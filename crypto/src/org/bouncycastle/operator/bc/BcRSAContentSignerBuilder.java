@@ -9,12 +9,12 @@ import org.bouncycastle.operator.OperatorCreationException;
 public class BcRSAContentSignerBuilder
     extends BcContentSignerBuilder
 {
-    public BcRSAContentSignerBuilder(AlgorithmIdentifier sigAlgId)
+    public BcRSAContentSignerBuilder(AlgorithmIdentifier sigAlgId, AlgorithmIdentifier digAlgId)
     {
-        super(sigAlgId);
+        super(sigAlgId, digAlgId);
     }
 
-    protected Signer createSignature(AlgorithmIdentifier sigAlgId, AlgorithmIdentifier digAlgId)
+    protected Signer createSigner(AlgorithmIdentifier sigAlgId, AlgorithmIdentifier digAlgId)
         throws OperatorCreationException
     {
         Digest dig = BcUtil.createDigest(digAlgId);

@@ -9,8 +9,6 @@ import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.RuntimeOperatorException;
 
@@ -18,12 +16,12 @@ public abstract class BcContentSignerBuilder
 {
     private SecureRandom random;
     private AlgorithmIdentifier sigAlgId;
-    private DigestAlgorithmIdentifierFinder digestAlgorithmFinder;
+    private AlgorithmIdentifier digAlgId;
 
-    public BcContentSignerBuilder(AlgorithmIdentifier sigAlgId)
+    public BcContentSignerBuilder(AlgorithmIdentifier sigAlgId, AlgorithmIdentifier digAlgId)
     {
         this.sigAlgId = sigAlgId;
-        this.digestAlgorithmFinder = new DefaultDigestAlgorithmIdentifierFinder();
+        this.digAlgId = digAlgId;
     }
 
     public BcContentSignerBuilder setSecureRandom(SecureRandom random)
@@ -36,7 +34,7 @@ public abstract class BcContentSignerBuilder
     public ContentSigner build(AsymmetricKeyParameter privateKey)
         throws OperatorCreationException
     {
-        final Signer sig = createSignature(sigAlgId, digestAlgorithmFinder.find(sigAlgId));
+        final Signer sig = createSigner(sigAlgId, digAlgId);
 
         if (random != null)
         {
@@ -75,6 +73,6 @@ public abstract class BcContentSignerBuilder
         };
     }
 
-    protected abstract Signer createSignature(AlgorithmIdentifier sigAlgId, AlgorithmIdentifier algorithmIdentifier)
+    protected abstract Signer createSigner(AlgorithmIdentifier sigAlgId, AlgorithmIdentifier algorithmIdentifier)
         throws OperatorCreationException;
 }
