@@ -61,9 +61,11 @@ import org.bouncycastle.x509.X509V2AttributeCertificate;
 /**
  * Class for reading OpenSSL PEM encoded streams containing
  * X509 certificates, PKCS8 encoded keys and PKCS7 objects.
- * <p/>
+ * <p>
  * In the case of PKCS7 objects the reader will return a CMS ContentInfo object. Keys and
- * Certificates will be returned using the appropriate java.security type.
+ * Certificates will be returned using the appropriate java.security type (KeyPair, PublicKey, X509Certificate,
+ * or X509CRL). In the case of a Certificate Request a PKCS10CertificationRequest will be returned.
+ * </p>
  */
 public class PEMReader
     extends PemReader
