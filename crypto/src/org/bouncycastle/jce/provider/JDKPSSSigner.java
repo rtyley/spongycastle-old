@@ -1,5 +1,6 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.ByteArrayOutputStream;
 import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -18,7 +19,6 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.NullDigest;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.PSSSigner;
@@ -53,7 +53,7 @@ public class JDKPSSSigner
     {
         if (isRaw)
         {
-            this.contentDigest = new NullDigest();
+            this.contentDigest = new NullPssDigest(mgfDigest);
         }
         else
         {
@@ -322,6 +322,67 @@ public class JDKPSSSigner
         public SHA512withRSA()
         {
             super(new RSABlindedEngine(), new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 64, 1));
+        }
+    }
+
+    private class NullPssDigest
+        implements Digest
+    {
+        private ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        private Digest baseDigest;
+        private boolean oddTime = true;
+
+        public NullPssDigest(Digest mgfDigest)
+        {
+            this.baseDigest = mgfDigest;
+        }
+
+        public String getAlgorithmName()
+        {
+            return "NULL";
+        }
+
+        public int getDigestSize()
+        {
+            return baseDigest.getDigestSize();
+        }
+
+        public void update(byte in)
+        {
+            bOut.write(in);
+        }
+
+        public void update(byte[] in, int inOff, int len)
+        {
+            bOut.write(in, inOff, len);
+        }
+
+        public int doFinal(byte[] out, int outOff)
+        {
+            byte[] res = bOut.toByteArray();
+
+            if (oddTime)
+            {
+                System.arraycopy(res, 0, out, outOff, res.length);
+            }
+            else
+            {
+                baseDigest.update(res, 0, res.length);
+
+                baseDigest.doFinal(out, outOff);
+            }
+
+            reset();
+
+            oddTime = !oddTime;
+
+            return res.length;
+        }
+
+        public void reset()
+        {
+            bOut.reset();
+            baseDigest.reset();
         }
     }
 }
