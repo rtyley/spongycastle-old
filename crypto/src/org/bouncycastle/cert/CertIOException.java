@@ -2,6 +2,9 @@ package org.bouncycastle.cert;
 
 import java.io.IOException;
 
+/**
+ * General IOException thrown in the cert package and its sub-packages.
+ */
 public class CertIOException
     extends IOException
 {

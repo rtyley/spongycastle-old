@@ -18,6 +18,9 @@ import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.util.Arrays;
 
+/**
+ * Holding class for an X.509 Certificate structure.
+ */
 public class X509CertificateHolder
 {
     private X509CertificateStructure x509Certificate;
@@ -52,17 +55,34 @@ public class X509CertificateHolder
         this(parseBytes(certEncoding));
     }
 
+    /**
+     * Create a X509CertificateHolder from the passed in ASN.1 structure.
+     *
+     * @param x509Certificate an ASN.1 Certificate structure.
+     */
     public X509CertificateHolder(X509CertificateStructure x509Certificate)
     {
         this.x509Certificate = x509Certificate;
         this.extensions = x509Certificate.getTBSCertificate().getExtensions();
     }
 
+    /**
+     * Return whether or not the holder's certificate contains extensions.
+     *
+     * @return true if extension are present, false otherwise.
+     */
     public boolean hasExtensions()
     {
         return extensions != null;
     }
 
+    /**
+     * Look up the extension associated with the passed in OID.
+     *
+     * @param oid the OID of the extension of interest.
+     *
+     * @return the extension if present, null otherwise.
+     */
     public X509Extension getExtension(ASN1ObjectIdentifier oid)
     {
         if (extensions != null)
@@ -73,16 +93,34 @@ public class X509CertificateHolder
         return null;
     }
 
+    /**
+     * Returns a list of ASN1ObjectIdentifier objects representing the OIDs of the
+     * extensions contained in this holder's certificate.
+     *
+     * @return a list of extension OIDs.
+     */
     public List getExtensionOIDs()
     {
         return CertUtils.getExtensionOIDs(extensions);
     }
 
+    /**
+     * Returns a set of ASN1ObjectIdentifier objects representing the OIDs of the
+     * critical extensions contained in this holder's certificate.
+     *
+     * @return a set of critical extension OIDs.
+     */
     public Set getCriticalExtensionOIDs()
     {
         return CertUtils.getCriticalExtensionOIDs(extensions);
     }
 
+    /**
+     * Returns a set of ASN1ObjectIdentifier objects representing the OIDs of the
+     * non-critical extensions contained in this holder's certificate.
+     *
+     * @return a set of non-critical extension OIDs.
+     */
     public Set getNonCriticalExtensionOIDs()
     {
         return CertUtils.getNonCriticalExtensionOIDs(extensions);
@@ -108,6 +146,13 @@ public class X509CertificateHolder
         return !date.before(x509Certificate.getStartDate().getDate()) && !date.after(x509Certificate.getEndDate().getDate());
     }
 
+    /**
+     * Validate the signature on the certificate in this holder.
+     *
+     * @param verifierProvider a ContentVerifierProvider that can generate a verifier for the signature.
+     * @return true if the signature is valid, false otherwise.
+     * @throws CertException if the signature cannot be processed or is inappropriate.
+     */
     public boolean isSignatureValid(ContentVerifierProvider verifierProvider)
         throws CertException
     {
