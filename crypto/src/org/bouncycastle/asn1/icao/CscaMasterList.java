@@ -32,21 +32,19 @@ public class CscaMasterList
     public static CscaMasterList getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof CscaMasterList)
+        if (obj instanceof CscaMasterList)
         {
             return (CscaMasterList)obj;
         }
-
-        if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
             return new CscaMasterList(ASN1Sequence.getInstance(obj));            
         }
-        
-        throw new IllegalArgumentException(
-                "unknown object in getInstance: " + obj.getClass().getName());
+
+        throw new IllegalArgumentException("null object in getInstance()");
     }    
     
-    public CscaMasterList(
+    private CscaMasterList(
         ASN1Sequence seq)
     {
         if (seq == null || seq.size() == 0)
