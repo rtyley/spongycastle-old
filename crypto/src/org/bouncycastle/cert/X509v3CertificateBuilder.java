@@ -25,6 +25,16 @@ public class X509v3CertificateBuilder
     private V3TBSCertificateGenerator   tbsGen;
     private X509ExtensionsGenerator     extGenerator;
 
+    /**
+     * Create a builder for a version 3 certificate.
+     *
+     * @param issuer the certificate issuer
+     * @param serial the certificate serial number
+     * @param notBefore the date before which the certificate is not valid
+     * @param notAfter the date after which the certificate is not valid
+     * @param subject the certificate subject
+     * @param publicKeyInfo the info structure for the public key to be associated with this certificate.
+     */
     public X509v3CertificateBuilder(X500Name issuer, BigInteger serial, Date notBefore, Date notAfter, X500Name subject, SubjectPublicKeyInfo publicKeyInfo)
     {
         tbsGen = new V3TBSCertificateGenerator();
@@ -39,7 +49,10 @@ public class X509v3CertificateBuilder
     }
 
     /**
-     * Set the subject unique ID - note: it is very rare that it is correct to do this.
+     * Set the subjectUniqueID - note: it is very rare that it is correct to do this.
+     *
+     * @param uniqueID a boolean array representing the bits making up the subjectUniqueID.
+     * @return this builder object.
      */
     public X509v3CertificateBuilder setSubjectUniqueID(boolean[] uniqueID)
     {
@@ -49,7 +62,10 @@ public class X509v3CertificateBuilder
     }
 
     /**
-     * Set the issuer unique ID - note: it is very rare that it is correct to do this.
+     * Set the issuerUniqueID - note: it is very rare that it is correct to do this.
+     *
+     * @param uniqueID a boolean array representing the bits making up the issuerUniqueID.
+     * @return this builder object.
      */
     public X509v3CertificateBuilder setIssuerUniqueID(boolean[] uniqueID)
     {
@@ -59,25 +75,35 @@ public class X509v3CertificateBuilder
     }
 
     /**
-     * add a given extension field for the standard extensions tag (tag 3)
+     * Add a given extension field for the standard extensions tag (tag 3)
+     *
+     * @param oid the OID defining the extension type.
+     * @param isCritical true if the extension is critical, false otherwise.
+     * @param value the ASN.1 structure that forms the extension's value.
+     * @return this builder object.
      */
     public X509v3CertificateBuilder addExtension(
         ASN1ObjectIdentifier oid,
-        boolean critical,
+        boolean isCritical,
         ASN1Encodable value)
     {
-        extGenerator.addExtension(oid, critical, value);
+        extGenerator.addExtension(oid, isCritical, value);
 
         return this;
     }
 
     /**
-     * add a given extension field for the standard extensions tag (tag 3)
+     * Add a given extension field for the standard extensions tag (tag 3)
      * copying the extension value from another certificate.
+     *
+     * @param oid the OID defining the extension type.
+     * @param isCritical true if the copied extension is to be marked as critical, false otherwise.
+     * @param certHolder the holder for the certificate that the extension is to be copied from.
+     * @return this builder object.
      */
     public X509v3CertificateBuilder copyAndAddExtension(
         ASN1ObjectIdentifier oid,
-        boolean critical,
+        boolean isCritical,
         X509CertificateHolder certHolder)
     {
         X509CertificateStructure cert = certHolder.toASN1Structure();
@@ -89,14 +115,17 @@ public class X509v3CertificateBuilder
             throw new NullPointerException("extension " + oid + " not present");
         }
 
-        extGenerator.addExtension(oid, critical, extension.getValue().getOctets());
+        extGenerator.addExtension(oid, isCritical, extension.getValue().getOctets());
 
         return this;
     }
 
     /**
-     * generate an X509 certificate, based on the current issuer and subject
-     * using the passed in signer
+     * Generate an X509 certificate, based on the current issuer and subject
+     * using the passed in signer.
+     *
+     * @param signer the content signer to be used to generate the signature validating the certificate.
+     * @return a holder containing the resulting signed certificate.
      */
     public X509CertificateHolder build(
         ContentSigner signer)

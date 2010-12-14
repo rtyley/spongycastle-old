@@ -18,6 +18,16 @@ public class X509v1CertificateBuilder
 {
     private V1TBSCertificateGenerator   tbsGen;
 
+    /**
+     * Create a builder for a version 1 certificate.
+     *
+     * @param issuer the certificate issuer
+     * @param serial the certificate serial number
+     * @param notBefore the date before which the certificate is not valid
+     * @param notAfter the date after which the certificate is not valid
+     * @param subject the certificate subject
+     * @param publicKeyInfo the info structure for the public key to be associated with this certificate.
+     */
     public X509v1CertificateBuilder(X500Name issuer, BigInteger serial, Date notBefore, Date notAfter, X500Name subject, SubjectPublicKeyInfo publicKeyInfo)
     {
         tbsGen = new V1TBSCertificateGenerator();
@@ -30,8 +40,11 @@ public class X509v1CertificateBuilder
     }
 
     /**
-     * generate an X509 certificate, based on the current issuer and subject
-     * using the passed in signer
+     * Generate an X509 certificate, based on the current issuer and subject
+     * using the passed in signer.
+     *
+     * @param signer the content signer to be used to generate the signature validating the certificate.
+     * @return a holder containing the resulting signed certificate.
      */
     public X509CertificateHolder build(
         ContentSigner signer)

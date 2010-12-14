@@ -11,6 +11,9 @@ import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 
+/**
+ * Holding class for a PKCS#10 certification request.
+ */
 public class PKCS10CertificationRequestHolder
 {
     private CertificationRequest certificationRequest;
@@ -60,6 +63,13 @@ public class PKCS10CertificationRequestHolder
         return certificationRequest.getEncoded();
     }
 
+    /**
+     * Validate the signature on the PKCS10 certification request in this holder.
+     *
+     * @param verifierProvider a ContentVerifierProvider that can generate a verifier for the signature.
+     * @return true if the signature is valid, false otherwise.
+     * @throws CertException if the signature cannot be processed or is inappropriate.
+     */
     public boolean isSignatureValid(ContentVerifierProvider verifierProvider)
         throws CertException
     {

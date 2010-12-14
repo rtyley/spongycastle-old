@@ -18,6 +18,9 @@ import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.util.Arrays;
 
+/**
+ * Holding class for an X.509 AttributeCertificate structure.
+ */
 public class X509AttributeCertificateHolder
 {
     private AttributeCertificate attrCert;
@@ -52,6 +55,11 @@ public class X509AttributeCertificateHolder
         this(parseBytes(certEncoding));
     }
 
+    /**
+     * Create a X509AttributeCertificateHolder from the passed in ASN.1 structure.
+     *
+     * @param attrCert an ASN.1 AttributeCertificate structure.
+     */
     public X509AttributeCertificateHolder(AttributeCertificate attrCert)
     {
         this.attrCert = attrCert;
@@ -64,11 +72,23 @@ public class X509AttributeCertificateHolder
         return attrCert.getEncoded();
     }
 
+    /**
+     * Return whether or not the holder's attribute certificate contains extensions.
+     *
+     * @return true if extension are present, false otherwise.
+     */
     public boolean hasExtensions()
     {
         return extensions != null;
     }
 
+    /**
+     * Look up the extension associated with the passed in OID.
+     *
+     * @param oid the OID of the extension of interest.
+     *
+     * @return the extension if present, null otherwise.
+     */
     public X509Extension getExtension(ASN1ObjectIdentifier oid)
     {
         if (extensions != null)
@@ -79,16 +99,34 @@ public class X509AttributeCertificateHolder
         return null;
     }
 
+    /**
+     * Returns a list of ASN1ObjectIdentifier objects representing the OIDs of the
+     * extensions contained in this holder's attribute certificate.
+     *
+     * @return a list of extension OIDs.
+     */
     public List getExtensionOIDs()
     {
         return CertUtils.getExtensionOIDs(extensions);
     }
 
+    /**
+     * Returns a set of ASN1ObjectIdentifier objects representing the OIDs of the
+     * critical extensions contained in this holder's attribute certificate.
+     *
+     * @return a set of critical extension OIDs.
+     */
     public Set getCriticalExtensionOIDs()
     {
         return CertUtils.getCriticalExtensionOIDs(extensions);
     }
 
+    /**
+     * Returns a set of ASN1ObjectIdentifier objects representing the OIDs of the
+     * non-critical extensions contained in this holder's attribute certificate.
+     *
+     * @return a set of non-critical extension OIDs.
+     */
     public Set getNonCriticalExtensionOIDs()
     {
         return CertUtils.getNonCriticalExtensionOIDs(extensions);

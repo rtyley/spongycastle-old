@@ -48,12 +48,25 @@ public class PKCS10CertificationRequestBuilder
     private X500Name subject;
     private List attributes = new ArrayList();
 
+    /**
+     * Basic constructor.
+     *
+     * @param subject the X.500 Name defining the certificate subject this request is for.
+     * @param publicKeyInfo the info structure for the public key to be associated with this subject.
+     */
     public PKCS10CertificationRequestBuilder(X500Name subject, SubjectPublicKeyInfo publicKeyInfo)
     {
         this.subject = subject;
         this.publicKeyInfo = publicKeyInfo;
     }
 
+    /**
+     * Add an attribute to the certification request we are building.
+     *
+     * @param attrType the OID giving the type of the attribute.
+     * @param attrValue the ASN.1 structure that forms the value of the attribute.
+     * @return this builder object.
+     */
     public PKCS10CertificationRequestBuilder addAttribute(ASN1ObjectIdentifier attrType, ASN1Encodable attrValue)
     {
         attributes.add(new Attribute(attrType, new DERSet(attrValue)));
@@ -61,6 +74,13 @@ public class PKCS10CertificationRequestBuilder
         return this;
     }
 
+    /**
+     * Add an attribute with multiple values to the certification request we are building.
+     *
+     * @param attrType the OID giving the type of the attribute.
+     * @param attrValues an array of ASN.1 structures that form the value of the attribute.
+     * @return this builder object.
+     */
     public PKCS10CertificationRequestBuilder addAttribute(ASN1ObjectIdentifier attrType, ASN1Encodable[] attrValues)
     {
         attributes.add(new Attribute(attrType, new DERSet(attrValues)));
@@ -69,7 +89,10 @@ public class PKCS10CertificationRequestBuilder
     }
 
     /**
-     * generate an PKCS10 request based on the past in signer.
+     * Generate an PKCS10 request based on the past in signer.
+     *
+     * @param signer the content signer to be used to generate the signature validating the certificate.
+     * @return a holder containing the resulting PKCS#10 certification request.
      */
     public PKCS10CertificationRequestHolder build(
         ContentSigner signer)
