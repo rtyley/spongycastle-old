@@ -1,6 +1,10 @@
 package org.bouncycastle.crypto.test;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
+
 import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
@@ -8,9 +12,6 @@ import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 import org.bouncycastle.crypto.signers.PSSSigner;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
 
 /*
  * RSA PSS test vectors for PKCS#1 V2.1
@@ -258,7 +259,7 @@ public class PSSTest
         testSig(10, pub9, prv9, slt9b, msg9b, sig9b);
 
         //
-        // loop test
+        // loop test  - sha-1 only
         //
         PSSSigner           eng = new PSSSigner(new RSAEngine(), new SHA1Digest(), 20);
         int failed = 0;
@@ -285,6 +286,38 @@ public class PSSTest
             }
         }
         
+        if (failed != 0)
+        {
+            fail("loop test failed - failures: " + failed);
+        }
+
+         //
+        // loop test - sha-256 and sha-1
+        //
+        eng = new PSSSigner(new RSAEngine(), new SHA256Digest(), new SHA1Digest(), 20);
+        failed = 0;
+        data = new byte[DATA_LENGTH];
+
+        random.nextBytes(data);
+
+        for (int j = 0; j < NUM_TESTS; j++)
+        {
+            eng.init(true, new ParametersWithRandom(prv8));
+
+            eng.update(data, 0, data.length);
+
+            byte[] s = eng.generateSignature();
+
+            eng.init(false, pub8);
+
+            eng.update(data, 0, data.length);
+
+            if (!eng.verifySignature(s))
+            {
+                failed++;
+            }
+        }
+
         if (failed != 0)
         {
             fail("loop test failed - failures: " + failed);
