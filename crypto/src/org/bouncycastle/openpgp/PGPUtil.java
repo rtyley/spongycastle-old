@@ -458,8 +458,18 @@ public class PGPUtil
         {
         case HashAlgorithmTags.MD5:
             return "MD5";
+        case HashAlgorithmTags.RIPEMD160:
+            return "RIPEMD160";
         case HashAlgorithmTags.SHA1:
             return "SHA1";
+        case HashAlgorithmTags.SHA224:
+            return "SHA224";
+        case HashAlgorithmTags.SHA256:
+            return "SHA256";
+        case HashAlgorithmTags.SHA384:
+            return "SHA384";
+        case HashAlgorithmTags.SHA512:
+            return "SHA512";
         default:
             throw new PGPException("unknown hash algorithm: " + s2k.getHashAlgorithm());
         }
