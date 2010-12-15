@@ -4,8 +4,18 @@ import java.io.OutputStream;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
+/**
+ * General interface for an operator that is able to calculate a digest from
+ * a stream of output.
+ */
 public interface DigestCalculator
 {
+    /**
+     * Return the algorithm identifier representing the digest implemented by
+     * this calculator.
+     *
+     * @return algorithm id and parameters.
+     */
     AlgorithmIdentifier getAlgorithmIdentifier();
 
     /**
@@ -17,5 +27,10 @@ public interface DigestCalculator
      */
     OutputStream getOutputStream();
 
+    /**
+     * Return the digest calculated on what has been written to the calculator's output stream.
+     *
+     * @return a digest.
+     */
     byte[] getDigest();
 }
