@@ -336,6 +336,9 @@ public class CMSEnvelopedDataGenerator
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
      * object using the given provider.
+     *
+     * @param content the content to be encrypted
+     * @param contentEncryptor the symmetric key based encryptor to encrypt the content with.
      */
     public CMSEnvelopedData generate(
         CMSTypedData content,
