@@ -1,9 +1,12 @@
 package org.bouncycastle.crypto.signers;
 
+import java.security.SecureRandom;
+
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.SignerWithRecovery;
 import org.bouncycastle.crypto.digests.RIPEMD128Digest;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
@@ -11,8 +14,6 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.ParametersWithSalt;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
-
-import java.security.SecureRandom;
 
 /**
  * ISO9796-2 - mechanism using a hash function with recovery (scheme 2 and 3).
@@ -172,26 +173,28 @@ public class ISO9796d2PSSSigner
     }
 
     /**
-     * compare two byte arrays.
+     * compare two byte arrays - constant time
      */
     private boolean isSameAs(
         byte[]    a,
         byte[]    b)
     {
+        boolean isOkay = true;
+
         if (messageLength != b.length)
         {
-            return false;
+            isOkay = false;
         }
-        
+
         for (int i = 0; i != b.length; i++)
         {
             if (a[i] != b[i])
             {
-                return false;
+                isOkay = false;
             }
         }
-        
-        return true;
+
+        return isOkay;
     }
     
     /**
@@ -204,6 +207,12 @@ public class ISO9796d2PSSSigner
         {
             block[i] = 0;
         }
+    }
+
+    public void updateWithRecoveredMessage(byte[] signature)
+        throws InvalidCipherTextException
+    {
+        throw new RuntimeException("not implemented"); // TODO:
     }
 
     /**
@@ -477,21 +486,25 @@ public class ISO9796d2PSSSigner
 
         int off = block.length - tLength - hash.length;
 
+        boolean isOkay = true;
+
         for (int i = 0; i != hash.length; i++)
         {
             if (hash[i] != block[off + i])
             {
-                clearBlock(block);
-                clearBlock(hash);
-                clearBlock(recoveredMessage);
-                fullMessage = false;
-
-                return false;
+                isOkay = false;
             }
         }
 
         clearBlock(block);
         clearBlock(hash);
+
+        if (!isOkay)
+        {
+            fullMessage = false;
+            clearBlock(recoveredMessage);
+            return false;
+        }
 
         //
         // if they've input a message check what we've recovered against
@@ -533,7 +546,7 @@ public class ISO9796d2PSSSigner
     {
         return recoveredMessage;
     }
-    
+
     /**
      * int to octet string.
      */

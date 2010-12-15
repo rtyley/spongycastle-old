@@ -282,6 +282,34 @@ public class ISO9796Test
             {
                 fail("failed ISO9796-2 recovered message Test 4");
             }
+
+            // try update with recovered
+            eng.updateWithRecoveredMessage(sig4);
+
+            if(!isSameAs(eng.getRecoveredMessage(), 0, msg4))
+            {
+                fail("failed ISO9796-2 updateWithRecovered recovered message Test 4");
+            }
+
+            if (!eng.verifySignature(sig4))
+            {
+                fail("failed ISO9796-2 updateWithRecovered verify and recover Test 4");
+            }
+
+            if(!isSameAs(eng.getRecoveredMessage(), 0, msg4))
+            {
+                fail("failed ISO9796-2 updateWithRecovered recovered verify message Test 4");
+            }
+
+            // should fail
+            eng.updateWithRecoveredMessage(sig4);
+
+            eng.update(msg4, 0, msg4.length);
+            
+            if (eng.verifySignature(sig4))
+            {
+                fail("failed ISO9796-2 updateWithRecovered verify and recover Test 4");
+            }
         }
         else
         {
@@ -332,6 +360,54 @@ public class ISO9796Test
         if (!startsWith(msg5, eng.getRecoveredMessage()))
         {
             fail("failed ISO9796-2 partial recovered message Test 5");
+        }
+
+        int length = eng.getRecoveredMessage().length;
+
+        if (length >= msg5.length)
+        {
+            fail("Test 5 recovered message too long");
+        }
+
+        eng = new ISO9796d2Signer(rsa, new RIPEMD160Digest(), true);
+
+        eng.init(false, pubParameters);
+
+        eng.updateWithRecoveredMessage(sig5);
+
+        if (!startsWith(msg5, eng.getRecoveredMessage()))
+        {
+            fail("failed ISO9796-2 updateWithRecovered partial recovered message Test 5");
+        }
+
+        if (eng.hasFullMessage())
+        {
+            fail("fullMessage updateWithRecovered true - Test 5");
+        }
+
+        for (int i = length ; i != msg5.length; i++)
+        {
+            eng.update(msg5[i]);
+        }
+
+        if (!eng.verifySignature(sig5))
+        {
+            fail("failed ISO9796-2 verify Test 5");
+        }
+
+        if (eng.hasFullMessage())
+        {
+            fail("fullMessage updateWithRecovered true - Test 5");
+        }
+
+        // should fail
+        eng.updateWithRecoveredMessage(sig5);
+
+        eng.update(msg5, 0, msg5.length);
+
+        if (eng.verifySignature(sig5))
+        {
+            fail("failed ISO9796-2 updateWithRecovered verify fail Test 5");
         }
     }
 
