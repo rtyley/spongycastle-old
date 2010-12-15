@@ -6,8 +6,10 @@ import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.SignerWithRecovery;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
+import org.bouncycastle.util.Arrays;
 
 /**
  * ISO9796-2 - mechanism using a hash function with recovery (scheme 1)
@@ -41,6 +43,7 @@ public class ISO9796d2Signer
 
     private Digest                      digest;
     private AsymmetricBlockCipher       cipher;
+    private boolean                     includeRecoveredMessage;
 
     private int         trailer;
     private int         keyBits;
@@ -49,6 +52,9 @@ public class ISO9796d2Signer
     private int         messageLength;
     private boolean     fullMessage;
     private byte[]      recoveredMessage;
+
+    private byte[]      preSig;
+    private byte[]      preBlock;
 
     /**
      * Generate a signer for the with either implicit or explicit trailers
@@ -177,6 +183,97 @@ public class ISO9796d2Signer
         }
     }
 
+    public void updateWithRecoveredMessage(byte[] signature)
+        throws InvalidCipherTextException
+    {
+        byte[]      block = cipher.processBlock(signature, 0, signature.length);
+
+        if (((block[0] & 0xC0) ^ 0x40) != 0)
+        {
+            throw new InvalidCipherTextException("malformed signature");
+        }
+
+        if (((block[block.length - 1] & 0xF) ^ 0xC) != 0)
+        {
+            throw new InvalidCipherTextException("malformed signature");
+        }
+
+        int     delta = 0;
+
+        if (((block[block.length - 1] & 0xFF) ^ 0xBC) == 0)
+        {
+            delta = 1;
+        }
+        else
+        {
+            int sigTrail = ((block[block.length - 2] & 0xFF) << 8) | (block[block.length - 1] & 0xFF);
+            Integer trailerObj = (Integer)trailerMap.get(digest.getAlgorithmName());
+
+            if (trailerObj != null)
+            {
+                if (sigTrail != trailerObj.intValue())
+                {
+                    throw new IllegalStateException("signer initialised with wrong digest for trailer " + sigTrail);
+                }
+            }
+            else
+            {
+                throw new IllegalArgumentException("unrecognised hash in signature");
+            }
+
+            delta = 2;
+        }
+
+        //
+        // find out how much padding we've got
+        //
+        int mStart = 0;
+
+        for (mStart = 0; mStart != block.length; mStart++)
+        {
+            if (((block[mStart] & 0x0f) ^ 0x0a) == 0)
+            {
+                break;
+            }
+        }
+
+        mStart++;
+
+        int off = block.length - delta - digest.getDigestSize();
+
+        //
+        // there must be at least one byte of message string
+        //
+        if ((off - mStart) <= 0)
+        {
+            throw new InvalidCipherTextException("malformed block");
+        }
+
+        //
+        // if we contain the whole message as well, check the hash of that.
+        //
+        if ((block[0] & 0x20) == 0)
+        {
+            fullMessage = true;
+
+            recoveredMessage = new byte[off - mStart];
+            System.arraycopy(block, mStart, recoveredMessage, 0, recoveredMessage.length);
+        }
+        else
+        {
+            fullMessage = false;
+
+            recoveredMessage = new byte[off - mStart];
+            System.arraycopy(block, mStart, recoveredMessage, 0, recoveredMessage.length);
+        }
+
+        preSig = signature;
+        preBlock = block;
+
+        digest.update(recoveredMessage, 0, recoveredMessage.length);
+        messageLength = recoveredMessage.length;
+    }
+    
     /**
      * update the internal digest with the byte b
      */
@@ -185,7 +282,7 @@ public class ISO9796d2Signer
     {
         digest.update(b);
 
-        if (messageLength < mBuf.length)
+        if (preSig == null && messageLength < mBuf.length)
         {
             mBuf[messageLength] = b;
         }
@@ -203,7 +300,7 @@ public class ISO9796d2Signer
     {
         digest.update(in, off, len);
 
-        if (messageLength < mBuf.length)
+        if (preSig == null && messageLength < mBuf.length)
         {
             for (int i = 0; i < len && (i + messageLength) < mBuf.length; i++)
             {
@@ -312,14 +409,32 @@ public class ISO9796d2Signer
         byte[]      signature)
     {
         byte[]      block = null;
+        boolean     updateWithRecoveredCalled;
 
-        try
+        if (preSig == null)
         {
-            block = cipher.processBlock(signature, 0, signature.length);
+            updateWithRecoveredCalled = false;
+            try
+            {
+                block = cipher.processBlock(signature, 0, signature.length);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
         }
-        catch (Exception e)
+        else
         {
-            return false;
+            if (!Arrays.areEqual(preSig, signature))
+            {
+                throw new IllegalStateException("updateWithRecoveredMessage called on different signature");
+            }
+
+            updateWithRecoveredCalled = true;
+            block = preBlock;
+
+            preSig = null;
+            preBlock = null;
         }
 
         if (((block[0] & 0xC0) ^ 0x40) != 0)
@@ -394,6 +509,12 @@ public class ISO9796d2Signer
         if ((block[0] & 0x20) == 0)
         {
             fullMessage = true;
+
+            // check right number of bytes passed in.
+            if (messageLength > off - mStart)
+            {
+                return returnFalse(block);
+            }
             
             digest.reset();
             digest.update(block, mStart, off - mStart);
@@ -448,7 +569,7 @@ public class ISO9796d2Signer
         // if they've input a message check what we've recovered against
         // what was input.
         //
-        if (messageLength != 0)
+        if (messageLength != 0 && !updateWithRecoveredCalled)
         {
             if (!isSameAs(mBuf, recoveredMessage))
             {

@@ -20,4 +20,15 @@ public interface SignerWithRecovery
      * @return full/partial message, null if nothing.
      */
     public byte[] getRecoveredMessage();
+
+    /**
+     * Perform an update with the recovered message before adding any other data. This must
+     * be the first update method called, and calling it will result in the signer assuming
+     * that further calls to update will include message content past what is recoverable.
+     *
+     * @param signature the signature that we are in the process of verifying.
+     * @throws IllegalStateException
+     */
+    public void updateWithRecoveredMessage(byte[] signature)
+        throws InvalidCipherTextException;
 }
