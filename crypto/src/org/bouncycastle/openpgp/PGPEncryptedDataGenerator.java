@@ -1,5 +1,22 @@
 package org.bouncycastle.openpgp;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.math.BigInteger;
+import java.security.DigestOutputStream;
+import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.spec.IvParameterSpec;
+
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.ContainedPacket;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
@@ -9,28 +26,37 @@ import org.bouncycastle.bcpg.S2K;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.spec.IvParameterSpec;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.math.BigInteger;
-import java.security.DigestOutputStream;
-import java.security.Key;
-import java.security.MessageDigest;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
-import java.security.Provider;
-import java.security.Security;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  *  Generator for encrypted objects.
  */
 public class PGPEncryptedDataGenerator
     implements SymmetricKeyAlgorithmTags, StreamGenerator
 {
+    /**
+     * Specifier for SHA-1 S2K PBE generator.
+     */
+    public static final int S2K_SHA1 = HashAlgorithmTags.SHA1;
+
+    /**
+     * Specifier for SHA-224 S2K PBE generator.
+     */
+    public static final int S2K_SHA224 = HashAlgorithmTags.SHA224;
+
+    /**
+     * Specifier for SHA-256 S2K PBE generator.
+     */
+    public static final int S2K_SHA256 = HashAlgorithmTags.SHA256;
+
+    /**
+     * Specifier for SHA-384 S2K PBE generator.
+     */
+    public static final int S2K_SHA384 = HashAlgorithmTags.SHA384;
+
+    /**
+     * Specifier for SHA-512 S2K PBE generator.
+     */
+    public static final int S2K_SHA512 = HashAlgorithmTags.SHA512;
+
     private BCPGOutputStream     pOut;
     private CipherOutputStream   cOut;
     private Cipher               c;
@@ -260,7 +286,7 @@ public class PGPEncryptedDataGenerator
     }
 
     /**
-     * Add a PBE encryption method to the encrypted object.
+     * Add a PBE encryption method to the encrypted object using the default algorithm (S2K_SHA1).
      * 
      * @param passPhrase
      * @throws NoSuchProviderException
@@ -270,20 +296,36 @@ public class PGPEncryptedDataGenerator
         char[]    passPhrase) 
         throws NoSuchProviderException, PGPException
     {
+        addMethod(passPhrase, HashAlgorithmTags.SHA1);
+    }
+
+    /**
+     * Add a PBE encryption method to the encrypted object.
+     *
+     * @param passPhrase passphrase to use to generate key.
+     * @param s2kDigest digest algorithm to use for S2K calculation
+     * @throws NoSuchProviderException
+     * @throws PGPException
+     */
+    public void addMethod(
+        char[]    passPhrase,
+        int       s2kDigest)
+        throws NoSuchProviderException, PGPException
+    {
         if (defProvider == null)
         {
             throw new NoSuchProviderException("unable to find provider.");
         }
 
         byte[]        iv = new byte[8];
-        
+
         rand.nextBytes(iv);
-        
-        S2K            s2k = new S2K(HashAlgorithmTags.SHA1, iv, 0x60);
-        
+
+        S2K            s2k = new S2K(s2kDigest, iv, 0x60);
+
         methods.add(new PBEMethod(defAlgorithm, s2k, PGPUtil.makeKeyFromPassPhrase(defAlgorithm, s2k, passPhrase, defProvider)));
     }
-    
+
     /**
      * Add a public key encrypted session key to the encrypted object.
      * 
