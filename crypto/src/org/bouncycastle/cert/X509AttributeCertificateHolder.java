@@ -2,14 +2,17 @@ package org.bouncycastle.cert;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.ParseException;
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.AttCertValidityPeriod;
+import org.bouncycastle.asn1.x509.Attribute;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x509.AttributeCertificateInfo;
 import org.bouncycastle.asn1.x509.X509Extension;
@@ -72,6 +75,71 @@ public class X509AttributeCertificateHolder
         return attrCert.getEncoded();
     }
 
+    public int getVersion()
+    {
+        return attrCert.getAcinfo().getVersion().getValue().intValue() + 1;
+    }
+
+    public BigInteger getSerialNumber()
+    {
+        return attrCert.getAcinfo().getSerialNumber().getValue();
+    }
+
+    public AttributeCertificateHolder getHolder()
+    {
+        return new AttributeCertificateHolder((ASN1Sequence)attrCert.getAcinfo().getHolder().toASN1Object());
+    }
+
+    public AttributeCertificateIssuer getIssuer()
+    {
+        return new AttributeCertificateIssuer(attrCert.getAcinfo().getIssuer());
+    }
+
+    public Date getNotBefore()
+    {
+        return CertUtils.recoverDate(attrCert.getAcinfo().getAttrCertValidityPeriod().getNotBeforeTime());
+    }
+
+    public Date getNotAfter()
+    {
+        return CertUtils.recoverDate(attrCert.getAcinfo().getAttrCertValidityPeriod().getNotAfterTime());
+    }
+
+    public Attribute[] getAttributes()
+    {
+        ASN1Sequence seq = attrCert.getAcinfo().getAttributes();
+        Attribute[] attrs = new Attribute[seq.size()];
+
+        for (int i = 0; i != seq.size(); i++)
+        {
+            attrs[i] = Attribute.getInstance(seq.getObjectAt(i));
+        }
+
+        return attrs;
+    }
+
+    public Attribute[] getAttributes(ASN1ObjectIdentifier oid)
+    {
+        ASN1Sequence    seq = attrCert.getAcinfo().getAttributes();
+        List            list = new ArrayList();
+
+        for (int i = 0; i != seq.size(); i++)
+        {
+            Attribute attr = Attribute.getInstance(seq.getObjectAt(i));
+            if (attr.getAttrType().equals(oid))
+            {
+                list.add(attr);
+            }
+        }
+
+        if (list.size() == 0)
+        {
+            return null;
+        }
+
+        return (Attribute[])list.toArray(new Attribute[list.size()]);
+    }
+
     /**
      * Return whether or not the holder's attribute certificate contains extensions.
      *
@@ -132,6 +200,16 @@ public class X509AttributeCertificateHolder
         return CertUtils.getNonCriticalExtensionOIDs(extensions);
     }
 
+    public boolean[] getIssuerUniqueID()
+    {
+        return CertUtils.bitStringToBoolean(attrCert.getAcinfo().getIssuerUniqueID());
+    }
+
+    public byte[] getSignature()
+    {
+        return attrCert.getSignatureValue().getBytes();
+    }
+
     public AttributeCertificate toASN1Structure()
     {
         return attrCert;
@@ -141,14 +219,7 @@ public class X509AttributeCertificateHolder
     {
         AttCertValidityPeriod certValidityPeriod = attrCert.getAcinfo().getAttrCertValidityPeriod();
 
-        try
-        {
-            return !date.before(certValidityPeriod.getNotBeforeTime().getDate()) && !date.after(certValidityPeriod.getNotAfterTime().getDate());
-        }
-        catch (ParseException e)
-        {
-            throw new IllegalStateException("unable to parse dates in attribute certificate");
-        }
+        return !date.before(CertUtils.recoverDate(certValidityPeriod.getNotBeforeTime())) && !date.after(CertUtils.recoverDate(certValidityPeriod.getNotAfterTime()));
     }
 
     public boolean isSignatureValid(ContentVerifierProvider verifierProvider)

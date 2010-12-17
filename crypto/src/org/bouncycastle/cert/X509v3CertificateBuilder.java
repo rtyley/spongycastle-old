@@ -5,7 +5,6 @@ import java.util.Date;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -56,7 +55,7 @@ public class X509v3CertificateBuilder
      */
     public X509v3CertificateBuilder setSubjectUniqueID(boolean[] uniqueID)
     {
-        tbsGen.setSubjectUniqueID(booleanToBitString(uniqueID));
+        tbsGen.setSubjectUniqueID(CertUtils.booleanToBitString(uniqueID));
 
         return this;
     }
@@ -69,7 +68,7 @@ public class X509v3CertificateBuilder
      */
     public X509v3CertificateBuilder setIssuerUniqueID(boolean[] uniqueID)
     {
-        tbsGen.setIssuerUniqueID(booleanToBitString(uniqueID));
+        tbsGen.setIssuerUniqueID(CertUtils.booleanToBitString(uniqueID));
 
         return this;
     }
@@ -138,26 +137,5 @@ public class X509v3CertificateBuilder
         }
 
         return CertUtils.generateFullCert(signer, tbsGen.generateTBSCertificate());
-    }
-
-    private DERBitString booleanToBitString(boolean[] id)
-    {
-        byte[] bytes = new byte[(id.length + 7) / 8];
-
-        for (int i = 0; i != id.length; i++)
-        {
-            bytes[i / 8] |= (id[i]) ? (1 << ((7 - (i % 8)))) : 0;
-        }
-
-        int pad = id.length % 8;
-
-        if (pad == 0)
-        {
-            return new DERBitString(bytes);
-        }
-        else
-        {
-            return new DERBitString(bytes, 8 - pad);
-        }
     }
 }

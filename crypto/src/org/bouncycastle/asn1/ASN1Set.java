@@ -131,6 +131,18 @@ abstract public class ASN1Set
         return set.size();
     }
 
+    public ASN1Encodable[] toArray()
+    {
+        ASN1Encodable[] values = new ASN1Encodable[this.size()];
+
+        for (int i = 0; i != this.size(); i++)
+        {
+            values[i] = (ASN1Encodable)this.getObjectAt(i);
+        }
+
+        return values;
+    }
+
     public ASN1SetParser parser()
     {
         final ASN1Set outer = this;

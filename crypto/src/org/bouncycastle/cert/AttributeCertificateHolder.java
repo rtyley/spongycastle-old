@@ -1,31 +1,22 @@
-package org.bouncycastle.x509;
+package org.bouncycastle.cert;
 
-import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.Principal;
-import java.security.cert.CertSelector;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateParsingException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.Holder;
 import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.asn1.x509.ObjectDigestInfo;
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Selector;
 
@@ -44,11 +35,17 @@ import org.bouncycastle.util.Selector;
  *                         -- for example, an executable
  *          }
  * </pre>
- * @deprecated use org.bouncycastle.cert.AttributeCertificateHolder
+ * <p>
+ * <b>Note:</b> If objectDigestInfo comparisons are to be carried out the static
+ * method setDigestCalculatorProvider <b>must</b> be called once to configure the class
+ * to do the necessary calculations.
+ * </p>
  */
 public class AttributeCertificateHolder
-    implements CertSelector, Selector
+    implements Selector
 {
+    private static DigestCalculatorProvider digestCalculatorProvider;
+
     final Holder holder;
 
     AttributeCertificateHolder(ASN1Sequence seq)
@@ -56,46 +53,23 @@ public class AttributeCertificateHolder
         holder = Holder.getInstance(seq);
     }
 
-    public AttributeCertificateHolder(X509Principal issuerName,
+    public AttributeCertificateHolder(X500Name issuerName,
         BigInteger serialNumber)
     {
-        holder = new org.bouncycastle.asn1.x509.Holder(new IssuerSerial(
+        holder = new Holder(new IssuerSerial(
             new GeneralNames(new DERSequence(new GeneralName(issuerName))),
             new DERInteger(serialNumber)));
     }
 
-    public AttributeCertificateHolder(X500Principal issuerName,
-        BigInteger serialNumber)
+    public AttributeCertificateHolder(X509CertificateHolder cert)
     {
-        this(X509Util.convertPrincipal(issuerName), serialNumber);
-    }
-
-    public AttributeCertificateHolder(X509Certificate cert)
-        throws CertificateParsingException
-    {
-        X509Principal name;
-
-        try
-        {
-            name = PrincipalUtil.getIssuerX509Principal(cert);
-        }
-        catch (Exception e)
-        {
-            throw new CertificateParsingException(e.getMessage());
-        }
-
-        holder = new Holder(new IssuerSerial(generateGeneralNames(name),
+        holder = new Holder(new IssuerSerial(generateGeneralNames(cert.getIssuer()),
             new DERInteger(cert.getSerialNumber())));
     }
 
-    public AttributeCertificateHolder(X509Principal principal)
+    public AttributeCertificateHolder(X500Name principal)
     {
         holder = new Holder(generateGeneralNames(principal));
-    }
-
-    public AttributeCertificateHolder(X500Principal principal)
-    {
-        this(X509Util.convertPrincipal(principal));
     }
 
     /**
@@ -198,12 +172,12 @@ public class AttributeCertificateHolder
         return null;
     }
 
-    private GeneralNames generateGeneralNames(X509Principal principal)
+    private GeneralNames generateGeneralNames(X500Name principal)
     {
         return new GeneralNames(new DERSequence(new GeneralName(principal)));
     }
 
-    private boolean matchesDN(X509Principal subject, GeneralNames targets)
+    private boolean matchesDN(X500Name subject, GeneralNames targets)
     {
         GeneralName[] names = targets.getNames();
 
@@ -213,16 +187,9 @@ public class AttributeCertificateHolder
 
             if (gn.getTagNo() == GeneralName.directoryName)
             {
-                try
+                if (X500Name.getInstance(gn.getName()).equals(subject))
                 {
-                    if (new X509Principal(((ASN1Encodable)gn.getName())
-                        .getEncoded()).equals(subject))
-                    {
-                        return true;
-                    }
-                }
-                catch (IOException e)
-                {
+                    return true;
                 }
             }
         }
@@ -230,7 +197,7 @@ public class AttributeCertificateHolder
         return false;
     }
 
-    private Object[] getNames(GeneralName[] names)
+    private X500Name[] getPrincipals(GeneralName[] names)
     {
         List l = new ArrayList(names.length);
 
@@ -238,35 +205,11 @@ public class AttributeCertificateHolder
         {
             if (names[i].getTagNo() == GeneralName.directoryName)
             {
-                try
-                {
-                    l.add(new X500Principal(
-                        ((ASN1Encodable)names[i].getName()).getEncoded()));
-                }
-                catch (IOException e)
-                {
-                    throw new RuntimeException("badly formed Name object");
-                }
+                l.add(X500Name.getInstance(names[i].getName()));
             }
         }
 
-        return l.toArray(new Object[l.size()]);
-    }
-
-    private Principal[] getPrincipals(GeneralNames names)
-    {
-        Object[] p = this.getNames(names.getNames());
-        List l = new ArrayList();
-
-        for (int i = 0; i != p.length; i++)
-        {
-            if (p[i] instanceof Principal)
-            {
-                l.add(p[i]);
-            }
-        }
-
-        return (Principal[])l.toArray(new Principal[l.size()]);
+        return (X500Name[])l.toArray(new X500Name[l.size()]);
     }
 
     /**
@@ -276,11 +219,11 @@ public class AttributeCertificateHolder
      * @return an array of Principal objects (usually X500Principal), null if no
      *         entity names field is set.
      */
-    public Principal[] getEntityNames()
+    public X500Name[] getEntityNames()
     {
         if (holder.getEntityName() != null)
         {
-            return getPrincipals(holder.getEntityName());
+            return getPrincipals(holder.getEntityName().getNames());
         }
 
         return null;
@@ -291,11 +234,11 @@ public class AttributeCertificateHolder
      * 
      * @return an array of principals, null if no BaseCertificateID is set.
      */
-    public Principal[] getIssuer()
+    public X500Name[] getIssuer()
     {
         if (holder.getBaseCertificateID() != null)
         {
-            return getPrincipals(holder.getBaseCertificateID().getIssuer());
+            return getPrincipals(holder.getBaseCertificateID().getIssuer().getNames());
         }
 
         return null;
@@ -324,62 +267,59 @@ public class AttributeCertificateHolder
             .toASN1Object());
     }
 
-    public boolean match(Certificate cert)
+    public boolean match(Object obj)
     {
-        if (!(cert instanceof X509Certificate))
+        if (!(obj instanceof X509CertificateHolder))
         {
             return false;
         }
 
-        X509Certificate x509Cert = (X509Certificate)cert;
+        X509CertificateHolder x509Cert = (X509CertificateHolder)obj;
 
-        try
+        if (holder.getBaseCertificateID() != null)
         {
-            if (holder.getBaseCertificateID() != null)
-            {
-                return holder.getBaseCertificateID().getSerial().getValue().equals(x509Cert.getSerialNumber())
-                    && matchesDN(PrincipalUtil.getIssuerX509Principal(x509Cert), holder.getBaseCertificateID().getIssuer());
-            }
+            return holder.getBaseCertificateID().getSerial().getValue().equals(x509Cert.getSerialNumber())
+                && matchesDN(x509Cert.getIssuer(), holder.getBaseCertificateID().getIssuer());
+        }
 
-            if (holder.getEntityName() != null)
+        if (holder.getEntityName() != null)
+        {
+            if (matchesDN(x509Cert.getSubject(),
+                holder.getEntityName()))
             {
-                if (matchesDN(PrincipalUtil.getSubjectX509Principal(x509Cert),
-                    holder.getEntityName()))
-                {
-                    return true;
-                }
+                return true;
             }
-            if (holder.getObjectDigestInfo() != null)
-            {
-                MessageDigest md = null;
-                try
-                {
-                    md = MessageDigest.getInstance(getDigestAlgorithm(), "BC");
+        }
 
-                }
-                catch (Exception e)
-                {
-                    return false;
-                }
+        if (holder.getObjectDigestInfo() != null)
+        {
+            try
+            {
+                DigestCalculator digCalc = digestCalculatorProvider.get(holder.getObjectDigestInfo().getDigestAlgorithm());
+                OutputStream     digOut = digCalc.getOutputStream();
+
                 switch (getDigestedObjectType())
                 {
                 case ObjectDigestInfo.publicKey:
                     // TODO: DSA Dss-parms
-                    md.update(cert.getPublicKey().getEncoded());
+                    digOut.write(x509Cert.getSubjectPublicKeyInfo().getEncoded());
                     break;
                 case ObjectDigestInfo.publicKeyCert:
-                    md.update(cert.getEncoded());
+                    digOut.write(x509Cert.getEncoded());
                     break;
                 }
-                if (!Arrays.areEqual(md.digest(), getObjectDigest()))
+
+                digOut.close();
+
+                if (!Arrays.areEqual(digCalc.getDigest(), getObjectDigest()))
                 {
                     return false;
                 }
             }
-        }
-        catch (CertificateEncodingException e)
-        {
-            return false;
+            catch (Exception e)
+            {
+                return false;
+            }
         }
 
         return false;
@@ -407,13 +347,14 @@ public class AttributeCertificateHolder
         return this.holder.hashCode();
     }
 
-    public boolean match(Object obj)
+    /**
+     * Set a digest calculator provider to be used if matches are attempted using
+     * ObjectDigestInfo,
+     *
+     * @param digCalcProvider a provider of digest calculators.
+     */
+    public static void setDigestCalculatorProvider(DigestCalculatorProvider digCalcProvider)
     {
-        if (!(obj instanceof X509Certificate))
-        {
-            return false;
-        }
-
-        return match((Certificate)obj);
+        digestCalculatorProvider = digCalcProvider;
     }
 }
