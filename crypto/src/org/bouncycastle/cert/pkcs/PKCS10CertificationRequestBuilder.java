@@ -19,7 +19,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.operator.ContentSigner;
 
 /**
- * A class for creating PKCS10 Certification requests.
+ * A class for creating PKCS#10 Certification requests.
  * <pre>
  * CertificationRequest ::= SEQUENCE {
  *   certificationRequestInfo  CertificationRequestInfo,
@@ -89,7 +89,7 @@ public class PKCS10CertificationRequestBuilder
     }
 
     /**
-     * Generate an PKCS10 request based on the past in signer.
+     * Generate an PKCS#10 request based on the past in signer.
      *
      * @param signer the content signer to be used to generate the signature validating the certificate.
      * @return a holder containing the resulting PKCS#10 certification request.
