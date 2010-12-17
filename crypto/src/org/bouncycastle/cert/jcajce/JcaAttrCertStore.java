@@ -10,6 +10,12 @@ import java.util.List;
 import org.bouncycastle.util.CollectionStore;
 import org.bouncycastle.x509.X509AttributeCertificate;
 
+/**
+ * Class for storing Attribute Certificates for later lookup.
+ * <p>
+ * The class will convert X509AttributeCertificate objects into X509AttributeCertificateHolder objects.
+ * </p>
+ */
 public class JcaAttrCertStore
     extends CollectionStore
 {

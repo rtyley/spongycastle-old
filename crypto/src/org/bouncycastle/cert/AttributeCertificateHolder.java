@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
@@ -128,17 +129,15 @@ public class AttributeCertificateHolder
     }
 
     /**
-     * Returns the other object type ID if an object digest info is used.
+     * Returns algorithm identifier for the digest used if ObjectDigestInfo is present.
      * 
-     * @return The other object type ID or <code>null</code> if no object
-     *         digest info is set.
+     * @return digest AlgorithmIdentifier or <code>null</code> if ObjectDigestInfo is absent.
      */
-    public String getDigestAlgorithm()
+    public AlgorithmIdentifier getDigestAlgorithm()
     {
         if (holder.getObjectDigestInfo() != null)
         {
-            holder.getObjectDigestInfo().getDigestAlgorithm().getObjectId()
-                .getId();
+            return holder.getObjectDigestInfo().getDigestAlgorithm();
         }
         return null;
     }
@@ -146,13 +145,13 @@ public class AttributeCertificateHolder
     /**
      * Returns the hash if an object digest info is used.
      * 
-     * @return The hash or <code>null</code> if no object digest info is set.
+     * @return The hash or <code>null</code> if ObjectDigestInfo is absent.
      */
     public byte[] getObjectDigest()
     {
         if (holder.getObjectDigestInfo() != null)
         {
-            holder.getObjectDigestInfo().getObjectDigest().getBytes();
+            return holder.getObjectDigestInfo().getObjectDigest().getBytes();
         }
         return null;
     }
@@ -163,11 +162,11 @@ public class AttributeCertificateHolder
      * @return The digest algorithm ID or <code>null</code> if no object
      *         digest info is set.
      */
-    public String getOtherObjectTypeID()
+    public ASN1ObjectIdentifier getOtherObjectTypeID()
     {
         if (holder.getObjectDigestInfo() != null)
         {
-            holder.getObjectDigestInfo().getOtherObjectTypeID().getId();
+            new ASN1ObjectIdentifier(holder.getObjectDigestInfo().getOtherObjectTypeID().getId());
         }
         return null;
     }

@@ -1,5 +1,23 @@
 package org.bouncycastle.x509;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.security.cert.CRLException;
+import java.security.cert.X509CRL;
+import java.security.cert.X509CRLEntry;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Set;
+
+import javax.security.auth.x500.X500Principal;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -20,25 +38,9 @@ import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.X509CRLObject;
 
-import javax.security.auth.x500.X500Principal;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.security.cert.CRLException;
-import java.security.cert.X509CRL;
-import java.security.cert.X509CRLEntry;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Set;
-
 /**
  * class to produce an X.509 Version 2 CRL.
+ *  @deprecated use org.bouncycastle.cert.X509v2CRLBuilder.
  */
 public class X509V2CRLGenerator
 {

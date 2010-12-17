@@ -19,6 +19,8 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x509.AttributeCertificateInfo;
+import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -50,6 +52,18 @@ class CertUtils
         catch (IOException e)
         {
             throw new IllegalStateException("cannot produce attribute certificate signature");
+        }
+    }
+
+    static X509CRLHolder generateFullCRL(ContentSigner signer, TBSCertList tbsCertList)
+    {
+        try
+        {
+            return new X509CRLHolder(generateCRLStructure(tbsCertList, signer.getAlgorithmIdentifier(), generateSig(signer, tbsCertList)));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException("cannot produce certificate signature");
         }
     }
 
@@ -85,6 +99,17 @@ class CertUtils
         v.add(new DERBitString(signature));
 
         return AttributeCertificate.getInstance(new DERSequence(v));
+    }
+
+    private static CertificateList generateCRLStructure(TBSCertList tbsCertList, AlgorithmIdentifier sigAlgId, byte[] signature)
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(tbsCertList);
+        v.add(sigAlgId);
+        v.add(new DERBitString(signature));
+
+        return CertificateList.getInstance(new DERSequence(v));
     }
 
     static Set getCriticalExtensionOIDs(X509Extensions extensions)
