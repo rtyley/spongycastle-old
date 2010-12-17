@@ -35,6 +35,7 @@ import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Enumerated;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEREnumerated;
@@ -58,12 +59,18 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.cert.X509CRLEntryHolder;
+import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
+import org.bouncycastle.cert.X509v2CRLBuilder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
+import org.bouncycastle.cert.jcajce.JcaX509CRLHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509v1CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509v2CRLBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
@@ -86,7 +93,6 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
@@ -1747,28 +1753,24 @@ public class CertTest
         throws Exception
     {
         KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", BC);
-        X509V2CRLGenerator   crlGen = new X509V2CRLGenerator();
         Date                 now = new Date();
         KeyPair              pair = kpGen.generateKeyPair();
+        X509v2CRLBuilder     crlGen = new X509v2CRLBuilder(new X500Name("CN=Test CA"), now);
 
-        crlGen.setIssuerDN(new X500Principal("CN=Test CA"));
-
-        crlGen.setThisUpdate(now);
         crlGen.setNextUpdate(new Date(now.getTime() + 100000));
-        crlGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
 
         crlGen.addCRLEntry(BigInteger.ONE, now, CRLReason.privilegeWithdrawn);
 
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
 
-        X509CRL    crl = crlGen.generate(pair.getPrivate(), BC);
+        X509CRLHolder crl = crlGen.build(new JcaContentSignerBuilder("SHA256withRSAEncryption").setProvider(BC).build(pair.getPrivate()));
 
-        if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
+        if (!crl.getIssuer().equals(new X500Name("CN=Test CA")))
         {
             fail("failed CRL issuer test");
         }
 
-        byte[] authExt = crl.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
+        X509Extension authExt = crl.getExtension(X509Extension.authorityKeyIdentifier);
 
         if (authExt == null)
         {
@@ -1777,7 +1779,7 @@ public class CertTest
 
         AuthorityKeyIdentifier authId = new AuthorityKeyIdentifierStructure(authExt);
 
-        X509CRLEntry entry = crl.getRevokedCertificate(BigInteger.ONE);
+        X509CRLEntryHolder entry = crl.getRevokedCertificate(BigInteger.ONE);
 
         if (entry == null)
         {
@@ -1794,11 +1796,11 @@ public class CertTest
             fail("CRL entry extension not found");
         }
 
-        byte[]  ext = entry.getExtensionValue(X509Extensions.ReasonCode.getId());
+        X509Extension ext = entry.getExtension(X509Extension.reasonCode);
 
         if (ext != null)
         {
-            DEREnumerated   reasonCode = (DEREnumerated)X509ExtensionUtil.fromExtensionValue(ext);
+            ASN1Enumerated   reasonCode = (ASN1Enumerated)ASN1Enumerated.getInstance(ext.getParsedValue());
 
             if (reasonCode.getValue().intValue() != CRLReason.privilegeWithdrawn)
             {
@@ -1815,16 +1817,13 @@ public class CertTest
         throws Exception
     {
         KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", BC);
-        X509V2CRLGenerator   crlGen = new X509V2CRLGenerator();
+
         Date                 now = new Date();
         KeyPair              pair = kpGen.generateKeyPair();
+        X509v2CRLBuilder     crlGen = new JcaX509v2CRLBuilder(new X500Principal("CN=Test CA"), now);
 
-        crlGen.setIssuerDN(new X500Principal("CN=Test CA"));
-
-        crlGen.setThisUpdate(now);
         crlGen.setNextUpdate(new Date(now.getTime() + 100000));
-        crlGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
-
+        
         Vector extOids = new Vector();
         Vector extValues = new Vector();
 
@@ -1846,7 +1845,9 @@ public class CertTest
 
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
 
-        X509CRL    crl = crlGen.generate(pair.getPrivate(), BC);
+        X509CRLHolder crlHolder = crlGen.build(new JcaContentSignerBuilder("SHA256withRSAEncryption").setProvider(BC).build(pair.getPrivate()));
+
+        X509CRL crl = new JcaX509CRLConverter().setProvider(BC).getCRL(crlHolder);
 
         if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
         {
@@ -1900,15 +1901,11 @@ public class CertTest
         throws Exception
     {
         KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", BC);
-        X509V2CRLGenerator   crlGen = new X509V2CRLGenerator();
         Date                 now = new Date();
         KeyPair              pair = kpGen.generateKeyPair();
+        X509v2CRLBuilder     crlGen = new JcaX509v2CRLBuilder(new X500Principal("CN=Test CA"), now);
 
-        crlGen.setIssuerDN(new X500Principal("CN=Test CA"));
-
-        crlGen.setThisUpdate(now);
         crlGen.setNextUpdate(new Date(now.getTime() + 100000));
-        crlGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
 
         Vector extOids = new Vector();
         Vector extValues = new Vector();
@@ -1931,7 +1928,9 @@ public class CertTest
 
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
 
-        X509CRL    crl = crlGen.generate(pair.getPrivate(), BC);
+        X509CRLHolder crlHolder = crlGen.build(new JcaContentSignerBuilder("SHA256withRSAEncryption").setProvider(BC).build(pair.getPrivate()));
+
+        X509CRL crl = new JcaX509CRLConverter().setProvider(BC).getCRL(crlHolder);
 
         if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
         {
@@ -1983,35 +1982,46 @@ public class CertTest
         //
         // check loading of existing CRL
         //
-        crlGen = new X509V2CRLGenerator();
         now = new Date();
+        crlGen = new X509v2CRLBuilder(new X500Name("CN=Test CA"), now);
 
-        crlGen.setIssuerDN(new X500Principal("CN=Test CA"));
-
-        crlGen.setThisUpdate(now);
         crlGen.setNextUpdate(new Date(now.getTime() + 100000));
-        crlGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
 
-        crlGen.addCRL(crl);
+        crlGen.addCRL(new JcaX509CRLHolder(crl));
 
         crlGen.addCRLEntry(BigInteger.valueOf(2), now, entryExtensions);
 
-        crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
+        crlGen.addExtension(X509Extension.authorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
 
-        X509CRL    newCrl = crlGen.generate(pair.getPrivate(), BC);
+        crlHolder = crlGen.build(new JcaContentSignerBuilder("SHA256withRSAEncryption").setProvider(BC).build(pair.getPrivate()));
 
         int     count = 0;
         boolean oneFound = false;
         boolean twoFound = false;
 
-        Iterator it = newCrl.getRevokedCertificates().iterator();
+        Iterator it = crlHolder.getRevokedCertificates().iterator();
         while (it.hasNext())
         {
-            X509CRLEntry crlEnt = (X509CRLEntry)it.next();
+            X509CRLEntryHolder crlEnt = (X509CRLEntryHolder)it.next();
 
             if (crlEnt.getSerialNumber().intValue() == 1)
             {
                 oneFound = true;
+                X509Extension  extn = crlEnt.getExtension(X509Extension.reasonCode);
+
+                if (extn != null)
+                {
+                    ASN1Enumerated reasonCode = (ASN1Enumerated)ASN1Enumerated.getInstance(extn.getParsedValue());
+
+                    if (reasonCode.getValue().intValue() != CRLReason.privilegeWithdrawn)
+                    {
+                        fail("CRL entry reasonCode wrong");
+                    }
+                }
+                else
+                {
+                    fail("CRL entry reasonCode not found");
+                }
             }
             else if (crlEnt.getSerialNumber().intValue() == 2)
             {
@@ -2036,14 +2046,14 @@ public class CertTest
         //
         CertificateFactory cFact = CertificateFactory.getInstance("X.509", BC);
 
-        X509CRL readCrl = (X509CRL)cFact.generateCRL(new ByteArrayInputStream(newCrl.getEncoded()));
+        X509CRL readCrl = (X509CRL)cFact.generateCRL(new ByteArrayInputStream(crlHolder.getEncoded()));
 
         if (readCrl == null)
         {
             fail("crl not returned!");
         }
 
-        Collection col = cFact.generateCRLs(new ByteArrayInputStream(newCrl.getEncoded()));
+        Collection col = cFact.generateCRLs(new ByteArrayInputStream(crlHolder.getEncoded()));
 
         if (col.size() != 1)
         {

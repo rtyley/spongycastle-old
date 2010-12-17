@@ -163,7 +163,7 @@ public class AttributeCertificateHolder
     {
         if (holder.getObjectDigestInfo() != null)
         {
-            holder.getObjectDigestInfo().getDigestAlgorithm().getObjectId()
+            return holder.getObjectDigestInfo().getDigestAlgorithm().getObjectId()
                 .getId();
         }
         return null;
@@ -178,7 +178,7 @@ public class AttributeCertificateHolder
     {
         if (holder.getObjectDigestInfo() != null)
         {
-            holder.getObjectDigestInfo().getObjectDigest().getBytes();
+            return holder.getObjectDigestInfo().getObjectDigest().getBytes();
         }
         return null;
     }

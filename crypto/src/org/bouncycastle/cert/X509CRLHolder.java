@@ -2,11 +2,16 @@ package org.bouncycastle.cert;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.X509Extension;
@@ -69,6 +74,43 @@ public class X509CRLHolder
         return x509CRL.getEncoded();
     }
 
+    public X500Name getIssuer()
+    {
+        return X500Name.getInstance(x509CRL.getIssuer());
+    }
+
+    public X509CRLEntryHolder getRevokedCertificate(BigInteger serialNumber)
+    {
+        for (Enumeration en = x509CRL.getRevokedCertificateEnumeration(); en.hasMoreElements();)
+        {
+            TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)en.nextElement();
+
+            if (entry.getUserCertificate().getValue().equals(serialNumber))
+            {
+                return new X509CRLEntryHolder(entry);
+            }
+        }
+
+        return null;
+    }
+
+    public Collection getRevokedCertificates()
+    {
+        TBSCertList.CRLEntry[] entries = x509CRL.getRevokedCertificates();
+        List l = new ArrayList(entries.length);
+
+        for (Enumeration en = x509CRL.getRevokedCertificateEnumeration(); en.hasMoreElements();)
+        {
+            TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)en.nextElement();
+
+
+                l.add(new X509CRLEntryHolder(entry));
+
+        }
+
+        return l;
+    }
+    
     /**
      * Return whether or not the holder's CRL contains extensions.
      *

@@ -120,7 +120,7 @@ public class X509v3CertificateBuilder
     }
 
     /**
-     * Generate an X509 certificate, based on the current issuer and subject
+     * Generate an X.509 certificate, based on the current issuer and subject
      * using the passed in signer.
      *
      * @param signer the content signer to be used to generate the signature validating the certificate.

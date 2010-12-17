@@ -11,6 +11,12 @@ import java.util.List;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.util.CollectionStore;
 
+/**
+ * Class for storing Certificates for later lookup.
+ * <p>
+ * The class will convert X509Certificate objects into X509CertificateHolder objects.
+ * </p>
+ */
 public class JcaCertStore
     extends CollectionStore
 {

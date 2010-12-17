@@ -11,6 +11,12 @@ import java.util.List;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.util.CollectionStore;
 
+/**
+ * Class for storing CRLs for later lookup.
+ * <p>
+ * The class will convert X509CRL objects into X509CRLHolder objects.
+ * </p>
+ */
 public class JcaCRLStore
     extends CollectionStore
 {
