@@ -91,6 +91,7 @@ import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcRSAContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
@@ -1274,11 +1275,19 @@ public class CertTest
             .addExtension(new ASN1ObjectIdentifier("2.5.29.17"), true,
                 new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
 
-        cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certGen.build(sigGen));
+        X509CertificateHolder certHolder = certGen.build(sigGen);
+
+        cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certHolder);
 
         cert.checkValidity(new Date());
 
         cert.verify(pubKey);
+
+        ContentVerifierProvider contentVerifierProvider = new JcaContentVerifierProviderBuilder().setProvider(BC).build(pubKey);
+        if (!certHolder.isSignatureValid(contentVerifierProvider))
+        {
+            fail("signature test failed");
+        }
 
         ByteArrayInputStream   bIn = new ByteArrayInputStream(cert.getEncoded());
         CertificateFactory     certFact = CertificateFactory.getInstance("X.509", "BC");
@@ -1375,7 +1384,7 @@ public class CertTest
         SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPublicKeyStructure(lwPubKey.getModulus(), lwPubKey.getExponent()));
         certGen = new X509v3CertificateBuilder(builder.build(), BigInteger.valueOf(1), new Date(System.currentTimeMillis() - 50000), new Date(System.currentTimeMillis() + 50000), builder.build(), pubInfo);
 
-        X509CertificateHolder certHolder = certGen.build(sigGen);
+        certHolder = certGen.build(sigGen);
 
         cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certHolder);
 
@@ -1383,7 +1392,7 @@ public class CertTest
 
         cert.verify(pubKey);
 
-        ContentVerifierProvider contentVerifierProvider = new BcRSAContentVerifierProviderBuilder(new DefaultDigestAlgorithmIdentifierFinder()).build(lwPubKey);
+        contentVerifierProvider = new BcRSAContentVerifierProviderBuilder(new DefaultDigestAlgorithmIdentifierFinder()).build(lwPubKey);
 
         if (!certHolder.isSignatureValid(contentVerifierProvider))
         {
