@@ -32,7 +32,7 @@ public class X509CRLEntryHolder
     }
 
     /**
-     * Return whether or not the holder's certificate contains extensions.
+     * Return whether or not the holder's CRL entry contains extensions.
      *
      * @return true if extension are present, false otherwise.
      */
@@ -60,7 +60,7 @@ public class X509CRLEntryHolder
 
     /**
      * Returns a list of ASN1ObjectIdentifier objects representing the OIDs of the
-     * extensions contained in this holder's certificate.
+     * extensions contained in this holder's CRL entry.
      *
      * @return a list of extension OIDs.
      */
@@ -71,7 +71,7 @@ public class X509CRLEntryHolder
 
     /**
      * Returns a set of ASN1ObjectIdentifier objects representing the OIDs of the
-     * critical extensions contained in this holder's certificate.
+     * critical extensions contained in this holder's CRL entry.
      *
      * @return a set of critical extension OIDs.
      */
@@ -82,7 +82,7 @@ public class X509CRLEntryHolder
 
     /**
      * Returns a set of ASN1ObjectIdentifier objects representing the OIDs of the
-     * non-critical extensions contained in this holder's certificate.
+     * non-critical extensions contained in this holder's CRL entry.
      *
      * @return a set of non-critical extension OIDs.
      */

@@ -379,9 +379,8 @@ public class X509AttributeCertStoreSelector
     }
 
     /**
-     * Gets the target names. The collection consists of <code>List</code>s
-     * made up of an <code>Integer</code> in the first entry and a DER encoded
-     * byte array or a <code>String</code> in the second entry.
+     * Gets the target names. The collection consists of <code>GeneralName</code>
+     * objects.
      * <p>
      * The returned collection is immutable.
      * 
@@ -448,9 +447,7 @@ public class X509AttributeCertStoreSelector
 
 
     /**
-     * Gets the target groups. The collection consists of <code>List</code>s
-     * made up of an <code>Integer</code> in the first entry and a DER encoded
-     * byte array or a <code>String</code> in the second entry.
+     * Gets the target groups. The collection consists of <code>GeneralName</code> objects.
      * <p>
      * The returned collection is immutable.
      *
