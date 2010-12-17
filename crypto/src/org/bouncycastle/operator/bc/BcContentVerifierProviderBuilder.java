@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.RawContentVerifier;
 
 public abstract class BcContentVerifierProviderBuilder
 {
@@ -24,8 +23,6 @@ public abstract class BcContentVerifierProviderBuilder
     {
         return new ContentVerifierProvider()
         {
-            private BcSignerOutputStream stream;
-
             public boolean hasAssociatedCertificate()
             {
                 return true;
@@ -41,25 +38,10 @@ public abstract class BcContentVerifierProviderBuilder
             {
                 try
                 {
-                    Signer sig = createSigner(algorithm);
+                    AsymmetricKeyParameter publicKey = extractKeyParameters(certHolder.getSubjectPublicKeyInfo());
+                    BcSignerOutputStream stream = createSignatureStream(algorithm, publicKey);
 
-                    AsymmetricKeyParameter publicKey = PublicKeyFactory.createKey(certHolder.getSubjectPublicKeyInfo());
-
-                    sig.init(false, publicKey);
-
-                    stream = new BcSignerOutputStream(sig);
-
-                    Signer rawSig = createRawSig(algorithm, publicKey);
-
-                    if (rawSig != null)
-                    {
-                        return new RawSigVerifier(stream, rawSig);
-                    }
-                    else
-                    {
-                        return new SigVerifier(stream);
-                    }
-
+                    return new SigVerifier(stream);
                 }
                 catch (IOException e)
                 {
@@ -89,16 +71,7 @@ public abstract class BcContentVerifierProviderBuilder
             {
                 BcSignerOutputStream stream = createSignatureStream(algorithm, publicKey);
 
-                Signer rawSig = createRawSig(algorithm, publicKey);
-
-                if (rawSig != null)
-                {
-                    return new RawSigVerifier(stream, rawSig);
-                }
-                else
-                {
-                    return new SigVerifier(stream);
-                }
+                return new SigVerifier(stream);
             }
         };
     }
@@ -113,22 +86,23 @@ public abstract class BcContentVerifierProviderBuilder
         return new BcSignerOutputStream(sig);
     }
 
-    private Signer createRawSig(AlgorithmIdentifier algorithm, AsymmetricKeyParameter publicKey)
-    {
-        Signer rawSig;
-        try
-        {
-            rawSig = null;
+    /**
+     * Extract an AsymmetricKeyParameter from the passed in SubjectPublicKeyInfo structure.
+     *
+     * @param publicKeyInfo a publicKeyInfo structure describing the public key required.
+     * @return an AsymmetricKeyParameter object containing the appropriate public key.
+     * @throws IOException if the publicKeyInfo data cannot be parsed,
+     */
+    protected abstract AsymmetricKeyParameter extractKeyParameters(SubjectPublicKeyInfo publicKeyInfo)
+        throws IOException;
 
-            rawSig.init(false, publicKey);
-        }
-        catch (Exception e)
-        {
-            rawSig = null;
-        }
-        return rawSig;
-    }
-
+    /**
+     * Create the correct signer for the algorithm identifier sigAlgId.
+     *
+     * @param sigAlgId the algorithm details for the signature we want to verify.
+     * @return a Signer object.
+     * @throws OperatorCreationException if the Signer cannot be constructed.
+     */
     protected abstract Signer createSigner(AlgorithmIdentifier sigAlgId)
         throws OperatorCreationException;
 
@@ -155,26 +129,6 @@ public abstract class BcContentVerifierProviderBuilder
         public boolean verify(byte[] expected)
         {
             return stream.verify(expected);
-        }
-    }
-
-    private class RawSigVerifier
-        extends SigVerifier
-        implements RawContentVerifier
-    {
-        private Signer rawSignature;
-
-        RawSigVerifier(BcSignerOutputStream stream, Signer rawSignature)
-        {
-            super(stream);
-            this.rawSignature = rawSignature;
-        }
-
-        public boolean verify(byte[] digest, byte[] expected)
-        {
-            rawSignature.update(digest, 0, digest.length);
-
-            return rawSignature.verifySignature(expected);
         }
     }
 }

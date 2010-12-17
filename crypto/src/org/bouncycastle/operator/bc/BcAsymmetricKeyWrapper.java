@@ -7,15 +7,13 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.encodings.PKCS1Encoding;
-import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.operator.AsymmetricKeyWrapper;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OperatorException;
 
-public class BcAsymmetricKeyWrapper
+public abstract class BcAsymmetricKeyWrapper
     extends AsymmetricKeyWrapper
 {
     private AsymmetricKeyParameter publicKey;
@@ -58,8 +56,5 @@ public class BcAsymmetricKeyWrapper
         }
     }
 
-    private AsymmetricBlockCipher createAsymmetricWrapper(ASN1ObjectIdentifier algorithm)
-    {
-        return new PKCS1Encoding(new RSAEngine());
-    }
+    protected abstract AsymmetricBlockCipher createAsymmetricWrapper(ASN1ObjectIdentifier algorithm);
 }
