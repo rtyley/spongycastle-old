@@ -5,25 +5,18 @@ import java.io.OutputStream;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.signers.RSADigestSigner;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
-import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.RawContentVerifier;
 
-public class BcContentVerifierProviderBuilder
+public abstract class BcContentVerifierProviderBuilder
 {
-    private DigestAlgorithmIdentifierFinder digestAlgorithmFinder;
-
     public BcContentVerifierProviderBuilder()
     {
-        digestAlgorithmFinder = new DefaultDigestAlgorithmIdentifierFinder();
     }
 
     public ContentVerifierProvider build(final X509CertificateHolder certHolder)
@@ -48,7 +41,7 @@ public class BcContentVerifierProviderBuilder
             {
                 try
                 {
-                    Signer sig = createSignature(algorithm);
+                    Signer sig = createSigner(algorithm);
 
                     AsymmetricKeyParameter publicKey = PublicKeyFactory.createKey(certHolder.getSubjectPublicKeyInfo());
 
@@ -113,7 +106,7 @@ public class BcContentVerifierProviderBuilder
     private BcSignerOutputStream createSignatureStream(AlgorithmIdentifier algorithm, AsymmetricKeyParameter publicKey)
         throws OperatorCreationException
     {
-        Signer sig = createSignature(algorithm);
+        Signer sig = createSigner(algorithm);
 
         sig.init(false, publicKey);
 
@@ -136,14 +129,8 @@ public class BcContentVerifierProviderBuilder
         return rawSig;
     }
 
-    private Signer createSignature(AlgorithmIdentifier sigAlgId)
-        throws OperatorCreationException
-    {
-        AlgorithmIdentifier digAlg = digestAlgorithmFinder.find(sigAlgId);
-        Digest dig = BcUtil.createDigest(digAlg);
-
-        return new RSADigestSigner(dig);
-    }
+    protected abstract Signer createSigner(AlgorithmIdentifier sigAlgId)
+        throws OperatorCreationException;
 
     private class SigVerifier
         implements ContentVerifier
