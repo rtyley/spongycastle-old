@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.GeneralName;
 
 /**
@@ -42,7 +41,7 @@ public class X509AttributeCertificateSelectorBuilder
      * Set the attribute certificate to be matched. If <code>null</code> is
      * given any will do.
      *
-     * @param attributeCert The attribute certificate to set.
+     * @param attributeCert The attribute certificate holder to set.
      */
     public void setAttributeCert(X509AttributeCertificateHolder attributeCert)
     {
@@ -103,7 +102,7 @@ public class X509AttributeCertificateSelectorBuilder
 
     /**
      * Adds a target name criterion for the attribute certificate to the target
-     * information extension criteria. The <code>X509AttributeCertificate</code>
+     * information extension criteria. The <code>X509AttributeCertificateHolder</code>
      * must contain at least one of the specified target names.
      * <p>
      * Each attribute certificate may contain a target information extension
@@ -119,24 +118,6 @@ public class X509AttributeCertificateSelectorBuilder
     }
 
     /**
-     * Adds a target name criterion for the attribute certificate to the target
-     * information extension criteria. The <code>X509AttributeCertificate</code>
-     * must contain at least one of the specified target names.
-     * <p>
-     * Each attribute certificate may contain a target information extension
-     * limiting the servers where this attribute certificate can be used. If
-     * this extension is not present, the attribute certificate is not targeted
-     * and may be accepted by any server.
-     *
-     * @param name a byte array containing the name in ASN.1 DER encoded form of a GeneralName
-     * @throws java.io.IOException if a parsing error occurs.
-     */
-    public void addTargetName(byte[] name) throws IOException
-    {
-        addTargetName(GeneralName.getInstance(ASN1Object.fromByteArray(name)));
-    }
-
-    /**
      * Adds a collection with target names criteria. If <code>null</code> is
      * given any will do.
      * <p>
@@ -145,7 +126,6 @@ public class X509AttributeCertificateSelectorBuilder
      *
      * @param names A collection of target names.
      * @throws java.io.IOException if a parsing error occurs.
-     * @see #addTargetName(byte[])
      * @see #addTargetName(org.bouncycastle.asn1.x509.GeneralName)
      */
     public void setTargetNames(Collection names) throws IOException
@@ -155,7 +135,7 @@ public class X509AttributeCertificateSelectorBuilder
 
     /**
      * Adds a target group criterion for the attribute certificate to the target
-     * information extension criteria. The <code>X509AttributeCertificate</code>
+     * information extension criteria. The <code>X509AttributeCertificateHolder</code>
      * must contain at least one of the specified target groups.
      * <p>
      * Each attribute certificate may contain a target information extension
@@ -171,24 +151,6 @@ public class X509AttributeCertificateSelectorBuilder
     }
 
     /**
-     * Adds a target group criterion for the attribute certificate to the target
-     * information extension criteria. The <code>X509AttributeCertificate</code>
-     * must contain at least one of the specified target groups.
-     * <p>
-     * Each attribute certificate may contain a target information extension
-     * limiting the servers where this attribute certificate can be used. If
-     * this extension is not present, the attribute certificate is not targeted
-     * and may be accepted by any server.
-     *
-     * @param name a byte array containing the group in ASN.1 DER encoded form of a GeneralName
-     * @throws java.io.IOException if a parsing error occurs.
-     */
-    public void addTargetGroup(byte[] name) throws IOException
-    {
-        addTargetGroup(GeneralName.getInstance(ASN1Object.fromByteArray(name)));
-    }
-
-    /**
      * Adds a collection with target groups criteria. If <code>null</code> is
      * given any will do.
      * <p>
@@ -197,7 +159,6 @@ public class X509AttributeCertificateSelectorBuilder
      *
      * @param names A collection of target groups.
      * @throws java.io.IOException if a parsing error occurs.
-     * @see #addTargetGroup(byte[])
      * @see #addTargetGroup(org.bouncycastle.asn1.x509.GeneralName)
      */
     public void setTargetGroups(Collection names) throws IOException

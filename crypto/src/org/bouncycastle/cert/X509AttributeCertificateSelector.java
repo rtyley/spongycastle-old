@@ -56,8 +56,8 @@ public class X509AttributeCertificateSelector
     /**
      * Decides if the given attribute certificate should be selected.
      *
-     * @param obj The attribute certificate which should be checked.
-     * @return <code>true</code> if the attribute certificate can be selected,
+     * @param obj The X509AttributeCertificateHolder which should be checked.
+     * @return <code>true</code> if the attribute certificate is a match
      *         <code>false</code> otherwise.
      */
     public boolean match(Object obj)
@@ -186,9 +186,9 @@ public class X509AttributeCertificateSelector
     }
 
     /**
-     * Returns the attribute certificate which must be matched.
+     * Returns the attribute certificate holder which must be matched.
      *
-     * @return Returns the attribute certificate.
+     * @return Returns an X509AttributeCertificateHolder
      */
     public X509AttributeCertificateHolder getAttributeCert()
     {
@@ -241,9 +241,7 @@ public class X509AttributeCertificateSelector
     }
 
     /**
-     * Gets the target names. The collection consists of <code>List</code>s
-     * made up of an <code>Integer</code> in the first entry and a DER encoded
-     * byte array or a <code>String</code> in the second entry.
+     * Gets the target names. The collection consists of GeneralName objects.
      * <p>
      * The returned collection is immutable.
      *
@@ -255,9 +253,7 @@ public class X509AttributeCertificateSelector
     }
 
     /**
-     * Gets the target groups. The collection consists of <code>List</code>s
-     * made up of an <code>Integer</code> in the first entry and a DER encoded
-     * byte array or a <code>String</code> in the second entry.
+     * Gets the target groups. The collection consists of GeneralName objects.
      * <p>
      * The returned collection is immutable.
      *
