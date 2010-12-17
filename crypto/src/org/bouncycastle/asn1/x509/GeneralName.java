@@ -1,9 +1,11 @@
 package org.bouncycastle.asn1.x509;
 
+import java.io.IOException;
 import java.util.StringTokenizer;
 
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -209,6 +211,18 @@ public class GeneralName
                 return new GeneralName(tag, ASN1OctetString.getInstance(tagObj, false));
             case registeredID:
                 return new GeneralName(tag, DERObjectIdentifier.getInstance(tagObj, false));
+            }
+        }
+
+        if (obj instanceof byte[])
+        {
+            try
+            {
+                return getInstance(ASN1Object.fromByteArray((byte[])obj));
+            }
+            catch (IOException e)
+            {
+                throw new IllegalArgumentException("unable to parse encoded general name");
             }
         }
 

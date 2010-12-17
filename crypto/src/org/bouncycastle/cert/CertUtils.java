@@ -2,17 +2,23 @@ package org.bouncycastle.cert;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.AttributeCertificate;
+import org.bouncycastle.asn1.x509.AttributeCertificateInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -27,18 +33,36 @@ class CertUtils
     {
         try
         {
-            OutputStream sOut = signer.getOutputStream();
-
-            sOut.write(tbsCert.getDEREncoded());
-
-            sOut.close();
-
-            return new X509CertificateHolder(generateStructure(tbsCert, signer.getAlgorithmIdentifier(), signer.getSignature()));
+            return new X509CertificateHolder(generateStructure(tbsCert, signer.getAlgorithmIdentifier(), generateSig(signer, tbsCert)));
         }
         catch (IOException e)
         {
             throw new IllegalStateException("cannot produce certificate signature");
         }
+    }
+
+    static X509AttributeCertificateHolder generateFullAttrCert(ContentSigner signer, AttributeCertificateInfo attrInfo)
+    {
+        try
+        {
+            return new X509AttributeCertificateHolder(generateAttrStructure(attrInfo, signer.getAlgorithmIdentifier(), generateSig(signer, attrInfo)));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException("cannot produce attribute certificate signature");
+        }
+    }
+
+    private static byte[] generateSig(ContentSigner signer, ASN1Encodable tbsObj)
+        throws IOException
+    {
+        OutputStream sOut = signer.getOutputStream();
+
+        sOut.write(tbsObj.getDEREncoded());
+
+        sOut.close();
+
+        return signer.getSignature();
     }
 
     private static X509CertificateStructure generateStructure(TBSCertificateStructure tbsCert, AlgorithmIdentifier sigAlgId, byte[] signature)
@@ -50,6 +74,17 @@ class CertUtils
         v.add(new DERBitString(signature));
 
         return X509CertificateStructure.getInstance(new DERSequence(v));
+    }
+
+    private static AttributeCertificate generateAttrStructure(AttributeCertificateInfo attrInfo, AlgorithmIdentifier sigAlgId, byte[] signature)
+    {
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(attrInfo);
+        v.add(sigAlgId);
+        v.add(new DERBitString(signature));
+
+        return AttributeCertificate.getInstance(new DERSequence(v));
     }
 
     static Set getCriticalExtensionOIDs(X509Extensions extensions)
@@ -81,5 +116,56 @@ class CertUtils
         }
 
         return Collections.unmodifiableList(Arrays.asList(extensions.getExtensionOIDs()));
+    }
+
+    static DERBitString booleanToBitString(boolean[] id)
+    {
+        byte[] bytes = new byte[(id.length + 7) / 8];
+
+        for (int i = 0; i != id.length; i++)
+        {
+            bytes[i / 8] |= (id[i]) ? (1 << ((7 - (i % 8)))) : 0;
+        }
+
+        int pad = id.length % 8;
+
+        if (pad == 0)
+        {
+            return new DERBitString(bytes);
+        }
+        else
+        {
+            return new DERBitString(bytes, 8 - pad);
+        }
+    }
+
+    static boolean[] bitStringToBoolean(DERBitString bitString)
+    {
+        if (bitString != null)
+        {
+            byte[]          bytes = bitString.getBytes();
+            boolean[]       boolId = new boolean[bytes.length * 8 - bitString.getPadBits()];
+
+            for (int i = 0; i != boolId.length; i++)
+            {
+                boolId[i] = (bytes[i / 8] & (0x80 >>> (i % 8))) != 0;
+            }
+
+            return boolId;
+        }
+
+        return null;
+    }
+
+    static Date recoverDate(DERGeneralizedTime time)
+    {
+        try
+        {
+            return time.getDate();
+        }
+        catch (ParseException e)
+        {
+            throw new IllegalStateException("unable to recover date: " + e.getMessage());
+        }
     }
 }

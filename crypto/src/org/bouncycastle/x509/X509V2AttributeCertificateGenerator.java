@@ -1,5 +1,18 @@
 package org.bouncycastle.x509;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
+import java.util.Date;
+import java.util.Iterator;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERBitString;
@@ -15,21 +28,9 @@ import org.bouncycastle.asn1.x509.AttributeCertificateInfo;
 import org.bouncycastle.asn1.x509.V2AttributeCertificateInfoGenerator;
 import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.security.cert.CertificateEncodingException;
-import java.util.Date;
-import java.util.Iterator;
-
 /**
  * class to produce an X.509 Version 2 AttributeCertificate.
+ * @deprecated use org.bouncycastle.cert.X509v2AttributeCertificateBuilder
  */
 public class X509V2AttributeCertificateGenerator
 {

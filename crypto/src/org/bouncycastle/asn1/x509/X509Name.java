@@ -19,6 +19,7 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.DERUniversalString;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -369,6 +370,10 @@ public class X509Name
         if (obj == null || obj instanceof X509Name)
         {
             return (X509Name)obj;
+        }
+        else if (obj instanceof X500Name)
+        {
+            return new X509Name(ASN1Sequence.getInstance(((X500Name)obj).getDERObject()));
         }
         else if (obj != null)
         {
@@ -941,6 +946,7 @@ public class X509Name
             value = canonicalize(value);
             value = stripInternalSpaces(value);
 
+            hashCodeValue ^= ordering.elementAt(i).hashCode();
             hashCodeValue ^= value.hashCode();
         }
 

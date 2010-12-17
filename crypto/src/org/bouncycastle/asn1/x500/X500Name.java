@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.asn1.x509.X509Name;
 
 /**
  * <pre>
@@ -65,6 +66,10 @@ public class X500Name
         if (obj instanceof X500Name)
         {
             return (X500Name)obj;
+        }
+        else if (obj instanceof X509Name)
+        {
+            return new X500Name(ASN1Sequence.getInstance(((X509Name)obj).getDERObject()));
         }
         else if (obj != null)
         {
@@ -192,7 +197,7 @@ public class X500Name
         }
         
         DERObject derO = ((DEREncodable)obj).getDERObject();
-        
+
         if (this.getDERObject().equals(derO))
         {
             return true;
