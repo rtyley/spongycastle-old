@@ -1,4 +1,4 @@
-package org.bouncycastle.cert;
+package org.bouncycastle.cert.selector;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -10,6 +10,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.cert.AttributeCertificateHolder;
+import org.bouncycastle.cert.AttributeCertificateIssuer;
+import org.bouncycastle.cert.X509AttributeCertificateHolder;
 
 /**
  * This class builds selectors according to the set criteria.
