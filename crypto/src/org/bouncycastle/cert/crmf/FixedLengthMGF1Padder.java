@@ -7,6 +7,9 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.generators.MGF1BytesGenerator;
 import org.bouncycastle.crypto.params.MGFParameters;
 
+/**
+ * An encrypted value padder that uses MGF1 as the basis of the padding.
+ */
 public class FixedLengthMGF1Padder
     implements EncryptedValuePadder
 {
@@ -14,11 +17,25 @@ public class FixedLengthMGF1Padder
     private SecureRandom random;
     private Digest dig = new SHA1Digest();
 
+    /**
+     * Create a padder to so that padded output will always be at least
+     * length bytes long.
+     *
+     * @param length fixed length for padded output.
+     */
     public FixedLengthMGF1Padder(int length)
     {
         this(length, null);
     }
 
+    /**
+     * Create a padder to so that padded output will always be at least
+     * length bytes long, using the passed in source of randomness to
+     * provide the random material for the padder.
+     *
+     * @param length fixed length for padded output.
+     * @param random a source of randomness.
+     */
     public FixedLengthMGF1Padder(int length, SecureRandom random)
     {
         this.length = length;
