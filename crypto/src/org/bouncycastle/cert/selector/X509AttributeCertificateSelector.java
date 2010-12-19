@@ -1,4 +1,4 @@
-package org.bouncycastle.cert;
+package org.bouncycastle.cert.selector;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -9,6 +9,9 @@ import org.bouncycastle.asn1.x509.Target;
 import org.bouncycastle.asn1.x509.TargetInformation;
 import org.bouncycastle.asn1.x509.Targets;
 import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.cert.AttributeCertificateHolder;
+import org.bouncycastle.cert.AttributeCertificateIssuer;
+import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.util.Selector;
 
 /**
