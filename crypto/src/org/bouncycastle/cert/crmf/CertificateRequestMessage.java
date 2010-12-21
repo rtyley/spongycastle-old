@@ -19,8 +19,16 @@ import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 
+/**
+ * Carrier for a CRMF CertReqMsg.
+ */
 public class CertificateRequestMessage
 {
+    public static final int popRaVerified = ProofOfPossession.TYPE_RA_VERIFIED;
+    public static final int popSigningKey = ProofOfPossession.TYPE_SIGNING_KEY;
+    public static final int popKeyEncipherment = ProofOfPossession.TYPE_KEY_ENCIPHERMENT;
+    public static final int popKeyAgreement = ProofOfPossession.TYPE_KEY_AGREEMENT;
+
     private final CertReqMsg certReqMsg;
     private final Controls controls;
 
@@ -64,21 +72,43 @@ public class CertificateRequestMessage
         return certReqMsg;
     }
 
+    /**
+     * Return the certificate template contained in this message.
+     *
+     * @return  a CertTemplate structure.
+     */
     public CertTemplate getCertTemplate()
     {
         return this.certReqMsg.getCertReq().getCertTemplate();
     }
 
+    /**
+     * Return whether or not this request has control values associated with it.
+     *
+     * @return true if there are control values present, false otherwise.
+     */
     public boolean hasControls()
     {
         return controls != null;
     }
 
+    /**
+     * Return whether or not this request has a specific type of control value.
+     *
+     * @param type the type OID for the control value we are checking for.
+     * @return true if a control value of type is present, false otherwise.
+     */
     public boolean hasControl(ASN1ObjectIdentifier type)
     {
         return findControl(type) != null;
     }
 
+    /**
+     * Return a control value of the specified type.
+     *
+     * @param type the type OID for the control value we are checking for.
+     * @return the control value if present, null otherwise.
+     */
     public Control getControl(ASN1ObjectIdentifier type)
     {
         AttributeTypeAndValue found = findControl(type);
@@ -124,16 +154,32 @@ public class CertificateRequestMessage
         return found;
     }
 
+    /**
+     * Return whether or not this request message has a proof-of-possession field in it.
+     *
+     * @return true if proof-of-possession is present, false otherwise.
+     */
     public boolean hasProofOfPossession()
     {
         return this.certReqMsg.getPopo() != null;
     }
 
+    /**
+     * Return the type of the proof-of-possession this request message provides.
+     *
+     * @return one of: popRaVerified, popSigningKey, popKeyEncipherment, popKeyAgreement
+     */
     public int getProofOfPossessionType()
     {
         return this.certReqMsg.getPopo().getType();
     }
 
+    /**
+     * Return whether or not the proof-of-possession (POP) is of the type popSigningKey and
+     * it has a public key MAC associated with it.
+     *
+     * @return true if POP is popSigningKey and a PKMAC is present, false otherwise.
+     */
     public boolean hasSigningKeyProofOfPossessionWithPKMAC()
     {
         ProofOfPossession pop = certReqMsg.getPopo();
@@ -148,7 +194,15 @@ public class CertificateRequestMessage
         return false;
     }
 
-    public boolean verifySigningKeyPOP(ContentVerifierProvider verifierProvider)
+    /**
+     * Return whether or not a signing key proof-of-possession (POP) is valid.
+     *
+     * @param verifierProvider a provider that can produce content verifiers for the signature contained in this POP.
+     * @return true if the POP is valid, false otherwise.
+     * @throws CRMFException if there is a problem in verification or content verifier creation.
+     * @throws IllegalStateException if POP not appropriate.
+     */
+    public boolean isValidSigningKeyPOP(ContentVerifierProvider verifierProvider)
         throws CRMFException, IllegalStateException
     {
         ProofOfPossession pop = certReqMsg.getPopo();
@@ -170,7 +224,17 @@ public class CertificateRequestMessage
         }
     }
 
-    public boolean verifySigningKeyPOP(ContentVerifierProvider verifierProvider, PKMACBuilder macBuilder, char[] password)
+    /**
+     * Return whether or not a signing key proof-of-possession (POP), with an associated PKMAC, is valid.
+     *
+     * @param verifierProvider a provider that can produce content verifiers for the signature contained in this POP.
+     * @param macBuilder a suitable PKMACBuilder to create the MAC verifier.
+     * @param password the password used to key the MAC calculation.
+     * @return true if the POP is valid, false otherwise.
+     * @throws CRMFException if there is a problem in verification or content verifier creation.
+     * @throws IllegalStateException if POP not appropriate.
+     */
+    public boolean isValidSigningKeyPOP(ContentVerifierProvider verifierProvider, PKMACBuilder macBuilder, char[] password)
         throws CRMFException, IllegalStateException
     {
         ProofOfPossession pop = certReqMsg.getPopo();
@@ -219,6 +283,12 @@ public class CertificateRequestMessage
         return verifier.verify(popoSign.getSignature().getBytes());
     }
 
+    /**
+     * Return the ASN.1 encoding of the certReqMsg we wrap.
+     *
+     * @return a byte array containing the binary encoding of the certReqMsg.
+     * @throws IOException if there is an exception creating the encoding.
+     */
     public byte[] getEncoded()
         throws IOException
     {

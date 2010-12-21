@@ -167,7 +167,7 @@ public class AllTests
         // check that internal check on popo signing is working okay
         try
         {
-            certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()));
+            certReqMsg.isValidSigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()));
             fail("IllegalStateException not thrown");
         }
         catch (IllegalStateException e)
@@ -175,7 +175,7 @@ public class AllTests
             // ignore
         }
 
-        assertTrue(certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()), new PKMACBuilder(new JcePKMACValuesCalculator().setProvider(BC)), "fred".toCharArray()));
+        assertTrue(certReqMsg.isValidSigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()), new PKMACBuilder(new JcePKMACValuesCalculator().setProvider(BC)), "fred".toCharArray()));
 
         assertEquals(kp.getPublic(), certReqMsg.getPublicKey());
     }
@@ -205,7 +205,7 @@ public class AllTests
         // check that internal check on popo signing is working okay
         try
         {
-            certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()), new PKMACBuilder(new JcePKMACValuesCalculator().setProvider(BC)), "fred".toCharArray());
+            certReqMsg.isValidSigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic()), new PKMACBuilder(new JcePKMACValuesCalculator().setProvider(BC)), "fred".toCharArray());
 
             fail("IllegalStateException not thrown");
         }
@@ -215,7 +215,7 @@ public class AllTests
         }
 
 
-        assertTrue(certReqMsg.verifySigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic())));
+        assertTrue(certReqMsg.isValidSigningKeyPOP(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic())));
 
         assertEquals(kp.getPublic(), certReqMsg.getPublicKey());
     }

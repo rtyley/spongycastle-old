@@ -10,6 +10,9 @@ import org.bouncycastle.asn1.crmf.EncryptedKey;
 import org.bouncycastle.asn1.crmf.PKIArchiveOptions;
 import org.bouncycastle.cms.CMSEnvelopedData;
 
+/**
+ * Carrier for a PKIArchiveOptions structure.
+ */
 public class PKIArchiveControl
     implements Control
 {
@@ -21,26 +24,51 @@ public class PKIArchiveControl
 
     private final PKIArchiveOptions pkiArchiveOptions;
 
+    /**
+     * Basic constructor - build from an PKIArchiveOptions structure.
+     *
+     * @param pkiArchiveOptions  the ASN.1 structure that will underlie this control.
+     */
     public PKIArchiveControl(PKIArchiveOptions pkiArchiveOptions)
     {
         this.pkiArchiveOptions = pkiArchiveOptions;
     }
 
+    /**
+     * Return the type of this control.
+     *
+     * @return CRMFObjectIdentifiers.id_regCtrl_pkiArchiveOptions
+     */
     public ASN1ObjectIdentifier getType()
     {
         return type;
     }
 
+    /**
+     * Return the underlying ASN.1 object.
+     *
+     * @return a PKIArchiveOptions structure.
+     */
     public ASN1Encodable getValue()
     {
         return pkiArchiveOptions;
     }
 
+    /**
+     * Return the archive control type, one of: encryptedPrivKey,keyGenParameters,or archiveRemGenPrivKey.
+     *
+     * @return the archive control type.
+     */
     public int getArchiveType()
     {
         return pkiArchiveOptions.getType();
     }
 
+    /**
+     * Return whether this control contains enveloped data.
+     *
+     * @return true if the control contains enveloped data, false otherwise.
+     */
     public boolean isEnvelopedData()
     {
         EncryptedKey encKey = EncryptedKey.getInstance(pkiArchiveOptions.getValue());
@@ -48,6 +76,11 @@ public class PKIArchiveControl
         return !encKey.isEncryptedValue();
     }
 
+    /**
+     * Return the enveloped data structure contained in this control.
+     *
+     * @return a CMSEnvelopedData object.
+     */
     public CMSEnvelopedData getEnvelopedData()
     {
         EncryptedKey encKey = EncryptedKey.getInstance(pkiArchiveOptions.getValue());
