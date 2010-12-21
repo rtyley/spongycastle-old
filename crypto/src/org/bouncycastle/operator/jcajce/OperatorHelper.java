@@ -6,7 +6,6 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -15,11 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.Cipher;
-import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -32,8 +28,6 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jcajce.JcaJceHelper;
@@ -88,38 +82,6 @@ class OperatorHelper
     OperatorHelper(JcaJceHelper helper)
     {
         this.helper = helper;
-    }
-
-    static X509Name convertName(
-        X500Principal name)
-    {
-        try
-        {
-            return new X509Name(ASN1Sequence.getInstance(ASN1Object.fromByteArray(name.getEncoded())));
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("can't convert name");
-        }
-    }
-
-    static SubjectPublicKeyInfo getPublicKeyInfo(PublicKey key)
-    {
-        byte[] encoded = key.getEncoded();
-
-        if (encoded == null)
-        {
-            throw new IllegalArgumentException("encoded key equals null");
-        }
-
-        try
-        {
-            return SubjectPublicKeyInfo.getInstance(ASN1Object.fromByteArray(encoded));
-        }
-        catch (IOException e)
-        {
-            throw new OpArgumentException("cannot convert public key: " + e.getMessage(), e);
-        }
     }
 
     Cipher createAsymmetricWrapper(ASN1ObjectIdentifier algorithm)
@@ -346,25 +308,6 @@ class OperatorHelper
         catch (NoSuchProviderException e)
         {
             throw new OpCertificateException("cannot find factory provider: " + e.getMessage(), e);
-        }
-    }
-
-    // TODO: put somewhere public so cause easily accessed
-    private static class OpArgumentException
-        extends IllegalArgumentException
-    {
-        private Throwable cause;
-
-        public OpArgumentException(String msg, Throwable cause)
-        {
-            super(msg);
-
-            this.cause = cause;
-        }
-
-        public Throwable getCause()
-        {
-            return cause;
         }
     }
 
