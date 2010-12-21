@@ -6,6 +6,7 @@ import java.io.OutputStream;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.Evidence;
@@ -61,6 +62,6 @@ public class CMSTimeStampedDataGenerator
 
         TimeStampAndCRL stamp = new TimeStampAndCRL(timeStamp.toCMSSignedData().getContentInfo());
 
-        return new CMSTimeStampedData(new ContentInfo(CMSObjectIdentifiers.timestampedData, new TimeStampedData(dataUri, metaData, content, new Evidence(new TimeStampTokenEvidence(stamp)))));
+        return new CMSTimeStampedData(new ContentInfo(CMSObjectIdentifiers.timestampedData, new TimeStampedData(new DERIA5String(dataUri.toString()), metaData, content, new Evidence(new TimeStampTokenEvidence(stamp)))));
     }
 }
