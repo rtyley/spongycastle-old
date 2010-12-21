@@ -37,6 +37,7 @@ Release 1.46
 <li>CRL searching for CertPath validation now supports the optional algorithm given in Section 6.3.3 of RFC 5280, allowing the latest CRL to be used for a set time providing the certificate is unexpired.</li>
 <li>AES-CMAC and DESede-CMAC have been added to the JCE provider.</li>
 <li>Support for CRMF (RFC 4211) and CMP (RFC 4210) has been added.</li>
+<li>BufferedBlockCipher will now always reset after a doFinal().</li>
 </ul>
 
 <h3>2.2.1 Version</h3>
