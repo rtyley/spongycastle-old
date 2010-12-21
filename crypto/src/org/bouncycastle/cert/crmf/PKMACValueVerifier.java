@@ -18,7 +18,7 @@ class PKMACValueVerifier
         this.builder = builder;
     }
 
-    public boolean verify(PKMACValue value, char[] password, SubjectPublicKeyInfo keyInfo)
+    public boolean isValid(PKMACValue value, char[] password, SubjectPublicKeyInfo keyInfo)
         throws CRMFException
     {
         builder.setParameters(PBMParameter.getInstance(value.getAlgId().getParameters()));
