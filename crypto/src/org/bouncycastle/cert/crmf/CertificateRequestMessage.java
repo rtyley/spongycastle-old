@@ -251,7 +251,7 @@ public class CertificateRequestMessage
             PKMACValue pkMAC = popoSign.getPoposkInput().getPublicKeyMAC();
             PKMACValueVerifier macVerifier = new PKMACValueVerifier(macBuilder);
 
-            if (macVerifier.verify(pkMAC, password, this.getCertTemplate().getPublicKey()))
+            if (macVerifier.isValid(pkMAC, password, this.getCertTemplate().getPublicKey()))
             {
                 return verifySignature(verifierProvider, popoSign);
             }
