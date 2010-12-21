@@ -7,6 +7,7 @@ import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -16,14 +17,12 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 
-/**
- * Created by IntelliJ IDEA.
- * User: dgh
- * Date: 25/08/2010
- * Time: 9:51:47 AM
- * To change this template use File | Settings | File Templates.
- */
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.operator.AsymmetricKeyUnwrapper;
+import org.bouncycastle.operator.SymmetricKeyUnwrapper;
+
 public interface JcaJceHelper
 {
     Cipher createCipher(
@@ -59,4 +58,8 @@ public interface JcaJceHelper
 
     CertificateFactory createCertificateFactory(String algorithm)
         throws NoSuchAlgorithmException, NoSuchProviderException, CertificateException;
+
+    AsymmetricKeyUnwrapper createAsymmetricUnwrapper(AlgorithmIdentifier keyEncryptionAlgorithm, PrivateKey keyEncryptionKey);
+
+    SymmetricKeyUnwrapper createSymmetricUnwrapper(AlgorithmIdentifier keyEncryptionAlgorithm, SecretKey keyEncryptionKey);
 }

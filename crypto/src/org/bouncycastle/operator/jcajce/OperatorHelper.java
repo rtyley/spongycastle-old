@@ -24,7 +24,9 @@ import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
@@ -41,6 +43,7 @@ class OperatorHelper
 {
     private static final Map oids = new HashMap();
     private static final Map asymmetricWrapperAlgNames = new HashMap();
+    private static final Map symmetricWrapperAlgNames = new HashMap();
 
     static
     {
@@ -69,6 +72,15 @@ class OperatorHelper
         oids.put(NISTObjectIdentifiers.dsa_with_sha256, "SHA256WITHDSA");
 
         asymmetricWrapperAlgNames.put(new ASN1ObjectIdentifier(PKCSObjectIdentifiers.rsaEncryption.getId()), "RSA/ECB/PKCS1Padding");
+
+        symmetricWrapperAlgNames.put(PKCSObjectIdentifiers.id_alg_CMS3DESwrap, "DESEDEWrap");
+        symmetricWrapperAlgNames.put(NISTObjectIdentifiers.id_aes128_wrap, "AESWrap");
+        symmetricWrapperAlgNames.put(NISTObjectIdentifiers.id_aes192_wrap, "AESWrap");
+        symmetricWrapperAlgNames.put(NISTObjectIdentifiers.id_aes256_wrap, "AESWrap");
+        symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia128_wrap, "CamilliaWrap");
+        symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia192_wrap, "CamilliaWrap");
+        symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia256_wrap, "CamilliaWrap");
+        symmetricWrapperAlgNames.put(KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap, "SEEDWrap");
     }
 
     private JcaJceHelper helper;
@@ -116,6 +128,33 @@ class OperatorHelper
         try
         {
             String cipherName = (String)asymmetricWrapperAlgNames.get(algorithm);
+
+            if (cipherName != null)
+            {
+                try
+                {
+                    // this is reversed as the Sun policy files now allow unlimited strength RSA
+                    return helper.createCipher(cipherName);
+                }
+                catch (NoSuchAlgorithmException e)
+                {
+                    // Ignore
+                }
+            }
+            return helper.createCipher(algorithm.getId());
+        }
+        catch (GeneralSecurityException e)
+        {
+            throw new OperatorCreationException("cannot create cipher: " + e.getMessage(), e);
+        }
+    }
+
+    Cipher createSymmetricWrapper(ASN1ObjectIdentifier algorithm)
+        throws OperatorCreationException
+    {
+        try
+        {
+            String cipherName = (String)symmetricWrapperAlgNames.get(algorithm);
 
             if (cipherName != null)
             {

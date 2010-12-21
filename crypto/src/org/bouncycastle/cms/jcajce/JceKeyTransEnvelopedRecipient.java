@@ -25,7 +25,7 @@ public class JceKeyTransEnvelopedRecipient
     {
         Key secretKey = extractSecretKey(keyEncryptionAlgorithm, contentEncryptionAlgorithm, encryptedContentEncryptionKey);
 
-        final Cipher dataCipher = helper.createContentCipher(secretKey, contentEncryptionAlgorithm);
+        final Cipher dataCipher = contentHelper.createContentCipher(secretKey, contentEncryptionAlgorithm);
 
         return new RecipientOperator(new InputDecryptor()
         {
