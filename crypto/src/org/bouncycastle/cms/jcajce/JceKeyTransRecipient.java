@@ -1,16 +1,8 @@
 package org.bouncycastle.cms.jcajce;
 
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
-import java.security.ProviderException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSException;
@@ -18,79 +10,88 @@ import org.bouncycastle.cms.KeyTransRecipient;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle.operator.AsymmetricKeyUnwrapper;
+import org.bouncycastle.operator.OperatorException;
 
 public abstract class JceKeyTransRecipient
     implements KeyTransRecipient
 {
     private PrivateKey recipientKey;
+
     protected EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
+    protected EnvelopedDataHelper contentHelper = helper;
 
     public JceKeyTransRecipient(PrivateKey recipientKey)
     {
         this.recipientKey = recipientKey;
     }
 
+    /**
+     * Set the provider to use for key recovery and content processing.
+     *
+     * @param provider provider to use.
+     * @return this recipient.
+     */
     public JceKeyTransRecipient setProvider(Provider provider)
     {
         this.helper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+        this.contentHelper = helper;
 
         return this;
     }
 
+    /**
+     * Set the provider to use for key recovery and content processing.
+     *
+     * @param providerName the name of the provider to use.
+     * @return this recipient.
+     */
     public JceKeyTransRecipient setProvider(String providerName)
     {
         this.helper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
+        this.contentHelper = helper;
 
         return this;
     }
 
-    protected Key extractSecretKey(AlgorithmIdentifier keyEncryptionAlgorithm, AlgorithmIdentifier contentEncryptionAlgorithm, byte[] encryptedContentEncryptionKey)
+    /**
+     * Set the provider to use for content processing.
+     *
+     * @param provider the provider to use.
+     * @return this recipient.
+     */
+    public JceKeyTransRecipient setContentProvider(Provider provider)
+    {
+        this.contentHelper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+
+        return this;
+    }
+
+    /**
+     * Set the provider to use for content processing.
+     *
+     * @param providerName the name of the provider to use.
+     * @return this recipient.
+     */
+    public JceKeyTransRecipient setContentProvider(String providerName)
+    {
+        this.contentHelper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
+
+        return this;
+    }
+
+    protected Key extractSecretKey(AlgorithmIdentifier keyEncryptionAlgorithm, AlgorithmIdentifier encryptedKeyAlgorithm, byte[] encryptedEncryptionKey)
         throws CMSException
     {
+        AsymmetricKeyUnwrapper unwrapper = helper.createAsymmetricUnwrapper(keyEncryptionAlgorithm, recipientKey);
+
         try
         {
-            Key sKey = null;
-
-            Cipher keyCipher = helper.createCipher(keyEncryptionAlgorithm.getAlgorithm());
-
-            try
-            {
-                keyCipher.init(Cipher.UNWRAP_MODE, recipientKey);
-                sKey = keyCipher.unwrap(encryptedContentEncryptionKey, contentEncryptionAlgorithm.getAlgorithm().getId(), Cipher.SECRET_KEY);
-            }
-            catch (GeneralSecurityException e)
-            {
-            }
-            catch (IllegalStateException e)
-            {
-            }
-            catch (UnsupportedOperationException e)
-            {
-            }
-            catch (ProviderException e)
-            {
-            }
-
-            // some providers do not support UNWRAP (this appears to be only for asymmetric algorithms)
-            if (sKey == null)
-            {
-                keyCipher.init(Cipher.DECRYPT_MODE, recipientKey);
-                sKey = new SecretKeySpec(keyCipher.doFinal(encryptedContentEncryptionKey), contentEncryptionAlgorithm.getAlgorithm().getId());
-            }
-
-            return sKey;
+            return CMSUtils.getJceKey(unwrapper.generateUnwrappedKey(encryptedKeyAlgorithm, encryptedEncryptionKey));
         }
-        catch (InvalidKeyException e)
+        catch (OperatorException e)
         {
-            throw new CMSException("key invalid in message.", e);
-        }
-        catch (IllegalBlockSizeException e)
-        {
-            throw new CMSException("illegal blocksize in message.", e);
-        }
-        catch (BadPaddingException e)
-        {
-            throw new CMSException("bad padding in message.", e);
+            throw new CMSException("exception unwrapping key: " + e.getMessage(), e);
         }
     }
 }

@@ -38,22 +38,63 @@ public abstract class JceKeyAgreeRecipient
 {
     private PrivateKey recipientKey;
     protected EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
+    protected EnvelopedDataHelper contentHelper = helper;
 
     public JceKeyAgreeRecipient(PrivateKey recipientKey)
     {
         this.recipientKey = recipientKey;
     }
 
+    /**
+     * Set the provider to use for key recovery and content processing.
+     *
+     * @param provider provider to use.
+     * @return this recipient.
+     */
     public JceKeyAgreeRecipient setProvider(Provider provider)
     {
         this.helper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+        this.contentHelper = helper;
 
         return this;
     }
 
+    /**
+     * Set the provider to use for key recovery and content processing.
+     *
+     * @param providerName the name of the provider to use.
+     * @return this recipient.
+     */
     public JceKeyAgreeRecipient setProvider(String providerName)
     {
         this.helper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
+        this.contentHelper = helper;
+
+        return this;
+    }
+
+    /**
+     * Set the provider to use for content processing.
+     *
+     * @param provider the provider to use.
+     * @return this recipient.
+     */
+    public JceKeyAgreeRecipient setContentProvider(Provider provider)
+    {
+        this.contentHelper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+
+        return this;
+    }
+
+    /**
+     * Set the provider to use for content processing.
+     *
+     * @param providerName the name of the provider to use.
+     * @return this recipient.
+     */
+    public JceKeyAgreeRecipient setContentProvider(String providerName)
+    {
+        this.contentHelper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }

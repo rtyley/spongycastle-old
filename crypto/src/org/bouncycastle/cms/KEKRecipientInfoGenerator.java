@@ -5,29 +5,35 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cms.KEKIdentifier;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.operator.GenericKey;
+import org.bouncycastle.operator.OperatorException;
+import org.bouncycastle.operator.SymmetricKeyWrapper;
 
 public abstract class KEKRecipientInfoGenerator
     implements RecipientInfoGenerator
 {
     private final KEKIdentifier kekIdentifier;
-    private final AlgorithmIdentifier keyEncryptionAlgorithm;
 
-    protected KEKRecipientInfoGenerator(KEKIdentifier kekIdentifier, AlgorithmIdentifier keyEncryptionAlgorithm)
+    protected final SymmetricKeyWrapper wrapper;
+
+    protected KEKRecipientInfoGenerator(KEKIdentifier kekIdentifier, SymmetricKeyWrapper wrapper)
     {
         this.kekIdentifier = kekIdentifier;
-        this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
+        this.wrapper = wrapper;
     }
 
     public final RecipientInfo generate(GenericKey contentEncryptionKey)
         throws CMSException
     {
-        ASN1OctetString encryptedKey = new DEROctetString(generateEncryptedBytes(keyEncryptionAlgorithm, contentEncryptionKey));
+        try
+        {
+            ASN1OctetString encryptedKey = new DEROctetString(wrapper.generateWrappedKey(contentEncryptionKey));
 
-        return new RecipientInfo(new KEKRecipientInfo(kekIdentifier, keyEncryptionAlgorithm, encryptedKey));
+            return new RecipientInfo(new KEKRecipientInfo(kekIdentifier, wrapper.getAlgorithmIdentifier(), encryptedKey));
+        }
+        catch (OperatorException e)
+        {
+            throw new CMSException("exception wrapping content key: " + e.getMessage(), e);
+        }
     }
-
-    protected abstract byte[] generateEncryptedBytes(AlgorithmIdentifier keyEncryptionAlgorithm, GenericKey contentEncryptionKey)
-        throws CMSException;
 }

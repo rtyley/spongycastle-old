@@ -31,7 +31,7 @@ public class JceKeyTransAuthenticatedRecipient
     {
         Key secretKey = extractSecretKey(keyEncryptionAlgorithm, contentMacAlgorithm, encryptedContentEncryptionKey);
 
-        final Mac dataMac = helper.createContentMac(secretKey, contentMacAlgorithm);
+        final Mac dataMac = contentHelper.createContentMac(secretKey, contentMacAlgorithm);
 
         return new RecipientOperator(new MacCalculator()
         {

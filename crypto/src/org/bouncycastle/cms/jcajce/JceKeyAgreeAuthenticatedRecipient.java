@@ -27,7 +27,7 @@ public class JceKeyAgreeAuthenticatedRecipient
     {
         Key secretKey = extractSecretKey(keyEncryptionAlgorithm, contentMacAlgorithm, senderPublicKey, userKeyingMaterial, encryptedContentKey);
 
-        final Mac dataMac = helper.createContentMac(secretKey, contentMacAlgorithm);
+        final Mac dataMac = contentHelper.createContentMac(secretKey, contentMacAlgorithm);
 
         return new RecipientOperator(new MacCalculator()
         {
