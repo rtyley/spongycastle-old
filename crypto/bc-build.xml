@@ -268,6 +268,7 @@
                  <exclude name="org/bouncycastle/cms/**/*.java" />
                  <exclude name="org/bouncycastle/cert/**/*.java" />
                  <exclude name="org/bouncycastle/operator/**/*.java" />
+                 <exclude name="org/bouncycastle/jcajce/**/*.java" />
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
                  <exclude name="org/bouncycastle/tsp/**/*.java" />
                  <exclude name="org/bouncycastle/openpgp/**/*.java" />
@@ -347,6 +348,7 @@
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
                  <exclude name="org/bouncycastle/cert/**/*.java" />
+                 <exclude name="org/bouncycastle/jcajce/**/*.java" />
                  <exclude name="org/bouncycastle/operator/**/*.java" />
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
                  <exclude name="org/bouncycastle/tsp/**/*.java" />
@@ -414,6 +416,7 @@
                  <include name="org/bouncycastle/cms/**/*.java" />
                  <include name="org/bouncycastle/cert/**/*.java" />
                  <include name="org/bouncycastle/operator/**/*.java" />
+                 <include name="org/bouncycastle/jcajce/**/*.java" />
                  <exclude name="**/*Test.java" />
                  <exclude name="**/*Tests.java" />
                  <exclude name="**/test/*.java" />
