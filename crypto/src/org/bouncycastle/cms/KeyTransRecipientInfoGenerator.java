@@ -12,7 +12,6 @@ import org.bouncycastle.operator.OperatorException;
 public abstract class KeyTransRecipientInfoGenerator
     implements RecipientInfoGenerator
 {
-    // Derived fields
     protected final AsymmetricKeyWrapper wrapper;
 
     private IssuerAndSerialNumber issuerAndSerial;

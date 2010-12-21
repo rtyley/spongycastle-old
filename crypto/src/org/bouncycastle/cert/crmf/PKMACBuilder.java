@@ -81,7 +81,7 @@ public class PKMACBuilder
         return this;
     }
 
-    public PKMACBuilder setRandom(SecureRandom random)
+    public PKMACBuilder setSecureRandom(SecureRandom random)
     {
         this.random = random;
 
