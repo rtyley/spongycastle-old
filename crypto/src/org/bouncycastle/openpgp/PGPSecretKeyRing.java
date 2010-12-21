@@ -1,24 +1,24 @@
 package org.bouncycastle.openpgp;
 
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.PacketTags;
-import org.bouncycastle.bcpg.SecretKeyPacket;
-import org.bouncycastle.bcpg.SecretSubkeyPacket;
-import org.bouncycastle.bcpg.TrustPacket;
-import org.bouncycastle.bcpg.PublicSubkeyPacket;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.security.SecureRandom;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
+
+import org.bouncycastle.bcpg.BCPGInputStream;
+import org.bouncycastle.bcpg.PacketTags;
+import org.bouncycastle.bcpg.PublicSubkeyPacket;
+import org.bouncycastle.bcpg.SecretKeyPacket;
+import org.bouncycastle.bcpg.SecretSubkeyPacket;
+import org.bouncycastle.bcpg.TrustPacket;
 
 /**
  * Class to hold a single master secret key and its subkeys.
@@ -222,15 +222,7 @@ public class PGPSecretKeyRing
         for (Iterator it = secretRing.keys.iterator(); it.hasNext();)
         {
             PGPSecretKey sk = (PGPSecretKey)it.next();
-            PGPPublicKey pk = null;
-            try
-            {
-                pk = publicRing.getPublicKey(sk.getKeyID());
-            }
-            catch (PGPException e)
-            {
-                throw new IllegalStateException(e.toString());
-            }
+            PGPPublicKey pk = publicRing.getPublicKey(sk.getKeyID());
 
             newList.add(PGPSecretKey.replacePublicKey(sk, pk));
         }
