@@ -22,9 +22,10 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.crmf.CRMFObjectIdentifiers;
 import org.bouncycastle.asn1.crmf.EncKeyWithID;
 import org.bouncycastle.asn1.crmf.EncryptedValue;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v1CertificateBuilder;
 import org.bouncycastle.cert.crmf.EncryptedValueBuilder;
 import org.bouncycastle.cert.crmf.EncryptedValuePadder;
 import org.bouncycastle.cert.crmf.EncryptedValueParser;
@@ -39,6 +40,8 @@ import org.bouncycastle.cert.crmf.jcajce.JcaPKIArchiveControlBuilder;
 import org.bouncycastle.cert.crmf.jcajce.JceAsymmetricValueDecryptorGenerator;
 import org.bouncycastle.cert.crmf.jcajce.JceCRMFEncryptorBuilder;
 import org.bouncycastle.cert.crmf.jcajce.JcePKMACValuesCalculator;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509v1CertificateBuilder;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.RecipientId;
@@ -48,11 +51,11 @@ import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JceAsymmetricKeyWrapper;
 import org.bouncycastle.util.Arrays;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
 
 public class AllTests
     extends TestCase
@@ -138,7 +141,7 @@ public class AllTests
         assertTrue(encKeyWithID.hasIdentifier());
         assertFalse(encKeyWithID.isIdentifierUTF8String());
 
-        assertEquals(new GeneralName(X509Name.getInstance(new X500Principal("CN=Test").getEncoded())), encKeyWithID.getIdentifier());
+        assertEquals(new GeneralName(X500Name.getInstance(new X500Principal("CN=Test").getEncoded())), encKeyWithID.getIdentifier());
         assertTrue(Arrays.areEqual(kp.getPrivate().getEncoded(), encKeyWithID.getPrivateKey().getEncoded()));
     }
 
@@ -305,45 +308,47 @@ public class AllTests
     }
 
     private static X509Certificate makeV1Certificate(KeyPair subKP, String _subDN, KeyPair issKP, String _issDN)
-        throws GeneralSecurityException, IOException
+        throws GeneralSecurityException, IOException, OperatorCreationException
     {
 
         PublicKey subPub  = subKP.getPublic();
         PrivateKey issPriv = issKP.getPrivate();
         PublicKey  issPub  = issKP.getPublic();
 
-        X509V1CertificateGenerator v1CertGen = new X509V1CertificateGenerator();
+        X509v1CertificateBuilder v1CertGen = new JcaX509v1CertificateBuilder(
+            new X500Name(_issDN),
+            BigInteger.valueOf(System.currentTimeMillis()),
+            new Date(System.currentTimeMillis()),
+            new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 100)),
+            new X500Name(_subDN),
+            subPub);
 
-        v1CertGen.reset();
-        v1CertGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
-        v1CertGen.setIssuerDN(new X509Name(_issDN));
-        v1CertGen.setNotBefore(new Date(System.currentTimeMillis()));
-        v1CertGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 100)));
-        v1CertGen.setSubjectDN(new X509Name(_subDN));
-        v1CertGen.setPublicKey(subPub);
+        JcaContentSignerBuilder signerBuilder = null;
 
         if (issPub instanceof RSAPublicKey)
         {
-            v1CertGen.setSignatureAlgorithm("SHA1WithRSA");
+            signerBuilder = new JcaContentSignerBuilder("SHA1WithRSA");
         }
         else if (issPub.getAlgorithm().equals("DSA"))
         {
-            v1CertGen.setSignatureAlgorithm("SHA1withDSA");
+            signerBuilder = new JcaContentSignerBuilder("SHA1withDSA");
         }
         else if (issPub.getAlgorithm().equals("ECDSA"))
         {
-            v1CertGen.setSignatureAlgorithm("SHA1withECDSA");
+            signerBuilder = new JcaContentSignerBuilder("SHA1withECDSA");
         }
         else if (issPub.getAlgorithm().equals("ECGOST3410"))
         {
-            v1CertGen.setSignatureAlgorithm("GOST3411withECGOST3410");
+            signerBuilder = new JcaContentSignerBuilder("GOST3411withECGOST3410");
         }
         else
         {
-            v1CertGen.setSignatureAlgorithm("GOST3411WithGOST3410");
+            signerBuilder = new JcaContentSignerBuilder("GOST3411WithGOST3410");
         }
 
-        X509Certificate _cert = v1CertGen.generate(issPriv);
+        signerBuilder.setProvider(BC);
+
+        X509Certificate _cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(v1CertGen.build(signerBuilder.build(issPriv)));
 
         _cert.checkValidity(new Date());
         _cert.verify(issPub);
