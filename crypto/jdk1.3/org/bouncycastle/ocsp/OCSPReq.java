@@ -8,9 +8,11 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
+import java.security.Signature;
 import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreParameters;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
+import org.bouncycastle.jce.cert.CertificateFactory;
 import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -19,11 +21,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.ocsp.OCSPRequest;
 import org.bouncycastle.asn1.ocsp.Request;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -183,7 +185,7 @@ public class OCSPReq
 
         try
         {
-            cf = CertificateFactory.getInstance("X.509", provider);
+            cf = OCSPUtil.createX509CertificateFactory(provider);
         }
         catch (CertificateException ex)
         {
@@ -263,8 +265,8 @@ public class OCSPReq
         
         try
         {
-            return CertStore.getInstance(type, 
-                new CollectionCertStoreParameters(this.getCertList(provider)), provider);
+            CertStoreParameters params = new CollectionCertStoreParameters(this.getCertList(provider));
+            return OCSPUtil.createCertStoreInstance(type, params, provider);
         }
         catch (InvalidAlgorithmParameterException e)
         {
@@ -297,7 +299,7 @@ public class OCSPReq
 
         try
         {
-            java.security.Signature signature = java.security.Signature.getInstance(this.getSignatureAlgOID(), sigProvider);
+            Signature signature = OCSPUtil.createSignatureInstance(this.getSignatureAlgOID(), sigProvider);
 
             signature.initVerify(key);
 
@@ -312,6 +314,7 @@ public class OCSPReq
         }
         catch (NoSuchProviderException e)
         {
+            // TODO Why this special case?
             throw e;
         }
         catch (Exception e)
@@ -362,7 +365,7 @@ public class OCSPReq
     
             while (e.hasMoreElements())
             {
-                DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
+                ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
                 X509Extension       ext = extensions.getExtension(oid);
     
                 if (critical == ext.isCritical())
@@ -391,18 +394,13 @@ public class OCSPReq
 
         if (exts != null)
         {
-            X509Extension   ext = exts.getExtension(new DERObjectIdentifier(oid));
+            X509Extension   ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
 
             if (ext != null)
             {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                DEROutputStream dOut = new DEROutputStream(bOut);
-
                 try
                 {
-                    dOut.writeObject(ext.getValue());
-
-                    return bOut.toByteArray();
+                    return ext.getValue().getEncoded(ASN1Encodable.DER);
                 }
                 catch (Exception e)
                 {

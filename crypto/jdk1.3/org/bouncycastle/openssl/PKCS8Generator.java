@@ -123,8 +123,14 @@ public class PKCS8Generator
         {
             throw new NoSuchAlgorithmException(algorithm + " found, but padding not available: " + e.getMessage());
         }
+        catch (NoSuchProviderException e)
+        {
+            throw new NoSuchAlgorithmException(algorithm + " found, but provider not available: " + e.getMessage());
+        }
         DERObjectIdentifier algOID = new DERObjectIdentifier(algorithm);
 
+        try
+        {
         if (PEMUtilities.isPKCS5Scheme2(algOID))
         {
             this.paramGen = AlgorithmParameterGenerator.getInstance(algorithm, provider.getName());
@@ -132,6 +138,11 @@ public class PKCS8Generator
         else
         {
             this.secKeyFact = SecretKeyFactory.getInstance(algorithm, provider.getName());
+        }
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw new NoSuchAlgorithmException(algorithm + " found, but provider not available: " + e.getMessage());
         }
     }
 
