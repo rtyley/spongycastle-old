@@ -12,9 +12,14 @@ import org.bouncycastle.cert.crmf.PKIArchiveControlBuilder;
 public class JcaPKIArchiveControlBuilder
     extends PKIArchiveControlBuilder
 {
+    public JcaPKIArchiveControlBuilder(PrivateKey privateKey, X500Name name)
+    {
+        this(privateKey, new GeneralName(name));
+    }
+
     public JcaPKIArchiveControlBuilder(PrivateKey privateKey, X500Principal name)
     {
-        this(privateKey, new GeneralName(X500Name.getInstance(name.getEncoded())));
+        this(privateKey, X500Name.getInstance(name.getEncoded()));
     }
 
     public JcaPKIArchiveControlBuilder(PrivateKey privateKey, GeneralName generalName)
