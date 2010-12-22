@@ -160,6 +160,11 @@ public class CertificateRequestMessageBuilder
         return this;
     }
 
+    public CertificateRequestMessageBuilder setAuthInfoSender(X500Name sender)
+    {
+        return setAuthInfoSender(new GeneralName(sender));
+    }
+
     public CertificateRequestMessageBuilder setAuthInfoSender(GeneralName sender)
     {
         this.sender = sender;
