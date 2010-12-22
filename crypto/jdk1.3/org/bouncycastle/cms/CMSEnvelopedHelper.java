@@ -1,5 +1,31 @@
 package org.bouncycastle.cms;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.AlgorithmParameterGenerator;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.spec.InvalidParameterSpecException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+
+import org.bouncycastle.asn1.ASN1Null;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
@@ -9,25 +35,6 @@ import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.Mac;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.AlgorithmParameters;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.AlgorithmParameterGenerator;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 class CMSEnvelopedHelper
 {
@@ -61,7 +68,7 @@ class CMSEnvelopedHelper
         MAC_ALG_NAMES.put(CMSEnvelopedGenerator.AES256_CBC,  "AESMac");
     }
 
-    private String getAsymmetricEncryptionAlgName(
+    String getAsymmetricEncryptionAlgName(
         String encryptionAlgOID)
     {
         if (PKCSObjectIdentifiers.rsaEncryption.getId().equals(encryptionAlgOID))
@@ -71,21 +78,47 @@ class CMSEnvelopedHelper
         
         return encryptionAlgOID;    
     }
-    
+
+    Cipher createAsymmetricCipher(
+        String encryptionOid,
+        String provName)
+        throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException
+    {
+        String asymName = getAsymmetricEncryptionAlgName(encryptionOid);
+        if (!asymName.equals(encryptionOid))
+        {
+            try
+            {
+                // this is reversed as the Sun policy files now allow unlimited strength RSA
+                return Cipher.getInstance(asymName, provName);
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                // Ignore
+            }
+        }
+        return Cipher.getInstance(encryptionOid, provName);
+    }
+
     Cipher createAsymmetricCipher(
         String encryptionOid,
         Provider provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException
+        throws NoSuchAlgorithmException, NoSuchPaddingException
     {
-        try
+        String asymName = getAsymmetricEncryptionAlgName(encryptionOid);
+        if (!asymName.equals(encryptionOid))
         {
-            // this is reversed as the Sun policy files now allow unlimited strength RSA
-            return getCipherInstance(getAsymmetricEncryptionAlgName(encryptionOid), provider);
+            try
+            {
+                // this is reversed as the Sun policy files now allow unlimited strength RSA
+                return getCipherInstance(asymName, provider);
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                // Ignore
+            }
         }
-        catch (NoSuchAlgorithmException e)
-        {
-            return getCipherInstance(encryptionOid, provider);
-        }
+        return getCipherInstance(encryptionOid, provider);
     }
 
     KeyGenerator createSymmetricKeyGenerator(
@@ -93,8 +126,6 @@ class CMSEnvelopedHelper
         Provider provider)
         throws NoSuchAlgorithmException
     {
-        try
-        {
         try
         {
             return createKeyGenerator(encryptionOID, provider);
@@ -118,11 +149,6 @@ class CMSEnvelopedHelper
                 return createSymmetricKeyGenerator(encryptionOID, null);
             }
             throw e;
-        }
-        }
-        catch (NoSuchProviderException e)
-        {
-            return createSymmetricKeyGenerator(encryptionOID, null);
         }
     }
 
@@ -149,18 +175,10 @@ class CMSEnvelopedHelper
             {
                 // ignore
             }
-            catch (NoSuchProviderException ex)
-            {
-                // ignore
-            }
             //
             // can't try with default provider here as parameters must be from the specified provider.
             //
             throw e;
-        }
-        catch (NoSuchProviderException e)
-        {
-             throw new NoSuchAlgorithmException("can't find provider: " + e);
         }
     }
 
@@ -169,8 +187,6 @@ class CMSEnvelopedHelper
         Provider provider)
         throws NoSuchAlgorithmException
     {
-        try
-        {
         try
         {
             return createAlgorithmParamsGenerator(encryptionOID, provider);
@@ -193,11 +209,6 @@ class CMSEnvelopedHelper
             // can't try with default provider here as parameters must be from the specified provider.
             //
             throw e;
-        }
-        }
-        catch (NoSuchProviderException e)
-        {
-            throw new NoSuchAlgorithmException("can't find provider: " + e);
         }
     }
 
@@ -225,14 +236,21 @@ class CMSEnvelopedHelper
         return keySize.intValue();
     }
 
-    Cipher getCipherInstance(
+    private Cipher getCipherInstance(
         String algName,
         Provider provider)
-        throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException
+        throws NoSuchAlgorithmException, NoSuchPaddingException
     {
         if (provider != null)
         {
+            try
+            {
             return Cipher.getInstance(algName, provider.getName());
+            }
+            catch (NoSuchProviderException e)
+            {
+                throw new NoSuchAlgorithmException(e.toString());
+            }
         }
         else
         {
@@ -243,11 +261,18 @@ class CMSEnvelopedHelper
     private AlgorithmParameters createAlgorithmParams(
         String algName,
         Provider provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException
+        throws NoSuchAlgorithmException
     {
         if (provider != null)
         {
+            try
+            {
             return AlgorithmParameters.getInstance(algName, provider.getName());
+            }
+            catch (NoSuchProviderException e)
+            {
+                throw new NoSuchAlgorithmException(e.toString());
+            }
         }
         else
         {
@@ -258,11 +283,18 @@ class CMSEnvelopedHelper
     private AlgorithmParameterGenerator createAlgorithmParamsGenerator(
         String algName,
         Provider provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException
+        throws NoSuchAlgorithmException
     {
         if (provider != null)
         {
+            try
+            {
             return AlgorithmParameterGenerator.getInstance(algName, provider.getName());
+            }
+            catch (NoSuchProviderException e)
+            {
+                throw new NoSuchAlgorithmException(e.toString());
+            }
         }
         else
         {
@@ -273,11 +305,18 @@ class CMSEnvelopedHelper
     private KeyGenerator createKeyGenerator(
         String algName,
         Provider provider)
-        throws NoSuchAlgorithmException, NoSuchProviderException
+        throws NoSuchAlgorithmException
     {
         if (provider != null)
         {
+            try
+            {
             return KeyGenerator.getInstance(algName, provider.getName());
+            }
+            catch (NoSuchProviderException e)
+            {
+                throw new NoSuchAlgorithmException(e.toString());
+            }
         }
         else
         {
@@ -285,11 +324,9 @@ class CMSEnvelopedHelper
         }
     }
 
-    Cipher getSymmetricCipher(String encryptionOID, Provider provider)
+    Cipher createSymmetricCipher(String encryptionOID, Provider provider)
         throws NoSuchAlgorithmException, NoSuchPaddingException
     {
-        try
-        {
         try
         {
             return getCipherInstance(encryptionOID, provider);
@@ -306,26 +343,28 @@ class CMSEnvelopedHelper
             {
                 if (provider != null)
                 {
-                    return getSymmetricCipher(encryptionOID, null); // roll back to default
+                    return createSymmetricCipher(encryptionOID, null); // roll back to default
                 }
                 throw e;
             }
-        }
-        }
-        catch (NoSuchProviderException e)
-        {
-            return getSymmetricCipher(encryptionOID, null); // roll back to default
         }
     }
 
     private Mac createMac(
         String algName,
         Provider provider)
-        throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException
+        throws NoSuchAlgorithmException, NoSuchPaddingException
     {
         if (provider != null)
         {
+            try
+            {
             return Mac.getInstance(algName, provider.getName());
+            }
+            catch (NoSuchProviderException e)
+            {
+                throw new NoSuchAlgorithmException(e.toString());
+            }
         }
         else
         {
@@ -336,8 +375,6 @@ class CMSEnvelopedHelper
     Mac getMac(String macOID, Provider provider)
         throws NoSuchAlgorithmException, NoSuchPaddingException
     {
-        try
-        {
         try
         {
             return createMac(macOID, provider);
@@ -358,11 +395,6 @@ class CMSEnvelopedHelper
                 }
                 throw e;
             }
-        }
-        }
-        catch (NoSuchProviderException e)
-        {
-            return getMac(macOID, null);
         }
     }
 
@@ -405,56 +437,260 @@ class CMSEnvelopedHelper
         return oid;
     }
 
-    static List readRecipientInfos(ASN1Set recipientInfos, byte[] contentOctets,
-        AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg)
+    static RecipientInformationStore buildRecipientInformationStore(
+        ASN1Set recipientInfos, CMSSecureReadable secureReadable)
     {
         List infos = new ArrayList();
         for (int i = 0; i != recipientInfos.size(); i++)
         {
             RecipientInfo info = RecipientInfo.getInstance(recipientInfos.getObjectAt(i));
-            InputStream contentStream = new ByteArrayInputStream(contentOctets);
 
-            readRecipientInfo(infos, info, contentStream, encAlg, macAlg, authEncAlg);
+            readRecipientInfo(infos, info, secureReadable);
         }
-        return infos;
+        return new RecipientInformationStore(infos);
     }
 
-    static List readRecipientInfos(Iterator recipientInfoIter, InputStream contentStream,
-        AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg)
-    {
-        List infos = new ArrayList();
-        while (recipientInfoIter.hasNext())
-        {
-            RecipientInfo info = (RecipientInfo)recipientInfoIter.next();
-
-            readRecipientInfo(infos, info, contentStream, encAlg, macAlg, authEncAlg);
-        }
-        return infos;
-    }
-
-    private static void readRecipientInfo(List infos, RecipientInfo info, InputStream contentStream,
-            AlgorithmIdentifier encAlg, AlgorithmIdentifier macAlg, AlgorithmIdentifier authEncAlg)
+    private static void readRecipientInfo(
+        List infos, RecipientInfo info, CMSSecureReadable secureReadable)
     {
         DEREncodable recipInfo = info.getInfo();
         if (recipInfo instanceof KeyTransRecipientInfo)
         {
             infos.add(new KeyTransRecipientInformation(
-                (KeyTransRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream));
+                (KeyTransRecipientInfo)recipInfo, secureReadable));
         }
         else if (recipInfo instanceof KEKRecipientInfo)
         {
             infos.add(new KEKRecipientInformation(
-                (KEKRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream));
+                (KEKRecipientInfo)recipInfo, secureReadable));
         }
         else if (recipInfo instanceof KeyAgreeRecipientInfo)
         {
-            infos.add(new KeyAgreeRecipientInformation(
-                (KeyAgreeRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream));
+            KeyAgreeRecipientInformation.readRecipientInfo(infos,
+                (KeyAgreeRecipientInfo)recipInfo, secureReadable);
         }
         else if (recipInfo instanceof PasswordRecipientInfo)
         {
             infos.add(new PasswordRecipientInformation(
-                (PasswordRecipientInfo)recipInfo, encAlg, macAlg, authEncAlg, contentStream));
+                (PasswordRecipientInfo)recipInfo, secureReadable));
         }
+    }
+
+    static class CMSAuthenticatedSecureReadable implements CMSSecureReadable
+    {
+        private AlgorithmIdentifier algorithm;
+        private Mac mac;
+        private CMSReadable readable;
+
+        CMSAuthenticatedSecureReadable(AlgorithmIdentifier algorithm, CMSReadable readable)
+        {
+            this.algorithm = algorithm;
+            this.readable = readable;
+        }
+
+        public AlgorithmIdentifier getAlgorithm()
+        {
+            return this.algorithm;
+        }
+
+        public Object getCryptoObject()
+        {
+            return this.mac;
+        }
+
+        public InputStream getInputStream()
+            throws IOException, CMSException
+        {
+            return readable.getInputStream();
+        }
+
+        public CMSReadable getReadable(final SecretKey sKey, final Provider provider)
+            throws CMSException
+        {
+            final String macAlg = this.algorithm.getObjectId().getId();
+            final ASN1Object sParams = (ASN1Object)this.algorithm.getParameters();
+
+            this.mac = (Mac)execute(new JCECallback()
+            {
+                public Object doInJCE() throws CMSException, InvalidAlgorithmParameterException,
+                    InvalidKeyException, InvalidParameterSpecException, NoSuchAlgorithmException,
+                    NoSuchPaddingException
+                {
+                    Mac mac = CMSEnvelopedHelper.INSTANCE.getMac(macAlg, provider);
+
+                    if (sParams != null && !(sParams instanceof ASN1Null))
+                    {
+                        AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(
+                            macAlg, provider);
+
+                        try
+                        {
+                            params.init(sParams.getEncoded(), "ASN.1");
+                        }
+                        catch (IOException e)
+                        {
+                            throw new CMSException("error decoding algorithm parameters.", e);
+                        }
+
+                        mac.init(sKey, params.getParameterSpec(IvParameterSpec.class));
+                    }
+                    else
+                    {
+                        mac.init(sKey);
+                    }
+
+                    return mac;
+                }
+            });
+
+            try
+            {
+                return new CMSProcessableInputStream(
+                    new TeeInputStream(readable.getInputStream(), new MacOutputStream(this.mac)));
+            }
+            catch (IOException e)
+            {
+                throw new CMSException("error reading content.", e);
+            }
+        }
+    }
+
+    static class CMSEnvelopedSecureReadable implements CMSSecureReadable
+    {
+        private AlgorithmIdentifier algorithm;
+        private Cipher cipher;
+        private CMSReadable readable;
+
+        CMSEnvelopedSecureReadable(AlgorithmIdentifier algorithm, CMSReadable readable)
+        {
+            this.algorithm = algorithm;
+            this.readable = readable;
+        }
+
+        public AlgorithmIdentifier getAlgorithm()
+        {
+            return this.algorithm;
+        }
+        public InputStream getInputStream()
+            throws IOException, CMSException
+        {
+            return readable.getInputStream();
+        }
+        public Object getCryptoObject()
+        {
+            return this.cipher;
+        }
+
+        public CMSReadable getReadable(final SecretKey sKey, final Provider provider)
+            throws CMSException
+        {
+            final String encAlg = this.algorithm.getObjectId().getId();
+            final ASN1Object sParams = (ASN1Object)this.algorithm.getParameters();
+
+            this.cipher = (Cipher)execute(new JCECallback()
+            {
+                public Object doInJCE() throws CMSException, InvalidAlgorithmParameterException,
+                    InvalidKeyException, InvalidParameterSpecException, NoSuchAlgorithmException,
+                    NoSuchPaddingException
+                {
+                    Cipher cipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(encAlg, provider);
+
+                    if (sParams != null && !(sParams instanceof ASN1Null))
+                    {
+                        try
+                        {
+                            AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(
+                                encAlg, cipher.getProvider());
+
+                            try
+                            {
+                                params.init(sParams.getEncoded(), "ASN.1");
+                            }
+                            catch (IOException e)
+                            {
+                                throw new CMSException("error decoding algorithm parameters.", e);
+                            }
+
+                            cipher.init(Cipher.DECRYPT_MODE, sKey, params);
+                        }
+                        catch (NoSuchAlgorithmException e)
+                        {
+                            if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
+                                || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
+                                || encAlg.equals(CMSEnvelopedDataGenerator.AES128_CBC)
+                                || encAlg.equals(CMSEnvelopedDataGenerator.AES192_CBC)
+                                || encAlg.equals(CMSEnvelopedDataGenerator.AES256_CBC))
+                            {
+                                cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(
+                                    ASN1OctetString.getInstance(sParams).getOctets()));
+                            }
+                            else
+                            {
+                                throw e;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
+                            || encAlg.equals(CMSEnvelopedDataGenerator.CAST5_CBC))
+                        {
+                            cipher.init(Cipher.DECRYPT_MODE, sKey, new IvParameterSpec(new byte[8]));
+                        }
+                        else
+                        {
+                            cipher.init(Cipher.DECRYPT_MODE, sKey);
+                        }
+                    }
+
+                    return cipher;
+                }
+            });
+
+            try
+            {
+                return new CMSProcessableInputStream(new CipherInputStream(readable.getInputStream(), cipher));
+            }
+            catch (IOException e)
+            {
+                throw new CMSException("error reading content.", e);
+            }
+        }
+    }
+
+    static Object execute(JCECallback callback) throws CMSException
+    {
+        try
+        {
+            return callback.doInJCE();
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new CMSException("can't find algorithm.", e);
+        }
+        catch (InvalidKeyException e)
+        {
+            throw new CMSException("key invalid in message.", e);
+        }
+        catch (NoSuchPaddingException e)
+        {
+            throw new CMSException("required padding not supported.", e);
+        }
+        catch (InvalidAlgorithmParameterException e)
+        {
+            throw new CMSException("algorithm parameters invalid.", e);
+        }
+        catch (InvalidParameterSpecException e)
+        {
+            throw new CMSException("MAC algorithm parameter spec invalid.", e);
+        }
+    }
+
+    static interface JCECallback
+    {
+        Object doInJCE()
+            throws CMSException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidParameterSpecException,
+                NoSuchAlgorithmException, NoSuchPaddingException;
     }
 }

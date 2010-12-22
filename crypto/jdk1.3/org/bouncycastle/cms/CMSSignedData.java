@@ -1,19 +1,5 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BERSequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cms.SignedData;
-import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.x509.NoSuchStoreException;
-import org.bouncycastle.x509.X509Store;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
@@ -22,9 +8,36 @@ import java.security.Provider;
 import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CertStoreException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.BERSequence;
+import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.cms.SignedData;
+import org.bouncycastle.asn1.cms.SignerInfo;
+import org.bouncycastle.asn1.x509.AttributeCertificate;
+import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.cert.X509AttributeCertificateHolder;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.util.CollectionStore;
+import org.bouncycastle.util.Store;
+import org.bouncycastle.x509.NoSuchStoreException;
+import org.bouncycastle.x509.X509Store;
 
 /**
  * general class for handling a pkcs7-signature message.
@@ -61,7 +74,6 @@ public class CMSSignedData
     SignedData              signedData;
     ContentInfo             contentInfo;
     CMSProcessable          signedContent;
-    CertStore               certStore;
     SignerInformationStore  signerInfoStore;
     X509Store               attributeStore;
     X509Store               certificateStore;
@@ -74,7 +86,6 @@ public class CMSSignedData
         this.signedData = c.signedData;
         this.contentInfo = c.contentInfo;
         this.signedContent = c.signedContent;
-        this.certStore = c.certStore;
         this.signerInfoStore = c.signerInfoStore;
     }
 
@@ -189,22 +200,23 @@ public class CMSSignedData
         {
             ASN1Set         s = signedData.getSignerInfos();
             List            signerInfos = new ArrayList();
+            SignatureAlgorithmIdentifierFinder sigAlgFinder = new DefaultSignatureAlgorithmIdentifierFinder();
 
             for (int i = 0; i != s.size(); i++)
             {
                 SignerInfo info = SignerInfo.getInstance(s.getObjectAt(i));
-                DERObjectIdentifier contentType = signedData.getEncapContentInfo().getContentType();
+                ASN1ObjectIdentifier contentType = signedData.getEncapContentInfo().getContentType();
 
                 if (hashes == null)
                 {
-                    signerInfos.add(new SignerInformation(info, contentType, signedContent, null));
+                    signerInfos.add(new SignerInformation(info, contentType, signedContent, null, sigAlgFinder));
                 }
                 else
                 {
 
-                    byte[] hash = (byte[])hashes.get(info.getDigestAlgorithm().getObjectId().getId());
+                    byte[] hash = (byte[])hashes.get(info.getDigestAlgorithm().getAlgorithm().getId());
 
-                    signerInfos.add(new SignerInformation(info, contentType, null, new BaseDigestCalculator(hash)));
+                    signerInfos.add(new SignerInformation(info, contentType, null, new BaseDigestCalculator(hash), sigAlgFinder));
                 }
             }
 
@@ -224,6 +236,7 @@ public class CMSSignedData
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
+     * @deprecated use base Store returning method
      */
     public X509Store getAttributeCertificates(
         String type,
@@ -242,6 +255,7 @@ public class CMSSignedData
      * @return a store of attribute certificates
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
+     * @deprecated use base Store returning method
      */
     public X509Store getAttributeCertificates(
         String type,
@@ -266,6 +280,7 @@ public class CMSSignedData
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
+     * @deprecated use base Store returning method
      */
     public X509Store getCertificates(
         String type,
@@ -284,6 +299,7 @@ public class CMSSignedData
      * @return a store of public key certificates
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
+     * @deprecated use base Store returning method
      */
     public X509Store getCertificates(
         String type,
@@ -308,6 +324,7 @@ public class CMSSignedData
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
+     * @deprecated use base Store returning method
      */
     public X509Store getCRLs(
         String type,
@@ -326,6 +343,7 @@ public class CMSSignedData
      * @return a store of CRLs
      * @exception NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
+     * @deprecated use base Store returning method
      */
     public X509Store getCRLs(
         String type,
@@ -347,6 +365,7 @@ public class CMSSignedData
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchAlgorithmException if the cert store isn't available.
      * @exception CMSException if a general exception prevents creation of the CertStore
+     * @deprecated use base Store returning method
      */
     public CertStore getCertificatesAndCRLs(
         String  type,
@@ -362,21 +381,89 @@ public class CMSSignedData
      *
      * @exception NoSuchAlgorithmException if the cert store isn't available.
      * @exception CMSException if a general exception prevents creation of the CertStore
+     * @deprecated use base Store returning method
      */
     public CertStore getCertificatesAndCRLs(
         String  type,
         Provider  provider)
         throws NoSuchAlgorithmException, CMSException
     {
-        if (certStore == null)
-        {
-            ASN1Set certSet = signedData.getCertificates();
-            ASN1Set crlSet = signedData.getCRLs();
+        ASN1Set certSet = signedData.getCertificates();
+        ASN1Set crlSet = signedData.getCRLs();
 
-            certStore = HELPER.createCertStore(type, provider, certSet, crlSet);
+        return HELPER.createCertStore(type, provider, certSet, crlSet);
+    }
+
+    public Store getCertificates()
+    {
+        ASN1Set certSet = signedData.getCertificates();
+
+        if (certSet != null)
+        {
+            List    certList = new ArrayList(certSet.size());
+
+            for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
+            {
+                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+
+                if (obj instanceof ASN1Sequence)
+                {
+                    certList.add(new X509CertificateHolder(X509CertificateStructure.getInstance(obj)));
+                }
+            }
+
+            return new CollectionStore(certList);
         }
 
-        return certStore;
+        return new CollectionStore(new ArrayList());
+    }
+
+    public Store getCRLs()
+    {
+        ASN1Set crlSet = signedData.getCRLs();
+
+        if (crlSet != null)
+        {
+            List    crlList = new ArrayList(crlSet.size());
+
+            for (Enumeration en = crlSet.getObjects(); en.hasMoreElements();)
+            {
+                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+
+                if (obj instanceof ASN1Sequence)
+                {
+                    crlList.add(CertificateList.getInstance(obj));
+                }
+            }
+
+            return new CollectionStore(crlList);
+        }
+
+        return new CollectionStore(new ArrayList());
+    }
+
+    public Store getAttributeCertificates()
+    {
+        ASN1Set certSet = signedData.getCertificates();
+
+        if (certSet != null)
+        {
+            List    certList = new ArrayList(certSet.size());
+
+            for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
+            {
+                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+
+                if (obj instanceof ASN1TaggedObject)
+                {
+                    certList.add(new X509AttributeCertificateHolder(AttributeCertificate.getInstance(((ASN1TaggedObject)obj).getObject())));
+                }
+            }
+
+            return new CollectionStore(certList);
+        }
+
+        return new CollectionStore(new ArrayList());
     }
 
     /**
@@ -499,11 +586,6 @@ public class CMSSignedData
         CMSSignedData   cms = new CMSSignedData(signedData);
         
         //
-        // replace the store
-        //
-        cms.certStore = certsAndCrls;
-        
-        //
         // replace the certs and crls in the SignedData object
         //
         ASN1Set             certs = null;
@@ -551,6 +633,83 @@ public class CMSSignedData
         //
         cms.contentInfo = new ContentInfo(cms.contentInfo.getContentType(), cms.signedData);
         
+        return cms;
+    }
+
+    /**
+     * Replace the certificate and CRL information associated with this
+     * CMSSignedData object with the new one passed in.
+     *
+     * @param signedData the signed data object to be used as a base.
+     * @param certificates the new certificates to be used.
+     * @param attrCerts the new attribute certificates to be used.
+     * @param crls the new CRLs to be used.
+     * @return a new signed data object.
+     * @exception CMSException if there is an error processing the CertStore
+     */
+    public static CMSSignedData replaceCertificatesAndCRLs(
+        CMSSignedData   signedData,
+        Store           certificates,
+        Store           attrCerts,
+        Store           crls)
+        throws CMSException
+    {
+        //
+        // copy
+        //
+        CMSSignedData   cms = new CMSSignedData(signedData);
+
+        //
+        // replace the certs and crls in the SignedData object
+        //
+        ASN1Set certSet = null;
+        ASN1Set crlSet = null;
+
+        if (certificates != null || attrCerts != null)
+        {
+            List certs = new ArrayList();
+
+            if (certificates != null)
+            {
+                certs.addAll(CMSUtils.getCertificatesFromStore(certificates));
+            }
+            if (attrCerts != null)
+            {
+                certs.addAll(CMSUtils.getAttributeCertificatesFromStore(attrCerts));   
+            }
+
+            ASN1Set set = CMSUtils.createBerSetFromList(certs);
+
+            if (set.size() != 0)
+            {
+                certSet = set;
+            }
+        }
+
+        if (crls != null)
+        {
+            ASN1Set set = CMSUtils.createBerSetFromList(CMSUtils.getCRLsFromStore(crls));
+
+            if (set.size() != 0)
+            {
+                crlSet = set;
+            }
+        }
+
+        //
+        // replace the CMS structure.
+        //
+        cms.signedData = new SignedData(signedData.signedData.getDigestAlgorithms(),
+                                   signedData.signedData.getEncapContentInfo(),
+                                   certSet,
+                                   crlSet,
+                                   signedData.signedData.getSignerInfos());
+
+        //
+        // replace the contentInfo with the new one
+        //
+        cms.contentInfo = new ContentInfo(cms.contentInfo.getContentType(), cms.signedData);
+
         return cms;
     }
 }

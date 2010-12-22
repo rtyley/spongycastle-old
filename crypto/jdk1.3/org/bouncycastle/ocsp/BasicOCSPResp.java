@@ -1,9 +1,9 @@
 package org.bouncycastle.ocsp;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
 import org.bouncycastle.asn1.ocsp.ResponseData;
 import org.bouncycastle.asn1.ocsp.SingleResponse;
@@ -17,9 +17,11 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
+import java.security.Signature;
 import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreParameters;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
+import org.bouncycastle.jce.cert.CertificateFactory;
 import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
@@ -172,14 +174,9 @@ public class BasicOCSPResp
 
             if (ext != null)
             {
-                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-                DEROutputStream dOut = new DEROutputStream(bOut);
-
                 try
                 {
-                    dOut.writeObject(ext.getValue());
-
-                    return bOut.toByteArray();
+                    return ext.getValue().getEncoded(ASN1Encodable.DER);
                 }
                 catch (Exception e)
                 {
@@ -227,7 +224,7 @@ public class BasicOCSPResp
 
         try
         {
-            cf = CertificateFactory.getInstance("X.509", provider);
+            cf = OCSPUtil.createX509CertificateFactory(provider);
         }
         catch (CertificateException ex)
         {
@@ -295,8 +292,8 @@ public class BasicOCSPResp
     {
         try
         {
-            return CertStore.getInstance(type, 
-                new CollectionCertStoreParameters(this.getCertList(provider)), provider);
+            CertStoreParameters params = new CollectionCertStoreParameters(this.getCertList(provider));
+            return OCSPUtil.createCertStoreInstance(type, params, provider);
         }
         catch (InvalidAlgorithmParameterException e)
         {
@@ -314,22 +311,17 @@ public class BasicOCSPResp
     {
         try
         {
-            java.security.Signature signature = java.security.Signature.getInstance(
-                                                                           this.getSignatureAlgName(), sigProvider);
+            Signature signature = OCSPUtil.createSignatureInstance(this.getSignatureAlgName(), sigProvider);
 
             signature.initVerify(key);
 
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(resp.getTbsResponseData());
-
-            signature.update(bOut.toByteArray());
+            signature.update(resp.getTbsResponseData().getEncoded(ASN1Encodable.DER));
 
             return signature.verify(this.getSignature());
         }
         catch (NoSuchProviderException e)
         {
+            // TODO Why this special case?
             throw e;
         }
         catch (Exception e)
@@ -344,12 +336,7 @@ public class BasicOCSPResp
     public byte[] getEncoded()
         throws IOException
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
-
-        aOut.writeObject(resp);
-
-        return bOut.toByteArray();
+    	return resp.getEncoded();
     }
     
     public boolean equals(Object o)

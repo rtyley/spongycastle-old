@@ -24,24 +24,25 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
 import org.bouncycastle.asn1.misc.NetscapeCertType;
 import org.bouncycastle.asn1.misc.NetscapeRevocationURL;
 import org.bouncycastle.asn1.misc.VerisignCzagExtension;
 import org.bouncycastle.asn1.util.ASN1Dump;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
@@ -57,12 +58,12 @@ public class X509CertificateObject
     implements PKCS12BagAttributeCarrier
 {
     private X509CertificateStructure    c;
-    private Hashtable                   pkcs12Attributes = new Hashtable();
-    private Vector                      pkcs12Ordering = new Vector();
     private BasicConstraints            basicConstraints;
     private boolean[]                   keyUsage;
     private boolean                     hashValueSet;
     private int                         hashValue;
+
+    private PKCS12BagAttributeCarrier   attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     public X509CertificateObject(
         X509CertificateStructure    c)
@@ -122,12 +123,12 @@ public class X509CertificateObject
         Date    date)
         throws CertificateExpiredException, CertificateNotYetValidException
     {
-        if (date.after(this.getNotAfter()))
+        if (date.getTime() > this.getNotAfter().getTime())  // for other VM compatibility
         {
             throw new CertificateExpiredException("certificate expired on " + c.getEndDate().getTime());
         }
 
-        if (date.before(this.getNotBefore()))
+        if (date.getTime() < this.getNotBefore().getTime())
         {
             throw new CertificateNotYetValidException("certificate not valid till " + c.getStartDate().getTime());
         }
@@ -166,14 +167,9 @@ public class X509CertificateObject
     public byte[] getTBSCertificate()
         throws CertificateEncodingException
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-
         try
         {
-            dOut.writeObject(c.getTBSCertificate());
-
-            return bOut.toByteArray();
+            return c.getTBSCertificate().getEncoded(ASN1Encodable.DER);
         }
         catch (IOException e)
         {
@@ -192,12 +188,16 @@ public class X509CertificateObject
      */
     public String getSigAlgName()
     {
-        Provider    prov = Security.getProvider("BC");
-        String      algName = prov.getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
+        Provider    prov = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
 
-        if (algName != null)
+        if (prov != null)
         {
-            return algName;
+            String      algName = prov.getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
+
+            if (algName != null)
+            {
+                return algName;
+            }
         }
 
         Provider[] provs = Security.getProviders();
@@ -207,7 +207,7 @@ public class X509CertificateObject
         //
         for (int i = 0; i != provs.length; i++)
         {
-            algName = provs[i].getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
+            String algName = provs[i].getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
             if (algName != null)
             {
                 return algName;
@@ -449,8 +449,19 @@ public class X509CertificateObject
                 while (e.hasMoreElements())
                 {
                     DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
-                    if (oid.getId().equals("2.5.29.15")
-                       || oid.getId().equals("2.5.29.19"))
+                    String              oidId = oid.getId();
+
+                    if (oidId.equals(RFC3280CertPathUtilities.KEY_USAGE)
+                     || oidId.equals(RFC3280CertPathUtilities.CERTIFICATE_POLICIES)
+                     || oidId.equals(RFC3280CertPathUtilities.POLICY_MAPPINGS)
+                     || oidId.equals(RFC3280CertPathUtilities.INHIBIT_ANY_POLICY)
+                     || oidId.equals(RFC3280CertPathUtilities.CRL_DISTRIBUTION_POINTS)
+                     || oidId.equals(RFC3280CertPathUtilities.ISSUING_DISTRIBUTION_POINT)
+                     || oidId.equals(RFC3280CertPathUtilities.DELTA_CRL_INDICATOR)
+                     || oidId.equals(RFC3280CertPathUtilities.POLICY_CONSTRAINTS)
+                     || oidId.equals(RFC3280CertPathUtilities.BASIC_CONSTRAINTS)
+                     || oidId.equals(RFC3280CertPathUtilities.SUBJECT_ALTERNATIVE_NAME)
+                     || oidId.equals(RFC3280CertPathUtilities.NAME_CONSTRAINTS))
                     {
                         continue;
                     }
@@ -476,14 +487,9 @@ public class X509CertificateObject
     public byte[] getEncoded()
         throws CertificateEncodingException
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-
         try
         {
-            dOut.writeObject(c);
-
-            return bOut.toByteArray();
+            return c.getEncoded(ASN1Encodable.DER);
         }
         catch (IOException e)
         {
@@ -498,19 +504,19 @@ public class X509CertificateObject
         {
             return true;
         }
-        
+
         if (!(o instanceof Certificate))
         {
             return false;
         }
 
         Certificate other = (Certificate)o;
-        
+
         try
         {
             byte[] b1 = this.getEncoded();
             byte[] b2 = other.getEncoded();
-            
+
             return Arrays.areEqual(b1, b2);
         }
         catch (CertificateEncodingException e)
@@ -519,7 +525,7 @@ public class X509CertificateObject
         }
     }
     
-    public int hashCode()
+    public synchronized int hashCode()
     {
         if (!hashValueSet)
         {
@@ -547,24 +553,23 @@ public class X509CertificateObject
             return 0;
         }
     }
-    
+
     public void setBagAttribute(
         DERObjectIdentifier oid,
         DEREncodable        attribute)
     {
-        pkcs12Attributes.put(oid, attribute);
-        pkcs12Ordering.addElement(oid);
+        attrCarrier.setBagAttribute(oid, attribute);
     }
 
     public DEREncodable getBagAttribute(
         DERObjectIdentifier oid)
     {
-        return (DEREncodable)pkcs12Attributes.get(oid);
+        return attrCarrier.getBagAttribute(oid);
     }
 
     public Enumeration getBagAttributeKeys()
     {
-        return pkcs12Ordering.elements();
+        return attrCarrier.getBagAttributeKeys();
     }
 
     public String toString()
@@ -673,7 +678,7 @@ public class X509CertificateObject
         
         try
         {
-            signature = Signature.getInstance(sigName, "BC");
+            signature = Signature.getInstance(sigName, BouncyCastleProvider.PROVIDER_NAME);
         }
         catch (Exception e)
         {
@@ -701,13 +706,14 @@ public class X509CertificateObject
         throws CertificateException, NoSuchAlgorithmException, 
             SignatureException, InvalidKeyException
     {
-        if (!c.getSignatureAlgorithm().equals(c.getTBSCertificate().getSignature()))
+        if (!isAlgIdEqual(c.getSignatureAlgorithm(), c.getTBSCertificate().getSignature()))
         {
             throw new CertificateException("signature algorithm in TBS cert not same as outer cert");
         }
 
         DEREncodable params = c.getSignatureAlgorithm().getParameters();
-        
+
+        // TODO This should go after the initVerify?
         X509SignatureUtil.setSignatureParameters(signature, params);
 
         signature.initVerify(key);
@@ -718,5 +724,35 @@ public class X509CertificateObject
         {
             throw new InvalidKeyException("Public key presented not for certificate signature");
         }
+    }
+
+    private boolean isAlgIdEqual(AlgorithmIdentifier id1, AlgorithmIdentifier id2)
+    {
+        if (!id1.getObjectId().equals(id2.getObjectId()))
+        {
+            return false;
+        }
+
+        if (id1.getParameters() == null)
+        {
+            if (id2.getParameters() != null && !id2.getParameters().equals(DERNull.INSTANCE))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        if (id2.getParameters() == null)
+        {
+            if (id1.getParameters() != null && !id1.getParameters().equals(DERNull.INSTANCE))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        
+        return id1.getParameters().equals(id2.getParameters());
     }
 }

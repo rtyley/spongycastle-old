@@ -1,16 +1,12 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.AlgorithmParameters;
-import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
-import java.security.SignatureException;
 import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CertStoreException;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
@@ -31,7 +27,6 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -40,12 +35,12 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
+import org.bouncycastle.util.Store;
+import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509Store;
-import org.bouncycastle.util.encoders.Hex;
 
 public class CMSSignedGenerator
 {
@@ -97,40 +92,41 @@ public class CMSSignedGenerator
         EC_ALGORITHMS.put(DIGEST_SHA256, ENCRYPTION_ECDSA_WITH_SHA256);
         EC_ALGORITHMS.put(DIGEST_SHA384, ENCRYPTION_ECDSA_WITH_SHA384);
         EC_ALGORITHMS.put(DIGEST_SHA512, ENCRYPTION_ECDSA_WITH_SHA512);
-
-        // default parameters for each algorithm
-        try
-        {
-        PSS_PARAMS.put("SHA1withRSAandMGF1", new AlgorithmIdentifier(
-                PKCSObjectIdentifiers.id_RSASSA_PSS,
-                ASN1Object.fromByteArray(Hex.decode("3000"))));
-        PSS_PARAMS.put("SHA224withRSAandMGF1", new AlgorithmIdentifier(
-                PKCSObjectIdentifiers.id_RSASSA_PSS,
-                ASN1Object.fromByteArray(Hex.decode(
-                   "3034a00f300d06096086480165030402040500a11c301a06092a864886f70d010108300d06096086480165030402040500a20302011c"))));
-        PSS_PARAMS.put("SHA256withRSAandMGF1", new AlgorithmIdentifier(
-                PKCSObjectIdentifiers.id_RSASSA_PSS,
-                ASN1Object.fromByteArray(Hex.decode(
-                   "3034a00f300d06096086480165030402010500a11c301a06092a864886f70d010108300d06096086480165030402010500a203020120"))));
-        PSS_PARAMS.put("SHA384withRSAandMGF1", new AlgorithmIdentifier(
-                PKCSObjectIdentifiers.id_RSASSA_PSS,
-                ASN1Object.fromByteArray(Hex.decode(
-                   "3034a00f300d06096086480165030402020500a11c301a06092a864886f70d010108300d06096086480165030402020500a203020130"))));
-        PSS_PARAMS.put("SHA512withRSAandMGF1", new AlgorithmIdentifier(
-                PKCSObjectIdentifiers.id_RSASSA_PSS,
-                ASN1Object.fromByteArray(Hex.decode(
-                   "3034a00f300d06096086480165030402030500a11c301a06092a864886f70d010108300d06096086480165030402030500a203020140"))));
-        }
-        catch (IOException e)
-        {
-            // ignore - this can never happen
-        }
+ 
+         // default parameters for each algorithm
+         try
+         {
+         PSS_PARAMS.put("SHA1withRSAandMGF1", new AlgorithmIdentifier(
+                 PKCSObjectIdentifiers.id_RSASSA_PSS,
+                 ASN1Object.fromByteArray(Hex.decode("3000"))));
+         PSS_PARAMS.put("SHA224withRSAandMGF1", new AlgorithmIdentifier(
+                 PKCSObjectIdentifiers.id_RSASSA_PSS,
+                 ASN1Object.fromByteArray(Hex.decode(
+                    "3034a00f300d06096086480165030402040500a11c301a06092a864886f70d010108300d06096086480165030402040500a20302011c"))));
+         PSS_PARAMS.put("SHA256withRSAandMGF1", new AlgorithmIdentifier(
+                 PKCSObjectIdentifiers.id_RSASSA_PSS,
+                 ASN1Object.fromByteArray(Hex.decode(
+                    "3034a00f300d06096086480165030402010500a11c301a06092a864886f70d010108300d06096086480165030402010500a203020120"))));
+         PSS_PARAMS.put("SHA384withRSAandMGF1", new AlgorithmIdentifier(
+                 PKCSObjectIdentifiers.id_RSASSA_PSS,
+                 ASN1Object.fromByteArray(Hex.decode(
+                    "3034a00f300d06096086480165030402020500a11c301a06092a864886f70d010108300d06096086480165030402020500a203020130"))));
+         PSS_PARAMS.put("SHA512withRSAandMGF1", new AlgorithmIdentifier(
+                 PKCSObjectIdentifiers.id_RSASSA_PSS,
+                 ASN1Object.fromByteArray(Hex.decode(
+                    "3034a00f300d06096086480165030402030500a11c301a06092a864886f70d010108300d06096086480165030402030500a203020140"))));
+         }
+         catch (IOException e)
+         {
+             // ignore - this can never happen
+         }
     }
 
-    protected List _certs = new ArrayList();
-    protected List _crls = new ArrayList();
+    protected List certs = new ArrayList();
+    protected List crls = new ArrayList();
     protected List _signers = new ArrayList();
-    protected Map  _digests = new HashMap();
+    protected List signerGens = new ArrayList();
+    protected Map digests = new HashMap();
 
     protected final SecureRandom rand;
 
@@ -202,12 +198,12 @@ public class CMSSignedGenerator
         {
             if (encOid.equals(CMSSignedGenerator.ENCRYPTION_RSA_PSS))
             {
-                //we could use the deprecated method, but there's no definition for the parameters...
                 //AlgorithmParameters sigParams = sig.getParameters();
-
+//
                 //return new AlgorithmIdentifier(
-                //   new DERObjectIdentifier(encOid), ASN1Object.fromByteArray(sigParams.getEncoded()));
+                    //new DERObjectIdentifier(encOid), ASN1Object.fromByteArray(sigParams.getEncoded()));
                 return (AlgorithmIdentifier)PSS_PARAMS.get(sig.getAlgorithm());
+
             }
             else
             {
@@ -244,15 +240,37 @@ public class CMSSignedGenerator
      * Note: this assumes the CertStore will support null in the get
      * methods.
      * @param certStore CertStore containing the public key certificates and CRLs
-     * @throws org.bouncycastle.jce.cert.CertStoreException  if an issue occurs processing the CertStore
+     * @throws java.security.cert.CertStoreException  if an issue occurs processing the CertStore
      * @throws CMSException  if an issue occurse transforming data from the CertStore into the message
+     * @deprecated use addCertificates and addCRLs
      */
     public void addCertificatesAndCRLs(
         CertStore certStore)
         throws CertStoreException, CMSException
     {
-        _certs.addAll(CMSUtils.getCertificatesFromStore(certStore));
-        _crls.addAll(CMSUtils.getCRLsFromStore(certStore));
+        certs.addAll(CMSUtils.getCertificatesFromStore(certStore));
+        crls.addAll(CMSUtils.getCRLsFromStore(certStore));
+    }
+
+    public void addCertificates(
+        Store certStore)
+        throws CMSException
+    {
+        certs.addAll(CMSUtils.getCertificatesFromStore(certStore));
+    }
+
+    public void addCRLs(
+        Store crlStore)
+        throws CMSException
+    {
+        crls.addAll(CMSUtils.getCRLsFromStore(crlStore));
+    }
+
+    public void addAttributeCertificates(
+        Store attrStore)
+        throws CMSException
+    {
+        certs.addAll(CMSUtils.getAttributeCertificatesFromStore(attrStore));
     }
 
     /**
@@ -261,6 +279,7 @@ public class CMSSignedGenerator
      *
      * @param store a store of Version 2 attribute certificates
      * @throws CMSException if an error occurse processing the store.
+     * @deprecated use basic Store method
      */
     public void addAttributeCertificates(
         X509Store store)
@@ -272,7 +291,7 @@ public class CMSSignedGenerator
             {
                 X509AttributeCertificate attrCert = (X509AttributeCertificate)it.next();
 
-                _certs.add(new DERTaggedObject(false, 2,
+                certs.add(new DERTaggedObject(false, 2,
                              AttributeCertificate.getInstance(ASN1Object.fromByteArray(attrCert.getEncoded()))));
             }
         }
@@ -303,6 +322,11 @@ public class CMSSignedGenerator
         }
     }
 
+    public void addSignerInfoGenerator(SignerInfoGenerator infoGen)
+    {
+         signerGens.add(infoGen);
+    }
+
     /**
      * Return a map of oids and byte arrays representing the digests calculated on the content during
      * the last generate.
@@ -311,83 +335,16 @@ public class CMSSignedGenerator
      */
     public Map getGeneratedDigests()
     {
-        return new HashMap(_digests);
+        return new HashMap(digests);
     }
 
     static SignerIdentifier getSignerIdentifier(X509Certificate cert)
     {
-        TBSCertificateStructure tbs;        
-        try
-        {
-            tbs = CMSUtils.getTBSCertificateStructure(cert);
-        }
-        catch (CertificateEncodingException e)
-        {
-            throw new IllegalArgumentException(
-                "can't extract TBS structure from this cert");
-        }
-
-        IssuerAndSerialNumber encSid = new IssuerAndSerialNumber(tbs
-                .getIssuer(), tbs.getSerialNumber().getValue());
-        return new SignerIdentifier(encSid);
+        return new SignerIdentifier(CMSUtils.getIssuerAndSerialNumber(cert));
     }
 
     static SignerIdentifier getSignerIdentifier(byte[] subjectKeyIdentifier)
     {
         return new SignerIdentifier(new DEROctetString(subjectKeyIdentifier));    
-    }
-
-    static class DigOutputStream extends OutputStream
-    {
-        MessageDigest dig;
-
-        public DigOutputStream(MessageDigest dig)
-        {
-            this.dig = dig;
-        }
-
-        public void write(byte[] b, int off, int len) throws IOException
-        {
-            dig.update(b, off, len);
-        }
-
-        public void write(int b) throws IOException
-        {
-            dig.update((byte) b);
-        }
-    }
-
-    static class SigOutputStream extends OutputStream
-    {
-        private final Signature sig;
-
-        public SigOutputStream(Signature sig)
-        {
-            this.sig = sig;
-        }
-
-        public void write(byte[] b, int off, int len) throws IOException
-        {
-            try
-            {
-                sig.update(b, off, len);
-            }
-            catch (SignatureException e)
-            {
-                throw new CMSStreamException("signature problem: " + e, e);
-            }
-        }
-
-        public void write(int b) throws IOException
-        {
-            try
-            {
-                sig.update((byte) b);
-            }
-            catch (SignatureException e)
-            {
-                throw new CMSStreamException("signature problem: " + e, e);
-            }
-        }
     }
 }

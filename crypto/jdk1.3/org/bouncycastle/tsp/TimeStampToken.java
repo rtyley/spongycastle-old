@@ -1,40 +1,52 @@
 package org.bouncycastle.tsp;
 
-import java.io.IOException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Collection;
-import java.util.Date;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import org.bouncycastle.jce.cert.CertStore;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.util.Collection;
+import java.util.Date;
 
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
+import org.bouncycastle.asn1.ess.ESSCertID;
+import org.bouncycastle.asn1.ess.ESSCertIDv2;
+import org.bouncycastle.asn1.ess.SigningCertificate;
+import org.bouncycastle.asn1.ess.SigningCertificateV2;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.tsp.TSTInfo;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.IssuerSerial;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.asn1.cms.Attribute;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.ess.ESSCertID;
-import org.bouncycastle.asn1.ess.SigningCertificate;
-import org.bouncycastle.asn1.ess.SigningCertificateV2;
-import org.bouncycastle.asn1.ess.ESSCertIDv2;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.tsp.TSTInfo;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.asn1.x509.IssuerSerial;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Store;
 
 public class TimeStampToken
 {
@@ -144,6 +156,21 @@ public class TimeStampToken
         return tsToken.getCertificatesAndCRLs(type, provider);
     }
 
+    public Store getCertificates()
+    {
+        return tsToken.getCertificates();
+    }
+
+    public Store getCRLs()
+    {
+        return tsToken.getCRLs();
+    }
+
+    public Store getAttributeCertificates()
+    {
+        return tsToken.getAttributeCertificates();
+    }
+
     /**
      * Validate the time stamp token.
      * <p>
@@ -157,6 +184,7 @@ public class TimeStampToken
      * <p>
      * A successful call to validate means all the above are true.
      * </p>
+     * @deprecated
      */
     public void validate(
         X509Certificate cert,
@@ -166,7 +194,7 @@ public class TimeStampToken
     {
         try
         {
-            if (!MessageDigest.isEqual(certID.getCertHash(), MessageDigest.getInstance(certID.getHashAlgorithm()).digest(cert.getEncoded())))
+            if (!Arrays.constantTimeAreEqual(certID.getCertHash(), MessageDigest.getInstance(certID.getHashAlgorithmName()).digest(cert.getEncoded())))
             {
                 throw new TSPValidationException("certificate hash does not match certID hash.");
             }
@@ -228,6 +256,105 @@ public class TimeStampToken
     }
 
     /**
+     * Validate the time stamp token.
+     * <p>
+     * To be valid the token must be signed by the passed in certificate and
+     * the certificate must be the one referred to by the SigningCertificate
+     * attribute included in the hashed attributes of the token. The
+     * certificate must also have the ExtendedKeyUsageExtension with only
+     * KeyPurposeId.id_kp_timeStamping and have been valid at the time the
+     * timestamp was created.
+     * </p>
+     * <p>
+     * A successful call to validate means all the above are true.
+     * </p>
+     */
+    public void validate(
+        ContentVerifierProvider sigVerifierProvider,
+        DigestCalculatorProvider digCalculatorProvider)
+        throws TSPException, TSPValidationException
+    {
+        if (!sigVerifierProvider.hasAssociatedCertificate())
+        {
+            throw new IllegalArgumentException("verifier provider needs an associated certificate");
+        }
+
+        try
+        {
+            X509CertificateHolder certHolder = sigVerifierProvider.getAssociatedCertificate();
+            DigestCalculator calc = digCalculatorProvider.get(certID.getHashAlgorithm());
+
+            OutputStream cOut = calc.getOutputStream();
+
+            cOut.write(certHolder.getEncoded());
+            cOut.close();
+
+            if (!Arrays.constantTimeAreEqual(certID.getCertHash(), calc.getDigest()))
+            {
+                throw new TSPValidationException("certificate hash does not match certID hash.");
+            }
+
+            if (certID.getIssuerSerial() != null)
+            {
+                IssuerAndSerialNumber issuerSerial = certHolder.getIssuerAndSerialNumber();
+
+                if (!certID.getIssuerSerial().getSerial().equals(issuerSerial.getSerialNumber()))
+                {
+                    throw new TSPValidationException("certificate serial number does not match certID for signature.");
+                }
+
+                GeneralName[]   names = certID.getIssuerSerial().getIssuer().getNames();
+                boolean         found = false;
+
+                for (int i = 0; i != names.length; i++)
+                {
+                    if (names[i].getTagNo() == 4 && X500Name.getInstance(names[i].getName()).equals(X500Name.getInstance(issuerSerial.getName().getDERObject())))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    throw new TSPValidationException("certificate name does not match certID for signature. ");
+                }
+            }
+
+            TSPUtil.validateCertificate(certHolder);
+
+            if (!certHolder.isValidOn(tstInfo.getGenTime()))
+            {
+                throw new TSPValidationException("certificate not valid when time stamp created.");
+            }
+
+            if (!tsaSignerInfo.verify(sigVerifierProvider))
+            {
+                throw new TSPValidationException("signature not created by certificate.");
+            }
+        }
+        catch (CMSException e)
+        {
+            if (e.getUnderlyingException() != null)
+            {
+                throw new TSPException(e.getMessage(), e.getUnderlyingException());
+            }
+            else
+            {
+                throw new TSPException("CMS exception: " + e, e);
+            }
+        }
+        catch (IOException e)
+        {
+            throw new TSPException("problem processing certificate: " + e, e);
+        }
+        catch (OperatorCreationException e)
+        {
+            throw new TSPException("unable to create digest: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Return the underlying CMSSignedData object.
      * 
      * @return the underlying CMS structure.
@@ -266,7 +393,7 @@ public class TimeStampToken
             this.certID = null;
         }
 
-        public String getHashAlgorithm()
+        public String getHashAlgorithmName()
         {
             if (certID != null)
             {
@@ -274,11 +401,23 @@ public class TimeStampToken
             }
             else
             {
-                if (NISTObjectIdentifiers.id_sha256.equals(certIDv2.getHashAlgorithm().getObjectId()))
+                if (NISTObjectIdentifiers.id_sha256.equals(certIDv2.getHashAlgorithm().getAlgorithm()))
                 {
                     return "SHA-256";
                 }
-                return certIDv2.getHashAlgorithm().getObjectId().getId();
+                return certIDv2.getHashAlgorithm().getAlgorithm().getId();
+            }
+        }
+
+        public AlgorithmIdentifier getHashAlgorithm()
+        {
+            if (certID != null)
+            {
+                return new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1);
+            }
+            else
+            {
+                return certIDv2.getHashAlgorithm();
             }
         }
 
