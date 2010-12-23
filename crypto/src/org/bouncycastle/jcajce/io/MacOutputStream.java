@@ -31,8 +31,8 @@ public class MacOutputStream
         mac.update(b, off, len);
     }
 
-    public Mac getMac()
+    public byte[] getMac()
     {
-        return mac;
+        return mac.doFinal();
     }
 }

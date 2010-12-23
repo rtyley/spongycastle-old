@@ -10,13 +10,25 @@ public interface MacCalculator
 
     /**
      * Returns a stream that will accept data for the purpose of calculating
-     * a signature for later verification. Use org.bouncycastle.util.io.TeeOutputStream if you want to accumulate
+     * the MAC for later verification. Use org.bouncycastle.util.io.TeeOutputStream if you want to accumulate
      * the data on the fly as well.
      *
      * @return an OutputStream
      */
     OutputStream getOutputStream();
 
+    /**
+     * Return the calculated MAC based on what has been written to the stream.
+     *
+     * @return calculated MAC.
+     */
     byte[] getMac();
 
+
+    /**
+     * Return the key used for calculating the MAC.
+     *
+     * @return the MAC key.
+     */
+    GenericKey getKey();
 }

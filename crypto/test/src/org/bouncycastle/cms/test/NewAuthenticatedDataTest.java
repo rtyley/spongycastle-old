@@ -25,6 +25,7 @@ import org.bouncycastle.cms.PasswordRecipient;
 import org.bouncycastle.cms.PasswordRecipientInformation;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.cms.jcajce.JceCMSMacCalculatorBuilder;
 import org.bouncycastle.cms.jcajce.JceKEKAuthenticatedRecipient;
 import org.bouncycastle.cms.jcajce.JceKEKRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyAgreeAuthenticatedRecipient;
@@ -113,7 +114,13 @@ public class NewAuthenticatedDataTest
     public void testKeyTransDESede()
         throws Exception
     {
-        tryKeyTrans(CMSAuthenticatedDataGenerator.DES_EDE3_CBC);
+        tryKeyTrans(CMSAlgorithm.DES_EDE3_CBC);
+    }
+
+    public void testKeyTransRC2()
+        throws Exception
+    {
+        tryKeyTrans(CMSAlgorithm.RC2_CBC);
     }
 
     public void testKEKDESede()
@@ -139,7 +146,7 @@ public class NewAuthenticatedDataTest
 
         CMSAuthenticatedData ad = adGen.generate(
                               new CMSProcessableByteArray(data),
-                              CMSAuthenticatedDataGenerator.DES_EDE3_CBC, BC);
+                              new JceCMSMacCalculatorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build());
 
         RecipientInformationStore  recipients = ad.getRecipientInfos();
 
@@ -174,7 +181,7 @@ public class NewAuthenticatedDataTest
 
         CMSAuthenticatedData ad = adGen.generate(
                                 new CMSProcessableByteArray(data),
-                                CMSAuthenticatedDataGenerator.DES_EDE3_CBC, BC);
+                                new JceCMSMacCalculatorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build());
 
         ad = new CMSAuthenticatedData(ad.getEncoded());
         
@@ -201,7 +208,7 @@ public class NewAuthenticatedDataTest
         }
     }
 
-    private void tryKeyTrans(String macAlg)
+    private void tryKeyTrans(ASN1ObjectIdentifier macAlg)
         throws Exception
     {
         byte[]          data     = "Eric H. Echidna".getBytes();
@@ -212,11 +219,11 @@ public class NewAuthenticatedDataTest
         
         CMSAuthenticatedData ad = adGen.generate(
                                 new CMSProcessableByteArray(data),
-                                macAlg, BC);
+                                new JceCMSMacCalculatorBuilder(macAlg).setProvider(BC).build());
 
         RecipientInformationStore recipients = ad.getRecipientInfos();
 
-        assertEquals(ad.getMacAlgOID(), macAlg);
+        assertEquals(ad.getMacAlgOID(), macAlg.getId());
 
         Collection c = recipients.getRecipients();
 
@@ -250,7 +257,7 @@ public class NewAuthenticatedDataTest
 
         CMSAuthenticatedData ad = adGen.generate(
                                 new CMSProcessableByteArray(data),
-                                CMSAuthenticatedDataGenerator.DES_EDE3_CBC, BC);
+                                new JceCMSMacCalculatorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build());
 
         RecipientInformationStore recipients = ad.getRecipientInfos();
 
@@ -287,7 +294,7 @@ public class NewAuthenticatedDataTest
 
         CMSAuthenticatedData ad = adGen.generate(
                               new CMSProcessableByteArray(data),
-                              CMSAuthenticatedDataGenerator.DES_EDE3_CBC, BC);
+                              new JceCMSMacCalculatorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build());
 
         RecipientInformationStore  recipients = ad.getRecipientInfos();
 

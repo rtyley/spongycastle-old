@@ -2,6 +2,7 @@ package org.bouncycastle.cms;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -28,6 +29,8 @@ import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.operator.GenericKey;
+import org.bouncycastle.operator.MacCalculator;
+import org.bouncycastle.util.io.TeeOutputStream;
 
 /**
  * General class for generating a CMS authenticated-data message.
@@ -53,8 +56,60 @@ public class CMSAuthenticatedDataGenerator
     }
 
     /**
+     * Generate an authenticated data object from the passed in typedData and MacCalculator.
+     *
+     * @param typedData the data to have a MAC attached.
+     * @param macCalculator the calculator of the MAC to be attached.
+     * @return the resulting CMSAuthenticatedData object.
+     * @throws CMSException on failure in encoding data or processing recipients.
+     */
+    public CMSAuthenticatedData generate(CMSTypedData typedData, MacCalculator macCalculator)
+        throws CMSException
+    {
+        ASN1EncodableVector     recipientInfos = new ASN1EncodableVector();
+        ASN1OctetString         encContent;
+        ASN1OctetString         macResult;
+
+        try
+        {
+            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+            OutputStream mOut = new TeeOutputStream(bOut, macCalculator.getOutputStream());
+
+            typedData.write(mOut);
+
+            mOut.close();
+
+            encContent = new BERConstructedOctetString(bOut.toByteArray());
+
+            macResult = new DEROctetString(macCalculator.getMac());
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("exception decoding algorithm parameters.", e);
+        }
+
+        for (Iterator it = recipientInfoGenerators.iterator(); it.hasNext();)
+        {
+            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
+
+            recipientInfos.add(recipient.generate(macCalculator.getKey()));
+        }
+
+        ContentInfo  eci = new ContentInfo(
+                CMSObjectIdentifiers.data,
+                encContent);
+
+        ContentInfo contentInfo = new ContentInfo(
+                CMSObjectIdentifiers.authenticatedData,
+                new AuthenticatedData(null, new DERSet(recipientInfos), macCalculator.getAlgorithmIdentifier(), null, eci, null, macResult, null));
+
+        return new CMSAuthenticatedData(contentInfo);
+    }
+
+    /**
      * constructor allowing specific source of randomness
      * @param rand instance of SecureRandom to use
+     * @deprecated no longer required, use simple constructor.
      */
     public CMSAuthenticatedDataGenerator(
         SecureRandom rand)
@@ -63,8 +118,9 @@ public class CMSAuthenticatedDataGenerator
     }
 
     /**
-     * generate an enveloped object that contains an CMS Enveloped Data
+     * generate an authenticated object that contains an CMS Authenticated Data
      * object using the given provider and the passed in key generator.
+     * @deprecated
      */
     private CMSAuthenticatedData generate(
         CMSProcessable  content,
@@ -167,6 +223,7 @@ public class CMSAuthenticatedDataGenerator
     /**
      * generate an authenticated object that contains an CMS Authenticated Data
      * object using the given provider.
+     * @deprecated use addRecipientInfoGenerator method.
      */
     public CMSAuthenticatedData generate(
         CMSProcessable  content,
@@ -179,7 +236,8 @@ public class CMSAuthenticatedDataGenerator
 
     /**
      * generate an authenticated object that contains an CMS Authenticated Data
-     * object using the given provider.
+     * object using the given provider
+     * @deprecated use addRecipientInfoGenerator method..
      */
     public CMSAuthenticatedData generate(
         CMSProcessable  content,
