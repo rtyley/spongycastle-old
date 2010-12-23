@@ -77,6 +77,9 @@ public class KeyTransRecipientInformation
         return oid.getId();
     }
 
+    /**
+     * @deprecated
+     */
     protected Key getSessionKey(Key receiverPrivateKey, Provider prov)
         throws CMSException
     {
