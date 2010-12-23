@@ -11,12 +11,14 @@ import java.util.Iterator;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.cms.CMSAuthenticatedDataGenerator;
+import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSAuthenticatedDataParser;
 import org.bouncycastle.cms.CMSAuthenticatedDataStreamGenerator;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.cms.jcajce.JceCMSMacCalculatorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransAuthenticatedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -98,10 +100,10 @@ public class NewAuthenticatedDataStreamTest
     public void testKeyTransDESede()
         throws Exception
     {
-        tryKeyTrans(CMSAuthenticatedDataGenerator.DES_EDE3_CBC);
+        tryKeyTrans(CMSAlgorithm.DES_EDE3_CBC);
     }
 
-    private void tryKeyTrans(String macAlg)
+    private void tryKeyTrans(ASN1ObjectIdentifier macAlg)
         throws Exception
     {
         byte[]          data     = "Eric H. Echidna".getBytes();
@@ -111,7 +113,7 @@ public class NewAuthenticatedDataStreamTest
 
         adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
         
-        OutputStream aOut = adGen.open(bOut, macAlg, BC);
+        OutputStream aOut = adGen.open(bOut, new JceCMSMacCalculatorBuilder(macAlg).setProvider(BC).build());
 
         aOut.write(data);
 
@@ -121,7 +123,7 @@ public class NewAuthenticatedDataStreamTest
 
         RecipientInformationStore recipients = ad.getRecipientInfos();
 
-        assertEquals(ad.getMacAlgOID(), macAlg);
+        assertEquals(ad.getMacAlgOID(), macAlg.getId());
 
         Collection c = recipients.getRecipients();
 

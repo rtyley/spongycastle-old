@@ -334,7 +334,10 @@ public class SignerInformation
 
         return null;
     }
-    
+
+    /**
+     * @deprecated
+     */
     private boolean doVerify(
         PublicKey       key,
         Provider        sigProvider)
@@ -746,7 +749,10 @@ public class SignerInformation
 
         return digInfo;
     }
-    
+
+    /**
+     * @deprecated
+     */
     private boolean verifyDigest(
         byte[]    digest, 
         PublicKey key,
