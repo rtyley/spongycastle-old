@@ -40,29 +40,20 @@ public class KeyTransRecipientInformation
         super(info.getKeyEncryptionAlgorithm(), secureReadable);
 
         this.info = info;
-        this.rid = new RecipientId();
 
         RecipientIdentifier r = info.getRecipientIdentifier();
 
-        try
+        if (r.isTagged())
         {
-            if (r.isTagged())
-            {
-                ASN1OctetString octs = ASN1OctetString.getInstance(r.getId());
+            ASN1OctetString octs = ASN1OctetString.getInstance(r.getId());
 
-                rid.setSubjectKeyIdentifier(octs.getOctets());
-            }
-            else
-            {
-                IssuerAndSerialNumber   iAnds = IssuerAndSerialNumber.getInstance(r.getId());
-
-                rid.setIssuer(iAnds.getName().getEncoded());
-                rid.setSerialNumber(iAnds.getSerialNumber().getValue());
-            }
+            rid = new KeyTransRecipientId(octs.getOctets());
         }
-        catch (IOException e)
+        else
         {
-            throw new IllegalArgumentException("invalid rid in KeyTransRecipientInformation");
+            IssuerAndSerialNumber   iAnds = IssuerAndSerialNumber.getInstance(r.getId());
+
+            rid = new KeyTransRecipientId(iAnds.getName(), iAnds.getSerialNumber().getValue());
         }
     }
 

@@ -9,19 +9,19 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
+import javax.crypto.Cipher;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
-import javax.crypto.Cipher;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
+import org.bouncycastle.cms.KeyTransRecipientId;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.bouncycastle.cms.test.CMSTestUtil;
-import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedParser;
@@ -225,11 +225,9 @@ public class SMIMEEnvelopedTest
 
         SMIMEEnveloped       m = new SMIMEEnveloped(mp);
 
-        RecipientId          recId = new RecipientId();
-
         dig.update(_reciCert.getPublicKey().getEncoded());
 
-        recId.setSubjectKeyIdentifier(dig.digest());
+        RecipientId          recId = new KeyTransRecipientId(dig.digest());
 
         RecipientInformationStore  recipients = m.getRecipientInfos();
         RecipientInformation       recipient = recipients.get(recId);
@@ -264,11 +262,9 @@ public class SMIMEEnvelopedTest
 
         SMIMEEnveloped       m = new SMIMEEnveloped(mp);
 
-        RecipientId          recId = new RecipientId();
-
         dig.update(_reciCert.getPublicKey().getEncoded());
 
-        recId.setSubjectKeyIdentifier(dig.digest());
+        RecipientId          recId = new KeyTransRecipientId(dig.digest());
 
         RecipientInformationStore  recipients = m.getRecipientInfos();
         RecipientInformation       recipient = recipients.get(recId);
@@ -377,14 +373,11 @@ public class SMIMEEnvelopedTest
         X509Certificate cert) 
         throws IOException, CertificateEncodingException
     {
-        RecipientId          recId = new RecipientId();
+        RecipientId          recId = new JceKeyTransRecipientId(cert.getIssuerX500Principal(), cert.getSerialNumber());
 
-        recId.setSerialNumber(cert.getSerialNumber());
-        recId.setIssuer(PrincipalUtil.getIssuerX509Principal(cert).getEncoded());
         return recId;
     }
-    
-    
+
     private void verifyMessageBytes(MimeBodyPart a, MimeBodyPart b) 
         throws IOException, MessagingException
     {

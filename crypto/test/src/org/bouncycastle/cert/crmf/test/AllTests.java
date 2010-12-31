@@ -49,6 +49,7 @@ import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -127,10 +128,7 @@ public class AllTests
 
         RecipientInformationStore recips = archiveControl.getEnvelopedData().getRecipientInfos();
 
-        RecipientId recipientId = new RecipientId();
-
-        recipientId.setIssuer(cert.getIssuerX500Principal().getEncoded());
-        recipientId.setSerialNumber(cert.getSerialNumber());
+        RecipientId recipientId = new JceKeyTransRecipientId(cert);
 
         RecipientInformation recipientInformation = recips.get(recipientId);
 

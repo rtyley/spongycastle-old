@@ -59,7 +59,7 @@ public class PasswordRecipientInformation
         super(info.getKeyEncryptionAlgorithm(), secureReadable);
 
         this.info = info;
-        this.rid = new RecipientId();
+        this.rid = new PasswordRecipientId();
     }
 
     /**

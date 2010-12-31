@@ -68,7 +68,8 @@ public class RegressionTest
         new SubjectKeyIdentifierTest(),
         new ESSCertIDv2UnitTest(),
         new ParsingTest(),
-        new GeneralNameTest()
+        new GeneralNameTest(),
+        new RFC4519Test()
     };
 
     public static void main(

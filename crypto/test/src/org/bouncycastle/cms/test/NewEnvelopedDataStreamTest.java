@@ -27,6 +27,7 @@ import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSEnvelopedDataParser;
 import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
 import org.bouncycastle.cms.CMSTypedStream;
+import org.bouncycastle.cms.KEKRecipientId;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
@@ -34,10 +35,10 @@ import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKEKEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKEKRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyAgreeEnvelopedRecipient;
+import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipientId;
 import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
-import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
@@ -572,9 +573,7 @@ public class NewEnvelopedDataStreamTest
 
         assertEquals(ep.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
 
-        RecipientId                recSel = new RecipientId();
-
-        recSel.setKeyIdentifier(kekId2);
+        RecipientId                recSel = new KEKRecipientId(kekId2);
 
         RecipientInformation       recipient = recipients.get(recSel);
 
@@ -611,10 +610,7 @@ public class NewEnvelopedDataStreamTest
 
         assertEquals(ep.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
 
-        RecipientId                recSel = new RecipientId();
-
-        recSel.setIssuer(PrincipalUtil.getIssuerX509Principal(_reciEcCert).getEncoded());
-        recSel.setSerialNumber(_reciEcCert.getSerialNumber());
+        RecipientId                recSel = new JceKeyAgreeRecipientId(_reciEcCert);
 
         RecipientInformation       recipient = recipients.get(recSel);
 
