@@ -82,31 +82,22 @@ public class SignerInformation
         SignatureAlgorithmIdentifierFinder sigAlgFinder)
     {
         this.info = info;
-        this.sid = new SignerId();
         this.contentType = contentType;
         this.sigAlgFinder = sigAlgFinder;
 
-        try
+        SignerIdentifier   s = info.getSID();
+
+        if (s.isTagged())
         {
-            SignerIdentifier   s = info.getSID();
+            ASN1OctetString octs = ASN1OctetString.getInstance(s.getId());
 
-            if (s.isTagged())
-            {
-                ASN1OctetString octs = ASN1OctetString.getInstance(s.getId());
-
-                sid = new SignerId(octs.getOctets());
-            }
-            else
-            {
-                IssuerAndSerialNumber   iAnds = IssuerAndSerialNumber.getInstance(s.getId());
-
-                sid.setIssuer(iAnds.getName().getEncoded());
-                sid.setSerialNumber(iAnds.getSerialNumber().getValue());
-            }
+            sid = new SignerId(octs.getOctets());
         }
-        catch (IOException e)
+        else
         {
-            throw new IllegalArgumentException("invalid sid in SignerInfo");
+            IssuerAndSerialNumber   iAnds = IssuerAndSerialNumber.getInstance(s.getId());
+
+            sid = new SignerId(iAnds.getName(), iAnds.getSerialNumber().getValue());
         }
 
         this.digestAlgorithm = info.getDigestAlgorithm();
@@ -936,8 +927,12 @@ public class SignerInformation
     }
 
     /**
-     * verify that the given signer can successfully verify the signature on
+     * Verify that the given verifierProvider can successfully verify the signature on
      * this SignerInformation object.
+     *
+     * @return true if the signer information is verified, false otherwise.
+     * @throws CMSVerifierCertificateNotValidException if the provider has an associated certificate and the certificate is not valid at the time given as the SignerInfo's signing time.
+     * @throws CMSException if the VerifierProvider is unable to create a verifier.
      */
     public boolean verify(ContentVerifierProvider verifierProvider)
         throws CMSException
@@ -948,17 +943,17 @@ public class SignerInformation
 
         try
         {
+            Time signingTime = getSigningTime();   // has to be validated if present.
 
             if (verifierProvider.hasAssociatedCertificate())
             {
-                Time signingTime = getSigningTime();
                 if (signingTime != null)
                 {
                     X509CertificateHolder dcv = verifierProvider.getAssociatedCertificate();
 
                     if (!dcv.isValidOn(signingTime.getDate()))
                     {
-                        throw new CMSException("verifier not valid at signingTime");
+                        throw new CMSVerifierCertificateNotValidException("verifier not valid at signingTime");
                     }
                 }
             }
@@ -975,8 +970,19 @@ public class SignerInformation
      * Return the base ASN.1 CMS structure that this object contains.
      * 
      * @return an object containing a CMS SignerInfo structure.
+     * @deprecated use toASN1Structure()
      */
     public SignerInfo toSignerInfo()
+    {
+        return info;
+    }
+
+    /**
+     * Return the underlying ASN.1 object defining this SignerInformation object.
+     *
+     * @return a SignerInfo.
+     */
+    public SignerInfo toASN1Structure()
     {
         return info;
     }

@@ -29,11 +29,10 @@ public class KEKRecipientInformation
         super(info.getKeyEncryptionAlgorithm(), secureReadable);
 
         this.info = info;
-        this.rid = new RecipientId();
-        
+
         KEKIdentifier kekId = info.getKekid();
 
-        rid.setKeyIdentifier(kekId.getKeyIdentifier().getOctets());
+        this.rid = new KEKRecipientId(kekId.getKeyIdentifier().getOctets());
     }
 
     /**

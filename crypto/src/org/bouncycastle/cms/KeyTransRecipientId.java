@@ -2,7 +2,6 @@ package org.bouncycastle.cms;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.cert.X509CertSelector;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
@@ -13,14 +12,9 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.Selector;
 
-/**
- * a basic index for a signer.
- */
-public class SignerId
-    extends X509CertSelector
-    implements Selector
+public class KeyTransRecipientId
+    extends RecipientId
 {
     private byte[] subjectKeyId;
 
@@ -28,36 +22,31 @@ public class SignerId
     private BigInteger serialNumber;
 
     /**
-     * @deprecated use specific constructor.
-     */
-    public SignerId()
-    {
-
-    }
-
-    /**
-     * Construct a signer ID with the value of a public key's subjectKeyId.
+     * Construct a key trans recipient ID with the value of a public key's subjectKeyId.
      *
      * @param subjectKeyId a subjectKeyId
      */
-    public SignerId(byte[] subjectKeyId)
+    public KeyTransRecipientId(byte[] subjectKeyId)
     {
+        super(keyTrans);
         super.setSubjectKeyIdentifier(new DEROctetString(subjectKeyId).getDEREncoded());
 
         this.subjectKeyId = subjectKeyId;
     }
 
     /**
-     * Construct a signer ID based on the issuer and serial number of the signer's associated
+     * Construct a key trans recipient ID based on the issuer and serial number of the recipient's associated
      * certificate.
      *
-     * @param issuer the issuer of the signer's associated certificate.
-     * @param serialNumber the serial number of the signer's associated certificate.
+     * @param issuer the issuer of the recipient's associated certificate.
+     * @param serialNumber the serial number of the recipient's associated certificate.
      */
-    public SignerId(X500Name issuer, BigInteger serialNumber)
+    public KeyTransRecipientId(X500Name issuer, BigInteger serialNumber)
     {
+        super(keyTrans);
         this.issuer = issuer;
         this.serialNumber = serialNumber;
+
         try
         {
             this.setIssuer(issuer.getDEREncoded());
@@ -89,12 +78,12 @@ public class SignerId
     public boolean equals(
         Object  o)
     {
-        if (!(o instanceof SignerId))
+        if (!(o instanceof KeyTransRecipientId))
         {
             return false;
         }
 
-        SignerId id = (SignerId)o;
+        KeyTransRecipientId id = (KeyTransRecipientId)o;
 
         return Arrays.areEqual(subjectKeyId, id.subjectKeyId)
             && equalsObj(this.serialNumber, id.serialNumber)
@@ -117,7 +106,7 @@ public class SignerId
                 IssuerAndSerialNumber iAndS = certHldr.getIssuerAndSerialNumber();
 
                 return iAndS.getName().equals(this.issuer)
-                    && iAndS.getSerialNumber().getValue().equals(this.serialNumber);
+                    && iAndS.getSerialNumber().getValue().equals(this.getSerialNumber());
             }
             else if (this.getSubjectKeyIdentifier() != null)
             {
@@ -146,9 +135,9 @@ public class SignerId
         {
             return Arrays.areEqual(subjectKeyId, (byte[])obj);
         }
-        else if (obj instanceof SignerInformation)
+        else if (obj instanceof KeyTransRecipientInformation)
         {
-            return ((SignerInformation)obj).getSID().equals(this);
+            return ((KeyTransRecipientInformation)obj).getRID().equals(this);
         }
 
         return false;

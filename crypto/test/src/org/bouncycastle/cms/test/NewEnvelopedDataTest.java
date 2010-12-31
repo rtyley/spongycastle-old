@@ -48,12 +48,12 @@ import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKEKEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKEKRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyAgreeEnvelopedRecipient;
+import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipientId;
 import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JcePasswordEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JcePasswordRecipientInfoGenerator;
-import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
@@ -717,9 +717,7 @@ public class NewEnvelopedDataTest
         byte[] expectedData, X509Certificate reciCert, PrivateKey reciPrivKey, String provider)
         throws CMSException, NoSuchProviderException, CertificateEncodingException, IOException
     {
-        RecipientId rid = new RecipientId();
-        rid.setIssuer(PrincipalUtil.getIssuerX509Principal(reciCert).getEncoded());
-        rid.setSerialNumber(reciCert.getSerialNumber());
+        RecipientId rid = new JceKeyAgreeRecipientId(reciCert);
 
         RecipientInformation recipient = recipients.get(rid);
         assertNotNull(recipient);

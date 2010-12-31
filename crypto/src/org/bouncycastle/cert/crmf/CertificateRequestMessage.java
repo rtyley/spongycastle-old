@@ -67,6 +67,11 @@ public class CertificateRequestMessage
         this.controls = certReqMsg.getCertReq().getControls();
     }
 
+    /**
+     * Return the underlying ASN.1 object defining this CertificateRequestMessage object.
+     *
+     * @return a CertReqMsg.
+     */
     public CertReqMsg toASN1Structure()
     {
         return certReqMsg;
@@ -184,7 +189,7 @@ public class CertificateRequestMessage
     {
         ProofOfPossession pop = certReqMsg.getPopo();
 
-        if (pop.getType() == ProofOfPossession.TYPE_SIGNING_KEY)
+        if (pop.getType() == popSigningKey)
         {
             POPOSigningKey popoSign = POPOSigningKey.getInstance(pop.getObject());
 
@@ -207,7 +212,7 @@ public class CertificateRequestMessage
     {
         ProofOfPossession pop = certReqMsg.getPopo();
 
-        if (pop.getType() == ProofOfPossession.TYPE_SIGNING_KEY)
+        if (pop.getType() == popSigningKey)
         {
             POPOSigningKey popoSign = POPOSigningKey.getInstance(pop.getObject());
 
@@ -239,7 +244,7 @@ public class CertificateRequestMessage
     {
         ProofOfPossession pop = certReqMsg.getPopo();
 
-        if (pop.getType() == ProofOfPossession.TYPE_SIGNING_KEY)
+        if (pop.getType() == popSigningKey)
         {
             POPOSigningKey popoSign = POPOSigningKey.getInstance(pop.getObject());
 
