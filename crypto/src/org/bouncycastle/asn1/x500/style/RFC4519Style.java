@@ -343,9 +343,18 @@ public class RFC4519Style
         return true;
     }
 
+    // parse backwards
     public RDN[] fromString(String dirName)
     {
-        return IETFUtils.rDNsFromString(dirName, this);
+        RDN[] tmp = IETFUtils.rDNsFromString(dirName, this);
+        RDN[] res = new RDN[tmp.length];
+
+        for (int i = 0; i != tmp.length; i++)
+        {
+            res[res.length - i - 1] = tmp[i];
+        }
+
+        return res;
     }
 
     public int calculateHashCode(X500Name name)
@@ -385,6 +394,7 @@ public class RFC4519Style
         return value.hashCode();
     }
 
+    // convert in reverse
     public String toString(X500Name name)
     {
         StringBuffer buf = new StringBuffer();
@@ -392,7 +402,7 @@ public class RFC4519Style
 
         RDN[] rdns = name.getRDNs();
 
-        for (int i = 0; i < rdns.length; i++)
+        for (int i = rdns.length - 1; i >= 0; i--)
         {
             if (first)
             {

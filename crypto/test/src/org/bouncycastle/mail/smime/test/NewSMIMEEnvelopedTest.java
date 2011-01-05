@@ -261,7 +261,7 @@ public class NewSMIMEEnvelopedTest
 
         dig.update(_reciCert.getPublicKey().getEncoded());
 
-        gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(dig.digest(), _reciCert.getPublicKey()));
+        gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(dig.digest(), _reciCert.getPublicKey()).setProvider(BC));
          
         //
         // generate a MimeBodyPart object which encapsulates the content
