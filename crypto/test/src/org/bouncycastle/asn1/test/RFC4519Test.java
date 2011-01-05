@@ -1,8 +1,11 @@
 package org.bouncycastle.asn1.test;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameStyle;
 import org.bouncycastle.asn1.x500.style.RFC4519Style;
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
 public class RFC4519Test
@@ -118,6 +121,22 @@ public class RFC4519Test
             {
                 fail("mismatch for " + attributeTypes[i]);
             }
+        }
+
+        byte[] enc = Hex.decode("305e310b300906035504061302415531283026060355040a0c1f546865204c6567696f6e206f662074686520426f756e637920436173746c653125301006035504070c094d656c626f75726e653011060355040b0c0a4173636f742056616c65");
+
+        X500Name n = new X500Name(style, X500Name.getInstance(enc));
+
+        if (!n.toString().equals("l=Melbourne+ou=Ascot Vale,o=The Legion of the Bouncy Castle,c=AU"))
+        {
+            fail("Failed composite to string test got: " + n.toString());
+        }
+
+        n = new X500Name(style, "l=Melbourne+ou=Ascot Vale,o=The Legion of the Bouncy Castle,c=AU");
+
+        if (!Arrays.areEqual(n.getEncoded(), enc))
+        {
+            fail("re-encoding test after parse failed");
         }
     }
 

@@ -610,7 +610,7 @@ public class NewEnvelopedDataTest
 
         byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
 
-        edGen.addRecipientInfoGenerator(new JceKEKRecipientInfoGenerator(kekId, kek));
+        edGen.addRecipientInfoGenerator(new JceKEKRecipientInfoGenerator(kekId, kek).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
