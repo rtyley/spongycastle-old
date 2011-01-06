@@ -3,7 +3,7 @@ package org.bouncycastle.crypto.tls;
 public class KeyExchangeAlgorithm
 {
     /*
-     * Not that the values here are implementation-specific and arbitrary.
+     * Note that the values here are implementation-specific and arbitrary.
      * It is recommended not to depend on the particular values (e.g. serialization).
      */
     public static final int RSA = 1;
