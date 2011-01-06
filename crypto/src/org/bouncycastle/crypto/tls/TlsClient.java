@@ -28,7 +28,7 @@ interface TlsClient
 
     TlsKeyExchange createKeyExchange() throws IOException;
 
-    // Vector is (X509Name)
+    // Vector is (X500Name)
     void processServerCertificateRequest(short[] certificateTypes, Vector certificateAuthorities);
 
     Certificate getCertificate();
