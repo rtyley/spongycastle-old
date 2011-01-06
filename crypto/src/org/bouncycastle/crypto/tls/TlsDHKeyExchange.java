@@ -155,7 +155,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
         // OK
     }
 
-    public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
+    public void processServerKeyExchange(InputStream is)
         throws IOException
     {
         throw new TlsFatalAlert(AlertDescription.unexpected_message);

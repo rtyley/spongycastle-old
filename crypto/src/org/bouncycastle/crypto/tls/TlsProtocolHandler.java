@@ -509,7 +509,7 @@ public class TlsProtocolHandler
                         /*
                          * Initialize our cipher suite
                          */
-                        rs.clientCipherSpecDecided(tlsClient.createCipher(securityParameters));
+                        rs.clientCipherSpecDecided(tlsClient.createCipher());
 
                         /*
                          * Send our finished message.
@@ -544,7 +544,7 @@ public class TlsProtocolHandler
 
                     case CS_SERVER_CERTIFICATE_RECEIVED:
 
-                        this.keyExchange.processServerKeyExchange(is, securityParameters);
+                        this.keyExchange.processServerKeyExchange(is);
 
                         assertEmpty(is);
                         break;
@@ -808,19 +808,19 @@ public class TlsProtocolHandler
             throw new IllegalStateException("connect can only be called once");
         }
 
-        this.tlsClientContext = new TlsClientContextImpl(random);
-        this.tlsClient = tlsClient;
-        this.tlsClient.init(tlsClientContext);
-
         /*
          * Send Client hello
          * 
          * First, generate some random data.
          */
-        securityParameters = new SecurityParameters();
-        securityParameters.clientRandom = new byte[32];
+        this.securityParameters = new SecurityParameters();
+        this.securityParameters.clientRandom = new byte[32];
         random.nextBytes(securityParameters.clientRandom);
         TlsUtils.writeGMTUnixTime(securityParameters.clientRandom, 0);
+
+        this.tlsClientContext = new TlsClientContextImpl(random, securityParameters);
+        this.tlsClient = tlsClient;
+        this.tlsClient.init(tlsClientContext);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         TlsUtils.writeVersion(os);
