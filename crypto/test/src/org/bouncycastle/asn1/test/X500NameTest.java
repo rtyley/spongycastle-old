@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERGeneralizedTime;
@@ -20,6 +21,7 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -504,131 +506,136 @@ public class X500NameTest
             fail("# string not properly escaped.");
         }
 
-//        Vector vls = n.getValues(BCStyle.CN);
-//        if (vls.size() != 1 || !vls.elementAt(0).equals("#nothex#string"))
-//        {
-//            fail("escaped # not reduced properly");
-//        }
-//
-//        n = new X500Name("CN=\"a+b\"");
-//
-//        vls = n.getValues(X500Name.CN);
-//        if (vls.size() != 1 || !vls.elementAt(0).equals("a+b"))
-//        {
-//            fail("escaped + not reduced properly");
-//        }
-//
-//        n = new X500Name("CN=a\\+b");
-//
-//        vls = n.getValues(X500Name.CN);
-//        if (vls.size() != 1 || !vls.elementAt(0).equals("a+b"))
-//        {
-//            fail("escaped + not reduced properly");
-//        }
-//
-//        if (!n.toString().equals("CN=a\\+b"))
-//        {
-//            fail("+ in string not properly escaped.");
-//        }
-//
-//        n = new X500Name("CN=a\\=b");
-//
-//        vls = n.getValues(X500Name.CN);
-//        if (vls.size() != 1 || !vls.elementAt(0).equals("a=b"))
-//        {
-//            fail("escaped = not reduced properly");
-//        }
-//
-//        if (!n.toString().equals("CN=a\\=b"))
-//        {
-//            fail("= in string not properly escaped.");
-//        }
-//
-//        n = new X500Name("TELEPHONENUMBER=\"+61999999999\"");
-//
-//        vls = n.getValues(X500Name.TELEPHONE_NUMBER);
-//        if (vls.size() != 1 || !vls.elementAt(0).equals("+61999999999"))
-//        {
-//            fail("telephonenumber escaped + not reduced properly");
-//        }
-//
-//        n = new X500Name("TELEPHONENUMBER=\\+61999999999");
-//
-//        vls = n.getValues(X500Name.TELEPHONE_NUMBER);
-//        if (vls.size() != 1 || !vls.elementAt(0).equals("+61999999999"))
-//        {
-//            fail("telephonenumber escaped + not reduced properly");
-//        }
+        RDN[] vls = n.getRDNs(BCStyle.CN);
+        if (vls.length != 1 || !getValue(vls[0]).equals("#nothex#string"))
+        {
+            fail("escaped # not reduced properly");
+        }
 
+        n = new X500Name("CN=\"a+b\"");
+
+        vls = n.getRDNs(BCStyle.CN);
+        if (vls.length != 1 || !getValue(vls[0]).equals("a+b"))
+        {
+            fail("escaped + not reduced properly");
+        }
+
+        n = new X500Name("CN=a\\+b");
+
+        vls = n.getRDNs(BCStyle.CN);
+        if (vls.length != 1 || !getValue(vls[0]).equals("a+b"))
+        {
+            fail("escaped + not reduced properly");
+        }
+
+        if (!n.toString().equals("CN=a\\+b"))
+        {
+            fail("+ in string not properly escaped.");
+        }
+
+        n = new X500Name("CN=a\\=b");
+
+        vls = n.getRDNs(BCStyle.CN);
+        if (vls.length != 1 || !getValue(vls[0]).equals("a=b"))
+        {
+            fail("escaped = not reduced properly");
+        }
+
+        if (!n.toString().equals("CN=a\\=b"))
+        {
+            fail("= in string not properly escaped.");
+        }
+
+        n = new X500Name("TELEPHONENUMBER=\"+61999999999\"");
+
+        vls = n.getRDNs(BCStyle.TELEPHONE_NUMBER);
+        if (vls.length != 1 || !getValue(vls[0]).equals("+61999999999"))
+        {
+            fail("telephonenumber escaped + not reduced properly");
+        }
+
+        n = new X500Name("TELEPHONENUMBER=\\+61999999999");
+
+        vls = n.getRDNs(BCStyle.TELEPHONE_NUMBER);
+        if (vls.length != 1 || !getValue(vls[0]).equals("+61999999999"))
+        {
+            fail("telephonenumber escaped + not reduced properly");
+        }
     }
-      /*
-    private boolean compareVectors(Vector a, Vector b)    // for compatibility with early JDKs
+
+    private String getValue(RDN vl)
     {
-        if (a.size() != b.size())
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.size(); i++)
-        {
-            if (!a.elementAt(i).equals(b.elementAt(i)))
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return ((ASN1String)vl.getFirst().getValue()).getString();
     }
 
-    private void compositeTest()
-        throws IOException
-    {
-        //
-        // composite test
-        //
-        byte[]  enc = Hex.decode("305e310b300906035504061302415531283026060355040a0c1f546865204c6567696f6e206f662074686520426f756e637920436173746c653125301006035504070c094d656c626f75726e653011060355040b0c0a4173636f742056616c65");
-        ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(enc));
+    /*
+  private boolean compareVectors(Vector a, Vector b)    // for compatibility with early JDKs
+  {
+      if (a.size() != b.size())
+      {
+          return false;
+      }
 
-        X500Name    n = X500Name.getInstance(aIn.readObject());
+      for (int i = 0; i != a.size(); i++)
+      {
+          if (!a.elementAt(i).equals(b.elementAt(i)))
+          {
+              return false;
+          }
+      }
 
-        if (!n.toString().equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne+OU=Ascot Vale"))
-        {
-            fail("Failed composite to string test got: " + n.toString());
-        }
+      return true;
+  }
 
-        if (!n.toString(true, X500Name.DefaultSymbols).equals("L=Melbourne+OU=Ascot Vale,O=The Legion of the Bouncy Castle,C=AU"))
-        {
-            fail("Failed composite to string test got: " + n.toString(true, X500Name.DefaultSymbols));
-        }
+  private void compositeTest()
+      throws IOException
+  {
+      //
+      // composite test
+      //
+      byte[]  enc = Hex.decode("305e310b300906035504061302415531283026060355040a0c1f546865204c6567696f6e206f662074686520426f756e637920436173746c653125301006035504070c094d656c626f75726e653011060355040b0c0a4173636f742056616c65");
+      ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(enc));
 
-        n = new X500Name(true, "L=Melbourne+OU=Ascot Vale,O=The Legion of the Bouncy Castle,C=AU");
-        if (!n.toString().equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne+OU=Ascot Vale"))
-        {
-            fail("Failed composite to string reversal test got: " + n.toString());
-        }
+      X500Name    n = X500Name.getInstance(aIn.readObject());
 
-        n = new X500Name("C=AU, O=The Legion of the Bouncy Castle, L=Melbourne + OU=Ascot Vale");
+      if (!n.toString().equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne+OU=Ascot Vale"))
+      {
+          fail("Failed composite to string test got: " + n.toString());
+      }
 
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        ASN1OutputStream aOut = new ASN1OutputStream(bOut);
+      if (!n.toString(true, X500Name.DefaultSymbols).equals("L=Melbourne+OU=Ascot Vale,O=The Legion of the Bouncy Castle,C=AU"))
+      {
+          fail("Failed composite to string test got: " + n.toString(true, X500Name.DefaultSymbols));
+      }
 
-        aOut.writeObject(n);
+      n = new X500Name(true, "L=Melbourne+OU=Ascot Vale,O=The Legion of the Bouncy Castle,C=AU");
+      if (!n.toString().equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne+OU=Ascot Vale"))
+      {
+          fail("Failed composite to string reversal test got: " + n.toString());
+      }
 
-        byte[]  enc2 = bOut.toByteArray();
+      n = new X500Name("C=AU, O=The Legion of the Bouncy Castle, L=Melbourne + OU=Ascot Vale");
 
-        if (!Arrays.areEqual(enc, enc2))
-        {
-            fail("Failed composite string to encoding test");
-        }
-        
-        //
-        // dud name test - handle empty DN without barfing.
-        //
-        n = new X500Name("C=CH,O=,OU=dummy,CN=mail@dummy.com");
+      ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+      ASN1OutputStream aOut = new ASN1OutputStream(bOut);
 
-        n = X500Name.getInstance(ASN1Object.fromByteArray(n.getEncoded()));
-    }
-      */
+      aOut.writeObject(n);
+
+      byte[]  enc2 = bOut.toByteArray();
+
+      if (!Arrays.areEqual(enc, enc2))
+      {
+          fail("Failed composite string to encoding test");
+      }
+
+      //
+      // dud name test - handle empty DN without barfing.
+      //
+      n = new X500Name("C=CH,O=,OU=dummy,CN=mail@dummy.com");
+
+      n = X500Name.getInstance(ASN1Object.fromByteArray(n.getEncoded()));
+  }
+    */
     private void equalityTest(X500Name name1, X500Name name2)
     {
         if (!name1.equals(name2))
