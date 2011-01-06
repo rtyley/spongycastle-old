@@ -6,6 +6,8 @@ class TlsClientContextImpl implements TlsClientContext
 {
     private SecureRandom secureRandom;
 
+    private Object userObject = null;
+
     TlsClientContextImpl(SecureRandom secureRandom)
     {
         this.secureRandom = secureRandom;
@@ -14,5 +16,15 @@ class TlsClientContextImpl implements TlsClientContext
     public SecureRandom getSecureRandom()
     {
         return secureRandom;
+    }
+
+    public Object getUserObject()
+    {
+        return userObject;
+    }
+
+    public void setUserObject(Object userObject)
+    {
+        this.userObject = userObject;
     }
 }
