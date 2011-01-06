@@ -27,7 +27,7 @@ import org.bouncycastle.util.BigIntegers;
  */
 abstract class TlsECKeyExchange implements TlsKeyExchange
 {
-    protected TlsProtocolHandler handler;
+    protected TlsClientContext context;
     protected CertificateVerifyer verifyer;
     protected short keyExchange;
     protected TlsSigner tlsSigner;
@@ -37,7 +37,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
     protected ECPublicKeyParameters ecAgreeServerPublicKey;
     protected ECPrivateKeyParameters ecAgreeClientPrivateKey = null;
 
-    TlsECKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
+    TlsECKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, short keyExchange)
     {
         switch (keyExchange)
         {
@@ -55,7 +55,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 throw new IllegalArgumentException("unsupported key exchange algorithm");
         }
 
-        this.handler = handler;
+        this.context = context;
         this.verifyer = verifyer;
         this.keyExchange = keyExchange;
     }
@@ -171,7 +171,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
     {
         ECKeyPairGenerator keyPairGenerator = new ECKeyPairGenerator();
         ECKeyGenerationParameters keyGenerationParameters = new ECKeyGenerationParameters(
-            ecParams, handler.getRandom());
+            ecParams, context.getSecureRandom());
         keyPairGenerator.init(keyGenerationParameters);
         return keyPairGenerator.generateKeyPair();
     }
@@ -200,7 +200,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         X509Extensions exts = c.getTBSCertificate().getExtensions();
         if (exts != null)
         {
-            X509Extension ext = exts.getExtension(X509Extensions.KeyUsage);
+            X509Extension ext = exts.getExtension(X509Extension.keyUsage);
             if (ext != null)
             {
                 DERBitString ku = KeyUsage.getInstance(ext);

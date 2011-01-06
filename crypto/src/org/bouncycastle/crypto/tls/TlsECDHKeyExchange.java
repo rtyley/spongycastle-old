@@ -9,9 +9,9 @@ import java.io.OutputStream;
  */
 class TlsECDHKeyExchange extends TlsECKeyExchange
 {
-    TlsECDHKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
+    TlsECDHKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, short keyExchange)
     {
-        super(handler, verifyer, keyExchange);
+        super(context, verifyer, keyExchange);
     }
 
     public void skipServerCertificate() throws IOException
