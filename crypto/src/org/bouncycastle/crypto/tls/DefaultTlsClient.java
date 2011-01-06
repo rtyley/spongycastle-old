@@ -151,7 +151,7 @@ class DefaultTlsClient implements TlsClient
              * some clients may want to terminate the handshake instead of continuing; see
              * Section 4.1 for discussion.
              */
-//            handler.failWithError(AlertLevel.fatal, AlertDescription.handshake_failure);
+//            throw new TlsFatalAlert(AlertDescription.handshake_failure);
         }
     }
 
@@ -355,14 +355,16 @@ class DefaultTlsClient implements TlsClient
 
     protected TlsCipher createAESCipher(int cipherKeySize, SecurityParameters securityParameters)
     {
-        return new TlsBlockCipher(handler, createAESBlockCipher(), createAESBlockCipher(),
-            createSHA1Digest(), createSHA1Digest(), cipherKeySize, securityParameters);
+        return new TlsBlockCipher(handler.getRandom(), createAESBlockCipher(),
+            createAESBlockCipher(), createSHA1Digest(), createSHA1Digest(), cipherKeySize,
+            securityParameters);
     }
 
     protected TlsCipher createDESedeCipher(int cipherKeySize, SecurityParameters securityParameters)
     {
-        return new TlsBlockCipher(handler, createDESedeBlockCipher(), createDESedeBlockCipher(),
-            createSHA1Digest(), createSHA1Digest(), cipherKeySize, securityParameters);
+        return new TlsBlockCipher(handler.getRandom(), createDESedeBlockCipher(),
+            createDESedeBlockCipher(), createSHA1Digest(), createSHA1Digest(), cipherKeySize,
+            securityParameters);
     }
 
     protected BlockCipher createAESBlockCipher()
@@ -374,7 +376,7 @@ class DefaultTlsClient implements TlsClient
     {
         return new CBCBlockCipher(new DESedeEngine());
     }
-    
+
     protected Digest createSHA1Digest()
     {
         return new SHA1Digest();
