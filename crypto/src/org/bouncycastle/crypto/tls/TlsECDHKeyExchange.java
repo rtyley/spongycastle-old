@@ -9,7 +9,7 @@ import java.io.OutputStream;
  */
 class TlsECDHKeyExchange extends TlsECKeyExchange
 {
-    TlsECDHKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, short keyExchange)
+    TlsECDHKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, int keyExchange)
     {
         super(context, verifyer, keyExchange);
     }

@@ -29,7 +29,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
 {
     protected TlsClientContext context;
     protected CertificateVerifyer verifyer;
-    protected short keyExchange;
+    protected int keyExchange;
     protected TlsSigner tlsSigner;
 
     protected AsymmetricKeyParameter serverPublicKey;
@@ -37,18 +37,18 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
     protected ECPublicKeyParameters ecAgreeServerPublicKey;
     protected ECPrivateKeyParameters ecAgreeClientPrivateKey = null;
 
-    TlsECKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, short keyExchange)
+    TlsECKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, int keyExchange)
     {
         switch (keyExchange)
         {
-            case KE_ECDHE_RSA:
+            case KeyExchangeAlgorithm.ECDHE_RSA:
                 this.tlsSigner = new TlsRSASigner();
                 break;
-            case KE_ECDHE_ECDSA:
+            case KeyExchangeAlgorithm.ECDHE_ECDSA:
                 this.tlsSigner = new TlsECDSASigner();
                 break;
-            case KE_ECDH_RSA:
-            case KE_ECDH_ECDSA:
+            case KeyExchangeAlgorithm.ECDH_RSA:
+            case KeyExchangeAlgorithm.ECDH_ECDSA:
                 this.tlsSigner = null;
                 break;
             default:
@@ -96,7 +96,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
 
         switch (this.keyExchange)
         {
-            case KE_ECDH_ECDSA:
+            case KeyExchangeAlgorithm.ECDH_ECDSA:
                 if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
                 {
                     throw new TlsFatalAlert(AlertDescription.certificate_unknown);
@@ -106,7 +106,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
 //                x509Cert.getSignatureAlgorithm();
                 this.ecAgreeServerPublicKey = validateECPublicKey((ECPublicKeyParameters)this.serverPublicKey);
                 break;
-            case KE_ECDHE_ECDSA:
+            case KeyExchangeAlgorithm.ECDHE_ECDSA:
                 if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
                 {
                     throw new TlsFatalAlert(AlertDescription.certificate_unknown);
@@ -114,7 +114,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 // TODO Validate ECDSA public key
                 break;
-            case KE_ECDH_RSA:
+            case KeyExchangeAlgorithm.ECDH_RSA:
                 if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
                 {
                     throw new TlsFatalAlert(AlertDescription.certificate_unknown);
@@ -124,7 +124,7 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
 //              x509Cert.getSignatureAlgorithm();
                 this.ecAgreeServerPublicKey = validateECPublicKey((ECPublicKeyParameters)this.serverPublicKey);
                 break;
-            case KE_ECDHE_RSA:
+            case KeyExchangeAlgorithm.ECDHE_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
                     throw new TlsFatalAlert(AlertDescription.certificate_unknown);
@@ -148,12 +148,10 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
     protected boolean areOnSameCurve(ECDomainParameters a, ECDomainParameters b)
     {
         // TODO Move to ECDomainParameters.equals() or other utility method?
-        return a.getCurve().equals(b.getCurve())
-            && a.getG().equals(b.getG())
-            && a.getN().equals(b.getN())
-            && a.getH().equals(b.getH());
+        return a.getCurve().equals(b.getCurve()) && a.getG().equals(b.getG())
+            && a.getN().equals(b.getN()) && a.getH().equals(b.getH());
     }
-    
+
     protected byte[] externalizeKey(ECPublicKeyParameters keyParameters) throws IOException
     {
         // TODO Add support for compressed encoding and SPF extension
@@ -170,13 +168,14 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
     protected AsymmetricCipherKeyPair generateECKeyPair(ECDomainParameters ecParams)
     {
         ECKeyPairGenerator keyPairGenerator = new ECKeyPairGenerator();
-        ECKeyGenerationParameters keyGenerationParameters = new ECKeyGenerationParameters(
-            ecParams, context.getSecureRandom());
+        ECKeyGenerationParameters keyGenerationParameters = new ECKeyGenerationParameters(ecParams,
+            context.getSecureRandom());
         keyPairGenerator.init(keyGenerationParameters);
         return keyPairGenerator.generateKeyPair();
     }
 
-    protected void generateEphemeralClientKeyExchange(ECDomainParameters ecParams, OutputStream os) throws IOException
+    protected void generateEphemeralClientKeyExchange(ECDomainParameters ecParams, OutputStream os)
+        throws IOException
     {
         AsymmetricCipherKeyPair ecAgreeClientKeyPair = generateECKeyPair(ecParams);
         this.ecAgreeClientPrivateKey = (ECPrivateKeyParameters)ecAgreeClientKeyPair.getPrivate();
@@ -195,7 +194,8 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         return BigIntegers.asUnsignedByteArray(agreement);
     }
 
-    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
+    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits)
+        throws IOException
     {
         X509Extensions exts = c.getTBSCertificate().getExtensions();
         if (exts != null)
@@ -213,7 +213,8 @@ abstract class TlsECKeyExchange implements TlsKeyExchange
         }
     }
 
-    protected ECPublicKeyParameters validateECPublicKey(ECPublicKeyParameters key) throws IOException
+    protected ECPublicKeyParameters validateECPublicKey(ECPublicKeyParameters key)
+        throws IOException
     {
         // TODO Check RFC 4492 for validation
         return key;

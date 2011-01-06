@@ -30,7 +30,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
 {
     protected TlsClientContext context;
     protected CertificateVerifyer verifyer;
-    protected short keyExchange;
+    protected int keyExchange;
     protected TlsSigner tlsSigner;
 
     protected AsymmetricKeyParameter serverPublicKey = null;
@@ -43,17 +43,17 @@ class TlsSRPKeyExchange implements TlsKeyExchange
     protected BigInteger B = null;
     protected SRP6Client srpClient = new SRP6Client();
 
-    TlsSRPKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, short keyExchange)
+    TlsSRPKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, int keyExchange)
     {
         switch (keyExchange)
         {
-            case KE_SRP:
+            case KeyExchangeAlgorithm.SRP:
                 this.tlsSigner = null;
                 break;
-            case KE_SRP_RSA:
+            case KeyExchangeAlgorithm.SRP_RSA:
                 this.tlsSigner = new TlsRSASigner();
                 break;
-            case KE_SRP_DSS:
+            case KeyExchangeAlgorithm.SRP_DSS:
                 this.tlsSigner = new TlsDSSSigner();
                 break;
             default:
@@ -106,14 +106,14 @@ class TlsSRPKeyExchange implements TlsKeyExchange
          */
         switch (this.keyExchange)
         {
-            case TlsKeyExchange.KE_SRP_RSA:
+            case KeyExchangeAlgorithm.SRP_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
                     throw new TlsFatalAlert(AlertDescription.certificate_unknown);
                 }
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 break;
-            case TlsKeyExchange.KE_SRP_DSS:
+            case KeyExchangeAlgorithm.SRP_DSS:
                 if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
                 {
                     throw new TlsFatalAlert(AlertDescription.certificate_unknown);
@@ -210,7 +210,8 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         }
     }
 
-    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
+    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits)
+        throws IOException
     {
         X509Extensions exts = c.getTBSCertificate().getExtensions();
         if (exts != null)

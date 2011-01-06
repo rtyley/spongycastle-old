@@ -12,7 +12,7 @@ import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 
 class TlsDHEKeyExchange extends TlsDHKeyExchange
 {
-    TlsDHEKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, short keyExchange)
+    TlsDHEKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, int keyExchange)
     {
         super(context, verifyer, keyExchange);
     }

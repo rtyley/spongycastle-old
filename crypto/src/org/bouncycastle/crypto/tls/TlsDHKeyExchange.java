@@ -34,7 +34,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
 
     protected TlsClientContext context;
     protected CertificateVerifyer verifyer;
-    protected short keyExchange;
+    protected int keyExchange;
     protected TlsSigner tlsSigner;
 
     protected AsymmetricKeyParameter serverPublicKey = null;
@@ -42,18 +42,18 @@ class TlsDHKeyExchange implements TlsKeyExchange
     protected DHPublicKeyParameters dhAgreeServerPublicKey = null;
     protected DHPrivateKeyParameters dhAgreeClientPrivateKey = null;
 
-    TlsDHKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, short keyExchange)
+    TlsDHKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, int keyExchange)
     {
         switch (keyExchange)
         {
-            case TlsKeyExchange.KE_DH_RSA:
-            case TlsKeyExchange.KE_DH_DSS:
+            case KeyExchangeAlgorithm.DH_RSA:
+            case KeyExchangeAlgorithm.DH_DSS:
                 this.tlsSigner = null;
                 break;
-            case TlsKeyExchange.KE_DHE_RSA:
+            case KeyExchangeAlgorithm.DHE_RSA:
                 this.tlsSigner = new TlsRSASigner();
                 break;
-            case TlsKeyExchange.KE_DHE_DSS:
+            case KeyExchangeAlgorithm.DHE_DSS:
                 this.tlsSigner = new TlsDSSSigner();
                 break;
             default:
@@ -101,7 +101,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
 
         switch (this.keyExchange)
         {
-            case TlsKeyExchange.KE_DH_DSS:
+            case KeyExchangeAlgorithm.DH_DSS:
                 if (!(this.serverPublicKey instanceof DHPublicKeyParameters))
                 {
                     throw new TlsFatalAlert(AlertDescription.certificate_unknown);
@@ -111,7 +111,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
 //                x509Cert.getSignatureAlgorithm();
                 this.dhAgreeServerPublicKey = validateDHPublicKey((DHPublicKeyParameters)this.serverPublicKey);
                 break;
-            case TlsKeyExchange.KE_DH_RSA:
+            case KeyExchangeAlgorithm.DH_RSA:
                 if (!(this.serverPublicKey instanceof DHPublicKeyParameters))
                 {
                     throw new TlsFatalAlert(AlertDescription.certificate_unknown);
@@ -121,7 +121,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
 //              x509Cert.getSignatureAlgorithm();
                 this.dhAgreeServerPublicKey = validateDHPublicKey((DHPublicKeyParameters)this.serverPublicKey);
                 break;
-            case TlsKeyExchange.KE_DHE_RSA:
+            case KeyExchangeAlgorithm.DHE_RSA:
                 if (!(this.serverPublicKey instanceof RSAKeyParameters))
                 {
                     throw new TlsFatalAlert(AlertDescription.certificate_unknown);
@@ -129,7 +129,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
                 validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
                 // TODO Validate RSA public key
                 break;
-            case TlsKeyExchange.KE_DHE_DSS:
+            case KeyExchangeAlgorithm.DHE_DSS:
                 if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
                 {
                     throw new TlsFatalAlert(AlertDescription.certificate_unknown);
@@ -188,8 +188,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
 
     protected boolean areCompatibleParameters(DHParameters a, DHParameters b)
     {
-        return a.getP().equals(b.getP())
-            && a.getG().equals(b.getG());
+        return a.getP().equals(b.getP()) && a.getG().equals(b.getG());
     }
 
     protected byte[] calculateDHBasicAgreement(DHPublicKeyParameters publicKey,
@@ -208,7 +207,8 @@ class TlsDHKeyExchange implements TlsKeyExchange
         return dhGen.generateKeyPair();
     }
 
-    protected void generateEphemeralClientKeyExchange(DHParameters dhParams, OutputStream os) throws IOException
+    protected void generateEphemeralClientKeyExchange(DHParameters dhParams, OutputStream os)
+        throws IOException
     {
         AsymmetricCipherKeyPair dhAgreeClientKeyPair = generateDHKeyPair(dhParams);
         this.dhAgreeClientPrivateKey = (DHPrivateKeyParameters)dhAgreeClientKeyPair.getPrivate();
@@ -219,7 +219,8 @@ class TlsDHKeyExchange implements TlsKeyExchange
         TlsUtils.writeOpaque16(keData, os);
     }
 
-    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
+    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits)
+        throws IOException
     {
         X509Extensions exts = c.getTBSCertificate().getExtensions();
         if (exts != null)
@@ -237,7 +238,8 @@ class TlsDHKeyExchange implements TlsKeyExchange
         }
     }
 
-    protected DHPublicKeyParameters validateDHPublicKey(DHPublicKeyParameters key) throws IOException
+    protected DHPublicKeyParameters validateDHPublicKey(DHPublicKeyParameters key)
+        throws IOException
     {
         BigInteger Y = key.getY();
         DHParameters params = key.getParameters();
