@@ -23,7 +23,7 @@ import org.bouncycastle.crypto.util.PublicKeyFactory;
  */
 class TlsRSAKeyExchange implements TlsKeyExchange
 {
-    protected TlsProtocolHandler handler;
+    protected TlsClientContext context;
     protected CertificateVerifyer verifyer;
 
     protected AsymmetricKeyParameter serverPublicKey = null;
@@ -32,9 +32,9 @@ class TlsRSAKeyExchange implements TlsKeyExchange
 
     protected byte[] premasterSecret;
 
-    TlsRSAKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer)
+    TlsRSAKeyExchange(TlsClientContext context, CertificateVerifyer verifyer)
     {
-        this.handler = handler;
+        this.context = context;
         this.verifyer = verifyer;
     }
 
@@ -106,11 +106,11 @@ class TlsRSAKeyExchange implements TlsKeyExchange
          * Choose a PremasterSecret and send it encrypted to the server
          */
         premasterSecret = new byte[48];
-        handler.getRandom().nextBytes(premasterSecret);
+        context.getSecureRandom().nextBytes(premasterSecret);
         TlsUtils.writeVersion(premasterSecret, 0);
 
         PKCS1Encoding encoding = new PKCS1Encoding(new RSABlindedEngine());
-        encoding.init(true, new ParametersWithRandom(this.rsaServerPublicKey, handler.getRandom()));
+        encoding.init(true, new ParametersWithRandom(this.rsaServerPublicKey, context.getSecureRandom()));
 
         try
         {
@@ -139,7 +139,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
         X509Extensions exts = c.getTBSCertificate().getExtensions();
         if (exts != null)
         {
-            X509Extension ext = exts.getExtension(X509Extensions.KeyUsage);
+            X509Extension ext = exts.getExtension(X509Extension.keyUsage);
             if (ext != null)
             {
                 DERBitString ku = KeyUsage.getInstance(ext);

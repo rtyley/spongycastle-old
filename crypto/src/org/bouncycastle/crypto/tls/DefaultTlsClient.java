@@ -20,7 +20,7 @@ class DefaultTlsClient implements TlsClient
 {
     private CertificateVerifyer verifyer;
 
-    private TlsProtocolHandler handler;
+    private TlsClientContext context;
 
     // (Optional) details for client-side authentication
     private Certificate clientCert = new Certificate(new X509CertificateStructure[0]);
@@ -72,9 +72,9 @@ class DefaultTlsClient implements TlsClient
         this.clientPrivateKey = clientPrivateKey;
     }
 
-    public void init(TlsProtocolHandler handler)
+    public void init(TlsClientContext context)
     {
-        this.handler = handler;
+        this.context = context;
     }
 
     public int[] getCipherSuites()
@@ -325,44 +325,44 @@ class DefaultTlsClient implements TlsClient
 
     protected TlsKeyExchange createDHKeyExchange(short keyExchange)
     {
-        return new TlsDHKeyExchange(handler, verifyer, keyExchange);
+        return new TlsDHKeyExchange(context, verifyer, keyExchange);
     }
 
     protected TlsKeyExchange createDHEKeyExchange(short keyExchange)
     {
-        return new TlsDHEKeyExchange(handler, verifyer, keyExchange);
+        return new TlsDHEKeyExchange(context, verifyer, keyExchange);
     }
 
     protected TlsKeyExchange createECDHKeyExchange(short keyExchange)
     {
-        return new TlsECDHKeyExchange(handler, verifyer, keyExchange);
+        return new TlsECDHKeyExchange(context, verifyer, keyExchange);
     }
 
     protected TlsKeyExchange createECDHEKeyExchange(short keyExchange)
     {
-        return new TlsECDHEKeyExchange(handler, verifyer, keyExchange);
+        return new TlsECDHEKeyExchange(context, verifyer, keyExchange);
     }
 
     protected TlsKeyExchange createRSAKeyExchange()
     {
-        return new TlsRSAKeyExchange(handler, verifyer);
+        return new TlsRSAKeyExchange(context, verifyer);
     }
 
     protected TlsKeyExchange createSRPKeyExchange(short keyExchange)
     {
-        return new TlsSRPKeyExchange(handler, verifyer, keyExchange);
+        return new TlsSRPKeyExchange(context, verifyer, keyExchange);
     }
 
     protected TlsCipher createAESCipher(int cipherKeySize, SecurityParameters securityParameters)
     {
-        return new TlsBlockCipher(handler.getRandom(), createAESBlockCipher(),
+        return new TlsBlockCipher(context.getSecureRandom(), createAESBlockCipher(),
             createAESBlockCipher(), createSHA1Digest(), createSHA1Digest(), cipherKeySize,
             securityParameters);
     }
 
     protected TlsCipher createDESedeCipher(int cipherKeySize, SecurityParameters securityParameters)
     {
-        return new TlsBlockCipher(handler.getRandom(), createDESedeBlockCipher(),
+        return new TlsBlockCipher(context.getSecureRandom(), createDESedeBlockCipher(),
             createDESedeBlockCipher(), createSHA1Digest(), createSHA1Digest(), cipherKeySize,
             securityParameters);
     }

@@ -66,6 +66,7 @@ public class TlsProtocolHandler
 
     private SecurityParameters securityParameters = null;
 
+    private TlsClientContextImpl tlsClientContext = null;
     private TlsClient tlsClient = null;
     private int[] offeredCipherSuites = null;
     private short[] offeredCompressionMethods = null;
@@ -100,11 +101,6 @@ public class TlsProtocolHandler
     {
         this.rs = new RecordStream(this, is, os);
         this.random = sr;
-    }
-
-    SecureRandom getRandom()
-    {
-        return random;
     }
 
     protected void processData(short protocol, byte[] buf, int offset, int len) throws IOException
@@ -812,8 +808,9 @@ public class TlsProtocolHandler
             throw new IllegalStateException("connect can only be called once");
         }
 
+        this.tlsClientContext = new TlsClientContextImpl(random);
         this.tlsClient = tlsClient;
-        this.tlsClient.init(this);
+        this.tlsClient.init(tlsClientContext);
 
         /*
          * Send Client hello

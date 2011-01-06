@@ -28,7 +28,7 @@ import org.bouncycastle.util.BigIntegers;
  */
 class TlsSRPKeyExchange implements TlsKeyExchange
 {
-    protected TlsProtocolHandler handler;
+    protected TlsClientContext context;
     protected CertificateVerifyer verifyer;
     protected short keyExchange;
     protected TlsSigner tlsSigner;
@@ -43,7 +43,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
     protected BigInteger B = null;
     protected SRP6Client srpClient = new SRP6Client();
 
-    TlsSRPKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
+    TlsSRPKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, short keyExchange)
     {
         switch (keyExchange)
         {
@@ -60,7 +60,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
                 throw new IllegalArgumentException("unsupported key exchange algorithm");
         }
 
-        this.handler = handler;
+        this.context = context;
         this.verifyer = verifyer;
         this.keyExchange = keyExchange;
     }
@@ -186,7 +186,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
             throw new TlsFatalAlert(AlertDescription.illegal_parameter);
         }
 
-        this.srpClient.init(N, g, new SHA1Digest(), handler.getRandom());
+        this.srpClient.init(N, g, new SHA1Digest(), context.getSecureRandom());
     }
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
@@ -215,7 +215,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         X509Extensions exts = c.getTBSCertificate().getExtensions();
         if (exts != null)
         {
-            X509Extension ext = exts.getExtension(X509Extensions.KeyUsage);
+            X509Extension ext = exts.getExtension(X509Extension.keyUsage);
             if (ext != null)
             {
                 DERBitString ku = KeyUsage.getInstance(ext);

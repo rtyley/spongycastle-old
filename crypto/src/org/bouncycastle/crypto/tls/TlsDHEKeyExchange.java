@@ -12,9 +12,9 @@ import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 
 class TlsDHEKeyExchange extends TlsDHKeyExchange
 {
-    TlsDHEKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
+    TlsDHEKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, short keyExchange)
     {
-        super(handler, verifyer, keyExchange);
+        super(context, verifyer, keyExchange);
     }
 
     public void skipServerKeyExchange() throws IOException

@@ -32,7 +32,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
     protected static final BigInteger ONE = BigInteger.valueOf(1);
     protected static final BigInteger TWO = BigInteger.valueOf(2);
 
-    protected TlsProtocolHandler handler;
+    protected TlsClientContext context;
     protected CertificateVerifyer verifyer;
     protected short keyExchange;
     protected TlsSigner tlsSigner;
@@ -42,7 +42,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
     protected DHPublicKeyParameters dhAgreeServerPublicKey = null;
     protected DHPrivateKeyParameters dhAgreeClientPrivateKey = null;
 
-    TlsDHKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer, short keyExchange)
+    TlsDHKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, short keyExchange)
     {
         switch (keyExchange)
         {
@@ -60,7 +60,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
                 throw new IllegalArgumentException("unsupported key exchange algorithm");
         }
 
-        this.handler = handler;
+        this.context = context;
         this.verifyer = verifyer;
         this.keyExchange = keyExchange;
     }
@@ -204,7 +204,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
     protected AsymmetricCipherKeyPair generateDHKeyPair(DHParameters dhParams)
     {
         DHBasicKeyPairGenerator dhGen = new DHBasicKeyPairGenerator();
-        dhGen.init(new DHKeyGenerationParameters(handler.getRandom(), dhParams));
+        dhGen.init(new DHKeyGenerationParameters(context.getSecureRandom(), dhParams));
         return dhGen.generateKeyPair();
     }
 
@@ -224,7 +224,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
         X509Extensions exts = c.getTBSCertificate().getExtensions();
         if (exts != null)
         {
-            X509Extension ext = exts.getExtension(X509Extensions.KeyUsage);
+            X509Extension ext = exts.getExtension(X509Extension.keyUsage);
             if (ext != null)
             {
                 DERBitString ku = KeyUsage.getInstance(ext);

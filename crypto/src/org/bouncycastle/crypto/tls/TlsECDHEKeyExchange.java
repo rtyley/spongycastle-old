@@ -15,10 +15,10 @@ import org.bouncycastle.math.ec.ECPoint;
  */
 class TlsECDHEKeyExchange extends TlsECKeyExchange
 {
-    TlsECDHEKeyExchange(TlsProtocolHandler handler, CertificateVerifyer verifyer,
+    TlsECDHEKeyExchange(TlsClientContext context, CertificateVerifyer verifyer,
         short keyExchange)
     {
-        super(handler, verifyer, keyExchange);
+        super(context, verifyer, keyExchange);
     }
 
     public void skipServerCertificate() throws IOException

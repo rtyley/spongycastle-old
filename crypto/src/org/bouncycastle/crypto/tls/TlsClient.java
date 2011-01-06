@@ -6,7 +6,7 @@ import java.util.Vector;
 
 interface TlsClient
 {
-    void init(TlsProtocolHandler handler);
+    void init(TlsClientContext context);
 
     int[] getCipherSuites();
 
