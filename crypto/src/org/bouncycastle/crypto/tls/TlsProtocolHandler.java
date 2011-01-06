@@ -11,7 +11,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.crypto.prng.ThreadedSeedGenerator;
 import org.bouncycastle.util.Arrays;
 
@@ -599,7 +599,7 @@ public class TlsProtocolHandler
                         while (bis.available() > 0)
                         {
                             byte[] dnBytes = TlsUtils.readOpaque16(bis);
-                            authorityDNs.add(X509Name.getInstance(ASN1Object.fromByteArray(dnBytes)));
+                            authorityDNs.add(X500Name.getInstance(ASN1Object.fromByteArray(dnBytes)));
                         }
 
                         this.tlsClient.processServerCertificateRequest(certificateTypes,
