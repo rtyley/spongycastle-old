@@ -136,6 +136,8 @@ public class X500Name
 
     /**
      * return an array of RDNs in structure order.
+     *
+     * @return an array of RDN objects.
      */
     public RDN[] getRDNs()
     {
@@ -147,19 +149,46 @@ public class X500Name
     }
 
     /**
-     * return an array of RDNs containing the attribute type given by OID.
+     * return an array of RDNs containing the attribute type given by OID in structure order.
+     *
+     * @param oid the type OID we are looking for.
+     * @return an array, possibly zero length, of RDN objects.
      */
     public RDN[] getRDNs(ASN1ObjectIdentifier oid)
     {
-//        Vector  v = new Vector();
-//
-//        for (int i = 0; i != ordering.size(); i++)
-//        {
-//            v.addElement(ordering.elementAt(i));
-//        }
-//
-//        return v;
-        return null;
+        RDN[] res = new RDN[rdns.length];
+        int   count = 0;
+
+        for (int i = 0; i != rdns.length; i++)
+        {
+            RDN rdn = rdns[i];
+
+            if (rdn.isMultiValued())
+            {
+                AttributeTypeAndValue[] attr = rdn.getTypesAndValues();
+                for (int j = 0; j != attr.length; j++)
+                {
+                    if (attr[j].getType().equals(oid))
+                    {
+                        res[count++] = rdn;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                if (rdn.getFirst().getType().equals(oid))
+                {
+                    res[count++] = rdn;
+                }
+            }
+        }
+
+        RDN[] tmp = new RDN[count];
+
+        System.arraycopy(res, 0, tmp, 0, tmp.length);
+
+        return tmp;
     }
 
     public DERObject toASN1Object()
