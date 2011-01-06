@@ -14,7 +14,7 @@ import org.bouncycastle.util.Arrays;
  */
 public class TlsBlockCipher implements TlsCipher
 {
-    private TlsProtocolHandler handler;
+    private SecureRandom random;
 
     private BlockCipher encryptCipher;
     private BlockCipher decryptCipher;
@@ -22,11 +22,11 @@ public class TlsBlockCipher implements TlsCipher
     private TlsMac writeMac;
     private TlsMac readMac;
 
-    TlsBlockCipher(TlsProtocolHandler handler, BlockCipher encryptCipher,
+    TlsBlockCipher(SecureRandom random, BlockCipher encryptCipher,
         BlockCipher decryptCipher, Digest writeDigest, Digest readDigest, int cipherKeySize,
         SecurityParameters securityParameters)
     {
-        this.handler = handler;
+        this.random = random;
         this.encryptCipher = encryptCipher;
         this.decryptCipher = decryptCipher;
 
@@ -71,7 +71,7 @@ public class TlsBlockCipher implements TlsCipher
         // Add a random number of extra blocks worth of padding
         int minPaddingSize = blocksize - ((len + writeMac.getSize() + 1) % blocksize);
         int maxExtraPadBlocks = (255 - minPaddingSize) / blocksize;
-        int actualExtraPadBlocks = chooseExtraPadBlocks(handler.getRandom(), maxExtraPadBlocks);
+        int actualExtraPadBlocks = chooseExtraPadBlocks(random, maxExtraPadBlocks);
         int paddingsize = minPaddingSize + (actualExtraPadBlocks * blocksize);
 
         int totalsize = len + writeMac.getSize() + paddingsize + 1;
