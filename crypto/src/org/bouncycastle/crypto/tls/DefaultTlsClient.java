@@ -173,57 +173,57 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA:
-                return createDHKeyExchange(TlsKeyExchange.KE_DH_DSS);
+                return createDHKeyExchange(KeyExchangeAlgorithm.DH_DSS);
 
             case CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA:
-                return createDHKeyExchange(TlsKeyExchange.KE_DH_RSA);
+                return createDHKeyExchange(KeyExchangeAlgorithm.DH_RSA);
 
             case CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
-                return createDHEKeyExchange(TlsKeyExchange.KE_DHE_DSS);
+                return createDHEKeyExchange(KeyExchangeAlgorithm.DHE_DSS);
 
             case CipherSuite.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
-                return createDHEKeyExchange(TlsKeyExchange.KE_DHE_RSA);
+                return createDHEKeyExchange(KeyExchangeAlgorithm.DHE_RSA);
 
             case CipherSuite.TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA:
-                return createECDHKeyExchange(TlsKeyExchange.KE_ECDH_ECDSA);
+                return createECDHKeyExchange(KeyExchangeAlgorithm.ECDH_ECDSA);
 
             case CipherSuite.TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA:
-                return createECDHEKeyExchange(TlsKeyExchange.KE_ECDHE_ECDSA);
+                return createECDHEKeyExchange(KeyExchangeAlgorithm.ECDHE_ECDSA);
 
             case CipherSuite.TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA:
-                return createECDHKeyExchange(TlsKeyExchange.KE_ECDH_RSA);
+                return createECDHKeyExchange(KeyExchangeAlgorithm.ECDH_RSA);
 
             case CipherSuite.TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:
-                return createECDHEKeyExchange(TlsKeyExchange.KE_ECDHE_RSA);
+                return createECDHEKeyExchange(KeyExchangeAlgorithm.ECDHE_RSA);
 
             case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
-                return createSRPKeyExchange(TlsKeyExchange.KE_SRP);
+                return createSRPKeyExchange(KeyExchangeAlgorithm.SRP);
 
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
-                return createSRPKeyExchange(TlsKeyExchange.KE_SRP_RSA);
+                return createSRPKeyExchange(KeyExchangeAlgorithm.SRP_RSA);
 
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
-                return createSRPKeyExchange(TlsKeyExchange.KE_SRP_DSS);
+                return createSRPKeyExchange(KeyExchangeAlgorithm.SRP_DSS);
 
             default:
                 /*
@@ -323,22 +323,22 @@ class DefaultTlsClient implements TlsClient
         }
     }
 
-    protected TlsKeyExchange createDHKeyExchange(short keyExchange)
+    protected TlsKeyExchange createDHKeyExchange(int keyExchange)
     {
         return new TlsDHKeyExchange(context, verifyer, keyExchange);
     }
 
-    protected TlsKeyExchange createDHEKeyExchange(short keyExchange)
+    protected TlsKeyExchange createDHEKeyExchange(int keyExchange)
     {
         return new TlsDHEKeyExchange(context, verifyer, keyExchange);
     }
 
-    protected TlsKeyExchange createECDHKeyExchange(short keyExchange)
+    protected TlsKeyExchange createECDHKeyExchange(int keyExchange)
     {
         return new TlsECDHKeyExchange(context, verifyer, keyExchange);
     }
 
-    protected TlsKeyExchange createECDHEKeyExchange(short keyExchange)
+    protected TlsKeyExchange createECDHEKeyExchange(int keyExchange)
     {
         return new TlsECDHEKeyExchange(context, verifyer, keyExchange);
     }
@@ -348,7 +348,7 @@ class DefaultTlsClient implements TlsClient
         return new TlsRSAKeyExchange(context, verifyer);
     }
 
-    protected TlsKeyExchange createSRPKeyExchange(short keyExchange)
+    protected TlsKeyExchange createSRPKeyExchange(int keyExchange)
     {
         return new TlsSRPKeyExchange(context, verifyer, keyExchange);
     }

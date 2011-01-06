@@ -15,8 +15,7 @@ import org.bouncycastle.math.ec.ECPoint;
  */
 class TlsECDHEKeyExchange extends TlsECKeyExchange
 {
-    TlsECDHEKeyExchange(TlsClientContext context, CertificateVerifyer verifyer,
-        short keyExchange)
+    TlsECDHEKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, int keyExchange)
     {
         super(context, verifyer, keyExchange);
     }
