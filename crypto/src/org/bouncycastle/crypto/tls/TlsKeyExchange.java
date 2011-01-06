@@ -15,7 +15,7 @@ interface TlsKeyExchange
 
     void skipServerKeyExchange() throws IOException;
 
-    void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
+    void processServerKeyExchange(InputStream is)
         throws IOException;
 
     void generateClientKeyExchange(OutputStream os) throws IOException;

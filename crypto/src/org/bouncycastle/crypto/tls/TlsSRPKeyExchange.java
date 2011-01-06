@@ -138,9 +138,11 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         throw new TlsFatalAlert(AlertDescription.unexpected_message);
     }
 
-    public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
+    public void processServerKeyExchange(InputStream is)
         throws IOException
     {
+        SecurityParameters securityParameters = context.getSecurityParameters();
+
         InputStream sigIn = is;
         Signer signer = null;
 

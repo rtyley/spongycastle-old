@@ -22,9 +22,11 @@ class TlsDHEKeyExchange extends TlsDHKeyExchange
         throw new TlsFatalAlert(AlertDescription.unexpected_message);
     }
 
-    public void processServerKeyExchange(InputStream is, SecurityParameters securityParameters)
+    public void processServerKeyExchange(InputStream is)
         throws IOException
     {
+        SecurityParameters securityParameters = context.getSecurityParameters();
+
         Signer signer = initSigner(tlsSigner, securityParameters);
         InputStream sigIn = new SignerInputStream(is, signer);
 

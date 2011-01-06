@@ -266,7 +266,7 @@ class DefaultTlsClient implements TlsClient
         }
     }
 
-    public TlsCipher createCipher(SecurityParameters securityParameters) throws IOException
+    public TlsCipher createCipher() throws IOException
     {
         switch (selectedCipherSuite)
         {
@@ -282,7 +282,7 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
-                return createDESedeCipher(24, securityParameters);
+                return createDESedeCipher(24);
 
             case CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA:
@@ -296,7 +296,7 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
-                return createAESCipher(16, securityParameters);
+                return createAESCipher(16);
 
             case CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA:
@@ -310,7 +310,7 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
-                return createAESCipher(32, securityParameters);
+                return createAESCipher(32);
 
             default:
                 /*
@@ -353,18 +353,16 @@ class DefaultTlsClient implements TlsClient
         return new TlsSRPKeyExchange(context, verifyer, keyExchange);
     }
 
-    protected TlsCipher createAESCipher(int cipherKeySize, SecurityParameters securityParameters)
+    protected TlsCipher createAESCipher(int cipherKeySize)
     {
-        return new TlsBlockCipher(context.getSecureRandom(), createAESBlockCipher(),
-            createAESBlockCipher(), createSHA1Digest(), createSHA1Digest(), cipherKeySize,
-            securityParameters);
+        return new TlsBlockCipher(context, createAESBlockCipher(),
+            createAESBlockCipher(), createSHA1Digest(), createSHA1Digest(), cipherKeySize);
     }
 
-    protected TlsCipher createDESedeCipher(int cipherKeySize, SecurityParameters securityParameters)
+    protected TlsCipher createDESedeCipher(int cipherKeySize)
     {
-        return new TlsBlockCipher(context.getSecureRandom(), createDESedeBlockCipher(),
-            createDESedeBlockCipher(), createSHA1Digest(), createSHA1Digest(), cipherKeySize,
-            securityParameters);
+        return new TlsBlockCipher(context, createDESedeBlockCipher(),
+            createDESedeBlockCipher(), createSHA1Digest(), createSHA1Digest(), cipherKeySize);
     }
 
     protected BlockCipher createAESBlockCipher()
