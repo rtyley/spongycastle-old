@@ -2,7 +2,6 @@ package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Vector;
 
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.crypto.CryptoException;
