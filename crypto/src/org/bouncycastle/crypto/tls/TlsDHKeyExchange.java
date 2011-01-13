@@ -163,7 +163,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
     {
-        // TODO 'dhAgreeClientKeyPair' should be set during client auth if a *_fixed_dh
+        // TODO 'dhAgreeClientPrivateKey' should be set during client auth if a *_fixed_dh
         // client cert was sent (and that cert's parameters must match the server cert)
 
         /*
