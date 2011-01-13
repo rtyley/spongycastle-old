@@ -778,7 +778,7 @@ public class TlsProtocolHandler
     // TODO Deprecate
     public void connect(CertificateVerifyer verifyer) throws IOException
     {
-        this.connect(new DefaultTlsClient(verifyer));
+        this.connect(new DefaultTlsClient(verifyer, new DefaultTlsCipherFactory()));
     }
 
 //    public void connect(CertificateVerifyer verifyer, Certificate clientCertificate,

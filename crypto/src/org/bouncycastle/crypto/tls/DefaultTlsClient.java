@@ -5,13 +5,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.engines.AESFastEngine;
-import org.bouncycastle.crypto.engines.DESedeEngine;
-import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
@@ -19,6 +13,7 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 class DefaultTlsClient implements TlsClient
 {
     private CertificateVerifyer verifyer;
+    private TlsCipherFactory cipherFactory;
 
     private TlsClientContext context;
 
@@ -29,9 +24,10 @@ class DefaultTlsClient implements TlsClient
 
     private int selectedCipherSuite;
 
-    DefaultTlsClient(CertificateVerifyer verifyer)
+    DefaultTlsClient(CertificateVerifyer verifyer, TlsCipherFactory cipherFactory)
     {
         this.verifyer = verifyer;
+        this.cipherFactory = cipherFactory;
     }
 
     void enableClientAuthentication(Certificate clientCertificate,
@@ -243,7 +239,7 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA:
-                return createDESedeCipher(24);
+                return cipherFactory.createCipher(context, EncryptionAlgorithm._3DES_EDE_CBC, DigestAlgorithm.SHA);
 
             case CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA:
@@ -254,7 +250,7 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:
-                return createAESCipher(16);
+                return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_128_CBC, DigestAlgorithm.SHA);
 
             case CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA:
@@ -265,7 +261,7 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:
-                return createAESCipher(32);
+                return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_256_CBC, DigestAlgorithm.SHA);
 
             default:
                 /*
@@ -301,32 +297,5 @@ class DefaultTlsClient implements TlsClient
     protected TlsKeyExchange createRSAKeyExchange()
     {
         return new TlsRSAKeyExchange(context, verifyer);
-    }
-
-    protected TlsCipher createAESCipher(int cipherKeySize)
-    {
-        return new TlsBlockCipher(context, createAESBlockCipher(),
-            createAESBlockCipher(), createSHA1Digest(), createSHA1Digest(), cipherKeySize);
-    }
-
-    protected TlsCipher createDESedeCipher(int cipherKeySize)
-    {
-        return new TlsBlockCipher(context, createDESedeBlockCipher(),
-            createDESedeBlockCipher(), createSHA1Digest(), createSHA1Digest(), cipherKeySize);
-    }
-
-    protected BlockCipher createAESBlockCipher()
-    {
-        return new CBCBlockCipher(new AESFastEngine());
-    }
-
-    protected BlockCipher createDESedeBlockCipher()
-    {
-        return new CBCBlockCipher(new DESedeEngine());
-    }
-
-    protected Digest createSHA1Digest()
-    {
-        return new SHA1Digest();
     }
 }

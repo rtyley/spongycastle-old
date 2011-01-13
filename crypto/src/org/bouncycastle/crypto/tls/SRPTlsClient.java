@@ -5,17 +5,12 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.engines.AESFastEngine;
-import org.bouncycastle.crypto.engines.DESedeEngine;
-import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.util.Arrays;
 
 class SRPTlsClient implements TlsClient
 {
     private CertificateVerifyer verifyer;
+    private TlsCipherFactory cipherFactory;
     private byte[] identity;
     private byte[] password;
 
@@ -23,9 +18,10 @@ class SRPTlsClient implements TlsClient
 
     private int selectedCipherSuite;
 
-    SRPTlsClient(CertificateVerifyer verifyer, byte[] identity, byte[] password)
+    SRPTlsClient(CertificateVerifyer verifyer, TlsCipherFactory cipherFactory, byte[] identity, byte[] password)
     {
         this.verifyer = verifyer;
+        this.cipherFactory = cipherFactory;
         this.identity = Arrays.clone(identity);
         this.password = Arrays.clone(password);
     }
@@ -152,17 +148,17 @@ class SRPTlsClient implements TlsClient
             case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
-                return createDESedeCipher(24);
+                return cipherFactory.createCipher(context, EncryptionAlgorithm._3DES_EDE_CBC, DigestAlgorithm.SHA);
 
             case CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
-                return createAESCipher(16);
+                return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_128_CBC, DigestAlgorithm.SHA);
 
             case CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
-                return createAESCipher(32);
+                return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_256_CBC, DigestAlgorithm.SHA);
 
             default:
                 /*
@@ -178,32 +174,5 @@ class SRPTlsClient implements TlsClient
     protected TlsKeyExchange createSRPKeyExchange(int keyExchange)
     {
         return new TlsSRPKeyExchange(context, verifyer, keyExchange, identity, password);
-    }
-
-    protected TlsCipher createAESCipher(int cipherKeySize)
-    {
-        return new TlsBlockCipher(context, createAESBlockCipher(),
-            createAESBlockCipher(), createSHA1Digest(), createSHA1Digest(), cipherKeySize);
-    }
-
-    protected TlsCipher createDESedeCipher(int cipherKeySize)
-    {
-        return new TlsBlockCipher(context, createDESedeBlockCipher(),
-            createDESedeBlockCipher(), createSHA1Digest(), createSHA1Digest(), cipherKeySize);
-    }
-
-    protected BlockCipher createAESBlockCipher()
-    {
-        return new CBCBlockCipher(new AESFastEngine());
-    }
-
-    protected BlockCipher createDESedeBlockCipher()
-    {
-        return new CBCBlockCipher(new DESedeEngine());
-    }
-
-    protected Digest createSHA1Digest()
-    {
-        return new SHA1Digest();
     }
 }
