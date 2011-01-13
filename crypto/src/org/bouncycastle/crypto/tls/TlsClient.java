@@ -13,7 +13,7 @@ interface TlsClient
     short[] getCompressionMethods();
 
     // Hashtable is (Integer -> byte[])
-    Hashtable generateClientExtensions();
+    Hashtable generateClientExtensions() throws IOException;
 
     void notifySessionID(byte[] sessionID);
 
@@ -29,7 +29,7 @@ interface TlsClient
     TlsKeyExchange createKeyExchange() throws IOException;
 
     // Vector is (X500Name)
-    void processServerCertificateRequest(short[] certificateTypes, Vector certificateAuthorities);
+    void processServerCertificateRequest(short[] certificateTypes, Vector certificateAuthorities) throws IOException;
 
     Certificate getCertificate();
 

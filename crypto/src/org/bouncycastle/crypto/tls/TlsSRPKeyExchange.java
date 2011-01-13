@@ -32,19 +32,20 @@ class TlsSRPKeyExchange implements TlsKeyExchange
     protected CertificateVerifyer verifyer;
     protected int keyExchange;
     protected TlsSigner tlsSigner;
+    protected byte[] identity;
+    protected byte[] password;
 
     protected AsymmetricKeyParameter serverPublicKey = null;
-
-    // TODO Need a way of providing these
-    protected byte[] SRP_identity = null;
-    protected byte[] SRP_password = null;
 
     protected byte[] s = null;
     protected BigInteger B = null;
     protected SRP6Client srpClient = new SRP6Client();
 
-    TlsSRPKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, int keyExchange)
+    TlsSRPKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, int keyExchange,
+        byte[] identity, byte[] password)
     {
+        // TODO According to RFC 5054, identity/password might be absent/empty when the client is "checking" for SRP support
+
         switch (keyExchange)
         {
             case KeyExchangeAlgorithm.SRP:
@@ -63,6 +64,8 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         this.context = context;
         this.verifyer = verifyer;
         this.keyExchange = keyExchange;
+        this.identity = identity;
+        this.password = password;
     }
 
     public void skipServerCertificate() throws IOException
@@ -138,8 +141,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         throw new TlsFatalAlert(AlertDescription.unexpected_message);
     }
 
-    public void processServerKeyExchange(InputStream is)
-        throws IOException
+    public void processServerKeyExchange(InputStream is) throws IOException
     {
         SecurityParameters securityParameters = context.getSecurityParameters();
 
@@ -194,7 +196,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
     public void generateClientKeyExchange(OutputStream os) throws IOException
     {
         byte[] keData = BigIntegers.asUnsignedByteArray(srpClient.generateClientCredentials(s,
-            this.SRP_identity, this.SRP_password));
+            this.identity, this.password));
         TlsUtils.writeUint24(keData.length + 2, os);
         TlsUtils.writeOpaque16(keData, os);
     }
