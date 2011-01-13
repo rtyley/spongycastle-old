@@ -1,8 +1,23 @@
 package org.bouncycastle.crypto.tls;
 
-class SecurityParameters
+public class SecurityParameters
 {
-    byte[] masterSecret = null;
     byte[] clientRandom = null;
     byte[] serverRandom = null;
+    byte[] masterSecret = null;
+
+    public byte[] getClientRandom()
+    {
+        return clientRandom;
+    }
+
+    public byte[] getServerRandom()
+    {
+        return serverRandom;
+    }
+
+    public byte[] getMasterSecret()
+    {
+        return masterSecret;
+    }
 }
