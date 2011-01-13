@@ -96,28 +96,11 @@ class DefaultTlsClient implements TlsClient
 //            CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
 //            CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
 //            CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
-
-//            CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA,
-//            CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA,
-//            CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA,
-//            CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA,
-//            CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA,
-//            CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA,
-//            CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA,
-//            CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA,
-//            CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA,
         };
     }
 
     public Hashtable generateClientExtensions()
     {
-        // TODO[SRP]
-//        Hashtable clientExtensions = new Hashtable();
-//        ByteArrayOutputStream srpData = new ByteArrayOutputStream();
-//        TlsUtils.writeOpaque8(SRP_identity, srpData);
-//
-//        clientExtensions.put(Integer.valueOf(ExtensionType.srp), srpData.toByteArray());
-//        return clientExtensions;
         return null;
     }
 
@@ -157,8 +140,6 @@ class DefaultTlsClient implements TlsClient
 
     public void processServerExtensions(Hashtable serverExtensions)
     {
-        // TODO Validate/process serverExtensions (via client?)
-        // TODO[SRP]
     }
 
     public TlsKeyExchange createKeyExchange() throws IOException
@@ -210,21 +191,6 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:
                 return createECDHEKeyExchange(KeyExchangeAlgorithm.ECDHE_RSA);
 
-            case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
-                return createSRPKeyExchange(KeyExchangeAlgorithm.SRP);
-
-            case CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
-                return createSRPKeyExchange(KeyExchangeAlgorithm.SRP_RSA);
-
-            case CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
-                return createSRPKeyExchange(KeyExchangeAlgorithm.SRP_DSS);
-
             default:
                 /*
                  * Note: internal error here; the TlsProtocolHandler verifies that the
@@ -239,8 +205,6 @@ class DefaultTlsClient implements TlsClient
     public void processServerCertificateRequest(short[] certificateTypes,
         Vector certificateAuthorities)
     {
-        // TODO There shouldn't be a certificate request for SRP 
-
         // TODO Use provided info to choose a certificate in getCertificate()
     }
 
@@ -279,9 +243,6 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
                 return createDESedeCipher(24);
 
             case CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA:
@@ -293,9 +254,6 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
                 return createAESCipher(16);
 
             case CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA:
@@ -307,9 +265,6 @@ class DefaultTlsClient implements TlsClient
             case CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
-            case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
                 return createAESCipher(32);
 
             default:
@@ -346,11 +301,6 @@ class DefaultTlsClient implements TlsClient
     protected TlsKeyExchange createRSAKeyExchange()
     {
         return new TlsRSAKeyExchange(context, verifyer);
-    }
-
-    protected TlsKeyExchange createSRPKeyExchange(int keyExchange)
-    {
-        return new TlsSRPKeyExchange(context, verifyer, keyExchange);
     }
 
     protected TlsCipher createAESCipher(int cipherKeySize)
