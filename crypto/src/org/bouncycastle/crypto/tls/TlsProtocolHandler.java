@@ -598,8 +598,10 @@ public class TlsProtocolHandler
                             authorityDNs.add(X500Name.getInstance(ASN1Object.fromByteArray(dnBytes)));
                         }
 
-                        this.tlsClient.processServerCertificateRequest(certificateTypes,
+                        CertificateRequest certificateRequest = new CertificateRequest(certificateTypes,
                             authorityDNs);
+
+                        this.tlsClient.processServerCertificateRequest(certificateRequest);
 
                         break;
                     }

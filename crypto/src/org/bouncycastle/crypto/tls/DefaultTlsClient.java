@@ -198,8 +198,7 @@ class DefaultTlsClient implements TlsClient
         }
     }
 
-    public void processServerCertificateRequest(short[] certificateTypes,
-        Vector certificateAuthorities)
+    public void processServerCertificateRequest(CertificateRequest certificateRequest)
     {
         // TODO Use provided info to choose a certificate in getCertificate()
     }

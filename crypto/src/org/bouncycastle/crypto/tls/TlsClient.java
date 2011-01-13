@@ -2,7 +2,6 @@ package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Vector;
 
 interface TlsClient
 {
@@ -28,8 +27,7 @@ interface TlsClient
 
     TlsKeyExchange createKeyExchange() throws IOException;
 
-    // Vector is (X500Name)
-    void processServerCertificateRequest(short[] certificateTypes, Vector certificateAuthorities) throws IOException;
+    void processServerCertificateRequest(CertificateRequest certificateRequest) throws IOException;
 
     Certificate getCertificate();
 
