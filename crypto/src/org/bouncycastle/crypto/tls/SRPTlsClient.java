@@ -3,7 +3,6 @@ package org.bouncycastle.crypto.tls;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Vector;
 
 import org.bouncycastle.util.Arrays;
 
@@ -125,8 +124,7 @@ class SRPTlsClient implements TlsClient
         }
     }
 
-    public void processServerCertificateRequest(short[] certificateTypes,
-        Vector certificateAuthorities) throws IOException
+    public void processServerCertificateRequest(CertificateRequest certificateRequest) throws IOException
     {
         throw new TlsFatalAlert(AlertDescription.handshake_failure);
     }
