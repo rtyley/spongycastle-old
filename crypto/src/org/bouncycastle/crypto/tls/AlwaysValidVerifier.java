@@ -8,14 +8,14 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
  * <pre>
  * DO NOT USE THIS FILE UNLESS YOU KNOW EXACTLY WHAT YOU ARE DOING.
  * </pre>
- * @deprecated use AlwaysValidVerifier
  */
-public class AlwaysValidVerifyer implements CertificateVerifyer
+public class AlwaysValidVerifier
+    implements CertificateVerifier
 {
     /**
      * Return true.
-     * 
-     * @see org.bouncycastle.crypto.tls.CertificateVerifyer#isValid(org.bouncycastle.asn1.x509.X509CertificateStructure[])
+     *
+     * @see CertificateVerifier#isValid(org.bouncycastle.asn1.x509.X509CertificateStructure[])
      */
     public boolean isValid(X509CertificateStructure[] certs)
     {
