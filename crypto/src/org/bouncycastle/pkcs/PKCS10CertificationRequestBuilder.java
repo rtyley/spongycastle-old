@@ -1,4 +1,4 @@
-package org.bouncycastle.cert.pkcs;
+package org.bouncycastle.pkcs;
 
 import java.io.IOException;
 import java.io.OutputStream;
