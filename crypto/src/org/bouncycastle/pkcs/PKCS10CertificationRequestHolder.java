@@ -6,8 +6,6 @@ import java.io.OutputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.pkcs.CertificationRequest;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
-import org.bouncycastle.cert.CertException;
-import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 
@@ -27,11 +25,11 @@ public class PKCS10CertificationRequestHolder
         }
         catch (ClassCastException e)
         {
-            throw new CertIOException("malformed data: " + e.getMessage(), e);
+            throw new PKCSIOException("malformed data: " + e.getMessage(), e);
         }
         catch (IllegalArgumentException e)
         {
-            throw new CertIOException("malformed data: " + e.getMessage(), e);
+            throw new PKCSIOException("malformed data: " + e.getMessage(), e);
         }
     }
     
@@ -68,10 +66,10 @@ public class PKCS10CertificationRequestHolder
      *
      * @param verifierProvider a ContentVerifierProvider that can generate a verifier for the signature.
      * @return true if the signature is valid, false otherwise.
-     * @throws CertException if the signature cannot be processed or is inappropriate.
+     * @throws PKCSException if the signature cannot be processed or is inappropriate.
      */
     public boolean isSignatureValid(ContentVerifierProvider verifierProvider)
-        throws CertException
+        throws PKCSException
     {
         CertificationRequestInfo requestInfo = certificationRequest.getCertificationRequestInfo();
 
@@ -89,7 +87,7 @@ public class PKCS10CertificationRequestHolder
         }
         catch (Exception e)
         {
-            throw new CertException("unable to process signature: " + e.getMessage(), e);
+            throw new PKCSException("unable to process signature: " + e.getMessage(), e);
         }
 
         return verifier.verify(certificationRequest.getSignature().getBytes());
