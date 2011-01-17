@@ -8,6 +8,8 @@ import org.bouncycastle.util.Arrays;
 
 class SRPTlsClient implements TlsClient
 {
+    private static final Integer EXT_SRP = new Integer(ExtensionType.srp);
+
     private CertificateVerifyer verifyer;
     private TlsCipherFactory cipherFactory;
     private byte[] identity;
@@ -51,7 +53,7 @@ class SRPTlsClient implements TlsClient
         ByteArrayOutputStream srpData = new ByteArrayOutputStream();
         TlsUtils.writeOpaque8(this.identity, srpData);
 
-        clientExtensions.put(Integer.valueOf(ExtensionType.srp), srpData.toByteArray());
+        clientExtensions.put(EXT_SRP, srpData.toByteArray());
         return clientExtensions;
     }
 
