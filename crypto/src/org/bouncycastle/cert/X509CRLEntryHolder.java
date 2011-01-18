@@ -10,6 +10,9 @@ import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 
+/**
+ * Holding class for an X.509 CRL Entry structure.
+ */
 public class X509CRLEntryHolder
 {
     private TBSCertList.CRLEntry entry;
