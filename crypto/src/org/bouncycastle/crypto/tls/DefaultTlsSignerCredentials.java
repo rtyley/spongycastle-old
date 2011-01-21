@@ -5,16 +5,17 @@ import java.io.IOException;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 
-public class DefaultTlsCredentials implements TlsCredentials
+public class DefaultTlsSignerCredentials implements TlsSignerCredentials
 {
     private Certificate clientCert;
     private AsymmetricKeyParameter clientPrivateKey;
 
     private TlsSigner clientSigner;
 
-    public DefaultTlsCredentials(Certificate clientCertificate, AsymmetricKeyParameter clientPrivateKey)
+    public DefaultTlsSignerCredentials(Certificate clientCertificate, AsymmetricKeyParameter clientPrivateKey)
     {
         if (clientCertificate == null)
         {
@@ -40,6 +41,10 @@ public class DefaultTlsCredentials implements TlsCredentials
         else if (clientPrivateKey instanceof DSAPrivateKeyParameters)
         {
             clientSigner = new TlsDSSSigner();
+        }
+        else if (clientPrivateKey instanceof ECPrivateKeyParameters)
+        {
+            clientSigner = new TlsECDSASigner();
         }
         else
         {

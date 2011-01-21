@@ -10,7 +10,7 @@ class SRPTlsClient implements TlsClient
 {
     private static final Integer EXT_SRP = new Integer(ExtensionType.srp);
 
-    private CertificateVerifyer verifyer;
+    private TlsAuthentication tlsAuthentication;
     private TlsCipherFactory cipherFactory;
     private byte[] identity;
     private byte[] password;
@@ -19,9 +19,10 @@ class SRPTlsClient implements TlsClient
 
     private int selectedCipherSuite;
 
-    SRPTlsClient(CertificateVerifyer verifyer, TlsCipherFactory cipherFactory, byte[] identity, byte[] password)
+    SRPTlsClient(TlsAuthentication tlsAuthentication, TlsCipherFactory cipherFactory,
+        byte[] identity, byte[] password)
     {
-        this.verifyer = verifyer;
+        this.tlsAuthentication = tlsAuthentication;
         this.cipherFactory = cipherFactory;
         this.identity = Arrays.clone(identity);
         this.password = Arrays.clone(password);
@@ -126,19 +127,9 @@ class SRPTlsClient implements TlsClient
         }
     }
 
-    public void processServerCertificateRequest(CertificateRequest certificateRequest) throws IOException
+    public TlsAuthentication createAuthentication() throws IOException
     {
-        throw new TlsFatalAlert(AlertDescription.handshake_failure);
-    }
-
-    public Certificate getCertificate()
-    {
-        return null;
-    }
-
-    public byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException
-    {
-        return null;
+        return tlsAuthentication;
     }
 
     public TlsCipher createCipher() throws IOException
@@ -173,6 +164,6 @@ class SRPTlsClient implements TlsClient
 
     protected TlsKeyExchange createSRPKeyExchange(int keyExchange)
     {
-        return new TlsSRPKeyExchange(context, verifyer, keyExchange, identity, password);
+        return new TlsSRPKeyExchange(context, keyExchange, identity, password);
     }
 }

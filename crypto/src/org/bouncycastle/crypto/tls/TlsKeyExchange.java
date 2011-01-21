@@ -18,6 +18,12 @@ interface TlsKeyExchange
     void processServerKeyExchange(InputStream is)
         throws IOException;
 
+    void validateCertificateRequest(CertificateRequest certificateRequest) throws IOException;
+
+    void skipClientCredentials() throws IOException;
+
+    void processClientCredentials(TlsCredentials clientCredentials) throws IOException;
+
     void generateClientKeyExchange(OutputStream os) throws IOException;
 
     byte[] generatePremasterSecret() throws IOException;

@@ -8,7 +8,8 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
  * <pre>
  * DO NOT USE THIS FILE UNLESS YOU KNOW EXACTLY WHAT YOU ARE DOING.
  * </pre>
- * @deprecated use AlwaysValidVerifier
+ * 
+ * @deprecated Perform certificate verification in TlsAuthentication implementation
  */
 public class AlwaysValidVerifyer implements CertificateVerifyer
 {
