@@ -91,6 +91,11 @@ public class Certificate
      */
     public Certificate(X509CertificateStructure[] certs)
     {
+        if (certs == null)
+        {
+            throw new IllegalArgumentException("'certs' cannot be null");
+        }
+
         this.certs = certs;
     }
 
@@ -102,5 +107,10 @@ public class Certificate
         X509CertificateStructure[] result = new X509CertificateStructure[certs.length];
         System.arraycopy(certs, 0, result, 0, certs.length);
         return result;
+    }
+
+    public boolean isEmpty()
+    {
+        return certs.length == 0;
     }
 }
