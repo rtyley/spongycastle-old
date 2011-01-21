@@ -2,7 +2,6 @@ package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.io.SignerInputStream;
@@ -13,16 +12,11 @@ import org.bouncycastle.math.ec.ECPoint;
 /**
  * ECDHE key exchange (see RFC 4492)
  */
-class TlsECDHEKeyExchange extends TlsECKeyExchange
+class TlsECDHEKeyExchange extends TlsECDHKeyExchange
 {
-    TlsECDHEKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, int keyExchange)
+    TlsECDHEKeyExchange(TlsClientContext context, int keyExchange)
     {
-        super(context, verifyer, keyExchange);
-    }
-
-    public void skipServerCertificate() throws IOException
-    {
-        throw new TlsFatalAlert(AlertDescription.unexpected_message);
+        super(context, keyExchange);
     }
 
     public void skipServerKeyExchange() throws IOException
@@ -72,16 +66,6 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
         this.ecAgreeServerPublicKey = validateECPublicKey(new ECPublicKeyParameters(Q, curve_params));
     }
 
-    public void generateClientKeyExchange(OutputStream os) throws IOException
-    {
-        generateEphemeralClientKeyExchange(ecAgreeServerPublicKey.getParameters(), os);
-    }
-
-    public byte[] generatePremasterSecret() throws IOException
-    {
-        return calculateECDHBasicAgreement(ecAgreeServerPublicKey, ecAgreeClientPrivateKey);
-    }
-
     protected Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
     {
         Signer signer = tlsSigner.createVerifyer(this.serverPublicKey);
@@ -89,14 +73,4 @@ class TlsECDHEKeyExchange extends TlsECKeyExchange
         signer.update(securityParameters.serverRandom, 0, securityParameters.serverRandom.length);
         return signer;
     }
-
-//    public void processServerCertificateRequest(byte[] certificateTypes,
-//        Vector certificateAuthorities)
-//    {
-//    }
-//
-//    public boolean sendCertificateVerify()
-//    {
-//        return true;
-//    }
 }

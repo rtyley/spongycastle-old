@@ -71,9 +71,10 @@ public class TlsProtocolHandler
     private int[] offeredCipherSuites = null;
     private short[] offeredCompressionMethods = null;
     private TlsKeyExchange keyExchange = null;
+    private TlsAuthentication authentication = null;
+    private CertificateRequest certificateRequest = null;
 
     private short connection_state = 0;
-    private boolean anonymous_server = true;
 
     private static SecureRandom createSecureRandom()
     {
@@ -214,8 +215,10 @@ public class TlsProtocolHandler
 
                         assertEmpty(is);
 
-                        this.anonymous_server = false;
                         this.keyExchange.processServerCertificate(serverCertificate);
+
+                        this.authentication = tlsClient.createAuthentication();
+                        this.authentication.notifyServerCertificate(serverCertificate);
 
                         break;
                     }
@@ -452,13 +455,24 @@ public class TlsProtocolHandler
 
                         assertEmpty(is);
 
-                        boolean isClientCertificateRequested = (connection_state == CS_CERTIFICATE_REQUEST_RECEIVED);
-
                         connection_state = CS_SERVER_HELLO_DONE_RECEIVED;
 
-                        if (isClientCertificateRequested)
+                        TlsCredentials clientCreds = null;
+                        if (certificateRequest != null)
                         {
-                            sendClientCertificate(tlsClient.getCertificate());
+                            clientCreds = this.authentication.getClientCredentials(certificateRequest);
+                        }
+
+                        if (clientCreds == null)
+                        {
+                            this.keyExchange.skipClientCredentials();
+                        }
+                        else
+                        {
+                            this.keyExchange.processClientCredentials(clientCreds);
+
+                            Certificate clientCert = clientCreds.getCertificate();
+                            sendClientCertificate(clientCert);
                         }
 
                         /*
@@ -469,15 +483,15 @@ public class TlsProtocolHandler
 
                         connection_state = CS_CLIENT_KEY_EXCHANGE_SEND;
 
-                        if (isClientCertificateRequested)
+                        if (clientCreds != null && clientCreds instanceof TlsSignerCredentials)
                         {
-                            byte[] clientCertificateSignature = tlsClient.generateCertificateSignature(rs.getCurrentHash());
-                            if (clientCertificateSignature != null)
-                            {
-                                sendCertificateVerify(clientCertificateSignature);
+                            TlsSignerCredentials signerCreds = (TlsSignerCredentials)clientCreds;
+                            byte[] md5andsha1 = rs.getCurrentHash();
+                            byte[] clientCertificateSignature = signerCreds.generateCertificateSignature(
+                                md5andsha1);
+                            sendCertificateVerify(clientCertificateSignature);
 
-                                connection_state = CS_CERTIFICATE_VERIFY_SEND;
-                            }
+                            connection_state = CS_CERTIFICATE_VERIFY_SEND;
                         }
 
                         /*
@@ -537,8 +551,8 @@ public class TlsProtocolHandler
                     case CS_SERVER_HELLO_RECEIVED:
 
                         // There was no server certificate message; check it's OK
-                        this.anonymous_server = true;
                         this.keyExchange.skipServerCertificate();
+                        this.authentication = null;
 
                         // NB: Fall through to next case label
 
@@ -569,7 +583,7 @@ public class TlsProtocolHandler
 
                     case CS_SERVER_KEY_EXCHANGE_RECEIVED:
                     {
-                    	if (this.anonymous_server)
+                    	if (this.authentication == null)
                     	{
                             /*
                              * RFC 2246 7.4.4. It is a fatal handshake_failure alert
@@ -598,10 +612,9 @@ public class TlsProtocolHandler
                             authorityDNs.add(X500Name.getInstance(ASN1Object.fromByteArray(dnBytes)));
                         }
 
-                        CertificateRequest certificateRequest = new CertificateRequest(certificateTypes,
+                        this.certificateRequest = new CertificateRequest(certificateTypes,
                             authorityDNs);
-
-                        this.tlsClient.processServerCertificateRequest(certificateRequest);
+                        this.keyExchange.validateCertificateRequest(this.certificateRequest);
 
                         break;
                     }
@@ -776,21 +789,13 @@ public class TlsProtocolHandler
      * @param verifyer Will be used when a certificate is received to verify that this
      *            certificate is accepted by the client.
      * @throws IOException If handshake was not successful.
+     * 
+     * @deprecated use version taking TlsClient
      */
-    // TODO Deprecate
     public void connect(CertificateVerifyer verifyer) throws IOException
     {
         this.connect(new DefaultTlsClient(verifyer, new DefaultTlsCipherFactory()));
     }
-
-//    public void connect(CertificateVerifyer verifyer, Certificate clientCertificate,
-//        AsymmetricKeyParameter clientPrivateKey) throws IOException
-//    {
-//        DefaultTlsClient client = new DefaultTlsClient(verifyer);
-//        client.enableClientAuthentication(clientCertificate, clientPrivateKey);
-//
-//        this.connect(client);
-//    }
 
     /**
      * Connects to the remote system using client authentication
@@ -798,8 +803,7 @@ public class TlsProtocolHandler
      * @param tlsClient
      * @throws IOException If handshake was not successful.
      */
-    // TODO Make public
-    void connect(TlsClient tlsClient) throws IOException
+    public void connect(TlsClient tlsClient) throws IOException
     {
         if (tlsClient == null)
         {

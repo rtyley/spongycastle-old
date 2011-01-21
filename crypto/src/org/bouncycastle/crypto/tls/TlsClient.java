@@ -27,11 +27,7 @@ interface TlsClient
 
     TlsKeyExchange createKeyExchange() throws IOException;
 
-    void processServerCertificateRequest(CertificateRequest certificateRequest) throws IOException;
-
-    Certificate getCertificate();
-
-    byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException;
+    TlsAuthentication createAuthentication() throws IOException;
 
     TlsCipher createCipher() throws IOException;
 }

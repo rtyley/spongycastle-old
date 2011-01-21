@@ -3,68 +3,27 @@ package org.bouncycastle.crypto.tls;
 import java.io.IOException;
 import java.util.Hashtable;
 
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
-
-class DefaultTlsClient implements TlsClient
+public class DefaultTlsClient implements TlsClient
 {
-    private CertificateVerifyer verifyer;
+    private TlsAuthentication tlsAuthentication;
     private TlsCipherFactory cipherFactory;
 
     private TlsClientContext context;
 
-    // (Optional) details for client-side authentication
-    private Certificate clientCert = new Certificate(new X509CertificateStructure[0]);
-    private AsymmetricKeyParameter clientPrivateKey = null;
-    private TlsSigner clientSigner = null;
-
     private int selectedCipherSuite;
 
+    /**
+     * @deprecated
+     */
     DefaultTlsClient(CertificateVerifyer verifyer, TlsCipherFactory cipherFactory)
     {
-        this.verifyer = verifyer;
-        this.cipherFactory = cipherFactory;
+        this(new LegacyTlsAuthentication(verifyer), cipherFactory);
     }
 
-    void enableClientAuthentication(Certificate clientCertificate,
-        AsymmetricKeyParameter clientPrivateKey)
+    public DefaultTlsClient(TlsAuthentication tlsAuthentication, TlsCipherFactory cipherFactory)
     {
-        if (clientCertificate == null)
-        {
-            throw new IllegalArgumentException("'clientCertificate' cannot be null");
-        }
-        if (clientCertificate.certs.length == 0)
-        {
-            throw new IllegalArgumentException("'clientCertificate' cannot be empty");
-        }
-        if (clientPrivateKey == null)
-        {
-            throw new IllegalArgumentException("'clientPrivateKey' cannot be null");
-        }
-        if (!clientPrivateKey.isPrivate())
-        {
-            throw new IllegalArgumentException("'clientPrivateKey' must be private");
-        }
-
-        if (clientPrivateKey instanceof RSAKeyParameters)
-        {
-            clientSigner = new TlsRSASigner();
-        }
-        else if (clientPrivateKey instanceof DSAPrivateKeyParameters)
-        {
-            clientSigner = new TlsDSSSigner();
-        }
-        else
-        {
-            throw new IllegalArgumentException("'clientPrivateKey' type not supported: "
-                + clientPrivateKey.getClass().getName());
-        }
-
-        this.clientCert = clientCertificate;
-        this.clientPrivateKey = clientPrivateKey;
+        this.tlsAuthentication = tlsAuthentication;
+        this.cipherFactory = cipherFactory;
     }
 
     public void init(TlsClientContext context)
@@ -75,6 +34,12 @@ class DefaultTlsClient implements TlsClient
     public int[] getCipherSuites()
     {
         return new int[] {
+            CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
+            CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA,
+            CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA,
+            CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
+            CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
+            CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
             CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
             CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
             CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
@@ -85,12 +50,18 @@ class DefaultTlsClient implements TlsClient
             CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
             CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
 
-//            CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
-//            CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA,
-//            CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA,
-//            CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
-//            CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
-//            CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
+//            CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
+//            CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
+//            CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
+//            CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
+//            CipherSuite.TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,
+//            CipherSuite.TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,
+//            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+//            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+//            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+//            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+//            CipherSuite.TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,
+//            CipherSuite.TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,
         };
     }
 
@@ -135,6 +106,11 @@ class DefaultTlsClient implements TlsClient
 
     public void processServerExtensions(Hashtable serverExtensions)
     {
+    }
+
+    public TlsAuthentication createAuthentication() throws IOException
+    {
+        return tlsAuthentication;
     }
 
     public TlsKeyExchange createKeyExchange() throws IOException
@@ -197,33 +173,6 @@ class DefaultTlsClient implements TlsClient
         }
     }
 
-    public void processServerCertificateRequest(CertificateRequest certificateRequest)
-    {
-        // TODO Use provided info to choose a certificate in getCertificate()
-    }
-
-    public Certificate getCertificate()
-    {
-        return clientCert;
-    }
-
-    public byte[] generateCertificateSignature(byte[] md5andsha1) throws IOException
-    {
-        if (clientSigner == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            return clientSigner.calculateRawSignature(clientPrivateKey, md5andsha1);
-        }
-        catch (CryptoException e)
-        {
-            throw new TlsFatalAlert(AlertDescription.internal_error);
-        }
-    }
-
     public TlsCipher createCipher() throws IOException
     {
         switch (selectedCipherSuite)
@@ -274,26 +223,26 @@ class DefaultTlsClient implements TlsClient
 
     protected TlsKeyExchange createDHKeyExchange(int keyExchange)
     {
-        return new TlsDHKeyExchange(context, verifyer, keyExchange);
+        return new TlsDHKeyExchange(context, keyExchange);
     }
 
     protected TlsKeyExchange createDHEKeyExchange(int keyExchange)
     {
-        return new TlsDHEKeyExchange(context, verifyer, keyExchange);
+        return new TlsDHEKeyExchange(context, keyExchange);
     }
 
     protected TlsKeyExchange createECDHKeyExchange(int keyExchange)
     {
-        return new TlsECDHKeyExchange(context, verifyer, keyExchange);
+        return new TlsECDHKeyExchange(context, keyExchange);
     }
 
     protected TlsKeyExchange createECDHEKeyExchange(int keyExchange)
     {
-        return new TlsECDHEKeyExchange(context, verifyer, keyExchange);
+        return new TlsECDHEKeyExchange(context, keyExchange);
     }
 
     protected TlsKeyExchange createRSAKeyExchange()
     {
-        return new TlsRSAKeyExchange(context, verifyer);
+        return new TlsRSAKeyExchange(context);
     }
 }

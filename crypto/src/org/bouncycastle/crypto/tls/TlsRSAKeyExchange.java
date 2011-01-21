@@ -24,7 +24,6 @@ import org.bouncycastle.crypto.util.PublicKeyFactory;
 class TlsRSAKeyExchange implements TlsKeyExchange
 {
     protected TlsClientContext context;
-    protected CertificateVerifyer verifyer;
 
     protected AsymmetricKeyParameter serverPublicKey = null;
 
@@ -32,10 +31,9 @@ class TlsRSAKeyExchange implements TlsKeyExchange
 
     protected byte[] premasterSecret;
 
-    TlsRSAKeyExchange(TlsClientContext context, CertificateVerifyer verifyer)
+    TlsRSAKeyExchange(TlsClientContext context)
     {
         this.context = context;
-        this.verifyer = verifyer;
     }
 
     public void skipServerCertificate() throws IOException
@@ -70,7 +68,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
          * certificate key."
          */
 
-        // TODO Should the 'instanceof' tests be replaces with stricter checks on keyInfo.getAlgorithmId()?
+        // TODO Should the 'instanceof' tests be replaced with stricter checks on keyInfo.getAlgorithmId()?
 
         if (!(this.serverPublicKey instanceof RSAKeyParameters))
         {
@@ -79,14 +77,6 @@ class TlsRSAKeyExchange implements TlsKeyExchange
 
         validateKeyUsage(x509Cert, KeyUsage.keyEncipherment);
         this.rsaServerPublicKey = validateRSAPublicKey((RSAKeyParameters)this.serverPublicKey);
-
-        /*
-         * Verify them.
-         */
-        if (!this.verifyer.isValid(serverCertificate.getCerts()))
-        {
-            throw new TlsFatalAlert(AlertDescription.user_canceled);
-        }
     }
 
     public void skipServerKeyExchange() throws IOException
@@ -97,7 +87,38 @@ class TlsRSAKeyExchange implements TlsKeyExchange
     public void processServerKeyExchange(InputStream is)
         throws IOException
     {
+        // TODO
         throw new TlsFatalAlert(AlertDescription.unexpected_message);
+    }
+
+    public void validateCertificateRequest(CertificateRequest certificateRequest)
+        throws IOException
+    {
+        short[] types = certificateRequest.getCertificateTypes();
+        for (int i = 0; i < types.length; ++i)
+        {
+            switch (types[i])
+            {
+                case ClientCertificateType.rsa_sign:
+                case ClientCertificateType.dss_sign:
+                    break;
+                default:
+                    throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+            }
+        }
+    }
+
+    public void skipClientCredentials() throws IOException
+    {
+        // OK
+    }
+
+    public void processClientCredentials(TlsCredentials clientCredentials) throws IOException
+    {
+        if (!(clientCredentials instanceof TlsSignerCredentials))
+        {
+            throw new TlsFatalAlert(AlertDescription.internal_error);
+        }
     }
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
@@ -152,6 +173,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
         }
     }
 
+    // Would be needed to process RSA_EXPORT server key exchange
 //    protected void processRSAServerKeyExchange(InputStream is, Signer signer) throws IOException
 //    {
 //        InputStream sigIn = is;

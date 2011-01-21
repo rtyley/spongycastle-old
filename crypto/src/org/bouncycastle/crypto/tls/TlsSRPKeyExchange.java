@@ -29,7 +29,6 @@ import org.bouncycastle.util.BigIntegers;
 class TlsSRPKeyExchange implements TlsKeyExchange
 {
     protected TlsClientContext context;
-    protected CertificateVerifyer verifyer;
     protected int keyExchange;
     protected TlsSigner tlsSigner;
     protected byte[] identity;
@@ -41,8 +40,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
     protected BigInteger B = null;
     protected SRP6Client srpClient = new SRP6Client();
 
-    TlsSRPKeyExchange(TlsClientContext context, CertificateVerifyer verifyer, int keyExchange,
-        byte[] identity, byte[] password)
+    TlsSRPKeyExchange(TlsClientContext context, int keyExchange, byte[] identity, byte[] password)
     {
         // TODO According to RFC 5054, identity/password might be absent/empty when the client is "checking" for SRP support
 
@@ -62,7 +60,6 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         }
 
         this.context = context;
-        this.verifyer = verifyer;
         this.keyExchange = keyExchange;
         this.identity = identity;
         this.password = password;
@@ -126,14 +123,6 @@ class TlsSRPKeyExchange implements TlsKeyExchange
             default:
                 throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
         }
-
-        /*
-         * Verify them.
-         */
-        if (!this.verifyer.isValid(serverCertificate.getCerts()))
-        {
-            throw new TlsFatalAlert(AlertDescription.user_canceled);
-        }
     }
 
     public void skipServerKeyExchange() throws IOException
@@ -191,6 +180,22 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         }
 
         this.srpClient.init(N, g, new SHA1Digest(), context.getSecureRandom());
+    }
+
+    public void validateCertificateRequest(CertificateRequest certificateRequest)
+        throws IOException
+    {
+        throw new TlsFatalAlert(AlertDescription.unexpected_message);
+    }
+
+    public void skipClientCredentials() throws IOException
+    {
+        // OK
+    }
+
+    public void processClientCredentials(TlsCredentials clientCredentials) throws IOException
+    {
+        throw new TlsFatalAlert(AlertDescription.internal_error);
     }
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
