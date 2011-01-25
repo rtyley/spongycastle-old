@@ -16,6 +16,8 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
  */
 public class Certificate
 {
+    public static final Certificate EMPTY_CHAIN = new Certificate(new X509CertificateStructure[0]);
+
     /**
      * The certificates.
      */
@@ -32,6 +34,10 @@ public class Certificate
     {
         X509CertificateStructure[] certs;
         int left = TlsUtils.readUint24(is);
+        if (left == 0)
+        {
+            return EMPTY_CHAIN;
+        }
         Vector tmp = new Vector();
         while (left > 0)
         {
