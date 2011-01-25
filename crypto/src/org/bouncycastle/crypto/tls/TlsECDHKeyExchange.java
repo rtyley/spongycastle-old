@@ -150,11 +150,19 @@ class TlsECDHKeyExchange implements TlsKeyExchange
     public void validateCertificateRequest(CertificateRequest certificateRequest)
         throws IOException
     {
+        /*
+         * RFC 4492 3. [...] The ECDSA_fixed_ECDH and RSA_fixed_ECDH mechanisms are usable
+         * with ECDH_ECDSA and ECDH_RSA. Their use with ECDHE_ECDSA and ECDHE_RSA is
+         * prohibited because the use of a long-term ECDH client key would jeopardize the
+         * forward secrecy property of these algorithms.
+         */
         short[] types = certificateRequest.getCertificateTypes();
         for (int i = 0; i < types.length; ++i)
         {
             switch (types[i])
             {
+                case ClientCertificateType.rsa_sign:
+                case ClientCertificateType.dss_sign:
                 case ClientCertificateType.ecdsa_sign:
                 case ClientCertificateType.rsa_fixed_ecdh:
                 case ClientCertificateType.ecdsa_fixed_ecdh:
