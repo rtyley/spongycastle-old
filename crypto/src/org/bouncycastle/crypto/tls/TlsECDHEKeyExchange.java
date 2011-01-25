@@ -66,6 +66,42 @@ class TlsECDHEKeyExchange extends TlsECDHKeyExchange
         this.ecAgreeServerPublicKey = validateECPublicKey(new ECPublicKeyParameters(Q, curve_params));
     }
 
+    public void validateCertificateRequest(CertificateRequest certificateRequest)
+        throws IOException
+    {
+        /*
+         * RFC 4492 3. [...] The ECDSA_fixed_ECDH and RSA_fixed_ECDH mechanisms are usable
+         * with ECDH_ECDSA and ECDH_RSA. Their use with ECDHE_ECDSA and ECDHE_RSA is
+         * prohibited because the use of a long-term ECDH client key would jeopardize the
+         * forward secrecy property of these algorithms.
+         */
+        short[] types = certificateRequest.getCertificateTypes();
+        for (int i = 0; i < types.length; ++i)
+        {
+            switch (types[i])
+            {
+                case ClientCertificateType.rsa_sign:
+                case ClientCertificateType.dss_sign:
+                case ClientCertificateType.ecdsa_sign:
+                    break;
+                default:
+                    throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+            }
+        }
+    }
+
+    public void processClientCredentials(TlsCredentials clientCredentials) throws IOException
+    {
+        if (clientCredentials instanceof TlsSignerCredentials)
+        {
+            // OK
+        }
+        else
+        {
+            throw new TlsFatalAlert(AlertDescription.internal_error);
+        }
+    }
+
     protected Signer initSigner(TlsSigner tlsSigner, SecurityParameters securityParameters)
     {
         Signer signer = tlsSigner.createVerifyer(this.serverPublicKey);
