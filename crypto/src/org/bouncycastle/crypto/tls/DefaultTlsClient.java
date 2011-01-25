@@ -65,7 +65,7 @@ public class DefaultTlsClient implements TlsClient
         };
     }
 
-    public Hashtable generateClientExtensions()
+    public Hashtable getClientExtensions()
     {
         return null;
     }
@@ -108,12 +108,12 @@ public class DefaultTlsClient implements TlsClient
     {
     }
 
-    public TlsAuthentication createAuthentication() throws IOException
+    public TlsAuthentication getAuthentication() throws IOException
     {
         return tlsAuthentication;
     }
 
-    public TlsKeyExchange createKeyExchange() throws IOException
+    public TlsKeyExchange getKeyExchange() throws IOException
     {
         switch (selectedCipherSuite)
         {
@@ -173,7 +173,7 @@ public class DefaultTlsClient implements TlsClient
         }
     }
 
-    public TlsCipher createCipher() throws IOException
+    public TlsCipher getCipher() throws IOException
     {
         switch (selectedCipherSuite)
         {

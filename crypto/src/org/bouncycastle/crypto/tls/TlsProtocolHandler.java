@@ -217,7 +217,7 @@ public class TlsProtocolHandler
 
                         this.keyExchange.processServerCertificate(serverCertificate);
 
-                        this.authentication = tlsClient.createAuthentication();
+                        this.authentication = tlsClient.getAuthentication();
                         this.authentication.notifyServerCertificate(serverCertificate);
 
                         break;
@@ -432,7 +432,7 @@ public class TlsProtocolHandler
                             tlsClient.processServerExtensions(serverExtensions);
                         }
 
-                        this.keyExchange = tlsClient.createKeyExchange();
+                        this.keyExchange = tlsClient.getKeyExchange();
 
                         connection_state = CS_SERVER_HELLO_RECEIVED;
                         break;
@@ -529,7 +529,7 @@ public class TlsProtocolHandler
                         /*
                          * Initialize our cipher suite
                          */
-                        rs.clientCipherSpecDecided(tlsClient.createCipher());
+                        rs.clientCipherSpecDecided(tlsClient.getCipher());
 
                         /*
                          * Send our finished message.
@@ -849,7 +849,7 @@ public class TlsProtocolHandler
         this.offeredCipherSuites = this.tlsClient.getCipherSuites();
 
         // Integer -> byte[]
-        this.clientExtensions = this.tlsClient.generateClientExtensions();
+        this.clientExtensions = this.tlsClient.getClientExtensions();
 
         // Cipher Suites (and SCSV)
         {

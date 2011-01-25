@@ -6,7 +6,7 @@ import java.util.Hashtable;
 
 import org.bouncycastle.util.Arrays;
 
-class SRPTlsClient implements TlsClient
+public class SRPTlsClient implements TlsClient
 {
     private static final Integer EXT_SRP = new Integer(ExtensionType.srp);
 
@@ -48,7 +48,7 @@ class SRPTlsClient implements TlsClient
         };
     }
 
-    public Hashtable generateClientExtensions() throws IOException
+    public Hashtable getClientExtensions() throws IOException
     {
         Hashtable clientExtensions = new Hashtable();
         ByteArrayOutputStream srpData = new ByteArrayOutputStream();
@@ -97,7 +97,7 @@ class SRPTlsClient implements TlsClient
         // TODO[SRP]
     }
 
-    public TlsKeyExchange createKeyExchange() throws IOException
+    public TlsKeyExchange getKeyExchange() throws IOException
     {
         switch (selectedCipherSuite)
         {
@@ -127,12 +127,12 @@ class SRPTlsClient implements TlsClient
         }
     }
 
-    public TlsAuthentication createAuthentication() throws IOException
+    public TlsAuthentication getAuthentication() throws IOException
     {
         return tlsAuthentication;
     }
 
-    public TlsCipher createCipher() throws IOException
+    public TlsCipher getCipher() throws IOException
     {
         switch (selectedCipherSuite)
         {

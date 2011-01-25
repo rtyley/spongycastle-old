@@ -3,7 +3,7 @@ package org.bouncycastle.crypto.tls;
 import java.io.IOException;
 import java.util.Hashtable;
 
-interface TlsClient
+public interface TlsClient
 {
     void init(TlsClientContext context);
 
@@ -12,7 +12,7 @@ interface TlsClient
     short[] getCompressionMethods();
 
     // Hashtable is (Integer -> byte[])
-    Hashtable generateClientExtensions() throws IOException;
+    Hashtable getClientExtensions() throws IOException;
 
     void notifySessionID(byte[] sessionID);
 
@@ -25,9 +25,9 @@ interface TlsClient
     // Hashtable is (Integer -> byte[])
     void processServerExtensions(Hashtable serverExtensions);
 
-    TlsKeyExchange createKeyExchange() throws IOException;
+    TlsKeyExchange getKeyExchange() throws IOException;
 
-    TlsAuthentication createAuthentication() throws IOException;
+    TlsAuthentication getAuthentication() throws IOException;
 
-    TlsCipher createCipher() throws IOException;
+    TlsCipher getCipher() throws IOException;
 }
