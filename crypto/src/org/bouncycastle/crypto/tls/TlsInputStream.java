@@ -6,7 +6,7 @@ import java.io.InputStream;
 /**
  * An InputStream for an TLS 1.0 connection.
  */
-public class TlsInputStream extends InputStream
+class TlsInputStream extends InputStream
 {
     private byte[] buf = new byte[1];
     private TlsProtocolHandler handler = null;

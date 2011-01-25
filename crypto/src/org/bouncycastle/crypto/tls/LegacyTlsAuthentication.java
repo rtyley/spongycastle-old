@@ -9,7 +9,7 @@ import java.io.IOException;
  */
 public class LegacyTlsAuthentication implements TlsAuthentication
 {
-    private CertificateVerifyer verifyer;
+    protected CertificateVerifyer verifyer;
 
     public LegacyTlsAuthentication(CertificateVerifyer verifyer)
     {

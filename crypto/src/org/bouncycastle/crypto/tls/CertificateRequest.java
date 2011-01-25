@@ -7,7 +7,7 @@ public class CertificateRequest
     private short[] certificateTypes;
     private Vector certificateAuthorities;
 
-    CertificateRequest(short[] certificateTypes, Vector certificateAuthorities)
+    public CertificateRequest(short[] certificateTypes, Vector certificateAuthorities)
     {
         this.certificateTypes = certificateTypes;
         this.certificateAuthorities = certificateAuthorities;

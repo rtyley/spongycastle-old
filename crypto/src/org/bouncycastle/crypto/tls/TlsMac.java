@@ -1,11 +1,11 @@
 package org.bouncycastle.crypto.tls;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  * A generic TLS MAC implementation, which can be used with any kind of Digest to act as
@@ -24,7 +24,7 @@ public class TlsMac
      * @param offset The number of bytes to skip, before the key starts in the buffer.
      * @param len The length of the key.
      */
-    protected TlsMac(Digest digest, byte[] key_block, int offset, int len)
+    public TlsMac(Digest digest, byte[] key_block, int offset, int len)
     {
         this.mac = new HMac(digest);
         KeyParameter param = new KeyParameter(key_block, offset, len);
@@ -75,5 +75,4 @@ public class TlsMac
         mac.doFinal(result, 0);
         return result;
     }
-
 }

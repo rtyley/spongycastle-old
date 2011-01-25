@@ -8,18 +8,18 @@ import org.bouncycastle.util.Arrays;
 
 public class SRPTlsClient implements TlsClient
 {
-    private static final Integer EXT_SRP = new Integer(ExtensionType.srp);
+    public static final Integer EXT_SRP = new Integer(ExtensionType.srp);
 
-    private TlsAuthentication tlsAuthentication;
-    private TlsCipherFactory cipherFactory;
-    private byte[] identity;
-    private byte[] password;
+    protected TlsAuthentication tlsAuthentication;
+    protected TlsCipherFactory cipherFactory;
+    protected byte[] identity;
+    protected byte[] password;
 
-    private TlsClientContext context;
+    protected TlsClientContext context;
 
-    private int selectedCipherSuite;
+    protected int selectedCipherSuite;
 
-    SRPTlsClient(TlsAuthentication tlsAuthentication, TlsCipherFactory cipherFactory,
+    public SRPTlsClient(TlsAuthentication tlsAuthentication, TlsCipherFactory cipherFactory,
         byte[] identity, byte[] password)
     {
         this.tlsAuthentication = tlsAuthentication;

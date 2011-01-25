@@ -9,7 +9,7 @@ import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 
-class DefaultTlsCipherFactory implements TlsCipherFactory
+public class DefaultTlsCipherFactory implements TlsCipherFactory
 {
     public TlsCipher createCipher(TlsClientContext context, int encryptionAlgorithm, int digestAlgorithm) throws IOException
     {
