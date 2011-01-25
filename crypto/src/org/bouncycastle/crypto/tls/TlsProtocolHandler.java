@@ -458,20 +458,26 @@ public class TlsProtocolHandler
                         connection_state = CS_SERVER_HELLO_DONE_RECEIVED;
 
                         TlsCredentials clientCreds = null;
-                        if (certificateRequest != null)
-                        {
-                            clientCreds = this.authentication.getClientCredentials(certificateRequest);
-                        }
-
-                        if (clientCreds == null)
+                        if (certificateRequest == null)
                         {
                             this.keyExchange.skipClientCredentials();
                         }
                         else
                         {
-                            this.keyExchange.processClientCredentials(clientCreds);
+                            clientCreds = this.authentication.getClientCredentials(certificateRequest);
 
-                            Certificate clientCert = clientCreds.getCertificate();
+                            Certificate clientCert;
+                            if (clientCreds == null)
+                            {
+                                this.keyExchange.skipClientCredentials();
+                                clientCert = Certificate.EMPTY_CHAIN;
+                            }
+                            else
+                            {
+                                this.keyExchange.processClientCredentials(clientCreds);
+                                clientCert = clientCreds.getCertificate();
+                            }
+
                             sendClientCertificate(clientCert);
                         }
 
