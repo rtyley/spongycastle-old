@@ -7,7 +7,7 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
 /**
  * A combined hash, which implements md5(m) || sha1(m).
  */
-public class CombinedHash implements Digest
+class CombinedHash implements Digest
 {
     private MD5Digest md5;
     private SHA1Digest sha1;

@@ -10,10 +10,10 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 
 public class DefaultTlsSignerCredentials implements TlsSignerCredentials
 {
-    private Certificate clientCert;
-    private AsymmetricKeyParameter clientPrivateKey;
+    protected Certificate clientCert;
+    protected AsymmetricKeyParameter clientPrivateKey;
 
-    private TlsSigner clientSigner;
+    protected TlsSigner clientSigner;
 
     public DefaultTlsSignerCredentials(Certificate clientCertificate, AsymmetricKeyParameter clientPrivateKey)
     {

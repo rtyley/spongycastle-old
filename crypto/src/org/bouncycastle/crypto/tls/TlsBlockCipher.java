@@ -14,15 +14,15 @@ import org.bouncycastle.util.Arrays;
  */
 public class TlsBlockCipher implements TlsCipher
 {
-    private TlsClientContext context;
+    protected TlsClientContext context;
 
-    private BlockCipher encryptCipher;
-    private BlockCipher decryptCipher;
+    protected BlockCipher encryptCipher;
+    protected BlockCipher decryptCipher;
 
-    private TlsMac writeMac;
-    private TlsMac readMac;
+    protected TlsMac writeMac;
+    protected TlsMac readMac;
 
-    TlsBlockCipher(TlsClientContext context, BlockCipher encryptCipher,
+    public TlsBlockCipher(TlsClientContext context, BlockCipher encryptCipher,
         BlockCipher decryptCipher, Digest writeDigest, Digest readDigest, int cipherKeySize)
     {
         this.context = context;

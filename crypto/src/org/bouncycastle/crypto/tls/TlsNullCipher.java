@@ -3,7 +3,7 @@ package org.bouncycastle.crypto.tls;
 /**
  * A NULL CipherSuite in java, this should only be used during handshake.
  */
-class TlsNullCipher implements TlsCipher
+public class TlsNullCipher implements TlsCipher
 {
     public byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len)
     {

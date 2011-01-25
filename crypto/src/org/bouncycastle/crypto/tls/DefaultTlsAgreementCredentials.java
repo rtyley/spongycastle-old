@@ -12,10 +12,10 @@ import org.bouncycastle.util.BigIntegers;
 
 public class DefaultTlsAgreementCredentials implements TlsAgreementCredentials
 {
-    private Certificate clientCert;
-    private AsymmetricKeyParameter clientPrivateKey;
+    protected Certificate clientCert;
+    protected AsymmetricKeyParameter clientPrivateKey;
 
-    private BasicAgreement basicAgreement;
+    protected BasicAgreement basicAgreement;
 
     public DefaultTlsAgreementCredentials(Certificate clientCertificate, AsymmetricKeyParameter clientPrivateKey)
     {

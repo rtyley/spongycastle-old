@@ -5,19 +5,24 @@ import java.util.Hashtable;
 
 public class DefaultTlsClient implements TlsClient
 {
-    private TlsAuthentication tlsAuthentication;
-    private TlsCipherFactory cipherFactory;
+    protected TlsAuthentication tlsAuthentication;
+    protected TlsCipherFactory cipherFactory;
 
-    private TlsClientContext context;
+    protected TlsClientContext context;
 
-    private int selectedCipherSuite;
+    protected int selectedCipherSuite;
 
     /**
      * @deprecated
      */
-    DefaultTlsClient(CertificateVerifyer verifyer, TlsCipherFactory cipherFactory)
+    public DefaultTlsClient(CertificateVerifyer verifyer)
     {
-        this(new LegacyTlsAuthentication(verifyer), cipherFactory);
+        this(new LegacyTlsAuthentication(verifyer));
+    }
+
+    public DefaultTlsClient(TlsAuthentication tlsAuthentication)
+    {
+        this(tlsAuthentication, new DefaultTlsCipherFactory());
     }
 
     public DefaultTlsClient(TlsAuthentication tlsAuthentication, TlsCipherFactory cipherFactory)
