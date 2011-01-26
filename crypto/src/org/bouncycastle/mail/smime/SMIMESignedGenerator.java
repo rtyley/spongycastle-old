@@ -50,13 +50,22 @@ import org.bouncycastle.x509.X509Store;
  * A simple example of usage.
  *
  * <pre>
- *      CertStore           certs...
- *      SMIMESignedGenerator  fact = new SMIMESignedGenerator();
+ *      X509Certificate signCert = ...
+ *      KeyPair         signKP = ...
  *
- *      fact.addSigner(privKey, cert, SMIMESignedGenerator.DIGEST_SHA1);
- *      fact.addCertificatesAndCRLs(certs);
+ *      List certList = new ArrayList();
  *
- *      MimeMultipart       smime = fact.generate(content, "BC");
+ *      certList.add(signCert);
+ *
+ *      Store certs = new JcaCertStore(certList);
+ *
+ *      SMIMESignedGenerator gen = new SMIMESignedGenerator();
+ *
+ *      gen.addSignerInfoGenerator(new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").build("SHA1withRSA", signKP.getPrivate(), signCert));
+ *
+ *      gen.addCertificates(certs);
+ *
+ *      MimeMultipart       smime = fact.generate(content);
  * </pre>
  * <p>
  * Note: if you are using this class with AS2 or some other protocol
