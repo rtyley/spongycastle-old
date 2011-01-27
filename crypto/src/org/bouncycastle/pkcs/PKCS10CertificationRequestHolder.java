@@ -2,8 +2,13 @@ package org.bouncycastle.pkcs;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.CertificationRequest;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -17,6 +22,8 @@ import org.bouncycastle.operator.ContentVerifierProvider;
  */
 public class PKCS10CertificationRequestHolder
 {
+    private static Attribute[] EMPTY_ARRAY = new Attribute[0];
+
     private CertificationRequest certificationRequest;
 
     private static CertificationRequest parseBytes(byte[] encoding)
@@ -53,11 +60,21 @@ public class PKCS10CertificationRequestHolder
         this(parseBytes(encoded));
     }
 
+    /**
+     * Return the underlying ASN.1 structure.
+     *
+     * @return a CertificateRequest object.
+     */
     public CertificationRequest toASN1Structure()
     {
          return certificationRequest;
     }
 
+    /**
+     * Return the subject on this request.
+     *
+     * @return the X500Name representing the request's subject.
+     */
     public X500Name getSubject()
     {
         return X500Name.getInstance(certificationRequest.getCertificationRequestInfo().getSubject());
@@ -76,6 +93,53 @@ public class PKCS10CertificationRequestHolder
     public SubjectPublicKeyInfo getSubjectPublicKeyInfo()
     {
         return certificationRequest.getCertificationRequestInfo().getSubjectPublicKeyInfo();
+    }
+
+    public Attribute[] getAttributes()
+    {
+        ASN1Set attrSet = certificationRequest.getCertificationRequestInfo().getAttributes();
+
+        if (attrSet == null)
+        {
+            return EMPTY_ARRAY;
+        }
+
+        Attribute[] attrs = new Attribute[attrSet.size()];
+
+        for (int i = 0; i != attrSet.size(); i++)
+        {
+            attrs[i] = Attribute.getInstance(attrSet.getObjectAt(i));
+        }
+
+        return attrs;
+    }
+
+    public Attribute[] getAttributes(ASN1ObjectIdentifier oid)
+    {
+        ASN1Set    attrSet = certificationRequest.getCertificationRequestInfo().getAttributes();
+
+        if (attrSet == null)
+        {
+            return EMPTY_ARRAY;
+        }
+        
+        List list = new ArrayList();
+
+        for (int i = 0; i != attrSet.size(); i++)
+        {
+            Attribute attr = Attribute.getInstance(attrSet.getObjectAt(i));
+            if (attr.getAttrType().equals(oid))
+            {
+                list.add(attr);
+            }
+        }
+
+        if (list.size() == 0)
+        {
+            return EMPTY_ARRAY;
+        }
+
+        return (Attribute[])list.toArray(new Attribute[list.size()]);
     }
 
     public byte[] getEncoded()

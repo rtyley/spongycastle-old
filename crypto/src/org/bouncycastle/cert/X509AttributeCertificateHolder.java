@@ -26,6 +26,8 @@ import org.bouncycastle.util.Arrays;
  */
 public class X509AttributeCertificateHolder
 {
+    private static Attribute[] EMPTY_ARRAY = new Attribute[0];
+    
     private AttributeCertificate attrCert;
     private X509Extensions extensions;
 
@@ -134,7 +136,7 @@ public class X509AttributeCertificateHolder
 
         if (list.size() == 0)
         {
-            return null;
+            return EMPTY_ARRAY;
         }
 
         return (Attribute[])list.toArray(new Attribute[list.size()]);
