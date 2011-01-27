@@ -16,6 +16,7 @@ import java.util.Vector;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
@@ -123,11 +124,11 @@ public class PKCS10Test
 
         PKCS10CertificationRequestBuilder requestBuilder = new JcaPKCS10CertificationRequestBuilder(subject, kp.getPublic());
                             
-        PKCS10CertificationRequestHolder req1 = requestBuilder.build(new JcaContentSignerBuilder(sigName).setProvider(BC).build(kp.getPrivate()));
+        PKCS10CertificationRequestHolder req1 = requestBuilder.build(new JcaContentSignerBuilder(sigName).setProvider(provider).build(kp.getPrivate()));
 
-        JcaPKCS10CertificationRequestHolder req2 = new JcaPKCS10CertificationRequestHolder(req1.getEncoded()).setProvider(BC);
+        JcaPKCS10CertificationRequestHolder req2 = new JcaPKCS10CertificationRequestHolder(req1.getEncoded()).setProvider(provider);
 
-        if (!req2.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider(BC).build(kp.getPublic())))
+        if (!req2.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider(provider).build(kp.getPublic())))
         {
             fail(sigName + ": Failed verify check.");
         }
@@ -445,6 +446,37 @@ public class PKCS10Test
         if (!p1.equals(p2))
         {
             fail("cert request comparison failed");
+        }
+
+        Attribute[] attr1 = p1.getAttributes();
+        Attribute[] attr2 = p1.getAttributes();
+
+        checkAttrs(1, attr1, attr2);
+
+        attr1 = p1.getAttributes(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest);
+        attr2 = p1.getAttributes(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest);
+
+        checkAttrs(1, attr1, attr2);
+    }
+
+    private void checkAttrs(int expectedLength, Attribute[] attr1, Attribute[] attr2)
+    {
+        if (expectedLength != attr1.length)
+        {
+            fail("expected length mismatch");
+        }
+
+        if (attr1.length != attr2.length)
+        {
+            fail("atrribute length mismatch");
+        }
+
+        for (int i = 0; i != attr1.length; i++)
+        {
+            if (!attr1[i].equals(attr2[i]))
+            {
+                fail("atrribute mismatch");
+            }
         }
     }
 
