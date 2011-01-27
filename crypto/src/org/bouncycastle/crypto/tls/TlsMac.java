@@ -13,8 +13,8 @@ import org.bouncycastle.crypto.params.KeyParameter;
  */
 public class TlsMac
 {
-    private long seqNo;
-    private HMac mac;
+    protected long seqNo;
+    protected HMac mac;
 
     /**
      * Generate a new instance of an TlsMac.
@@ -35,7 +35,7 @@ public class TlsMac
     /**
      * @return The Keysize of the mac.
      */
-    protected int getSize()
+    public int getSize()
     {
         return mac.getMacSize();
     }
@@ -51,7 +51,7 @@ public class TlsMac
      * @param len The length of the message.
      * @return A new byte-buffer containing the mac value.
      */
-    protected byte[] calculateMac(short type, byte[] message, int offset, int len)
+    public byte[] calculateMac(short type, byte[] message, int offset, int len)
     {
         ByteArrayOutputStream bosMac = new ByteArrayOutputStream(13);
         try
