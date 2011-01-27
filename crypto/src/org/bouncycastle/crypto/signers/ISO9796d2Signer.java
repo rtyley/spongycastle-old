@@ -43,7 +43,6 @@ public class ISO9796d2Signer
 
     private Digest                      digest;
     private AsymmetricBlockCipher       cipher;
-    private boolean                     includeRecoveredMessage;
 
     private int         trailer;
     private int         keyBits;
