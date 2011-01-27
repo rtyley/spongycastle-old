@@ -50,16 +50,31 @@ public class ProtectedPKIMessage
         this.pkiMessage = pkiMessage;
     }
 
+    /**
+     * Return the message header.
+     *
+     * @return the message's PKIHeader structure.
+     */
     public PKIHeader getHeader()
     {
         return pkiMessage.getHeader();
     }
 
+    /**
+     * Return the message body.
+     *
+     * @return the message's PKIBody structure.
+     */
     public PKIBody getBody()
     {
         return pkiMessage.getBody();
     }
 
+    /**
+     * Return the underlying ASN.1 structure contained in this object.
+     *
+     * @return a PKIMessage structure.
+     */
     public PKIMessage toASN1Structure()
     {
         return pkiMessage;
@@ -76,6 +91,11 @@ public class ProtectedPKIMessage
         return pkiMessage.getHeader().getProtectionAlg().getAlgorithm().equals(CMPObjectIdentifiers.passwordBasedMac);
     }
 
+    /**
+     * Return the extra certificates associated with this message.
+     *
+     * @return an array of extra certificates, zero length if none present.
+     */
     public X509CertificateHolder[] getCertificates()
     {
         CMPCertificate[] certs = pkiMessage.getExtraCerts();

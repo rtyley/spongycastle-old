@@ -17,33 +17,51 @@ import org.bouncycastle.asn1.cmp.PKIFreeText;
 import org.bouncycastle.asn1.cmp.PKIHeader;
 import org.bouncycastle.asn1.cmp.PKIHeaderBuilder;
 import org.bouncycastle.asn1.cmp.PKIMessage;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.MacCalculator;
 
+/**
+ * Builder for creating a protected PKI message.
+ */
 public class ProtectedPKIMessageBuilder
 {
     private PKIHeaderBuilder hdrBuilder;
     private PKIBody body;
+    private List generalInfos = new ArrayList();
     private List extraCerts = new ArrayList();
 
     /**
-     * Commence a message with the header type CMP_2000
+     * Commence a message with the header version CMP_2000.
      *
-     * @param sender message sender
-     * @param recipient intended recipient
+     * @param sender message sender.
+     * @param recipient intended recipient.
      */
     public ProtectedPKIMessageBuilder(GeneralName sender, GeneralName recipient)
     {
         this(PKIHeader.CMP_2000, sender, recipient);
     }
 
+    /**
+     * Commence a message with a specific header type.
+     *
+     * @param pvno  the version CMP_1999 or CMP_2000.
+     * @param sender message sender.
+     * @param recipient intended recipient.
+     */
     public ProtectedPKIMessageBuilder(int pvno, GeneralName sender, GeneralName recipient)
     {
         hdrBuilder = new PKIHeaderBuilder(pvno, sender, recipient);
     }
 
+    /**
+     * Set the identifier for the transaction the new message will belong to.
+     *
+     * @param tid  the transaction ID.
+     * @return the current builder instance.
+     */
     public ProtectedPKIMessageBuilder setTransactionID(byte[] tid)
     {
         hdrBuilder.setTransactionID(tid);
@@ -51,6 +69,12 @@ public class ProtectedPKIMessageBuilder
         return this;
     }
 
+    /**
+     * Include a human-readable message in the new message.
+     *
+     * @param freeText the contents of the human readable message,
+     * @return the current builder instance.
+     */
     public ProtectedPKIMessageBuilder setFreeText(PKIFreeText freeText)
     {
         hdrBuilder.setFreeText(freeText);
@@ -58,20 +82,25 @@ public class ProtectedPKIMessageBuilder
         return this;
     }
 
-    public ProtectedPKIMessageBuilder setGeneralInfo(InfoTypeAndValue genInfo)
+    /**
+     * Add a generalInfo data record to the header of the new message.
+     *
+     * @param genInfo the generalInfo data to be added.
+     * @return the current builder instance.
+     */
+    public ProtectedPKIMessageBuilder addGeneralInfo(InfoTypeAndValue genInfo)
     {
-        hdrBuilder.setGeneralInfo(genInfo);
+        generalInfos.add(genInfo);
 
         return this;
     }
 
-    public ProtectedPKIMessageBuilder setGeneralInfo(InfoTypeAndValue[] genInfos)
-    {
-        hdrBuilder.setGeneralInfo(genInfos);
-
-        return this;
-    }
-
+    /**
+     * Set the creation time for the new message.
+     *
+     * @param time the message creation time.
+     * @return the current builder instance.
+     */
     public ProtectedPKIMessageBuilder setMessageTime(Date time)
     {
         hdrBuilder.setMessageTime(new DERGeneralizedTime(time));
@@ -79,6 +108,12 @@ public class ProtectedPKIMessageBuilder
         return this;
     }
 
+    /**
+     * Set the recipient key identifier for the key to be used to verify the new message.
+     *
+     * @param kid a key identifier.
+     * @return the current builder instance.
+     */
     public ProtectedPKIMessageBuilder setRecipKID(byte[] kid)
     {
         hdrBuilder.setRecipKID(kid);
@@ -86,6 +121,12 @@ public class ProtectedPKIMessageBuilder
         return this;
     }
 
+    /**
+     * Set the recipient nonce field on the new message.
+     *
+     * @param nonce a NONCE, typically copied from the sender nonce of the previous message.
+     * @return the current builder instance.
+     */
     public ProtectedPKIMessageBuilder setRecipNonce(byte[] nonce)
     {
         hdrBuilder.setRecipNonce(nonce);
@@ -93,6 +134,12 @@ public class ProtectedPKIMessageBuilder
         return this;
     }
 
+    /**
+     * Set the sender key identifier for the key used to protect the new message.
+     *
+     * @param kid a key identifier.
+     * @return the current builder instance.
+     */
     public ProtectedPKIMessageBuilder setSenderKID(byte[] kid)
     {
         hdrBuilder.setSenderKID(kid);
@@ -100,6 +147,12 @@ public class ProtectedPKIMessageBuilder
         return this;
     }
 
+    /**
+     * Set the sender nonce field on the new message.
+     *
+     * @param nonce a NONCE, typically 128 bits of random data.
+     * @return the current builder instance.
+     */
     public ProtectedPKIMessageBuilder setSenderNonce(byte[] nonce)
     {
         hdrBuilder.setSenderNonce(nonce);
@@ -108,8 +161,10 @@ public class ProtectedPKIMessageBuilder
     }
 
     /**
-     * set the body for the message
+     * Set the body for the new message
      *
+     * @param body the message body.
+     * @return the current builder instance.
      */
     public ProtectedPKIMessageBuilder setBody(PKIBody body)
     {
@@ -118,6 +173,12 @@ public class ProtectedPKIMessageBuilder
         return this;
     }
 
+    /**
+     * Add an "extra certificate" to the message.
+     *
+     * @param extraCert the extra certificate to add.
+     * @return the current builder instance.
+     */
     public ProtectedPKIMessageBuilder addCMPCertificate(X509CertificateHolder extraCert)
     {
         extraCerts.add(extraCert);
@@ -125,10 +186,17 @@ public class ProtectedPKIMessageBuilder
         return this;
     }
 
+    /**
+     * Build a protected PKI message which has MAC based integrity protection.
+     *
+     * @param macCalculator MAC calculator.
+     * @return the resulting protected PKI message.
+     * @throws CMPException if the protection MAC cannot be calculated.
+     */
     public ProtectedPKIMessage build(MacCalculator macCalculator)
         throws CMPException
     {
-        hdrBuilder.setProtectionAlg(macCalculator.getAlgorithmIdentifier());
+        finaliseHeader(macCalculator.getAlgorithmIdentifier());
 
         PKIHeader header = hdrBuilder.build();
 
@@ -140,14 +208,21 @@ public class ProtectedPKIMessageBuilder
         }
         catch (IOException e)
         {
-            throw new CMPException("unable to encode signature input: " + e.getMessage(), e);
+            throw new CMPException("unable to encode MAC input: " + e.getMessage(), e);
         }
     }
 
+    /**
+     * Build a protected PKI message which has MAC based integrity protection.
+     *
+     * @param signer the ContentSigner to be used to calculate the signature.
+     * @return the resulting protected PKI message.
+     * @throws CMPException if the protection signature cannot be calculated.
+     */
     public ProtectedPKIMessage build(ContentSigner signer)
         throws CMPException
     {
-        hdrBuilder.setProtectionAlg(signer.getAlgorithmIdentifier());
+        finaliseHeader(signer.getAlgorithmIdentifier());
 
         PKIHeader header = hdrBuilder.build();
         
@@ -160,6 +235,18 @@ public class ProtectedPKIMessageBuilder
         catch (IOException e)
         {
             throw new CMPException("unable to encode signature input: " + e.getMessage(), e);
+        }
+    }
+
+    private void finaliseHeader(AlgorithmIdentifier algorithmIdentifier)
+    {
+        hdrBuilder.setProtectionAlg(algorithmIdentifier);
+
+        if (!generalInfos.isEmpty())
+        {
+            InfoTypeAndValue[] genInfos = new InfoTypeAndValue[generalInfos.size()];
+
+            hdrBuilder.setGeneralInfo((InfoTypeAndValue[])generalInfos.toArray(genInfos));
         }
     }
 
