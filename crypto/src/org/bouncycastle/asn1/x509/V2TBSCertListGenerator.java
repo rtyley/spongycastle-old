@@ -125,7 +125,7 @@ public class V2TBSCertListGenerator
             
             try
             {
-                extOids.addElement(X509Extensions.ReasonCode);
+                extOids.addElement(X509Extension.reasonCode);
                 extValues.addElement(new X509Extension(false, new DEROctetString(crlReason.getEncoded())));
             }
             catch (IOException e)
@@ -138,7 +138,7 @@ public class V2TBSCertListGenerator
         {
             try
             {
-                extOids.addElement(X509Extensions.InvalidityDate);
+                extOids.addElement(X509Extension.invalidityDate);
                 extValues.addElement(new X509Extension(false, new DEROctetString(invalidityDate.getEncoded())));
             }
             catch (IOException e)

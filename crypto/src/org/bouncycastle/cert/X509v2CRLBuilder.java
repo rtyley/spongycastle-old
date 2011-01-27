@@ -25,6 +25,12 @@ public class X509v2CRLBuilder
     private V2TBSCertListGenerator      tbsGen;
     private X509ExtensionsGenerator     extGenerator;
 
+    /**
+     * Basic constructor.
+     *
+     * @param issuer the issuer this CRL is associated with.
+     * @param thisUpdate  the date of this update.
+     */
     public X509v2CRLBuilder(
         X500Name issuer,
         Date     thisUpdate)
@@ -36,6 +42,12 @@ public class X509v2CRLBuilder
         tbsGen.setThisUpdate(new Time(thisUpdate));
     }
 
+    /**
+     * Set the date by which the next CRL will become available.
+     *
+     * @param date  date of next CRL update.
+     * @return the current builder.
+     */
     public X509v2CRLBuilder setNextUpdate(
         Date    date)
     {
@@ -45,34 +57,48 @@ public class X509v2CRLBuilder
     }
 
     /**
-     * Reason being as indicated by CRLReason, i.e. CRLReason.keyCompromise
-     * or 0 if CRLReason is not to be used
-     **/
-    public X509v2CRLBuilder addCRLEntry(BigInteger userCertificate, Date revocationDate, int reason)
+     * Add a CRL entry with the just reasonCode extension.
+     *
+     * @param userCertificateSerial serial number of revoked certificate.
+     * @param revocationDate date of certificate revocation.
+     * @param reason the reason code, as indicated in CRLReason, i.e CRLReason.keyCompromise, or 0 if not to be used.
+     * @return the current builder.
+     */
+    public X509v2CRLBuilder addCRLEntry(BigInteger userCertificateSerial, Date revocationDate, int reason)
     {
-        tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), reason);
+        tbsGen.addCRLEntry(new DERInteger(userCertificateSerial), new Time(revocationDate), reason);
 
         return this;
     }
 
     /**
-     * Add a CRL entry with an Invalidity Date extension as well as a CRLReason extension.
-     * Reason being as indicated by CRLReason, i.e. CRLReason.keyCompromise
-     * or 0 if CRLReason is not to be used
-     **/
-    public X509v2CRLBuilder addCRLEntry(BigInteger userCertificate, Date revocationDate, int reason, Date invalidityDate)
+     * Add a CRL entry with an invalidityDate extension as well as a reasonCode extension. This is used
+     * where the date of revocation might be after issues with the certificate may have occurred.
+     *
+     * @param userCertificateSerial serial number of revoked certificate.
+     * @param revocationDate date of certificate revocation.
+     * @param reason the reason code, as indicated in CRLReason, i.e CRLReason.keyCompromise, or 0 if not to be used.
+     * @param invalidityDate the date on which the private key for the certificate became compromised or the certificate otherwise became invalid.
+     * @return the current builder.
+     */
+    public X509v2CRLBuilder addCRLEntry(BigInteger userCertificateSerial, Date revocationDate, int reason, Date invalidityDate)
     {
-        tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), reason, new DERGeneralizedTime(invalidityDate));
+        tbsGen.addCRLEntry(new DERInteger(userCertificateSerial), new Time(revocationDate), reason, new DERGeneralizedTime(invalidityDate));
 
         return this;
     }
    
     /**
      * Add a CRL entry with extensions.
-     **/
-    public X509v2CRLBuilder addCRLEntry(BigInteger userCertificate, Date revocationDate, X509Extensions extensions)
+     *
+     * @param userCertificateSerial serial number of revoked certificate.
+     * @param revocationDate date of certificate revocation.
+     * @param extensions extension set to be associated with this CRLEntry.
+     * @return the current builder.
+     */
+    public X509v2CRLBuilder addCRLEntry(BigInteger userCertificateSerial, Date revocationDate, X509Extensions extensions)
     {
-        tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), extensions);
+        tbsGen.addCRLEntry(new DERInteger(userCertificateSerial), new Time(revocationDate), extensions);
 
         return this;
     }
@@ -81,6 +107,7 @@ public class X509v2CRLBuilder
      * Add the CRLEntry objects contained in a previous CRL.
      * 
      * @param other the X509CRLHolder to source the other entries from.
+     * @return the current builder.
      */
     public X509v2CRLBuilder addCRL(X509CRLHolder other)
     {

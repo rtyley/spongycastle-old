@@ -18,7 +18,6 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
-import org.bouncycastle.util.Arrays;
 
 /**
  * Holding class for an X.509 CRL structure.
@@ -68,12 +67,23 @@ public class X509CRLHolder
         this.extensions = x509CRL.getTBSCertList().getExtensions();
     }
 
+    /**
+     * Return the ASN.1 encoding of this holder's CRL.
+     *
+     * @return a DER encoded byte array.
+     * @throws IOException if an encoding cannot be generated.
+     */
     public byte[] getEncoded()
         throws IOException
     {
         return x509CRL.getEncoded();
     }
 
+    /**
+     * Return the issuer of this holder's CRL.
+     *
+     * @return the CRL issuer.
+     */
     public X500Name getIssuer()
     {
         return X500Name.getInstance(x509CRL.getIssuer());
@@ -94,6 +104,12 @@ public class X509CRLHolder
         return null;
     }
 
+    /**
+     * Return a collection of X509CRLEntryHolder objects, giving the details of the
+     * revoked certificates that appear on this CRL.
+     *
+     * @return the revoked certificates as a collection of X509CRLEntryHolder objects.
+     */
     public Collection getRevokedCertificates()
     {
         TBSCertList.CRLEntry[] entries = x509CRL.getRevokedCertificates();
@@ -171,6 +187,11 @@ public class X509CRLHolder
         return CertUtils.getNonCriticalExtensionOIDs(extensions);
     }
 
+    /**
+     * Return the underlying ASN.1 structure for the CRL in this holder.
+     *
+     * @return a CertificateList object.
+     */
     public CertificateList toASN1Structure()
     {
         return x509CRL;
@@ -228,28 +249,11 @@ public class X509CRLHolder
 
         X509CRLHolder other = (X509CRLHolder)o;
 
-        try
-        {
-            byte[] b1 = this.getEncoded();
-            byte[] b2 = other.getEncoded();
-
-            return Arrays.areEqual(b1, b2);
-        }
-        catch (IOException e)
-        {
-            return false;
-        }
+        return this.x509CRL.equals(other.x509CRL);
     }
 
     public int hashCode()
     {
-        try
-        {
-            return Arrays.hashCode(this.getEncoded());
-        }
-        catch (IOException e)
-        {
-            return 0;
-        }
+        return this.x509CRL.hashCode();
     }
 }

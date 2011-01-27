@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
@@ -18,7 +19,6 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
-import org.bouncycastle.util.Arrays;
 
 /**
  * Holding class for an X.509 Certificate structure.
@@ -138,41 +138,102 @@ public class X509CertificateHolder
         return new IssuerAndSerialNumber(x509Certificate.getIssuer(), x509Certificate.getSerialNumber());
     }
 
+    /**
+     * Return the serial number of this attribute certificate.
+     *
+     * @return the serial number.
+     */
     public BigInteger getSerialNumber()
     {
         return x509Certificate.getSerialNumber().getValue();
     }
 
+    /**
+     * Return the issuer of this certificate.
+     *
+     * @return the certificate issuer.
+     */
     public X500Name getIssuer()
     {
         return X500Name.getInstance(x509Certificate.getIssuer());
     }
 
+    /**
+     * Return the subject this certificate is for.
+     *
+     * @return the subject for the certificate.
+     */
     public X500Name getSubject()
     {
         return X500Name.getInstance(x509Certificate.getSubject());
     }
 
+    /**
+     * Return the date before which this certificate is not valid.
+     *
+     * @return the start time for the certificate's validity period.
+     */
     public Date getNotBefore()
     {
         return x509Certificate.getStartDate().getDate();
     }
 
+    /**
+     * Return the date after which this certificate is not valid.
+     *
+     * @return the final time for the certificate's validity period.
+     */
     public Date getNotAfter()
     {
         return x509Certificate.getEndDate().getDate();
     }
 
+    /**
+     * Return the SubjectPublicKeyInfo describing the public key this certificate is carrying.
+     *
+     * @return the public key ASN.1 structure contained in the certificate.
+     */
     public SubjectPublicKeyInfo getSubjectPublicKeyInfo()
     {
         return x509Certificate.getSubjectPublicKeyInfo();
     }
 
+    /**
+     * Return the underlying ASN.1 structure for the certificate in this holder.
+     *
+     * @return a X509CertificateStructure object.
+     */
     public X509CertificateStructure toASN1Structure()
     {
         return x509Certificate;
     }
 
+    /**
+     * Return the details of the signature algorithm used to create this attribute certificate.
+     *
+     * @return the AlgorithmIdentifier describing the signature algorithm used to create this attribute certificate.
+     */
+    public AlgorithmIdentifier getSignatureAlgorithm()
+    {
+        return x509Certificate.getSignatureAlgorithm();
+    }
+
+    /**
+     * Return the bytes making up the signature associated with this attribute certificate.
+     *
+     * @return the attribute certificate signature bytes.
+     */
+    public byte[] getSignature()
+    {
+        return x509Certificate.getSignature().getBytes();
+    }
+
+    /**
+     * Return whether or not this certificate is valid on a particular date.
+     *
+     * @param date the date of interest.
+     * @return true if the certificate is valid, false otherwise.
+     */
     public boolean isValidOn(Date date)
     {
         return !date.before(x509Certificate.getStartDate().getDate()) && !date.after(x509Certificate.getEndDate().getDate());
@@ -230,31 +291,20 @@ public class X509CertificateHolder
 
         X509CertificateHolder other = (X509CertificateHolder)o;
 
-        try
-        {
-            byte[] b1 = this.getEncoded();
-            byte[] b2 = other.getEncoded();
-
-            return Arrays.areEqual(b1, b2);
-        }
-        catch (IOException e)
-        {
-            return false;
-        }
+        return this.x509Certificate.equals(other.x509Certificate);
     }
 
     public int hashCode()
     {
-        try
-        {
-            return Arrays.hashCode(this.getEncoded());
-        }
-        catch (IOException e)
-        {
-            return 0;
-        }
+        return this.x509Certificate.hashCode();
     }
 
+    /**
+     * Return the ASN.1 encoding of this holder's certificate.
+     *
+     * @return a DER encoded byte array.
+     * @throws IOException if an encoding cannot be generated.
+     */
     public byte[] getEncoded()
         throws IOException
     {

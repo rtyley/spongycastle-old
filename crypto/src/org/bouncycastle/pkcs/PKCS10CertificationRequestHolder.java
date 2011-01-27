@@ -42,7 +42,12 @@ public class PKCS10CertificationRequestHolder
             throw new PKCSIOException("malformed data: " + e.getMessage(), e);
         }
     }
-    
+
+    /**
+     * Create a PKCS10CertificationRequestHolder from an underlying ASN.1 structure.
+     *
+     * @param certificationRequest the underlying ASN.1 structure representing a request.
+     */
     public PKCS10CertificationRequestHolder(CertificationRequest certificationRequest)
     {
          this.certificationRequest = certificationRequest;
@@ -61,7 +66,7 @@ public class PKCS10CertificationRequestHolder
     }
 
     /**
-     * Return the underlying ASN.1 structure.
+     * Return the underlying ASN.1 structure for this request.
      *
      * @return a CertificateRequest object.
      */
@@ -80,21 +85,41 @@ public class PKCS10CertificationRequestHolder
         return X500Name.getInstance(certificationRequest.getCertificationRequestInfo().getSubject());
     }
 
+    /**
+     * Return the details of the signature algorithm used to create this request.
+     *
+     * @return the AlgorithmIdentifier describing the signature algorithm used to create this request.
+     */
     public AlgorithmIdentifier getSignatureAlgorithm()
     {
         return certificationRequest.getSignatureAlgorithm();
     }
 
+    /**
+     * Return the bytes making up the signature associated with this request.
+     *
+     * @return the request signature bytes.
+     */
     public byte[] getSignature()
     {
         return certificationRequest.getSignature().getBytes();
     }
-    
+
+    /**
+     * Return the SubjectPublicKeyInfo describing the public key this request is carrying.
+     *
+     * @return the public key ASN.1 structure contained in the request.
+     */
     public SubjectPublicKeyInfo getSubjectPublicKeyInfo()
     {
         return certificationRequest.getCertificationRequestInfo().getSubjectPublicKeyInfo();
     }
 
+    /**
+     * Return the attributes, if any associated with this request.
+     *
+     * @return an array of Attribute, zero length if none present.
+     */
     public Attribute[] getAttributes()
     {
         ASN1Set attrSet = certificationRequest.getCertificationRequestInfo().getAttributes();
@@ -114,7 +139,13 @@ public class PKCS10CertificationRequestHolder
         return attrs;
     }
 
-    public Attribute[] getAttributes(ASN1ObjectIdentifier oid)
+    /**
+     * Return an  array of attributes matching the passed in type OID.
+     *
+     * @param type the type of the attribute being looked for.
+     * @return an array of Attribute of the requested type, zero length if none present.
+     */
+    public Attribute[] getAttributes(ASN1ObjectIdentifier type)
     {
         ASN1Set    attrSet = certificationRequest.getCertificationRequestInfo().getAttributes();
 
@@ -128,7 +159,7 @@ public class PKCS10CertificationRequestHolder
         for (int i = 0; i != attrSet.size(); i++)
         {
             Attribute attr = Attribute.getInstance(attrSet.getObjectAt(i));
-            if (attr.getAttrType().equals(oid))
+            if (attr.getAttrType().equals(type))
             {
                 list.add(attr);
             }
