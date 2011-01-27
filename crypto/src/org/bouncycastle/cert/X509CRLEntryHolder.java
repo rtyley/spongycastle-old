@@ -24,11 +24,21 @@ public class X509CRLEntryHolder
         this.extensions = entry.getExtensions();
     }
 
+    /**
+     * Return the serial number of the certificate associated with this CRLEntry.
+     *
+     * @return the revoked certificate's serial number.
+     */
     public BigInteger getSerialNumber()
     {
         return entry.getUserCertificate().getValue();
     }
 
+    /**
+     * Return the date on which the certificate associated with this CRLEntry was revoked.
+     *
+     * @return the revocation date for the revoked certificate.
+     */
     public Date getRevocationDate()
     {
         return entry.getRevocationDate().getDate();

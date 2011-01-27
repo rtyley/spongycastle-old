@@ -11,6 +11,7 @@ import java.util.Set;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttCertValidityPeriod;
 import org.bouncycastle.asn1.x509.Attribute;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
@@ -19,7 +20,6 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
-import org.bouncycastle.util.Arrays;
 
 /**
  * Holding class for an X.509 AttributeCertificate structure.
@@ -71,6 +71,12 @@ public class X509AttributeCertificateHolder
         this.extensions = attrCert.getAcinfo().getExtensions();
     }
 
+    /**
+     * Return the ASN.1 encoding of this holder's attribute certificate.
+     *
+     * @return a DER encoded byte array.
+     * @throws IOException if an encoding cannot be generated.
+     */
     public byte[] getEncoded()
         throws IOException
     {
@@ -82,31 +88,61 @@ public class X509AttributeCertificateHolder
         return attrCert.getAcinfo().getVersion().getValue().intValue() + 1;
     }
 
+    /**
+     * Return the serial number of this attribute certificate.
+     *
+     * @return the serial number.
+     */
     public BigInteger getSerialNumber()
     {
         return attrCert.getAcinfo().getSerialNumber().getValue();
     }
 
+    /**
+     * Return the holder details for this attribute certificate.
+     *
+     * @return this attribute certificate's holder structure.
+     */
     public AttributeCertificateHolder getHolder()
     {
         return new AttributeCertificateHolder((ASN1Sequence)attrCert.getAcinfo().getHolder().toASN1Object());
     }
 
+    /**
+     * Return the issuer details for this attribute certificate.
+     *
+     * @return this attribute certificate's issuer structure,
+     */
     public AttributeCertificateIssuer getIssuer()
     {
         return new AttributeCertificateIssuer(attrCert.getAcinfo().getIssuer());
     }
 
+    /**
+     * Return the date before which this attribute certificate is not valid.
+     *
+     * @return the start date for the attribute certificate's validity period.
+     */
     public Date getNotBefore()
     {
         return CertUtils.recoverDate(attrCert.getAcinfo().getAttrCertValidityPeriod().getNotBeforeTime());
     }
 
+    /**
+     * Return the date after which this attribute certificate is not valid.
+     *
+     * @return the final date for the attribute certificate's validity period.
+     */
     public Date getNotAfter()
     {
         return CertUtils.recoverDate(attrCert.getAcinfo().getAttrCertValidityPeriod().getNotAfterTime());
     }
 
+    /**
+     * Return the attributes, if any associated with this request.
+     *
+     * @return an array of Attribute, zero length if none present.
+     */
     public Attribute[] getAttributes()
     {
         ASN1Sequence seq = attrCert.getAcinfo().getAttributes();
@@ -120,7 +156,13 @@ public class X509AttributeCertificateHolder
         return attrs;
     }
 
-    public Attribute[] getAttributes(ASN1ObjectIdentifier oid)
+    /**
+     * Return an  array of attributes matching the passed in type OID.
+     *
+     * @param type the type of the attribute being looked for.
+     * @return an array of Attribute of the requested type, zero length if none present.
+     */
+    public Attribute[] getAttributes(ASN1ObjectIdentifier type)
     {
         ASN1Sequence    seq = attrCert.getAcinfo().getAttributes();
         List            list = new ArrayList();
@@ -128,7 +170,7 @@ public class X509AttributeCertificateHolder
         for (int i = 0; i != seq.size(); i++)
         {
             Attribute attr = Attribute.getInstance(seq.getObjectAt(i));
-            if (attr.getAttrType().equals(oid))
+            if (attr.getAttrType().equals(type))
             {
                 list.add(attr);
             }
@@ -207,16 +249,42 @@ public class X509AttributeCertificateHolder
         return CertUtils.bitStringToBoolean(attrCert.getAcinfo().getIssuerUniqueID());
     }
 
+    /**
+     * Return the details of the signature algorithm used to create this attribute certificate.
+     *
+     * @return the AlgorithmIdentifier describing the signature algorithm used to create this attribute certificate.
+     */
+    public AlgorithmIdentifier getSignatureAlgorithm()
+    {
+        return attrCert.getSignatureAlgorithm();
+    }
+
+    /**
+     * Return the bytes making up the signature associated with this attribute certificate.
+     *
+     * @return the attribute certificate signature bytes.
+     */
     public byte[] getSignature()
     {
         return attrCert.getSignatureValue().getBytes();
     }
 
+    /**
+     * Return the underlying ASN.1 structure for the attribute certificate in this holder.
+     *
+     * @return a AttributeCertificate object.
+     */
     public AttributeCertificate toASN1Structure()
     {
         return attrCert;
     }
 
+    /**
+     * Return whether or not this attribute certificate is valid on a particular date.
+     *
+     * @param date the date of interest.
+     * @return true if the attribute certificate is valid, false otherwise.
+     */
     public boolean isValidOn(Date date)
     {
         AttCertValidityPeriod certValidityPeriod = attrCert.getAcinfo().getAttrCertValidityPeriod();
@@ -224,6 +292,13 @@ public class X509AttributeCertificateHolder
         return !date.before(CertUtils.recoverDate(certValidityPeriod.getNotBeforeTime())) && !date.after(CertUtils.recoverDate(certValidityPeriod.getNotAfterTime()));
     }
 
+    /**
+     * Validate the signature on the attribute certificate in this holder.
+     *
+     * @param verifierProvider a ContentVerifierProvider that can generate a verifier for the signature.
+     * @return true if the signature is valid, false otherwise.
+     * @throws CertException if the signature cannot be processed or is inappropriate.
+     */
     public boolean isSignatureValid(ContentVerifierProvider verifierProvider)
         throws CertException
     {
@@ -269,28 +344,11 @@ public class X509AttributeCertificateHolder
 
         X509AttributeCertificateHolder other = (X509AttributeCertificateHolder)o;
 
-        try
-        {
-            byte[] b1 = this.getEncoded();
-            byte[] b2 = other.getEncoded();
-
-            return Arrays.areEqual(b1, b2);
-        }
-        catch (IOException e)
-        {
-            return false;
-        }
+        return this.attrCert.equals(other.attrCert);
     }
 
     public int hashCode()
     {
-        try
-        {
-            return Arrays.hashCode(this.getEncoded());
-        }
-        catch (IOException e)
-        {
-            return 0;
-        }
+        return this.attrCert.hashCode();
     }
 }
