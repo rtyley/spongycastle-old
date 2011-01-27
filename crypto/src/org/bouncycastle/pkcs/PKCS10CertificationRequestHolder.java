@@ -6,6 +6,9 @@ import java.io.OutputStream;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.pkcs.CertificationRequest;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 
@@ -55,6 +58,26 @@ public class PKCS10CertificationRequestHolder
          return certificationRequest;
     }
 
+    public X500Name getSubject()
+    {
+        return X500Name.getInstance(certificationRequest.getCertificationRequestInfo().getSubject());
+    }
+
+    public AlgorithmIdentifier getSignatureAlgorithm()
+    {
+        return certificationRequest.getSignatureAlgorithm();
+    }
+
+    public byte[] getSignature()
+    {
+        return certificationRequest.getSignature().getBytes();
+    }
+    
+    public SubjectPublicKeyInfo getSubjectPublicKeyInfo()
+    {
+        return certificationRequest.getCertificationRequestInfo().getSubjectPublicKeyInfo();
+    }
+
     public byte[] getEncoded()
         throws IOException
     {
@@ -91,5 +114,27 @@ public class PKCS10CertificationRequestHolder
         }
 
         return verifier.verify(certificationRequest.getSignature().getBytes());
+    }
+
+    public boolean equals(Object o)
+    {
+        if (o == this)
+        {
+            return true;
+        }
+
+        if (!(o instanceof PKCS10CertificationRequestHolder))
+        {
+            return false;
+        }
+
+        PKCS10CertificationRequestHolder other = (PKCS10CertificationRequestHolder)o;
+
+        return this.toASN1Structure().equals(other.toASN1Structure());
+    }
+
+    public int hashCode()
+    {
+        return this.toASN1Structure().hashCode();
     }
 }
