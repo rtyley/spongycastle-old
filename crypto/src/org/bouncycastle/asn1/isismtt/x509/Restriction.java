@@ -1,8 +1,8 @@
 package org.bouncycastle.asn1.isismtt.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.x500.DirectoryString;
 
 /**
@@ -18,12 +18,12 @@ public class Restriction extends ASN1Encodable
 
     public static Restriction getInstance(Object obj)
     {
-        if (obj == null || obj instanceof Restriction)
+        if (obj instanceof Restriction)
         {
             return (Restriction)obj;
         }
 
-        if (obj instanceof DERString)
+        if (obj instanceof ASN1String)
         {
             return new Restriction(DirectoryString.getInstance(obj));
         }

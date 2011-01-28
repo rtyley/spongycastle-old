@@ -1,15 +1,5 @@
 package org.bouncycastle.x509.extension;
 
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERString;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
-
 import java.io.IOException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
@@ -18,6 +8,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1String;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Name;
 
 
 public class X509ExtensionUtil
@@ -76,7 +76,7 @@ public class X509ExtensionUtil
                 case GeneralName.dNSName:
                 case GeneralName.rfc822Name:
                 case GeneralName.uniformResourceIdentifier:
-                    list.add(((DERString)genName.getName()).getString());
+                    list.add(((ASN1String)genName.getName()).getString());
                     break;
                 case GeneralName.registeredID:
                     list.add(DERObjectIdentifier.getInstance(genName.getName()).getId());

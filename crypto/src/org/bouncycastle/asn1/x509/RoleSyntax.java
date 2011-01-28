@@ -3,11 +3,11 @@ package org.bouncycastle.asn1.x509;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.DERTaggedObject;
 
 /**
@@ -41,15 +41,15 @@ public class RoleSyntax
         Object obj)
     {
         
-        if(obj == null || obj instanceof RoleSyntax)
+        if (obj instanceof RoleSyntax)
         {
             return (RoleSyntax)obj;
         }
-        else if(obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new RoleSyntax((ASN1Sequence)obj);
+            return new RoleSyntax(ASN1Sequence.getInstance(obj));
         }
-        throw new IllegalArgumentException("Unknown object in RoleSyntax factory.");
+        throw new IllegalArgumentException("null object in getInstance.");
     }
     
     /**
@@ -63,7 +63,7 @@ public class RoleSyntax
     {
         if(roleName == null || 
                 roleName.getTagNo() != GeneralName.uniformResourceIdentifier ||
-                ((DERString)roleName.getName()).getString().equals(""))
+                ((ASN1String)roleName.getName()).getString().equals(""))
         {
             throw new IllegalArgumentException("the role name MUST be non empty and MUST " +
                     "use the URI option of GeneralName");
@@ -103,7 +103,7 @@ public class RoleSyntax
      * @param seq    an instance of <code>ASN1Sequence</code> that holds
      * the encoded elements used to build this <code>RoleSyntax</code>.
      */
-    public RoleSyntax(
+    private RoleSyntax(
         ASN1Sequence seq)
     {
         if (seq.size() < 1 || seq.size() > 2)
@@ -156,7 +156,7 @@ public class RoleSyntax
      */
     public String getRoleNameAsString()
     {
-        DERString str = (DERString)this.roleName.getName();
+        ASN1String str = (ASN1String)this.roleName.getName();
         
         return str.getString();
     }
@@ -178,9 +178,9 @@ public class RoleSyntax
         for(int i = 0; i < names.length; i++) 
         {
             DEREncodable value = names[i].getName();
-            if(value instanceof DERString)
+            if(value instanceof ASN1String)
             {
-                namesString[i] = ((DERString)value).getString();
+                namesString[i] = ((ASN1String)value).getString();
             }
             else
             {

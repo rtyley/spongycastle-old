@@ -3,13 +3,13 @@ package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERBMPString;
 import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.DERVisibleString;
-import org.bouncycastle.asn1.DERString;
 
 /**
  * <code>DisplayText</code> class, used in
@@ -58,7 +58,7 @@ public class DisplayText
    public static final int DISPLAY_TEXT_MAXIMUM_SIZE = 200;
    
    int contentType;
-   DERString contents;
+   ASN1String contents;
    
    /**
     * Creates a new <code>DisplayText</code> instance.
@@ -67,7 +67,7 @@ public class DisplayText
     * @param text the text to store. Strings longer than 200
     * characters are truncated. 
     */
-   public DisplayText (int type, String text) 
+   public DisplayText(int type, String text)
    {
       if (text.length() > DISPLAY_TEXT_MAXIMUM_SIZE)
       {
@@ -80,19 +80,19 @@ public class DisplayText
       switch (type)
       {
          case CONTENT_TYPE_IA5STRING:
-            contents = (DERString)new DERIA5String (text);
+            contents = new DERIA5String(text);
             break;
          case CONTENT_TYPE_UTF8STRING:
-            contents = (DERString)new DERUTF8String(text);
+            contents = new DERUTF8String(text);
             break;
          case CONTENT_TYPE_VISIBLESTRING:
-            contents = (DERString)new DERVisibleString(text);
+            contents = new DERVisibleString(text);
             break;
          case CONTENT_TYPE_BMPSTRING:
-            contents = (DERString)new DERBMPString(text);
+            contents = new DERBMPString(text);
             break;
          default:
-            contents = (DERString)new DERUTF8String(text);
+            contents = new DERUTF8String(text);
             break;
       }
    }
@@ -103,7 +103,7 @@ public class DisplayText
     * @param text the text to encapsulate. Strings longer than 200
     * characters are truncated. 
     */
-   public DisplayText (String text) 
+   public DisplayText(String text) 
    {
       // by default use UTF8String
       if (text.length() > DISPLAY_TEXT_MAXIMUM_SIZE)
@@ -122,16 +122,16 @@ public class DisplayText
     *
     * @param de a <code>DEREncodable</code> instance. 
     */
-   public DisplayText(DERString de)
+   private DisplayText(ASN1String de)
    {
       contents = de;
    }
 
    public static DisplayText getInstance(Object obj) 
    {
-      if (obj instanceof DERString)
+      if (obj instanceof ASN1String)
       {
-          return new DisplayText((DERString)obj);
+          return new DisplayText((ASN1String)obj);
       }
       else if (obj instanceof DisplayText)
       {
