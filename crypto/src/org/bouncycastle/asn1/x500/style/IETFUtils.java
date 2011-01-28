@@ -7,8 +7,8 @@ import java.util.Vector;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.DERUniversalString;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
@@ -176,9 +176,9 @@ public class IETFUtils
     {
         StringBuffer vBuf = new StringBuffer();
 
-        if (value instanceof DERString && !(value instanceof DERUniversalString))
+        if (value instanceof ASN1String && !(value instanceof DERUniversalString))
         {
-            String v = ((DERString)value).getString();
+            String v = ((ASN1String)value).getString();
             if (v.length() > 0 && v.charAt(0) == '#')
             {
                 vBuf.append("\\" + v);
@@ -244,9 +244,9 @@ public class IETFUtils
         {
             DERObject obj = decodeObject(value);
 
-            if (obj instanceof DERString)
+            if (obj instanceof ASN1String)
             {
-                value = Strings.toLowerCase(((DERString)obj).getString().trim());
+                value = Strings.toLowerCase(((ASN1String)obj).getString().trim());
             }
         }
 

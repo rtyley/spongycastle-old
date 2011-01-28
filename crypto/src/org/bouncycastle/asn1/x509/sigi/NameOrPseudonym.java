@@ -1,15 +1,15 @@
 package org.bouncycastle.asn1.x509.sigi;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.x500.DirectoryString;
-
-import java.util.Enumeration;
 
 /**
  * Structure for a name or pseudonym.
@@ -44,7 +44,7 @@ public class NameOrPseudonym
             return (NameOrPseudonym)obj;
         }
 
-        if (obj instanceof DERString)
+        if (obj instanceof ASN1String)
         {
             return new NameOrPseudonym(DirectoryString.getInstance(obj));
         }
@@ -104,7 +104,7 @@ public class NameOrPseudonym
                 + seq.size());
         }
 
-        if (!(seq.getObjectAt(0) instanceof DERString))
+        if (!(seq.getObjectAt(0) instanceof ASN1String))
         {
             throw new IllegalArgumentException("Bad object encountered: "
                 + seq.getObjectAt(0).getClass());

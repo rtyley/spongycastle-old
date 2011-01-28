@@ -1,19 +1,19 @@
 package org.bouncycastle.asn1.isismtt.x509;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.isismtt.ISISMTTObjectIdentifiers;
 import org.bouncycastle.asn1.x500.DirectoryString;
-
-import java.util.Enumeration;
 
 /**
  * Names of authorities which are responsible for the administration of title
@@ -105,7 +105,7 @@ public class NamingAuthority
             {
                 namingAuthorityUrl = DERIA5String.getInstance(o).getString();
             }
-            else if (o instanceof DERString)
+            else if (o instanceof ASN1String)
             {
                 namingAuthorityText = DirectoryString.getInstance(o);
             }
@@ -122,7 +122,7 @@ public class NamingAuthority
             {
                 namingAuthorityUrl = DERIA5String.getInstance(o).getString();
             }
-            else if (o instanceof DERString)
+            else if (o instanceof ASN1String)
             {
                 namingAuthorityText = DirectoryString.getInstance(o);
             }
@@ -135,7 +135,7 @@ public class NamingAuthority
         if (e.hasMoreElements())
         {
             DEREncodable o = (DEREncodable)e.nextElement();
-            if (o instanceof DERString)
+            if (o instanceof ASN1String)
             {
                 namingAuthorityText = DirectoryString.getInstance(o);
             }
