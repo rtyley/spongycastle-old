@@ -267,6 +267,7 @@
                  <exclude name="org/bouncycastle/mail/**/*.properties" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
                  <exclude name="org/bouncycastle/cert/**/*.java" />
+                 <exclude name="org/bouncycastle/pkcs/**/*.java" />
                  <exclude name="org/bouncycastle/operator/**/*.java" />
                  <exclude name="org/bouncycastle/jcajce/**/*.java" />
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
@@ -348,6 +349,7 @@
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
                  <exclude name="org/bouncycastle/cert/**/*.java" />
+                 <exclude name="org/bouncycastle/pkcs/**/*.java" />
                  <exclude name="org/bouncycastle/jcajce/**/*.java" />
                  <exclude name="org/bouncycastle/operator/**/*.java" />
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
@@ -415,6 +417,7 @@
                  <include name="org/bouncycastle/mail/**/*.properties" />
                  <include name="org/bouncycastle/cms/**/*.java" />
                  <include name="org/bouncycastle/cert/**/*.java" />
+                 <include name="org/bouncycastle/pkcs/**/*.java" />
                  <include name="org/bouncycastle/operator/**/*.java" />
                  <include name="org/bouncycastle/jcajce/**/*.java" />
                  <exclude name="**/*Test.java" />
@@ -709,10 +712,12 @@
                  <include name="org/bouncycastle/mail/**/test/*.java" />
                  <include name="org/bouncycastle/cms/**/test/*.java" />
                  <include name="org/bouncycastle/cert/**/test/*.java" />
+                 <include name="org/bouncycastle/pkcs/**/test/*.java" />
                  <include name="org/bouncycastle/operator/**/test/*.java" />
                  <include name="org/bouncycastle/mail/**/*.html" />
                  <include name="org/bouncycastle/cms/**/*.html" />
                  <include name="org/bouncycastle/cert/**/*.html" />
+                 <include name="org/bouncycastle/pkcs/**/*.html" />
                  <include name="org/bouncycastle/operator/**/*.html" />
              </fileset>
         </copy>
@@ -722,10 +727,12 @@
                 <package name="org.bouncycastle.cms.*" />
                 <package name="org.bouncycastle.mail.*" />
                 <package name="org.bouncycastle.cert.*" />
+                <package name="org.bouncycastle.pkcs.*" />
                 <package name="org.bouncycastle.operator.*" />
                 <group title="CMS Packages" packages="org.bouncycastle.cms*" />
                 <group title="S/MIME Packages" packages="org.bouncycastle.mail.smime*" />
                 <group title="Certificate Packages" packages="org.bouncycastle.cert*" />
+                <group title="PKCS Packages" packages="org.bouncycastle.pkcs*" />
             </docElements>
         </compile-doc>
 
