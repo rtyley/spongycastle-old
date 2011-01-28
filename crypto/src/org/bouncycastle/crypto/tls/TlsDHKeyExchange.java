@@ -5,12 +5,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.agreement.DHBasicAgreement;
 import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
@@ -19,8 +16,6 @@ import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
-import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.util.BigIntegers;
 
@@ -82,10 +77,27 @@ class TlsDHKeyExchange implements TlsKeyExchange
             throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
         }
 
-        // Sanity check the PublicKeyFactory
-        if (this.serverPublicKey.isPrivate())
+        if (tlsSigner == null)
         {
-            throw new TlsFatalAlert(AlertDescription.internal_error);
+            try
+            {
+                this.dhAgreeServerPublicKey = validateDHPublicKey((DHPublicKeyParameters)this.serverPublicKey);
+            }
+            catch (ClassCastException e)
+            {
+                throw new TlsFatalAlert(AlertDescription.certificate_unknown);
+            }
+
+            TlsUtils.validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
+        }
+        else
+        {
+            if (!tlsSigner.isValidPublicKey(this.serverPublicKey))
+            {
+                throw new TlsFatalAlert(AlertDescription.certificate_unknown);
+            }
+
+            TlsUtils.validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
         }
 
         // TODO 
@@ -94,50 +106,6 @@ class TlsDHKeyExchange implements TlsKeyExchange
          * signing algorithm for the certificate must be the same as the algorithm for the
          * certificate key."
          */
-
-        // TODO Should the 'instanceof' tests be replaced with stricter checks on keyInfo.getAlgorithmId()?
-
-        switch (this.keyExchange)
-        {
-            case KeyExchangeAlgorithm.DH_DSS:
-                if (!(this.serverPublicKey instanceof DHPublicKeyParameters))
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-                validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
-                // TODO The algorithm used to sign the certificate should be DSS.
-//                x509Cert.getSignatureAlgorithm();
-                this.dhAgreeServerPublicKey = validateDHPublicKey((DHPublicKeyParameters)this.serverPublicKey);
-                break;
-            case KeyExchangeAlgorithm.DH_RSA:
-                if (!(this.serverPublicKey instanceof DHPublicKeyParameters))
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-                validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
-                // TODO The algorithm used to sign the certificate should be RSA.
-//              x509Cert.getSignatureAlgorithm();
-                this.dhAgreeServerPublicKey = validateDHPublicKey((DHPublicKeyParameters)this.serverPublicKey);
-                break;
-            case KeyExchangeAlgorithm.DHE_RSA:
-                if (!(this.serverPublicKey instanceof RSAKeyParameters))
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-                validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
-                // TODO Validate RSA public key
-                break;
-            case KeyExchangeAlgorithm.DHE_DSS:
-                if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-                validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
-                // TODO Validate DSA public key
-                break;
-            default:
-                throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
-        }
     }
 
     public void skipServerKeyExchange() throws IOException
@@ -252,25 +220,6 @@ class TlsDHKeyExchange implements TlsKeyExchange
         byte[] keData = BigIntegers.asUnsignedByteArray(Yc);
         TlsUtils.writeUint24(keData.length + 2, os);
         TlsUtils.writeOpaque16(keData, os);
-    }
-
-    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits)
-        throws IOException
-    {
-        X509Extensions exts = c.getTBSCertificate().getExtensions();
-        if (exts != null)
-        {
-            X509Extension ext = exts.getExtension(X509Extension.keyUsage);
-            if (ext != null)
-            {
-                DERBitString ku = KeyUsage.getInstance(ext);
-                int bits = ku.getBytes()[0] & 0xff;
-                if ((bits & keyUsageBits) != keyUsageBits)
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-            }
-        }
     }
 
     protected DHPublicKeyParameters validateDHPublicKey(DHPublicKeyParameters key)

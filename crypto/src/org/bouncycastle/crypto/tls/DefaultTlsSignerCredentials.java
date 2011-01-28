@@ -10,12 +10,14 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 
 public class DefaultTlsSignerCredentials implements TlsSignerCredentials
 {
+    protected TlsClientContext context;
     protected Certificate clientCert;
     protected AsymmetricKeyParameter clientPrivateKey;
 
     protected TlsSigner clientSigner;
 
-    public DefaultTlsSignerCredentials(Certificate clientCertificate, AsymmetricKeyParameter clientPrivateKey)
+    public DefaultTlsSignerCredentials(TlsClientContext context, Certificate clientCertificate,
+        AsymmetricKeyParameter clientPrivateKey)
     {
         if (clientCertificate == null)
         {
@@ -52,6 +54,7 @@ public class DefaultTlsSignerCredentials implements TlsSignerCredentials
                 + clientPrivateKey.getClass().getName());
         }
 
+        this.context = context;
         this.clientCert = clientCertificate;
         this.clientPrivateKey = clientPrivateKey;
     }
@@ -65,7 +68,8 @@ public class DefaultTlsSignerCredentials implements TlsSignerCredentials
     {
         try
         {
-            return clientSigner.calculateRawSignature(clientPrivateKey, md5andsha1);
+            return clientSigner.calculateRawSignature(context.getSecureRandom(), clientPrivateKey,
+                md5andsha1);
         }
         catch (CryptoException e)
         {

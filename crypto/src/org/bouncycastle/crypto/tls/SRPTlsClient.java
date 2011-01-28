@@ -6,11 +6,10 @@ import java.util.Hashtable;
 
 import org.bouncycastle.util.Arrays;
 
-public class SRPTlsClient implements TlsClient
+public abstract class SRPTlsClient implements TlsClient
 {
     public static final Integer EXT_SRP = new Integer(ExtensionType.srp);
 
-    protected TlsAuthentication tlsAuthentication;
     protected TlsCipherFactory cipherFactory;
     protected byte[] identity;
     protected byte[] password;
@@ -19,10 +18,13 @@ public class SRPTlsClient implements TlsClient
 
     protected int selectedCipherSuite;
 
-    public SRPTlsClient(TlsAuthentication tlsAuthentication, TlsCipherFactory cipherFactory,
-        byte[] identity, byte[] password)
+    public SRPTlsClient(byte[] identity, byte[] password)
     {
-        this.tlsAuthentication = tlsAuthentication;
+        this(new DefaultTlsCipherFactory(), identity, password);
+    }
+
+    public SRPTlsClient(TlsCipherFactory cipherFactory, byte[] identity, byte[] password)
+    {
         this.cipherFactory = cipherFactory;
         this.identity = Arrays.clone(identity);
         this.password = Arrays.clone(password);
@@ -44,8 +46,7 @@ public class SRPTlsClient implements TlsClient
             CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA,
             CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA,
             CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA,
-            CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA,
-        };
+            CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA, };
     }
 
     public Hashtable getClientExtensions() throws IOException
@@ -94,7 +95,7 @@ public class SRPTlsClient implements TlsClient
 
     public void processServerExtensions(Hashtable serverExtensions)
     {
-        // TODO[SRP]
+        // There is no server response for the SRP extension
     }
 
     public TlsKeyExchange getKeyExchange() throws IOException
@@ -127,11 +128,6 @@ public class SRPTlsClient implements TlsClient
         }
     }
 
-    public TlsAuthentication getAuthentication() throws IOException
-    {
-        return tlsAuthentication;
-    }
-
     public TlsCipher getCipher() throws IOException
     {
         switch (selectedCipherSuite)
@@ -139,17 +135,20 @@ public class SRPTlsClient implements TlsClient
             case CipherSuite.TLS_SRP_SHA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_3DES_EDE_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_3DES_EDE_CBC_SHA:
-                return cipherFactory.createCipher(context, EncryptionAlgorithm._3DES_EDE_CBC, DigestAlgorithm.SHA);
+                return cipherFactory.createCipher(context, EncryptionAlgorithm._3DES_EDE_CBC,
+                    DigestAlgorithm.SHA);
 
             case CipherSuite.TLS_SRP_SHA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA:
-                return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_128_CBC, DigestAlgorithm.SHA);
+                return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_128_CBC,
+                    DigestAlgorithm.SHA);
 
             case CipherSuite.TLS_SRP_SHA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_RSA_WITH_AES_256_CBC_SHA:
             case CipherSuite.TLS_SRP_SHA_DSS_WITH_AES_256_CBC_SHA:
-                return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_256_CBC, DigestAlgorithm.SHA);
+                return cipherFactory.createCipher(context, EncryptionAlgorithm.AES_256_CBC,
+                    DigestAlgorithm.SHA);
 
             default:
                 /*

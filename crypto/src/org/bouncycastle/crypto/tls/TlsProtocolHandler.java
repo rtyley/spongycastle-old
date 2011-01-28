@@ -800,7 +800,7 @@ public class TlsProtocolHandler
      */
     public void connect(CertificateVerifyer verifyer) throws IOException
     {
-        this.connect(new DefaultTlsClient(verifyer));
+        this.connect(new LegacyTlsClient(verifyer));
     }
 
     /**
