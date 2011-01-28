@@ -5,12 +5,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
@@ -19,7 +16,6 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.util.BigIntegers;
 
@@ -78,62 +74,35 @@ class TlsECDHKeyExchange implements TlsKeyExchange
             throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
         }
 
-        // Sanity check the PublicKeyFactory
-        if (this.serverPublicKey.isPrivate())
+        if (tlsSigner == null)
         {
-            throw new TlsFatalAlert(AlertDescription.internal_error);
-        }
+            try
+            {
+                this.ecAgreeServerPublicKey = validateECPublicKey((ECPublicKeyParameters)this.serverPublicKey);
+            }
+            catch (ClassCastException e)
+            {
+                throw new TlsFatalAlert(AlertDescription.certificate_unknown);
+            }
 
+            TlsUtils.validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
+        }
+        else
+        {
+            if (!tlsSigner.isValidPublicKey(this.serverPublicKey))
+            {
+                throw new TlsFatalAlert(AlertDescription.certificate_unknown);
+            }
+
+            TlsUtils.validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
+        }
+        
         // TODO 
         /*
          * Perform various checks per RFC2246 7.4.2: "Unless otherwise specified, the
          * signing algorithm for the certificate must be the same as the algorithm for the
          * certificate key."
          */
-
-        // TODO Should the 'instanceof' tests be replaced with stricter checks on keyInfo.getAlgorithmId()?
-
-        switch (this.keyExchange)
-        {
-            case KeyExchangeAlgorithm.ECDH_ECDSA:
-                if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-                validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
-                // TODO The algorithm used to sign the certificate should be ECDSA.
-//                x509Cert.getSignatureAlgorithm();
-                this.ecAgreeServerPublicKey = validateECPublicKey((ECPublicKeyParameters)this.serverPublicKey);
-                break;
-            case KeyExchangeAlgorithm.ECDHE_ECDSA:
-                if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-                validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
-                // TODO Validate ECDSA public key
-                break;
-            case KeyExchangeAlgorithm.ECDH_RSA:
-                if (!(this.serverPublicKey instanceof ECPublicKeyParameters))
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-                validateKeyUsage(x509Cert, KeyUsage.keyAgreement);
-                // TODO The algorithm used to sign the certificate should be RSA.
-//              x509Cert.getSignatureAlgorithm();
-                this.ecAgreeServerPublicKey = validateECPublicKey((ECPublicKeyParameters)this.serverPublicKey);
-                break;
-            case KeyExchangeAlgorithm.ECDHE_RSA:
-                if (!(this.serverPublicKey instanceof RSAKeyParameters))
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-                validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
-                // TODO Validate RSA public key
-                break;
-            default:
-                throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
-        }
     }
 
     public void skipServerKeyExchange() throws IOException
@@ -265,25 +234,6 @@ class TlsECDHKeyExchange implements TlsKeyExchange
         basicAgreement.init(privateKey);
         BigInteger agreement = basicAgreement.calculateAgreement(publicKey);
         return BigIntegers.asUnsignedByteArray(agreement);
-    }
-
-    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits)
-        throws IOException
-    {
-        X509Extensions exts = c.getTBSCertificate().getExtensions();
-        if (exts != null)
-        {
-            X509Extension ext = exts.getExtension(X509Extension.keyUsage);
-            if (ext != null)
-            {
-                DERBitString ku = KeyUsage.getInstance(ext);
-                int bits = ku.getBytes()[0] & 0xff;
-                if ((bits & keyUsageBits) != keyUsageBits)
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-            }
-        }
     }
 
     protected ECPublicKeyParameters validateECPublicKey(ECPublicKeyParameters key)

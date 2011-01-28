@@ -5,12 +5,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.agreement.srp.SRP6Client;
@@ -18,8 +15,6 @@ import org.bouncycastle.crypto.agreement.srp.SRP6Util;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.io.SignerInputStream;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.bouncycastle.util.BigIntegers;
 
@@ -42,8 +37,6 @@ class TlsSRPKeyExchange implements TlsKeyExchange
 
     TlsSRPKeyExchange(TlsClientContext context, int keyExchange, byte[] identity, byte[] password)
     {
-        // TODO According to RFC 5054, identity/password might be absent/empty when the client is "checking" for SRP support
-
         switch (keyExchange)
         {
             case KeyExchangeAlgorithm.SRP:
@@ -92,37 +85,19 @@ class TlsSRPKeyExchange implements TlsKeyExchange
             throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
         }
 
-        // Sanity check the PublicKeyFactory
-        if (this.serverPublicKey.isPrivate())
+        if (!tlsSigner.isValidPublicKey(this.serverPublicKey))
         {
-            throw new TlsFatalAlert(AlertDescription.internal_error);
+            throw new TlsFatalAlert(AlertDescription.certificate_unknown);
         }
 
+        TlsUtils.validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
+        
         // TODO 
         /*
          * Perform various checks per RFC2246 7.4.2: "Unless otherwise specified, the
          * signing algorithm for the certificate must be the same as the algorithm for the
          * certificate key."
          */
-        switch (this.keyExchange)
-        {
-            case KeyExchangeAlgorithm.SRP_RSA:
-                if (!(this.serverPublicKey instanceof RSAKeyParameters))
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-                validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
-                break;
-            case KeyExchangeAlgorithm.SRP_DSS:
-                if (!(this.serverPublicKey instanceof DSAPublicKeyParameters))
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-                validateKeyUsage(x509Cert, KeyUsage.digitalSignature);
-                break;
-            default:
-                throw new TlsFatalAlert(AlertDescription.unsupported_certificate);
-        }
     }
 
     public void skipServerKeyExchange() throws IOException
@@ -216,25 +191,6 @@ class TlsSRPKeyExchange implements TlsKeyExchange
         catch (CryptoException e)
         {
             throw new TlsFatalAlert(AlertDescription.illegal_parameter);
-        }
-    }
-
-    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits)
-        throws IOException
-    {
-        X509Extensions exts = c.getTBSCertificate().getExtensions();
-        if (exts != null)
-        {
-            X509Extension ext = exts.getExtension(X509Extension.keyUsage);
-            if (ext != null)
-            {
-                DERBitString ku = KeyUsage.getInstance(ext);
-                int bits = ku.getBytes()[0] & 0xff;
-                if ((bits & keyUsageBits) != keyUsageBits)
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-            }
         }
     }
 

@@ -4,12 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
@@ -61,22 +58,16 @@ class TlsRSAKeyExchange implements TlsKeyExchange
             throw new TlsFatalAlert(AlertDescription.internal_error);
         }
 
+        this.rsaServerPublicKey = validateRSAPublicKey((RSAKeyParameters)this.serverPublicKey);
+
+        TlsUtils.validateKeyUsage(x509Cert, KeyUsage.keyEncipherment);
+
         // TODO 
         /*
          * Perform various checks per RFC2246 7.4.2: "Unless otherwise specified, the
          * signing algorithm for the certificate must be the same as the algorithm for the
          * certificate key."
          */
-
-        // TODO Should the 'instanceof' tests be replaced with stricter checks on keyInfo.getAlgorithmId()?
-
-        if (!(this.serverPublicKey instanceof RSAKeyParameters))
-        {
-            throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-        }
-
-        validateKeyUsage(x509Cert, KeyUsage.keyEncipherment);
-        this.rsaServerPublicKey = validateRSAPublicKey((RSAKeyParameters)this.serverPublicKey);
     }
 
     public void skipServerKeyExchange() throws IOException
@@ -154,24 +145,6 @@ class TlsRSAKeyExchange implements TlsKeyExchange
         byte[] tmp = this.premasterSecret;
         this.premasterSecret = null;
         return tmp;
-    }
-
-    protected void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
-    {
-        X509Extensions exts = c.getTBSCertificate().getExtensions();
-        if (exts != null)
-        {
-            X509Extension ext = exts.getExtension(X509Extension.keyUsage);
-            if (ext != null)
-            {
-                DERBitString ku = KeyUsage.getInstance(ext);
-                int bits = ku.getBytes()[0] & 0xff;
-                if ((bits & keyUsageBits) != keyUsageBits)
-                {
-                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
-                }
-            }
-        }
     }
 
     // Would be needed to process RSA_EXPORT server key exchange

@@ -3,31 +3,21 @@ package org.bouncycastle.crypto.tls;
 import java.io.IOException;
 import java.util.Hashtable;
 
-public class DefaultTlsClient implements TlsClient
+public abstract class DefaultTlsClient implements TlsClient
 {
-    protected TlsAuthentication tlsAuthentication;
     protected TlsCipherFactory cipherFactory;
 
     protected TlsClientContext context;
 
     protected int selectedCipherSuite;
 
-    /**
-     * @deprecated
-     */
-    public DefaultTlsClient(CertificateVerifyer verifyer)
+    public DefaultTlsClient()
     {
-        this(new LegacyTlsAuthentication(verifyer));
+        this(new DefaultTlsCipherFactory());
     }
 
-    public DefaultTlsClient(TlsAuthentication tlsAuthentication)
+    public DefaultTlsClient(TlsCipherFactory cipherFactory)
     {
-        this(tlsAuthentication, new DefaultTlsCipherFactory());
-    }
-
-    public DefaultTlsClient(TlsAuthentication tlsAuthentication, TlsCipherFactory cipherFactory)
-    {
-        this.tlsAuthentication = tlsAuthentication;
         this.cipherFactory = cipherFactory;
     }
 
@@ -39,12 +29,6 @@ public class DefaultTlsClient implements TlsClient
     public int[] getCipherSuites()
     {
         return new int[] {
-            CipherSuite.TLS_DH_RSA_WITH_AES_256_CBC_SHA,
-            CipherSuite.TLS_DH_DSS_WITH_AES_256_CBC_SHA,
-            CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA,
-            CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA,
-            CipherSuite.TLS_DH_RSA_WITH_3DES_EDE_CBC_SHA,
-            CipherSuite.TLS_DH_DSS_WITH_3DES_EDE_CBC_SHA,
             CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
             CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
             CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
@@ -54,19 +38,6 @@ public class DefaultTlsClient implements TlsClient
             CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
             CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
             CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-
-//            CipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
-//            CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
-//            CipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
-//            CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
-//            CipherSuite.TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA,
-//            CipherSuite.TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA,
-//            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
-//            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-//            CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-//            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-//            CipherSuite.TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA,
-//            CipherSuite.TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,
         };
     }
 
@@ -111,11 +82,6 @@ public class DefaultTlsClient implements TlsClient
 
     public void processServerExtensions(Hashtable serverExtensions)
     {
-    }
-
-    public TlsAuthentication getAuthentication() throws IOException
-    {
-        return tlsAuthentication;
     }
 
     public TlsKeyExchange getKeyExchange() throws IOException

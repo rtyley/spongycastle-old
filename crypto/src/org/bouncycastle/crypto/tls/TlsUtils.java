@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
@@ -292,5 +297,23 @@ public class TlsUtils
         System.arraycopy(a, 0, c, 0, a.length);
         System.arraycopy(b, 0, c, a.length, b.length);
         return c;
+    }
+
+    static void validateKeyUsage(X509CertificateStructure c, int keyUsageBits) throws IOException
+    {
+        X509Extensions exts = c.getTBSCertificate().getExtensions();
+        if (exts != null)
+        {
+            X509Extension ext = exts.getExtension(X509Extension.keyUsage);
+            if (ext != null)
+            {
+                DERBitString ku = KeyUsage.getInstance(ext);
+                int bits = ku.getBytes()[0] & 0xff;
+                if ((bits & keyUsageBits) != keyUsageBits)
+                {
+                    throw new TlsFatalAlert(AlertDescription.certificate_unknown);
+                }
+            }
+        }
     }
 }
