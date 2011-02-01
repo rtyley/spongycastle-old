@@ -281,7 +281,7 @@ public class SMIMEEnvelopedGenerator
     private MimeBodyPart make(
         MimeBodyPart    content,
         OutputEncryptor encryptor)
-        throws NoSuchAlgorithmException, SMIMEException
+        throws SMIMEException
     {
         try
         {
@@ -308,9 +308,31 @@ public class SMIMEEnvelopedGenerator
     public MimeBodyPart generate(
         MimeBodyPart     content,
         OutputEncryptor  encryptor)
-        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+        throws SMIMEException
     {
         return make(makeContentBodyPart(content), encryptor);
+    }
+
+    /**
+     * generate an enveloped object that contains an SMIME Enveloped
+     * object using the given provider from the contents of the passed in
+     * message
+     */
+    public MimeBodyPart generate(
+        MimeMessage     message,
+        OutputEncryptor  encryptor)
+        throws SMIMEException
+    {
+        try
+        {
+            message.saveChanges();      // make sure we're up to date.
+        }
+        catch (MessagingException e)
+        {
+            throw new SMIMEException("unable to save message", e);
+        }
+
+        return make(makeContentBodyPart(message), encryptor);
     }
 
     /**

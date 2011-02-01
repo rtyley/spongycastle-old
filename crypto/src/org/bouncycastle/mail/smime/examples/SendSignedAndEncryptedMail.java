@@ -1,20 +1,20 @@
 package org.bouncycastle.mail.smime.examples;
 
-import java.io.FileInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.security.KeyStore;
-import java.security.Security;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.security.cert.CertStore;
-import java.security.cert.CollectionCertStoreParameters;
-import java.util.Properties;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Properties;
 
+import javax.activation.CommandMap;
+import javax.activation.MailcapCommandMap;
 import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -22,22 +22,26 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.activation.MailcapCommandMap;
-import javax.activation.CommandMap;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
+import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
+import org.bouncycastle.asn1.smime.SMIMECapability;
+import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
+import org.bouncycastle.asn1.smime.SMIMEEncryptionKeyPreferenceAttribute;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.cert.jcajce.JcaCertStore;
+import org.bouncycastle.cms.CMSAlgorithm;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
+import org.bouncycastle.util.Store;
 import org.bouncycastle.util.Strings;
-import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
-import org.bouncycastle.asn1.smime.SMIMECapability;
-import org.bouncycastle.asn1.smime.SMIMEEncryptionKeyPreferenceAttribute;
-import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle.asn1.cms.AttributeTable;
 
 /**
  * Example that sends a signed and encrypted mail message.
@@ -110,26 +114,20 @@ public class SendSignedAndEncryptedMail
             ASN1EncodableVector attributes = new ASN1EncodableVector();
             attributes.add(new SMIMEEncryptionKeyPreferenceAttribute(
                     new IssuerAndSerialNumber(
-                            new X509Name(((X509Certificate)chain[0])
+                            new X500Name(((X509Certificate)chain[0])
                                     .getIssuerDN().getName()),
                             ((X509Certificate)chain[0]).getSerialNumber())));
             attributes.add(new SMIMECapabilitiesAttribute(capabilities));
 
             SMIMESignedGenerator signer = new SMIMESignedGenerator();
-            signer
-                    .addSigner(
-                            privateKey,
-                            (X509Certificate)chain[0],
-                            "DSA".equals(privateKey.getAlgorithm()) ? SMIMESignedGenerator.DIGEST_SHA1
-                                    : SMIMESignedGenerator.DIGEST_MD5,
-                            new AttributeTable(attributes), null);
+            signer.addSignerInfoGenerator(new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(new AttributeTable(attributes)).build("DSA".equals(privateKey.getAlgorithm()) ? "SHA1withDSA" : "MD5withDSA", privateKey, (X509Certificate)chain[0]));
+
 
             /* Add the list of certs to the generator */
             List certList = new ArrayList();
             certList.add(chain[0]);
-            CertStore certs = CertStore.getInstance("Collection",
-                    new CollectionCertStoreParameters(certList), "BC");
-            signer.addCertificatesAndCRLs(certs);
+            Store certs = new JcaCertStore(certList);
+            signer.addCertificates(certs);
 
             /* Sign the message */
             MimeMultipart mm = signer.generate(body, "BC");
@@ -148,11 +146,11 @@ public class SendSignedAndEncryptedMail
 
             /* Create the encrypter */
             SMIMEEnvelopedGenerator encrypter = new SMIMEEnvelopedGenerator();
-            encrypter.addKeyTransRecipient((X509Certificate)chain[0]);
+            encrypter.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator((X509Certificate)chain[0]).setProvider("BC"));
 
             /* Encrypt the message */
             MimeBodyPart encryptedPart = encrypter.generate(signedMessage,
-                    SMIMEEnvelopedGenerator.RC2_CBC, "BC");
+                    new JceCMSContentEncryptorBuilder(CMSAlgorithm.RC2_CBC).setProvider("BC").build());
 
             /*
              * Create a new MimeMessage that contains the encrypted and signed
