@@ -11,8 +11,6 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.cert.CertStore;
-import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,13 +36,20 @@ import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
 import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.asn1.smime.SMIMEEncryptionKeyPreferenceAttribute;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaCertStore;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.util.Store;
 
 /**
  * a simple example that creates a single signed mail message.
@@ -86,34 +91,26 @@ public class CreateLargeSignedMail
         KeyPair subKP,
         String  subDN,
         KeyPair issKP,
-        String  issDN) 
-        throws GeneralSecurityException, IOException
+        String  issDN)
+        throws GeneralSecurityException, IOException, OperatorCreationException
     {
         PublicKey  subPub  = subKP.getPublic();
         PrivateKey issPriv = issKP.getPrivate();
         PublicKey  issPub  = issKP.getPublic();
-        
-        X509V3CertificateGenerator v3CertGen = new X509V3CertificateGenerator();
-        
-        v3CertGen.setSerialNumber(BigInteger.valueOf(serialNo++));
-        v3CertGen.setIssuerDN(new X509Name(issDN));
-        v3CertGen.setNotBefore(new Date(System.currentTimeMillis()));
-        v3CertGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 100)));
-        v3CertGen.setSubjectDN(new X509Name(subDN));
-        v3CertGen.setPublicKey(subPub);
-        v3CertGen.setSignatureAlgorithm("MD5WithRSAEncryption");
+
+        X509v3CertificateBuilder v3CertGen = new JcaX509v3CertificateBuilder(new X500Name(issDN), BigInteger.valueOf(serialNo++), new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 100)), new X500Name(subDN), subPub);
 
         v3CertGen.addExtension(
-            X509Extensions.SubjectKeyIdentifier,
+            X509Extension.subjectKeyIdentifier,
             false,
             createSubjectKeyId(subPub));
 
         v3CertGen.addExtension(
-            X509Extensions.AuthorityKeyIdentifier,
+            X509Extension.authorityKeyIdentifier,
             false,
             createAuthorityKeyId(issPub));
 
-        return v3CertGen.generate(issPriv);
+        return new JcaX509CertificateConverter().setProvider("BC").getCertificate(v3CertGen.build(new JcaContentSignerBuilder("MD5withRSA").setProvider("BC").build(issPriv)));
     }
 
     public static void main(
@@ -152,9 +149,7 @@ public class CreateLargeSignedMail
         // create a CertStore containing the certificates we want carried
         // in the signature
         //
-        CertStore           certsAndcrls = CertStore.getInstance(
-                                "Collection",
-                                new CollectionCertStoreParameters(certList), "BC");
+        Store certs = new JcaCertStore(certList);
 
         //
         // create some smime capabilities in case someone wants to respond
@@ -173,7 +168,7 @@ public class CreateLargeSignedMail
         // normally this would be different from the signing certificate...
         //
         IssuerAndSerialNumber   issAndSer = new IssuerAndSerialNumber(
-                new X509Name(signDN), origCert.getSerialNumber());
+                new X500Name(signDN), origCert.getSerialNumber());
 
         signedAttrs.add(new SMIMEEncryptionKeyPreferenceAttribute(issAndSer));
 
@@ -188,12 +183,12 @@ public class CreateLargeSignedMail
         // will be generated as part of the signature. The encryption algorithm
         // used is taken from the key - in this RSA with PKCS1Padding
         //
-        gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA1, new AttributeTable(signedAttrs), null);
+        gen.addSignerInfoGenerator(new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(new AttributeTable(signedAttrs)).build("SHA1withRSA", origKP.getPrivate(), origCert));
 
         //
         // add our pool of certs and cerls (if any) to go with the signature
         //
-        gen.addCertificatesAndCRLs(certsAndcrls);
+        gen.addCertificates(certs);
 
         //
         // create the base for our message
@@ -207,7 +202,7 @@ public class CreateLargeSignedMail
         //
         // extract the multipart object from the SMIMESigned object.
         //
-        MimeMultipart mm = gen.generate(msg, "BC");
+        MimeMultipart mm = gen.generate(msg);
 
         //
         // Get a Session object and create the mail message
