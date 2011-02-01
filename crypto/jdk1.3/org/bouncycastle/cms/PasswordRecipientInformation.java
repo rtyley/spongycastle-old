@@ -59,7 +59,7 @@ public class PasswordRecipientInformation
         super(info.getKeyEncryptionAlgorithm(), secureReadable);
 
         this.info = info;
-        this.rid = new RecipientId();
+        this.rid = new PasswordRecipientId();
     }
 
     /**
@@ -149,6 +149,7 @@ public class PasswordRecipientInformation
 
     /**
      * decrypt the content and return an input stream.
+     * @deprecated use getContentStream(Recipient)
      */
     public CMSTypedStream getContentStream(
         Key key,
@@ -160,6 +161,7 @@ public class PasswordRecipientInformation
 
     /**
      * decrypt the content and return an input stream.
+     * @deprecated use getContentStream(Recipient)
      */
     public CMSTypedStream getContentStream(
         Key key,
