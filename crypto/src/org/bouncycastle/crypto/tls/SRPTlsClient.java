@@ -52,10 +52,11 @@ public abstract class SRPTlsClient implements TlsClient
     public Hashtable getClientExtensions() throws IOException
     {
         Hashtable clientExtensions = new Hashtable();
+
         ByteArrayOutputStream srpData = new ByteArrayOutputStream();
         TlsUtils.writeOpaque8(this.identity, srpData);
-
         clientExtensions.put(EXT_SRP, srpData.toByteArray());
+
         return clientExtensions;
     }
 
