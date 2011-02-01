@@ -4,7 +4,10 @@ import java.io.IOException;
 
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
@@ -52,8 +55,14 @@ public class DefaultTlsCipherFactory implements TlsCipherFactory
     {
         switch (digestAlgorithm)
         {
+            case DigestAlgorithm.MD5:
+                return new MD5Digest();
             case DigestAlgorithm.SHA:
                 return new SHA1Digest();
+            case DigestAlgorithm.SHA256:
+                return new SHA256Digest();
+            case DigestAlgorithm.SHA384:
+                return new SHA384Digest();
             default:
                 throw new TlsFatalAlert(AlertDescription.internal_error);
         }
