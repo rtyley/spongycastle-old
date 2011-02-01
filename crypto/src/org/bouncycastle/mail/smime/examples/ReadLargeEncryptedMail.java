@@ -1,6 +1,7 @@
 package org.bouncycastle.mail.smime.examples;
 
 import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
@@ -11,6 +12,7 @@ import javax.mail.internet.MimeMessage;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedParser;
 import org.bouncycastle.mail.smime.SMIMEUtil;
@@ -46,7 +48,7 @@ public class ReadLargeEncryptedMail
         // suitable recipient identifier.
         //
         X509Certificate cert = (X509Certificate)ks.getCertificate(keyAlias);
-        RecipientId     recId = new JceKeyTransRecipientId(cert.getIssuerX500Principal(), cert.getSerialNumber());        
+        RecipientId     recId = new JceKeyTransRecipientId(cert);
 
         //
         // Get a Session object with the default properties.
@@ -62,7 +64,7 @@ public class ReadLargeEncryptedMail
         RecipientInformationStore   recipients = m.getRecipientInfos();
         RecipientInformation        recipient = recipients.get(recId);
 
-        MimeBodyPart        res = SMIMEUtil.toMimeBodyPart(recipient.getContentStream(ks.getKey(keyAlias, null), "BC"));
+        MimeBodyPart        res = SMIMEUtil.toMimeBodyPart(recipient.getContentStream(new JceKeyTransEnvelopedRecipient((PrivateKey)ks.getKey(keyAlias, null)).setProvider("BC")));
 
         ExampleUtils.dumpContent(res, args[2]);
     }
