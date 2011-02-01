@@ -457,7 +457,7 @@ public class SMIMESignedGenerator
 
     private MimeMultipart make(
         MimeBodyPart    content)
-    throws NoSuchAlgorithmException, SMIMEException
+    throws SMIMEException
     {
         try
         {
@@ -527,7 +527,7 @@ public class SMIMESignedGenerator
      */
     private MimeBodyPart makeEncapsulated(
         MimeBodyPart    content)
-        throws NoSuchAlgorithmException, SMIMEException
+        throws SMIMEException
     {
         try
         {
@@ -637,7 +637,7 @@ public class SMIMESignedGenerator
 
     public MimeMultipart generate(
         MimeBodyPart    content)
-        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+        throws SMIMEException
     {
         return make(makeContentBodyPart(content));
     }
@@ -651,7 +651,7 @@ public class SMIMESignedGenerator
      */
     public MimeBodyPart generateEncapsulated(
         MimeBodyPart    content)
-        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+        throws SMIMEException
     {
         return makeEncapsulated(makeContentBodyPart(content));
     }
