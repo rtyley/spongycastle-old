@@ -270,7 +270,7 @@ public class PSSTest
         
         for (int j = 0; j < NUM_TESTS; j++)
         {
-            eng.init(true, new ParametersWithRandom(prv8));
+            eng.init(true, new ParametersWithRandom(prv8, random));
 
             eng.update(data, 0, data.length);
 
@@ -302,7 +302,7 @@ public class PSSTest
 
         for (int j = 0; j < NUM_TESTS; j++)
         {
-            eng.init(true, new ParametersWithRandom(prv8));
+            eng.init(true, new ParametersWithRandom(prv8, random));
 
             eng.update(data, 0, data.length);
 
