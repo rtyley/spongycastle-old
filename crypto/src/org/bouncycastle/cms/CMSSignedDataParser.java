@@ -428,6 +428,7 @@ public class CMSSignedDataParser
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchAlgorithmException if the cert store isn't available.
      * @exception CMSException if a general exception prevents creation of the CertStore
+     * @deprecated use getCertificates()
      */
     public CertStore getCertificatesAndCRLs(
         String  type,
@@ -444,6 +445,7 @@ public class CMSSignedDataParser
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchAlgorithmException if the cert store isn't available.
      * @exception CMSException if a general exception prevents creation of the CertStore
+     * @deprecated use getCertificates()
      */
     public CertStore getCertificatesAndCRLs(
         String  type,
