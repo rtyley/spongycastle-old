@@ -18,7 +18,7 @@ abstract class TlsDSASigner implements TlsSigner
     {
         // Note: Only use the SHA1 part of the hash
         Signer signer = new DSADigestSigner(createDSAImpl(), new NullDigest());
-        signer.init(true, new ParametersWithRandom(privateKey));
+        signer.init(true, new ParametersWithRandom(privateKey, secureRandom));
         signer.update(md5andsha1, 16, 20);
         return signer.generateSignature();
     }
