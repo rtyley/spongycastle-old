@@ -373,7 +373,7 @@ public class SMIMEEnvelopedTest
         X509Certificate cert) 
         throws IOException, CertificateEncodingException
     {
-        RecipientId          recId = new JceKeyTransRecipientId(cert.getIssuerX500Principal(), cert.getSerialNumber());
+        RecipientId          recId = new JceKeyTransRecipientId(cert);
 
         return recId;
     }
