@@ -7,7 +7,7 @@ import java.io.OutputStream;
 /**
  * A generic interface for key exchange implementations in TLS 1.0.
  */
-interface TlsKeyExchange
+public interface TlsKeyExchange
 {
     void skipServerCertificate() throws IOException;
 
