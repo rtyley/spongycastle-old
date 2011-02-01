@@ -2,7 +2,7 @@ package org.bouncycastle.crypto.tls;
 
 import java.io.IOException;
 
-interface TlsCipher
+public interface TlsCipher
 {
     byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len) throws IOException;
 
