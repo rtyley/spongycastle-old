@@ -1,7 +1,6 @@
 package org.bouncycastle.mail.smime.examples;
 
 import java.io.FileInputStream;
-import java.security.cert.CertStore;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Iterator;
@@ -14,9 +13,13 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.mail.smime.SMIMESigned;
+import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.bouncycastle.util.Store;
 
 /**
  * a simple example that reads a basic SMIME signed mail file.
@@ -37,8 +40,7 @@ public class ReadSignedMail
         //
         // certificates and crls passed in the signature
         //
-        CertStore               certs = s.getCertificatesAndCRLs(
-                                                "Collection", "BC");
+        Store certs = s.getCertificates();
 
         //
         // SignerInfo blocks which contain the signatures
@@ -54,16 +56,16 @@ public class ReadSignedMail
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certs.getMatches(signer.getSID());
 
             Iterator        certIt = certCollection.iterator();
-            X509Certificate cert = (X509Certificate)certIt.next();
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate((X509CertificateHolder)certIt.next());
 
             //
             // verify that the sig is correct and that it was generated
             // when the certificate was current
             //
-            if (signer.verify(cert, "BC"))
+            if (signer.verify(new JcaContentVerifierProviderBuilder().setProvider("BC").build(cert)))
             {
                 System.out.println("signature verified");
             }
