@@ -29,5 +29,7 @@ public interface TlsClient
 
     TlsAuthentication getAuthentication() throws IOException;
 
+    TlsCompression getCompression() throws IOException;
+
     TlsCipher getCipher() throws IOException;
 }

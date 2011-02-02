@@ -529,7 +529,7 @@ public class TlsProtocolHandler
                         /*
                          * Initialize our cipher suite
                          */
-                        rs.clientCipherSpecDecided(tlsClient.getCipher());
+                        rs.clientCipherSpecDecided(tlsClient.getCompression(), tlsClient.getCipher());
 
                         /*
                          * Send our finished message.
