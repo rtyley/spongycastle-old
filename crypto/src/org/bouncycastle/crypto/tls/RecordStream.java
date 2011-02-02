@@ -74,7 +74,7 @@ class RecordStream
         }
 
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        OutputStream cOut = writeCompression.decompress(bOut);
+        OutputStream cOut = writeCompression.compress(bOut);
         cOut.write(message, offset, len);
         cOut.close();
         byte[] compressed = bOut.toByteArray();
