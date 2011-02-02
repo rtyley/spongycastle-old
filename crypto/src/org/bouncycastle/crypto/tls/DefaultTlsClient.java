@@ -10,6 +10,7 @@ public abstract class DefaultTlsClient implements TlsClient
     protected TlsClientContext context;
 
     protected int selectedCipherSuite;
+    protected int selectedCompressionMethod;
 
     public DefaultTlsClient()
     {
@@ -63,7 +64,7 @@ public abstract class DefaultTlsClient implements TlsClient
 
     public void notifySelectedCompressionMethod(short selectedCompressionMethod)
     {
-        // TODO Store and use
+        this.selectedCompressionMethod = selectedCompressionMethod;
     }
 
     public void notifySecureRenegotiation(boolean secureRenegotiation) throws IOException
@@ -138,6 +139,27 @@ public abstract class DefaultTlsClient implements TlsClient
                  * Note: internal error here; the TlsProtocolHandler verifies that the
                  * server-selected cipher suite was in the list of client-offered cipher
                  * suites, so if we now can't produce an implementation, we shouldn't have
+                 * offered it!
+                 */
+                throw new TlsFatalAlert(AlertDescription.internal_error);
+        }
+    }
+
+    public TlsCompression getCompression() throws IOException
+    {
+        switch (selectedCompressionMethod)
+        {
+            case CompressionMethod.NULL:
+                return new TlsNullCompression();
+
+            case CompressionMethod.DEFLATE:
+                return new TlsDeflateCompression();
+
+            default:
+                /*
+                 * Note: internal error here; the TlsProtocolHandler verifies that the
+                 * server-selected compression method was in the list of client-offered compression
+                 * methods, so if we now can't produce an implementation, we shouldn't have
                  * offered it!
                  */
                 throw new TlsFatalAlert(AlertDescription.internal_error);
