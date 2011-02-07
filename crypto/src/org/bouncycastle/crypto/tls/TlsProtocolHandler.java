@@ -615,7 +615,7 @@ public class TlsProtocolHandler
                         while (bis.available() > 0)
                         {
                             byte[] dnBytes = TlsUtils.readOpaque16(bis);
-                            authorityDNs.add(X500Name.getInstance(ASN1Object.fromByteArray(dnBytes)));
+                            authorityDNs.addElement(X500Name.getInstance(ASN1Object.fromByteArray(dnBytes)));
                         }
 
                         this.certificateRequest = new CertificateRequest(certificateTypes,
