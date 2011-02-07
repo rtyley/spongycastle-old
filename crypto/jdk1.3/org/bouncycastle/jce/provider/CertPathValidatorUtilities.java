@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.PublicKey;
+import java.security.GeneralSecurityException;
 import java.security.cert.CRL;
 import org.bouncycastle.jce.cert.CertPath;
 import org.bouncycastle.jce.cert.CertPathValidatorException;
@@ -1446,4 +1447,17 @@ public class CertPathValidatorUtilities
         return certs;
     }
     
+    protected static void verifyX509Certificate(X509Certificate cert, PublicKey publicKey,
+         String sigProvider)
+             throws GeneralSecurityException
+     {
+         if (sigProvider == null)
+         {
+             cert.verify(publicKey);
+         }
+         else
+         {
+             cert.verify(publicKey, sigProvider);
+         }
+     }
 }
