@@ -459,7 +459,7 @@ public class X509Extensions
 
             if (((X509Extension)extensions.get(oid)).isCritical() == isCritical)
             {
-                oidVec.add(oid);
+                oidVec.addElement(oid);
             }
         }
 
