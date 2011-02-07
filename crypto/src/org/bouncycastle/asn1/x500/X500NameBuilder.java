@@ -24,7 +24,7 @@ public class X500NameBuilder
 
     public X500NameBuilder addRDN(ASN1ObjectIdentifier oid, ASN1Encodable value)
     {
-        rdns.add(new RDN(oid, value));
+        rdns.addElement(new RDN(oid, value));
 
         return this;
     }
