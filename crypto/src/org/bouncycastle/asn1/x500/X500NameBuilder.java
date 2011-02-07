@@ -31,7 +31,7 @@ public class X500NameBuilder
 
     public X500NameBuilder addRDN(AttributeTypeAndValue attrTAndV)
     {
-        rdns.add(new RDN(attrTAndV));
+        rdns.addElement(new RDN(attrTAndV));
 
         return this;
     }
@@ -62,7 +62,7 @@ public class X500NameBuilder
 
     public X500NameBuilder addMultiValuedRDN(AttributeTypeAndValue[] attrTAndVs)
     {
-        rdns.add(new RDN(attrTAndVs));
+        rdns.addElement(new RDN(attrTAndVs));
 
         return this;
     }
