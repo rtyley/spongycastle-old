@@ -25,6 +25,7 @@ then
      | (cd lcrypto-jdk12-$base && tar xf -)
     (cd test && tar cf - src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1) \
      | (cd lcrypto-jdk12-$base && tar xf -)
+    (cd jdk1.3 && tar cf - org/bouncycastle/crypto/* | (cd ../lcrypto-jdk12-$base/src; tar xf -))
     (
         cd lcrypto-jdk12-$base;
 
@@ -38,6 +39,7 @@ then
         rm src/org/bouncycastle/asn1/test/OctetStringTest.java
         rm src/org/bouncycastle/asn1/test/ParseTest.java
         rm src/org/bouncycastle/util/IPTest.java
+        rm src/org/bouncycastle/crypto/test/GCMReorderTest.java
 
         (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
             -header "$HEADER" \
@@ -120,7 +122,6 @@ then
     cd jce-jdk12-$base; mkdir classes; mkdir docs;
 
     rm -rf src/org/bouncycastle/mail
-    rm -rf src/org/bouncycastle/cms
     rm -rf src/org/bouncycastle/bcpg
     rm -rf src/org/bouncycastle/openpgp
     rm -rf src/org/bouncycastle/tsp
@@ -129,13 +130,14 @@ then
     rm -rf src/org/bouncycastle/i18n/filter/test
     rm -rf src/org/bouncycastle/math/ec/test
     rm -rf src/org/bouncycastle/crypto/tls/test
+    rm -rf src/org/bouncycastle/crypto/test/GCMReorderTest.java
     rm -rf src/org/bouncycastle/jce/ECPointUtil.java
     rm -rf src/org/bouncycastle/jce/X509LDAP*.java
     rm -rf src/org/bouncycastle/jce/provider/X509LDAP*.java
     rm -rf src/org/bouncycastle/jce/provider/JCEEC5*.java
     rm -rf src/org/bouncycastle/jce/provider/EC5*.java
     rm -rf src/org/bouncycastle/jce/provider/asymmetric/ec/EC5*.java
-    rm -rf src/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java
+    #rm -rf src/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java
     rm -rf src/org/bouncycastle/jce/provider/test/ECDSA5Test.java
     rm -rf src/org/bouncycastle/jce/provider/test/CRL5Test.java
     rm -rf src/org/bouncycastle/jce/provider/test/X509LDAP*.java
@@ -154,17 +156,18 @@ then
     rm -rf src/org/bouncycastle/jce/provider/test/PKIXNameConstraintsTest.java
     rm -rf src/org/bouncycastle/jce/provider/test/nist
     rm -rf src/org/bouncycastle/jce/provider/test/rsa3
-    rm -rf src/org/bouncycastle/x509/ExtendedPKIX*.java
     rm -rf src/org/bouncycastle/x509/PKIXAttrCert*.java
     rm -rf src/org/bouncycastle/jce/provider/RFC3281*.java
-    rm -rf src/org/bouncycastle/jce/provider/RFC3280*.java
-    rm -rf src/org/bouncycastle/jce/provider/CertPathValidatorUtilities.java
+    rm -rf src/org/bouncycastle/jce/provider/JDKPKCS12StoreParameter.java
     find src -name AllTests.java -exec rm {} \;
     rm src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java
     rm src/org/bouncycastle/asn1/test/OctetStringTest.java
     rm src/org/bouncycastle/asn1/test/ParseTest.java
     rm -rf src/org/bouncycastle/openssl/test
     rm src/org/bouncycastle/util/IPTest.java
+    rm -rf src/org/bouncycastle/cms
+    rm -rf src/org/bouncycastle/cert/crmf
+    rm -rf src/org/bouncycastle/cert/cmp
 
     (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
@@ -205,6 +208,7 @@ then
         org.bouncycastle.asn1.x509 \
         org.bouncycastle.asn1.x9 \
         org.bouncycastle.math.ec \
+        org.bouncycastle.cert \
         org.bouncycastle.crypto \
         org.bouncycastle.crypto.agreement \
         org.bouncycastle.crypto.digests \
@@ -233,6 +237,7 @@ then
         org.bouncycastle.ocsp \
         org.bouncycastle.ocsp.test \
         org.bouncycastle.openssl \
+        org.bouncycastle.pkcs \
         org.bouncycastle.mozilla \
         org.bouncycastle.mozilla.test \
         org.bouncycastle.x509 \
@@ -248,7 +253,8 @@ then
 
     (cd src/java/security/spec; javac -d ../../../../classes -classpath ../../../../classes *.java )
 
-    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src *.java */*.java */*/*.java */*/*/*.java */*/*/*/*.java)
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src *.java [abci]*/*.java [abci]*/*/*.java [abci]*/*/*/*.java )
+    (cd src/org/bouncycastle; javac -d ../../../classes -classpath ../../../classes:../../../src [jmoptuvx]*/*.java [jmoptuvx]*/*/*.java [jmoptuvx]*/*/*/*.java [jmoptuvx]*/*/*/*/*.java)
 
     (cd src/javax/crypto; javac -d ../../../classes -classpath ../../../classes:../../../src *.java */*.java)
 
