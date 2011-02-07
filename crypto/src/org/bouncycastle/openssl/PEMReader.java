@@ -72,7 +72,7 @@ public class PEMReader
 {
     private final Map parsers = new HashMap();
 
-    private final PasswordFinder pFinder;
+    private PasswordFinder pFinder;
 
 
     /**
