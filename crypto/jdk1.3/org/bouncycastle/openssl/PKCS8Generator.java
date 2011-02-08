@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
@@ -214,6 +215,10 @@ public class PKCS8Generator
             {
                 throw new PemGenerationException(e.getMessage(), e);
             }
+            catch (InvalidKeyException e)
+            {
+                throw new PemGenerationException(e.getMessage(), e);
+            }
             catch (GeneralSecurityException e)
             {
                 throw new PemGenerationException(e.getMessage(), e);
@@ -247,6 +252,10 @@ public class PKCS8Generator
                 return new PemObject("ENCRYPTED PRIVATE KEY", info.getEncoded());
             }
             catch (IOException e)
+            {
+                throw new PemGenerationException(e.getMessage(), e);
+            }
+            catch (InvalidKeyException e)
             {
                 throw new PemGenerationException(e.getMessage(), e);
             }
