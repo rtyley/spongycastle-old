@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERUTCTime;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.X509Name;
 
 /**
@@ -26,7 +27,7 @@ import org.bouncycastle.asn1.x509.X509Name;
 public class CrlIdentifier
     extends ASN1Encodable
 {
-    private X509Name crlIssuer;
+    private X500Name crlIssuer;
     private DERUTCTime crlIssuedTime;
     private DERInteger crlNumber;
 
@@ -50,7 +51,7 @@ public class CrlIdentifier
         {
             throw new IllegalArgumentException();
         }
-        this.crlIssuer = X509Name.getInstance(seq.getObjectAt(0));
+        this.crlIssuer = X500Name.getInstance(seq.getObjectAt(0));
         this.crlIssuedTime = DERUTCTime.getInstance(seq.getObjectAt(1));
         if (seq.size() > 2)
         {
@@ -58,12 +59,34 @@ public class CrlIdentifier
         }
     }
 
+    /**
+     * @deprecated use X500Name constructor.
+     */
     public CrlIdentifier(X509Name crlIssuer, Date crlIssuedTime)
     {
         this(crlIssuer, crlIssuedTime, null);
     }
 
+    /**
+     * @deprecated use X500Name constructor.
+     */
     public CrlIdentifier(X509Name crlIssuer, Date crlIssuedTime,
+                         BigInteger crlNumber)
+    {
+        this.crlIssuer = X500Name.getInstance(crlIssuer);
+        this.crlIssuedTime = new DERUTCTime(crlIssuedTime);
+        if (null != crlNumber)
+        {
+            this.crlNumber = new DERInteger(crlNumber);
+        }
+    }
+
+    public CrlIdentifier(X500Name crlIssuer, Date crlIssuedTime)
+    {
+        this(crlIssuer, crlIssuedTime, null);
+    }
+
+    public CrlIdentifier(X500Name crlIssuer, Date crlIssuedTime,
                          BigInteger crlNumber)
     {
         this.crlIssuer = crlIssuer;
@@ -74,7 +97,7 @@ public class CrlIdentifier
         }
     }
 
-    public X509Name getCrlIssuer()
+    public X500Name getCrlIssuer()
     {
         return this.crlIssuer;
     }
