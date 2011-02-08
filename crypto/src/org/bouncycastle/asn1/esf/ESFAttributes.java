@@ -18,5 +18,5 @@ public interface ESFAttributes
     public static final ASN1ObjectIdentifier  escTimeStamp = PKCSObjectIdentifiers.id_aa_ets_escTimeStamp;
     public static final ASN1ObjectIdentifier  certCRLTimestamp = PKCSObjectIdentifiers.id_aa_ets_certCRLTimestamp;
     public static final ASN1ObjectIdentifier  archiveTimestamp = PKCSObjectIdentifiers.id_aa_ets_archiveTimestamp;
-    public static final ASN1ObjectIdentifier  archiveTimestampV2 = new ASN1ObjectIdentifier(PKCSObjectIdentifiers.id_aa + ".48");
+    public static final ASN1ObjectIdentifier  archiveTimestampV2 = PKCSObjectIdentifiers.id_aa.branch("48");
 }
