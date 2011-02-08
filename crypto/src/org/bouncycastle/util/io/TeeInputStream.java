@@ -1,17 +1,16 @@
-package org.bouncycastle.cms;
+package org.bouncycastle.util.io;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-class TeeInputStream
+public class TeeInputStream
     extends InputStream
 {
     private final InputStream input;
-    // FIXME Need internal access in RecipientInformation atm
-    final OutputStream output;
+    private final OutputStream output;
 
-    TeeInputStream(InputStream input, OutputStream output)
+    public TeeInputStream(InputStream input, OutputStream output)
     {
         this.input = input;
         this.output = output;
