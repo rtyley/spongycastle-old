@@ -330,8 +330,8 @@ public class PGPUtil
         {
             if (s2k != null)
             {     
-                String digestName = getS2kDigestName(s2k);
-                
+                String digestName = getDigestName(s2k.getHashAlgorithm());
+
                 try
                 {
                     digest = getDigestInstance(digestName, provider);
@@ -452,29 +452,6 @@ public class PGPUtil
         }
     }
 
-    private static String getS2kDigestName(S2K s2k) throws PGPException
-    {
-        switch (s2k.getHashAlgorithm())
-        {
-        case HashAlgorithmTags.MD5:
-            return "MD5";
-        case HashAlgorithmTags.RIPEMD160:
-            return "RIPEMD160";
-        case HashAlgorithmTags.SHA1:
-            return "SHA1";
-        case HashAlgorithmTags.SHA224:
-            return "SHA224";
-        case HashAlgorithmTags.SHA256:
-            return "SHA256";
-        case HashAlgorithmTags.SHA384:
-            return "SHA384";
-        case HashAlgorithmTags.SHA512:
-            return "SHA512";
-        default:
-            throw new PGPException("unknown hash algorithm: " + s2k.getHashAlgorithm());
-        }
-    }
-    
     /**
      * write out the passed in file as a literal data packet.
      * 
