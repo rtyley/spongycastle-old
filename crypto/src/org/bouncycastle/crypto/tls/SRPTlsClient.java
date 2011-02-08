@@ -137,9 +137,6 @@ public abstract class SRPTlsClient implements TlsClient
             case CompressionMethod.NULL:
                 return new TlsNullCompression();
 
-            case CompressionMethod.DEFLATE:
-                return new TlsDeflateCompression();
-
             default:
                 /*
                  * Note: internal error here; the TlsProtocolHandler verifies that the
