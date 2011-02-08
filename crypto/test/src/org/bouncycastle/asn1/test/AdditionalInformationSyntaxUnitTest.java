@@ -1,11 +1,11 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.isismtt.x509.AdditionalInformationSyntax;
 import org.bouncycastle.asn1.x500.DirectoryString;
-
-import java.io.IOException;
 
 public class AdditionalInformationSyntaxUnitTest
     extends ASN1UnitTest
@@ -21,13 +21,6 @@ public class AdditionalInformationSyntaxUnitTest
         AdditionalInformationSyntax syntax = new AdditionalInformationSyntax("hello world");
 
         checkConstruction(syntax, new DirectoryString("hello world"));
-
-        syntax = AdditionalInformationSyntax.getInstance(null);
-
-        if (syntax != null)
-        {
-            fail("null getInstance() failed.");
-        }
 
         try
         {
