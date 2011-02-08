@@ -1,11 +1,11 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.isismtt.x509.Restriction;
 import org.bouncycastle.asn1.x500.DirectoryString;
-
-import java.io.IOException;
 
 public class RestrictionUnitTest
     extends ASN1UnitTest
@@ -22,13 +22,6 @@ public class RestrictionUnitTest
         Restriction restriction = new Restriction(res.getString());
 
         checkConstruction(restriction, res);
-
-        restriction = Restriction.getInstance(null);
-
-        if (restriction != null)
-        {
-            fail("null getInstance() failed.");
-        }
 
         try
         {
