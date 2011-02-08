@@ -47,7 +47,7 @@ public class DERInteger
         }
         else
         {
-            return new DERInteger(ASN1OctetString.getInstance(obj.getObject()).getOctets());
+            return new ASN1Integer(ASN1OctetString.getInstance(obj.getObject()).getOctets());
         }
     }
 
