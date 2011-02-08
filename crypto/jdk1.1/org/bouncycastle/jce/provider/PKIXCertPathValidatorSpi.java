@@ -6,6 +6,28 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.PublicKey;
+import java.security.cert.CRLException;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathParameters;
+import java.security.cert.CertPathValidatorSpi;
+import java.security.cert.CertPathValidatorException;
+import java.security.cert.CertPathValidatorResult;
+import java.security.cert.PolicyQualifierInfo;
+import java.security.cert.X509Certificate;
+import java.security.cert.X509CRL;
+import java.security.cert.X509CRLEntry;
+import java.security.cert.X509CRLSelector;
+import java.security.cert.X509CertSelector;
+import java.security.cert.PKIXParameters;
+import java.security.cert.PKIXCertPathChecker;
+import java.security.cert.PKIXCertPathValidatorResult;
+import java.security.cert.TrustAnchor;
+import java.security.cert.PKIXParameters;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -17,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1OutputStream;
@@ -1315,7 +1339,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                                         permittedSubtreesDN = intersectDN(permittedSubtreesDN, (ASN1Sequence)base.getName());
                                         break;
                                     case 7:
-                                        permittedSubtreesIP = intersectIP(permittedSubtreesIP, BERConstructedOctetString.fromSequence(base.getName()).getOctets());
+                                        permittedSubtreesIP = intersectIP(permittedSubtreesIP, BERConstructedOctetString.fromSequence((ASN1Sequence)base.getName()).getOctets());
                                         break;
                                 }
                             }
@@ -1342,7 +1366,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                                     excludedSubtreesDN = unionDN(excludedSubtreesDN, (ASN1Sequence)base.getName());
                                     break;
                                 case 7:
-                                    excludedSubtreesIP = unionIP(excludedSubtreesIP, BERConstructedOctetString.fromSequence(base.getName()).getOctets());
+                                    excludedSubtreesIP = unionIP(excludedSubtreesIP, BERConstructedOctetString.fromSequence((ASN1Sequence)base.getName()).getOctets());
                                     break;
                                 }
                             }

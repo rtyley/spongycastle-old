@@ -1,12 +1,12 @@
 package org.bouncycastle.asn1;
 
-import org.bouncycastle.util.io.Streams;
-
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.bouncycastle.util.io.Streams;
 
 /**
  * a general purpose ASN.1 decoder - note: this class differs from the
@@ -21,10 +21,24 @@ public class ASN1InputStream
     private int limit;
     private boolean lazyEvaluate;
 
+    static int findLimit(InputStream in)
+    {
+        if (in instanceof LimitedInputStream)
+        {
+            return ((LimitedInputStream)in).getRemaining();
+        }
+        else if (in instanceof ByteArrayInputStream)
+        {
+            return ((ByteArrayInputStream)in).available();
+        }
+
+        return Integer.MAX_VALUE;
+    }
+
     public ASN1InputStream(
         InputStream is)
     {
-        this(is, Integer.MAX_VALUE);
+        this(is, findLimit(is));
     }
 
     /**
@@ -120,7 +134,7 @@ public class ASN1InputStream
 
         if ((tag & TAGGED) != 0)
         {
-            return new BERTaggedObjectParser(tag, tagNo, defIn).getDERObject();
+            return new ASN1StreamParser(defIn).readTaggedObject(isConstructed, tagNo);
         }
 
         if (isConstructed)
@@ -144,6 +158,8 @@ public class ASN1InputStream
                     }
                 case SET:
                     return DERFactory.createSet(buildDEREncodableVector(defIn), false);
+                case EXTERNAL:
+                    return new DERExternal(buildDEREncodableVector(defIn));                
                 default:
                     return new DERUnknownTag(true, tagNo, defIn.toByteArray());
             }
@@ -205,31 +221,44 @@ public class ASN1InputStream
                 throw new IOException("indefinite length primitive encoding encountered");
             }
 
-            IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this);
+            IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this, limit);
+            ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
+
+            if ((tag & APPLICATION) != 0)
+            {
+                return new BERApplicationSpecificParser(tagNo, sp).getLoadedObject();
+            }
 
             if ((tag & TAGGED) != 0)
             {
-                return new BERTaggedObjectParser(tag, tagNo, indIn).getDERObject();
+                return new BERTaggedObjectParser(true, tagNo, sp).getLoadedObject();
             }
-
-            ASN1StreamParser sp = new ASN1StreamParser(indIn);
 
             // TODO There are other tags that may be constructed (e.g. BIT_STRING)
             switch (tagNo)
             {
                 case OCTET_STRING:
-                    return new BEROctetStringParser(sp).getDERObject();
+                    return new BEROctetStringParser(sp).getLoadedObject();
                 case SEQUENCE:
-                    return new BERSequenceParser(sp).getDERObject();
+                    return new BERSequenceParser(sp).getLoadedObject();
                 case SET:
-                    return new BERSetParser(sp).getDERObject();
+                    return new BERSetParser(sp).getLoadedObject();
+                case EXTERNAL:
+                    return new DERExternalParser(sp).getLoadedObject();
                 default:
                     throw new IOException("unknown BER object encountered");
             }
         }
         else
         {
-            return buildObject(tag, tagNo, length);
+            try
+            {
+                return buildObject(tag, tagNo, length);
+            }
+            catch (IllegalArgumentException e)
+            {
+                throw new ASN1Exception("corrupted stream detected", e);
+            }
         }
     }
 
@@ -290,9 +319,10 @@ public class ASN1InputStream
         {
             int size = length & 0x7f;
 
+            // Note: The invalid long form "0xff" (see X.690 8.1.3.5c) will be caught here
             if (size > 4)
             {
-                throw new IOException("DER length more than 4 bytes");
+                throw new IOException("DER length more than 4 bytes: " + size);
             }
 
             length = 0;
@@ -329,32 +359,27 @@ public class ASN1InputStream
         switch (tagNo)
         {
             case BIT_STRING:
-            {
-                int padBits = bytes[0];
-                byte[] data = new byte[bytes.length - 1];
-                System.arraycopy(bytes, 1, data, 0, bytes.length - 1);
-                return new DERBitString(data, padBits);
-            }
+                return DERBitString.fromOctetString(bytes);
             case BMP_STRING:
                 return new DERBMPString(bytes);
             case BOOLEAN:
-                return new DERBoolean(bytes);
+                return new ASN1Boolean(bytes);
             case ENUMERATED:
-                return new DEREnumerated(bytes);
+                return new ASN1Enumerated(bytes);
             case GENERALIZED_TIME:
-                return new DERGeneralizedTime(bytes);
+                return new ASN1GeneralizedTime(bytes);
             case GENERAL_STRING:
                 return new DERGeneralString(bytes);
             case IA5_STRING:
                 return new DERIA5String(bytes);
             case INTEGER:
-                return new DERInteger(bytes);
+                return new ASN1Integer(bytes);
             case NULL:
                 return DERNull.INSTANCE;   // actual content is ignored (enforce 0 length?)
             case NUMERIC_STRING:
                 return new DERNumericString(bytes);
             case OBJECT_IDENTIFIER:
-                return new DERObjectIdentifier(bytes);
+                return new ASN1ObjectIdentifier(bytes);
             case OCTET_STRING:
                 return new DEROctetString(bytes);
             case PRINTABLE_STRING:
@@ -364,7 +389,7 @@ public class ASN1InputStream
             case UNIVERSAL_STRING:
                 return new DERUniversalString(bytes);
             case UTC_TIME:
-                return new DERUTCTime(bytes);
+                return new ASN1UTCTime(bytes);
             case UTF8_STRING:
                 return new DERUTF8String(bytes);
             case VISIBLE_STRING:
