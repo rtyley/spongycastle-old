@@ -9,7 +9,6 @@ import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.X509Name;
 
 public class ResponderID
     extends ASN1Encodable
@@ -32,7 +31,7 @@ public class ResponderID
     public static ResponderID getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof ResponderID)
+        if (obj instanceof ResponderID)
         {
             return (ResponderID)obj;
         }
@@ -75,15 +74,14 @@ public class ResponderID
 		return null;
 	}
 
-	public X509Name getName()
+	public X500Name getName()
 	{
-		if (this.value instanceof X509Name)
+		if (this.value instanceof ASN1OctetString)
 		{
-			X509Name name = (X509Name)this.value;
-			return name;
+			return null;
 		}
 
-		return null;
+		return X500Name.getInstance(value);
 	}
 
     /**
