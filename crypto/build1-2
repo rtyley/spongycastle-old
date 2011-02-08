@@ -117,6 +117,8 @@ then
     (cd jdk1.3 && tar cf - * | (cd ../jce-jdk12-$base/src; tar xf -))
     (cd test/jdk1.3 && tar cf - * | (cd ../../jce-jdk12-$base/src; tar xf -))
     (cd jdk1.2 && tar cf - * | (cd ../jce-jdk12-$base/src; tar xf -))
+    (cd test/data && tar cf - org/bouncycastle/asn1 | (cd ../../jce-jdk11-$base/src; tar xf -))
+
 
     (
     cd jce-jdk12-$base; mkdir classes; mkdir docs;
@@ -261,6 +263,7 @@ then
 
     echo "provider regression test"
     java -classpath classes org.bouncycastle.jce.provider.test.RegressionTest
+    java -classpath classes org.bouncycastle.asn1.test.RegressionTest
 
     (cd classes; jar cf ../../bctest-jdk12-$base.jar org/bouncycastle/asn1/test org/bouncycastle/crypto/test org/bouncycastle/jce/provider/test)
 
@@ -306,6 +309,7 @@ then
     rm -rf src/org/bouncycastle/tsp
     rm -rf src/org/bouncycastle/x509
     rm -rf src/org/bouncycastle/sasn1
+    rm -rf src/org/bouncycastle/asn1/test
     rm -f src/org/bouncycastle/openpgp/test/DSA2Test.java
     find src -name AllTests.java -exec rm {} \;
 
@@ -313,7 +317,7 @@ then
         -header "$HEADER" \
         -group "BCPG Support Packages" "org.bouncycastle.bcpg*" \
         -group "OpenPGP Packages" "org.bouncycastle.openpgp*" \
-        -classpath classes:../jce-jdk12-$base/classes \
+        -classpath classes:../jce-ext-jdk12-146.jar \
         -d docs -sourcepath src \
         org.bouncycastle.bcpg \
         org.bouncycastle.bcpg.attr \
@@ -342,7 +346,7 @@ Implementation-Version: $version.0
 %
 
     (cd classes; jar cmf pg.mf ../../bcpg-jdk12-$base.jar org)
-    java -classpath ../jce-jdk12-$base/classes:classes org.bouncycastle.openpgp.test.RegressionTest
+    java -classpath ../jce-ext-jdk12-$base.jar:classes org.bouncycastle.openpgp.test.RegressionTest
 
     )
 
