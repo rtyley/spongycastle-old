@@ -3,7 +3,7 @@ package org.bouncycastle.tsp;
 /**
  * Exception thrown if a TSP request or response fails to validate.
  * <p>
- * If a failure code is assciated with the exception it can be retrieved using
+ * If a failure code is associated with the exception it can be retrieved using
  * the getFailureCode() method.
  */
 public class TSPValidationException

@@ -51,7 +51,7 @@ public class CMSTimeStampedDataGenerator
         }
     }
 
-    public CMSTimeStampedData generate(TimeStampToken timeStamp)
+    public CMSTimeStampedData generate(TimeStampToken timeStamp) throws CMSException
     {
         ASN1OctetString content = null;
 
@@ -65,3 +65,4 @@ public class CMSTimeStampedDataGenerator
         return new CMSTimeStampedData(new ContentInfo(CMSObjectIdentifiers.timestampedData, new TimeStampedData(new DERIA5String(dataUri.toString()), metaData, content, new Evidence(new TimeStampTokenEvidence(stamp)))));
     }
 }
+
