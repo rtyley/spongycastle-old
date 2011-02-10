@@ -80,6 +80,10 @@ public abstract class ECCurve
             {
                 // infinity
             case 0x00:
+                if (encoded.length > 1)
+                {
+                    throw new RuntimeException("Invalid point encoding");
+                }
                 p = getInfinity();
                 break;
                 // compressed
@@ -410,6 +414,10 @@ public abstract class ECCurve
             {
                 // infinity
             case 0x00:
+                if (encoded.length > 1)
+                {
+                    throw new RuntimeException("Invalid point encoding");
+                }
                 p = getInfinity();
                 break;
                 // compressed
