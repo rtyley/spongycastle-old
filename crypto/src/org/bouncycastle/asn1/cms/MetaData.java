@@ -17,6 +17,18 @@ public class MetaData
     private DERIA5String  mediaType;
     private Attributes otherMetaData;
 
+    public MetaData(
+        DERBoolean hashProtected,
+        DERUTF8String fileName,
+        DERIA5String mediaType,
+        Attributes otherMetaData)
+    {
+        this.hashProtected = hashProtected;
+        this.fileName = fileName;
+        this.mediaType = mediaType;
+        this.otherMetaData = otherMetaData;
+    }
+
     private MetaData(ASN1Sequence seq)
     {
         this.hashProtected = DERBoolean.getInstance(seq.getObjectAt(0));

@@ -41,6 +41,16 @@ public class TimeStampAndCRL
         throw new IllegalArgumentException("null object in factory");
     }
 
+    public ContentInfo getTimeStampToken()
+    {
+        return this.timeStamp;
+    }
+
+    public CertificateList getCertificateList()
+    {
+        return this.crl;
+    }
+
     /**
      * <pre>
      * TimeStampAndCRL ::= SEQUENCE {
