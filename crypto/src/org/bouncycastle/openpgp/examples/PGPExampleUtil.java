@@ -115,7 +115,8 @@ class PGPExampleUtil
      */
     static PGPSecretKey readSecretKey(InputStream input) throws IOException, PGPException
     {
-        PGPSecretKeyRingCollection pgpSec = new PGPSecretKeyRingCollection(input);
+        PGPSecretKeyRingCollection pgpSec = new PGPSecretKeyRingCollection(
+            PGPUtil.getDecoderStream(input));
 
         //
         // we just loop through the collection till we find a key suitable for encryption, in the real
