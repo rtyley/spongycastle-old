@@ -1,26 +1,7 @@
 package org.bouncycastle.openpgp.examples;
 
-import org.bouncycastle.bcpg.ArmoredOutputStream;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openpgp.PGPCompressedData;
-import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
-import org.bouncycastle.openpgp.PGPEncryptedData;
-import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
-import org.bouncycastle.openpgp.PGPEncryptedDataList;
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPLiteralData;
-import org.bouncycastle.openpgp.PGPObjectFactory;
-import org.bouncycastle.openpgp.PGPOnePassSignatureList;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyEncryptedData;
-import org.bouncycastle.openpgp.PGPPublicKeyRing;
-import org.bouncycastle.openpgp.PGPPublicKeyRingCollection;
-import org.bouncycastle.openpgp.PGPSecretKey;
-import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
-import org.bouncycastle.openpgp.PGPUtil;
-
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,6 +12,24 @@ import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Iterator;
+
+import org.bouncycastle.bcpg.ArmoredOutputStream;
+import org.bouncycastle.bcpg.CompressionAlgorithmTags;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openpgp.PGPCompressedData;
+import org.bouncycastle.openpgp.PGPEncryptedData;
+import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
+import org.bouncycastle.openpgp.PGPEncryptedDataList;
+import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPLiteralData;
+import org.bouncycastle.openpgp.PGPObjectFactory;
+import org.bouncycastle.openpgp.PGPOnePassSignatureList;
+import org.bouncycastle.openpgp.PGPPrivateKey;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPPublicKeyEncryptedData;
+import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
+import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.util.io.Streams;
 
 /**
  * A simple utility class that encrypts/decrypts public key based
@@ -51,79 +50,20 @@ import java.util.Iterator;
  */
 public class KeyBasedFileProcessor
 {
-    /**
-     * A simple routine that opens a key ring file and loads the first available key suitable for
-     * encryption.
-     * 
-     * @param in
-     * @return
-     * @throws IOException
-     * @throws PGPException
-     */
-    private static PGPPublicKey readPublicKey(
-        InputStream    in)
-        throws IOException, PGPException
+    private static void decryptFile(
+        String inputFileName,
+        String keyFileName,
+        char[] passwd,
+        String defaultFileName)
+        throws IOException, NoSuchProviderException
     {
-        in = PGPUtil.getDecoderStream(in);
-        
-        PGPPublicKeyRingCollection        pgpPub = new PGPPublicKeyRingCollection(in);
+        InputStream in = new BufferedInputStream(new FileInputStream(inputFileName));
+        InputStream keyIn = new BufferedInputStream(new FileInputStream(keyFileName));
+        decryptFile(in, keyIn, passwd, defaultFileName);
+        keyIn.close();
+        in.close();
+    }
 
-        //
-        // we just loop through the collection till we find a key suitable for encryption, in the real
-        // world you would probably want to be a bit smarter about this.
-        //
-        
-        //
-        // iterate through the key rings.
-        //
-        Iterator rIt = pgpPub.getKeyRings();
-        
-        while (rIt.hasNext())
-        {
-            PGPPublicKeyRing    kRing = (PGPPublicKeyRing)rIt.next();    
-            Iterator                        kIt = kRing.getPublicKeys();
-            
-            while (kIt.hasNext())
-            {
-                PGPPublicKey    k = (PGPPublicKey)kIt.next();
-                
-                if (k.isEncryptionKey())
-                {
-                    return k;
-                }
-            }
-        }
-        
-        throw new IllegalArgumentException("Can't find encryption key in key ring.");
-    }
-    
-    /**
-     * Search a secret key ring collection for a secret key corresponding to
-     * keyID if it exists.
-     * 
-     * @param pgpSec a secret key ring collection.
-     * @param keyID keyID we want.
-     * @param pass passphrase to decrypt secret key with.
-     * @return
-     * @throws PGPException
-     * @throws NoSuchProviderException
-     */
-    private static PGPPrivateKey findSecretKey(
-        PGPSecretKeyRingCollection  pgpSec,
-        long                        keyID,
-        char[]                      pass)
-        throws PGPException, NoSuchProviderException
-    {    
-        PGPSecretKey pgpSecKey = pgpSec.getSecretKey(keyID);
-        
-        if (pgpSecKey == null)
-        {
-            return null;
-        }
-        
-        return pgpSecKey.extractPrivateKey(pass, "BC");
-    }
-    
     /**
      * decrypt the passed in message stream
      */
@@ -132,7 +72,7 @@ public class KeyBasedFileProcessor
         InputStream keyIn,
         char[]      passwd,
         String      defaultFileName)
-        throws Exception
+        throws IOException, NoSuchProviderException
     {
         in = PGPUtil.getDecoderStream(in);
         
@@ -167,7 +107,7 @@ public class KeyBasedFileProcessor
             {
                 pbe = (PGPPublicKeyEncryptedData)it.next();
                 
-                sKey = findSecretKey(pgpSec, pbe.getKeyID(), passwd);
+                sKey = PGPExampleUtil.findSecretKey(pgpSec, pbe.getKeyID(), passwd);
             }
             
             if (sKey == null)
@@ -191,21 +131,20 @@ public class KeyBasedFileProcessor
             
             if (message instanceof PGPLiteralData)
             {
-                PGPLiteralData      ld = (PGPLiteralData)message;
-                String              outFileName = ld.getFileName();
-                if (ld.getFileName().length() == 0)
+                PGPLiteralData ld = (PGPLiteralData)message;
+
+                String outFileName = ld.getFileName();
+                if (outFileName.length() == 0)
                 {
                     outFileName = defaultFileName;
                 }
-                FileOutputStream    fOut = new FileOutputStream(outFileName);
-                
-                InputStream    unc = ld.getInputStream();
-                int    ch;
-                
-                while ((ch = unc.read()) >= 0)
-                {
-                    fOut.write(ch);
-                }
+
+                InputStream unc = ld.getInputStream();
+                OutputStream fOut = new BufferedOutputStream(new FileOutputStream(outFileName));
+
+                Streams.pipeAll(unc, fOut);
+
+                fOut.close();
             }
             else if (message instanceof PGPOnePassSignatureList)
             {
@@ -243,43 +182,49 @@ public class KeyBasedFileProcessor
     }
 
     private static void encryptFile(
+        String          outputFileName,
+        String          inputFileName,
+        String          encKeyFileName,
+        boolean         armor,
+        boolean         withIntegrityCheck)
+        throws IOException, NoSuchProviderException, PGPException
+    {
+        OutputStream out = new BufferedOutputStream(new FileOutputStream(outputFileName));
+        PGPPublicKey encKey = PGPExampleUtil.readPublicKey(encKeyFileName);
+        encryptFile(out, inputFileName, encKey, armor, withIntegrityCheck);
+        out.close();
+    }
+
+    private static void encryptFile(
         OutputStream    out,
         String          fileName,
         PGPPublicKey    encKey,
         boolean         armor,
         boolean         withIntegrityCheck)
         throws IOException, NoSuchProviderException
-    {    
+    {
         if (armor)
         {
             out = new ArmoredOutputStream(out);
         }
-        
+
         try
         {
-            ByteArrayOutputStream       bOut = new ByteArrayOutputStream();
-            
-    
-            PGPCompressedDataGenerator  comData = new PGPCompressedDataGenerator(
-                                                                    PGPCompressedData.ZIP);
-                                                                    
-            PGPUtil.writeFileToLiteralData(comData.open(bOut), PGPLiteralData.BINARY, new File(fileName));
-            
-            comData.close();
-            
-            PGPEncryptedDataGenerator   cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, withIntegrityCheck, new SecureRandom(), "BC");
-                
-            cPk.addMethod(encKey);
-            
-            byte[]                bytes = bOut.toByteArray();
-            
-            OutputStream    cOut = cPk.open(out, bytes.length);
+            byte[] bytes = PGPExampleUtil.compressFile(fileName, CompressionAlgorithmTags.ZIP);
+
+            PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
+                PGPEncryptedData.CAST5, withIntegrityCheck, new SecureRandom(), "BC");
+            encGen.addMethod(encKey);
+
+            OutputStream cOut = encGen.open(out, bytes.length);
 
             cOut.write(bytes);
-            
             cOut.close();
 
-            out.close();
+            if (armor)
+            {
+                out.close();
+            }
         }
         catch (PGPException e)
         {
@@ -302,33 +247,25 @@ public class KeyBasedFileProcessor
             System.err.println("usage: KeyBasedFileProcessor -e|-d [-a|ai] file [secretKeyFile passPhrase|pubKeyFile]");
             return;
         }
-        
+
         if (args[0].equals("-e"))
         {
             if (args[1].equals("-a") || args[1].equals("-ai") || args[1].equals("-ia"))
             {
-                FileInputStream     keyIn = new FileInputStream(args[3]);
-                FileOutputStream    out = new FileOutputStream(args[2] + ".asc");
-                encryptFile(out, args[2], readPublicKey(keyIn), true, (args[1].indexOf('i') > 0));
+                encryptFile(args[2] + ".asc", args[2], args[3], true, (args[1].indexOf('i') > 0));
             }
             else if (args[1].equals("-i"))
             {
-                FileInputStream     keyIn = new FileInputStream(args[3]);
-                FileOutputStream    out = new FileOutputStream(args[2] + ".bpg");
-                encryptFile(out, args[2], readPublicKey(keyIn), false, true);
+                encryptFile(args[2] + ".bpg", args[2], args[3], false, true);
             }
             else
             {
-                FileInputStream     keyIn = new FileInputStream(args[2]);
-                FileOutputStream    out = new FileOutputStream(args[1] + ".bpg");
-                encryptFile(out, args[1], readPublicKey(keyIn), false, false);
+                encryptFile(args[1] + ".bpg", args[1], args[2], false, false);
             }
         }
         else if (args[0].equals("-d"))
         {
-            FileInputStream    in = new FileInputStream(args[1]);
-            FileInputStream    keyIn = new FileInputStream(args[2]);
-            decryptFile(in, keyIn, args[3].toCharArray(), new File(args[1]).getName() + ".out");
+            decryptFile(args[1], args[2], args[3].toCharArray(), new File(args[1]).getName() + ".out");
         }
         else
         {

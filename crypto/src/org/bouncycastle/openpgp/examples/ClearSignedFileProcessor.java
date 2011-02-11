@@ -172,6 +172,8 @@ public class ClearSignedFileProcessor
             while (lookAhead != -1);
         }
 
+        sigIn.close();
+
         if (sig.verify())
         {
             System.out.println("signature verified.");
@@ -247,8 +249,8 @@ public class ClearSignedFileProcessor
             sGen.setHashedSubpackets(spGen.generate());
         }
         
-        FileInputStream        fIn = new FileInputStream(fileName);
-        ArmoredOutputStream    aOut = new ArmoredOutputStream(out);
+        InputStream fIn = new BufferedInputStream(new FileInputStream(fileName));
+        ArmoredOutputStream aOut = new ArmoredOutputStream(out);
         
         aOut.beginClearText(digest);
 
@@ -273,7 +275,9 @@ public class ClearSignedFileProcessor
             }
             while (lookAhead != -1);
         }
-        
+
+        fIn.close();
+
         aOut.endClearText();
         
         BCPGOutputStream            bOut = new BCPGOutputStream(aOut);

@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import java.security.Security;
 
 import org.bouncycastle.bcpg.ArmoredOutputStream;
+import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
 import org.bouncycastle.openpgp.PGPEncryptedDataList;
@@ -18,6 +19,7 @@ import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPPBEEncryptedData;
 import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
 import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.util.io.Streams;
 
 /**
  * Simple routine to encrypt and decrypt using a passphrase.
@@ -78,22 +80,9 @@ public class ByteArrayHandler
 
         pgpFact = new PGPObjectFactory(cData.getDataStream());
 
-        PGPLiteralData  ld = (PGPLiteralData)pgpFact.nextObject();
+        PGPLiteralData ld = (PGPLiteralData)pgpFact.nextObject();
 
-        InputStream unc = ld.getInputStream();
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        int ch;
-
-        while ((ch = unc.read()) >= 0)
-        {
-            out.write(ch);
-
-        }
-        
-        byte[] returnBytes = out.toByteArray();
-        out.close();
-        return returnBytes;
+        return Streams.readAll(ld.getInputStream());
     }
 
     /**
@@ -120,32 +109,50 @@ public class ByteArrayHandler
      * @exception NoSuchProviderException
      */
     public static byte[] encrypt(
-        byte[]     clearData,
-        char[]         passPhrase,
-        String         fileName,
-        int            algorithm,
-        boolean     armor)
+        byte[]  clearData,
+        char[]  passPhrase,
+        String  fileName,
+        int     algorithm,
+        boolean armor)
         throws IOException, PGPException, NoSuchProviderException
     {
         if (fileName == null)
         {
             fileName= PGPLiteralData.CONSOLE;
         }
-        
-        ByteArrayOutputStream    encOut = new ByteArrayOutputStream();
-        
-        OutputStream out = encOut;
+
+        byte[] compressedData = compress(clearData, fileName, CompressionAlgorithmTags.ZIP);
+
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        OutputStream out = bOut;
         if (armor)
         {
             out = new ArmoredOutputStream(out);
         }
 
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+        PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(algorithm, new SecureRandom(), "BC");
+        encGen.addMethod(passPhrase);
 
+        OutputStream encOut = encGen.open(out, compressedData.length);
 
-        PGPCompressedDataGenerator comData = new PGPCompressedDataGenerator(
-                                                        PGPCompressedDataGenerator.ZIP);
+        encOut.write(compressedData);
+        encOut.close();
+
+        if (armor)
+        {
+            out.close();
+        }
+
+        return bOut.toByteArray();
+    }
+
+    private static byte[] compress(byte[] clearData, String fileName, int algorithm) throws IOException
+    {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        PGPCompressedDataGenerator comData = new PGPCompressedDataGenerator(algorithm);
         OutputStream cos = comData.open(bOut); // open it with the final destination
+
         PGPLiteralDataGenerator lData = new PGPLiteralDataGenerator();
 
         // we want to generate compressed data. This might be a user option later,
@@ -156,31 +163,16 @@ public class ByteArrayHandler
                                         clearData.length, // length of clear data
                                         new Date()  // current time
                                       );
-        pOut.write(clearData);
 
-        lData.close();
+        pOut.write(clearData);
+        pOut.close();
+
         comData.close();
 
-        PGPEncryptedDataGenerator   cPk = new PGPEncryptedDataGenerator(algorithm, new SecureRandom(), "BC");
-
-        cPk.addMethod(passPhrase);
-
-        byte[]              bytes = bOut.toByteArray();
-
-        OutputStream    cOut = cPk.open(out, bytes.length);
-
-        cOut.write(bytes);  // obtain the actual bytes from the compressed stream
-
-        cOut.close();
-
-        out.close();
-
-        return  encOut.toByteArray();
+        return bOut.toByteArray();
     }
 
-    public static void main(
-                           String[] args)
-    throws Exception
+    public static void main(String[] args) throws Exception
     {
         Security.addProvider(new BouncyCastleProvider());
         

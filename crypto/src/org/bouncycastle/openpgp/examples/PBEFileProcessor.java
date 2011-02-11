@@ -1,20 +1,7 @@
 package org.bouncycastle.openpgp.examples;
 
-import org.bouncycastle.bcpg.ArmoredOutputStream;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openpgp.PGPCompressedData;
-import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
-import org.bouncycastle.openpgp.PGPEncryptedData;
-import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
-import org.bouncycastle.openpgp.PGPEncryptedDataList;
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPLiteralData;
-import org.bouncycastle.openpgp.PGPObjectFactory;
-import org.bouncycastle.openpgp.PGPPBEEncryptedData;
-import org.bouncycastle.openpgp.PGPUtil;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,6 +10,20 @@ import java.io.OutputStream;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
+
+import org.bouncycastle.bcpg.ArmoredOutputStream;
+import org.bouncycastle.bcpg.CompressionAlgorithmTags;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openpgp.PGPCompressedData;
+import org.bouncycastle.openpgp.PGPEncryptedData;
+import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
+import org.bouncycastle.openpgp.PGPEncryptedDataList;
+import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPLiteralData;
+import org.bouncycastle.openpgp.PGPObjectFactory;
+import org.bouncycastle.openpgp.PGPPBEEncryptedData;
+import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.util.io.Streams;
 
 /**
  * A simple utility class that encrypts/decrypts password based
@@ -40,13 +41,21 @@ import java.security.Security;
  */
 public class PBEFileProcessor
 {
+    private static void decryptFile(String inputFileName, char[] passPhrase)
+        throws IOException, NoSuchProviderException, PGPException
+    {
+        InputStream in = new BufferedInputStream(new FileInputStream(inputFileName));
+        decryptFile(in, passPhrase);
+        in.close();
+    }
+
     /**
      * decrypt the passed in message stream
      */
     private static void decryptFile(
         InputStream    in,
         char[]         passPhrase)
-        throws Exception
+        throws IOException, NoSuchProviderException, PGPException
     {
         in = PGPUtil.getDecoderStream(in);
         
@@ -87,18 +96,15 @@ public class PBEFileProcessor
             o = pgpFact.nextObject();
         }
         
-        PGPLiteralData          ld = (PGPLiteralData)o;
-        
-        FileOutputStream        fOut = new FileOutputStream(ld.getFileName());
-        
-        InputStream    unc = ld.getInputStream();
-        int    ch;
-        
-        while ((ch = unc.read()) >= 0)
-        {
-            fOut.write(ch);
-        }
-        
+        PGPLiteralData ld = (PGPLiteralData)o;
+        InputStream unc = ld.getInputStream();
+
+        OutputStream fOut = new BufferedOutputStream(new FileOutputStream(ld.getFileName()));
+
+        Streams.pipeAll(unc, fOut);
+
+        fOut.close();
+
         if (pbe.isIntegrityProtected())
         {
             if (!pbe.verify())
@@ -117,41 +123,57 @@ public class PBEFileProcessor
     }
 
     private static void encryptFile(
+        String          outputFileName,
+        String          inputFileName,
+        char[]          passPhrase,
+        boolean         armor,
+        boolean         withIntegrityCheck)
+        throws IOException, NoSuchProviderException
+    {
+        OutputStream out = new BufferedOutputStream(new FileOutputStream(outputFileName));
+        encryptFile(out, inputFileName, passPhrase, armor, withIntegrityCheck);
+        out.close();
+    }
+
+    private static void encryptFile(
         OutputStream    out,
         String          fileName,
         char[]          passPhrase,
         boolean         armor,
         boolean         withIntegrityCheck)
-        throws IOException, NoSuchProviderException, PGPException
-    {    
+        throws IOException, NoSuchProviderException
+    {
         if (armor)
         {
             out = new ArmoredOutputStream(out);
         }
-        
-        ByteArrayOutputStream       bOut = new ByteArrayOutputStream();
-        
 
-        PGPCompressedDataGenerator  comData = new PGPCompressedDataGenerator(
-                                                                PGPCompressedData.ZIP);
-                                                                
-        PGPUtil.writeFileToLiteralData(comData.open(bOut), PGPLiteralData.BINARY, new File(fileName));
-        
-        comData.close();
-        
-        PGPEncryptedDataGenerator   cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, withIntegrityCheck, new SecureRandom(), "BC");
-            
-        cPk.addMethod(passPhrase);
-        
-        byte[]                      bytes = bOut.toByteArray();
-        
-        OutputStream                cOut = cPk.open(out, bytes.length);
+        try
+        {
+            byte[] compressedData = PGPExampleUtil.compressFile(fileName, CompressionAlgorithmTags.ZIP);
 
-        cOut.write(bytes);
-        
-        cOut.close();
-        
-        out.close();
+            PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5,
+                withIntegrityCheck, new SecureRandom(), "BC");
+            encGen.addMethod(passPhrase);
+
+            OutputStream encOut = encGen.open(out, compressedData.length);
+
+            encOut.write(compressedData);
+            encOut.close();
+
+            if (armor)
+            {
+                out.close();
+            }
+        }
+        catch (PGPException e)
+        {
+            System.err.println(e);
+            if (e.getUnderlyingException() != null)
+            {
+                e.getUnderlyingException().printStackTrace();
+            }
+        }
     }
 
     public static void main(
@@ -164,24 +186,20 @@ public class PBEFileProcessor
         {
             if (args[1].equals("-a") || args[1].equals("-ai") || args[1].equals("-ia"))
             {
-                FileOutputStream    out = new FileOutputStream(args[2] + ".asc");
-                encryptFile(out, args[2], args[3].toCharArray(), true, (args[1].indexOf('i') > 0));
+                encryptFile(args[2] + ".asc", args[2], args[3].toCharArray(), true, (args[1].indexOf('i') > 0));
             }
             else if (args[1].equals("-i"))
             {
-                FileOutputStream    out = new FileOutputStream(args[2] + ".bpg");
-                encryptFile(out, args[2], args[3].toCharArray(), false, true);
+                encryptFile(args[2] + ".bpg", args[2], args[3].toCharArray(), false, true);
             }
             else
             {
-                FileOutputStream    out = new FileOutputStream(args[1] + ".bpg");
-                encryptFile(out, args[1], args[2].toCharArray(), false, false);
+                encryptFile(args[1] + ".bpg", args[1], args[2].toCharArray(), false, false);
             }
         }
         else if (args[0].equals("-d"))
         {
-            FileInputStream    in = new FileInputStream(args[1]);
-            decryptFile(in, args[2].toCharArray());
+            decryptFile(args[1], args[2].toCharArray());
         }
         else
         {
