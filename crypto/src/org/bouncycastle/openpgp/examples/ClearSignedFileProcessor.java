@@ -23,8 +23,6 @@ import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKeyRingCollection;
 import org.bouncycastle.openpgp.PGPSecretKey;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
-import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.bouncycastle.openpgp.PGPSignatureGenerator;
 import org.bouncycastle.openpgp.PGPSignatureList;
@@ -40,56 +38,6 @@ import org.bouncycastle.openpgp.PGPUtil;
  */
 public class ClearSignedFileProcessor
 {
-    /**
-     * A simple routine that opens a key ring file and loads the first available key suitable for
-     * signature generation.
-     * 
-     * @param in  stream to read the secret key ring collection from.
-     * @return  a secret key.
-     * @throws IOException on a problem with using the input stream.
-     * @throws PGPException if there is an issue parsing the input stream.
-     */
-    private static PGPSecretKey readSecretKey(
-        InputStream    in)
-        throws IOException, PGPException
-    {    
-        PGPSecretKeyRingCollection        pgpSec = new PGPSecretKeyRingCollection(in);
-
-        //
-        // we just loop through the collection till we find a key suitable for encryption, in the real
-        // world you would probably want to be a bit smarter about this.
-        //
-        PGPSecretKey    key = null;
-        
-        //
-        // iterate through the key rings.
-        //
-        Iterator rIt = pgpSec.getKeyRings();
-        
-        while (key == null && rIt.hasNext())
-        {
-            PGPSecretKeyRing    kRing = (PGPSecretKeyRing)rIt.next();    
-            Iterator                        kIt = kRing.getSecretKeys();
-            
-            while (key == null && kIt.hasNext())
-            {
-                PGPSecretKey    k = (PGPSecretKey)kIt.next();
-                
-                if (k.isSigningKey())
-                {
-                    key = k;
-                }
-            }
-        }
-        
-        if (key == null)
-        {
-            throw new IllegalArgumentException("Can't find signing key in key ring.");
-        }
-        
-        return key;
-    }
-
     private static int readInputLine(ByteArrayOutputStream bOut, InputStream fIn)
         throws IOException
     {
@@ -285,7 +233,7 @@ public class ClearSignedFileProcessor
             digest = PGPUtil.SHA1;
         }
         
-        PGPSecretKey                    pgpSecKey = readSecretKey(keyIn);
+        PGPSecretKey                    pgpSecKey = PGPExampleUtil.readSecretKey(keyIn);
         PGPPrivateKey                   pgpPrivKey = pgpSecKey.extractPrivateKey(pass, "BC");        
         PGPSignatureGenerator           sGen = new PGPSignatureGenerator(pgpSecKey.getPublicKey().getAlgorithm(), digest, "BC");
         PGPSignatureSubpacketGenerator  spGen = new PGPSignatureSubpacketGenerator();
