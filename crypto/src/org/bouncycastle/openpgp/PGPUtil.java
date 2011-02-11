@@ -468,18 +468,8 @@ public class PGPUtil
         throws IOException
     {
         PGPLiteralDataGenerator lData = new PGPLiteralDataGenerator();
-        OutputStream            pOut = lData.open(out, fileType, file.getName(), file.length(), new Date(file.lastModified()));
-        FileInputStream         in = new FileInputStream(file);
-        byte[]                  buf = new byte[4096];
-        int                     len;
-        
-        while ((len = in.read(buf)) > 0)
-        {
-            pOut.write(buf, 0, len);
-        }
-        
-        lData.close();
-        in.close();
+        OutputStream pOut = lData.open(out, fileType, file.getName(), file.length(), new Date(file.lastModified()));
+        pipeFileContents(file, pOut, 4096);
     }
     
     /**
@@ -500,20 +490,25 @@ public class PGPUtil
         throws IOException
     {
         PGPLiteralDataGenerator lData = new PGPLiteralDataGenerator();
-        OutputStream            pOut = lData.open(out, fileType, file.getName(), new Date(file.lastModified()), buffer);
-        FileInputStream         in = new FileInputStream(file);
-        byte[]                  buf = new byte[buffer.length];
-        int                     len;
-        
+        OutputStream pOut = lData.open(out, fileType, file.getName(), new Date(file.lastModified()), buffer);
+        pipeFileContents(file, pOut, buffer.length);
+    }
+
+    private static void pipeFileContents(File file, OutputStream pOut, int bufSize) throws IOException
+    {
+        FileInputStream in = new FileInputStream(file);
+        byte[] buf = new byte[bufSize];
+
+        int len;
         while ((len = in.read(buf)) > 0)
         {
             pOut.write(buf, 0, len);
         }
-        
-        lData.close();
+
+        pOut.close();
         in.close();
     }
-    
+
     private static final int READ_AHEAD = 60;
     
     private static boolean isPossiblyBase64(
