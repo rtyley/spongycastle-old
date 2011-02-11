@@ -122,12 +122,12 @@ public class SignedFileProcessor
         char[]          pass,
         boolean         armor)
         throws IOException, NoSuchAlgorithmException, NoSuchProviderException, PGPException, SignatureException
-    {    
+    {
         if (armor)
         {
             out = new ArmoredOutputStream(out);
         }
-        
+
         PGPSecretKey                pgpSec = PGPExampleUtil.readSecretKey(keyIn);
         PGPPrivateKey               pgpPrivKey = pgpSec.extractPrivateKey(pass, "BC");        
         PGPSignatureGenerator       sGen = new PGPSignatureGenerator(pgpSec.getPublicKey().getAlgorithm(), PGPUtil.SHA1, "BC");
@@ -161,14 +161,17 @@ public class SignedFileProcessor
             lOut.write(ch);
             sGen.update((byte)ch);
         }
-        
+
         lGen.close();
-        
+
         sGen.generate().encode(bOut);
-        
+
         cGen.close();
-        
-        out.close();
+
+        if (armor)
+        {
+            out.close();
+        }
     }
 
     public static void main(

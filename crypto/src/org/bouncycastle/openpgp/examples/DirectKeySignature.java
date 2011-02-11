@@ -123,6 +123,11 @@ public class DirectKeySignature
 
         bOut.flush();
 
+        if (armor)
+        {
+            out.close();
+        }
+
         return PGPPublicKey.addCertification(keyToBeSigned, sGen.generate()).getEncoded();
     }
 }
