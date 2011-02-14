@@ -41,7 +41,7 @@ public abstract class BcContentVerifierProviderBuilder
                     AsymmetricKeyParameter publicKey = extractKeyParameters(certHolder.getSubjectPublicKeyInfo());
                     BcSignerOutputStream stream = createSignatureStream(algorithm, publicKey);
 
-                    return new SigVerifier(stream);
+                    return new SigVerifier(algorithm, stream);
                 }
                 catch (IOException e)
                 {
@@ -71,7 +71,7 @@ public abstract class BcContentVerifierProviderBuilder
             {
                 BcSignerOutputStream stream = createSignatureStream(algorithm, publicKey);
 
-                return new SigVerifier(stream);
+                return new SigVerifier(algorithm, stream);
             }
         };
     }
@@ -110,10 +110,17 @@ public abstract class BcContentVerifierProviderBuilder
         implements ContentVerifier
     {
         private BcSignerOutputStream stream;
+        private AlgorithmIdentifier algorithm;
 
-        SigVerifier(BcSignerOutputStream stream)
+        SigVerifier(AlgorithmIdentifier algorithm, BcSignerOutputStream stream)
         {
+            this.algorithm = algorithm;
             this.stream = stream;
+        }
+
+        public AlgorithmIdentifier getAlgorithmIdentifier()
+        {
+            return algorithm;
         }
 
         public OutputStream getOutputStream()

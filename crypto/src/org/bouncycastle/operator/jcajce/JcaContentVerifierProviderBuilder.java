@@ -100,11 +100,11 @@ public class JcaContentVerifierProviderBuilder
 
                 if (rawSig != null)
                 {
-                    return new RawSigVerifier(stream, rawSig);
+                    return new RawSigVerifier(algorithm, stream, rawSig);
                 }
                 else
                 {
-                    return new SigVerifier(stream);
+                    return new SigVerifier(algorithm, stream);
                 }
             }
         };
@@ -134,11 +134,11 @@ public class JcaContentVerifierProviderBuilder
 
                 if (rawSig != null)
                 {
-                    return new RawSigVerifier(stream, rawSig);
+                    return new RawSigVerifier(algorithm, stream, rawSig);
                 }
                 else
                 {
-                    return new SigVerifier(stream);
+                    return new SigVerifier(algorithm, stream);
                 }
             }
         };
@@ -181,10 +181,17 @@ public class JcaContentVerifierProviderBuilder
         implements ContentVerifier
     {
         private SignatureOutputStream stream;
+        private AlgorithmIdentifier algorithm;
 
-        SigVerifier(SignatureOutputStream stream)
+        SigVerifier(AlgorithmIdentifier algorithm, SignatureOutputStream stream)
         {
+            this.algorithm = algorithm;
             this.stream = stream;
+        }
+
+        public AlgorithmIdentifier getAlgorithmIdentifier()
+        {
+            return algorithm;
         }
 
         public OutputStream getOutputStream()
@@ -216,9 +223,9 @@ public class JcaContentVerifierProviderBuilder
     {
         private Signature rawSignature;
 
-        RawSigVerifier(SignatureOutputStream stream, Signature rawSignature)
+        RawSigVerifier(AlgorithmIdentifier algorithm, SignatureOutputStream stream, Signature rawSignature)
         {
-            super(stream);
+            super(algorithm, stream);
             this.rawSignature = rawSignature;
         }
 
