@@ -7,6 +7,8 @@ import java.util.zip.InflaterInputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.cms.CompressedData;
 import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.operator.InputExpander;
+import org.bouncycastle.operator.InputExpanderProvider;
 
 /**
  * containing class for an CMS Compressed Data object
@@ -41,6 +43,7 @@ public class CMSCompressedData
      *
      * @return the uncompressed content
      * @throws CMSException if there is an exception uncompressing the data.
+     * @deprecated use getContent(InputExpanderProvider)
      */
     public byte[] getContent()
         throws CMSException
@@ -70,6 +73,7 @@ public class CMSCompressedData
      * @param limit maximum number of bytes to read
      * @return the content read
      * @throws CMSException if there is an exception uncompressing the data.
+     * @deprecated use getContent(InputExpanderProvider)
      */
     public byte[] getContent(int limit)
         throws CMSException
@@ -84,6 +88,33 @@ public class CMSCompressedData
         try
         {
             return CMSUtils.streamToByteArray(zIn, limit);
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("exception reading compressed stream.", e);
+        }
+    }
+
+    /**
+     * Return the uncompressed content.
+     *
+     * @param expanderProvider a provider of expander algorithm implementations.
+     * @return the uncompressed content
+     * @throws CMSException if there is an exception uncompressing the data.
+     */
+    public byte[] getContent(InputExpanderProvider expanderProvider)
+        throws CMSException
+    {
+        CompressedData  comData = CompressedData.getInstance(contentInfo.getContent());
+        ContentInfo     content = comData.getEncapContentInfo();
+
+        ASN1OctetString bytes = (ASN1OctetString)content.getContent();
+        InputExpander   expander = expanderProvider.get(comData.getCompressionAlgorithmIdentifier());
+        InputStream     zIn = expander.getInputStream(bytes.getOctetStream());
+
+        try
+        {
+            return CMSUtils.streamToByteArray(zIn);
         }
         catch (IOException e)
         {
