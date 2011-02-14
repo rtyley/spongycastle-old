@@ -71,14 +71,22 @@ class TimeStampDataUtil
         }
     }
 
-    /**
-     * Returns an appropriately initialised digest calculator based on the message imprint algorithm
-     * described in the first time stamp in the TemporalData for this message.
-     *
-     * @param calculatorProvider
-     * @return
-     * @throws org.bouncycastle.operator.OperatorCreationException
-     */
+    void initialiseMessageImprintDigestCalculator(DigestCalculator calculator)
+        throws CMSException
+    {
+        if (metaData != null && metaData.isHashProtected())
+        {
+            try
+            {
+                calculator.getOutputStream().write(metaData.getDEREncoded());
+            }
+            catch (IOException e)
+            {
+                throw new CMSException("unable to initialise calculator from metaData: " + e.getMessage(), e);
+            }
+        }
+    }
+
     DigestCalculator getMessageImprintDigestCalculator(DigestCalculatorProvider calculatorProvider)
         throws OperatorCreationException
     {
@@ -87,30 +95,20 @@ class TimeStampDataUtil
         try
         {
             token = this.getTimeStampToken(timeStamps[0]);
+
+            TimeStampTokenInfo info = token.getTimeStampInfo();
+            String algOID = info.getMessageImprintAlgOID();
+
+            DigestCalculator calc = calculatorProvider.get(new AlgorithmIdentifier(algOID));
+
+            initialiseMessageImprintDigestCalculator(calc);
+
+            return calc;
         }
         catch (CMSException e)
         {
             throw new OperatorCreationException("unable to extract algorithm ID: " + e.getMessage(), e);
         }
-
-        TimeStampTokenInfo info = token.getTimeStampInfo();
-        String algOID = info.getMessageImprintAlgOID();
-
-        DigestCalculator calc = calculatorProvider.get(new AlgorithmIdentifier(algOID));
-
-        if (metaData != null && metaData.isHashProtected())
-        {
-            try
-            {
-                calc.getOutputStream().write(metaData.getDEREncoded());
-            }
-            catch (IOException e)
-            {
-                throw new OperatorCreationException("unable to initialise calculator from metaData: " + e.getMessage(), e);
-            }
-        }
-
-        return calc;
     }
 
     TimeStampToken[] getTimeStampTokens()

@@ -123,6 +123,28 @@ public class CMSTimeStampedData
         return util.getTimeStampTokens();
     }
 
+    /**
+     * Initialise the passed in calculator with the MetaData for this message, if it is
+     * required as part of the initial message imprint calculation.
+     *
+     * @param calculator the digest calculator to be initialised.
+     * @throws CMSException if the MetaData is required and cannot be processed
+     */
+    public void initialiseMessageImprintDigestCalculator(DigestCalculator calculator)
+        throws CMSException
+    {
+        util.initialiseMessageImprintDigestCalculator(calculator);
+    }
+
+    /**
+     * Returns an appropriately initialised digest calculator based on the message imprint algorithm
+     * described in the first time stamp in the TemporalData for this message. If the metadata is required
+     * to be included in the digest calculation, the returned calculator will be pre-initialised.
+     *
+     * @param calculatorProvider  a provider of DigestCalculator objects.
+     * @return an initialised digest calculator.
+     * @throws OperatorCreationException if the provider is unable to create the calculator.
+     */
     public DigestCalculator getMessageImprintDigestCalculator(DigestCalculatorProvider calculatorProvider)
         throws OperatorCreationException
     {
@@ -131,6 +153,11 @@ public class CMSTimeStampedData
 
     /**
      * Validate the digests present in the TimeStampTokens contained in the CMSTimeStampedData.
+     *
+     * @param calculatorProvider provider for digest calculators
+     * @param dataDigest the calculated data digest for the message
+     * @throws ImprintDigestInvalidException if an imprint digest fails to compare
+     * @throws CMSException  if an exception occurs processing the message.
      */
     public void validate(DigestCalculatorProvider calculatorProvider, byte[] dataDigest)
         throws ImprintDigestInvalidException, CMSException
@@ -138,6 +165,15 @@ public class CMSTimeStampedData
         util.validate(calculatorProvider, dataDigest);
     }
 
+    /**
+     * Validate the passed in timestamp token against the tokens and data present in the message.
+     *
+     * @param calculatorProvider provider for digest calculators
+     * @param dataDigest the calculated data digest for the message.
+     * @param timeStampToken  the timestamp token of interest.
+     * @throws ImprintDigestInvalidException if the token is not present in the message, or an imprint digest fails to compare.
+     * @throws CMSException if an exception occurs processing the message.
+     */
     public void validate(DigestCalculatorProvider calculatorProvider, byte[] dataDigest, TimeStampToken timeStampToken)
         throws ImprintDigestInvalidException, CMSException
     {
