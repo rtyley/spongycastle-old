@@ -268,6 +268,12 @@ public class TimeStampToken
      * <p>
      * A successful call to validate means all the above are true.
      * </p>
+     *
+     * @param sigVerifierProvider the content verifier provider to create the signature verifier.
+     * @param digCalculatorProvider the calculator provider to create the calculator for verifying the certID.
+     * @throws TSPException if an exception occurs in processing the token.
+     * @throws TSPValidationException if the certificate or signature fail to be valid.
+     * @throws IllegalArgumentException if the sigVerifierProvider has no associated certificate.
      */
     public void validate(
         ContentVerifierProvider sigVerifierProvider,
@@ -351,6 +357,37 @@ public class TimeStampToken
         catch (OperatorCreationException e)
         {
             throw new TSPException("unable to create digest: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Return true if the signature on time stamp token is valid.
+     * <p>
+     * Note: this is a much weaker proof of correctness than calling validate().
+     * </p>
+     *
+     * @param sigVerifierProvider the content verifier provider to create the signature verifier.
+     * @return true if the signature matches, false otherwise.
+     * @throws TSPException if the signature cannot be processed or the provider cannot match the algorithm.
+     */
+    public boolean isSignatureValid(
+        ContentVerifierProvider sigVerifierProvider)
+        throws TSPException
+    {
+        try
+        {
+            return tsaSignerInfo.verify(sigVerifierProvider);
+        }
+        catch (CMSException e)
+        {
+            if (e.getUnderlyingException() != null)
+            {
+                throw new TSPException(e.getMessage(), e.getUnderlyingException());
+            }
+            else
+            {
+                throw new TSPException("CMS exception: " + e, e);
+            }
         }
     }
 
