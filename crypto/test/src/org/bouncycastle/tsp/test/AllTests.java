@@ -25,6 +25,7 @@ public class AllTests
         suite.addTestSuite(TSPTest.class);
         suite.addTestSuite(NewTSPTest.class);
         suite.addTestSuite(CMSTimeStampedDataTest.class);
+        suite.addTestSuite(CMSTimeStampedDataParserTest.class);
 
         return suite;
     }
