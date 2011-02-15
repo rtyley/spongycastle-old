@@ -28,6 +28,9 @@ Release 1.46
 <li>An edge condition in ECDSA which could result in an invalid signature has been fixed.</li>
 <li>Exhaustive testing has been performed on the ASN.1 parser, eliminating another potential OutOfMemoryException and several escaping run time exceptions.</li>
 <li>BC generated certificates generated different hashCodes from other equivalent implementations. This has been fixed.</li>
+<li>Parsing an ESSCertIDv2 would fail if the object did not include an IssuerSerialNumber. This has been fixed.</li>
+<li>DERGeneralizedTime.getDate() would produce incorrect results for fractional seconds. This has been fixed.</li>
+<li>PSSSigner would produce incorrect results if the MGF digest and content digest were not the same. This has been fixed.</li>
 </ul>
 <h3>2.1.3 Additional Features and Functionality</h3>
 <ul>
@@ -38,8 +41,29 @@ Release 1.46
 <li>AES-CMAC and DESede-CMAC have been added to the JCE provider.</li>
 <li>Support for CRMF (RFC 4211) and CMP (RFC 4210) has been added.</li>
 <li>BufferedBlockCipher will now always reset after a doFinal().</li>
+<li>Support for CMS TimeStampedData (RFC 5544) has been added.</li>
+<li>JCE EC keypairs are now serialisable.</li>
+<li>TLS client side authentication has been added.</li>
+<li>TLS now supports the EC cipher suites.</li>
+<li>PGP public subkeys can now be separately decoded and encoded.</li>
+<li>An IV can now be passed to an ISO9797Alg3Mac.</li>
 </ul>
-
+<h3>2.1.4 Other notes</h3>
+<p>
+Baring security patches we expect 1.46 will be the last of the 1.* releases. The next release of
+BC will be version 2.0. For this reason a lot of things in 1.46 that relate to CMS have been deprecated and
+new methods have been added to the CMS and certificate handling APIs which provide greater flexibility
+in how digest and signature algorithms get used. It is now possible to use the lightweight API or a simple
+custom API with CMS and for certificate generation. In addition a lot of methods and some classes that were
+deprecated for reasons of been confusing, or in some cases just plan wrong, have been removed. 
+</p>
+<p>
+So there are two things to keep in mind about this release:
+<ul>
+<li>It's not a simple drop in like previous releases, if you wish migrate to it you will need to recompile your application.</li>
+<li>If you avoid deprecated methods it should be relatively painless to move to version 2.0</li>
+</ul>
+</p>
 <h3>2.2.1 Version</h3>
 Release 1.45
 <h3>2.2.2 Defects Fixed</h3>
