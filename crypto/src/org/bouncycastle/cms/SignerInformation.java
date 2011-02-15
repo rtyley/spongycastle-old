@@ -684,9 +684,9 @@ public class SignerInformation
             {
                 if (digestCalculator != null)
                 {
-                    if (verifier instanceof RawContentVerifier)
+                    if (contentVerifier instanceof RawContentVerifier)
                     {           
-                        RawContentVerifier rawVerifier = (RawContentVerifier)verifier;
+                        RawContentVerifier rawVerifier = (RawContentVerifier)contentVerifier;
 
                         if (encName.equals("RSA"))
                         {
