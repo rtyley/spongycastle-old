@@ -13,9 +13,10 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMESignedParser;
 import org.bouncycastle.mail.smime.util.SharedFileInputStream;
-import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.util.Store;
 
 /**
@@ -23,6 +24,8 @@ import org.bouncycastle.util.Store;
  */
 public class ReadLargeSignedMail
 {
+    private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
+
     /**
      * verify the signature (assuming the cert is contained in the message)
      */
@@ -57,14 +60,14 @@ public class ReadLargeSignedMail
             Collection          certCollection = certs.getMatches(signer.getSID());
 
             Iterator        certIt = certCollection.iterator();
-            X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate((X509CertificateHolder)certIt.next());
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate((X509CertificateHolder)certIt.next());
 
 
             //
             // verify that the sig is correct and that it was generated
             // when the certificate was current
             //
-            if (signer.verify(new JcaContentVerifierProviderBuilder().setProvider("BC").build(cert)))
+            if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)))
             {
                 System.out.println("signature verified");
             }
