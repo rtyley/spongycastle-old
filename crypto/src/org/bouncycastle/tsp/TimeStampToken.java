@@ -39,11 +39,10 @@ import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.DigestCalculator;
-import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Store;
@@ -119,8 +118,6 @@ public class TimeStampToken
 
                 this.certID = new CertID(ESSCertIDv2.getInstance(signCertV2.getCerts()[0]));
             }
-            
-
         }
         catch (CMSException e)
         {
@@ -269,26 +266,24 @@ public class TimeStampToken
      * A successful call to validate means all the above are true.
      * </p>
      *
-     * @param sigVerifierProvider the content verifier provider to create the signature verifier.
-     * @param digCalculatorProvider the calculator provider to create the calculator for verifying the certID.
+     * @param sigVerifier the content verifier create the objects required to verify the CMS object in the timestamp.
      * @throws TSPException if an exception occurs in processing the token.
      * @throws TSPValidationException if the certificate or signature fail to be valid.
      * @throws IllegalArgumentException if the sigVerifierProvider has no associated certificate.
      */
     public void validate(
-        ContentVerifierProvider sigVerifierProvider,
-        DigestCalculatorProvider digCalculatorProvider)
+        SignerInformationVerifier sigVerifier)
         throws TSPException, TSPValidationException
     {
-        if (!sigVerifierProvider.hasAssociatedCertificate())
+        if (!sigVerifier.hasAssociatedCertificate())
         {
             throw new IllegalArgumentException("verifier provider needs an associated certificate");
         }
 
         try
         {
-            X509CertificateHolder certHolder = sigVerifierProvider.getAssociatedCertificate();
-            DigestCalculator calc = digCalculatorProvider.get(certID.getHashAlgorithm());
+            X509CertificateHolder certHolder = sigVerifier.getAssociatedCertificate();
+            DigestCalculator calc = sigVerifier.getDigestCalculator(certID.getHashAlgorithm());
 
             OutputStream cOut = calc.getOutputStream();
 
@@ -334,7 +329,7 @@ public class TimeStampToken
                 throw new TSPValidationException("certificate not valid when time stamp created.");
             }
 
-            if (!tsaSignerInfo.verify(sigVerifierProvider))
+            if (!tsaSignerInfo.verify(sigVerifier))
             {
                 throw new TSPValidationException("signature not created by certificate.");
             }
@@ -366,17 +361,17 @@ public class TimeStampToken
      * Note: this is a much weaker proof of correctness than calling validate().
      * </p>
      *
-     * @param sigVerifierProvider the content verifier provider to create the signature verifier.
+     * @param sigVerifier the content verifier create the objects required to verify the CMS object in the timestamp.
      * @return true if the signature matches, false otherwise.
      * @throws TSPException if the signature cannot be processed or the provider cannot match the algorithm.
      */
     public boolean isSignatureValid(
-        ContentVerifierProvider sigVerifierProvider)
+        SignerInformationVerifier sigVerifier)
         throws TSPException
     {
         try
         {
-            return tsaSignerInfo.verify(sigVerifierProvider);
+            return tsaSignerInfo.verify(sigVerifier);
         }
         catch (CMSException e)
         {

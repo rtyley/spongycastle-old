@@ -18,9 +18,9 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.tsp.GenTimeAccuracy;
 import org.bouncycastle.tsp.TSPAlgorithms;
@@ -96,7 +96,7 @@ public class NewTSPTest
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        tsToken.validate(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert), new JcaDigestCalculatorProviderBuilder().setProvider(BC).build());
+        tsToken.validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert));
 
         AttributeTable  table = tsToken.getSignedAttributes();
 
@@ -375,7 +375,7 @@ public class NewTSPTest
         
         try
         {
-            tsToken.validate(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert), new JcaDigestCalculatorProviderBuilder().setProvider(BC).build());
+            tsToken.validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert));
         }
         catch (TSPValidationException e)
         {

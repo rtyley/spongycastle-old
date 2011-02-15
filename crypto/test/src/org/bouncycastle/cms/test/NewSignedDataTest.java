@@ -51,8 +51,10 @@ import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.bc.BcRSASignerInfoVerifierBuilder;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -63,9 +65,7 @@ import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.bc.BcContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
-import org.bouncycastle.operator.bc.BcRSAContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.util.CollectionStore;
 import org.bouncycastle.util.Store;
@@ -486,7 +486,7 @@ public class NewSignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
-            assertEquals(true, signer.verify(new BcRSAContentVerifierProviderBuilder(new DefaultDigestAlgorithmIdentifierFinder()).build(cert)));
+            assertEquals(true, signer.verify(new BcRSASignerInfoVerifierBuilder(new DefaultDigestAlgorithmIdentifierFinder(), new BcDigestCalculatorProvider()).build(cert)));
 
             if (contentDigest != null)
             {
@@ -513,7 +513,7 @@ public class NewSignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
-            assertEquals(true, signer.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
             
             if (contentDigest != null)
             {
@@ -622,7 +622,7 @@ public class NewSignedDataTest
 
             sid = signer.getSID();
             
-            assertEquals(true, signer.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
 
             //
             // check content digest
@@ -674,7 +674,7 @@ public class NewSignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
-            assertEquals(true, signer.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
         }
         
         checkSignerStoreReplacement(s, signers);
@@ -1119,7 +1119,7 @@ public class NewSignedDataTest
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
             assertNull(cSigner.getSignedAttributes().get(PKCSObjectIdentifiers.pkcs_9_at_contentType));
-            assertEquals(true, cSigner.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, cSigner.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
         }
     }
 
@@ -1207,7 +1207,7 @@ public class NewSignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
-            assertEquals(true, signer.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
         }
 
         //
@@ -1250,7 +1250,7 @@ public class NewSignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
-            assertEquals(true, signer.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
         }
 
         checkSignerStoreReplacement(s, signers);
@@ -1303,7 +1303,7 @@ public class NewSignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
     
-            assertEquals(true, signer.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
         }
 
         //
@@ -1346,7 +1346,7 @@ public class NewSignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
     
-            assertEquals(true, signer.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
         }
         
         checkSignerStoreReplacement(s, signers);
@@ -1376,7 +1376,7 @@ public class NewSignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
     
-            assertEquals(true, signer.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
         }
     }
     
@@ -1399,7 +1399,7 @@ public class NewSignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
-            assertEquals(true, signer.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
         }
     }
     
@@ -1716,7 +1716,7 @@ public class NewSignedDataTest
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
             assertNull(cSigner.getSignedAttributes().get(PKCSObjectIdentifiers.pkcs_9_at_contentType));
-            assertEquals(true, cSigner.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, cSigner.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
         }
         
         verifySignatures(sig);
@@ -1777,7 +1777,7 @@ public class NewSignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
-            assertEquals(true, signer.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
         }
     }
 }

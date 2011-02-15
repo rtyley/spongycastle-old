@@ -48,10 +48,10 @@ import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
@@ -133,7 +133,7 @@ public class NewSignedDataStreamTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
     
-            assertEquals(true, signer.verify(new JcaContentVerifierProviderBuilder().setProvider(BC).build(cert)));
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
             
             if (contentDigest != null)
             {

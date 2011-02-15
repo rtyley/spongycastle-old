@@ -53,13 +53,13 @@ import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.cms.test.CMSTestUtil;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMESignedParser;
 import org.bouncycastle.mail.smime.util.CRLFOutputStream;
 import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
-import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.x509.X509AttributeCertificate;
 
@@ -1206,7 +1206,7 @@ public class NewSMIMESignedTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder certHolder = (X509CertificateHolder)certIt.next();
     
-            assertEquals(true, signer.verify(new JcaContentVerifierProviderBuilder().build(certHolder)));
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().build(certHolder)));
         }
     }
     
