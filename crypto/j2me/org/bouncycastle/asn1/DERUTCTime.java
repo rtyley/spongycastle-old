@@ -1,38 +1,80 @@
 package org.bouncycastle.asn1;
 
-import java.io.*;
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
+import java.util.Date;
 
 /**
  * UTC time object.
  */
-public class DERUTCTime extends DERObject
+public class DERUTCTime
+    extends ASN1Object
 {
-    String time;
+    String      time;
 
     /**
-     * The correct format for this is YYMMDDHHMMSSZ (it used to be that seconds
-     * were never encoded. When you're creating one of these objects from
-     * scratch, that's what you want to use, otherwise we'll try to deal with
-     * whatever gets read from the input stream... (this is why the input format
-     * is different from the getTime() method output).
-     * <p>
-     * 
-     * @param time
-     *            the time string.
+     * return an UTC Time from the passed in object.
+     *
+     * @exception IllegalArgumentException if the object cannot be converted.
      */
-    public DERUTCTime(String time)
+    public static DERUTCTime getInstance(
+        Object  obj)
+    {
+        if (obj == null || obj instanceof DERUTCTime)
+        {
+            return (DERUTCTime)obj;
+        }
+
+        throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
+    }
+
+    /**
+     * return an UTC Time from a tagged object.
+     *
+     * @param obj the tagged object holding the object we want
+     * @param explicit true if the object is meant to be explicitly
+     *              tagged false otherwise.
+     * @exception IllegalArgumentException if the tagged object cannot
+     *               be converted.
+     */
+    public static DERUTCTime getInstance(
+        ASN1TaggedObject obj,
+        boolean          explicit)
+    {
+        DERObject o = obj.getObject();
+
+        if (explicit || o instanceof DERUTCTime)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return new DERUTCTime(((ASN1OctetString)o).getOctets());
+        }
+    }
+    
+    /**
+     * The correct format for this is YYMMDDHHMMSSZ (it used to be that seconds were
+     * never encoded. When you're creating one of these objects from scratch, that's
+     * what you want to use, otherwise we'll try to deal with whatever gets read from
+     * the input stream... (this is why the input format is different from the getTime()
+     * method output).
+     * <p>
+     *
+     * @param time the time string.
+     */
+    public DERUTCTime(
+        String  time)
     {
         this.time = time;
     }
 
-    DERUTCTime(byte[] bytes)
+    DERUTCTime(
+        byte[]  bytes)
     {
         //
         // explicitly convert to characters
         //
-        char[] dateC = new char[bytes.length];
+        char[]  dateC = new char[bytes.length];
 
         for (int i = 0; i != dateC.length; i++)
         {
@@ -43,47 +85,69 @@ public class DERUTCTime extends DERObject
     }
 
     /**
-     * return the time - always in the form of YYMMDDhhmmssGMT(+hh:mm|-hh:mm).
+     * return the time - always in the form of 
+     *  YYMMDDhhmmssGMT(+hh:mm|-hh:mm).
      * <p>
-     * Normally in a certificate we would expect "Z" rather than "GMT", however
-     * adding the "GMT" means we can just use:
-     * 
+     * Normally in a certificate we would expect "Z" rather than "GMT",
+     * however adding the "GMT" means we can just use:
      * <pre>
-     * dateF = new SimpleDateFormat(&quot;yyMMddHHmmssz&quot;);
+     *     dateF = new SimpleDateFormat("yyMMddHHmmssz");
      * </pre>
-     * 
      * To read in the time and get a date which is compatible with our local
      * time zone.
+     * <p>
+     * <b>Note:</b> In some cases, due to the local date processing, this
+     * may lead to unexpected results. If you want to stick the normal
+     * convention of 1950 to 2049 use the getAdjustedTime() method.
      */
     public String getTime()
     {
         //
         // standardise the format.
         //
-        if (time.length() == 11)
+        if (time.indexOf('-') < 0 && time.indexOf('+') < 0)
         {
-            return time.substring(0, 10) + "00GMT+00:00";
+            if (time.length() == 11)
+            {
+                return time.substring(0, 10) + "00GMT+00:00";
+            }
+            else
+            {
+                return time.substring(0, 12) + "GMT+00:00";
+            }
         }
-        else if (time.length() == 13)
+        else
         {
-            return time.substring(0, 12) + "GMT+00:00";
-        }
-        else if (time.length() == 17)
-        {
-            return time.substring(0, 12) + "GMT" + time.substring(12, 15) + ":"
-                    + time.substring(15, 17);
-        }
+            int index = time.indexOf('-');
+            if (index < 0)
+            {
+                index = time.indexOf('+');
+            }
+            String d = time;
 
-        return time;
+            if (index == time.length() - 3)
+            {
+                d += "00";
+            }
+
+            if (index == 10)
+            {
+                return d.substring(0, 10) + "00GMT" + d.substring(10, 13) + ":" + d.substring(13, 15);
+            }
+            else
+            {
+                return d.substring(0, 12) + "GMT" + d.substring(12, 15) + ":" +  d.substring(15, 17);
+            }
+        }
     }
 
     /**
-     * return the time as an adjusted date with a 4 digit year. This goes in the
-     * range of 1950 - 2049.
+     * return a time string as an adjusted date with a 4 digit year. This goes
+     * in the range of 1950 - 2049.
      */
     public String getAdjustedTime()
     {
-        String d = this.getTime();
+        String   d = this.getTime();
 
         if (d.charAt(0) < '5')
         {
@@ -95,24 +159,44 @@ public class DERUTCTime extends DERObject
         }
     }
 
-    void encode(DEROutputStream out) throws IOException
+    private byte[] getOctets()
     {
-        out.writeEncoded(UTC_TIME, time.getBytes());
+        char[]  cs = time.toCharArray();
+        byte[]  bs = new byte[cs.length];
+
+        for (int i = 0; i != cs.length; i++)
+        {
+            bs[i] = (byte)cs[i];
+        }
+
+        return bs;
     }
 
-    public boolean equals(Object o)
+    void encode(
+        DEROutputStream  out)
+        throws IOException
     {
-        if ((o == null) || !(o instanceof DERUTCTime))
+        out.writeEncoded(UTC_TIME, this.getOctets());
+    }
+    
+    boolean asn1Equals(
+        DERObject  o)
+    {
+        if (!(o instanceof DERUTCTime))
         {
             return false;
         }
 
         return time.equals(((DERUTCTime)o).time);
     }
-
+    
     public int hashCode()
     {
         return time.hashCode();
     }
 
+    public String toString() 
+    {
+      return time;
+    }
 }
