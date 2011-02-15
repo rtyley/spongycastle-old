@@ -49,23 +49,23 @@ class DHParametersHelper
         /*
          * (see: Handbook of Applied Cryptography 4.80)
          */
-        do
-        {
-            g = BigIntegers.createRandomInRange(TWO, pMinusTwo, random);
-        }
-        while (g.modPow(TWO, p).equals(ONE) || g.modPow(q, p).equals(ONE));
+//        do
+//        {
+//            g = BigIntegers.createRandomInRange(TWO, pMinusTwo, random);
+//        }
+//        while (g.modPow(TWO, p).equals(ONE) || g.modPow(q, p).equals(ONE));
 
 
         /*
          * RFC 2631 2.2.1.2 (and see: Handbook of Applied Cryptography 4.81)
          */
-//        do
-//        {
-//            BigInteger h = BigIntegers.createRandomInRange(TWO, pMinusTwo, random);
-//
-//            g = h.modPow(TWO, p);
-//        }
-//        while (g.equals(ONE));
+        do
+        {
+            BigInteger h = BigIntegers.createRandomInRange(TWO, pMinusTwo, random);
+
+            g = h.modPow(TWO, p);
+        }
+        while (g.equals(ONE));
 
 
         return g;
