@@ -1,7 +1,5 @@
 package org.bouncycastle.asn1.esf;
 
-import java.util.Date;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -49,10 +47,10 @@ public class OcspIdentifier
         this.producedAt = (DERGeneralizedTime)seq.getObjectAt(1);
     }
 
-    public OcspIdentifier(ResponderID ocspResponderID, Date producedAt)
+    public OcspIdentifier(ResponderID ocspResponderID, DERGeneralizedTime producedAt)
     {
         this.ocspResponderID = ocspResponderID;
-        this.producedAt = new DERGeneralizedTime(producedAt);
+        this.producedAt = producedAt;
     }
 
     public ResponderID getOcspResponderID()

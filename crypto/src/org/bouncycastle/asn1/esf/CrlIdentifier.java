@@ -1,7 +1,6 @@
 package org.bouncycastle.asn1.esf;
 
 import java.math.BigInteger;
-import java.util.Date;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -11,7 +10,6 @@ import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.X509Name;
 
 /**
  * <pre>
@@ -58,38 +56,16 @@ public class CrlIdentifier
         }
     }
 
-    /**
-     * @deprecated use X500Name constructor.
-     */
-    public CrlIdentifier(X509Name crlIssuer, Date crlIssuedTime)
+    public CrlIdentifier(X500Name crlIssuer, DERUTCTime crlIssuedTime)
     {
         this(crlIssuer, crlIssuedTime, null);
     }
 
-    /**
-     * @deprecated use X500Name constructor.
-     */
-    public CrlIdentifier(X509Name crlIssuer, Date crlIssuedTime,
-                         BigInteger crlNumber)
-    {
-        this.crlIssuer = X500Name.getInstance(crlIssuer);
-        this.crlIssuedTime = new DERUTCTime(crlIssuedTime);
-        if (null != crlNumber)
-        {
-            this.crlNumber = new DERInteger(crlNumber);
-        }
-    }
-
-    public CrlIdentifier(X500Name crlIssuer, Date crlIssuedTime)
-    {
-        this(crlIssuer, crlIssuedTime, null);
-    }
-
-    public CrlIdentifier(X500Name crlIssuer, Date crlIssuedTime,
+    public CrlIdentifier(X500Name crlIssuer, DERUTCTime crlIssuedTime,
                          BigInteger crlNumber)
     {
         this.crlIssuer = crlIssuer;
-        this.crlIssuedTime = new DERUTCTime(crlIssuedTime);
+        this.crlIssuedTime = crlIssuedTime;
         if (null != crlNumber)
         {
             this.crlNumber = new DERInteger(crlNumber);
