@@ -86,6 +86,7 @@ src/org/bouncycastle/asn1 \
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/TypeOfBiometricDataUnitTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/asn1/test/UTCTimeTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/AESVectorFileTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/GCMReorderTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/HCFamilyVecTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/RSABlindedTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/examples/DESExample.java
