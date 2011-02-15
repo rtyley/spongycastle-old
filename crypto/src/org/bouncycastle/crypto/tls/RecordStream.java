@@ -8,7 +8,6 @@ import java.io.OutputStream;
 /**
  * An implementation of the TLS 1.0 record layer.
  */
-// TODO Use fixed temporary buffers (since there is a limit on the size) for input/output
 class RecordStream
 {
     private TlsProtocolHandler handler;
@@ -19,6 +18,7 @@ class RecordStream
     private TlsCompression writeCompression = null;
     private TlsCipher readCipher = null;
     private TlsCipher writeCipher = null;
+    private ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
     RecordStream(TlsProtocolHandler handler, InputStream is, OutputStream os)
     {
@@ -59,11 +59,16 @@ class RecordStream
         TlsUtils.readFully(buf, is);
         byte[] decoded = readCipher.decodeCiphertext(type, buf, 0, buf.length);
 
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        OutputStream cOut = readCompression.decompress(bOut);
+        OutputStream cOut = readCompression.decompress(buffer);
+
+        if (cOut == buffer)
+        {
+            return decoded;
+        }
+
         cOut.write(decoded, 0, decoded.length);
-        cOut.close();
-        return bOut.toByteArray();
+        cOut.flush();
+        return getBufferContents();
     }
 
     protected void writeMessage(short type, byte[] message, int offset, int len) throws IOException
@@ -73,13 +78,21 @@ class RecordStream
             updateHandshakeData(message, offset, len);
         }
 
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        OutputStream cOut = writeCompression.compress(bOut);
-        cOut.write(message, offset, len);
-        cOut.close();
-        byte[] compressed = bOut.toByteArray();
+        OutputStream cOut = writeCompression.compress(buffer);
 
-        byte[] ciphertext = writeCipher.encodePlaintext(type, compressed, 0, compressed.length);
+        byte[] ciphertext;
+        if (cOut == buffer)
+        {
+            ciphertext = writeCipher.encodePlaintext(type, message, offset, len);
+        }
+        else
+        {
+            cOut.write(message, offset, len);
+            cOut.flush();
+            byte[] compressed = getBufferContents();
+            ciphertext = writeCipher.encodePlaintext(type, compressed, 0, compressed.length);
+        }
+
         byte[] writeMessage = new byte[ciphertext.length + 5];
         TlsUtils.writeUint8(type, writeMessage, 0);
         TlsUtils.writeVersion(writeMessage, 1);
@@ -127,6 +140,13 @@ class RecordStream
     protected void flush() throws IOException
     {
         os.flush();
+    }
+
+    private byte[] getBufferContents()
+    {
+        byte[] contents = buffer.toByteArray();
+        buffer.reset();
+        return contents;
     }
 
     private static byte[] doFinal(CombinedHash ch)
