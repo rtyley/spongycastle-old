@@ -35,6 +35,7 @@
             <fileset dir="test/data" includes="**/*.p7m" />
             <fileset dir="test/data" includes="**/*.crt" />
             <fileset dir="test/data" includes="**/*.crl" />
+            <fileset dir="test/data" includes="**/*.der" />
         </copy>
         <available classname="com.puppycrawl.tools.checkstyle.CheckStyleTask" property="checkstyle.on" />
     </target>

@@ -147,6 +147,7 @@
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.data" />
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crt" />
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crl" />
+                     <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.der" />
                 </copy>
                 <packJar jarbase="${artifacts.jars.dir}/@{target}">
                     <manifest-element>
@@ -160,10 +161,12 @@
                             <include name="**/*.pem" />
                             <include name="**/*.p7m" />
                             <include name="**/*.crl" />
+                            <include name="**/*.der" />
                             <include name="**/*.crt" />
                             <include name="**/*.eml" />
                             <include name="**/*.sig" />
                             <include name="**/*.data" />
+                            <include name="**/*.der" />
                             <include name="**/*.message" />
                             <include name="**/*.properties" />
                         </fileset>
@@ -345,6 +348,7 @@
                  <exclude name="org/bouncycastle/**/test/*.eml" />
                  <exclude name="org/bouncycastle/**/test/*.sig" />
                  <exclude name="org/bouncycastle/**/test/*.data" />
+                 <exclude name="org/bouncycastle/**/test/*.der" />
                  <exclude name="org/bouncycastle/**/test/*.properties" />
                  <exclude name="org/bouncycastle/mail/**/*.java" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
@@ -549,6 +553,7 @@
              <fileset dir="${src.dir}" includes="**/*.eml" />
              <fileset dir="${src.dir}" includes="**/*.sig" />
              <fileset dir="${src.dir}" includes="**/*.data" />
+             <fileset dir="${src.dir}" includes="**/*.der" />
              <fileset dir="${src.dir}" includes="**/*.crt" />
              <fileset dir="${src.dir}" includes="**/*.crl" />
              <fileset dir="${src.dir}" includes="**/*.properties" />
