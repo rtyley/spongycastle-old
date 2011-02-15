@@ -1,7 +1,6 @@
 package org.bouncycastle.asn1.esf;
 
 import java.math.BigInteger;
-import java.text.ParseException;
 import java.util.Date;
 
 import org.bouncycastle.asn1.ASN1Encodable;
@@ -102,16 +101,9 @@ public class CrlIdentifier
         return this.crlIssuer;
     }
 
-    public Date getCrlIssuedTime()
+    public DERUTCTime getCrlIssuedTime()
     {
-        try
-        {
-            return this.crlIssuedTime.getAdjustedDate();
-        }
-        catch (ParseException e)
-        {
-            throw new IllegalStateException("invalid date: " + e.getMessage());
-        }
+        return this.crlIssuedTime;
     }
 
     public BigInteger getCrlNumber()
