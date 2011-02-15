@@ -10,8 +10,8 @@
   
   $RCSfile: midp.xml,v $
   $Author: bouncy $
-  $Date: 2009-04-07 21:46:19 $
-  $Revision: 1.9 $
+  $Date: 2011-02-15 13:09:20 $
+  $Revision: 1.10 $
 -->
 
 <project name="midp" default="init" basedir=".">
@@ -109,6 +109,7 @@
                 <include name="**/util/BigIntegers.java" />
                 <include name="**/util/IPAddress.java" />
                 <include name="**/util/Strings.java" />
+                <include name="**/util/io/StreamOverflowException.java" />
                 <include name="**/util/io/Streams.java" />
                 <include name="**/encoders/*.java" />
 
@@ -138,6 +139,7 @@
                 <exclude name="**/asn1/test/ParseTest.java" /> 
                 <exclude name="**/asn1/test/SMIMETest.java" /> 
                 <exclude name="**/crypto/test/AESVectorFileTest.java" />
+                <exclude name="**/crypto/test/GCMReorderTest.java" />
                 <exclude name="**/crypto/test/RSABlindedTest.java" />
                 <exclude name="**/crypto/test/EAXTest.java" />
                 <exclude name="**/util/encoders/test/*.java" />
