@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.util.io.Streams;
 
@@ -11,7 +12,7 @@ public class CMSTypedStream
 {
     private static final int BUF_SIZ = 32 * 1024;
     
-    private final String      _oid;
+    private final ASN1ObjectIdentifier      _oid;
     private final InputStream _in;
 
     public CMSTypedStream(
@@ -24,7 +25,7 @@ public class CMSTypedStream
          String oid,
          InputStream in)
     {
-        this(oid, in, BUF_SIZ);
+        this(new ASN1ObjectIdentifier(oid), in, BUF_SIZ);
     }
     
     public CMSTypedStream(
@@ -32,11 +33,26 @@ public class CMSTypedStream
         InputStream in,
         int         bufSize)
     {
+        this(new ASN1ObjectIdentifier(oid), in, bufSize);
+    }
+
+    public CMSTypedStream(
+         ASN1ObjectIdentifier oid,
+         InputStream in)
+    {
+        this(oid, in, BUF_SIZ);
+    }
+
+    public CMSTypedStream(
+        ASN1ObjectIdentifier      oid,
+        InputStream in,
+        int         bufSize)
+    {
         _oid = oid;
         _in = new FullReaderStream(in, bufSize);
     }
 
-    public String getContentType()
+    public ASN1ObjectIdentifier getContentType()
     {
         return _oid;
     }

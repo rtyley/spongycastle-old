@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.DeflaterOutputStream;
 
-import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequenceGenerator;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle.operator.OutputCompressor;
 
 /**
  * General class for generating a compressed CMS message stream.
@@ -18,7 +20,7 @@ import org.bouncycastle.asn1.DERSequenceGenerator;
  * <pre>
  *      CMSCompressedDataStreamGenerator gen = new CMSCompressedDataStreamGenerator();
  *      
- *      OutputStream cOut = gen.open(outputStream, CMSCompressedDataStreamGenerator.ZLIB);
+ *      OutputStream cOut = gen.open(outputStream, new ZlibCompressor());
  *      
  *      cOut.write(data);
  *      
@@ -49,6 +51,9 @@ public class CMSCompressedDataStreamGenerator
         _bufferSize = bufferSize;
     }
 
+    /**
+     * @deprecated use open(OutputStream, ContentCompressor)
+     */
     public OutputStream open(
         OutputStream out,
         String       compressionOID) 
@@ -56,7 +61,10 @@ public class CMSCompressedDataStreamGenerator
     {
         return open(out, CMSObjectIdentifiers.data.getId(), compressionOID);
     }
-    
+
+    /**
+     * @deprecated use open(OutputStream, ASN1ObjectIdentifier, ContentCompressor)
+     */
     public OutputStream open(
         OutputStream  out,        
         String        contentOID,
@@ -96,17 +104,61 @@ public class CMSCompressedDataStreamGenerator
         return new CmsCompressedOutputStream(
             new DeflaterOutputStream(octetStream), sGen, cGen, eiGen);
     }
-    
+
+    public OutputStream open(
+        OutputStream out,
+        OutputCompressor compressor)
+        throws IOException
+    {
+        return open(out, CMSObjectIdentifiers.data, compressor);
+    }
+
+    public OutputStream open(
+        OutputStream         out,
+        ASN1ObjectIdentifier contentOID,
+        OutputCompressor     compressor)
+        throws IOException
+    {
+        BERSequenceGenerator sGen = new BERSequenceGenerator(out);
+
+        sGen.addObject(CMSObjectIdentifiers.compressedData);
+
+        //
+        // Compressed Data
+        //
+        BERSequenceGenerator cGen = new BERSequenceGenerator(sGen.getRawOutputStream(), 0, true);
+
+        cGen.addObject(new DERInteger(0));
+
+        //
+        // AlgorithmIdentifier
+        //
+        cGen.addObject(compressor.getAlgorithmIdentifier());
+
+        //
+        // Encapsulated ContentInfo
+        //
+        BERSequenceGenerator eiGen = new BERSequenceGenerator(cGen.getRawOutputStream());
+
+        eiGen.addObject(contentOID);
+
+        OutputStream octetStream = CMSUtils.createBEROctetOutputStream(
+            eiGen.getRawOutputStream(), 0, true, _bufferSize);
+
+        return new CmsCompressedOutputStream(
+            compressor.getOutputStream(octetStream), sGen, cGen, eiGen);
+    }
+
     private class CmsCompressedOutputStream
         extends OutputStream
     {
-        private DeflaterOutputStream _out;
+        private OutputStream _out;
         private BERSequenceGenerator _sGen;
         private BERSequenceGenerator _cGen;
         private BERSequenceGenerator _eiGen;
         
         CmsCompressedOutputStream(
-            DeflaterOutputStream out,
+            OutputStream out,
             BERSequenceGenerator sGen,
             BERSequenceGenerator cGen,
             BERSequenceGenerator eiGen)
