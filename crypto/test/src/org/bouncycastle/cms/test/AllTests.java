@@ -21,6 +21,7 @@ public class AllTests
         suite.addTest(AuthenticatedDataTest.suite());
         suite.addTest(AuthenticatedDataStreamTest.suite());
         suite.addTest(CompressedDataTest.suite());
+        suite.addTest(NewCompressedDataTest.suite());
         suite.addTest(SignedDataTest.suite());
         suite.addTest(NewSignedDataTest.suite());
         suite.addTest(EnvelopedDataTest.suite());
@@ -28,6 +29,7 @@ public class AllTests
         suite.addTest(NewAuthenticatedDataTest.suite());
         suite.addTest(NewAuthenticatedDataStreamTest.suite());
         suite.addTest(CompressedDataStreamTest.suite());
+        suite.addTest(NewCompressedDataStreamTest.suite());
         suite.addTest(SignedDataStreamTest.suite());
         suite.addTest(NewSignedDataStreamTest.suite());
         suite.addTest(EnvelopedDataStreamTest.suite());

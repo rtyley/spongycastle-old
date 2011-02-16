@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.InflaterInputStream;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.cms.CompressedData;
 import org.bouncycastle.asn1.cms.ContentInfo;
@@ -12,6 +13,11 @@ import org.bouncycastle.operator.InputExpanderProvider;
 
 /**
  * containing class for an CMS Compressed Data object
+ * <pre>
+ *     CMSCompressedData cd = new CMSCompressedDataParser(inputStream);
+ *
+ *     process(cd.getContent(new ZlibExpanderProvider()));
+ * </pre>
  */
 public class CMSCompressedData
 {
@@ -95,12 +101,17 @@ public class CMSCompressedData
         }
     }
 
+    public ASN1ObjectIdentifier getContentType()
+    {
+        return contentInfo.getContentType();
+    }
+
     /**
      * Return the uncompressed content.
      *
      * @param expanderProvider a provider of expander algorithm implementations.
      * @return the uncompressed content
-     * @throws CMSException if there is an exception uncompressing the data.
+     * @throws CMSException if there is an exception un-compressing the data.
      */
     public byte[] getContent(InputExpanderProvider expanderProvider)
         throws CMSException

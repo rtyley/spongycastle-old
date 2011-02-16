@@ -22,7 +22,7 @@ import org.bouncycastle.operator.OutputCompressor;
  * <pre>
  *      CMSCompressedDataGenerator  fact = new CMSCompressedDataGenerator();
  *
- *      CMSCompressedData           data = fact.generate(content, algorithm);
+ *      CMSCompressedData           data = fact.generate(content, new ZlibCompressor());
  * </pre>
  */
 public class CMSCompressedDataGenerator
