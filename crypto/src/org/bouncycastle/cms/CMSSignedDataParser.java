@@ -84,12 +84,12 @@ import org.bouncycastle.x509.X509Store;
  *      while (it.hasNext())
  *      {
  *          SignerInformation   signer = (SignerInformation)it.next();
- *          Collection          certCollection = certs.getCertificates(signer.getSID());
+ *          Collection          certCollection = certStore.getMatches(signer.getSID());
  *
  *          Iterator        certIt = certCollection.iterator();
- *          X509Certificate cert = (X509Certificate)certIt.next();
+ *          X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
  *
- *          System.out.println("verify returns: " + signer.verify(cert, "BC"));
+ *          System.out.println("verify returns: " + signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert)));
  *      }
  * </pre>
  *  Note also: this class does not introduce buffering - if you are processing large files you should create
