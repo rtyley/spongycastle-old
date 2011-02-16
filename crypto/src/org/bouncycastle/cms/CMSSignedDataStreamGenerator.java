@@ -44,12 +44,20 @@ import org.bouncycastle.util.io.TeeOutputStream;
  * A simple example of usage.
  * </p>
  * <pre>
- *      CertStore                    certs...
+ *      X509Certificate signCert = ...
+ *      certList.add(signCert);
+ *
+ *      Store           certs = new JcaCertStore(certList);
+ *      ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider("BC").build(signKP.getPrivate());
+ *
  *      CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
  *  
- *      gen.addSigner(privateKey, cert, CMSSignedDataStreamGenerator.DIGEST_SHA1, "BC");
- *  
- *      gen.addCertificatesAndCRLs(certs);
+ *      gen.addSignerInfoGenerator(
+ *                new JcaSignerInfoGeneratorBuilder(
+ *                     new JcaDigestCalculatorProviderBuilder().setProvider("BC").build())
+ *                     .build(sha1Signer, signCert));
+ *
+ *      gen.addCertificates(certs);
  *  
  *      OutputStream sigOut = gen.open(bOut);
  *  
