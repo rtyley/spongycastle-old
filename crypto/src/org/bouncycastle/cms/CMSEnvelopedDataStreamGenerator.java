@@ -36,12 +36,13 @@ import org.bouncycastle.operator.OutputEncryptor;
  * <pre>
  *      CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
  *
- *      edGen.addKeyTransRecipient(cert);
+ *      edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert).setProvider("BC"));
  *
  *      ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
  *      
  *      OutputStream out = edGen.open(
- *                              bOut, CMSEnvelopedDataGenerator.AES128_CBC, "BC");*
+ *                              bOut, new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC)
+ *                                              .setProvider("BC").build());
  *      out.write(data);
  *      
  *      out.close();
