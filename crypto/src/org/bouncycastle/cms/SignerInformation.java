@@ -556,22 +556,22 @@ public class SignerInformation
             }
             else
             {
+                DigestCalculator calc = verifier.getDigestCalculator(this.getDigestAlgorithmID());
                 if (content != null)
                 {
-                    DigestCalculator calc = verifier.getDigestCalculator(this.getDigestAlgorithmID());
                     OutputStream      digOut = calc.getOutputStream();
 
                     content.write(digOut);
 
                     digOut.close();
-
-                    resultDigest = calc.getDigest();
                 }
                 else if (signedAttributeSet == null)
                 {
                     // TODO Get rid of this exception and just treat content==null as empty not missing?
                     throw new CMSException("data not encapsulated in signature - use detached constructor.");
                 }
+
+                resultDigest = calc.getDigest();
             }
         }
         catch (IOException e)
