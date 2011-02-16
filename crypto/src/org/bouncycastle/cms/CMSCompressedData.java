@@ -14,7 +14,7 @@ import org.bouncycastle.operator.InputExpanderProvider;
 /**
  * containing class for an CMS Compressed Data object
  * <pre>
- *     CMSCompressedData cd = new CMSCompressedDataParser(inputStream);
+ *     CMSCompressedData cd = new CMSCompressedData(inputStream);
  *
  *     process(cd.getContent(new ZlibExpanderProvider()));
  * </pre>

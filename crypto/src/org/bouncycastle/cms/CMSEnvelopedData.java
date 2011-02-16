@@ -16,6 +16,25 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
  * containing class for an CMS Enveloped Data object
+ * <p>
+ * Example of use - assuming the first recipient matches the private key we have.
+ * <pre>
+ *      CMSEnvelopedData     ed = new CMSEnvelopedData(inputStream);
+ *
+ *      RecipientInformationStore  recipients = ed.getRecipientInfos();
+ *
+ *      Collection  c = recipients.getRecipients();
+ *      Iterator    it = c.iterator();
+ *
+ *      if (it.hasNext())
+ *      {
+ *          RecipientInformation   recipient = (RecipientInformation)it.next();
+ *
+ *          byte[] recData = recipient.getContent(new JceKeyTransEnvelopedRecipient(privateKey).setProvider("BC"));
+ *
+ *          processData(recData);
+ *      }
+ *  </pre>
  */
 public class CMSEnvelopedData
 {
