@@ -70,6 +70,7 @@
             <fileset dir="test/data" includes="**/*.sig" />
             <fileset dir="test/data" includes="**/*.data" />
             <fileset dir="test/data" includes="**/*.message" />
+            <fileset dir="test/data" includes="**/*.der" />
         </copy>
         <copy todir="${src.dir}" overwrite="true">
             <fileset dir="jdk1.4">
