@@ -48,7 +48,7 @@ public class EncryptedPrivateKeyInfoBuilder
         }
         catch (IOException e)
         {
-            throw new IllegalStateException("cannot produce certification request signature");
+            throw new IllegalStateException("cannot encode privateKeyInfo");
         }
     }
 }
