@@ -11,7 +11,6 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -648,7 +647,7 @@ public class NewEnvelopedDataTest
 
         edGen.addRecipientInfoGenerator(new JceKeyAgreeRecipientInfoGenerator(CMSAlgorithm.ECDH_SHA1KDF,
             _origEcKP.getPrivate(), _origEcKP.getPublic(),
-             CMSAlgorithm.AES128_WRAP, _reciEcCert).setProvider(BC));
+             CMSAlgorithm.AES128_WRAP).addRecipient(_reciEcCert).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
             new CMSProcessableByteArray(data),
@@ -671,7 +670,7 @@ public class NewEnvelopedDataTest
 
         edGen.addRecipientInfoGenerator(new JceKeyAgreeRecipientInfoGenerator(CMSAlgorithm.ECMQV_SHA1KDF,
             _origEcKP.getPrivate(), _origEcKP.getPublic(),
-            CMSAlgorithm.AES128_WRAP, _reciEcCert).setProvider(BC));
+            CMSAlgorithm.AES128_WRAP).addRecipient(_reciEcCert).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
             new CMSProcessableByteArray(data),
@@ -692,13 +691,13 @@ public class NewEnvelopedDataTest
 
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
-        ArrayList recipientCerts = new ArrayList();
-        recipientCerts.add(_reciEcCert);
-        recipientCerts.add(_reciEcCert2);
+        JceKeyAgreeRecipientInfoGenerator recipientGenerator = new JceKeyAgreeRecipientInfoGenerator(CMSAlgorithm.ECMQV_SHA1KDF,
+            _origEcKP.getPrivate(), _origEcKP.getPublic(), CMSAlgorithm.AES128_WRAP).setProvider(BC);
 
-        edGen.addRecipientInfoGenerator(new JceKeyAgreeRecipientInfoGenerator(CMSAlgorithm.ECMQV_SHA1KDF,
-            _origEcKP.getPrivate(), _origEcKP.getPublic(),
-            CMSAlgorithm.AES128_WRAP, recipientCerts).setProvider(BC));
+        recipientGenerator.addRecipient(_reciEcCert);
+        recipientGenerator.addRecipient(_reciEcCert2);
+
+        edGen.addRecipientInfoGenerator(recipientGenerator);
 
         CMSEnvelopedData ed = edGen.generate(
             new CMSProcessableByteArray(data),

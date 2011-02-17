@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 
 public class RecipientKeyIdentifier
@@ -25,7 +26,23 @@ public class RecipientKeyIdentifier
         this.date = date;
         this.other = other;
     }
-    
+
+    public RecipientKeyIdentifier(
+        byte[]                  subjectKeyIdentifier,
+        DERGeneralizedTime      date,
+        OtherKeyAttribute       other)
+    {
+        this.subjectKeyIdentifier = new DEROctetString(subjectKeyIdentifier);
+        this.date = date;
+        this.other = other;
+    }
+
+    public RecipientKeyIdentifier(
+        byte[]         subjectKeyIdentifier)
+    {
+        this(subjectKeyIdentifier, null, null);
+    }
+
     public RecipientKeyIdentifier(
         ASN1Sequence seq)
     {
