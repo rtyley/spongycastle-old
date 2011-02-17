@@ -10,8 +10,8 @@
   
   $RCSfile: midp.xml,v $
   $Author: bouncy $
-  $Date: 2011-02-15 13:09:20 $
-  $Revision: 1.10 $
+  $Date: 2011-02-17 02:22:06 $
+  $Revision: 1.11 $
 -->
 
 <project name="midp" default="init" basedir=".">
@@ -128,7 +128,6 @@
                 <include name="**/math/**/*.java" />
 
                 <exclude name="**/AllTests.java" /> 
-                <exclude name="**/HCFamilyVecTest.java" />
                 <exclude name="**/tls/test/*.java" /> 
                 <exclude name="**/asn1/test/ASN1SequenceParserTest.java" /> 
                 <exclude name="**/asn1/test/BiometricDataUnitTest.java" /> 
@@ -139,9 +138,10 @@
                 <exclude name="**/asn1/test/ParseTest.java" /> 
                 <exclude name="**/asn1/test/SMIMETest.java" /> 
                 <exclude name="**/crypto/test/AESVectorFileTest.java" />
-                <exclude name="**/crypto/test/GCMReorderTest.java" />
-                <exclude name="**/crypto/test/RSABlindedTest.java" />
                 <exclude name="**/crypto/test/EAXTest.java" />
+                <exclude name="**/crypto/test/GCMReorderTest.java" />
+                <exclude name="**/crypto/test/HCFamilyVecTest.java" />
+                <exclude name="**/crypto/test/RSABlindedTest.java" />
                 <exclude name="**/util/encoders/test/*.java" />
                 <exclude name="**/math/ec/test/*.java" />
             </fileset>
