@@ -211,7 +211,7 @@ public class CMSSignedDataParser
             }
             else
             {
-                _signedContentType = new ASN1ObjectIdentifier(_signedContent.getContentType());
+                _signedContentType = _signedContent.getContentType();
             }
         }
         catch (IOException e)
