@@ -137,6 +137,11 @@ public class PKCS1Encoding
         int     inLen)
         throws InvalidCipherTextException
     {
+        if (inLen > getInputBlockSize())
+        {
+            throw new IllegalArgumentException("input data too large");
+        }
+        
         byte[]  block = new byte[engine.getInputBlockSize()];
 
         if (forPrivateKey)
