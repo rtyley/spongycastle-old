@@ -104,6 +104,14 @@ class PGPExampleUtil
         throw new IllegalArgumentException("Can't find encryption key in key ring.");
     }
 
+    static PGPSecretKey readSecretKey(String fileName) throws IOException, PGPException
+    {
+        InputStream keyIn = new BufferedInputStream(new FileInputStream(fileName));
+        PGPSecretKey secKey = readSecretKey(keyIn);
+        keyIn.close();
+        return secKey;
+    }
+
     /**
      * A simple routine that opens a key ring file and loads the first available key
      * suitable for signature generation.
