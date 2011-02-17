@@ -19,6 +19,7 @@ import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -380,7 +381,7 @@ public class SignedDataStreamTest
 
         CMSTypedStream stream = sp.getSignedContent();
 
-        assertEquals("1.2.3.4", stream.getContentType());
+        assertEquals(new ASN1ObjectIdentifier("1.2.3.4"), stream.getContentType());
 
         stream.drain();
 
