@@ -7,8 +7,7 @@ import javax.crypto.Mac;
 
 class MacOutputStream extends OutputStream
 {
-    // FIXME Need internal access in RecipientInformation atm
-    final Mac mac;
+    private final Mac mac;
 
     MacOutputStream(Mac mac)
     {
