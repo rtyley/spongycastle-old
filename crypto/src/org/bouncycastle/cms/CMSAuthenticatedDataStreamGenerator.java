@@ -247,19 +247,21 @@ public class CMSAuthenticatedDataStreamGenerator
     private class OldCmsAuthenticatedDataOutputStream
         extends OutputStream
     {
-        private MacOutputStream dataStream;
+        private OutputStream dataStream;
+        private Mac mac;
         private BERSequenceGenerator cGen;
         private BERSequenceGenerator envGen;
         private BERSequenceGenerator eiGen;
-        private MacCalculator macCalculator;
 
         public OldCmsAuthenticatedDataOutputStream(
-            MacOutputStream dataStream,
+            OutputStream dataStream,
+            Mac mac,
             BERSequenceGenerator cGen,
             BERSequenceGenerator envGen,
             BERSequenceGenerator eiGen)
         {
             this.dataStream = dataStream;
+            this.mac = mac;
             this.cGen = cGen;
             this.envGen = envGen;
             this.eiGen = eiGen;
@@ -295,7 +297,7 @@ public class CMSAuthenticatedDataStreamGenerator
             eiGen.close();
 
             // [TODO] auth attributes go here
-            envGen.addObject(new DEROctetString(dataStream.getMac()));
+            envGen.addObject(new DEROctetString(mac.doFinal()));
             // [TODO] unauth attributes go here
 
             envGen.close();
@@ -415,9 +417,9 @@ public class CMSAuthenticatedDataStreamGenerator
             OutputStream octetStream = CMSUtils.createBEROctetOutputStream(
                     eiGen.getRawOutputStream(), 0, false, bufferSize);
 
-            MacOutputStream mOut = new MacOutputStream(octetStream, mac);
+            OutputStream mOut = new TeeOutputStream(octetStream, new MacOutputStream(mac));
 
-            return new OldCmsAuthenticatedDataOutputStream(mOut, cGen, authGen, eiGen);
+            return new OldCmsAuthenticatedDataOutputStream(mOut, mac, cGen, authGen, eiGen);
         }
         catch (InvalidKeyException e)
         {
