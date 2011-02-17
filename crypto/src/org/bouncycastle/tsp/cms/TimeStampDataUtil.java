@@ -5,7 +5,6 @@ import java.io.OutputStream;
 
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.Evidence;
-import org.bouncycastle.asn1.cms.MetaData;
 import org.bouncycastle.asn1.cms.TimeStampAndCRL;
 import org.bouncycastle.asn1.cms.TimeStampedData;
 import org.bouncycastle.asn1.cms.TimeStampedDataParser;
@@ -23,11 +22,11 @@ class TimeStampDataUtil
 {
     private final TimeStampAndCRL[] timeStamps;
 
-    private final MetaData          metaData;
+    private final MetaDataUtil      metaDataUtil;
 
     TimeStampDataUtil(TimeStampedData timeStampedData)
     {
-        this.metaData = timeStampedData.getMetaData();
+        this.metaDataUtil = new MetaDataUtil(timeStampedData.getMetaData());
 
         Evidence evidence = timeStampedData.getTemporalEvidence();
         this.timeStamps = evidence.getTstEvidence().toTimeStampAndCRLArray();
@@ -36,7 +35,7 @@ class TimeStampDataUtil
     TimeStampDataUtil(TimeStampedDataParser timeStampedData)
         throws IOException
     {       
-        this.metaData = timeStampedData.getMetaData();
+        this.metaDataUtil = new MetaDataUtil(timeStampedData.getMetaData());
 
         Evidence evidence = timeStampedData.getTemporalEvidence();
         this.timeStamps = evidence.getTstEvidence().toTimeStampAndCRLArray();
@@ -74,17 +73,7 @@ class TimeStampDataUtil
     void initialiseMessageImprintDigestCalculator(DigestCalculator calculator)
         throws CMSException
     {
-        if (metaData != null && metaData.isHashProtected())
-        {
-            try
-            {
-                calculator.getOutputStream().write(metaData.getDEREncoded());
-            }
-            catch (IOException e)
-            {
-                throw new CMSException("unable to initialise calculator from metaData: " + e.getMessage(), e);
-            }
-        }
+        metaDataUtil.initialiseMessageImprintDigestCalculator(calculator);
     }
 
     DigestCalculator getMessageImprintDigestCalculator(DigestCalculatorProvider calculatorProvider)

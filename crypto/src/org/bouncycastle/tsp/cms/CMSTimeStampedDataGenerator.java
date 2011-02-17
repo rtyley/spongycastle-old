@@ -1,8 +1,9 @@
 package org.bouncycastle.tsp.cms;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.BERConstructedOctetString;
@@ -14,55 +15,56 @@ import org.bouncycastle.asn1.cms.TimeStampAndCRL;
 import org.bouncycastle.asn1.cms.TimeStampTokenEvidence;
 import org.bouncycastle.asn1.cms.TimeStampedData;
 import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSProcessable;
-import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.util.io.TeeOutputStream;
+import org.bouncycastle.util.io.Streams;
 
 public class CMSTimeStampedDataGenerator
     extends CMSTimeStampedGenerator
 {
-    private ByteArrayOutputStream contentOut = new ByteArrayOutputStream();
-
-    public byte[] calculateHash(DigestCalculator hashCalculator, CMSProcessable content)
-        throws CMSException
-    {
-        OutputStream out = hashCalculator.getOutputStream();
-
-        try
-        {
-            if (metaData != null && metaData.isHashProtected())
-            {
-                out.write(metaData.getDEREncoded());
-            }
-
-            if (encapsulate)
-            {
-                out = new TeeOutputStream(contentOut, out);
-            }
-
-            content.write(out);
-
-            return hashCalculator.getDigest();
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("exception encoding content or metadata: " + e.getMessage(), e);
-        }
-    }
-
     public CMSTimeStampedData generate(TimeStampToken timeStamp) throws CMSException
     {
-        ASN1OctetString content = null;
+        return generate(timeStamp, (InputStream)null);
+    }
+
+    public CMSTimeStampedData generate(TimeStampToken timeStamp, byte[] content) throws CMSException
+    {
+        return generate(timeStamp, new ByteArrayInputStream(content));
+    }
+
+    public CMSTimeStampedData generate(TimeStampToken timeStamp, InputStream content)
+        throws CMSException
+    {
+        ByteArrayOutputStream contentOut = new ByteArrayOutputStream();
+
+        if (content != null)
+        {
+            try
+            {
+                Streams.pipeAll(content, contentOut);
+            }
+            catch (IOException e)
+            {
+                throw new CMSException("exception encapsulating content: " + e.getMessage(), e);
+            }
+        }
+
+        ASN1OctetString encContent = null;
 
         if (contentOut.size() != 0)
         {
-            content = new BERConstructedOctetString(contentOut.toByteArray());
+            encContent = new BERConstructedOctetString(contentOut.toByteArray());
         }
 
         TimeStampAndCRL stamp = new TimeStampAndCRL(timeStamp.toCMSSignedData().getContentInfo());
 
-        return new CMSTimeStampedData(new ContentInfo(CMSObjectIdentifiers.timestampedData, new TimeStampedData(new DERIA5String(dataUri.toString()), metaData, content, new Evidence(new TimeStampTokenEvidence(stamp)))));
+        DERIA5String asn1DataUri = null;
+
+        if (dataUri != null)
+        {
+            asn1DataUri = new DERIA5String(dataUri.toString());
+        }
+        
+        return new CMSTimeStampedData(new ContentInfo(CMSObjectIdentifiers.timestampedData, new TimeStampedData(asn1DataUri, metaData, encContent, new Evidence(new TimeStampTokenEvidence(stamp)))));
     }
 }
 
