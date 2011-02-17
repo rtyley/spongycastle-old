@@ -150,7 +150,7 @@ public class CMSAuthenticatedDataGenerator
             macAlgId = getAlgorithmIdentifier(macOID, params, encProvider);
 
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            MacOutputStream         mOut = new MacOutputStream(bOut, mac);
+            OutputStream mOut = new TeeOutputStream(bOut, new MacOutputStream(mac));
 
             content.write(mOut);
 
@@ -159,7 +159,7 @@ public class CMSAuthenticatedDataGenerator
 
             encContent = new BERConstructedOctetString(bOut.toByteArray());
 
-            macResult = new DEROctetString(mOut.getMac());
+            macResult = new DEROctetString(mac.doFinal());
         }
         catch (InvalidKeyException e)
         {

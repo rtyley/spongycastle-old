@@ -1,20 +1,18 @@
 package org.bouncycastle.cms;
 
-import java.security.SecureRandom;
-import java.security.Provider;
+import java.io.IOException;
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
-import java.io.OutputStream;
-import java.io.IOException;
 
-import javax.crypto.Mac;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.RC2ParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.RC2ParameterSpec;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
@@ -71,51 +69,6 @@ public class CMSAuthenticatedGenerator
         catch (GeneralSecurityException e)
         {
             return null;
-        }
-    }
-
-    protected static class MacOutputStream
-        extends OutputStream
-    {
-        private final OutputStream out;
-        private Mac mac;
-
-        MacOutputStream(OutputStream out, Mac mac)
-        {
-            this.out = out;
-            this.mac = mac;
-        }
-
-        public void write(byte[] buf)
-            throws IOException
-        {
-            mac.update(buf, 0, buf.length);
-            out.write(buf, 0, buf.length);
-        }
-
-        public void write(byte[] buf, int off, int len)
-            throws IOException
-        {
-            mac.update(buf, off, len);
-            out.write(buf, off, len);
-        }
-
-        public void write(int i)
-            throws IOException
-        {
-            mac.update((byte)i);
-            out.write(i);
-        }
-
-        public void close()
-            throws IOException
-        {
-            out.close();
-        }
-        
-        public byte[] getMac()
-        {
-            return mac.doFinal();
         }
     }
 }
