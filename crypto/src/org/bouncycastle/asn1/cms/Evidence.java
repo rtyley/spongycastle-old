@@ -51,7 +51,6 @@ public class Evidence
            return new DERTaggedObject(false, 0, tstEvidence);
        }
 
-       return null;  //To change body of implemented methods use File | Settings | File Templates.
+       return null;
     }
-
 }

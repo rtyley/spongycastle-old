@@ -1,0 +1,159 @@
+package org.bouncycastle.tsp.test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import junit.framework.TestCase;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cert.jcajce.JcaCertStore;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
+import org.bouncycastle.tsp.TSPAlgorithms;
+import org.bouncycastle.tsp.TimeStampRequest;
+import org.bouncycastle.tsp.TimeStampRequestGenerator;
+import org.bouncycastle.tsp.TimeStampResponse;
+import org.bouncycastle.tsp.TimeStampResponseGenerator;
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.tsp.TimeStampTokenGenerator;
+import org.bouncycastle.tsp.cms.CMSTimeStampedData;
+import org.bouncycastle.tsp.cms.CMSTimeStampedDataGenerator;
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Store;
+
+public class CMSTimeStampedDataGeneratorTest
+    extends TestCase
+{
+
+    BouncyCastleProvider bouncyCastleProvider;
+    CMSTimeStampedDataGenerator cmsTimeStampedDataGenerator = null;
+    String fileInput = "FileDaFirmare.data";
+    String mediaType;
+    byte[] baseData;
+
+    protected void setUp()
+        throws Exception
+    {
+        bouncyCastleProvider = new BouncyCastleProvider();
+        if (Security.getProvider(bouncyCastleProvider.getName()) == null)
+        {
+            Security.addProvider(bouncyCastleProvider);
+        }
+
+        cmsTimeStampedDataGenerator = new CMSTimeStampedDataGenerator();
+        ByteArrayOutputStream origStream = new ByteArrayOutputStream();
+        InputStream in = this.getClass().getResourceAsStream(fileInput);
+        int ch;
+
+        while ((ch = in.read()) >= 0)
+        {
+            origStream.write(ch);
+        }
+
+        origStream.close();
+
+        this.baseData = origStream.toByteArray();
+
+    }
+
+    protected void tearDown()
+        throws Exception
+    {
+        cmsTimeStampedDataGenerator = null;
+        Security.removeProvider(bouncyCastleProvider.getName());
+    }
+
+    public void testGenerate()
+        throws Exception
+    {
+        cmsTimeStampedDataGenerator.setMetaData(true, fileInput, null);
+
+        BcDigestCalculatorProvider calculatorProvider = new BcDigestCalculatorProvider();
+        String algOID = "2.16.840.1.101.3.4.2.1"; // SHA-256
+        DigestCalculator hashCalculator = calculatorProvider.get(new AlgorithmIdentifier(algOID));
+
+        cmsTimeStampedDataGenerator.initialiseMessageImprintDigestCalculator(hashCalculator);
+
+        hashCalculator.getOutputStream().write(baseData);
+        hashCalculator.getOutputStream().close();
+
+        TimeStampToken timeStampToken = createTimeStampToken(hashCalculator.getDigest());
+        CMSTimeStampedData cmsTimeStampedData = cmsTimeStampedDataGenerator.generate(timeStampToken, baseData);
+
+        for (int i = 0; i < 3; i++)
+        {
+            byte[] newRequestData = cmsTimeStampedData.calculateNextHash(hashCalculator);
+            TimeStampToken newTimeStampToken = createTimeStampToken(newRequestData);
+            cmsTimeStampedData = cmsTimeStampedData.addTimeStamp(newTimeStampToken);
+        }
+        byte[] timeStampedData = cmsTimeStampedData.getEncoded();
+
+        // verify
+        DigestCalculatorProvider newCalculatorProvider = new BcDigestCalculatorProvider();
+        DigestCalculator imprintCalculator = cmsTimeStampedData.getMessageImprintDigestCalculator(newCalculatorProvider);
+        CMSTimeStampedData newCMSTimeStampedData = new CMSTimeStampedData(timeStampedData);
+        byte[] newContent = newCMSTimeStampedData.getContent();
+        assertEquals("Content expected and verified are different", true, Arrays.areEqual(newContent, baseData));
+
+        imprintCalculator.getOutputStream().write(newContent);
+
+        byte[] digest = imprintCalculator.getDigest();
+
+        TimeStampToken[] tokens = cmsTimeStampedData.getTimeStampTokens();
+        assertEquals("TimeStampToken expected and verified are different", 4, tokens.length);
+        for (int i = 0; i < tokens.length; i++)
+        {
+            cmsTimeStampedData.validate(newCalculatorProvider, digest, tokens[i]);
+        }
+    }
+
+    private TimeStampToken createTimeStampToken(byte[] hash)
+        throws Exception
+    {
+        String signDN = "O=Bouncy Castle, C=AU";
+        KeyPair signKP = TSPTestUtil.makeKeyPair();
+        X509Certificate signCert = TSPTestUtil.makeCACertificate(signKP,
+            signDN, signKP, signDN);
+
+        String origDN = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
+        KeyPair origKP = TSPTestUtil.makeKeyPair();
+        X509Certificate cert = TSPTestUtil.makeCertificate(origKP,
+            origDN, signKP, signDN);
+
+        PrivateKey privateKey = origKP.getPrivate();
+
+        List certList = new ArrayList();
+        certList.add(cert);
+        certList.add(signCert);
+
+        Store certs = new JcaCertStore(certList);
+
+
+        TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
+            new JcaSimpleSignerInfoGeneratorBuilder().build("SHA256withRSA", privateKey, cert), new ASN1ObjectIdentifier("1.2"));
+
+        tsTokenGen.addCertificates(certs);
+
+        TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
+        TimeStampRequest request = reqGen.generate(TSPAlgorithms.SHA256, hash);
+
+        TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
+
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date());
+
+        tsResp = new TimeStampResponse(tsResp.getEncoded());
+
+        return tsResp.getTimeStampToken();
+    }
+}
