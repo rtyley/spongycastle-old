@@ -6,7 +6,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
  * General interface for an operator that is able to produce
- * an OutputStream that will output uncompressed data.
+ * an InputStream that will produce uncompressed data.
  */
 public interface InputExpander
 {
