@@ -52,6 +52,7 @@
             <fileset dir="test/data" includes="**/*.crt" />
             <fileset dir="test/data" includes="**/*.crl" />
             <fileset dir="test/data" includes="**/*.message" />
+            <fileset dir="test/data" includes="**/*.der" />
         </copy>
         <copy todir="${src.dir}" overwrite="true">
             <fileset dir="jdk1.4" includes="**/*.java" />
