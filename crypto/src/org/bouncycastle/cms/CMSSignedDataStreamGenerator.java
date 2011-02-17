@@ -742,7 +742,7 @@ public class CMSSignedDataStreamGenerator
         boolean      encapsulate)
         throws IOException
     {
-        return open(out, DATA, encapsulate);
+        return open(out, CMSObjectIdentifiers.data, encapsulate);
     }
 
     /**
@@ -761,14 +761,11 @@ public class CMSSignedDataStreamGenerator
         OutputStream dataOutputStream)
         throws IOException
     {
-        return open(out, DATA, encapsulate, dataOutputStream);
+        return open(out, CMSObjectIdentifiers.data, encapsulate, dataOutputStream);
     }
 
     /**
-     * generate a signed object that for a CMS Signed Data
-     * object using the given provider - if encapsulate is true a copy
-     * of the message will be included in the signature. The content type
-     * is set according to the OID represented by the string signedContentType.
+     * @deprecated use open(OutputStream, ASN1ObjectIdentifier, boolean)
      */
     public OutputStream open(
         OutputStream out,
@@ -784,6 +781,34 @@ public class CMSSignedDataStreamGenerator
      * object using the given provider - if encapsulate is true a copy
      * of the message will be included in the signature. The content type
      * is set according to the OID represented by the string signedContentType.
+     */
+    public OutputStream open(
+        OutputStream              out,
+        ASN1ObjectIdentifier      eContentType,
+        boolean                   encapsulate)
+        throws IOException
+    {
+        return open(out, eContentType, encapsulate, null);
+    }
+
+    /**
+     * @deprecated use open(OutputStream, ASN1ObjectIdenfier, boolean, OutputStream)
+     */
+    public OutputStream open(
+        OutputStream out,
+        String eContentType,
+        boolean      encapsulate,
+        OutputStream dataOutputStream)
+        throws IOException
+    {
+        return open(out, new ASN1ObjectIdentifier(eContentType), encapsulate, dataOutputStream);
+    }
+
+    /**
+     * generate a signed object that for a CMS Signed Data
+     * object using the given provider - if encapsulate is true a copy
+     * of the message will be included in the signature. The content type
+     * is set according to the OID represented by the string signedContentType.
      * @param out stream the CMS object is to be written to.
      * @param eContentType OID for data to be signed.
      * @param encapsulate true if data should be encapsulated.
@@ -791,7 +816,7 @@ public class CMSSignedDataStreamGenerator
      */
     public OutputStream open(
         OutputStream out,
-        String       eContentType,
+        ASN1ObjectIdentifier eContentType,
         boolean      encapsulate,
         OutputStream dataOutputStream)
         throws IOException
@@ -838,7 +863,7 @@ public class CMSSignedDataStreamGenerator
         //
         BERSequenceGenerator sigGen = new BERSequenceGenerator(sGen.getRawOutputStream(), 0, true);
         
-        sigGen.addObject(calculateVersion(eContentType));
+        sigGen.addObject(calculateVersion(eContentType.getId()));
         
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
         
@@ -870,7 +895,7 @@ public class CMSSignedDataStreamGenerator
         sigGen.getRawOutputStream().write(new DERSet(digestAlgs).getEncoded());
         
         BERSequenceGenerator eiGen = new BERSequenceGenerator(sigGen.getRawOutputStream());
-        eiGen.addObject(new DERObjectIdentifier(eContentType));
+        eiGen.addObject(eContentType);
 
         // If encapsulating, add the data as an octet string in the sequence
         OutputStream encapStream = encapsulate
@@ -1061,13 +1086,13 @@ public class CMSSignedDataStreamGenerator
 
         public CmsSignedDataOutputStream(
             OutputStream         out,
-            String               contentOID,
+            ASN1ObjectIdentifier contentOID,
             BERSequenceGenerator sGen,
             BERSequenceGenerator sigGen,
             BERSequenceGenerator eiGen)
         {
             _out = out;
-            _contentOID = new ASN1ObjectIdentifier(contentOID);
+            _contentOID = contentOID;
             _sGen = sGen;
             _sigGen = sigGen;
             _eiGen = eiGen;
