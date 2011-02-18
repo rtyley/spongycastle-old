@@ -260,6 +260,11 @@ public class CMSEnvelopedDataGenerator
         return new CMSEnvelopedData(contentInfo);
     }
 
+    public void setUnprotectedAttributeGenerator(CMSAttributeTableGenerator unprotectedAttributeGenerator)
+    {
+        this.unprotectedAttributeGenerator = unprotectedAttributeGenerator;
+    }
+
     /**
      * generate an enveloped object that contains an CMS Enveloped Data
      * object using the given provider.

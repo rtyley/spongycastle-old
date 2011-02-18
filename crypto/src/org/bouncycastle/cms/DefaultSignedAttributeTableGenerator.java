@@ -1,5 +1,9 @@
 package org.bouncycastle.cms;
 
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Map;
+
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
@@ -7,10 +11,6 @@ import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.Time;
-
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Map;
 
 /**
  * Default signed attributes generator.
@@ -65,9 +65,14 @@ public class DefaultSignedAttributeTableGenerator
         {
             DERObjectIdentifier contentType = (DERObjectIdentifier)
                 parameters.get(CMSAttributeTableGenerator.CONTENT_TYPE);
-            Attribute attr = new Attribute(CMSAttributes.contentType,
-                new DERSet(contentType));
-            std.put(attr.getAttrType(), attr);
+
+            // contentType will be null if where trying to generate a counter signature.
+            if (contentType != null)
+            {
+                Attribute attr = new Attribute(CMSAttributes.contentType,
+                    new DERSet(contentType));
+                std.put(attr.getAttrType(), attr);
+            }
         }
 
         if (!std.containsKey(CMSAttributes.signingTime))

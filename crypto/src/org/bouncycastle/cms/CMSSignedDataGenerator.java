@@ -827,11 +827,7 @@ public class CMSSignedDataGenerator
         //
         // add the SignerInfo objects
         //
-        boolean isCounterSignature = (content.getContentType() == null);
-
-        ASN1ObjectIdentifier contentTypeOID = isCounterSignature
-            ?   CMSObjectIdentifiers.data
-            :   content.getContentType();
+        ASN1ObjectIdentifier contentTypeOID = content.getContentType();
 
         ASN1OctetString octs = null;
 
@@ -898,24 +894,7 @@ public class CMSSignedDataGenerator
         for (Iterator it = signerGens.iterator(); it.hasNext();)
         {
             SignerInfoGenerator sGen = (SignerInfoGenerator)it.next();
-
-            if (isCounterSignature)
-            {
-                final CMSAttributeTableGenerator signedGen = sGen.getSignedAttributeTableGenerator();
-
-                sGen = new SignerInfoGenerator(sGen, new CMSAttributeTableGenerator()
-                {
-                    public AttributeTable getAttributes(Map parameters)
-                        throws CMSAttributeTableGenerationException
-                    {
-                        AttributeTable table = signedGen.getAttributes(parameters);
-
-                        return table.remove(CMSAttributes.contentType);
-                    }
-                }, sGen.getUnsignedAttributeTableGenerator());
-            }
-
-            SignerInfo inf = sGen.generate(new ASN1ObjectIdentifier(contentTypeOID.getId()));
+            SignerInfo inf = sGen.generate(contentTypeOID);
 
             digestAlgs.add(inf.getDigestAlgorithm());
             signerInfos.add(inf);

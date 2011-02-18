@@ -267,7 +267,12 @@ public class SignerInfoGenerator
     private Map getBaseParameters(DERObjectIdentifier contentType, AlgorithmIdentifier digAlgId, byte[] hash)
     {
         Map param = new HashMap();
-        param.put(CMSAttributeTableGenerator.CONTENT_TYPE, contentType);
+
+        if (contentType != null)
+        {
+            param.put(CMSAttributeTableGenerator.CONTENT_TYPE, contentType);
+        }
+
         param.put(CMSAttributeTableGenerator.DIGEST_ALGORITHM_IDENTIFIER, digAlgId);
         param.put(CMSAttributeTableGenerator.DIGEST,  hash.clone());
         return param;

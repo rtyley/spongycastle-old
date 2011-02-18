@@ -87,7 +87,12 @@ public class CMSEnvelopedDataStreamGenerator
     {
         _bufferSize = bufferSize;
     }
-    
+
+    public void setUnprotectedAttributeGenerator(CMSAttributeTableGenerator unprotectedAttributeGenerator)
+    {
+        this.unprotectedAttributeGenerator = unprotectedAttributeGenerator;
+    }
+
     /**
      * Use a BER Set to store the recipient information
      */
