@@ -3,7 +3,7 @@ package org.bouncycastle.tsp.cms;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.bouncycastle.asn1.cms.Attributes;
+import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.Evidence;
 import org.bouncycastle.asn1.cms.TimeStampAndCRL;
@@ -247,8 +247,8 @@ class TimeStampDataUtil
         return metaDataUtil.getMediaType();
     }
 
-    Attributes getOtherMetaData()
+    AttributeTable getOtherMetaData()
     {
-        return metaDataUtil.getOtherMetaData();
+        return new AttributeTable(metaDataUtil.getOtherMetaData());
     }
 }

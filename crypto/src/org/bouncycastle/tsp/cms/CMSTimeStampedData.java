@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.cms.Attributes;
+import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.Evidence;
@@ -128,7 +128,7 @@ public class CMSTimeStampedData
         return util.getMediaType();
     }
 
-    public Attributes getOtherMetaData()
+    public AttributeTable getOtherMetaData()
     {
         return util.getOtherMetaData();
     }
