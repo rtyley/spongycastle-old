@@ -1,7 +1,9 @@
 package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.DERObject;
 
 public class Attributes
@@ -12,6 +14,11 @@ public class Attributes
     private Attributes(ASN1Set set)
     {
         attributes = set;
+    }
+
+    public Attributes(ASN1EncodableVector v)
+    {
+        attributes = new BERSet(v);
     }
 
     public static Attributes getInstance(Object obj)
@@ -37,6 +44,6 @@ public class Attributes
      */
     public DERObject toASN1Object()
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return attributes;
     }
 }

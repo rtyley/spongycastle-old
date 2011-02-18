@@ -514,7 +514,7 @@ public class CMSEnvelopedDataStreamGenerator
                 {
                     v.add((DEREncodable)it.next());
                 }
-                ASN1Set unprotectedAttrs = new DERSet(v);
+                ASN1Set unprotectedAttrs = new BERSet(v);
 
                 _envGen.addObject(new DERTaggedObject(false, 1, unprotectedAttrs));
             }

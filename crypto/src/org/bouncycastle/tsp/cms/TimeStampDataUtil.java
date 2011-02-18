@@ -3,6 +3,7 @@ package org.bouncycastle.tsp.cms;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.bouncycastle.asn1.cms.Attributes;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.Evidence;
 import org.bouncycastle.asn1.cms.TimeStampAndCRL;
@@ -234,5 +235,20 @@ class TimeStampDataUtil
         {
             throw new ImprintDigestInvalidException("hash calculated is different from MessageImprintDigest found in TimeStampToken", timeStampToken);
         }
+    }
+
+    String getFileName()
+    {
+        return metaDataUtil.getFileName();
+    }
+
+    String getMediaType()
+    {
+        return metaDataUtil.getMediaType();
+    }
+
+    Attributes getOtherMetaData()
+    {
+        return metaDataUtil.getOtherMetaData();
     }
 }

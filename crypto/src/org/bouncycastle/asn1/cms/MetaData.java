@@ -102,4 +102,19 @@ public class MetaData
     {
         return hashProtected.isTrue();
     }
+
+    public DERUTF8String getFileName()
+    {
+        return this.fileName;
+    }
+
+    public DERIA5String getMediaType()
+    {
+        return this.mediaType;
+    }
+
+    public Attributes getOtherMetaData()
+    {
+        return otherMetaData;
+    }
 }
