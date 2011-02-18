@@ -300,11 +300,6 @@ public class CMSEnvelopedGenerator
         recipientInfoGenerators.add(recipientGenerator);
     }
 
-    public void setUnprotectedAttributeGenerator(CMSAttributeTableGenerator unprotectedAttributeGenerator)
-    {
-        this.unprotectedAttributeGenerator = unprotectedAttributeGenerator;
-    }
-
     protected AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameters params) throws IOException
     {
         DEREncodable asn1Params;

@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.cms;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -12,8 +14,6 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERTaggedObject;
-
-import java.util.Enumeration;
 
 /**
  * a signed data object.
@@ -149,21 +149,17 @@ public class SignedData
             return new DERInteger(3);
         }
 
-        if (contentOid.equals(CMSObjectIdentifiers.data))
-        {
-            if (checkForVersion3(signerInfs))
-            {
-                return new DERInteger(3);
-            }
-            else
-            {
-                return new DERInteger(1);
-            }
-        }
-        else
+        if (checkForVersion3(signerInfs))
         {
             return new DERInteger(3);
         }
+
+        if (!CMSObjectIdentifiers.data.equals(contentOid))
+        {
+            return new DERInteger(3);
+        }
+
+        return new DERInteger(1);
     }
 
     private boolean checkForVersion3(ASN1Set signerInfs)

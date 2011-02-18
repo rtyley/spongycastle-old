@@ -13,6 +13,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Iterator;
 
 import javax.crypto.SecretKey;
@@ -26,7 +27,9 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -44,6 +47,7 @@ import org.bouncycastle.cms.PasswordRecipientInformation;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.cms.SimpleAttributeTableGenerator;
 import org.bouncycastle.cms.bc.BcRSAKeyTransRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKEKEnvelopedRecipient;
@@ -228,8 +232,14 @@ public class NewEnvelopedDataTest
 
         edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
-        edGen.addUnprotectedAttribute(PKCSObjectIdentifiers.id_aa_contentHint, new DERUTF8String("Hint"));
-        edGen.addUnprotectedAttribute(PKCSObjectIdentifiers.id_aa_receiptRequest, new DERUTF8String("Request"));
+        Hashtable attrs = new Hashtable();
+
+        attrs.put(PKCSObjectIdentifiers.id_aa_contentHint, new Attribute(PKCSObjectIdentifiers.id_aa_contentHint, new DERSet(new DERUTF8String("Hint"))));
+        attrs.put(PKCSObjectIdentifiers.id_aa_receiptRequest, new Attribute(PKCSObjectIdentifiers.id_aa_receiptRequest, new DERSet(new DERUTF8String("Request"))));
+
+        AttributeTable attrTable = new AttributeTable(attrs);
+
+        edGen.setUnprotectedAttributeGenerator(new SimpleAttributeTableGenerator(attrTable));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
@@ -239,12 +249,12 @@ public class NewEnvelopedDataTest
 
         assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
 
-        AttributeTable attrs = ed.getUnprotectedAttributes();
+        attrTable = ed.getUnprotectedAttributes();
 
         assertEquals(attrs.size(), 2);
 
-        assertEquals(new DERUTF8String("Hint"), attrs.get(PKCSObjectIdentifiers.id_aa_contentHint).getAttrValues().getObjectAt(0));
-        assertEquals(new DERUTF8String("Request"), attrs.get(PKCSObjectIdentifiers.id_aa_receiptRequest).getAttrValues().getObjectAt(0));
+        assertEquals(new DERUTF8String("Hint"), attrTable.get(PKCSObjectIdentifiers.id_aa_contentHint).getAttrValues().getObjectAt(0));
+        assertEquals(new DERUTF8String("Request"), attrTable.get(PKCSObjectIdentifiers.id_aa_receiptRequest).getAttrValues().getObjectAt(0));
                 
         Collection  c = recipients.getRecipients();
 
