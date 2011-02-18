@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.crypto.Cipher;
@@ -24,8 +25,8 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.BERSet;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.EncryptedContentInfo;
@@ -181,15 +182,11 @@ public class CMSEnvelopedDataGenerator
         }
 
         ASN1Set unprotectedAttrSet = null;
-        if (!unprotectedAttributes.isEmpty())
+        if (unprotectedAttributeGenerator != null)
         {
-            ASN1EncodableVector v = new ASN1EncodableVector();
+            AttributeTable attrTble = unprotectedAttributeGenerator.getAttributes(new HashMap());
 
-            for (Iterator it = unprotectedAttributes.iterator(); it.hasNext();)
-            {
-                v.add((DEREncodable)it.next());
-            }
-            unprotectedAttrSet = new BERSet(v);
+            unprotectedAttrSet = new BERSet(attrTble.toASN1EncodableVector());
         }
 
         ContentInfo contentInfo = new ContentInfo(
@@ -249,15 +246,11 @@ public class CMSEnvelopedDataGenerator
                         encContent);
 
         ASN1Set unprotectedAttrSet = null;
-        if (!unprotectedAttributes.isEmpty())
+        if (unprotectedAttributeGenerator != null)
         {
-            ASN1EncodableVector v = new ASN1EncodableVector();
+            AttributeTable attrTble = unprotectedAttributeGenerator.getAttributes(new HashMap());
 
-            for (Iterator it = unprotectedAttributes.iterator(); it.hasNext();)
-            {
-                v.add((DEREncodable)it.next());
-            }
-            unprotectedAttrSet = new BERSet(v);
+            unprotectedAttrSet = new BERSet(attrTble.toASN1EncodableVector());
         }
 
         ContentInfo contentInfo = new ContentInfo(

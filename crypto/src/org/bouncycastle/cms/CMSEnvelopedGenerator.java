@@ -22,15 +22,11 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.RC2ParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.KEKIdentifier;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -71,7 +67,8 @@ public class CMSEnvelopedGenerator
 
     final List oldRecipientInfoGenerators = new ArrayList();
     final List recipientInfoGenerators = new ArrayList();
-    final List unprotectedAttributes = new ArrayList();
+
+    protected CMSAttributeTableGenerator unprotectedAttributeGenerator = null;
 
     final SecureRandom rand;
 
@@ -303,9 +300,9 @@ public class CMSEnvelopedGenerator
         recipientInfoGenerators.add(recipientGenerator);
     }
 
-    public void addUnprotectedAttribute(ASN1ObjectIdentifier attrType, ASN1Encodable attrValue)
+    public void setUnprotectedAttributeGenerator(CMSAttributeTableGenerator unprotectedAttributeGenerator)
     {
-        unprotectedAttributes.add(new Attribute(attrType, new DERSet(attrValue)));
+        this.unprotectedAttributeGenerator = unprotectedAttributeGenerator;
     }
 
     protected AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameters params) throws IOException
