@@ -43,6 +43,12 @@ public class AttributeTable
         }
     }
 
+    public AttributeTable(
+        Attributes    attrs)
+    {
+        this(ASN1Set.getInstance(attrs.getDERObject()));
+    }
+
     private void addAttribute(
         DERObjectIdentifier oid,
         Attribute           a)
