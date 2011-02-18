@@ -11,7 +11,6 @@ import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -214,7 +213,9 @@ public class SMIMEEnvelopedGenerator
     {
         try
         {
-            JceKeyAgreeRecipientInfoGenerator infoGenerator = new JceKeyAgreeRecipientInfoGenerator(new ASN1ObjectIdentifier(agreementAlgorithm), senderPrivateKey, senderPublicKey, new ASN1ObjectIdentifier(cekWrapAlgorithm), Collections.singletonList(recipientCert));
+            JceKeyAgreeRecipientInfoGenerator infoGenerator = new JceKeyAgreeRecipientInfoGenerator(new ASN1ObjectIdentifier(agreementAlgorithm), senderPrivateKey, senderPublicKey, new ASN1ObjectIdentifier(cekWrapAlgorithm));
+
+            infoGenerator.addRecipient(recipientCert);
 
             if (provider != null)
             {
@@ -222,6 +223,10 @@ public class SMIMEEnvelopedGenerator
             }
 
             fact.addRecipientInfoGenerator(infoGenerator);
+        }
+        catch (CertificateEncodingException e)
+        {
+            throw new NoSuchAlgorithmException("cannot set up generator: " + e);
         }
         catch (CMSException e)
         {

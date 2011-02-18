@@ -124,7 +124,28 @@ public class AttributeTable
         
         return v;
     }
-    
+
+    public int size()
+    {
+        int size = 0;
+
+        for (Enumeration en = attributes.elements(); en.hasMoreElements();)
+        {
+            Object o = en.nextElement();
+
+            if (o instanceof Vector)
+            {
+                size += ((Vector)o).size();
+            }
+            else
+            {
+                size++;
+            }
+        }
+
+        return size;
+    }
+
     public Hashtable toHashtable()
     {
         return copyTable(attributes);

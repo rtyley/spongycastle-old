@@ -21,6 +21,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
@@ -182,6 +184,57 @@ public class NewEnvelopedDataStreamTest
 
             assertEquals(true, Arrays.equals(expectedData, CMSTestUtil.streamToByteArray(recData.getContentStream())));
         }
+    }
+
+    public void testUnprotectedAttributes()
+        throws Exception
+    {
+        byte[]          data     = "WallaWallaWashington".getBytes();
+
+        CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+
+        edGen.addUnprotectedAttribute(PKCSObjectIdentifiers.id_aa_contentHint, new DERUTF8String("Hint"));
+        edGen.addUnprotectedAttribute(PKCSObjectIdentifiers.id_aa_receiptRequest, new DERUTF8String("Request"));
+
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+
+        OutputStream out = edGen.open(
+                                bOut, new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(BC).build());
+
+        out.write(data);
+
+        out.close();
+
+        CMSEnvelopedDataParser ed = new CMSEnvelopedDataParser(bOut.toByteArray());
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        Collection  c = recipients.getRecipients();
+
+        assertEquals(1, c.size());
+
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+
+            byte[] recData = recipient.getContent(new JceKeyTransEnvelopedRecipient(_reciKP.getPrivate()).setProvider(BC));
+
+            assertEquals(true, Arrays.equals(data, recData));
+        }
+
+        AttributeTable attrs = ed.getUnprotectedAttributes();
+
+        assertEquals(attrs.size(), 2);
+
+        assertEquals(new DERUTF8String("Hint"), attrs.get(PKCSObjectIdentifiers.id_aa_contentHint).getAttrValues().getObjectAt(0));
+        assertEquals(new DERUTF8String("Request"), attrs.get(PKCSObjectIdentifiers.id_aa_receiptRequest).getAttrValues().getObjectAt(0));
+
     }
 
     public void testKeyTransAES128BufferedStream()
@@ -593,8 +646,12 @@ public class NewEnvelopedDataStreamTest
 
         CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
 
-        edGen.addRecipientInfoGenerator(new JceKeyAgreeRecipientInfoGenerator(CMSAlgorithm.ECDH_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), CMSAlgorithm.AES128_WRAP, _reciEcCert).setProvider(BC));
+        JceKeyAgreeRecipientInfoGenerator recipientGenerator = new JceKeyAgreeRecipientInfoGenerator(CMSAlgorithm.ECDH_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), CMSAlgorithm.AES128_WRAP).setProvider(BC);
 
+        recipientGenerator.addRecipient(_reciEcCert);
+
+        edGen.addRecipientInfoGenerator(recipientGenerator);
+        
         ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
 
         OutputStream out = edGen.open(

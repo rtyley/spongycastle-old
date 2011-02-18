@@ -142,7 +142,11 @@ public class NewAuthenticatedDataTest
 
         CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
 
-        adGen.addRecipientInfoGenerator(new JceKeyAgreeRecipientInfoGenerator(CMSAlgorithm.ECDH_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), CMSAlgorithm.AES128_WRAP, _reciEcCert).setProvider(BC));
+        JceKeyAgreeRecipientInfoGenerator recipientGenerator = new JceKeyAgreeRecipientInfoGenerator(CMSAlgorithm.ECDH_SHA1KDF, _origEcKP.getPrivate(), _origEcKP.getPublic(), CMSAlgorithm.AES128_WRAP).setProvider(BC);
+
+        recipientGenerator.addRecipient(_reciEcCert);
+
+        adGen.addRecipientInfoGenerator(recipientGenerator);
 
         CMSAuthenticatedData ad = adGen.generate(
                               new CMSProcessableByteArray(data),
