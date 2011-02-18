@@ -26,6 +26,8 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
@@ -215,6 +217,51 @@ public class NewEnvelopedDataTest
         init();
 
         return new CMSTestSetup(new TestSuite(NewEnvelopedDataTest.class));
+    }
+
+    public void testUnprotectedAttributes()
+        throws Exception
+    {
+        byte[]          data     = "WallaWallaWashington".getBytes();
+
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+
+        edGen.addUnprotectedAttribute(PKCSObjectIdentifiers.id_aa_contentHint, new DERUTF8String("Hint"));
+        edGen.addUnprotectedAttribute(PKCSObjectIdentifiers.id_aa_receiptRequest, new DERUTF8String("Request"));
+
+        CMSEnvelopedData ed = edGen.generate(
+                                new CMSProcessableByteArray(data),
+                                new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build());
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.DES_EDE3_CBC);
+
+        AttributeTable attrs = ed.getUnprotectedAttributes();
+
+        assertEquals(attrs.size(), 2);
+
+        assertEquals(new DERUTF8String("Hint"), attrs.get(PKCSObjectIdentifiers.id_aa_contentHint).getAttrValues().getObjectAt(0));
+        assertEquals(new DERUTF8String("Request"), attrs.get(PKCSObjectIdentifiers.id_aa_receiptRequest).getAttrValues().getObjectAt(0));
+                
+        Collection  c = recipients.getRecipients();
+
+        assertEquals(1, c.size());
+
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+
+            byte[] recData = recipient.getContent(new JceKeyTransEnvelopedRecipient(_reciKP.getPrivate()).setProvider(BC));
+
+            assertEquals(true, Arrays.equals(data, recData));
+        }
     }
 
     public void testKeyTrans()

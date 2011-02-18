@@ -20,10 +20,13 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.BERSet;
+import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.operator.GenericKey;
@@ -502,8 +505,19 @@ public class CMSEnvelopedDataStreamGenerator
         {
             _out.close();
             _eiGen.close();
-            
-            // [TODO] unprotected attributes go here
+
+            if (!unprotectedAttributes.isEmpty())
+            {
+                ASN1EncodableVector v = new ASN1EncodableVector();
+
+                for (Iterator it = unprotectedAttributes.iterator(); it.hasNext();)
+                {
+                    v.add((DEREncodable)it.next());
+                }
+                ASN1Set unprotectedAttrs = new DERSet(v);
+
+                _envGen.addObject(new DERTaggedObject(false, 1, unprotectedAttrs));
+            }
     
             _envGen.close();
             _cGen.close();
