@@ -177,7 +177,12 @@ public class AttributeTable
         
         return v;
     }
-    
+
+    public Attributes toAttributes()
+    {
+        return new Attributes(this.toASN1EncodableVector());
+    }
+
     private Hashtable copyTable(
         Hashtable in)
     {
