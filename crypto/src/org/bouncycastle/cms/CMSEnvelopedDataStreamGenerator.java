@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.crypto.Cipher;
@@ -23,10 +24,10 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.BERSet;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.operator.GenericKey;
@@ -506,15 +507,11 @@ public class CMSEnvelopedDataStreamGenerator
             _out.close();
             _eiGen.close();
 
-            if (!unprotectedAttributes.isEmpty())
+            if (unprotectedAttributeGenerator != null)
             {
-                ASN1EncodableVector v = new ASN1EncodableVector();
-
-                for (Iterator it = unprotectedAttributes.iterator(); it.hasNext();)
-                {
-                    v.add((DEREncodable)it.next());
-                }
-                ASN1Set unprotectedAttrs = new BERSet(v);
+                AttributeTable attrTble = unprotectedAttributeGenerator.getAttributes(new HashMap());
+      
+                ASN1Set unprotectedAttrs = new BERSet(attrTble.toASN1EncodableVector());
 
                 _envGen.addObject(new DERTaggedObject(false, 1, unprotectedAttrs));
             }
