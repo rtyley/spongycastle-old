@@ -1,5 +1,6 @@
 package org.bouncycastle.cms.jcajce;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.InflaterInputStream;
@@ -16,7 +17,7 @@ public class ZlibExpanderProvider
 
     public ZlibExpanderProvider()
     {
-        this.limit = 0;
+        this.limit = -1;
     }
 
     /**
@@ -34,7 +35,6 @@ public class ZlibExpanderProvider
     {
         return new InputExpander()
         {
-
             public AlgorithmIdentifier getAlgorithmIdentifier()
             {
                 return algorithm;
@@ -42,79 +42,71 @@ public class ZlibExpanderProvider
 
             public InputStream getInputStream(InputStream comIn)
             {
-                if (limit == 0)
+                InputStream s = new InflaterInputStream(comIn);                
+                if (limit >= 0)
                 {
-                    return new InflaterInputStream(comIn);
+                    s = new LimitedInputStream(s, limit);
                 }
-                else
-                {
-                    return new LimitedInflaterInputStream(comIn);
-                }
+                return s;
             }
         };
     }
 
-    private class LimitedInflaterInputStream
-        extends InputStream
+    private static class LimitedInputStream
+        extends FilterInputStream
     {
-        private InputStream comIn;
-        private long maxLeft;
+        private long remaining;
 
-        public LimitedInflaterInputStream(InputStream comIn)
+        public LimitedInputStream(InputStream input, long limit)
         {
-            this.comIn = new InflaterInputStream(comIn);
-            this.maxLeft = limit;
-        }
+            super(input);
 
-        public int read(byte[] inBuf)
-            throws IOException
-        {
-            return read(inBuf, 0, inBuf.length);
-        }
-
-        public int read(byte[] inBuf, int inOff, int inLen)
-            throws IOException
-        {
-            if (maxLeft >= inLen)
-            {
-                maxLeft -= inLen;
-                return comIn.read(inBuf, inOff, inLen);
-            }
-            else
-            {
-                int b;
-                int count = 0;
-
-                while ((b = this.read()) >= 0 && inLen != count)
-                {
-                    inBuf[inOff++] = (byte)b;
-                    count++;
-                }
-
-                if (count == 0 && inLen != 0)
-                {
-                    return -1;
-                }
-                
-                return count;
-            }
+            this.remaining = limit;
         }
 
         public int read()
             throws IOException
         {
-            int b = comIn.read();
-
-            if (b < 0)
+            // Only a single 'extra' byte will ever be read
+            if (remaining >= 0)
             {
-                return b;
+                int b = super.in.read();
+                if (b < 0 || --remaining >= 0)
+                {
+                    return b;
+                }
             }
 
-            if (--maxLeft < 0)
+            throw new StreamOverflowException("expanded byte limit exceeded");
+        }
+
+        public int read(byte[] buf, int off, int len)
+            throws IOException
+        {
+            if (len < 1)
             {
-                throw new StreamOverflowException("expanded byte limit exceeded");
+                // This will give correct exceptions/returns for strange lengths
+                return super.read(buf, off, len);
             }
-            return b;
+
+            if (remaining < 1)
+            {
+                // Will either return EOF or throw exception
+                return read();
+            }
+
+            /*
+             * Limit the underlying request to 'remaining' bytes. This ensures the
+             * caller will see the full 'limit' bytes before getting an exception.
+             * Also, only one extra byte will ever be read.
+             */
+            int actualLen = (remaining > len ? len : (int)remaining);
+            int numRead = super.in.read(buf, off, actualLen);
+            if (numRead > 0)
+            {
+                remaining -= numRead;
+            }
+            return numRead;
         }
     }
 }
