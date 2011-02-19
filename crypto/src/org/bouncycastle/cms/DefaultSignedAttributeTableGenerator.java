@@ -66,7 +66,7 @@ public class DefaultSignedAttributeTableGenerator
             DERObjectIdentifier contentType = (DERObjectIdentifier)
                 parameters.get(CMSAttributeTableGenerator.CONTENT_TYPE);
 
-            // contentType will be null if where trying to generate a counter signature.
+            // contentType will be null if we're trying to generate a counter signature.
             if (contentType != null)
             {
                 Attribute attr = new Attribute(CMSAttributes.contentType,
