@@ -184,9 +184,9 @@ public class CMSEnvelopedDataGenerator
         ASN1Set unprotectedAttrSet = null;
         if (unprotectedAttributeGenerator != null)
         {
-            AttributeTable attrTble = unprotectedAttributeGenerator.getAttributes(new HashMap());
+            AttributeTable attrTable = unprotectedAttributeGenerator.getAttributes(new HashMap());
 
-            unprotectedAttrSet = new BERSet(attrTble.toASN1EncodableVector());
+            unprotectedAttrSet = new BERSet(attrTable.toASN1EncodableVector());
         }
 
         ContentInfo contentInfo = new ContentInfo(
@@ -248,9 +248,9 @@ public class CMSEnvelopedDataGenerator
         ASN1Set unprotectedAttrSet = null;
         if (unprotectedAttributeGenerator != null)
         {
-            AttributeTable attrTble = unprotectedAttributeGenerator.getAttributes(new HashMap());
+            AttributeTable attrTable = unprotectedAttributeGenerator.getAttributes(new HashMap());
 
-            unprotectedAttrSet = new BERSet(attrTble.toASN1EncodableVector());
+            unprotectedAttrSet = new BERSet(attrTable.toASN1EncodableVector());
         }
 
         ContentInfo contentInfo = new ContentInfo(
@@ -258,11 +258,6 @@ public class CMSEnvelopedDataGenerator
                 new EnvelopedData(null, new DERSet(recipientInfos), eci, unprotectedAttrSet));
 
         return new CMSEnvelopedData(contentInfo);
-    }
-
-    public void setUnprotectedAttributeGenerator(CMSAttributeTableGenerator unprotectedAttributeGenerator)
-    {
-        this.unprotectedAttributeGenerator = unprotectedAttributeGenerator;
     }
 
     /**

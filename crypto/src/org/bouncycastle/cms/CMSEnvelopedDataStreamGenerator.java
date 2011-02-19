@@ -88,11 +88,6 @@ public class CMSEnvelopedDataStreamGenerator
         _bufferSize = bufferSize;
     }
 
-    public void setUnprotectedAttributeGenerator(CMSAttributeTableGenerator unprotectedAttributeGenerator)
-    {
-        this.unprotectedAttributeGenerator = unprotectedAttributeGenerator;
-    }
-
     /**
      * Use a BER Set to store the recipient information
      */
@@ -514,9 +509,9 @@ public class CMSEnvelopedDataStreamGenerator
 
             if (unprotectedAttributeGenerator != null)
             {
-                AttributeTable attrTble = unprotectedAttributeGenerator.getAttributes(new HashMap());
+                AttributeTable attrTable = unprotectedAttributeGenerator.getAttributes(new HashMap());
       
-                ASN1Set unprotectedAttrs = new BERSet(attrTble.toASN1EncodableVector());
+                ASN1Set unprotectedAttrs = new BERSet(attrTable.toASN1EncodableVector());
 
                 _envGen.addObject(new DERTaggedObject(false, 1, unprotectedAttrs));
             }
