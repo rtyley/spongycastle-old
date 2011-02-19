@@ -1,6 +1,7 @@
 package org.bouncycastle.cms;
 
 import java.io.BufferedInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -49,7 +50,7 @@ public class CMSTypedStream
         int         bufSize)
     {
         _oid = oid;
-        _in = new FullReaderStream(in, bufSize);
+        _in = new FullReaderStream(new BufferedInputStream(in, bufSize));
     }
 
     public ASN1ObjectIdentifier getContentType()
@@ -69,54 +70,17 @@ public class CMSTypedStream
         _in.close();
     }
 
-    private class FullReaderStream
-        extends InputStream
+    private static class FullReaderStream extends FilterInputStream
     {
-        InputStream _stream;
-        
-        FullReaderStream(
-            InputStream in,
-            int         bufSize)
+        FullReaderStream(InputStream in)
         {
-            _stream = new BufferedInputStream(in, bufSize);
+            super(in);
         }
-        
-        public int read() 
-            throws IOException
+
+        public int read(byte[] buf, int off, int len) throws IOException
         {
-            return _stream.read();
-        }
-        
-        public int read(
-            byte[] buf,
-            int    off,
-            int    len) 
-            throws IOException
-        {
-            int    rd = 0;
-            int    total = 0;
-            
-            while (len != 0 && (rd = _stream.read(buf, off, len)) > 0)
-            {
-                off += rd;
-                len -= rd;
-                total += rd;
-            }
-            
-            if (total > 0)
-            {
-                return total;
-            }
-            else
-            {
-                return -1;
-            }
-        }
-        
-        public void close() 
-            throws IOException
-        {
-            _stream.close();
+            int totalRead = Streams.readFully(super.in, buf, off, len);
+            return totalRead > 0 ? totalRead : -1;
         }
     }
 }

@@ -1,12 +1,11 @@
 package org.bouncycastle.cms;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.operator.InputDecryptor;
 import org.bouncycastle.operator.MacCalculator;
+import org.bouncycastle.util.io.TeeInputStream;
 
 public class RecipientOperator
 {
@@ -33,7 +32,7 @@ public class RecipientOperator
         }
         else
         {
-            return new WrappingStream(((MacCalculator)operator).getOutputStream(), dataIn);
+            return new TeeInputStream(dataIn, ((MacCalculator)operator).getOutputStream());
         }
     }
 
@@ -45,32 +44,5 @@ public class RecipientOperator
     public byte[] getMac()
     {
         return ((MacCalculator)operator).getMac();
-    }
-
-    private class WrappingStream extends InputStream
-    {
-        private OutputStream output;
-        private InputStream input;
-
-        private WrappingStream(OutputStream output, InputStream input)
-        {
-            this.output = output;
-            this.input = input;
-        }
-
-        public int read()
-            throws IOException
-        {
-            int b = input.read();
-
-            if (b < 0)
-            {
-                return b;
-            }
-
-            output.write(b);
-
-            return b;
-        }
     }
 }
