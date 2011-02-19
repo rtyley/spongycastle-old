@@ -90,6 +90,11 @@ public class CMSEnvelopedGenerator
         this.rand = rand;
     }
 
+    public void setUnprotectedAttributeGenerator(CMSAttributeTableGenerator unprotectedAttributeGenerator)
+    {
+        this.unprotectedAttributeGenerator = unprotectedAttributeGenerator;
+    }
+
     /**
      * add a recipient.
      *
