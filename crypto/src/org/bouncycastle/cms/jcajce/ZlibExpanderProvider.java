@@ -92,7 +92,8 @@ public class ZlibExpanderProvider
             if (remaining < 1)
             {
                 // Will either return EOF or throw exception
-                return read();
+                read();
+                return -1;
             }
 
             /*
