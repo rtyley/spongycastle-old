@@ -9,16 +9,24 @@ import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
 
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.operator.DigestCalculator;
 
 public class CMSAuthenticatedGenerator
     extends CMSEnvelopedGenerator
 {
+    protected CMSAttributeTableGenerator authGen;
+    protected CMSAttributeTableGenerator unauthGen;
+    protected DigestCalculator digCalculator;
+
     /**
      * base constructor
      */
@@ -70,5 +78,29 @@ public class CMSAuthenticatedGenerator
         {
             return null;
         }
+    }
+
+    public void setDigestCalculator(DigestCalculator digCalculator)
+    {
+        this.digCalculator = digCalculator;
+    }
+
+    public void setAuthenticatedAttributeGenerator(CMSAttributeTableGenerator authGen)
+    {
+        this.authGen = authGen;
+    }
+
+    public void setUnauthenticatedAttributeGenerator(CMSAttributeTableGenerator unauthGen)
+    {
+        this.unauthGen = unauthGen;
+    }
+
+    protected Map getBaseParameters(DERObjectIdentifier contentType, AlgorithmIdentifier digAlgId, byte[] hash)
+    {
+        Map param = new HashMap();
+        param.put(CMSAttributeTableGenerator.CONTENT_TYPE, contentType);
+        param.put(CMSAttributeTableGenerator.DIGEST_ALGORITHM_IDENTIFIER, digAlgId);
+        param.put(CMSAttributeTableGenerator.DIGEST,  hash.clone());
+        return param;
     }
 }

@@ -159,6 +159,11 @@ public class AuthenticatedData
         return macAlgorithm;
     }
 
+    public AlgorithmIdentifier getDigestAlgorithm()
+    {
+        return digestAlgorithm;
+    }
+
     public ContentInfo getEncapsulatedContentInfo()
     {
         return encapsulatedContentInfo;

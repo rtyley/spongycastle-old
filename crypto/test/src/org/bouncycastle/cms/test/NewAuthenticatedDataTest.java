@@ -15,7 +15,9 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSAuthenticatedData;
 import org.bouncycastle.cms.CMSAuthenticatedDataGenerator;
@@ -35,6 +37,9 @@ import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JcePasswordAuthenticatedRecipient;
 import org.bouncycastle.cms.jcajce.JcePasswordRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.util.encoders.Hex;
 
 public class NewAuthenticatedDataTest
@@ -117,6 +122,12 @@ public class NewAuthenticatedDataTest
         tryKeyTrans(CMSAlgorithm.DES_EDE3_CBC);
     }
 
+    public void testKeyTransDESedeWithDigest()
+        throws Exception
+    {
+        tryKeyTransWithDigest(CMSAlgorithm.DES_EDE3_CBC);
+    }
+
     public void testKeyTransRC2()
         throws Exception
     {
@@ -127,6 +138,12 @@ public class NewAuthenticatedDataTest
         throws Exception
     {
         tryKekAlgorithm(CMSTestUtil.makeDesede192Key(), new DERObjectIdentifier("1.2.840.113549.1.9.16.3.6"));
+    }
+
+    public void testKEKDESedeWithDigest()
+        throws Exception
+    {
+        tryKekAlgorithmWithDigest(CMSTestUtil.makeDesede192Key(), new DERObjectIdentifier("1.2.840.113549.1.9.16.3.6"));
     }
 
     public void testPasswordAES256()
@@ -248,12 +265,55 @@ public class NewAuthenticatedDataTest
         }
     }
 
-    private void tryKekAlgorithm(SecretKey kek, DERObjectIdentifier algOid)
-        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+    private void tryKeyTransWithDigest(ASN1ObjectIdentifier macAlg)
+        throws Exception
     {
         byte[]          data     = "Eric H. Echidna".getBytes();
 
         CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
+        DigestCalculatorProvider calcProvider = new JcaDigestCalculatorProviderBuilder().setProvider(BC).build();
+
+        adGen.setDigestCalculator(calcProvider.get(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1)));
+
+        adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+
+        CMSAuthenticatedData ad = adGen.generate(
+                                new CMSProcessableByteArray(data),
+                                new JceCMSMacCalculatorBuilder(macAlg).setProvider(BC).build());
+
+        RecipientInformationStore recipients = ad.getRecipientInfos();
+
+        assertEquals(ad.getMacAlgOID(), macAlg.getId());
+
+        Collection c = recipients.getRecipients();
+
+        assertEquals(1, c.size());
+
+        Iterator it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+
+            byte[] recData = recipient.getContent(new JceKeyTransAuthenticatedRecipient(_reciKP.getPrivate()).setProvider(BC));
+
+            assertTrue(Arrays.equals(data, recData));
+            assertTrue(Arrays.equals(ad.getMac(), recipient.getMac()));
+            assertTrue(Arrays.equals(ad.getContentDigest(), recipient.getContentDigest()));
+        }
+    }
+
+    private void tryKekAlgorithm(SecretKey kek, DERObjectIdentifier algOid)
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, OperatorCreationException
+    {
+        byte[]          data     = "Eric H. Echidna".getBytes();
+
+        CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
+        DigestCalculatorProvider calcProvider = new JcaDigestCalculatorProviderBuilder().setProvider(BC).build();
+
+        adGen.setDigestCalculator(calcProvider.get(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1)));
 
         byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
 
@@ -286,6 +346,47 @@ public class NewAuthenticatedDataTest
             fail("no recipient found");
         }
     }
+
+    private void tryKekAlgorithmWithDigest(SecretKey kek, DERObjectIdentifier algOid)
+            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+        {
+            byte[]          data     = "Eric H. Echidna".getBytes();
+
+            CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
+
+            byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
+
+            adGen.addRecipientInfoGenerator(new JceKEKRecipientInfoGenerator(kekId, kek).setProvider(BC));
+
+            CMSAuthenticatedData ad = adGen.generate(
+                                    new CMSProcessableByteArray(data),
+                                    new JceCMSMacCalculatorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build());
+
+            RecipientInformationStore recipients = ad.getRecipientInfos();
+
+            Collection c = recipients.getRecipients();
+            Iterator it = c.iterator();
+
+            assertEquals(ad.getMacAlgOID(), CMSAuthenticatedDataGenerator.DES_EDE3_CBC);
+
+            if (it.hasNext())
+            {
+                RecipientInformation recipient = (RecipientInformation)it.next();
+
+                assertEquals(recipient.getKeyEncryptionAlgOID(), algOid.getId());
+
+                byte[] recData = recipient.getContent(new JceKEKAuthenticatedRecipient(kek).setProvider(BC));
+
+                assertTrue(Arrays.equals(data, recData));
+                assertTrue(Arrays.equals(ad.getMac(), recipient.getMac()));
+                assertTrue(Arrays.equals(ad.getContentDigest(), recipient.getContentDigest()));
+            }
+            else
+            {
+                fail("no recipient found");
+            }
+        }
+
 
     private void passwordTest(String algorithm)
         throws Exception

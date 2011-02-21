@@ -19,6 +19,8 @@ import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.AuthenticatedDataParser;
 import org.bouncycastle.asn1.cms.ContentInfoParser;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.util.Arrays;
 
 /**
@@ -61,7 +63,7 @@ import org.bouncycastle.util.Arrays;
 public class CMSAuthenticatedDataParser
     extends CMSContentInfoParser
 {
-    RecipientInformationStore   _recipientInfoStore;
+    RecipientInformationStore   recipientInfoStore;
     AuthenticatedDataParser authData;
 
     private AlgorithmIdentifier macAlg;
@@ -104,14 +106,31 @@ public class CMSAuthenticatedDataParser
         ContentInfoParser data = authData.getEnapsulatedContentInfo();
         CMSReadable readable = new CMSProcessableInputStream(
             ((ASN1OctetStringParser)data.getContent(DERTags.OCTET_STRING)).getOctetStream());
-        CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSAuthenticatedSecureReadable(
-            this.macAlg, readable);
 
         //
         // build the RecipientInformationStore
         //
-        this._recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, secureReadable);
+        if (authAttrs != null)
+        {
+            DigestCalculatorProvider digestCalculatorProvider = new BcDigestCalculatorProvider();
+
+//            try
+//            {
+//                CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSDigestAuthenticatedSecureReadable(digestCalculatorProvider.get(authData.getDigestAlgorithm()), readable);
+//
+//                this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(recipientInfos, secureReadable, authAttrs.getDEREncoded());
+//            }
+//            catch (OperatorCreationException e)
+//            {
+//                throw new CMSException("unable to create digest calculator: " + e.getMessage(), e);
+//            }
+        }
+        else
+        {
+            CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSAuthenticatedSecureReadable(this.macAlg, readable);
+
+            this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(recipientInfos, this.macAlg, secureReadable);
+        }
     }
 
     /**
@@ -174,7 +193,7 @@ public class CMSAuthenticatedDataParser
      */
     public RecipientInformationStore getRecipientInfos()
     {
-        return _recipientInfoStore;
+        return recipientInfoStore;
     }
 
     public byte[] getMac()
