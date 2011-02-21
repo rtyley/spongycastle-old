@@ -592,7 +592,7 @@ public class CMSSignedDataGenerator
         boolean isCounterSignature = (eContentType == null);
 
         ASN1ObjectIdentifier contentTypeOID = isCounterSignature
-            ?   CMSObjectIdentifiers.data
+            ?   null
             :   new ASN1ObjectIdentifier(eContentType);
 
         for (Iterator it = signerGens.iterator(); it.hasNext();)
@@ -613,22 +613,6 @@ public class CMSSignedDataGenerator
                 {
                     throw new CMSException("data processing exception: " + e.getMessage(), e);
                 }
-            }
-
-            if (isCounterSignature)
-            {
-                final CMSAttributeTableGenerator signedGen = sGen.getSignedAttributeTableGenerator();
-
-                sGen = new SignerInfoGenerator(sGen, new CMSAttributeTableGenerator()
-                {
-                    public AttributeTable getAttributes(Map parameters)
-                        throws CMSAttributeTableGenerationException
-                    {
-                        AttributeTable table = signedGen.getAttributes(parameters);
-
-                        return table.remove(CMSAttributes.contentType);
-                    }
-                }, sGen.getUnsignedAttributeTableGenerator());
             }
 
             SignerInfo inf = sGen.generate(contentTypeOID);
