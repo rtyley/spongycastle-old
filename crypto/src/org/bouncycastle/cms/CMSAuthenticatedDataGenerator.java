@@ -12,7 +12,9 @@ import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
@@ -21,15 +23,20 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AuthenticatedData;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.MacCalculator;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.io.TeeOutputStream;
 
 /**
@@ -40,9 +47,10 @@ import org.bouncycastle.util.io.TeeOutputStream;
  * <pre>
  *      CMSAuthenticatedDataGenerator  fact = new CMSAuthenticatedDataGenerator();
  *
- *      fact.addKeyTransRecipient(cert);
+ *      adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert).setProvider("BC"));
  *
- *      CMSAuthenticatedData         data = fact.generate(content, algorithm, "BC");
+ *      CMSAuthenticatedData         data = fact.generate(new CMSProcessableByteArray(data),
+ *                              new JceCMSMacCalculatorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build()));
  * </pre>
  */
 public class CMSAuthenticatedDataGenerator
@@ -70,24 +78,6 @@ public class CMSAuthenticatedDataGenerator
         ASN1OctetString         encContent;
         ASN1OctetString         macResult;
 
-        try
-        {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            OutputStream mOut = new TeeOutputStream(bOut, macCalculator.getOutputStream());
-
-            typedData.write(mOut);
-
-            mOut.close();
-
-            encContent = new BERConstructedOctetString(bOut.toByteArray());
-
-            macResult = new DEROctetString(macCalculator.getMac());
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("exception decoding algorithm parameters.", e);
-        }
-
         for (Iterator it = recipientInfoGenerators.iterator(); it.hasNext();)
         {
             RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
@@ -95,15 +85,96 @@ public class CMSAuthenticatedDataGenerator
             recipientInfos.add(recipient.generate(macCalculator.getKey()));
         }
 
-        ContentInfo  eci = new ContentInfo(
-                CMSObjectIdentifiers.data,
-                encContent);
+        AuthenticatedData authData;
+
+        if (digCalculator != null)
+        {
+            try
+            {
+                ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+                OutputStream out = new TeeOutputStream(digCalculator.getOutputStream(), bOut);
+
+                typedData.write(out);
+
+                out.close();
+
+                encContent = new BERConstructedOctetString(bOut.toByteArray());
+            }
+            catch (IOException e)
+            {
+                throw new CMSException("unable to perform digest calculation: " + e.getMessage(), e);
+            }
+
+            Map parameters = getBaseParameters(typedData.getContentType(), digCalculator.getAlgorithmIdentifier(), digCalculator.getDigest());
+
+            if (authGen == null)
+            {
+                authGen = new DefaultAuthenticatedAttributeTableGenerator();
+            }
+            ASN1Set authed = new DERSet(authGen.getAttributes(Collections.unmodifiableMap(parameters)).toASN1EncodableVector());
+
+            try
+            {
+                OutputStream mOut = macCalculator.getOutputStream();
+
+                mOut.write(authed.getDEREncoded());
+
+                mOut.close();
+
+                macResult = new DEROctetString(macCalculator.getMac());
+            }
+            catch (IOException e)
+            {
+                throw new CMSException("exception decoding algorithm parameters.", e);
+            }
+            ASN1Set unauthed = (unauthGen != null) ? new BERSet(unauthGen.getAttributes(Collections.unmodifiableMap(parameters)).toASN1EncodableVector()) : null;
+
+            ContentInfo  eci = new ContentInfo(
+                            CMSObjectIdentifiers.data,
+                            encContent);
+
+            authData = new AuthenticatedData(null, new DERSet(recipientInfos), macCalculator.getAlgorithmIdentifier(), digCalculator.getAlgorithmIdentifier(), eci, authed, macResult, unauthed);
+        }
+        else
+        {
+            try
+            {
+                ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+                OutputStream mOut = new TeeOutputStream(bOut, macCalculator.getOutputStream());
+
+                typedData.write(mOut);
+
+                mOut.close();
+
+                encContent = new BERConstructedOctetString(bOut.toByteArray());
+
+                macResult = new DEROctetString(macCalculator.getMac());
+            }
+            catch (IOException e)
+            {
+                throw new CMSException("exception decoding algorithm parameters.", e);
+            }
+
+            ASN1Set unauthed = (unauthGen != null) ? new BERSet(unauthGen.getAttributes(Collections.EMPTY_MAP).toASN1EncodableVector()) : null;
+
+            ContentInfo  eci = new ContentInfo(
+                            CMSObjectIdentifiers.data,
+                            encContent);
+            
+            authData = new AuthenticatedData(null, new DERSet(recipientInfos), macCalculator.getAlgorithmIdentifier(), null, eci, null, macResult, unauthed);
+        }
 
         ContentInfo contentInfo = new ContentInfo(
-                CMSObjectIdentifiers.authenticatedData,
-                new AuthenticatedData(null, new DERSet(recipientInfos), macCalculator.getAlgorithmIdentifier(), null, eci, null, macResult, null));
+                CMSObjectIdentifiers.authenticatedData, authData);
 
-        return new CMSAuthenticatedData(contentInfo);
+        return new CMSAuthenticatedData(contentInfo, new DigestCalculatorProvider()
+        {
+            public DigestCalculator get(AlgorithmIdentifier digestAlgorithmIdentifier)
+                throws OperatorCreationException
+            {
+                return digCalculator;
+            }
+        });
     }
 
     /**

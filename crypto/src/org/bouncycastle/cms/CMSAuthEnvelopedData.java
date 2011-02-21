@@ -101,7 +101,7 @@ class CMSAuthEnvelopedData
         // build the RecipientInformationStore
         //
         this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, secureReadable);
+            recipientInfos, this.authEncAlg, secureReadable);
 
         // FIXME These need to be passed to the AEAD cipher as AAD (Additional Authenticated Data)
         this.authAttrs = authEnvData.getAuthAttrs();

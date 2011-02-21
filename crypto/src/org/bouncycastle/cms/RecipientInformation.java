@@ -1,5 +1,6 @@
 package org.bouncycastle.cms;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.AlgorithmParameters;
 import java.security.Key;
@@ -12,22 +13,30 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.util.io.Streams;
 
 public abstract class RecipientInformation
 {
     protected RecipientId rid;
     protected AlgorithmIdentifier   keyEncAlg;
-    protected CMSSecureReadable     secureReadable;
-    protected RecipientOperator     operator;
+    protected AlgorithmIdentifier messageAlgorithm;
+    private CMSSecureReadable     secureReadable;
+
+    private byte[]                additionalData;
 
     private byte[] resultMac;
+    private RecipientOperator     operator;
 
     RecipientInformation(
         AlgorithmIdentifier     keyEncAlg,
-        CMSSecureReadable       secureReadable)
+        AlgorithmIdentifier     messageAlgorithm,
+        CMSSecureReadable       secureReadable,
+        byte[]                  additionalData)
     {
         this.keyEncAlg = keyEncAlg;
+        this.messageAlgorithm = messageAlgorithm;
         this.secureReadable = secureReadable;
+        this.additionalData = additionalData;
     }
 
     String getContentAlgorithmName()
@@ -180,7 +189,23 @@ public abstract class RecipientInformation
     }
 
     /**
-     * Return the MAC calculated for the content stream. Note: this call is only meaningful once all
+     * Return the content digest calculated during the read of the content if one has been generated. This will
+     * only happen if we are dealing with authenticated data and authenticated attributes are present.
+     *
+     * @return byte array containing the digest.
+     */
+    public byte[] getContentDigest()
+    {
+        if (secureReadable instanceof CMSEnvelopedHelper.CMSDigestAuthenticatedSecureReadable)
+        {
+            return ((CMSEnvelopedHelper.CMSDigestAuthenticatedSecureReadable)secureReadable).getDigest();
+        }
+
+        return null;
+    }
+
+    /**
+     * Return the MAC calculated for the recipient. Note: this call is only meaningful once all
      * the content has been read.
      *
      * @return  byte array containing the mac.
@@ -193,6 +218,17 @@ public abstract class RecipientInformation
             {
                 if (operator.isMacBased())
                 {
+                    if (additionalData != null)
+                    {
+                        try
+                        {
+                            Streams.drain(operator.getInputStream(new ByteArrayInputStream(additionalData)));
+                        }
+                        catch (IOException e)
+                        {
+                            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                        }
+                    }
                     resultMac = operator.getMac();
                 }
             }
@@ -257,6 +293,19 @@ public abstract class RecipientInformation
      * @return  the content inside the EnvelopedData this RecipientInformation is associated with.
      * @throws CMSException if the content-encryption/MAC key cannot be recovered.
      */
-    public abstract CMSTypedStream getContentStream(Recipient recipient)
+    public CMSTypedStream getContentStream(Recipient recipient)
+        throws CMSException, IOException
+    {
+        operator = getRecipientOperator(recipient);
+
+        if (additionalData != null)
+        {
+            return new CMSTypedStream(secureReadable.getInputStream());
+        }
+
+        return new CMSTypedStream(operator.getInputStream(secureReadable.getInputStream()));
+    }
+
+    protected abstract RecipientOperator getRecipientOperator(Recipient recipient)
         throws CMSException, IOException;
 }

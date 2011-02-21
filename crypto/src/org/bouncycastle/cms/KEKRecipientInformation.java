@@ -12,6 +12,7 @@ import javax.crypto.NoSuchPaddingException;
 
 import org.bouncycastle.asn1.cms.KEKIdentifier;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message
@@ -24,9 +25,11 @@ public class KEKRecipientInformation
 
     KEKRecipientInformation(
         KEKRecipientInfo        info,
-        CMSSecureReadable       secureReadable)
+        AlgorithmIdentifier     messageAlgorithm,
+        CMSSecureReadable       secureReadable,
+        byte[]                  additionalData)
     {
-        super(info.getKeyEncryptionAlgorithm(), secureReadable);
+        super(info.getKeyEncryptionAlgorithm(), messageAlgorithm, secureReadable, additionalData);
 
         this.info = info;
 
@@ -78,11 +81,9 @@ public class KEKRecipientInformation
         }
     }
 
-    public CMSTypedStream getContentStream(Recipient recipient)
+    protected RecipientOperator getRecipientOperator(Recipient recipient)
         throws CMSException, IOException
     {
-        operator = ((KEKRecipient)recipient).getRecipientOperator(keyEncAlg, secureReadable.getAlgorithm(), info.getEncryptedKey().getOctets());
-        
-        return new CMSTypedStream(operator.getInputStream(secureReadable.getInputStream()));
+        return ((KEKRecipient)recipient).getRecipientOperator(keyEncAlg, messageAlgorithm, info.getEncryptedKey().getOctets());
     }
 }

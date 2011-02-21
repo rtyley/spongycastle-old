@@ -83,7 +83,7 @@ public class CMSEnvelopedData
         // build the RecipientInformationStore
         //
         this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, secureReadable);
+            recipientInfos, this.encAlg, secureReadable);
 
         this.unprotectedAttributes = envData.getUnprotectedAttrs();
     }

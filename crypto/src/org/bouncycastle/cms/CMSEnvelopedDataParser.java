@@ -100,7 +100,7 @@ public class CMSEnvelopedDataParser
         // build the RecipientInformationStore
         //
         this._recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, secureReadable);
+            recipientInfos, this._encAlg, secureReadable);
     }
 
     /**

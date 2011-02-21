@@ -11,8 +11,11 @@ import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.AuthenticatedData;
+import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Arrays;
 
 /**
@@ -36,6 +39,14 @@ public class CMSAuthenticatedData
     }
 
     public CMSAuthenticatedData(
+        byte[]    authData,
+        DigestCalculatorProvider digestCalculatorProvider)
+        throws CMSException
+    {
+        this(CMSUtils.readContentInfo(authData), digestCalculatorProvider);
+    }
+
+    public CMSAuthenticatedData(
         InputStream    authData)
         throws CMSException
     {
@@ -43,7 +54,23 @@ public class CMSAuthenticatedData
     }
 
     public CMSAuthenticatedData(
+        InputStream    authData,
+        DigestCalculatorProvider digestCalculatorProvider)
+        throws CMSException
+    {
+        this(CMSUtils.readContentInfo(authData), digestCalculatorProvider);
+    }
+
+    public CMSAuthenticatedData(
         ContentInfo contentInfo)
+        throws CMSException
+    {
+        this(contentInfo, null);
+    }
+
+    public CMSAuthenticatedData(
+        ContentInfo contentInfo,
+        DigestCalculatorProvider digestCalculatorProvider)
         throws CMSException
     {
         this.contentInfo = contentInfo;
@@ -57,24 +84,45 @@ public class CMSAuthenticatedData
 
         this.macAlg = authData.getMacAlgorithm();
 
+
+        this.authAttrs = authData.getAuthAttrs();
+        this.mac = authData.getMac().getOctets();
+        this.unauthAttrs = authData.getUnauthAttrs();
+
         //
         // read the authenticated content info
         //
         ContentInfo encInfo = authData.getEncapsulatedContentInfo();
         CMSReadable readable = new CMSProcessableByteArray(
             ASN1OctetString.getInstance(encInfo.getContent()).getOctets());
-        CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSAuthenticatedSecureReadable(
-            this.macAlg, readable);
 
         //
         // build the RecipientInformationStore
         //
-        this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, secureReadable);
+        if (authAttrs != null)
+        {
+            if (digestCalculatorProvider == null)
+            {
+                throw new CMSException("a digest calculator provider is required if authenticated attributes are present");
+            }
 
-        this.authAttrs = authData.getAuthAttrs();
-        this.mac = authData.getMac().getOctets();
-        this.unauthAttrs = authData.getUnauthAttrs();
+            try
+            {
+                CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSDigestAuthenticatedSecureReadable(digestCalculatorProvider.get(authData.getDigestAlgorithm()), readable);
+
+                this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(recipientInfos, this.macAlg, secureReadable, authAttrs.getDEREncoded());
+            }
+            catch (OperatorCreationException e)
+            {
+                throw new CMSException("unable to create digest calculator: " + e.getMessage(), e);
+            }
+        }
+        else
+        {
+            CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSAuthenticatedSecureReadable(this.macAlg, readable);
+
+            this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(recipientInfos, this.macAlg, secureReadable);
+        }
     }
 
     public byte[] getMac()
@@ -200,5 +248,15 @@ public class CMSAuthenticatedData
         throws IOException
     {
         return contentInfo.getEncoded();
+    }
+
+    public byte[] getContentDigest()
+    {
+        if (authAttrs != null)
+        {
+            return ASN1OctetString.getInstance(getAuthAttrs().get(CMSAttributes.messageDigest).getAttrValues().getObjectAt(0)).getOctets();
+        }
+
+        return null;
     }
 }

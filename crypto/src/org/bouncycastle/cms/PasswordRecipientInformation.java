@@ -54,9 +54,11 @@ public class PasswordRecipientInformation
 
     PasswordRecipientInformation(
         PasswordRecipientInfo   info,
-        CMSSecureReadable       secureReadable)
+        AlgorithmIdentifier     messageAlgorithm,
+        CMSSecureReadable       secureReadable,
+        byte[]                  additionalData)
     {
-        super(info.getKeyEncryptionAlgorithm(), secureReadable);
+        super(info.getKeyEncryptionAlgorithm(), messageAlgorithm, secureReadable, additionalData);
 
         this.info = info;
         this.rid = new PasswordRecipientId();
@@ -203,7 +205,7 @@ public class PasswordRecipientInformation
         }
     }
 
-    public CMSTypedStream getContentStream(Recipient recipient)
+    protected RecipientOperator getRecipientOperator(Recipient recipient)
         throws CMSException, IOException
     {
         PasswordRecipient pbeRecipient = (PasswordRecipient)recipient;
@@ -232,8 +234,6 @@ public class PasswordRecipientInformation
             derivedKey = ((KeyParameter)gen.generateDerivedParameters(keySize)).getKey();
         }
         
-        operator = pbeRecipient.getRecipientOperator(AlgorithmIdentifier.getInstance(kekAlg.getParameters()), secureReadable.getAlgorithm(), derivedKey, info.getEncryptedKey().getOctets());
-
-        return new CMSTypedStream(operator.getInputStream(secureReadable.getInputStream()));
+        return pbeRecipient.getRecipientOperator(AlgorithmIdentifier.getInstance(kekAlg.getParameters()), messageAlgorithm, derivedKey, info.getEncryptedKey().getOctets());
     }
 }
