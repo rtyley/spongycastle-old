@@ -23,7 +23,6 @@ import org.bouncycastle.asn1.cmp.PKIBody;
 import org.bouncycastle.asn1.cmp.PKIMessage;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.CertException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -94,8 +93,8 @@ public class AllTests
         KeyPair kp = kGen.generateKeyPair();
         X509CertificateHolder cert = makeV3Certificate(kp, "CN=Test", kp, "CN=Test");
 
-        GeneralName sender = new GeneralName(new X509Name("CN=Sender"));
-        GeneralName recipient = new GeneralName(new X509Name("CN=Recip"));
+        GeneralName sender = new GeneralName(new X500Name("CN=Sender"));
+        GeneralName recipient = new GeneralName(new X500Name("CN=Recip"));
 
         ContentSigner signer = new JcaContentSignerBuilder("MD5WithRSAEncryption").setProvider(BC).build(kp.getPrivate());
         ProtectedPKIMessage message = new ProtectedPKIMessageBuilder(sender, recipient)
@@ -122,8 +121,8 @@ public class AllTests
         KeyPair kp = kGen.generateKeyPair();
         X509CertificateHolder cert = makeV3Certificate(kp, "CN=Test", kp, "CN=Test");
 
-        GeneralName sender = new GeneralName(new X509Name("CN=Sender"));
-        GeneralName recipient = new GeneralName(new X509Name("CN=Recip"));
+        GeneralName sender = new GeneralName(new X500Name("CN=Sender"));
+        GeneralName recipient = new GeneralName(new X500Name("CN=Recip"));
 
         ProtectedPKIMessage message = new ProtectedPKIMessageBuilder(sender, recipient)
                                                   .setBody(new PKIBody(PKIBody.TYPE_INIT_REP, CertRepMessage.getInstance(new DERSequence(new DERSequence()))))
@@ -148,8 +147,8 @@ public class AllTests
         KeyPair kp = kGen.generateKeyPair();
         X509CertificateHolder cert = makeV3Certificate(kp, "CN=Test", kp, "CN=Test");
 
-        GeneralName sender = new GeneralName(new X509Name("CN=Sender"));
-        GeneralName recipient = new GeneralName(new X509Name("CN=Recip"));
+        GeneralName sender = new GeneralName(new X500Name("CN=Sender"));
+        GeneralName recipient = new GeneralName(new X500Name("CN=Recip"));
 
         CertificateConfirmationContent content = new CertificateConfirmationContentBuilder()
                              .addAcceptedCertificate(cert, BigInteger.valueOf(1))
