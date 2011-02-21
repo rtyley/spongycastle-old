@@ -14,6 +14,7 @@ import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
@@ -138,7 +140,7 @@ public class CMSSignedDataStreamGenerator
                     _sig = CMSSignedHelper.INSTANCE.getSignatureInstance("NONEwithDSA", sigProvider);
                 }
                 // TODO Add support for raw PSS
-//                else if (_encName("RSAandMGF1"))
+//                else if (_encName.equals("RSAandMGF1"))
 //                {
 //                    sig = CMSSignedHelper.INSTANCE.getSignatureInstance("NONEWITHRSAPSS", _sigProvider);
 //                    try
@@ -183,9 +185,17 @@ public class CMSSignedDataStreamGenerator
                 {
                     Map parameters = getBaseParameters(contentType, digestAlgorithm, calculatedDigest);
                     AttributeTable signed = _sAttr.getAttributes(Collections.unmodifiableMap(parameters));
-    
-                    // TODO Handle countersignatures (see CMSSignedDataGenerator)
-    
+
+                    if (contentType == null) //counter signature
+                    {
+                        if (signed != null && signed.get(CMSAttributes.contentType) != null)
+                        {
+                            Hashtable tmpSigned = signed.toHashtable();
+                            tmpSigned.remove(CMSAttributes.contentType);
+                            signed = new AttributeTable(tmpSigned);
+                        }
+                    }
+                    
                     signedAttr = getAttributeSet(signed);
     
                     // sig must be composed from the DER encoding.
@@ -863,7 +873,7 @@ public class CMSSignedDataStreamGenerator
         //
         BERSequenceGenerator sigGen = new BERSequenceGenerator(sGen.getRawOutputStream(), 0, true);
         
-        sigGen.addObject(calculateVersion(eContentType.getId()));
+        sigGen.addObject(calculateVersion(eContentType));
         
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
         
@@ -954,7 +964,7 @@ public class CMSSignedDataStreamGenerator
     //       ELSE version MUST be 1
     //
     private DERInteger calculateVersion(
-        String contentOid)
+        ASN1ObjectIdentifier contentOid)
     {
         boolean otherCert = false;
         boolean otherCrl = false;
@@ -991,7 +1001,7 @@ public class CMSSignedDataStreamGenerator
             return new DERInteger(5);
         }
 
-        if (crls != null && !otherCert)         // no need to check if otherCert is true
+        if (crls != null)         // no need to check if otherCert is true
         {
             for (Iterator it = crls.iterator(); it.hasNext();)
             {
@@ -1018,21 +1028,17 @@ public class CMSSignedDataStreamGenerator
             return new DERInteger(3);
         }
 
-        if (contentOid.equals(DATA))
-        {
-            if (checkForVersion3(_signers))
-            {
-                return new DERInteger(3);
-            }
-            else
-            {
-                return new DERInteger(1);
-            }
-        }
-        else
+        if (checkForVersion3(_signers))
         {
             return new DERInteger(3);
         }
+
+        if (!CMSObjectIdentifiers.data.equals(contentOid))
+        {
+            return new DERInteger(3);
+        }
+
+        return new DERInteger(1);
     }
 
     private boolean checkForVersion3(List signerInfos)
