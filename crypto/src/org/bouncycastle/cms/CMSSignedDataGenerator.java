@@ -111,8 +111,7 @@ public class CMSSignedDataGenerator
             CMSProcessable      content,
             SecureRandom        random,
             Provider            sigProvider,
-            boolean             addDefaultAttributes,
-            boolean             isCounterSignature)
+            boolean             addDefaultAttributes)
             throws IOException, SignatureException, InvalidKeyException, NoSuchAlgorithmException, CertificateEncodingException, CMSException
         {
             AlgorithmIdentifier digAlgId = getDigestAlgorithmID();
@@ -147,11 +146,14 @@ public class CMSSignedDataGenerator
             ASN1Set signedAttr = null;
             if (signed != null)
             {
-                if (isCounterSignature)
+                if (contentType == null) //counter signature
                 {
-                    Hashtable tmpSigned = signed.toHashtable();
-                    tmpSigned.remove(CMSAttributes.contentType);
-                    signed = new AttributeTable(tmpSigned);
+                    if (signed.get(CMSAttributes.contentType) != null)
+                    {
+                        Hashtable tmpSigned = signed.toHashtable();
+                        tmpSigned.remove(CMSAttributes.contentType);
+                        signed = new AttributeTable(tmpSigned);
+                    }
                 }
 
                 // TODO Validate proposed signed attributes
@@ -629,7 +631,7 @@ public class CMSSignedDataGenerator
             {
                 digestAlgs.add(signer.getDigestAlgorithmID());
                 signerInfos.add(signer.toSignerInfo(contentTypeOID, content, rand, sigProvider,
-                    addDefaultAttributes, isCounterSignature));
+                    addDefaultAttributes));
             }
             catch (IOException e)
             {
