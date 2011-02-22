@@ -43,7 +43,7 @@ import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 public final class BouncyCastleProvider extends Provider
     implements ConfigurableProvider
 {
-    private static String info = "BouncyCastle Security Provider v1.46b";
+    private static String info = "BouncyCastle Security Provider v1.46";
 
     public static String PROVIDER_NAME = "BC";
 
@@ -73,7 +73,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.455, info);
+        super(PROVIDER_NAME, 1.46, info);
 
         AccessController.doPrivileged(new PrivilegedAction()
         {
