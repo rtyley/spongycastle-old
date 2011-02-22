@@ -40,7 +40,6 @@ import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.util.io.TeeOutputStream;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -838,27 +837,17 @@ public class CMSSignedDataGenerator
 
         if (content != null)
         {
-            OutputStream cOut = null;
             ByteArrayOutputStream bOut = null;
 
             if (encapsulate)
             {
-                cOut = bOut = new ByteArrayOutputStream();
+                bOut = new ByteArrayOutputStream();
             }
 
-            for (Iterator it = signerGens.iterator(); it.hasNext();)
-            {
-                SignerInfoGenerator sGen = (SignerInfoGenerator)it.next();
+            OutputStream cOut = CMSUtils.attachSignersToOutputStream(signerGens, bOut);
 
-                if (cOut == null)
-                {
-                    cOut = sGen.getCalculatingOutputStream();
-                }
-                else
-                {
-                    cOut = new TeeOutputStream(cOut, sGen.getCalculatingOutputStream());
-                }
-            }
+            // Just in case it's unencapsulated and there are no signers!
+            cOut = CMSUtils.getSafeOutputStream(cOut);
 
             try
             {

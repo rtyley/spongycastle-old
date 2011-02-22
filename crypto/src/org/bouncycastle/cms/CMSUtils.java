@@ -336,6 +336,18 @@ class CMSUtils
         return result;
     }
 
+    static OutputStream attachSignersToOutputStream(Collection signers, OutputStream s)
+    {
+        OutputStream result = s;
+        Iterator it = signers.iterator();
+        while (it.hasNext())
+        {
+            SignerInfoGenerator signerGen = (SignerInfoGenerator)it.next();
+            result = getSafeTeeOutputStream(result, signerGen.getCalculatingOutputStream());
+        }
+        return result;
+    }
+
     static OutputStream getSafeOutputStream(OutputStream s)
     {
         return s == null ? new NullOutputStream() : s;

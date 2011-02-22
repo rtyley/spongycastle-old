@@ -38,7 +38,6 @@ import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
-import org.bouncycastle.util.io.TeeOutputStream;
 
 /**
  * General class for generating a pkcs7-signature message stream.
@@ -918,14 +917,10 @@ public class CMSSignedDataStreamGenerator
         // Let all the digests see the data as it is written
         OutputStream digStream = CMSUtils.attachDigestsToOutputStream(_messageDigests, contentStream);
 
-        for (Iterator it = signerGens.iterator(); it.hasNext();)
-        {
-            SignerInfoGenerator signerGen = (SignerInfoGenerator)it.next();
+        // Let all the signers see the data as it is written
+        OutputStream sigStream = CMSUtils.attachSignersToOutputStream(signerGens, digStream);
 
-            digStream = new TeeOutputStream(digStream, signerGen.getCalculatingOutputStream());
-        }
-        
-        return new CmsSignedDataOutputStream(digStream, eContentType, sGen, sigGen, eiGen);
+        return new CmsSignedDataOutputStream(sigStream, eContentType, sGen, sigGen, eiGen);
     }
 
     // TODO Make public?
