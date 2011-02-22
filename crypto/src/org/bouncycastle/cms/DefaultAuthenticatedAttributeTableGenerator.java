@@ -46,8 +46,8 @@ public class DefaultAuthenticatedAttributeTableGenerator
 
     /**
      * Create a standard attribute table from the passed in parameters - this will
-     * normally include contentType, signingTime, and messageDigest. If the constructor
-     * using an AttributeTable was used, entries in it for contentType, signingTime, and
+     * normally include contentType and messageDigest. If the constructor
+     * using an AttributeTable was used, entries in it for contentType and
      * messageDigest will override the generated ones.
      *
      * @param parameters source parameters for table generation.
@@ -63,14 +63,9 @@ public class DefaultAuthenticatedAttributeTableGenerator
         {
             DERObjectIdentifier contentType = (DERObjectIdentifier)
                 parameters.get(CMSAttributeTableGenerator.CONTENT_TYPE);
-
-            // contentType will be null if where trying to generate a counter signature.
-            if (contentType != null)
-            {
-                Attribute attr = new Attribute(CMSAttributes.contentType,
-                    new DERSet(contentType));
-                std.put(attr.getAttrType(), attr);
-            }
+            Attribute attr = new Attribute(CMSAttributes.contentType,
+                new DERSet(contentType));
+            std.put(attr.getAttrType(), attr);
         }
 
         if (!std.containsKey(CMSAttributes.messageDigest))
