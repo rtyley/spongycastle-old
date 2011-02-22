@@ -913,10 +913,10 @@ public class CMSSignedDataStreamGenerator
             : null;
 
         // Also send the data to 'dataOutputStream' if necessary
-        OutputStream contentStream = getSafeTeeOutputStream(dataOutputStream, encapStream);
+        OutputStream contentStream = CMSUtils.getSafeTeeOutputStream(dataOutputStream, encapStream);
 
         // Let all the digests see the data as it is written
-        OutputStream digStream = attachDigestsToOutputStream(_messageDigests, contentStream);
+        OutputStream digStream = CMSUtils.attachDigestsToOutputStream(_messageDigests, contentStream);
 
         for (Iterator it = signerGens.iterator(); it.hasNext();)
         {
@@ -1054,31 +1054,6 @@ public class CMSSignedDataStreamGenerator
         }
 
         return false;
-    }
-
-    private static OutputStream attachDigestsToOutputStream(List digests, OutputStream s)
-    {
-        OutputStream result = s;
-        Iterator it = digests.iterator();
-        while (it.hasNext())
-        {
-            MessageDigest digest = (MessageDigest)it.next();
-            result = getSafeTeeOutputStream(result, new DigOutputStream(digest));
-        }
-        return result;
-    }
-
-    private static OutputStream getSafeOutputStream(OutputStream s)
-    {
-        return s == null ? new NullOutputStream() : s;
-    }
-
-    private static OutputStream getSafeTeeOutputStream(OutputStream s1,
-            OutputStream s2)
-    {
-        return s1 == null ? getSafeOutputStream(s2)
-                : s2 == null ? getSafeOutputStream(s1) : new TeeOutputStream(
-                        s1, s2);
     }
 
     private class CmsSignedDataOutputStream
