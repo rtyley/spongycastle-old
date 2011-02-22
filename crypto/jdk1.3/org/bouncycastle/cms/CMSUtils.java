@@ -3,6 +3,7 @@ package org.bouncycastle.cms;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.MessageDigest;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.Security;
@@ -13,6 +14,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,6 +37,8 @@ import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.io.Streams;
+import org.bouncycastle.util.io.TeeInputStream;
+import org.bouncycastle.util.io.TeeOutputStream;
 
 class CMSUtils
 {
@@ -42,7 +46,7 @@ class CMSUtils
     
     static int getMaximumMemory()
     {
-        return Integer.MAX_VALUE;
+            return Integer.MAX_VALUE;
     }
     
     static ContentInfo readContentInfo(
@@ -299,5 +303,54 @@ class CMSUtils
         }
 
         return null; 
+    }
+
+    static InputStream attachDigestsToInputStream(Collection digests, InputStream s)
+    {
+        InputStream result = s;
+        Iterator it = digests.iterator();
+        while (it.hasNext())
+        {
+            MessageDigest digest = (MessageDigest)it.next();
+            result = new TeeInputStream(result, new DigOutputStream(digest));
+        }
+        return result;
+    }
+
+    static OutputStream attachDigestsToOutputStream(Collection digests, OutputStream s)
+    {
+        OutputStream result = s;
+        Iterator it = digests.iterator();
+        while (it.hasNext())
+        {
+            MessageDigest digest = (MessageDigest)it.next();
+            result = getSafeTeeOutputStream(result, new DigOutputStream(digest));
+        }
+        return result;
+    }
+
+    static OutputStream attachSignersToOutputStream(Collection signers, OutputStream s)
+    {
+        OutputStream result = s;
+        Iterator it = signers.iterator();
+        while (it.hasNext())
+        {
+            SignerInfoGenerator signerGen = (SignerInfoGenerator)it.next();
+            result = getSafeTeeOutputStream(result, signerGen.getCalculatingOutputStream());
+        }
+        return result;
+    }
+
+    static OutputStream getSafeOutputStream(OutputStream s)
+    {
+        return s == null ? new NullOutputStream() : s;
+    }
+
+    static OutputStream getSafeTeeOutputStream(OutputStream s1,
+            OutputStream s2)
+    {
+        return s1 == null ? getSafeOutputStream(s2)
+                : s2 == null ? getSafeOutputStream(s1) : new TeeOutputStream(
+                        s1, s2);
     }
 }

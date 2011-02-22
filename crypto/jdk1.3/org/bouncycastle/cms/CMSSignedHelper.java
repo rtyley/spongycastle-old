@@ -11,7 +11,7 @@ import java.security.Signature;
 import java.security.cert.CRLException;
 import org.bouncycastle.jce.cert.CertStore;
 import java.security.cert.CertificateException;
-import org.bouncycastle.jce.cert.CertificateFactory;
+import java.security.cert.CertificateFactory;
 import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -367,16 +367,12 @@ class CMSSignedHelper
         {
             if (provider != null)
             {
-                return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider.getName());
+                return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider);
             }
             else
             {
                 return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls));
             }
-        }
-        catch (NoSuchProviderException e)
-        {
-            throw new CMSException("can't setup the CertStore", e);
         }
         catch (InvalidAlgorithmParameterException e)
         {
@@ -393,19 +389,16 @@ class CMSSignedHelper
         {
             if (provider != null)
             {
-                try
-                {
                 cf = CertificateFactory.getInstance("X.509", provider.getName());
-                }
-                catch (NoSuchProviderException e)
-                {
-                    throw new CMSException(e.toString(), e);
-                }
             }
             else
             {
                 cf = CertificateFactory.getInstance("X.509");
             }
+        }
+        catch (NoSuchProviderException ex)
+        {
+            throw new CMSException("can't get certificate factory.", ex);
         }
         catch (CertificateException ex)
         {
@@ -447,19 +440,16 @@ class CMSSignedHelper
         {
             if (provider != null)
             {
-                try
-                {
                 cf = CertificateFactory.getInstance("X.509", provider.getName());
-                }
-                catch (NoSuchProviderException e)
-                {
-                    throw new CMSException(e.toString(), e);
-                }
             }
             else
             {
                 cf = CertificateFactory.getInstance("X.509");
             }
+        }
+        catch (NoSuchProviderException ex)
+        {
+            throw new CMSException("can't get certificate factory.", ex);
         }
         catch (CertificateException ex)
         {

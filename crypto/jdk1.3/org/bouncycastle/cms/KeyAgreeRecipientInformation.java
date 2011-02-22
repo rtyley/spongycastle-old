@@ -48,7 +48,7 @@ public class KeyAgreeRecipientInformation
     private ASN1OctetString       encryptedKey;
 
     static void readRecipientInfo(List infos, KeyAgreeRecipientInfo info,
-        CMSSecureReadable secureReadable)
+        AlgorithmIdentifier messageAlgorithm, CMSSecureReadable secureReadable, AuthAttributesProvider additionalData)
     {
         ASN1Sequence s = info.getRecipientEncryptedKeys();
 
@@ -75,8 +75,8 @@ public class KeyAgreeRecipientInformation
                 rid = new KeyAgreeRecipientId(rKeyID.getSubjectKeyIdentifier().getOctets());
             }
 
-            infos.add(new KeyAgreeRecipientInformation(info, rid, id.getEncryptedKey(),
-                secureReadable));
+            infos.add(new KeyAgreeRecipientInformation(info, rid, id.getEncryptedKey(), messageAlgorithm,
+                secureReadable, additionalData));
         }
     }
 
@@ -84,9 +84,11 @@ public class KeyAgreeRecipientInformation
         KeyAgreeRecipientInfo   info,
         RecipientId             rid,
         ASN1OctetString         encryptedKey,
-        CMSSecureReadable       secureReadable)
+        AlgorithmIdentifier     messageAlgorithm,
+        CMSSecureReadable       secureReadable,
+        AuthAttributesProvider  additionalData)
     {
-        super(info.getKeyEncryptionAlgorithm(), secureReadable);
+        super(info.getKeyEncryptionAlgorithm(), messageAlgorithm, secureReadable, additionalData);
 
         this.info = info;
         this.rid = rid;
@@ -180,7 +182,7 @@ public class KeyAgreeRecipientInformation
             receiverPrivateKey = new MQVPrivateKeySpec(receiverPrivateKey, receiverPrivateKey);
         }
 
-        KeyAgreement agreement = KeyAgreement.getInstance(agreeAlg, prov);
+        KeyAgreement agreement = KeyAgreement.getInstance(agreeAlg, prov.getName());
         agreement.init(receiverPrivateKey);
         agreement.doPhase(senderPublicKey, true);
         return agreement.generateSecret(wrapAlg);
@@ -259,15 +261,13 @@ public class KeyAgreeRecipientInformation
         return getContentFromSessionKey(sKey, prov);
     }
 
-    public CMSTypedStream getContentStream(Recipient recipient)
+    protected RecipientOperator getRecipientOperator(Recipient recipient)
         throws CMSException, IOException
     {
         KeyAgreeRecipient agreeRecipient = (KeyAgreeRecipient)recipient;
-        AlgorithmIdentifier    recKeyAlgId = agreeRecipient.getPrivateKeyAlgorithmIdentifier();
+                AlgorithmIdentifier    recKeyAlgId = agreeRecipient.getPrivateKeyAlgorithmIdentifier();
 
-        operator = ((KeyAgreeRecipient)recipient).getRecipientOperator(keyEncAlg, secureReadable.getAlgorithm(), getSenderPublicKeyInfo(recKeyAlgId,
-                info.getOriginator()), info.getUserKeyingMaterial(), encryptedKey.getOctets());
-
-        return new CMSTypedStream(operator.getInputStream(secureReadable.getInputStream()));
+        return ((KeyAgreeRecipient)recipient).getRecipientOperator(keyEncAlg, messageAlgorithm, getSenderPublicKeyInfo(recKeyAlgId,
+                        info.getOriginator()), info.getUserKeyingMaterial(), encryptedKey.getOctets());
     }
 }
