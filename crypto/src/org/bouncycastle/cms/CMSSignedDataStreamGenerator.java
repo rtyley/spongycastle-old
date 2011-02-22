@@ -774,7 +774,7 @@ public class CMSSignedDataStreamGenerator
     }
 
     /**
-     * @deprecated use open(OutputStream, ASN1ObjectIdentifier, boolean)
+     * @deprecated use open(ASN1ObjectIdentifier, OutputStream, boolean)
      */
     public OutputStream open(
         OutputStream out,
