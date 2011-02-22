@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -578,25 +577,16 @@ public class CMSSignedDataParser
 
     public CMSTypedStream getSignedContent()
     {
-        if (_signedContent != null)
-        {
-            InputStream digStream = _signedContent.getContentStream();
-            
-            Iterator it = _digests.values().iterator();
-            
-            while (it.hasNext())
-            {
-                digStream = new DigestInputStream(digStream, (MessageDigest)it.next());
-            }
-            
-            return new CMSTypedStream(_signedContent.getContentType(), digStream);
-        }
-        else
+        if (_signedContent == null)
         {
             return null;
         }
-    }
 
+        InputStream digStream = CMSUtils.attachDigestsToInputStream(
+            _digests.values(), _signedContent.getContentStream());
+
+        return new CMSTypedStream(_signedContent.getContentType(), digStream);
+    }
 
     /**
      * Replace the signerinformation store associated with the passed
