@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERTags;
+import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfoParser;
 import org.bouncycastle.asn1.cms.TimeStampedDataParser;
@@ -123,6 +124,21 @@ public class CMSTimeStampedDataParser
         }
 
         return util.getMessageImprintDigestCalculator(calculatorProvider);
+    }
+
+    public String getFileName()
+    {
+        return util.getFileName();
+    }
+
+    public String getMediaType()
+    {
+        return util.getMediaType();
+    }
+
+    public AttributeTable getOtherMetaData()
+    {
+        return util.getOtherMetaData();
     }
 
     public TimeStampToken[] getTimeStampTokens()

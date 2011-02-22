@@ -55,12 +55,12 @@ import org.bouncycastle.x509.X509Store;
  *  while (it.hasNext())
  *  {
  *      SignerInformation   signer = (SignerInformation)it.next();
- *      Collection          certCollection = certs.getCertificates(signer.getSID());
- *  
+ *      Collection          certCollection = certStore.getMatches(signer.getSID());
+ *
  *      Iterator        certIt = certCollection.iterator();
- *      X509Certificate cert = (X509Certificate)certIt.next();
+ *      X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
  *  
- *      if (signer.verify(cert.getPublicKey()))
+ *      if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert)))
  *      {
  *          verified++;
  *      }   

@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -84,12 +83,12 @@ import org.bouncycastle.x509.X509Store;
  *      while (it.hasNext())
  *      {
  *          SignerInformation   signer = (SignerInformation)it.next();
- *          Collection          certCollection = certs.getCertificates(signer.getSID());
+ *          Collection          certCollection = certStore.getMatches(signer.getSID());
  *
  *          Iterator        certIt = certCollection.iterator();
- *          X509Certificate cert = (X509Certificate)certIt.next();
+ *          X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
  *
- *          System.out.println("verify returns: " + signer.verify(cert, "BC"));
+ *          System.out.println("verify returns: " + signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert)));
  *      }
  * </pre>
  *  Note also: this class does not introduce buffering - if you are processing large files you should create
@@ -428,6 +427,7 @@ public class CMSSignedDataParser
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchAlgorithmException if the cert store isn't available.
      * @exception CMSException if a general exception prevents creation of the CertStore
+     * @deprecated use getCertificates()
      */
     public CertStore getCertificatesAndCRLs(
         String  type,
@@ -444,6 +444,7 @@ public class CMSSignedDataParser
      * @exception NoSuchProviderException if the provider requested isn't available.
      * @exception NoSuchAlgorithmException if the cert store isn't available.
      * @exception CMSException if a general exception prevents creation of the CertStore
+     * @deprecated use getCertificates()
      */
     public CertStore getCertificatesAndCRLs(
         String  type,
@@ -576,25 +577,16 @@ public class CMSSignedDataParser
 
     public CMSTypedStream getSignedContent()
     {
-        if (_signedContent != null)
-        {
-            InputStream digStream = _signedContent.getContentStream();
-            
-            Iterator it = _digests.values().iterator();
-            
-            while (it.hasNext())
-            {
-                digStream = new DigestInputStream(digStream, (MessageDigest)it.next());
-            }
-            
-            return new CMSTypedStream(_signedContent.getContentType(), digStream);
-        }
-        else
+        if (_signedContent == null)
         {
             return null;
         }
-    }
 
+        InputStream digStream = CMSUtils.attachDigestsToInputStream(
+            _digests.values(), _signedContent.getContentStream());
+
+        return new CMSTypedStream(_signedContent.getContentType(), digStream);
+    }
 
     /**
      * Replace the signerinformation store associated with the passed

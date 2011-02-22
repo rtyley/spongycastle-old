@@ -2,7 +2,6 @@ package org.bouncycastle.cms;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Provider;
 
 
