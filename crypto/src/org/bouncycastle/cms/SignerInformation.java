@@ -73,6 +73,7 @@ public class SignerInformation
     // Derived
     private AttributeTable          signedAttributeValues;
     private AttributeTable          unsignedAttributeValues;
+    private boolean                 isCounterSignature;
 
     SignerInformation(
         SignerInfo          info,
@@ -84,6 +85,7 @@ public class SignerInformation
         this.info = info;
         this.contentType = contentType;
         this.sigAlgFinder = sigAlgFinder;
+        this.isCounterSignature = contentType == null;
 
         SignerIdentifier   s = info.getSID();
 
@@ -108,6 +110,11 @@ public class SignerInformation
 
         this.content = content;
         this.digestCalculator = digestCalculator;
+    }
+
+    public boolean isCounterSignature()
+    {
+        return isCounterSignature;
     }
 
     public ASN1ObjectIdentifier getContentType()
@@ -304,7 +311,7 @@ public class SignerInformation
 
                 String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(si.getDigestAlgorithm().getObjectId().getId());
                 
-                counterSignatures.add(new SignerInformation(si, CMSAttributes.counterSignature, null, new CounterSignatureDigestCalculator(digestName, null, getSignature()), new DefaultSignatureAlgorithmIdentifierFinder()));
+                counterSignatures.add(new SignerInformation(si, null, null, new CounterSignatureDigestCalculator(digestName, null, getSignature()), new DefaultSignatureAlgorithmIdentifierFinder()));
             }
         }
 
@@ -412,10 +419,6 @@ public class SignerInformation
         {
             throw new CMSException("can't process mime object to create signature.", e);
         }
-
-        // TODO Shouldn't be using attribute OID as contentType (should be null)
-        boolean isCounterSignature = contentType.equals(
-            CMSAttributes.counterSignature);
 
         // RFC 3852 11.1 Check the content-type attribute is correct
         {
@@ -586,9 +589,6 @@ public class SignerInformation
         {
             throw new CMSException("can't create digest calculator: " + e.getMessage(), e);
         }
-
-        // TODO Shouldn't be using attribute OID as contentType (should be null)
-        boolean isCounterSignature = contentType.equals(CMSAttributes.counterSignature);
 
         // RFC 3852 11.1 Check the content-type attribute is correct
         {

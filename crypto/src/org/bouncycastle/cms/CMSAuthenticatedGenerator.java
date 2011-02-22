@@ -18,14 +18,12 @@ import javax.crypto.spec.RC2ParameterSpec;
 
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.operator.DigestCalculator;
 
 public class CMSAuthenticatedGenerator
     extends CMSEnvelopedGenerator
 {
     protected CMSAttributeTableGenerator authGen;
     protected CMSAttributeTableGenerator unauthGen;
-    protected DigestCalculator digCalculator;
 
     /**
      * base constructor
@@ -78,11 +76,6 @@ public class CMSAuthenticatedGenerator
         {
             return null;
         }
-    }
-
-    public void setDigestCalculator(DigestCalculator digCalculator)
-    {
-        this.digCalculator = digCalculator;
     }
 
     public void setAuthenticatedAttributeGenerator(CMSAttributeTableGenerator authGen)

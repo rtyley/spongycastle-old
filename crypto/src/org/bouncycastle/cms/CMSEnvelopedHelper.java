@@ -412,7 +412,7 @@ class CMSEnvelopedHelper
     }
 
     static RecipientInformationStore buildRecipientInformationStore(
-        ASN1Set recipientInfos, AlgorithmIdentifier messageAlgorithm, CMSSecureReadable secureReadable, byte[] additionalData)
+        ASN1Set recipientInfos, AlgorithmIdentifier messageAlgorithm, CMSSecureReadable secureReadable, AuthAttributesProvider additionalData)
     {
         List infos = new ArrayList();
         for (int i = 0; i != recipientInfos.size(); i++)
@@ -425,7 +425,7 @@ class CMSEnvelopedHelper
     }
 
     private static void readRecipientInfo(
-        List infos, RecipientInfo info, AlgorithmIdentifier messageAlgorithm, CMSSecureReadable secureReadable, byte[] additionalData)
+        List infos, RecipientInfo info, AlgorithmIdentifier messageAlgorithm, CMSSecureReadable secureReadable, AuthAttributesProvider additionalData)
     {
         DEREncodable recipInfo = info.getInfo();
         if (recipInfo instanceof KeyTransRecipientInfo)

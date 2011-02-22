@@ -27,7 +27,7 @@ public class KEKRecipientInformation
         KEKRecipientInfo        info,
         AlgorithmIdentifier     messageAlgorithm,
         CMSSecureReadable       secureReadable,
-        byte[]                  additionalData)
+        AuthAttributesProvider  additionalData)
     {
         super(info.getKeyEncryptionAlgorithm(), messageAlgorithm, secureReadable, additionalData);
 

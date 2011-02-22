@@ -12,7 +12,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSAuthenticatedDataParser;
 import org.bouncycastle.cms.CMSAuthenticatedDataStreamGenerator;
@@ -22,6 +24,8 @@ import org.bouncycastle.cms.jcajce.JceCMSMacCalculatorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransAuthenticatedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
 public class NewAuthenticatedDataStreamTest
     extends TestCase
@@ -103,6 +107,12 @@ public class NewAuthenticatedDataStreamTest
         tryKeyTrans(CMSAlgorithm.DES_EDE3_CBC);
     }
 
+    public void testKeyTransDESedeWithDigest()
+        throws Exception
+    {
+        tryKeyTransWithDigest(CMSAlgorithm.DES_EDE3_CBC);
+    }
+
     private void tryKeyTrans(ASN1ObjectIdentifier macAlg)
         throws Exception
     {
@@ -141,6 +151,49 @@ public class NewAuthenticatedDataStreamTest
 
             assertTrue(Arrays.equals(data, recData));
             assertTrue(Arrays.equals(ad.getMac(), recipient.getMac()));
+        }
+    }
+
+    private void tryKeyTransWithDigest(ASN1ObjectIdentifier macAlg)
+        throws Exception
+    {
+        byte[]          data     = "Eric H. Echidna".getBytes();
+
+        CMSAuthenticatedDataStreamGenerator adGen = new CMSAuthenticatedDataStreamGenerator();
+        ByteArrayOutputStream               bOut = new ByteArrayOutputStream();
+        DigestCalculatorProvider            calcProvider = new JcaDigestCalculatorProviderBuilder().setProvider(BC).build();
+
+        adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+
+        OutputStream aOut = adGen.open(bOut, new JceCMSMacCalculatorBuilder(macAlg).setProvider(BC).build(), calcProvider.get(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1)));
+
+        aOut.write(data);
+
+        aOut.close();
+
+        CMSAuthenticatedDataParser ad = new CMSAuthenticatedDataParser(bOut.toByteArray(), calcProvider);
+
+        RecipientInformationStore recipients = ad.getRecipientInfos();
+
+        assertEquals(ad.getMacAlgOID(), macAlg.getId());
+
+        Collection c = recipients.getRecipients();
+
+        assertEquals(1, c.size());
+
+        Iterator it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+
+            byte[] recData = recipient.getContent(new JceKeyTransAuthenticatedRecipient(_reciKP.getPrivate()).setProvider(BC));
+
+            assertTrue(Arrays.equals(data, recData));
+            assertTrue(Arrays.equals(ad.getMac(), recipient.getMac()));
+            assertTrue(Arrays.equals(ad.getContentDigest(), recipient.getContentDigest()));
         }
     }
 }

@@ -110,13 +110,22 @@ public class CMSCompressedDataStreamGenerator
         OutputCompressor compressor)
         throws IOException
     {
-        return open(out, CMSObjectIdentifiers.data, compressor);
+        return open(CMSObjectIdentifiers.data, out, compressor);
     }
 
+    /**
+     * Open a compressing output stream.
+     *
+     * @param contentOID
+     * @param out
+     * @param compressor
+     * @return
+     * @throws IOException
+     */
     public OutputStream open(
-        OutputStream         out,
         ASN1ObjectIdentifier contentOID,
-        OutputCompressor     compressor)
+        OutputStream out,
+        OutputCompressor compressor)
         throws IOException
     {
         BERSequenceGenerator sGen = new BERSequenceGenerator(out);

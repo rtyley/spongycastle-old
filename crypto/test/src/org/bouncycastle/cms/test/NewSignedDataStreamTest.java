@@ -435,7 +435,7 @@ public class NewSignedDataStreamTest
         gen.addCertificates(certs);
         gen.addCRLs(crls);
 
-        OutputStream sigOut = gen.open(bOut, new ASN1ObjectIdentifier("1.2.3.4"), true);
+        OutputStream sigOut = gen.open(new ASN1ObjectIdentifier("1.2.3.4"), bOut, true);
 
         sigOut.write(TEST_MESSAGE.getBytes());
 

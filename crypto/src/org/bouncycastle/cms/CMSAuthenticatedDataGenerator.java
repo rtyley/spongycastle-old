@@ -74,6 +74,21 @@ public class CMSAuthenticatedDataGenerator
     public CMSAuthenticatedData generate(CMSTypedData typedData, MacCalculator macCalculator)
         throws CMSException
     {
+        return generate(typedData, macCalculator, null);
+    }
+
+    /**
+     * Generate an authenticated data object from the passed in typedData and MacCalculator.
+     *
+     * @param typedData the data to have a MAC attached.
+     * @param macCalculator the calculator of the MAC to be attached.
+     * @param digestCalculator calculator for computing digest of the encapsulated data.
+     * @return the resulting CMSAuthenticatedData object.
+     * @throws CMSException on failure in encoding data or processing recipients.    
+     */
+    public CMSAuthenticatedData generate(CMSTypedData typedData, MacCalculator macCalculator, final DigestCalculator digestCalculator)
+        throws CMSException
+    {
         ASN1EncodableVector     recipientInfos = new ASN1EncodableVector();
         ASN1OctetString         encContent;
         ASN1OctetString         macResult;
@@ -87,12 +102,12 @@ public class CMSAuthenticatedDataGenerator
 
         AuthenticatedData authData;
 
-        if (digCalculator != null)
+        if (digestCalculator != null)
         {
             try
             {
                 ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-                OutputStream out = new TeeOutputStream(digCalculator.getOutputStream(), bOut);
+                OutputStream out = new TeeOutputStream(digestCalculator.getOutputStream(), bOut);
 
                 typedData.write(out);
 
@@ -105,7 +120,7 @@ public class CMSAuthenticatedDataGenerator
                 throw new CMSException("unable to perform digest calculation: " + e.getMessage(), e);
             }
 
-            Map parameters = getBaseParameters(typedData.getContentType(), digCalculator.getAlgorithmIdentifier(), digCalculator.getDigest());
+            Map parameters = getBaseParameters(typedData.getContentType(), digestCalculator.getAlgorithmIdentifier(), digestCalculator.getDigest());
 
             if (authGen == null)
             {
@@ -133,7 +148,7 @@ public class CMSAuthenticatedDataGenerator
                             CMSObjectIdentifiers.data,
                             encContent);
 
-            authData = new AuthenticatedData(null, new DERSet(recipientInfos), macCalculator.getAlgorithmIdentifier(), digCalculator.getAlgorithmIdentifier(), eci, authed, macResult, unauthed);
+            authData = new AuthenticatedData(null, new DERSet(recipientInfos), macCalculator.getAlgorithmIdentifier(), digestCalculator.getAlgorithmIdentifier(), eci, authed, macResult, unauthed);
         }
         else
         {
@@ -160,7 +175,7 @@ public class CMSAuthenticatedDataGenerator
             ContentInfo  eci = new ContentInfo(
                             CMSObjectIdentifiers.data,
                             encContent);
-            
+
             authData = new AuthenticatedData(null, new DERSet(recipientInfos), macCalculator.getAlgorithmIdentifier(), null, eci, null, macResult, unauthed);
         }
 
@@ -172,7 +187,7 @@ public class CMSAuthenticatedDataGenerator
             public DigestCalculator get(AlgorithmIdentifier digestAlgorithmIdentifier)
                 throws OperatorCreationException
             {
-                return digCalculator;
+                return digestCalculator;
             }
         });
     }
