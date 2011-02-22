@@ -752,7 +752,7 @@ public class CMSSignedDataStreamGenerator
         boolean      encapsulate)
         throws IOException
     {
-        return open(out, CMSObjectIdentifiers.data, encapsulate);
+        return open(CMSObjectIdentifiers.data, out, encapsulate);
     }
 
     /**
@@ -771,7 +771,7 @@ public class CMSSignedDataStreamGenerator
         OutputStream dataOutputStream)
         throws IOException
     {
-        return open(out, CMSObjectIdentifiers.data, encapsulate, dataOutputStream);
+        return open(CMSObjectIdentifiers.data, out, encapsulate, dataOutputStream);
     }
 
     /**
@@ -793,16 +793,16 @@ public class CMSSignedDataStreamGenerator
      * is set according to the OID represented by the string signedContentType.
      */
     public OutputStream open(
-        OutputStream              out,
-        ASN1ObjectIdentifier      eContentType,
-        boolean                   encapsulate)
+        ASN1ObjectIdentifier eContentType,
+        OutputStream out,
+        boolean encapsulate)
         throws IOException
     {
-        return open(out, eContentType, encapsulate, null);
+        return open(eContentType, out, encapsulate, null);
     }
 
     /**
-     * @deprecated use open(OutputStream, ASN1ObjectIdenfier, boolean, OutputStream)
+     * @deprecated use open(ASN1ObjectIdenfier, OutputStream, boolean, OutputStream)
      */
     public OutputStream open(
         OutputStream out,
@@ -811,7 +811,7 @@ public class CMSSignedDataStreamGenerator
         OutputStream dataOutputStream)
         throws IOException
     {
-        return open(out, new ASN1ObjectIdentifier(eContentType), encapsulate, dataOutputStream);
+        return open(new ASN1ObjectIdentifier(eContentType), out, encapsulate, dataOutputStream);
     }
 
     /**
@@ -819,15 +819,15 @@ public class CMSSignedDataStreamGenerator
      * object using the given provider - if encapsulate is true a copy
      * of the message will be included in the signature. The content type
      * is set according to the OID represented by the string signedContentType.
-     * @param out stream the CMS object is to be written to.
      * @param eContentType OID for data to be signed.
+     * @param out stream the CMS object is to be written to.
      * @param encapsulate true if data should be encapsulated.
      * @param dataOutputStream output stream to copy the data being signed to.
      */
     public OutputStream open(
-        OutputStream out,
         ASN1ObjectIdentifier eContentType,
-        boolean      encapsulate,
+        OutputStream out,
+        boolean encapsulate,
         OutputStream dataOutputStream)
         throws IOException
     {

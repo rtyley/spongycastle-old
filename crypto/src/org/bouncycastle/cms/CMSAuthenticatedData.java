@@ -110,7 +110,13 @@ public class CMSAuthenticatedData
             {
                 CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSDigestAuthenticatedSecureReadable(digestCalculatorProvider.get(authData.getDigestAlgorithm()), readable);
 
-                this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(recipientInfos, this.macAlg, secureReadable, authAttrs.getDEREncoded());
+                this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(recipientInfos, this.macAlg, secureReadable, new AuthAttributesProvider()
+                {
+                    public ASN1Set getAuthAttributes()
+                    {
+                        return authAttrs;
+                    }
+                });
             }
             catch (OperatorCreationException e)
             {

@@ -273,13 +273,12 @@ public class NewAuthenticatedDataTest
         CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
         DigestCalculatorProvider calcProvider = new JcaDigestCalculatorProviderBuilder().setProvider(BC).build();
 
-        adGen.setDigestCalculator(calcProvider.get(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1)));
-
         adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
         CMSAuthenticatedData ad = adGen.generate(
                                 new CMSProcessableByteArray(data),
-                                new JceCMSMacCalculatorBuilder(macAlg).setProvider(BC).build());
+                                new JceCMSMacCalculatorBuilder(macAlg).setProvider(BC).build(),
+                                calcProvider.get(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1)));
 
         RecipientInformationStore recipients = ad.getRecipientInfos();
 
@@ -311,10 +310,7 @@ public class NewAuthenticatedDataTest
         byte[]          data     = "Eric H. Echidna".getBytes();
 
         CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
-        DigestCalculatorProvider calcProvider = new JcaDigestCalculatorProviderBuilder().setProvider(BC).build();
-
-        adGen.setDigestCalculator(calcProvider.get(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1)));
-
+       
         byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
 
         adGen.addRecipientInfoGenerator(new JceKEKRecipientInfoGenerator(kekId, kek).setProvider(BC));
@@ -348,11 +344,12 @@ public class NewAuthenticatedDataTest
     }
 
     private void tryKekAlgorithmWithDigest(SecretKey kek, DERObjectIdentifier algOid)
-            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
-        {
+        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, OperatorCreationException
+    {
             byte[]          data     = "Eric H. Echidna".getBytes();
 
             CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
+            DigestCalculatorProvider calcProvider = new JcaDigestCalculatorProviderBuilder().setProvider(BC).build();
 
             byte[]  kekId = new byte[] { 1, 2, 3, 4, 5 };
 
@@ -360,7 +357,8 @@ public class NewAuthenticatedDataTest
 
             CMSAuthenticatedData ad = adGen.generate(
                                     new CMSProcessableByteArray(data),
-                                    new JceCMSMacCalculatorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build());
+                                    new JceCMSMacCalculatorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build(),
+                                    calcProvider.get(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1)));
 
             RecipientInformationStore recipients = ad.getRecipientInfos();
 

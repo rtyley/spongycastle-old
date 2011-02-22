@@ -48,7 +48,7 @@ public class KeyAgreeRecipientInformation
     private ASN1OctetString       encryptedKey;
 
     static void readRecipientInfo(List infos, KeyAgreeRecipientInfo info,
-        AlgorithmIdentifier messageAlgorithm, CMSSecureReadable secureReadable, byte[] additionalData)
+        AlgorithmIdentifier messageAlgorithm, CMSSecureReadable secureReadable, AuthAttributesProvider additionalData)
     {
         ASN1Sequence s = info.getRecipientEncryptedKeys();
 
@@ -86,7 +86,7 @@ public class KeyAgreeRecipientInformation
         ASN1OctetString         encryptedKey,
         AlgorithmIdentifier     messageAlgorithm,
         CMSSecureReadable       secureReadable,
-        byte[]                  additionalData)
+        AuthAttributesProvider  additionalData)
     {
         super(info.getKeyEncryptionAlgorithm(), messageAlgorithm, secureReadable, additionalData);
 

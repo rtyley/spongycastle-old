@@ -22,7 +22,7 @@ public abstract class RecipientInformation
     protected AlgorithmIdentifier messageAlgorithm;
     private CMSSecureReadable     secureReadable;
 
-    private byte[]                additionalData;
+    private AuthAttributesProvider additionalData;
 
     private byte[] resultMac;
     private RecipientOperator     operator;
@@ -31,7 +31,7 @@ public abstract class RecipientInformation
         AlgorithmIdentifier     keyEncAlg,
         AlgorithmIdentifier     messageAlgorithm,
         CMSSecureReadable       secureReadable,
-        byte[]                  additionalData)
+        AuthAttributesProvider  additionalData)
     {
         this.keyEncAlg = keyEncAlg;
         this.messageAlgorithm = messageAlgorithm;
@@ -222,7 +222,7 @@ public abstract class RecipientInformation
                     {
                         try
                         {
-                            Streams.drain(operator.getInputStream(new ByteArrayInputStream(additionalData)));
+                            Streams.drain(operator.getInputStream(new ByteArrayInputStream(additionalData.getAuthAttributes().getDEREncoded())));
                         }
                         catch (IOException e)
                         {

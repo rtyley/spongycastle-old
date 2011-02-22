@@ -11,7 +11,10 @@ import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
@@ -20,14 +23,17 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.AuthenticatedData;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.MacCalculator;
 import org.bouncycastle.util.io.TeeOutputStream;
@@ -39,12 +45,12 @@ import org.bouncycastle.util.io.TeeOutputStream;
  * <pre>
  *      CMSAuthenticatedDataStreamGenerator edGen = new CMSAuthenticatedDataStreamGenerator();
  *
- *      edGen.addKeyTransRecipient(cert);
+ *      edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(cert).setProvider("BC"));
  *
  *      ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
  *
  *      OutputStream out = edGen.open(
- *                              bOut, CMSAuthenticatedDataGenerator.AES128_CBC, "BC");*
+ *                              bOut, new JceCMSMacCalculatorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());*
  *      out.write(data);
  *
  *      out.close();
@@ -58,6 +64,7 @@ public class CMSAuthenticatedDataStreamGenerator
 //    private Object              _unprotectedAttributes = null;
     private int bufferSize;
     private boolean berEncodeRecipientSet;
+    private MacCalculator macCalculator;
 
     /**
      * base constructor
@@ -103,6 +110,15 @@ public class CMSAuthenticatedDataStreamGenerator
         return open(CMSObjectIdentifiers.data, out, macCalculator);
     }
 
+    public OutputStream open(
+        OutputStream    out,
+        MacCalculator   macCalculator,
+        DigestCalculator digestCalculator)
+        throws CMSException
+    {
+        return open(CMSObjectIdentifiers.data, out, macCalculator, digestCalculator);
+    }
+
     /**
      * generate an authenticated data structure with the encapsulated bytes marked as type dataType.
      *
@@ -116,6 +132,26 @@ public class CMSAuthenticatedDataStreamGenerator
         MacCalculator        macCalculator)
         throws CMSException
     {
+        return open(dataType, out, macCalculator, null);
+    }
+
+    /**
+     * generate an authenticated data structure with the encapsulated bytes marked as type dataType.
+     *
+     * @param dataType the type of the data been written to the object.
+     * @param out the stream to store the authenticated structure in.
+     * @param macCalculator calculator for the MAC to be attached to the data.
+     * @param digestCalculator calculator for computing digest of the encapsulated data.
+     */
+    public OutputStream open(
+        ASN1ObjectIdentifier dataType,
+        OutputStream         out,
+        MacCalculator        macCalculator,
+        DigestCalculator     digestCalculator)
+        throws CMSException
+    {
+        this.macCalculator = macCalculator;
+
         try
         {
             ASN1EncodableVector recipientInfos = new ASN1EncodableVector();
@@ -154,6 +190,11 @@ public class CMSAuthenticatedDataStreamGenerator
 
             authGen.getRawOutputStream().write(macAlgId.getEncoded());
 
+            if (digestCalculator != null)
+            {
+                authGen.addObject(new DERTaggedObject(false, 1, digestCalculator.getAlgorithmIdentifier()));
+            }
+            
             BERSequenceGenerator eiGen = new BERSequenceGenerator(authGen.getRawOutputStream());
 
             eiGen.addObject(dataType);
@@ -161,9 +202,18 @@ public class CMSAuthenticatedDataStreamGenerator
             OutputStream octetStream = CMSUtils.createBEROctetOutputStream(
                     eiGen.getRawOutputStream(), 0, false, bufferSize);
 
-            OutputStream mOut = new TeeOutputStream(octetStream, macCalculator.getOutputStream());
+            OutputStream mOut;
 
-            return new CmsAuthenticatedDataOutputStream(macCalculator, mOut, cGen, authGen, eiGen);
+            if (digestCalculator != null)
+            {
+                mOut = new TeeOutputStream(octetStream, digestCalculator.getOutputStream());
+            }
+            else
+            {
+                mOut = new TeeOutputStream(octetStream, macCalculator.getOutputStream());
+            }
+
+            return new CmsAuthenticatedDataOutputStream(macCalculator, digestCalculator, dataType, mOut, cGen, authGen, eiGen);
         }
         catch (IOException e)
         {
@@ -179,15 +229,21 @@ public class CMSAuthenticatedDataStreamGenerator
         private BERSequenceGenerator envGen;
         private BERSequenceGenerator eiGen;
         private MacCalculator macCalculator;
+        private DigestCalculator digestCalculator;
+        private ASN1ObjectIdentifier contentType;
 
         public CmsAuthenticatedDataOutputStream(
             MacCalculator   macCalculator,
+            DigestCalculator digestCalculator,
+            ASN1ObjectIdentifier contentType,
             OutputStream dataStream,
             BERSequenceGenerator cGen,
             BERSequenceGenerator envGen,
             BERSequenceGenerator eiGen)
         {
             this.macCalculator = macCalculator;
+            this.digestCalculator = digestCalculator;
+            this.contentType = contentType;
             this.dataStream = dataStream;
             this.cGen = cGen;
             this.envGen = envGen;
@@ -223,9 +279,38 @@ public class CMSAuthenticatedDataStreamGenerator
             dataStream.close();
             eiGen.close();
 
-            // [TODO] auth attributes go here           
+            Map parameters;
+
+            if (digestCalculator != null)
+            {
+                parameters = Collections.unmodifiableMap(getBaseParameters(contentType, digestCalculator.getAlgorithmIdentifier(), digestCalculator.getDigest()));
+
+                if (authGen == null)
+                {
+                    authGen = new DefaultAuthenticatedAttributeTableGenerator();
+                }
+                
+                ASN1Set authed = new DERSet(authGen.getAttributes(parameters).toASN1EncodableVector());
+
+                OutputStream mOut = macCalculator.getOutputStream();
+
+                mOut.write(authed.getDEREncoded());
+
+                mOut.close();
+
+                envGen.addObject(new DERTaggedObject(false, 2, authed));
+            }
+            else
+            {
+                parameters = Collections.unmodifiableMap(new HashMap());                
+            }
+
             envGen.addObject(new DEROctetString(macCalculator.getMac()));
-            // [TODO] unauth attributes go here
+
+            if (unauthGen != null)
+            {
+                envGen.addObject(new DERTaggedObject(false, 3, new BERSet(unauthGen.getAttributes(parameters).toASN1EncodableVector())));
+            }
 
             envGen.close();
             cGen.close();

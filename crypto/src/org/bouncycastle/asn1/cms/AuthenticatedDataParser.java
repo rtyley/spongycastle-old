@@ -1,15 +1,16 @@
 package org.bouncycastle.asn1.cms;
 
+import java.io.IOException;
+
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1SetParser;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.ASN1TaggedObjectParser;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERTags;
-import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-
-import java.io.IOException;
 
 /**
  * Produce an object suitable for an ASN1OutputStream.
@@ -103,6 +104,24 @@ public class AuthenticatedDataParser
             ASN1SequenceParser o = (ASN1SequenceParser)nextObject;
             nextObject = null;
             return AlgorithmIdentifier.getInstance(o.getDERObject());
+        }
+
+        return null;
+    }
+
+    public AlgorithmIdentifier getDigestAlgorithm()
+        throws IOException
+    {
+        if (nextObject == null)
+        {
+            nextObject = seq.readObject();
+        }
+
+        if (nextObject instanceof ASN1TaggedObjectParser)
+        {
+            AlgorithmIdentifier obj = AlgorithmIdentifier.getInstance((ASN1TaggedObject)nextObject.getDERObject(), false);
+            nextObject = null;
+            return obj;
         }
 
         return null;

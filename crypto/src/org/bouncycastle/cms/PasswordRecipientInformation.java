@@ -56,7 +56,7 @@ public class PasswordRecipientInformation
         PasswordRecipientInfo   info,
         AlgorithmIdentifier     messageAlgorithm,
         CMSSecureReadable       secureReadable,
-        byte[]                  additionalData)
+        AuthAttributesProvider  additionalData)
     {
         super(info.getKeyEncryptionAlgorithm(), messageAlgorithm, secureReadable, additionalData);
 
