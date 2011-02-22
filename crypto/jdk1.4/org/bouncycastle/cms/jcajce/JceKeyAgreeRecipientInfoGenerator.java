@@ -10,8 +10,9 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.Collections;
-import java.util.Iterator;
+import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.crypto.Cipher;
@@ -27,6 +28,7 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientIdentifier;
 import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
+import org.bouncycastle.asn1.cms.RecipientKeyIdentifier;
 import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -37,8 +39,6 @@ import org.bouncycastle.cms.KeyAgreeRecipientInfoGenerator;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
 import org.bouncycastle.jce.spec.MQVPublicKeySpec;
 import org.bouncycastle.operator.GenericKey;
@@ -46,7 +46,8 @@ import org.bouncycastle.operator.GenericKey;
 public class JceKeyAgreeRecipientInfoGenerator
     extends KeyAgreeRecipientInfoGenerator
 {
-    private List recipientCerts;
+    private List recipientIDs = new ArrayList();
+    private List recipientKeys = new ArrayList();
     private PublicKey senderPublicKey;
     private PrivateKey senderPrivateKey;
 
@@ -54,20 +55,13 @@ public class JceKeyAgreeRecipientInfoGenerator
     private SecureRandom random;
     private KeyPair ephemeralKP;
 
-    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, List recipientCerts)
+    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID)
         throws CMSException
     {
         super(keyAgreementOID, SubjectPublicKeyInfo.getInstance(senderPublicKey.getEncoded()), keyEncryptionOID);
 
         this.senderPublicKey = senderPublicKey;
         this.senderPrivateKey = senderPrivateKey;
-        this.recipientCerts = recipientCerts;
-    }
-
-    public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID, X509Certificate recipientCert)
-        throws CMSException
-    {
-        this(keyAgreementOID, senderPrivateKey, senderPublicKey, keyEncryptionOID,  Collections.singletonList(recipientCert));
     }
 
     public JceKeyAgreeRecipientInfoGenerator setProvider(Provider provider)
@@ -84,9 +78,42 @@ public class JceKeyAgreeRecipientInfoGenerator
         return this;
     }
 
-    public JceKeyAgreeRecipientInfoGenerator setRandom(SecureRandom random)
+    public JceKeyAgreeRecipientInfoGenerator setSecureRandom(SecureRandom random)
     {
         this.random = random;
+
+        return this;
+    }
+
+    /**
+     * Add a recipient based on the passed in certificate's public key and its issuer and serial number.
+     * 
+     * @param recipientCert recipient's certificate
+     * @return the current instance.
+     * @throws CertificateEncodingException  if the necessary data cannot be extracted from the certificate.
+     */
+    public JceKeyAgreeRecipientInfoGenerator addRecipient(X509Certificate recipientCert)
+        throws CertificateEncodingException
+    {
+        recipientIDs.add(new KeyAgreeRecipientIdentifier(CMSUtils.getIssuerAndSerialNumber(recipientCert)));
+        recipientKeys.add(recipientCert.getPublicKey());
+
+        return this;
+    }
+
+    /**
+     * Add a recipient identified by the passed in subjectKeyID and the for the passed in public key.
+     *
+     * @param subjectKeyID identifier actual recipient will use to match the private key.
+     * @param publicKey the public key for encrypting the secret key.
+     * @return the current instance.
+     * @throws CertificateEncodingException
+     */
+    public JceKeyAgreeRecipientInfoGenerator addRecipient(byte[] subjectKeyID, PublicKey publicKey)
+        throws CertificateEncodingException
+    {
+        recipientIDs.add(new KeyAgreeRecipientIdentifier(new RecipientKeyIdentifier(subjectKeyID)));
+        recipientKeys.add(publicKey);
 
         return this;
     }
@@ -107,24 +134,10 @@ public class JceKeyAgreeRecipientInfoGenerator
         }
 
         ASN1EncodableVector recipientEncryptedKeys = new ASN1EncodableVector();
-        Iterator it = recipientCerts.iterator();
-        while (it.hasNext())
+        for (int i = 0; i != recipientIDs.size(); i++)
         {
-            X509Certificate recipientCert = (X509Certificate)it.next();
-            KeyAgreeRecipientIdentifier karid;
-
-            try
-            {
-            // TODO Should there be a SubjectKeyIdentifier-based alternative?
-                karid = new KeyAgreeRecipientIdentifier(
-                    CMSUtils.getIssuerAndSerialNumber(recipientCert));
-            }
-            catch (CertificateEncodingException e)
-            {
-                throw new CMSException("cannot parse recipient certificate: " + e.getMessage(), e);
-            }
-
-            PublicKey recipientPublicKey = recipientCert.getPublicKey();
+            PublicKey recipientPublicKey = (PublicKey)recipientKeys.get(i);
+            KeyAgreeRecipientIdentifier karId = (KeyAgreeRecipientIdentifier)recipientIDs.get(i);
 
             if (keyAgreementOID.getId().equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
             {
@@ -148,7 +161,7 @@ public class JceKeyAgreeRecipientInfoGenerator
 
                 ASN1OctetString encryptedKey = new DEROctetString(encryptedKeyBytes);
 
-                recipientEncryptedKeys.add(new RecipientEncryptedKey(karid, encryptedKey));
+                recipientEncryptedKeys.add(new RecipientEncryptedKey(karId, encryptedKey));
             }
             catch (GeneralSecurityException e)
             {
@@ -187,7 +200,7 @@ public class JceKeyAgreeRecipientInfoGenerator
             {
                 try
                 {
-                    ECParameterSpec ecParamSpec = ((ECPublicKey)senderPublicKey).getParameters();
+                    ECParameterSpec ecParamSpec = ((ECPublicKey)senderPublicKey).getParams();
 
                     KeyPairGenerator ephemKPG = helper.createKeyPairGenerator(keyAgreementOID);
 
