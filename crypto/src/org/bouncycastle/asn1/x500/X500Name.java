@@ -76,7 +76,7 @@ public class X500Name
             return new X500Name(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     /**

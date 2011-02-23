@@ -58,7 +58,7 @@ public class TimeStampedData
             return new TimeStampedData(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     public DERIA5String getDataUri()

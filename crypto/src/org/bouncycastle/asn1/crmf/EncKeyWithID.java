@@ -26,7 +26,7 @@ public class EncKeyWithID
             return new EncKeyWithID(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     private EncKeyWithID(ASN1Sequence seq)

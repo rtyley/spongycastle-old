@@ -29,7 +29,7 @@ public class RDN
             return new RDN(ASN1Set.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in getInstance");
+        return null;
     }
 
     /**

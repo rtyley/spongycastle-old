@@ -50,7 +50,7 @@ public class CertificateList
             return new CertificateList(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     public CertificateList(

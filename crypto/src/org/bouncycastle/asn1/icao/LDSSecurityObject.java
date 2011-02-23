@@ -49,7 +49,7 @@ public class LDSSecurityObject
             return new LDSSecurityObject(ASN1Sequence.getInstance(obj));            
         }
         
-        throw new IllegalArgumentException("null object in getInstance()");
+        return null;
     }    
     
     private LDSSecurityObject(

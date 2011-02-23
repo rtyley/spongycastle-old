@@ -38,7 +38,7 @@ public class TimeStampAndCRL
             return new TimeStampAndCRL(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     public ContentInfo getTimeStampToken()

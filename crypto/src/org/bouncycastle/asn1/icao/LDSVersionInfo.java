@@ -41,7 +41,7 @@ public class LDSVersionInfo
             return new LDSVersionInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in getInstance()");
+        return null;
     }
 
     public String getLdsVersion()

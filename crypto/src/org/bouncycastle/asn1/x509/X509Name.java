@@ -381,7 +381,7 @@ public class X509Name
             return new X509Name(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     protected X509Name()

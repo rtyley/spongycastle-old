@@ -29,7 +29,7 @@ public class AttributeCertificate
             return new AttributeCertificate(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
     
     public AttributeCertificate(

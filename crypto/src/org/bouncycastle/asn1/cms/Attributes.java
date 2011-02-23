@@ -32,7 +32,7 @@ public class Attributes
             return new Attributes(ASN1Set.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     /**

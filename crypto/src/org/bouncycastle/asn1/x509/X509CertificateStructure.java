@@ -46,7 +46,7 @@ public class X509CertificateStructure
             return new X509CertificateStructure(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     public X509CertificateStructure(

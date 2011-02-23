@@ -63,7 +63,7 @@ public class EncryptedValue
             return new EncryptedValue(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     public EncryptedValue(

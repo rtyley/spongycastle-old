@@ -55,7 +55,7 @@ public class DataGroupHash
             return new DataGroupHash(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in getInstance()");
+        return null;
     }                
             
     private DataGroupHash(ASN1Sequence seq)
