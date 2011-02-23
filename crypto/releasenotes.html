@@ -59,10 +59,12 @@ custom API with CMS and for certificate generation. In addition a lot of methods
 deprecated for reasons of been confusing, or in some cases just plan wrong, have been removed. 
 </p>
 <p>
-So there are two things to keep in mind about this release:
+So there are four things useful to know about this release:
 <ul>
 <li>It's not a simple drop in like previous releases, if you wish migrate to it you will need to recompile your application.</li>
 <li>If you avoid deprecated methods it should be relatively painless to move to version 2.0</li>
+<li>The X509Name class will utlimately be replacde with the X500Name class, the getInstance() methods on both these classes allow conversion from one type to another.</li>
+<li>The org.bouncycastle.cms.RecipientId class now has a collection of subclasses to allow for more specific recipient matching. If you are creating your own recipient ids you should use the constructors for the subclasses rather than relying on the set methods inherited from X509CertSelector. The dependencies on X509CertSelector and CertStore will be removed from the version 2 CMS API.<li>
 </ul>
 </p>
 <h3>2.2.1 Version</h3>
