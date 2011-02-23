@@ -124,6 +124,8 @@ src/org/bouncycastle/asn1 \
     org.bouncycastle.asn1.test \
     org.bouncycastle.asn1.tsp \
     org.bouncycastle.asn1.util \
+    org.bouncycastle.asn1.x500 \
+    org.bouncycastle.asn1.x500.style \
     org.bouncycastle.asn1.x509 \
     org.bouncycastle.asn1.x9 \
     org.bouncycastle.bcpg \
