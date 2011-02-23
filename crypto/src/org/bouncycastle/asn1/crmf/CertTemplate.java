@@ -87,7 +87,7 @@ public class CertTemplate
             return new CertTemplate(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     public int getVersion()

@@ -44,7 +44,7 @@ public class SubjectPublicKeyInfo
             return new SubjectPublicKeyInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     public SubjectPublicKeyInfo(

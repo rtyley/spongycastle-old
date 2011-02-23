@@ -57,7 +57,7 @@ public class TimeStampedDataParser
             return new TimeStampedDataParser((ASN1SequenceParser)obj);
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     public DERIA5String getDataUri()

@@ -60,7 +60,7 @@ public class MetaData
             return new MetaData(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     /**

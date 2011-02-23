@@ -49,7 +49,8 @@ public class RoleSyntax
         {
             return new RoleSyntax(ASN1Sequence.getInstance(obj));
         }
-        throw new IllegalArgumentException("null object in getInstance.");
+
+        return null;
     }
     
     /**

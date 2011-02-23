@@ -47,7 +47,7 @@ public class CertReqMsg
             return new CertReqMsg(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     /**

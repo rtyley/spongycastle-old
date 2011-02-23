@@ -65,7 +65,7 @@ public class TBSCertificateStructure
             return new TBSCertificateStructure(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null object in factory");
+        return null;
     }
 
     public TBSCertificateStructure(
