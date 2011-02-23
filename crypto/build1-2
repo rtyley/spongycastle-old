@@ -25,7 +25,6 @@ then
      | (cd lcrypto-jdk12-$base && tar xf -)
     (cd test && tar cf - src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1) \
      | (cd lcrypto-jdk12-$base && tar xf -)
-    (cd jdk1.3 && tar cf - org/bouncycastle/crypto/* | (cd ../lcrypto-jdk12-$base/src; tar xf -))
     (
         cd lcrypto-jdk12-$base;
 
@@ -117,7 +116,7 @@ then
     (cd jdk1.3 && tar cf - * | (cd ../jce-jdk12-$base/src; tar xf -))
     (cd test/jdk1.3 && tar cf - * | (cd ../../jce-jdk12-$base/src; tar xf -))
     (cd jdk1.2 && tar cf - * | (cd ../jce-jdk12-$base/src; tar xf -))
-    (cd test/data && tar cf - org/bouncycastle/asn1 | (cd ../../jce-jdk11-$base/src; tar xf -))
+    (cd test/data && tar cf - org/bouncycastle/asn1 | (cd ../../jce-jdk12-$base/src; tar xf -))
 
 
     (
