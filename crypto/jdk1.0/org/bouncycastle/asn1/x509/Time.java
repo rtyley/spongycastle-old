@@ -36,7 +36,7 @@ public class Time
     public static Time getInstance(
         Object  obj)
     {
-        if (obj instanceof Time)
+        if (obj == null || obj instanceof Time)
         {
             return (Time)obj;
         }
