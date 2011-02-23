@@ -43,12 +43,10 @@ public class DataGroupHashUnitTest
         try
         {
             DataGroupHash.getInstance(null);
-
-            fail("getInstance() failed to detect null.");
         }
-        catch (IllegalArgumentException e)
+        catch (Exception e)
         {
-            // expected
+            fail("getInstance() failed to handle null.");
         }
 
         try
