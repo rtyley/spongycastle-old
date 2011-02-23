@@ -1,14 +1,14 @@
 package org.bouncycastle.x509;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.x509.CertificatePair;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.jce.provider.X509CertificateObject;
-
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.x509.CertificatePair;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.jce.provider.X509CertificateObject;
 
 /**
  * This class contains a cross certificate pair. Cross certificates pairs may
@@ -65,11 +65,19 @@ public class X509CertificatePair
             {
                 f = X509CertificateStructure.getInstance(new ASN1InputStream(
                     forward.getEncoded()).readObject());
+                if (f == null)
+                {
+                    throw new CertificateEncodingException("unable to get encoding for forward");
+                }
             }
             if (reverse != null)
             {
                 r = X509CertificateStructure.getInstance(new ASN1InputStream(
                     reverse.getEncoded()).readObject());
+                if (r == null)
+                {
+                    throw new CertificateEncodingException("unable to get encoding for reverse");
+                }
             }
             return new CertificatePair(f, r).getDEREncoded();
         }

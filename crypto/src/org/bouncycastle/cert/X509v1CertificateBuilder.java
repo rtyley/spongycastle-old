@@ -30,6 +30,16 @@ public class X509v1CertificateBuilder
      */
     public X509v1CertificateBuilder(X500Name issuer, BigInteger serial, Date notBefore, Date notAfter, X500Name subject, SubjectPublicKeyInfo publicKeyInfo)
     {
+        if (issuer == null)
+        {
+            throw new IllegalArgumentException("issuer must not be null");
+        }
+
+        if (publicKeyInfo == null)
+        {
+            throw new IllegalArgumentException("publicKeyInfo must not be null");
+        }
+
         tbsGen = new V1TBSCertificateGenerator();
         tbsGen.setSerialNumber(new DERInteger(serial));
         tbsGen.setIssuer(issuer);
