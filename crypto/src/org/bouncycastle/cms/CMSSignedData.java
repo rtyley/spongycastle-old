@@ -534,7 +534,7 @@ public class CMSSignedData
         {
             SignerInformation signer = (SignerInformation)it.next();
             digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
-            vec.add(signer.toSignerInfo());
+            vec.add(signer.toASN1Structure());
         }
 
         ASN1Set             digests = new DERSet(digestAlgs);

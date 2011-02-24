@@ -107,8 +107,7 @@ public class CMSSignedDataParser
     private ASN1ObjectIdentifier    _signedContentType;
     private CMSTypedStream          _signedContent;
     private Map                     _digests;
-    
-    private CertStore               _certStore;
+
     private SignerInformationStore  _signerInfoStore;
     private X509Store               _attributeStore;
     private ASN1Set                 _certSet, _crlSet;
@@ -168,7 +167,7 @@ public class CMSSignedDataParser
                 AlgorithmIdentifier id = AlgorithmIdentifier.getInstance(o.getDERObject());
                 try
                 {
-                    String        digestName = HELPER.getDigestAlgName(id.getObjectId().toString());
+                    String        digestName = HELPER.getDigestAlgName(id.getAlgorithm().toString());
                     MessageDigest dig = HELPER.getDigestInstance(digestName, null);
 
                     this._digests.put(digestName, dig);
@@ -654,7 +653,7 @@ public class CMSSignedDataParser
         {
             SignerInformation        signer = (SignerInformation)it.next();
 
-            signerInfos.add(signer.toSignerInfo());
+            signerInfos.add(signer.toASN1Structure());
         }
 
         sigGen.getRawOutputStream().write(new DERSet(signerInfos).getEncoded());
