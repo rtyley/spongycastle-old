@@ -14,6 +14,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
@@ -88,13 +89,13 @@ public class CMSTimeStampedDataGeneratorTest
         hashCalculator.getOutputStream().write(baseData);
         hashCalculator.getOutputStream().close();
 
-        TimeStampToken timeStampToken = createTimeStampToken(hashCalculator.getDigest());
+        TimeStampToken timeStampToken = createTimeStampToken(hashCalculator.getDigest(), NISTObjectIdentifiers.id_sha256);
         CMSTimeStampedData cmsTimeStampedData = cmsTimeStampedDataGenerator.generate(timeStampToken, baseData);
 
         for (int i = 0; i < 3; i++)
         {
             byte[] newRequestData = cmsTimeStampedData.calculateNextHash(hashCalculator);
-            TimeStampToken newTimeStampToken = createTimeStampToken(newRequestData);
+            TimeStampToken newTimeStampToken = createTimeStampToken(newRequestData, NISTObjectIdentifiers.id_sha256);
             cmsTimeStampedData = cmsTimeStampedData.addTimeStamp(newTimeStampToken);
         }
         byte[] timeStampedData = cmsTimeStampedData.getEncoded();
@@ -132,13 +133,13 @@ public class CMSTimeStampedDataGeneratorTest
         hashCalculator.getOutputStream().write(baseData);
         hashCalculator.getOutputStream().close();
 
-        TimeStampToken timeStampToken = createTimeStampToken(hashCalculator.getDigest());
+        TimeStampToken timeStampToken = createTimeStampToken(hashCalculator.getDigest(), NISTObjectIdentifiers.id_sha256);
         CMSTimeStampedData cmsTimeStampedData = cmsTimeStampedDataGenerator.generate(timeStampToken, baseData);
 
         for (int i = 0; i < 3; i++)
         {
             byte[] newRequestData = cmsTimeStampedData.calculateNextHash(hashCalculator);
-            TimeStampToken newTimeStampToken = createTimeStampToken(newRequestData);
+            TimeStampToken newTimeStampToken = createTimeStampToken(newRequestData, NISTObjectIdentifiers.id_sha256);
             cmsTimeStampedData = cmsTimeStampedData.addTimeStamp(newTimeStampToken);
         }
         byte[] timeStampedData = cmsTimeStampedData.getEncoded();
@@ -146,6 +147,53 @@ public class CMSTimeStampedDataGeneratorTest
         metadataCheck(timeStampedData);
         metadataParserCheck(timeStampedData);
     }
+
+    public void testGenerateWithMetadataAndDifferentAlgorithmIdentifier()
+        throws Exception
+    {
+        cmsTimeStampedDataGenerator.setMetaData(true, fileInput, "TXT");
+
+        BcDigestCalculatorProvider calculatorProvider = new BcDigestCalculatorProvider();
+
+        ASN1ObjectIdentifier algIdentifier = NISTObjectIdentifiers.id_sha224;
+
+        DigestCalculator hashCalculator = calculatorProvider.get(new AlgorithmIdentifier(algIdentifier));
+        cmsTimeStampedDataGenerator.initialiseMessageImprintDigestCalculator(hashCalculator);
+        hashCalculator.getOutputStream().write(baseData);
+        hashCalculator.getOutputStream().close();
+
+        byte[] requestData = hashCalculator.getDigest();
+        TimeStampToken timeStampToken = createTimeStampToken(requestData, algIdentifier);
+
+        CMSTimeStampedData cmsTimeStampedData = cmsTimeStampedDataGenerator.generate(timeStampToken, baseData);
+
+        for (int i = 0; i < 3; i++) {
+            switch (i) {
+            case 0:
+                algIdentifier =	NISTObjectIdentifiers.id_sha224;
+                break;
+            case 1:
+                algIdentifier =	NISTObjectIdentifiers.id_sha256;
+                break;
+            case 2:
+                algIdentifier =	NISTObjectIdentifiers.id_sha384;
+                break;
+            case 3:
+                algIdentifier =	NISTObjectIdentifiers.id_sha512;
+                break;
+            }
+            hashCalculator = calculatorProvider.get(new AlgorithmIdentifier(algIdentifier));
+            byte[] newRequestData = cmsTimeStampedData.calculateNextHash(hashCalculator);
+            TimeStampToken newTimeStampToken = createTimeStampToken(newRequestData, algIdentifier);
+            cmsTimeStampedData = cmsTimeStampedData.addTimeStamp(newTimeStampToken);
+        }
+        byte[] timeStampedData = cmsTimeStampedData.getEncoded();
+
+        metadataCheck(timeStampedData);
+        metadataParserCheck(timeStampedData);
+
+    }
+
 
     private void metadataCheck(byte[] timeStampedData)
         throws Exception
@@ -202,9 +250,27 @@ public class CMSTimeStampedDataGeneratorTest
         }
     }
 
-    private TimeStampToken createTimeStampToken(byte[] hash)
+    private TimeStampToken createTimeStampToken(byte[] hash, ASN1ObjectIdentifier hashAlg)
         throws Exception
     {
+        String algorithmName = null;
+        if (hashAlg.equals(NISTObjectIdentifiers.id_sha224))
+        {
+            algorithmName = "SHA224withRSA";
+        }
+        else if (hashAlg.equals(NISTObjectIdentifiers.id_sha256))
+        {
+            algorithmName = "SHA256withRSA";
+        }
+        else if (hashAlg.equals(NISTObjectIdentifiers.id_sha384))
+        {
+            algorithmName = "SHA384withRSA";
+        }
+        else if (hashAlg.equals(NISTObjectIdentifiers.id_sha512))
+        {
+            algorithmName = "SHA512withRSA";
+        }
+
         String signDN = "O=Bouncy Castle, C=AU";
         KeyPair signKP = TSPTestUtil.makeKeyPair();
         X509Certificate signCert = TSPTestUtil.makeCACertificate(signKP,
@@ -225,12 +291,12 @@ public class CMSTimeStampedDataGeneratorTest
 
 
         TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
-            new JcaSimpleSignerInfoGeneratorBuilder().build("SHA256withRSA", privateKey, cert), new ASN1ObjectIdentifier("1.2"));
+            new JcaSimpleSignerInfoGeneratorBuilder().build(algorithmName, privateKey, cert), new ASN1ObjectIdentifier("1.2"));
 
         tsTokenGen.addCertificates(certs);
 
         TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
-        TimeStampRequest request = reqGen.generate(TSPAlgorithms.SHA256, hash);
+        TimeStampRequest request = reqGen.generate(hashAlg, hash);
 
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
