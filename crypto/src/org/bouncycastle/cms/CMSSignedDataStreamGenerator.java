@@ -1040,7 +1040,7 @@ public class CMSSignedDataStreamGenerator
     {
         for (Iterator it = signerInfos.iterator(); it.hasNext();)
         {
-            SignerInfo s = SignerInfo.getInstance(((SignerInformation)it.next()).toSignerInfo());
+            SignerInfo s = SignerInfo.getInstance(((SignerInformation)it.next()).toASN1Structure());
 
             if (s.getVersion().getValue().intValue() == 3)
             {
@@ -1188,7 +1188,7 @@ public class CMSSignedDataStreamGenerator
 //                        }
 //                    }
 
-                    signerInfos.add(signer.toSignerInfo());
+                    signerInfos.add(signer.toASN1Structure());
                 }
             }
             
