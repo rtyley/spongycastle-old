@@ -144,6 +144,11 @@ public class TimeStampRequestGenerator
         }
     }
 
+    public TimeStampRequest generate(ASN1ObjectIdentifier digestAlgorithm, byte[] digest)
+    {
+        return generate(digestAlgorithm.getId(), digest);
+    }
+
     public TimeStampRequest generate(ASN1ObjectIdentifier digestAlgorithm, byte[] digest, BigInteger nonce)
     {
         return generate(digestAlgorithm.getId(), digest, nonce);
