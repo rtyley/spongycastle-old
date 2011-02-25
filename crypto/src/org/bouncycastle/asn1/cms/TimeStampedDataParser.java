@@ -97,6 +97,7 @@ public class TimeStampedDataParser
      * }
      * </pre>
      * @return
+     * @deprecated will be removed
      */
     public DERObject toASN1Object()
     {
