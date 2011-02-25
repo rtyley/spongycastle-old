@@ -73,9 +73,19 @@ abstract class GCMUtil
 
     static void multiplyP8(int[] x)
     {
-        for (int i = 8; i != 0; --i)
+//        for (int i = 8; i != 0; --i)
+//        {
+//            multiplyP(x);
+//        }
+
+        int lsw = x[3];
+        shiftRightN(x, 8);
+        for (int i = 7; i >= 0; --i)
         {
-            multiplyP(x);
+            if ((lsw & (1 << i)) != 0)
+            {
+                x[0] ^= (0xe1000000 >>> (7 - i));
+            }
         }
     }
 
@@ -108,6 +118,22 @@ abstract class GCMUtil
                 break;
             }
             bit = b << 31;
+        }
+    }
+
+    static void shiftRightN(int[] block, int n)
+    {
+        int i = 0;
+        int bits = 0;
+        for (;;)
+        {
+            int b = block[i];
+            block[i] = (b >>> n) | bits;
+            if (++i == 4)
+            {
+                break;
+            }
+            bits = b << (32 - n);
         }
     }
 
