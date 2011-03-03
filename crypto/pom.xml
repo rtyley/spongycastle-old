@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.madgag</groupId>
+	<artifactId>bcprov-jdk15</artifactId>
+	<version>1.46.99.0-UNOFFICIAL-ROBERTO-RELEASE-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<name>Bouncy Castle Provider - hacked about, unofficial release by Roberto Tyley</name>
+	<description>The Bouncy Castle Crypto package is a Java implementation of cryptographic algorithms. This jar contains JCE provider and lightweight API for the Bouncy Castle Cryptography APIs for JDK 1.5.</description>
+	<url>http://www.bouncycastle.org/java.html</url>
+	<licenses>
+		<license>
+			<name>Bouncy Castle Licence</name>
+			<url>http://www.bouncycastle.org/licence.html</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+					<excludes>
+						<exclude>org/bouncycastle/mail/**/*.java</exclude>
+						<exclude>org/bouncycastle/mail/**/*.properties</exclude>
+						<exclude>org/bouncycastle/cms/**/*.java</exclude>
+						<exclude>org/bouncycastle/cert/**/*.java</exclude>
+						<exclude>org/bouncycastle/pkcs/**/*.java</exclude>
+						<exclude>org/bouncycastle/operator/**/*.java</exclude>
+						<exclude>org/bouncycastle/jcajce/**/*.java</exclude>
+						<exclude>org/bouncycastle/sasn1/**/*.java</exclude>
+						<exclude>org/bouncycastle/tsp/**/*.java</exclude>
+						<exclude>org/bouncycastle/openpgp/**/*.java</exclude>
+						<exclude>org/bouncycastle/bcpg/**/*.java</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
