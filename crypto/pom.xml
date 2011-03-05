@@ -16,8 +16,29 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.2</version>
+		</dependency>
+	</dependencies>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
+		<testSourceDirectory>test/src</testSourceDirectory>
+		<resources>
+			<resource>
+				<directory>src</directory>
+			</resource>
+		</resources>
+		<testResources>
+			<testResource>
+				<directory>test/data</directory>
+			</testResource>
+			<testResource>
+				<directory>test/src</directory>
+			</testResource>
+		</testResources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -38,6 +59,44 @@
 						<exclude>org/bouncycastle/openpgp/**/*.java</exclude>
 						<exclude>org/bouncycastle/bcpg/**/*.java</exclude>
 					</excludes>
+				</configuration>
+
+				<executions>
+					<execution>
+						<id>default-testCompile</id>
+						<phase>test-compile</phase>
+						<configuration>
+							<testExcludes>
+								<exclude>org/bouncycastle/mail/**/*.java</exclude>
+								<exclude>org/bouncycastle/mail/**/*.properties</exclude>
+								<exclude>org/bouncycastle/cms/**/*.java</exclude>
+								<exclude>org/bouncycastle/cert/**/*.java</exclude>
+								<exclude>org/bouncycastle/pkcs/**/*.java</exclude>
+								<exclude>org/bouncycastle/operator/**/*.java</exclude>
+								<exclude>org/bouncycastle/jcajce/**/*.java</exclude>
+								<exclude>org/bouncycastle/sasn1/**/*.java</exclude>
+								<exclude>org/bouncycastle/tsp/**/*.java</exclude>
+								<exclude>org/bouncycastle/openpgp/**/*.java</exclude>
+								<exclude>org/bouncycastle/bcpg/**/*.java</exclude>
+							</testExcludes>
+						</configuration>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.7.2</version>
+				<configuration>
+					<childDelegation>true</childDelegation>
+					<systemPropertyVariables>
+						<bc.test.data.home>${project.basedir}/test/data</bc.test.data.home>
+					</systemPropertyVariables>
 				</configuration>
 			</plugin>
 		</plugins>
