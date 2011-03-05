@@ -1,23 +1,22 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
 
-import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.MultiCertStoreParameters;
-import org.bouncycastle.jce.PrincipalUtil;
+import org.spongycastle.util.test.SimpleTest;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.jce.MultiCertStoreParameters;
+import org.spongycastle.jce.PrincipalUtil;
 
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.cert.X509CRL;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.X509CertSelector;
-import org.bouncycastle.jce.cert.X509CRLSelector;
+import org.spongycastle.jce.cert.CollectionCertStoreParameters;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.X509CertSelector;
+import org.spongycastle.jce.cert.X509CRLSelector;
 import java.security.Security;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 public class MultiCertStoreTest
     extends SimpleTest

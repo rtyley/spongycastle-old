@@ -1,7 +1,6 @@
-package org.bouncycastle.asn1;
+package org.spongycastle.asn1;
 
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.encoders.Hex;
+import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
@@ -151,7 +150,7 @@ public class DERApplicationSpecific
     }
     
     /* (non-Javadoc)
-     * @see org.bouncycastle.asn1.DERObject#encode(org.bouncycastle.asn1.DEROutputStream)
+     * @see org.spongycastle.asn1.DERObject#encode(org.spongycastle.asn1.DEROutputStream)
      */
     void encode(DEROutputStream out) throws IOException
     {

@@ -1,6 +1,5 @@
-package org.bouncycastle.operator.jcajce;
+package org.spongycastle.operator.jcajce;
 
-import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -13,13 +12,13 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.jcajce.DefaultJcaJceHelper;
-import org.bouncycastle.jcajce.NamedJcaJceHelper;
-import org.bouncycastle.jcajce.ProviderJcaJceHelper;
-import org.bouncycastle.operator.AsymmetricKeyUnwrapper;
-import org.bouncycastle.operator.GenericKey;
-import org.bouncycastle.operator.OperatorException;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.jcajce.DefaultJcaJceHelper;
+import org.spongycastle.jcajce.NamedJcaJceHelper;
+import org.spongycastle.jcajce.ProviderJcaJceHelper;
+import org.spongycastle.operator.AsymmetricKeyUnwrapper;
+import org.spongycastle.operator.GenericKey;
+import org.spongycastle.operator.OperatorException;
 
 public class JceAsymmetricKeyUnwrapper
     extends AsymmetricKeyUnwrapper

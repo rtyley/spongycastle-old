@@ -1,11 +1,11 @@
-package org.bouncycastle.tools.openpgp;
+package org.spongycastle.tools.openpgp;
 
 import java.security.Security;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.tools.openpgp.rampage.PGPRampageEngine;
-import org.bouncycastle.tools.openpgp.util.PGPCmdLineArgProcessor;
-import org.bouncycastle.tools.openpgp.util.PGPParams;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.tools.openpgp.rampage.PGPRampageEngine;
+import org.spongycastle.tools.openpgp.util.PGPCmdLineArgProcessor;
+import org.spongycastle.tools.openpgp.util.PGPParams;
 
 /**
  * A general tool for manipulating PGP messages.

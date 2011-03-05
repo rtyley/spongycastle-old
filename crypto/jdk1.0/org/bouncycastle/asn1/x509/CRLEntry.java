@@ -1,10 +1,10 @@
-package org.bouncycastle.asn1.x509;
+package org.spongycastle.asn1.x509;
 
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERUTCTime;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERInteger;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DERUTCTime;
 
 public class CRLEntry
     implements DEREncodable

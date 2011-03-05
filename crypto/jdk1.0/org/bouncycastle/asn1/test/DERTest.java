@@ -1,20 +1,20 @@
-package org.bouncycastle.asn1.test;
+package org.spongycastle.asn1.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInputStream;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.util.encoders.Hex;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DERInputStream;
+import org.spongycastle.asn1.DEROutputStream;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.PrivateKeyInfo;
+import org.spongycastle.asn1.pkcs.RSAPrivateKeyStructure;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.RSAPublicKeyStructure;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.util.encoders.Hex;
 
 public class DERTest
     implements PKCSObjectIdentifiers

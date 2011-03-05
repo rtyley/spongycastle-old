@@ -1,41 +1,41 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DEREnumerated;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cms.SignedData;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.CRLReason;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.X509KeyUsage;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.interfaces.ECPointEncoder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
-import org.bouncycastle.x509.X509V2CRLGenerator;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.DEREnumerated;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.DERSet;
+import org.spongycastle.asn1.DERTaggedObject;
+import org.spongycastle.asn1.cms.CMSObjectIdentifiers;
+import org.spongycastle.asn1.cms.ContentInfo;
+import org.spongycastle.asn1.cms.SignedData;
+import org.spongycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.spongycastle.asn1.x509.CRLReason;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.GeneralNames;
+import org.spongycastle.asn1.x509.KeyPurposeId;
+import org.spongycastle.asn1.x509.X509Extension;
+import org.spongycastle.asn1.x509.X509Extensions;
+import org.spongycastle.asn1.x9.X9ObjectIdentifiers;
+import org.spongycastle.jce.X509KeyUsage;
+import org.spongycastle.jce.X509Principal;
+import org.spongycastle.jce.interfaces.ECPointEncoder;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.jce.spec.ECParameterSpec;
+import org.spongycastle.jce.spec.ECPrivateKeySpec;
+import org.spongycastle.jce.spec.ECPublicKeySpec;
+import org.spongycastle.jce.spec.GOST3410ParameterSpec;
+import org.spongycastle.math.ec.ECCurve;
+import org.spongycastle.util.encoders.Base64;
+import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.test.SimpleTest;
+import org.spongycastle.x509.X509V1CertificateGenerator;
+import org.spongycastle.x509.X509V2CRLGenerator;
+import org.spongycastle.x509.X509V3CertificateGenerator;
+import org.spongycastle.x509.extension.AuthorityKeyIdentifierStructure;
+import org.spongycastle.x509.extension.X509ExtensionUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -62,7 +62,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -1157,7 +1156,7 @@ public class CertTest
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+        attrs.put(X509Principal.E, "feedback-crypto@spongycastle.org");
 
         Vector                      ord = new Vector();
         Vector                      values = new Vector();
@@ -1172,7 +1171,7 @@ public class CertTest
         values.addElement("The Legion of the Bouncy Castle");
         values.addElement("Melbourne");
         values.addElement("Victoria");
-        values.addElement("feedback-crypto@bouncycastle.org");
+        values.addElement("feedback-crypto@spongycastle.org");
 
         //
         // extensions
@@ -1315,7 +1314,7 @@ public class CertTest
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+        attrs.put(X509Principal.E, "feedback-crypto@spongycastle.org");
 
         //
         // extensions
@@ -1455,7 +1454,7 @@ public class CertTest
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+        attrs.put(X509Principal.E, "feedback-crypto@spongycastle.org");
 
         order.addElement(X509Principal.C);
         order.addElement(X509Principal.O);
@@ -1470,7 +1469,7 @@ public class CertTest
         X509Principal p = new X509Principal(order, attrs);
         String  s = p.toString();
 
-        if (!s.equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne,ST=Victoria,E=feedback-crypto@bouncycastle.org"))
+        if (!s.equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne,ST=Victoria,E=feedback-crypto@spongycastle.org"))
         {
             fail("ordered X509Principal test failed - s = " + s + ".");
         }
@@ -1481,7 +1480,7 @@ public class CertTest
         //
         // we need two of these as the hash code for strings changed...
         //
-        if (!s.equals("O=The Legion of the Bouncy Castle,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU") && !s.equals("ST=Victoria,L=Melbourne,C=AU,E=feedback-crypto@bouncycastle.org,O=The Legion of the Bouncy Castle"))
+        if (!s.equals("O=The Legion of the Bouncy Castle,E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU") && !s.equals("ST=Victoria,L=Melbourne,C=AU,E=feedback-crypto@spongycastle.org,O=The Legion of the Bouncy Castle"))
         {
             fail("unordered X509Principal test failed.");
         }
@@ -1536,16 +1535,16 @@ public class CertTest
             fail("error setting generating cert - " + e.toString());
         }
 
-        X509Principal pr = new X509Principal("O=\"The Bouncy Castle, The Legion of\",E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU");
+        X509Principal pr = new X509Principal("O=\"The Bouncy Castle, The Legion of\",E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU");
 
-        if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU"))
+        if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU"))
         {
             fail("string based X509Principal test failed.");
         }
 
-        pr = new X509Principal("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU");
+        pr = new X509Principal("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU");
 
-        if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU"))
+        if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU"))
         {
             fail("string based X509Principal test failed.");
         }
@@ -1598,7 +1597,7 @@ public class CertTest
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+        attrs.put(X509Principal.E, "feedback-crypto@spongycastle.org");
 
         order.addElement(X509Principal.C);
         order.addElement(X509Principal.O);
@@ -2035,7 +2034,7 @@ public class CertTest
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+        attrs.put(X509Principal.E, "feedback-crypto@spongycastle.org");
 
         //
         // extensions
@@ -2120,7 +2119,7 @@ public class CertTest
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+        attrs.put(X509Principal.E, "feedback-crypto@spongycastle.org");
     
         Vector                      ord = new Vector();
         Vector                      values = new Vector();
@@ -2135,7 +2134,7 @@ public class CertTest
         values.addElement("The Legion of the Bouncy Castle");
         values.addElement("Melbourne");
         values.addElement("Victoria");
-        values.addElement("feedback-crypto@bouncycastle.org");
+        values.addElement("feedback-crypto@spongycastle.org");
     
         //
         // create base certificate - version 3
@@ -2396,7 +2395,7 @@ public class CertTest
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+        attrs.put(X509Principal.E, "feedback-crypto@spongycastle.org");
 
         Vector                      ord = new Vector();
         Vector                      values = new Vector();
@@ -2411,7 +2410,7 @@ public class CertTest
         values.addElement("The Legion of the Bouncy Castle");
         values.addElement("Melbourne");
         values.addElement("Victoria");
-        values.addElement("feedback-crypto@bouncycastle.org");
+        values.addElement("feedback-crypto@spongycastle.org");
 
         //
         // create base certificate - version 3

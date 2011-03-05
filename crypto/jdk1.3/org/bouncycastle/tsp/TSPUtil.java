@@ -1,4 +1,4 @@
-package org.bouncycastle.tsp;
+package org.spongycastle.tsp;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -17,28 +17,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.cms.Attribute;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.operator.DigestCalculator;
-import org.bouncycastle.operator.DigestCalculatorProvider;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.util.Arrays;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Set;
+import org.spongycastle.asn1.cms.Attribute;
+import org.spongycastle.asn1.cms.AttributeTable;
+import org.spongycastle.asn1.cms.ContentInfo;
+import org.spongycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.spongycastle.asn1.nist.NISTObjectIdentifiers;
+import org.spongycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.spongycastle.asn1.x509.ExtendedKeyUsage;
+import org.spongycastle.asn1.x509.KeyPurposeId;
+import org.spongycastle.asn1.x509.X509Extension;
+import org.spongycastle.asn1.x509.X509Extensions;
+import org.spongycastle.cert.X509CertificateHolder;
+import org.spongycastle.cms.SignerInformation;
+import org.spongycastle.operator.DigestCalculator;
+import org.spongycastle.operator.DigestCalculatorProvider;
+import org.spongycastle.operator.OperatorCreationException;
+import org.spongycastle.util.Arrays;
 
 public class TSPUtil
 {

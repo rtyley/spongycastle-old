@@ -1,14 +1,14 @@
-package org.bouncycastle.asn1.x9;
+package org.spongycastle.asn1.x9;
 
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERTaggedObject;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.DERTaggedObject;
 
 /**
  * ANS.1 def for Diffie-Hellman key exchange OtherInfo structure. See

@@ -1,4 +1,4 @@
-package org.bouncycastle.tools.openpgp.dump;
+package org.spongycastle.tools.openpgp.dump;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -6,24 +6,24 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openpgp.PGPCompressedData;
-import org.bouncycastle.openpgp.PGPEncryptedDataList;
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPLiteralData;
-import org.bouncycastle.openpgp.PGPObjectFactory;
-import org.bouncycastle.openpgp.PGPOnePassSignature;
-import org.bouncycastle.openpgp.PGPOnePassSignatureList;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyEncryptedData;
-import org.bouncycastle.openpgp.PGPPublicKeyRingCollection;
-import org.bouncycastle.openpgp.PGPSecretKey;
-import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
-import org.bouncycastle.openpgp.PGPSignature;
-import org.bouncycastle.openpgp.PGPSignatureList;
-import org.bouncycastle.openpgp.PGPUtil;
-import org.bouncycastle.tools.openpgp.util.PGPParams;
-import org.bouncycastle.tools.openpgp.util.ProcessingEngine;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.openpgp.PGPCompressedData;
+import org.spongycastle.openpgp.PGPEncryptedDataList;
+import org.spongycastle.openpgp.PGPException;
+import org.spongycastle.openpgp.PGPLiteralData;
+import org.spongycastle.openpgp.PGPObjectFactory;
+import org.spongycastle.openpgp.PGPOnePassSignature;
+import org.spongycastle.openpgp.PGPOnePassSignatureList;
+import org.spongycastle.openpgp.PGPPublicKey;
+import org.spongycastle.openpgp.PGPPublicKeyEncryptedData;
+import org.spongycastle.openpgp.PGPPublicKeyRingCollection;
+import org.spongycastle.openpgp.PGPSecretKey;
+import org.spongycastle.openpgp.PGPSecretKeyRingCollection;
+import org.spongycastle.openpgp.PGPSignature;
+import org.spongycastle.openpgp.PGPSignatureList;
+import org.spongycastle.openpgp.PGPUtil;
+import org.spongycastle.tools.openpgp.util.PGPParams;
+import org.spongycastle.tools.openpgp.util.ProcessingEngine;
 
 /**
  * 
@@ -106,7 +106,7 @@ public class PGPDumpEngine implements ProcessingEngine
         else
         {
             System.out.println("Can only process compressed data. "
-                    + " Please report this message to feedback-crypto@bouncycastle.org");
+                    + " Please report this message to feedback-crypto@spongycastle.org");
             return;
         }
 

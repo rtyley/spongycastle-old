@@ -1,8 +1,8 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
-import org.bouncycastle.jce.cert.PKIXParameters;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CertStoreException;
+import org.spongycastle.jce.cert.PKIXParameters;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
@@ -12,10 +12,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.util.StoreException;
-import org.bouncycastle.x509.ExtendedPKIXParameters;
-import org.bouncycastle.x509.X509CRLStoreSelector;
-import org.bouncycastle.x509.X509Store;
+import org.spongycastle.util.StoreException;
+import org.spongycastle.x509.ExtendedPKIXParameters;
+import org.spongycastle.x509.X509CRLStoreSelector;
+import org.spongycastle.x509.X509Store;
 
 public class PKIXCRLUtil
 {
@@ -95,7 +95,7 @@ public class PKIXCRLUtil
      * @param crlSelect a {@link X509CRLStoreSelector} object that will be used
      *            to select the CRLs
      * @param crlStores a List containing only
-     *            {@link org.bouncycastle.x509.X509Store  X509Store} objects.
+     *            {@link org.spongycastle.x509.X509Store  X509Store} objects.
      *            These are used to search for CRLs
      *
      * @return a Collection of all found {@link java.security.cert.X509CRL X509CRL} objects. May be

@@ -1,9 +1,9 @@
-package org.bouncycastle.crypto.test;
+package org.spongycastle.crypto.test;
 
-import org.bouncycastle.crypto.engines.RC2Engine;
-import org.bouncycastle.crypto.params.RC2Parameters;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.crypto.engines.RC2Engine;
+import org.spongycastle.crypto.params.RC2Parameters;
+import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.test.TestResult;
 
 /**
  * RC2 tester - vectors from  ftp://ftp.isi.edu/in-notes/rfc2268.txt

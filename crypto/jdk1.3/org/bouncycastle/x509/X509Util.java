@@ -1,20 +1,19 @@
-package org.bouncycastle.x509;
+package org.spongycastle.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.util.Strings;
+import org.spongycastle.asn1.ASN1Encodable;
+import org.spongycastle.asn1.DERNull;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERInteger;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.spongycastle.asn1.nist.NISTObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.RSASSAPSSparams;
+import org.spongycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x9.X9ObjectIdentifiers;
+import org.spongycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.spongycastle.util.Strings;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;

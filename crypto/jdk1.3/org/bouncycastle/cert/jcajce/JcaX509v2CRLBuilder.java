@@ -1,9 +1,9 @@
-package org.bouncycastle.cert.jcajce;
+package org.spongycastle.cert.jcajce;
 
 import java.util.Date;
 
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.cert.X509v2CRLBuilder;
+import org.spongycastle.asn1.x500.X500Name;
+import org.spongycastle.cert.X509v2CRLBuilder;
 
 public class JcaX509v2CRLBuilder
     extends X509v2CRLBuilder

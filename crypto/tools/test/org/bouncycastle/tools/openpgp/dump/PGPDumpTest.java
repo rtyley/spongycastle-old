@@ -1,9 +1,9 @@
-package org.bouncycastle.tools.openpgp.dump;
+package org.spongycastle.tools.openpgp.dump;
 
 import junit.framework.TestCase;
 
-import org.bouncycastle.tools.openpgp.PGPDump;
-import org.bouncycastle.tools.openpgp.util.PGPParams;
+import org.spongycastle.tools.openpgp.PGPDump;
+import org.spongycastle.tools.openpgp.util.PGPParams;
 
 /*
  * NOTE:  This test class _will not work_ in your environment unless you have

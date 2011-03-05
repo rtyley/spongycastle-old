@@ -1,4 +1,4 @@
-package org.bouncycastle.cms;
+package org.spongycastle.cms;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -24,20 +24,20 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import org.bouncycastle.asn1.ASN1Null;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.cms.KEKRecipientInfo;
-import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
-import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
-import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
-import org.bouncycastle.asn1.cms.RecipientInfo;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.operator.DigestCalculator;
-import org.bouncycastle.util.io.TeeInputStream;
+import org.spongycastle.asn1.ASN1Null;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Set;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.cms.KEKRecipientInfo;
+import org.spongycastle.asn1.cms.KeyAgreeRecipientInfo;
+import org.spongycastle.asn1.cms.KeyTransRecipientInfo;
+import org.spongycastle.asn1.cms.PasswordRecipientInfo;
+import org.spongycastle.asn1.cms.RecipientInfo;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.operator.DigestCalculator;
+import org.spongycastle.util.io.TeeInputStream;
 
 class CMSEnvelopedHelper
 {

@@ -1,9 +1,9 @@
-package org.bouncycastle.i18n;
+package org.spongycastle.i18n;
 
-import org.bouncycastle.i18n.filter.Filter;
-import org.bouncycastle.i18n.filter.TrustedInput;
-import org.bouncycastle.i18n.filter.UntrustedInput;
-import org.bouncycastle.i18n.filter.UntrustedUrlInput;
+import org.spongycastle.i18n.filter.Filter;
+import org.spongycastle.i18n.filter.TrustedInput;
+import org.spongycastle.i18n.filter.UntrustedInput;
+import org.spongycastle.i18n.filter.UntrustedUrlInput;
 
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;

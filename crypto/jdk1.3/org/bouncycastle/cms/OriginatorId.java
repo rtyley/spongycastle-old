@@ -1,8 +1,8 @@
-package org.bouncycastle.cms;
+package org.spongycastle.cms;
 
-import org.bouncycastle.util.Arrays;
+import org.spongycastle.util.Arrays;
 
-import org.bouncycastle.jce.cert.X509CertSelector;
+import org.spongycastle.jce.cert.X509CertSelector;
 
 /**
  * a basic index for an originator.

@@ -1,6 +1,6 @@
 package java.security;
 
-import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.spongycastle.crypto.digests.SHA1Digest;
 
 /**
  * An implementation of SecureRandom specifically for the

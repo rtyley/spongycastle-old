@@ -1,4 +1,4 @@
-package org.bouncycastle.tools.openpgp.util;
+package org.spongycastle.tools.openpgp.util;
 
 import java.io.File;
 import java.util.ArrayList;

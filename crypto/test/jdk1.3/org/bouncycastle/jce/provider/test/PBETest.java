@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
 
 import java.security.AlgorithmParameters;
 import java.security.Security;
@@ -12,19 +12,19 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.PBEParametersGenerator;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator;
-import org.bouncycastle.crypto.generators.PKCS12ParametersGenerator;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithIV;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.crypto.Digest;
+import org.spongycastle.crypto.PBEParametersGenerator;
+import org.spongycastle.crypto.digests.SHA1Digest;
+import org.spongycastle.crypto.digests.SHA256Digest;
+import org.spongycastle.crypto.generators.OpenSSLPBEParametersGenerator;
+import org.spongycastle.crypto.generators.PKCS12ParametersGenerator;
+import org.spongycastle.crypto.params.KeyParameter;
+import org.spongycastle.crypto.params.ParametersWithIV;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 /**
  * test out the various PBE modes, making sure the JCE implementations

@@ -1,23 +1,16 @@
-package org.bouncycastle.cavp.test;
+package org.spongycastle.cavp.test;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.spec.DSAParameterSpec;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.params.DSAParameters;
-import org.bouncycastle.crypto.params.DSAValidationParameters;
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.encoders.Hex;
+import org.spongycastle.util.encoders.Hex;
 
-import static org.bouncycastle.crypto.generators.DSAParametersGenerator.calculateGenerator_FIPS186_3_Verifiable;
+import static org.spongycastle.crypto.generators.DSAParametersGenerator.calculateGenerator_FIPS186_3_Verifiable;
 
 public class DsaTest
 {

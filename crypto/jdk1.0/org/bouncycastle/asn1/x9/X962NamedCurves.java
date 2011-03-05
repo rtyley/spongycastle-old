@@ -1,13 +1,13 @@
-package org.bouncycastle.asn1.x9;
+package org.spongycastle.asn1.x9;
 
 import java.math.BigInteger;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECCurveFp;
-import org.bouncycastle.util.encoders.Hex;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.math.ec.ECCurve;
+import org.spongycastle.math.ec.ECCurveFp;
+import org.spongycastle.util.encoders.Hex;
 
 
 /**

@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.asymmetric.ec;
+package org.spongycastle.jce.provider.asymmetric.ec;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,29 +8,29 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.DSA;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA224Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA384Digest;
-import org.bouncycastle.crypto.digests.SHA512Digest;
-import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.crypto.signers.ECDSASigner;
-import org.bouncycastle.crypto.signers.ECNRSigner;
-import org.bouncycastle.jce.interfaces.ECKey;
-import org.bouncycastle.jce.provider.DSABase;
-import org.bouncycastle.jce.provider.DSAEncoder;
-import org.bouncycastle.jce.provider.JDKKeyFactory;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DERInteger;
+import org.spongycastle.asn1.DEROutputStream;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.crypto.CipherParameters;
+import org.spongycastle.crypto.DSA;
+import org.spongycastle.crypto.Digest;
+import org.spongycastle.crypto.digests.RIPEMD160Digest;
+import org.spongycastle.crypto.digests.SHA1Digest;
+import org.spongycastle.crypto.digests.SHA224Digest;
+import org.spongycastle.crypto.digests.SHA256Digest;
+import org.spongycastle.crypto.digests.SHA384Digest;
+import org.spongycastle.crypto.digests.SHA512Digest;
+import org.spongycastle.crypto.params.ParametersWithRandom;
+import org.spongycastle.crypto.signers.ECDSASigner;
+import org.spongycastle.crypto.signers.ECNRSigner;
+import org.spongycastle.jce.interfaces.ECKey;
+import org.spongycastle.jce.provider.DSABase;
+import org.spongycastle.jce.provider.DSAEncoder;
+import org.spongycastle.jce.provider.JDKKeyFactory;
+import org.spongycastle.jce.interfaces.ECPublicKey;
 
 public class Signature
     extends DSABase

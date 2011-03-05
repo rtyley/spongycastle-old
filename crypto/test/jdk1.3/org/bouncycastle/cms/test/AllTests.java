@@ -1,10 +1,7 @@
-package org.bouncycastle.cms.test;
+package org.spongycastle.cms.test;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import javax.crypto.Cipher;
-import java.security.Security;
 
 public class AllTests 
 {

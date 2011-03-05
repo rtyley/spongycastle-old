@@ -1,18 +1,17 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
 
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.x509.X509AttributeCertStoreSelector;
-import org.bouncycastle.x509.X509AttributeCertificate;
-import org.bouncycastle.x509.X509CRLStoreSelector;
-import org.bouncycastle.x509.X509CertPairStoreSelector;
-import org.bouncycastle.x509.X509CertStoreSelector;
-import org.bouncycastle.x509.X509CertificatePair;
-import org.bouncycastle.x509.X509CollectionStoreParameters;
-import org.bouncycastle.x509.X509Store;
-import org.bouncycastle.x509.X509V2AttributeCertificate;
+import org.spongycastle.jce.PrincipalUtil;
+import org.spongycastle.jce.X509Principal;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.test.SimpleTest;
+import org.spongycastle.x509.X509AttributeCertStoreSelector;
+import org.spongycastle.x509.X509AttributeCertificate;
+import org.spongycastle.x509.X509CertPairStoreSelector;
+import org.spongycastle.x509.X509CertStoreSelector;
+import org.spongycastle.x509.X509CertificatePair;
+import org.spongycastle.x509.X509CollectionStoreParameters;
+import org.spongycastle.x509.X509Store;
+import org.spongycastle.x509.X509V2AttributeCertificate;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
@@ -22,7 +21,6 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 

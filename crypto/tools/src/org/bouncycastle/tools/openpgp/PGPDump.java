@@ -1,12 +1,12 @@
-package org.bouncycastle.tools.openpgp;
+package org.spongycastle.tools.openpgp;
 
 import java.io.File;
 import java.security.Security;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.tools.openpgp.dump.PGPDumpEngine;
-import org.bouncycastle.tools.openpgp.util.PGPCmdLineArgProcessor;
-import org.bouncycastle.tools.openpgp.util.PGPParams;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.tools.openpgp.dump.PGPDumpEngine;
+import org.spongycastle.tools.openpgp.util.PGPCmdLineArgProcessor;
+import org.spongycastle.tools.openpgp.util.PGPParams;
 
 /**
  * A simple packet walker that will dump the contents of the OpenPGP Message.

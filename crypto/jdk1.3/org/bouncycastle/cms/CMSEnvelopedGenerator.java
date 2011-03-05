@@ -1,4 +1,4 @@
-package org.bouncycastle.cms;
+package org.spongycastle.cms;
 
 import java.io.IOException;
 import java.security.AlgorithmParameterGenerator;
@@ -22,19 +22,19 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.RC2ParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.cms.KEKIdentifier;
-import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PBKDF2Params;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERNull;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.cms.KEKIdentifier;
+import org.spongycastle.asn1.kisa.KISAObjectIdentifiers;
+import org.spongycastle.asn1.nist.NISTObjectIdentifiers;
+import org.spongycastle.asn1.ntt.NTTObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.PBKDF2Params;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x9.X9ObjectIdentifiers;
 
 /**
  * General class for generating a CMS enveloped-data message.

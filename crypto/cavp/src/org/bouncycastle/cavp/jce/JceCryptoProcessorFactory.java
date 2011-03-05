@@ -1,4 +1,4 @@
-package org.bouncycastle.cavp.jce;
+package org.spongycastle.cavp.jce;
 
 import java.security.GeneralSecurityException;
 
@@ -6,9 +6,9 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.cavp.test.CryptoProcessor;
-import org.bouncycastle.cavp.test.CryptoProcessorFactory;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.cavp.test.CryptoProcessor;
+import org.spongycastle.cavp.test.CryptoProcessorFactory;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
 
 public class JceCryptoProcessorFactory
     implements CryptoProcessorFactory

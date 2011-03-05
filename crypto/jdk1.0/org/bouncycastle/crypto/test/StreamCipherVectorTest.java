@@ -1,11 +1,11 @@
-package org.bouncycastle.crypto.test;
+package org.spongycastle.crypto.test;
 
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.StreamCipher;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.crypto.CipherParameters;
+import org.spongycastle.crypto.StreamCipher;
+import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 /**
  * a basic test that takes a stream cipher, key parameter, and an input

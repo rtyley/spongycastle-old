@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.asymmetric.ec;
+package org.spongycastle.jce.provider.asymmetric.ec;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -7,11 +7,11 @@ import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-import org.bouncycastle.jce.provider.JCEECPrivateKey;
-import org.bouncycastle.jce.provider.JCEECPublicKey;
-import org.bouncycastle.jce.provider.JDKKeyFactory;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.spongycastle.jce.provider.JCEECPrivateKey;
+import org.spongycastle.jce.provider.JCEECPublicKey;
+import org.spongycastle.jce.provider.JDKKeyFactory;
+import org.spongycastle.jce.spec.ECPrivateKeySpec;
+import org.spongycastle.jce.spec.ECPublicKeySpec;
 
 public class KeyFactory
     extends JDKKeyFactory

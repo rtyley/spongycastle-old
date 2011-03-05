@@ -1,4 +1,4 @@
-package org.bouncycastle.cms;
+package org.spongycastle.cms;
 
 import java.io.IOException;
 import java.security.AlgorithmParameters;
@@ -16,16 +16,16 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
-import org.bouncycastle.asn1.pkcs.PBKDF2Params;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.crypto.PBEParametersGenerator;
-import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
-import org.bouncycastle.crypto.params.KeyParameter;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.cms.PasswordRecipientInfo;
+import org.spongycastle.asn1.pkcs.PBKDF2Params;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.crypto.PBEParametersGenerator;
+import org.spongycastle.crypto.generators.PKCS5S2ParametersGenerator;
+import org.spongycastle.crypto.params.KeyParameter;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message

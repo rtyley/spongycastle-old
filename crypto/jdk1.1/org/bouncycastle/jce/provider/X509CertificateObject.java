@@ -1,6 +1,5 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -27,31 +26,30 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
-import org.bouncycastle.asn1.misc.NetscapeCertType;
-import org.bouncycastle.asn1.misc.NetscapeRevocationURL;
-import org.bouncycastle.asn1.misc.VerisignCzagExtension;
-import org.bouncycastle.asn1.util.ASN1Dump;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.encoders.Hex;
+import org.spongycastle.asn1.ASN1Encodable;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DERBitString;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERIA5String;
+import org.spongycastle.asn1.DERNull;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.misc.MiscObjectIdentifiers;
+import org.spongycastle.asn1.misc.NetscapeCertType;
+import org.spongycastle.asn1.misc.NetscapeRevocationURL;
+import org.spongycastle.asn1.misc.VerisignCzagExtension;
+import org.spongycastle.asn1.util.ASN1Dump;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.BasicConstraints;
+import org.spongycastle.asn1.x509.KeyUsage;
+import org.spongycastle.asn1.x509.X509CertificateStructure;
+import org.spongycastle.asn1.x509.X509Extension;
+import org.spongycastle.asn1.x509.X509Extensions;
+import org.spongycastle.jce.X509Principal;
+import org.spongycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+import org.spongycastle.util.Arrays;
+import org.spongycastle.util.encoders.Hex;
 
 public class X509CertificateObject
     extends X509Certificate

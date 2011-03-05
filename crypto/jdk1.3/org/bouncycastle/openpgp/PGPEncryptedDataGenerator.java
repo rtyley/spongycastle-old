@@ -1,13 +1,13 @@
-package org.bouncycastle.openpgp;
+package org.spongycastle.openpgp;
 
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.ContainedPacket;
-import org.bouncycastle.bcpg.HashAlgorithmTags;
-import org.bouncycastle.bcpg.PacketTags;
-import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
-import org.bouncycastle.bcpg.S2K;
-import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
-import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
+import org.spongycastle.bcpg.BCPGOutputStream;
+import org.spongycastle.bcpg.ContainedPacket;
+import org.spongycastle.bcpg.HashAlgorithmTags;
+import org.spongycastle.bcpg.PacketTags;
+import org.spongycastle.bcpg.PublicKeyEncSessionPacket;
+import org.spongycastle.bcpg.S2K;
+import org.spongycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.spongycastle.bcpg.SymmetricKeyEncSessionPacket;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;

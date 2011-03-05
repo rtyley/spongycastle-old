@@ -1,4 +1,4 @@
-package org.bouncycastle.mail.smime.test;
+package org.spongycastle.mail.smime.test;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;

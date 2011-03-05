@@ -1,24 +1,24 @@
-package org.bouncycastle.ocsp;
+package org.spongycastle.ocsp;
 
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.util.Strings;
+import org.spongycastle.asn1.DERNull;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.spongycastle.asn1.nist.NISTObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x9.X9ObjectIdentifiers;
+import org.spongycastle.util.Strings;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Signature;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreParameters;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CertStoreParameters;
 import java.security.cert.CertificateException;
-import org.bouncycastle.jce.cert.CertificateFactory;
+import org.spongycastle.jce.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;

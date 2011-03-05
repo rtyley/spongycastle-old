@@ -1,14 +1,14 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
-import org.bouncycastle.jce.MultiCertStoreParameters;
+import org.spongycastle.jce.MultiCertStoreParameters;
 
 import java.security.InvalidAlgorithmParameterException;
-import org.bouncycastle.jce.cert.CRLSelector;
-import org.bouncycastle.jce.cert.CertSelector;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
-import org.bouncycastle.jce.cert.CertStoreParameters;
-import org.bouncycastle.jce.cert.CertStoreSpi;
+import org.spongycastle.jce.cert.CRLSelector;
+import org.spongycastle.jce.cert.CertSelector;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CertStoreException;
+import org.spongycastle.jce.cert.CertStoreParameters;
+import org.spongycastle.jce.cert.CertStoreSpi;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,7 +27,7 @@ public class MultiCertStoreSpi
 
         if (!(params instanceof MultiCertStoreParameters))
         {
-            throw new InvalidAlgorithmParameterException("org.bouncycastle.jce.provider.MultiCertStoreSpi: parameter must be a MultiCertStoreParameters object\n" +  params.toString());
+            throw new InvalidAlgorithmParameterException("org.spongycastle.jce.provider.MultiCertStoreSpi: parameter must be a MultiCertStoreParameters object\n" +  params.toString());
         }
 
         this.params = (MultiCertStoreParameters)params;

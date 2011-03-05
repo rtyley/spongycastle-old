@@ -1,14 +1,14 @@
-package org.bouncycastle.tsp.cms;
+package org.spongycastle.tsp.cms;
 
 import java.net.URL;
 
-import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERUTF8String;
-import org.bouncycastle.asn1.cms.Attributes;
-import org.bouncycastle.asn1.cms.MetaData;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.operator.DigestCalculator;
+import org.spongycastle.asn1.DERBoolean;
+import org.spongycastle.asn1.DERIA5String;
+import org.spongycastle.asn1.DERUTF8String;
+import org.spongycastle.asn1.cms.Attributes;
+import org.spongycastle.asn1.cms.MetaData;
+import org.spongycastle.cms.CMSException;
+import org.spongycastle.operator.DigestCalculator;
 
 public class CMSTimeStampedGenerator
 {

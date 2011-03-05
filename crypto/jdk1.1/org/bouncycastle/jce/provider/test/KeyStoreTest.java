@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -16,12 +16,12 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 import java.util.Hashtable;
 
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.spongycastle.jce.X509Principal;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
+import org.spongycastle.x509.X509V3CertificateGenerator;
 
 /**
  * Exercise the various key stores, making sure we at least get back what we put in!
@@ -62,7 +62,7 @@ public class KeyStoreTest
             attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
             attrs.put(X509Principal.L, "Melbourne");
             attrs.put(X509Principal.ST, "Victoria");
-            attrs.put(X509Principal.EmailAddress, "feedback-crypto@bouncycastle.org");
+            attrs.put(X509Principal.EmailAddress, "feedback-crypto@spongycastle.org");
 
             //
             // extensions

@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -6,17 +6,17 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Security;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.jce.netscape.NetscapeCertRequest;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DEROutputStream;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.jce.netscape.NetscapeCertRequest;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.encoders.Base64;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 /**
  **/

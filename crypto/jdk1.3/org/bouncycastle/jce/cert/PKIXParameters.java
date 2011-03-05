@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.cert;
+package org.spongycastle.jce.cert;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
@@ -8,7 +8,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;

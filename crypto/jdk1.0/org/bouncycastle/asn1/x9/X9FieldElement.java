@@ -1,13 +1,13 @@
-package org.bouncycastle.asn1.x9;
+package org.spongycastle.asn1.x9;
 
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.math.ec.ECFieldElement;
-import org.bouncycastle.math.ec.ECFieldElementFp;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.math.ec.ECFieldElement;
+import org.spongycastle.math.ec.ECFieldElementFp;
 
 /**
  * class for processing an FieldElement as a DER object.

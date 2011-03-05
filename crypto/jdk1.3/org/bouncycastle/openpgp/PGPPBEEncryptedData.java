@@ -1,10 +1,10 @@
-package org.bouncycastle.openpgp;
+package org.spongycastle.openpgp;
 
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.HashAlgorithmTags;
-import org.bouncycastle.bcpg.InputStreamPacket;
-import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
-import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
+import org.spongycastle.bcpg.BCPGInputStream;
+import org.spongycastle.bcpg.HashAlgorithmTags;
+import org.spongycastle.bcpg.InputStreamPacket;
+import org.spongycastle.bcpg.SymmetricEncIntegrityPacket;
+import org.spongycastle.bcpg.SymmetricKeyEncSessionPacket;
 
 import java.io.EOFException;
 import java.io.InputStream;

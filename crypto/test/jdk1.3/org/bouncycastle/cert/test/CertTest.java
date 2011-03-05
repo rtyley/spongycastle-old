@@ -1,4 +1,4 @@
-package org.bouncycastle.cert.test;
+package org.spongycastle.cert.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,79 +27,78 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Enumerated;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DEREnumerated;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x500.X500NameBuilder;
-import org.bouncycastle.asn1.x500.style.BCStyle;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.CRLReason;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.cert.X509CRLEntryHolder;
-import org.bouncycastle.cert.X509CRLHolder;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.X509v1CertificateBuilder;
-import org.bouncycastle.cert.X509v2CRLBuilder;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
-import org.bouncycastle.cert.jcajce.JcaX509CRLHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509v1CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509v2CRLBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
-import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
-import org.bouncycastle.jce.X509KeyUsage;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.interfaces.ECPointEncoder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.provider.test.PEMData;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.ContentVerifierProvider;
-import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
-import org.bouncycastle.operator.bc.BcRSAContentVerifierProviderBuilder;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import org.spongycastle.asn1.ASN1Encodable;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1Enumerated;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
+import org.spongycastle.asn1.DEREnumerated;
+import org.spongycastle.asn1.DERNull;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.x500.X500Name;
+import org.spongycastle.asn1.x500.X500NameBuilder;
+import org.spongycastle.asn1.x500.style.BCStyle;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.spongycastle.asn1.x509.CRLReason;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.GeneralNames;
+import org.spongycastle.asn1.x509.KeyPurposeId;
+import org.spongycastle.asn1.x509.RSAPublicKeyStructure;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.asn1.x509.X509CertificateStructure;
+import org.spongycastle.asn1.x509.X509Extension;
+import org.spongycastle.asn1.x509.X509Extensions;
+import org.spongycastle.asn1.x9.X9ObjectIdentifiers;
+import org.spongycastle.cert.X509CRLEntryHolder;
+import org.spongycastle.cert.X509CRLHolder;
+import org.spongycastle.cert.X509CertificateHolder;
+import org.spongycastle.cert.X509v1CertificateBuilder;
+import org.spongycastle.cert.X509v2CRLBuilder;
+import org.spongycastle.cert.X509v3CertificateBuilder;
+import org.spongycastle.cert.jcajce.JcaX509CRLConverter;
+import org.spongycastle.cert.jcajce.JcaX509CRLHolder;
+import org.spongycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.spongycastle.cert.jcajce.JcaX509v1CertificateBuilder;
+import org.spongycastle.cert.jcajce.JcaX509v2CRLBuilder;
+import org.spongycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.spongycastle.crypto.params.RSAKeyParameters;
+import org.spongycastle.crypto.params.RSAPrivateCrtKeyParameters;
+import org.spongycastle.jce.X509KeyUsage;
+import org.spongycastle.jce.X509Principal;
+import org.spongycastle.jce.interfaces.ECPointEncoder;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.jce.provider.test.PEMData;
+import org.spongycastle.jce.spec.ECParameterSpec;
+import org.spongycastle.jce.spec.ECPrivateKeySpec;
+import org.spongycastle.jce.spec.ECPublicKeySpec;
+import org.spongycastle.jce.spec.GOST3410ParameterSpec;
+import org.spongycastle.math.ec.ECCurve;
+import org.spongycastle.operator.ContentSigner;
+import org.spongycastle.operator.ContentVerifierProvider;
+import org.spongycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.spongycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.spongycastle.operator.bc.BcRSAContentSignerBuilder;
+import org.spongycastle.operator.bc.BcRSAContentVerifierProviderBuilder;
+import org.spongycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.spongycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.spongycastle.util.encoders.Base64;
+import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.test.SimpleTest;
+import org.spongycastle.x509.extension.AuthorityKeyIdentifierStructure;
+import org.spongycastle.x509.extension.X509ExtensionUtil;
 
 public class CertTest
     extends SimpleTest
 {
-    private static final String BC = org.bouncycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
+    private static final String BC = org.spongycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
     
     //
     // server.crt
@@ -1228,7 +1227,7 @@ public class CertTest
         builder.addRDN(BCStyle.O, "The Legion of the Bouncy Castle");
         builder.addRDN(BCStyle.L, "Melbourne");
         builder.addRDN(BCStyle.ST, "Victoria");
-        builder.addRDN(BCStyle.E, "feedback-crypto@bouncycastle.org");
+        builder.addRDN(BCStyle.E, "feedback-crypto@spongycastle.org");
 
         //
         // extensions
@@ -1369,7 +1368,7 @@ public class CertTest
         builder.addRDN(BCStyle.O, "The Legion of the Bouncy Castle");
         builder.addRDN(BCStyle.L, "Melbourne");
         builder.addRDN(BCStyle.ST, "Victoria");
-        builder.addRDN(BCStyle.E, "feedback-crypto@bouncycastle.org");
+        builder.addRDN(BCStyle.E, "feedback-crypto@spongycastle.org");
 
         //
         // extensions
@@ -1504,7 +1503,7 @@ public class CertTest
         builder.addRDN(BCStyle.O, "The Legion of the Bouncy Castle");
         builder.addRDN(BCStyle.L, "Melbourne");
         builder.addRDN(BCStyle.ST, "Victoria");
-        builder.addRDN(BCStyle.E, "feedback-crypto@bouncycastle.org");
+        builder.addRDN(BCStyle.E, "feedback-crypto@spongycastle.org");
         
         return builder;
     }
@@ -1564,7 +1563,7 @@ public class CertTest
         X500Name p = builder.build();
         String  s = p.toString();
 
-        if (!s.equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne,ST=Victoria,E=feedback-crypto@bouncycastle.org"))
+        if (!s.equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne,ST=Victoria,E=feedback-crypto@spongycastle.org"))
         {
             fail("ordered X509Principal test failed - s = " + s + ".");
         }
@@ -1575,7 +1574,7 @@ public class CertTest
 //        //
 //        // we need two of these as the hash code for strings changed...
 //        //
-//        if (!s.equals("O=The Legion of the Bouncy Castle,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU") && !s.equals("ST=Victoria,L=Melbourne,C=AU,E=feedback-crypto@bouncycastle.org,O=The Legion of the Bouncy Castle"))
+//        if (!s.equals("O=The Legion of the Bouncy Castle,E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU") && !s.equals("ST=Victoria,L=Melbourne,C=AU,E=feedback-crypto@spongycastle.org,O=The Legion of the Bouncy Castle"))
 //        {
 //            fail("unordered X509Principal test failed.");
 //        }
@@ -1623,16 +1622,16 @@ public class CertTest
             fail("error setting generating cert - " + e.toString());
         }
 
-        X509Principal pr = new X509Principal("O=\"The Bouncy Castle, The Legion of\",E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU");
+        X509Principal pr = new X509Principal("O=\"The Bouncy Castle, The Legion of\",E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU");
 
-        if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU"))
+        if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU"))
         {
             fail("string based X509Principal test failed.");
         }
 
-        pr = new X509Principal("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU");
+        pr = new X509Principal("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU");
 
-        if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU"))
+        if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU"))
         {
             fail("string based X509Principal test failed.");
         }

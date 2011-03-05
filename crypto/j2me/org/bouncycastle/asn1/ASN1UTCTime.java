@@ -1,6 +1,4 @@
-package org.bouncycastle.asn1;
-
-import java.util.Date;
+package org.spongycastle.asn1;
 
 public class ASN1UTCTime
     extends DERUTCTime

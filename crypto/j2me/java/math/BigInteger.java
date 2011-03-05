@@ -2648,7 +2648,7 @@ public class BigInteger
             // Notice however that for this to work, radix 16 _MUST_ be a special case,
             // unless we want to enter a recursion well. In their infinite wisdom, why did not 
             // the Sun engineers made a c'tor for BigIntegers taking a BigInteger as parameter?
-            // (Answer: Becuase Sun's BigIntger is clonable, something bouncycastle's isn't.)
+            // (Answer: Becuase Sun's BigIntger is clonable, something spongycastle's isn't.)
 //            BigInteger u = new BigInteger(this.abs().toString(16), 16);
             BigInteger u = this.abs();
             BigInteger b;

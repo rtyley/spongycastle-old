@@ -1,10 +1,10 @@
-package org.bouncycastle.crypto.test;
+package org.spongycastle.crypto.test;
 
-import org.bouncycastle.crypto.engines.RijndaelEngine;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.crypto.engines.RijndaelEngine;
+import org.spongycastle.crypto.params.KeyParameter;
+import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 /**
  */

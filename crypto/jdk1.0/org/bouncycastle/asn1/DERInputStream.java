@@ -1,4 +1,4 @@
-package org.bouncycastle.asn1;
+package org.spongycastle.asn1;
 
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;

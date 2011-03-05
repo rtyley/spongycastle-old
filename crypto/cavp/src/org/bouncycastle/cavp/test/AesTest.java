@@ -1,4 +1,4 @@
-package org.bouncycastle.cavp.test;
+package org.spongycastle.cavp.test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,9 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.cavp.jce.JceCryptoProcessorFactory;
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.encoders.Hex;
+import org.spongycastle.cavp.jce.JceCryptoProcessorFactory;
+import org.spongycastle.util.Arrays;
+import org.spongycastle.util.encoders.Hex;
 
 public class AesTest
 {

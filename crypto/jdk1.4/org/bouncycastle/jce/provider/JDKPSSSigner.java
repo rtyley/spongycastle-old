@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
@@ -13,17 +13,17 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA224Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA384Digest;
-import org.bouncycastle.crypto.digests.SHA512Digest;
-import org.bouncycastle.crypto.engines.RSABlindedEngine;
-import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.crypto.signers.PSSSigner;
+import org.spongycastle.crypto.AsymmetricBlockCipher;
+import org.spongycastle.crypto.CryptoException;
+import org.spongycastle.crypto.Digest;
+import org.spongycastle.crypto.digests.SHA1Digest;
+import org.spongycastle.crypto.digests.SHA224Digest;
+import org.spongycastle.crypto.digests.SHA256Digest;
+import org.spongycastle.crypto.digests.SHA384Digest;
+import org.spongycastle.crypto.digests.SHA512Digest;
+import org.spongycastle.crypto.engines.RSABlindedEngine;
+import org.spongycastle.crypto.params.ParametersWithRandom;
+import org.spongycastle.crypto.signers.PSSSigner;
 
 public class JDKPSSSigner
     extends Signature

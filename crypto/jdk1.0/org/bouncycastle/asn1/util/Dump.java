@@ -1,9 +1,9 @@
-package org.bouncycastle.asn1.util;
+package org.spongycastle.asn1.util;
 
 import java.io.EOFException;
 import java.io.FileInputStream;
 
-import org.bouncycastle.asn1.BERInputStream;
+import org.spongycastle.asn1.BERInputStream;
 
 public class Dump
 {

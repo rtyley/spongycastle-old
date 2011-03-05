@@ -1,22 +1,20 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
 
-import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.util.test.FixedSecureRandom;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
-import org.bouncycastle.jce.interfaces.ECPrivateKey;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.util.test.SimpleTest;
+import org.spongycastle.util.test.FixedSecureRandom;
+import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.math.ec.ECCurve;
+import org.spongycastle.jce.spec.ECParameterSpec;
+import org.spongycastle.jce.spec.ECPublicKeySpec;
+import org.spongycastle.jce.spec.ECPrivateKeySpec;
+import org.spongycastle.jce.interfaces.ConfigurableProvider;
+import org.spongycastle.jce.interfaces.ECPrivateKey;
+import org.spongycastle.jce.interfaces.ECPublicKey;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.DERNull;
+import org.spongycastle.asn1.pkcs.PrivateKeyInfo;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
 
 import java.security.SecureRandom;
 import java.security.Signature;
@@ -27,8 +25,6 @@ import java.security.KeyFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.math.BigInteger;
-import java.io.IOException;
-import java.io.ByteArrayInputStream;
 
 public class ImplicitlyCaTest
     extends SimpleTest

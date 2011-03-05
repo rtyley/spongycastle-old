@@ -1,10 +1,10 @@
-package org.bouncycastle.tsp.test;
+package org.spongycastle.tsp.test;
 
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.PrivateKey;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,21 +14,21 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.bouncycastle.asn1.cmp.PKIFailureInfo;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.tsp.GenTimeAccuracy;
-import org.bouncycastle.tsp.TSPAlgorithms;
-import org.bouncycastle.tsp.TSPValidationException;
-import org.bouncycastle.tsp.TimeStampRequest;
-import org.bouncycastle.tsp.TimeStampRequestGenerator;
-import org.bouncycastle.tsp.TimeStampResponse;
-import org.bouncycastle.tsp.TimeStampResponseGenerator;
-import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.tsp.TimeStampTokenGenerator;
-import org.bouncycastle.tsp.TimeStampTokenInfo;
-import org.bouncycastle.util.Arrays;
+import org.spongycastle.asn1.cmp.PKIFailureInfo;
+import org.spongycastle.asn1.cms.AttributeTable;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.tsp.GenTimeAccuracy;
+import org.spongycastle.tsp.TSPAlgorithms;
+import org.spongycastle.tsp.TSPValidationException;
+import org.spongycastle.tsp.TimeStampRequest;
+import org.spongycastle.tsp.TimeStampRequestGenerator;
+import org.spongycastle.tsp.TimeStampResponse;
+import org.spongycastle.tsp.TimeStampResponseGenerator;
+import org.spongycastle.tsp.TimeStampToken;
+import org.spongycastle.tsp.TimeStampTokenGenerator;
+import org.spongycastle.tsp.TimeStampTokenInfo;
+import org.spongycastle.util.Arrays;
 
 public class TSPTest
     extends TestCase
@@ -41,7 +41,7 @@ public class TSPTest
             X509Certificate signCert = TSPTestUtil.makeCACertificate(signKP,
                     signDN, signKP, signDN);
 
-            String origDN = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
+            String origDN = "CN=Eric H. Echidna, E=eric@spongycastle.org, O=Bouncy Castle, C=AU";
             KeyPair origKP = TSPTestUtil.makeKeyPair();
             X509Certificate origCert = TSPTestUtil.makeCertificate(origKP,
                     origDN, signKP, signDN);

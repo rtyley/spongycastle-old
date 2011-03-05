@@ -1,15 +1,15 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.TBSCertList;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DEROutputStream;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.GeneralNames;
+import org.spongycastle.asn1.x509.TBSCertList;
+import org.spongycastle.asn1.x509.X509Extension;
+import org.spongycastle.asn1.x509.X509Extensions;
+import org.spongycastle.x509.extension.X509ExtensionUtil;
 
-import org.bouncycastle.jce.X509Principal;
+import org.spongycastle.jce.X509Principal;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;

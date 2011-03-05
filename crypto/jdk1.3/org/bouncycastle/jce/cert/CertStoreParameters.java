@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.cert;
+package org.spongycastle.jce.cert;
 
 /**
  * A specification of <code>CertStore</code> parameters.<br />

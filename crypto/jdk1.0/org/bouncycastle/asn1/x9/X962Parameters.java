@@ -1,9 +1,9 @@
-package org.bouncycastle.asn1.x9;
+package org.spongycastle.asn1.x9;
 
-import org.bouncycastle.asn1.ASN1Choice;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.ASN1Choice;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DERObjectIdentifier;
 
 public class X962Parameters
     implements DEREncodable, ASN1Choice

@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.cert;
+package org.spongycastle.jce.cert;
 
 import java.util.ArrayList;
 import java.util.Collection;

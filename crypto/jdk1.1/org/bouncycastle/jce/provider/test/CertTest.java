@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
@@ -20,26 +20,26 @@ import java.util.Hashtable;
 import java.util.Set;
 import java.util.Vector;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.jce.X509KeyUsage;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.interfaces.ECPointEncoder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.GeneralNames;
+import org.spongycastle.asn1.x509.KeyPurposeId;
+import org.spongycastle.jce.X509KeyUsage;
+import org.spongycastle.jce.X509Principal;
+import org.spongycastle.jce.interfaces.ECPointEncoder;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.jce.spec.ECParameterSpec;
+import org.spongycastle.jce.spec.ECPrivateKeySpec;
+import org.spongycastle.jce.spec.ECPublicKeySpec;
+import org.spongycastle.math.ec.ECCurve;
+import org.spongycastle.util.encoders.Base64;
+import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
+import org.spongycastle.x509.X509V1CertificateGenerator;
+import org.spongycastle.x509.X509V3CertificateGenerator;
 
 public class CertTest
     implements Test
@@ -641,7 +641,7 @@ public class CertTest
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+        attrs.put(X509Principal.E, "feedback-crypto@spongycastle.org");
 
         Vector                      ord = new Vector();
         Vector                      values = new Vector();
@@ -656,7 +656,7 @@ public class CertTest
         values.addElement("The Legion of the Bouncy Castle");
         values.addElement("Melbourne");
         values.addElement("Victoria");
-        values.addElement("feedback-crypto@bouncycastle.org");
+        values.addElement("feedback-crypto@spongycastle.org");
 
         //
         // extensions
@@ -813,7 +813,7 @@ public class CertTest
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+        attrs.put(X509Principal.E, "feedback-crypto@spongycastle.org");
 
         //
         // extensions
@@ -940,7 +940,7 @@ public class CertTest
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.ST, "Victoria");
-        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+        attrs.put(X509Principal.E, "feedback-crypto@spongycastle.org");
 
         order.addElement(X509Principal.C);
         order.addElement(X509Principal.O);
@@ -955,7 +955,7 @@ public class CertTest
         X509Principal p = new X509Principal(order, attrs);
         String  s = p.toString();
 
-        if (!s.equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne,ST=Victoria,E=feedback-crypto@bouncycastle.org"))
+        if (!s.equals("C=AU,O=The Legion of the Bouncy Castle,L=Melbourne,ST=Victoria,E=feedback-crypto@spongycastle.org"))
         {
             return new SimpleTestResult(false, getName() + ": ordered X509Principal test failed - s = " + s + ".");
         }
@@ -966,7 +966,7 @@ public class CertTest
         //
         // we need two of these as the hash code for strings changed...
         //
-        if (!s.equals("O=The Legion of the Bouncy Castle,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU") && !s.equals("ST=Victoria,L=Melbourne,C=AU,E=feedback-crypto@bouncycastle.org,O=The Legion of the Bouncy Castle"))
+        if (!s.equals("O=The Legion of the Bouncy Castle,E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU") && !s.equals("ST=Victoria,L=Melbourne,C=AU,E=feedback-crypto@spongycastle.org,O=The Legion of the Bouncy Castle"))
         {
             return new SimpleTestResult(false, getName() + ": unordered X509Principal test failed.");
         }
@@ -1021,16 +1021,16 @@ public class CertTest
             return new SimpleTestResult(false, getName() + ": error setting generating cert - " + e.toString());
         }
 
-        X509Principal pr = new X509Principal("O=\"The Bouncy Castle, The Legion of\",E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU");
+        X509Principal pr = new X509Principal("O=\"The Bouncy Castle, The Legion of\",E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU");
 
-        if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU"))
+        if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU"))
         {
             return new SimpleTestResult(false, getName() + ": string based X509Principal test failed.");
         }
 
-        pr = new X509Principal("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU");
+        pr = new X509Principal("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU");
 
-        if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@bouncycastle.org,ST=Victoria,L=Melbourne,C=AU"))
+        if (!pr.toString().equals("O=The Bouncy Castle\\, The Legion of,E=feedback-crypto@spongycastle.org,ST=Victoria,L=Melbourne,C=AU"))
         {
             return new SimpleTestResult(false, getName() + ": string based X509Principal test failed.");
         }
@@ -1100,7 +1100,7 @@ public class CertTest
 //        attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
 //        attrs.put(X509Principal.L, "Melbourne");
 //        attrs.put(X509Principal.ST, "Victoria");
-//        attrs.put(X509Principal.E, "feedback-crypto@bouncycastle.org");
+//        attrs.put(X509Principal.E, "feedback-crypto@spongycastle.org");
 //
 //        //
 //        // extensions

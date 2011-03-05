@@ -1,6 +1,6 @@
-package org.bouncycastle.asn1.x9;
+package org.spongycastle.asn1.x9;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DERObjectIdentifier;
 
 public interface X9ObjectIdentifiers
 {

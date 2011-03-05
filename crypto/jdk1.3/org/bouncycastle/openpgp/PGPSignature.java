@@ -1,11 +1,11 @@
-package org.bouncycastle.openpgp;
+package org.spongycastle.openpgp;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.bcpg.*;
-import org.bouncycastle.util.BigIntegers;
-import org.bouncycastle.util.Strings;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.DERInteger;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.bcpg.*;
+import org.spongycastle.util.BigIntegers;
+import org.spongycastle.util.Strings;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

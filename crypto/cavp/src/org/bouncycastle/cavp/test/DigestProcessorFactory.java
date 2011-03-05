@@ -1,6 +1,6 @@
-package org.bouncycastle.cavp.test;
+package org.spongycastle.cavp.test;
 
-import org.bouncycastle.cavp.test.DigestProcessor;
+import org.spongycastle.cavp.test.DigestProcessor;
 
 public interface DigestProcessorFactory
 {

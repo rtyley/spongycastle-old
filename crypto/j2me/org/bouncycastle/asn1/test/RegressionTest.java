@@ -1,7 +1,7 @@
-package org.bouncycastle.asn1.test;
+package org.spongycastle.asn1.test;
 
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 public class RegressionTest
 {

@@ -1,11 +1,11 @@
-package org.bouncycastle.cavp.jca;
+package org.spongycastle.cavp.jca;
 
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 
-import org.bouncycastle.cavp.test.DigestProcessor;
-import org.bouncycastle.cavp.test.DigestProcessorFactory;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.cavp.test.DigestProcessor;
+import org.spongycastle.cavp.test.DigestProcessorFactory;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
 
 public class JcaDigestProcessorFactory
     implements DigestProcessorFactory

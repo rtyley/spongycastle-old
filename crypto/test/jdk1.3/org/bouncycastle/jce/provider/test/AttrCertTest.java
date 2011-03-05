@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
@@ -7,9 +7,9 @@ import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
-import org.bouncycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CertStore;
 import java.security.cert.CertificateFactory;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
+import org.spongycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
@@ -19,16 +19,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.x509.AttributeCertificateHolder;
-import org.bouncycastle.x509.AttributeCertificateIssuer;
-import org.bouncycastle.x509.X509Attribute;
-import org.bouncycastle.x509.X509AttributeCertificate;
-import org.bouncycastle.x509.X509V2AttributeCertificate;
-import org.bouncycastle.x509.X509V2AttributeCertificateGenerator;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTest;
+import org.spongycastle.x509.AttributeCertificateHolder;
+import org.spongycastle.x509.AttributeCertificateIssuer;
+import org.spongycastle.x509.X509Attribute;
+import org.spongycastle.x509.X509AttributeCertificate;
+import org.spongycastle.x509.X509V2AttributeCertificate;
+import org.spongycastle.x509.X509V2AttributeCertificateGenerator;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.encoders.Base64;
+import org.spongycastle.util.test.SimpleTest;
 
 public class AttrCertTest
     extends SimpleTest

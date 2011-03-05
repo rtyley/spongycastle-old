@@ -1,8 +1,8 @@
-package org.bouncycastle.util.test;
+package org.spongycastle.util.test;
 
 import java.io.PrintStream;
 
-import org.bouncycastle.util.Arrays;
+import org.spongycastle.util.Arrays;
 
 public abstract class SimpleTest
     implements Test

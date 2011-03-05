@@ -1,12 +1,12 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.ProviderConfigurationPermission;
+import org.spongycastle.jce.interfaces.ConfigurableProvider;
+import org.spongycastle.jce.spec.ECParameterSpec;
+import org.spongycastle.jce.ProviderConfigurationPermission;
 
 import java.security.Permission;
 

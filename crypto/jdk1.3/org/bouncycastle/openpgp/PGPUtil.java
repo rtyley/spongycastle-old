@@ -1,4 +1,4 @@
-package org.bouncycastle.openpgp;
+package org.spongycastle.openpgp;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -17,17 +17,17 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.bcpg.ArmoredInputStream;
-import org.bouncycastle.bcpg.HashAlgorithmTags;
-import org.bouncycastle.bcpg.MPInteger;
-import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
-import org.bouncycastle.bcpg.S2K;
-import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DERInteger;
+import org.spongycastle.bcpg.ArmoredInputStream;
+import org.spongycastle.bcpg.HashAlgorithmTags;
+import org.spongycastle.bcpg.MPInteger;
+import org.spongycastle.bcpg.PublicKeyAlgorithmTags;
+import org.spongycastle.bcpg.S2K;
+import org.spongycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.encoders.Base64;
 
 /**
  * Basic utility class

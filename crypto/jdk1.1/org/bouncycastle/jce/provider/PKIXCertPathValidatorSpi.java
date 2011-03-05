@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,7 +25,6 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.PKIXCertPathChecker;
 import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.TrustAnchor;
-import java.security.cert.PKIXParameters;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.util.ArrayList;
@@ -39,29 +38,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.BERConstructedOctetString;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DEREnumerated;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralSubtree;
-import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
-import org.bouncycastle.asn1.x509.NameConstraints;
-import org.bouncycastle.asn1.x509.PolicyInformation;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.spongycastle.jce.X509Principal;
+import org.spongycastle.jce.PrincipalUtil;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1OutputStream;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.ASN1TaggedObject;
+import org.spongycastle.asn1.BERConstructedOctetString;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DEREnumerated;
+import org.spongycastle.asn1.DERIA5String;
+import org.spongycastle.asn1.DERInteger;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.BasicConstraints;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.GeneralSubtree;
+import org.spongycastle.asn1.x509.IssuingDistributionPoint;
+import org.spongycastle.asn1.x509.NameConstraints;
+import org.spongycastle.asn1.x509.PolicyInformation;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.asn1.x509.X509Extensions;
 
 /**
  * CertPathValidatorSpi implemenation for X.509 Certificate validation ala rfc 3280<br />

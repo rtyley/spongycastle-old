@@ -1,10 +1,10 @@
-package org.bouncycastle.pkcs.jcajce;
+package org.spongycastle.pkcs.jcajce;
 
 import java.security.PublicKey;
 
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
+import org.spongycastle.asn1.x500.X500Name;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.pkcs.PKCS10CertificationRequestBuilder;
 
 /**
  * Extension of the PKCS#10 builder to support PublicKey and X500Principal objects.

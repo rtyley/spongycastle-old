@@ -1,7 +1,7 @@
-package org.bouncycastle.jce.exception;
+package org.spongycastle.jce.exception;
 
-import org.bouncycastle.jce.cert.CertPath;
-import org.bouncycastle.jce.cert.CertPathBuilderException;
+import org.spongycastle.jce.cert.CertPath;
+import org.spongycastle.jce.cert.CertPathBuilderException;
 
 public class ExtCertPathBuilderException
     extends CertPathBuilderException

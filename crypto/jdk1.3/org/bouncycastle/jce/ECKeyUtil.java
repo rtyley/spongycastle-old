@@ -1,28 +1,26 @@
-package org.bouncycastle.jce;
+package org.spongycastle.jce;
 
 import java.io.UnsupportedEncodingException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
-import java.security.Provider;
 import java.security.PublicKey;
-import java.security.Security;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x9.X962Parameters;
-import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.provider.ProviderUtil;
-import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.PrivateKeyInfo;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.asn1.x9.X962Parameters;
+import org.spongycastle.asn1.x9.X9ECParameters;
+import org.spongycastle.asn1.x9.X9ObjectIdentifiers;
+import org.spongycastle.jce.provider.ProviderUtil;
+import org.spongycastle.jce.provider.asymmetric.ec.ECUtil;
 
 /**
  * Utility class to allow conversion of EC key parameters to explicit from named

@@ -1,4 +1,4 @@
-package org.bouncycastle.tsp.cms;
+package org.spongycastle.tsp.cms;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -6,19 +6,19 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERTags;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.ContentInfoParser;
-import org.bouncycastle.asn1.cms.TimeStampedDataParser;
-import org.bouncycastle.cms.CMSContentInfoParser;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.operator.DigestCalculator;
-import org.bouncycastle.operator.DigestCalculatorProvider;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.util.io.Streams;
+import org.spongycastle.asn1.DERIA5String;
+import org.spongycastle.asn1.DERTags;
+import org.spongycastle.asn1.cms.AttributeTable;
+import org.spongycastle.asn1.cms.CMSObjectIdentifiers;
+import org.spongycastle.asn1.cms.ContentInfoParser;
+import org.spongycastle.asn1.cms.TimeStampedDataParser;
+import org.spongycastle.cms.CMSContentInfoParser;
+import org.spongycastle.cms.CMSException;
+import org.spongycastle.operator.DigestCalculator;
+import org.spongycastle.operator.DigestCalculatorProvider;
+import org.spongycastle.operator.OperatorCreationException;
+import org.spongycastle.tsp.TimeStampToken;
+import org.spongycastle.util.io.Streams;
 
 public class CMSTimeStampedDataParser
     extends CMSContentInfoParser

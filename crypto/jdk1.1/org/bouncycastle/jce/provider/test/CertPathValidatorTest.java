@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
  
 import java.io.ByteArrayInputStream;
 import java.security.PublicKey;
@@ -10,10 +10,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 public class CertPathValidatorTest
     implements Test

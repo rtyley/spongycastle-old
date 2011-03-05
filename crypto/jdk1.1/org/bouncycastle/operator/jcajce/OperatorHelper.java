@@ -1,4 +1,4 @@
-package org.bouncycastle.operator.jcajce;
+package org.spongycastle.operator.jcajce;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -15,23 +15,23 @@ import java.util.Map;
 
 import javax.crypto.Cipher;
 
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.jcajce.JcaJceHelper;
-import org.bouncycastle.operator.OperatorCreationException;
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERNull;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.spongycastle.asn1.kisa.KISAObjectIdentifiers;
+import org.spongycastle.asn1.nist.NISTObjectIdentifiers;
+import org.spongycastle.asn1.ntt.NTTObjectIdentifiers;
+import org.spongycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.RSASSAPSSparams;
+import org.spongycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x9.X9ObjectIdentifiers;
+import org.spongycastle.cert.X509CertificateHolder;
+import org.spongycastle.jcajce.JcaJceHelper;
+import org.spongycastle.operator.OperatorCreationException;
 
 class OperatorHelper
 {

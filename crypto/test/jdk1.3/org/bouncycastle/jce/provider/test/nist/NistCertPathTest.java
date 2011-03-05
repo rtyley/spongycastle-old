@@ -1,17 +1,17 @@
-package org.bouncycastle.jce.provider.test.nist;
+package org.spongycastle.jce.provider.test.nist;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
-import org.bouncycastle.jce.cert.CertPath;
-import org.bouncycastle.jce.cert.CertPathValidator;
-import org.bouncycastle.jce.cert.CertPathValidatorException;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertificateFactory;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
-import org.bouncycastle.jce.cert.PKIXCertPathValidatorResult;
-import org.bouncycastle.jce.cert.PKIXParameters;
-import org.bouncycastle.jce.cert.TrustAnchor;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.jce.cert.CertPath;
+import org.spongycastle.jce.cert.CertPathValidator;
+import org.spongycastle.jce.cert.CertPathValidatorException;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CertificateFactory;
+import org.spongycastle.jce.cert.CollectionCertStoreParameters;
+import org.spongycastle.jce.cert.PKIXCertPathValidatorResult;
+import org.spongycastle.jce.cert.PKIXParameters;
+import org.spongycastle.jce.cert.TrustAnchor;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.Security;
 import java.security.cert.X509CRL;
@@ -29,9 +29,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import org.spongycastle.asn1.ASN1Encodable;
+import org.spongycastle.asn1.x509.X509Extensions;
+import org.spongycastle.x509.extension.X509ExtensionUtil;
 
 /**
  * NIST CertPath test data for RFC 3280

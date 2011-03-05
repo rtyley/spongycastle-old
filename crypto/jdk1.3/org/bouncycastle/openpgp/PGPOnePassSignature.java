@@ -1,8 +1,8 @@
-package org.bouncycastle.openpgp;
+package org.spongycastle.openpgp;
 
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.OnePassSignaturePacket;
+import org.spongycastle.bcpg.BCPGInputStream;
+import org.spongycastle.bcpg.BCPGOutputStream;
+import org.spongycastle.bcpg.OnePassSignaturePacket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

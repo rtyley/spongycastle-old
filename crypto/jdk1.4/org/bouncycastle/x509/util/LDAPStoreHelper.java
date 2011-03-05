@@ -1,20 +1,20 @@
-package org.bouncycastle.x509.util;
+package org.spongycastle.x509.util;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.x509.CertificatePair;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.jce.X509LDAPCertStoreParameters;
-import org.bouncycastle.jce.provider.X509AttrCertParser;
-import org.bouncycastle.jce.provider.X509CRLParser;
-import org.bouncycastle.jce.provider.X509CertPairParser;
-import org.bouncycastle.jce.provider.X509CertParser;
-import org.bouncycastle.util.StoreException;
-import org.bouncycastle.x509.X509AttributeCertStoreSelector;
-import org.bouncycastle.x509.X509AttributeCertificate;
-import org.bouncycastle.x509.X509CRLStoreSelector;
-import org.bouncycastle.x509.X509CertPairStoreSelector;
-import org.bouncycastle.x509.X509CertStoreSelector;
-import org.bouncycastle.x509.X509CertificatePair;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.x509.CertificatePair;
+import org.spongycastle.asn1.x509.X509CertificateStructure;
+import org.spongycastle.jce.X509LDAPCertStoreParameters;
+import org.spongycastle.jce.provider.X509AttrCertParser;
+import org.spongycastle.jce.provider.X509CRLParser;
+import org.spongycastle.jce.provider.X509CertPairParser;
+import org.spongycastle.jce.provider.X509CertParser;
+import org.spongycastle.util.StoreException;
+import org.spongycastle.x509.X509AttributeCertStoreSelector;
+import org.spongycastle.x509.X509AttributeCertificate;
+import org.spongycastle.x509.X509CRLStoreSelector;
+import org.spongycastle.x509.X509CertPairStoreSelector;
+import org.spongycastle.x509.X509CertStoreSelector;
+import org.spongycastle.x509.X509CertificatePair;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -47,10 +47,10 @@ import java.util.Set;
  * attribute certificates and cross certificates from a LDAP location.
  * <p/>
  * At first a search is performed in the ldap*AttributeNames of the
- * {@link org.bouncycastle.jce.X509LDAPCertStoreParameters} with the given
+ * {@link org.spongycastle.jce.X509LDAPCertStoreParameters} with the given
  * information of the subject (for all kind of certificates) or issuer (for
- * CRLs), respectively, if a {@link org.bouncycastle.x509.X509CertStoreSelector} or
- * {@link org.bouncycastle.x509.X509AttributeCertificate} is given with that
+ * CRLs), respectively, if a {@link org.spongycastle.x509.X509CertStoreSelector} or
+ * {@link org.spongycastle.x509.X509AttributeCertificate} is given with that
  * details.
  * <p/>
  * For the used schemes see:
@@ -248,7 +248,7 @@ public class LDAPStoreHelper
     /**
      * Can use the subject of the forward certificate of the set certificate
      * pair or the subject of the forward
-     * {@link org.bouncycastle.x509.X509CertStoreSelector} of the given
+     * {@link org.spongycastle.x509.X509CertStoreSelector} of the given
      * selector.
      *
      * @param xselector             The selector with the search criteria.

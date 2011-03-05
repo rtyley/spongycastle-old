@@ -1,13 +1,13 @@
-package org.bouncycastle.asn1.cms;
+package org.spongycastle.asn1.cms;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.BERSequence;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
+import org.spongycastle.asn1.ASN1Encodable;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.BERSequence;
+import org.spongycastle.asn1.DERIA5String;
+import org.spongycastle.asn1.DERInteger;
+import org.spongycastle.asn1.DERObject;
 
 public class TimeStampedData
     extends ASN1Encodable

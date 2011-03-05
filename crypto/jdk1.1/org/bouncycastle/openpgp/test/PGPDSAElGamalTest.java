@@ -1,13 +1,10 @@
-package org.bouncycastle.openpgp.test;
+package org.spongycastle.openpgp.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -17,35 +14,33 @@ import java.util.Iterator;
 
 import javax.crypto.Cipher;
 
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ElGamalParameterSpec;
-import org.bouncycastle.openpgp.PGPCompressedData;
-import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
-import org.bouncycastle.openpgp.PGPEncryptedDataList;
-import org.bouncycastle.openpgp.PGPKeyPair;
-import org.bouncycastle.openpgp.PGPPublicKeyEncryptedData;
-import org.bouncycastle.openpgp.PGPSignature;
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
-import org.bouncycastle.openpgp.PGPLiteralData;
-import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
-import org.bouncycastle.openpgp.PGPObjectFactory;
-import org.bouncycastle.openpgp.PGPOnePassSignature;
-import org.bouncycastle.openpgp.PGPOnePassSignatureList;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyRing;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
-import org.bouncycastle.openpgp.PGPSignatureGenerator;
-import org.bouncycastle.openpgp.PGPSignatureList;
-import org.bouncycastle.openpgp.PGPUtil;
+import org.spongycastle.bcpg.BCPGOutputStream;
+import org.spongycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.openpgp.PGPCompressedData;
+import org.spongycastle.openpgp.PGPEncryptedDataGenerator;
+import org.spongycastle.openpgp.PGPEncryptedDataList;
+import org.spongycastle.openpgp.PGPPublicKeyEncryptedData;
+import org.spongycastle.openpgp.PGPSignature;
+import org.spongycastle.openpgp.PGPException;
+import org.spongycastle.openpgp.PGPCompressedDataGenerator;
+import org.spongycastle.openpgp.PGPLiteralData;
+import org.spongycastle.openpgp.PGPLiteralDataGenerator;
+import org.spongycastle.openpgp.PGPObjectFactory;
+import org.spongycastle.openpgp.PGPOnePassSignature;
+import org.spongycastle.openpgp.PGPOnePassSignatureList;
+import org.spongycastle.openpgp.PGPPrivateKey;
+import org.spongycastle.openpgp.PGPPublicKey;
+import org.spongycastle.openpgp.PGPPublicKeyRing;
+import org.spongycastle.openpgp.PGPSecretKeyRing;
+import org.spongycastle.openpgp.PGPSignatureGenerator;
+import org.spongycastle.openpgp.PGPSignatureList;
+import org.spongycastle.openpgp.PGPUtil;
 
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.util.encoders.Base64;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 public class PGPDSAElGamalTest implements Test
 {

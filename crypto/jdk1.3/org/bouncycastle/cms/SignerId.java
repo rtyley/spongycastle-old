@@ -1,19 +1,19 @@
-package org.bouncycastle.cms;
+package org.spongycastle.cms;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import org.bouncycastle.jce.cert.X509CertSelector;
+import org.spongycastle.jce.cert.X509CertSelector;
 
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.Selector;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.cms.IssuerAndSerialNumber;
+import org.spongycastle.asn1.x500.X500Name;
+import org.spongycastle.asn1.x509.X509Extension;
+import org.spongycastle.cert.X509CertificateHolder;
+import org.spongycastle.crypto.Digest;
+import org.spongycastle.crypto.digests.SHA1Digest;
+import org.spongycastle.util.Arrays;
+import org.spongycastle.util.Selector;
 
 /**
  * a basic index for a signer.

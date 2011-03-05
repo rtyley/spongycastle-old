@@ -1,10 +1,10 @@
-package org.bouncycastle.crypto.test;
+package org.spongycastle.crypto.test;
 
-import org.bouncycastle.crypto.engines.AESEngine;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.crypto.engines.AESEngine;
+import org.spongycastle.crypto.params.KeyParameter;
+import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 /**
  * Test vectors from the NIST standard tests and Brian Gladman's vector set

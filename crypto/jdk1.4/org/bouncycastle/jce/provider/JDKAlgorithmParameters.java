@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,30 +13,30 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
-import org.bouncycastle.asn1.misc.CAST5CBCParameters;
-import org.bouncycastle.asn1.oiw.ElGamalParameter;
-import org.bouncycastle.asn1.pkcs.DHParameter;
-import org.bouncycastle.asn1.pkcs.PBKDF2Params;
-import org.bouncycastle.asn1.pkcs.PKCS12PBEParams;
-import org.bouncycastle.asn1.pkcs.RC2CBCParameter;
-import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
-import org.bouncycastle.asn1.x509.DSAParameter;
-import org.bouncycastle.jce.spec.ElGamalParameterSpec;
-import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
-import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
-import org.bouncycastle.jce.spec.IESParameterSpec;
+import org.spongycastle.asn1.ASN1Encodable;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DERInteger;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.DEROutputStream;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
+import org.spongycastle.asn1.misc.CAST5CBCParameters;
+import org.spongycastle.asn1.oiw.ElGamalParameter;
+import org.spongycastle.asn1.pkcs.DHParameter;
+import org.spongycastle.asn1.pkcs.PBKDF2Params;
+import org.spongycastle.asn1.pkcs.PKCS12PBEParams;
+import org.spongycastle.asn1.pkcs.RC2CBCParameter;
+import org.spongycastle.asn1.pkcs.RSASSAPSSparams;
+import org.spongycastle.asn1.x509.DSAParameter;
+import org.spongycastle.jce.spec.ElGamalParameterSpec;
+import org.spongycastle.jce.spec.GOST3410ParameterSpec;
+import org.spongycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
+import org.spongycastle.jce.spec.IESParameterSpec;
 
 public abstract class JDKAlgorithmParameters
     extends AlgorithmParametersSpi

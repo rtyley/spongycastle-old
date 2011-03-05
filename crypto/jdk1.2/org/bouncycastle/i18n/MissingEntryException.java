@@ -1,6 +1,5 @@
-package org.bouncycastle.i18n;
+package org.spongycastle.i18n;
 
-import java.net.URL;
 import java.util.Locale;
 
 public class MissingEntryException extends RuntimeException 

@@ -1,4 +1,4 @@
-package org.bouncycastle.cavp.test;
+package org.spongycastle.cavp.test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bouncycastle.cavp.test.DigestProcessor;
-import org.bouncycastle.cavp.test.DigestProcessorFactory;
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.encoders.Hex;
+import org.spongycastle.cavp.test.DigestProcessor;
+import org.spongycastle.cavp.test.DigestProcessorFactory;
+import org.spongycastle.util.Arrays;
+import org.spongycastle.util.encoders.Hex;
 
 public class ShaTest
 {

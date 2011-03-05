@@ -1,6 +1,6 @@
-package org.bouncycastle.crypto.test;
+package org.spongycastle.crypto.test;
 
-import org.bouncycastle.util.test.*;
+import org.spongycastle.util.test.*;
 
 public class CryptoRegressionTest
 {

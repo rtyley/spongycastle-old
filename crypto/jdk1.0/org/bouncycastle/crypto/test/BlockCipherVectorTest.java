@@ -1,13 +1,13 @@
-package org.bouncycastle.crypto.test;
+package org.spongycastle.crypto.test;
 
-import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.BufferedBlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.CryptoException;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.crypto.BlockCipher;
+import org.spongycastle.crypto.BufferedBlockCipher;
+import org.spongycastle.crypto.CipherParameters;
+import org.spongycastle.crypto.CryptoException;
+import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 /**
  * a basic test that takes a cipher, key parameter, and an input

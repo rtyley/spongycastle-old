@@ -1,4 +1,4 @@
-package org.bouncycastle.ocsp;
+package org.spongycastle.ocsp;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,11 +9,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Signature;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreParameters;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CertStoreParameters;
 import java.security.cert.CertificateException;
-import org.bouncycastle.jce.cert.CertificateFactory;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
+import org.spongycastle.jce.cert.CertificateFactory;
+import org.spongycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -21,16 +21,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ocsp.OCSPRequest;
-import org.bouncycastle.asn1.ocsp.Request;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.spongycastle.asn1.ASN1Encodable;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
+import org.spongycastle.asn1.ASN1OutputStream;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.ocsp.OCSPRequest;
+import org.spongycastle.asn1.ocsp.Request;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.X509Extension;
+import org.spongycastle.asn1.x509.X509Extensions;
 
 /**
  * <pre>

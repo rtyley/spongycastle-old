@@ -1,16 +1,16 @@
-package org.bouncycastle.ocsp;
+package org.spongycastle.ocsp;
 
 import java.security.MessageDigest;
 import java.security.PublicKey;
 
-import org.bouncycastle.jce.X509Principal;
+import org.spongycastle.jce.X509Principal;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.ocsp.ResponderID;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.ocsp.ResponderID;
+import org.spongycastle.asn1.x500.X500Name;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
 
 /**
  * Carrier for a ResponderID.

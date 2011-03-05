@@ -1,7 +1,6 @@
-package org.bouncycastle.asn1;
+package org.spongycastle.asn1;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.TimeZone;
 
 /**

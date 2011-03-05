@@ -1,7 +1,7 @@
-package org.bouncycastle.tools.openpgp.rampage;
+package org.spongycastle.tools.openpgp.rampage;
 
-import org.bouncycastle.tools.openpgp.BCRampage;
-import org.bouncycastle.tools.openpgp.util.PGPParams;
+import org.spongycastle.tools.openpgp.BCRampage;
+import org.spongycastle.tools.openpgp.util.PGPParams;
 
 import junit.framework.TestCase;
 

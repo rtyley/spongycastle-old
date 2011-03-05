@@ -1,20 +1,20 @@
-package org.bouncycastle.x509;
+package org.spongycastle.x509;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.Target;
-import org.bouncycastle.asn1.x509.TargetInformation;
-import org.bouncycastle.asn1.x509.Targets;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.util.Selector;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.Target;
+import org.spongycastle.asn1.x509.TargetInformation;
+import org.spongycastle.asn1.x509.Targets;
+import org.spongycastle.asn1.x509.X509Extensions;
+import org.spongycastle.util.Selector;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
-import org.bouncycastle.jce.cert.X509CertSelector;
+import org.spongycastle.jce.cert.X509CertSelector;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -26,8 +26,8 @@ import java.util.Set;
  * This class is an <code>Selector</code> like implementation to select
  * attribute certificates from a given set of criteria.
  * 
- * @see org.bouncycastle.x509.X509AttributeCertificate
- * @see org.bouncycastle.x509.X509Store
+ * @see org.spongycastle.x509.X509AttributeCertificate
+ * @see org.spongycastle.x509.X509Store
  */
 public class X509AttributeCertStoreSelector
     implements Selector

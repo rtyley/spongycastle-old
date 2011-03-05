@@ -22,7 +22,7 @@
  * great code.
  */
 
-package org.bouncycastle.apache.bzip2;
+package org.spongycastle.apache.bzip2;
 
 /**
  * A simple class the hold and calculate the CRC for sanity checking

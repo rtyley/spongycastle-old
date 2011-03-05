@@ -1,6 +1,6 @@
-package org.bouncycastle.cavp.test;
+package org.spongycastle.cavp.test;
 
-import org.bouncycastle.cavp.test.CryptoProcessor;
+import org.spongycastle.cavp.test.CryptoProcessor;
 
 public interface CryptoProcessorFactory
     {

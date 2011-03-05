@@ -1,6 +1,6 @@
-package org.bouncycastle.jce;
+package org.spongycastle.jce;
 
-import org.bouncycastle.jce.cert.CertStoreParameters;
+import org.spongycastle.jce.cert.CertStoreParameters;
 import java.util.Collection;
 
 public class MultiCertStoreParameters

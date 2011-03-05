@@ -1,9 +1,9 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
 
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.MultiCertStoreParameters;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.test.SimpleTest;
+import org.spongycastle.jce.PrincipalUtil;
+import org.spongycastle.jce.MultiCertStoreParameters;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.test.SimpleTest;
 
 import java.io.ByteArrayInputStream;
 import java.security.Security;

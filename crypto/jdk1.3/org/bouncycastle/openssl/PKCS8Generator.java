@@ -1,4 +1,4 @@
-package org.bouncycastle.openssl;
+package org.spongycastle.openssl;
 
 import java.io.IOException;
 import java.security.AlgorithmParameterGenerator;
@@ -19,24 +19,24 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo;
-import org.bouncycastle.asn1.pkcs.EncryptionScheme;
-import org.bouncycastle.asn1.pkcs.KeyDerivationFunc;
-import org.bouncycastle.asn1.pkcs.PBES2Parameters;
-import org.bouncycastle.asn1.pkcs.PBKDF2Params;
-import org.bouncycastle.asn1.pkcs.PKCS12PBEParams;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.util.io.pem.PemGenerationException;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemObjectGenerator;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.DERInteger;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.nist.NISTObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.EncryptedPrivateKeyInfo;
+import org.spongycastle.asn1.pkcs.EncryptionScheme;
+import org.spongycastle.asn1.pkcs.KeyDerivationFunc;
+import org.spongycastle.asn1.pkcs.PBES2Parameters;
+import org.spongycastle.asn1.pkcs.PBKDF2Params;
+import org.spongycastle.asn1.pkcs.PKCS12PBEParams;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.util.io.pem.PemGenerationException;
+import org.spongycastle.util.io.pem.PemObject;
+import org.spongycastle.util.io.pem.PemObjectGenerator;
 
 public class PKCS8Generator
     implements PemObjectGenerator

@@ -1,4 +1,4 @@
-package org.bouncycastle.openpgp;
+package org.spongycastle.openpgp;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,27 +25,27 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.BCPGObject;
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.ContainedPacket;
-import org.bouncycastle.bcpg.DSAPublicBCPGKey;
-import org.bouncycastle.bcpg.DSASecretBCPGKey;
-import org.bouncycastle.bcpg.ElGamalPublicBCPGKey;
-import org.bouncycastle.bcpg.ElGamalSecretBCPGKey;
-import org.bouncycastle.bcpg.HashAlgorithmTags;
-import org.bouncycastle.bcpg.PublicKeyPacket;
-import org.bouncycastle.bcpg.RSAPublicBCPGKey;
-import org.bouncycastle.bcpg.RSASecretBCPGKey;
-import org.bouncycastle.bcpg.S2K;
-import org.bouncycastle.bcpg.SecretKeyPacket;
-import org.bouncycastle.bcpg.SecretSubkeyPacket;
-import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
-import org.bouncycastle.bcpg.UserAttributePacket;
-import org.bouncycastle.bcpg.UserIDPacket;
-import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
-import org.bouncycastle.jce.spec.ElGamalParameterSpec;
-import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
+import org.spongycastle.bcpg.BCPGInputStream;
+import org.spongycastle.bcpg.BCPGObject;
+import org.spongycastle.bcpg.BCPGOutputStream;
+import org.spongycastle.bcpg.ContainedPacket;
+import org.spongycastle.bcpg.DSAPublicBCPGKey;
+import org.spongycastle.bcpg.DSASecretBCPGKey;
+import org.spongycastle.bcpg.ElGamalPublicBCPGKey;
+import org.spongycastle.bcpg.ElGamalSecretBCPGKey;
+import org.spongycastle.bcpg.HashAlgorithmTags;
+import org.spongycastle.bcpg.PublicKeyPacket;
+import org.spongycastle.bcpg.RSAPublicBCPGKey;
+import org.spongycastle.bcpg.RSASecretBCPGKey;
+import org.spongycastle.bcpg.S2K;
+import org.spongycastle.bcpg.SecretKeyPacket;
+import org.spongycastle.bcpg.SecretSubkeyPacket;
+import org.spongycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.spongycastle.bcpg.UserAttributePacket;
+import org.spongycastle.bcpg.UserIDPacket;
+import org.spongycastle.jce.interfaces.ElGamalPrivateKey;
+import org.spongycastle.jce.spec.ElGamalParameterSpec;
+import org.spongycastle.jce.spec.ElGamalPrivateKeySpec;
 
 /**
  * general class to handle a PGP secret key object.

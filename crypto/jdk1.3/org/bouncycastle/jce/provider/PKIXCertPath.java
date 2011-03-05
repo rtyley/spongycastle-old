@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.security.NoSuchProviderException;
-import org.bouncycastle.jce.cert.CertPath;
+import org.spongycastle.jce.cert.CertPath;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import org.bouncycastle.jce.cert.CertificateFactory;
-import org.bouncycastle.openssl.PEMWriter;
+import org.spongycastle.jce.cert.CertificateFactory;
+import org.spongycastle.openssl.PEMWriter;
 
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -22,20 +22,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.pkcs.ContentInfo;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.SignedData;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.PrincipalUtil;
+import org.spongycastle.asn1.ASN1Encodable;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DERInteger;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DEROutputStream;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.DERSet;
+import org.spongycastle.asn1.pkcs.ContentInfo;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.SignedData;
+import org.spongycastle.jce.X509Principal;
+import org.spongycastle.jce.PrincipalUtil;
 
 /**
  * CertPath implementation for X.509 certificates.

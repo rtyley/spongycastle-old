@@ -1,13 +1,13 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.engines.RSABlindedEngine;
-import org.bouncycastle.crypto.signers.ISO9796d2Signer;
+import org.spongycastle.crypto.AsymmetricBlockCipher;
+import org.spongycastle.crypto.CipherParameters;
+import org.spongycastle.crypto.Digest;
+import org.spongycastle.crypto.digests.MD5Digest;
+import org.spongycastle.crypto.digests.RIPEMD160Digest;
+import org.spongycastle.crypto.digests.SHA1Digest;
+import org.spongycastle.crypto.engines.RSABlindedEngine;
+import org.spongycastle.crypto.signers.ISO9796d2Signer;
 
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;

@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -7,16 +7,16 @@ import java.security.KeyPairGenerator;
 import java.security.Security;
 import java.util.Hashtable;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DEROutputStream;
+import org.spongycastle.asn1.x509.X509Name;
+import org.spongycastle.jce.PKCS10CertificationRequest;
+import org.spongycastle.jce.X509Principal;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 /**
  **/
@@ -44,7 +44,7 @@ public class PKCS10CertRequestTest
             attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
             attrs.put(X509Principal.L, "Melbourne");
             attrs.put(X509Principal.ST, "Victoria");
-            attrs.put(X509Principal.EmailAddress, "feedback-crypto@bouncycastle.org");
+            attrs.put(X509Principal.EmailAddress, "feedback-crypto@spongycastle.org");
 
             X509Name    subject = new X509Name(attrs);
 

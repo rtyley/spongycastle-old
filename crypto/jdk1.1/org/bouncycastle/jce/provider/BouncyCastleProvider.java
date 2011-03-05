@@ -1,24 +1,24 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.security.Provider;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.bc.BCObjectIdentifiers;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.bc.BCObjectIdentifiers;
+import org.spongycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.spongycastle.asn1.iana.IANAObjectIdentifiers;
+import org.spongycastle.asn1.nist.NISTObjectIdentifiers;
+import org.spongycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.spongycastle.jce.interfaces.ConfigurableProvider;
 
 /**
  * To add the provider at runtime use:
  * <pre>
  * import java.security.Security;
- * import org.bouncycastle.jce.provider.BouncyCastleProvider;
+ * import org.spongycastle.jce.provider.BouncyCastleProvider;
  *
  * Security.addProvider(new BouncyCastleProvider());
  * </pre>
@@ -30,7 +30,7 @@ import org.bouncycastle.jce.interfaces.ConfigurableProvider;
  * a line:
  * <pre>
  * <code>
- *    security.provider.&lt;n&gt;=org.bouncycastle.jce.provider.BouncyCastleProvider
+ *    security.provider.&lt;n&gt;=org.spongycastle.jce.provider.BouncyCastleProvider
  * </code>
  * </pre>
  * Where &lt;n&gt; is the preference you want the provider at (1 being the
@@ -43,12 +43,12 @@ public final class BouncyCastleProvider extends Provider
 {
     private static String info = "BouncyCastle Security Provider v1.46b";
 
-	public static String PROVIDER_NAME = org.bouncycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
+	public static String PROVIDER_NAME = org.spongycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
 
     /*
      * Configurable symmetric ciphers
      */
-    private static final String SYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jce.provider.symmetric.";
+    private static final String SYMMETRIC_CIPHER_PACKAGE = "org.spongycastle.jce.provider.symmetric.";
     private static final String[] SYMMETRIC_CIPHERS =
     {
         "AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "DESede", "Grainv1", "Grain128", "HC128", "HC256", "IDEA",
@@ -58,7 +58,7 @@ public final class BouncyCastleProvider extends Provider
     /*
      * Configurable asymmetric ciphers
      */
-    private static final String ASYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jce.provider.asymmetric.";
+    private static final String ASYMMETRIC_CIPHER_PACKAGE = "org.spongycastle.jce.provider.asymmetric.";
     private static final String[] ASYMMETRIC_CIPHERS =
     {
         "EC"
@@ -84,81 +84,81 @@ public final class BouncyCastleProvider extends Provider
         //
         // X509Store
         //
-        put("X509Store.CERTIFICATE/COLLECTION", "org.bouncycastle.jce.provider.X509StoreCertCollection");
-        put("X509Store.ATTRIBUTECERTIFICATE/COLLECTION", "org.bouncycastle.jce.provider.X509StoreAttrCertCollection");
-        put("X509Store.CRL/COLLECTION", "org.bouncycastle.jce.provider.X509StoreCRLCollection");
-        put("X509Store.CERTIFICATEPAIR/COLLECTION", "org.bouncycastle.jce.provider.X509StoreCertPairCollection");
+        put("X509Store.CERTIFICATE/COLLECTION", "org.spongycastle.jce.provider.X509StoreCertCollection");
+        put("X509Store.ATTRIBUTECERTIFICATE/COLLECTION", "org.spongycastle.jce.provider.X509StoreAttrCertCollection");
+        put("X509Store.CRL/COLLECTION", "org.spongycastle.jce.provider.X509StoreCRLCollection");
+        put("X509Store.CERTIFICATEPAIR/COLLECTION", "org.spongycastle.jce.provider.X509StoreCertPairCollection");
 
-        put("X509Store.CERTIFICATE/LDAP", "org.bouncycastle.jce.provider.X509StoreLDAPCerts");
-        put("X509Store.CRL/LDAP", "org.bouncycastle.jce.provider.X509StoreLDAPCRLs");
-        put("X509Store.ATTRIBUTECERTIFICATE/LDAP", "org.bouncycastle.jce.provider.X509StoreLDAPAttrCerts");
-        put("X509Store.CERTIFICATEPAIR/LDAP", "org.bouncycastle.jce.provider.X509StoreLDAPCertPairs");
+        put("X509Store.CERTIFICATE/LDAP", "org.spongycastle.jce.provider.X509StoreLDAPCerts");
+        put("X509Store.CRL/LDAP", "org.spongycastle.jce.provider.X509StoreLDAPCRLs");
+        put("X509Store.ATTRIBUTECERTIFICATE/LDAP", "org.spongycastle.jce.provider.X509StoreLDAPAttrCerts");
+        put("X509Store.CERTIFICATEPAIR/LDAP", "org.spongycastle.jce.provider.X509StoreLDAPCertPairs");
         
         //
         // X509StreamParser
         //
-        put("X509StreamParser.CERTIFICATE", "org.bouncycastle.jce.provider.X509CertParser");
-        put("X509StreamParser.ATTRIBUTECERTIFICATE", "org.bouncycastle.jce.provider.X509AttrCertParser");
-        put("X509StreamParser.CRL", "org.bouncycastle.jce.provider.X509CRLParser");
-        put("X509StreamParser.CERTIFICATEPAIR", "org.bouncycastle.jce.provider.X509CertPairParser");
+        put("X509StreamParser.CERTIFICATE", "org.spongycastle.jce.provider.X509CertParser");
+        put("X509StreamParser.ATTRIBUTECERTIFICATE", "org.spongycastle.jce.provider.X509AttrCertParser");
+        put("X509StreamParser.CRL", "org.spongycastle.jce.provider.X509CRLParser");
+        put("X509StreamParser.CERTIFICATEPAIR", "org.spongycastle.jce.provider.X509CertPairParser");
 
 
         //
         // KeyStore
         //
-        put("KeyStore.BKS", "org.bouncycastle.jce.provider.JDKKeyStore");
-        put("KeyStore.BouncyCastle", "org.bouncycastle.jce.provider.JDKKeyStore$BouncyCastleStore");
-        put("KeyStore.PKCS12", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore");
-        put("KeyStore.BCPKCS12", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore");
-        put("KeyStore.PKCS12-DEF", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$DefPKCS12KeyStore");
+        put("KeyStore.BKS", "org.spongycastle.jce.provider.JDKKeyStore");
+        put("KeyStore.BouncyCastle", "org.spongycastle.jce.provider.JDKKeyStore$BouncyCastleStore");
+        put("KeyStore.PKCS12", "org.spongycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore");
+        put("KeyStore.BCPKCS12", "org.spongycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore");
+        put("KeyStore.PKCS12-DEF", "org.spongycastle.jce.provider.JDKPKCS12KeyStore$DefPKCS12KeyStore");
 
-        put("KeyStore.PKCS12-3DES-40RC2", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore");
-        put("KeyStore.PKCS12-3DES-3DES", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore3DES");
+        put("KeyStore.PKCS12-3DES-40RC2", "org.spongycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore");
+        put("KeyStore.PKCS12-3DES-3DES", "org.spongycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore3DES");
 
-        put("KeyStore.PKCS12-DEF-3DES-40RC2", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$DefPKCS12KeyStore");
-        put("KeyStore.PKCS12-DEF-3DES-3DES", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$DefPKCS12KeyStore3DES");
+        put("KeyStore.PKCS12-DEF-3DES-40RC2", "org.spongycastle.jce.provider.JDKPKCS12KeyStore$DefPKCS12KeyStore");
+        put("KeyStore.PKCS12-DEF-3DES-3DES", "org.spongycastle.jce.provider.JDKPKCS12KeyStore$DefPKCS12KeyStore3DES");
 
         put("Alg.Alias.KeyStore.UBER", "BouncyCastle");
         put("Alg.Alias.KeyStore.BOUNCYCASTLE", "BouncyCastle");
-        put("Alg.Alias.KeyStore.bouncycastle", "BouncyCastle");
+        put("Alg.Alias.KeyStore.spongycastle", "BouncyCastle");
 
         //
         // certificate factories.
         //
-        put("CertificateFactory.X.509", "org.bouncycastle.jce.provider.JDKX509CertificateFactory");
+        put("CertificateFactory.X.509", "org.spongycastle.jce.provider.JDKX509CertificateFactory");
         put("Alg.Alias.CertificateFactory.X509", "X.509");
 
         //
         // algorithm parameter generators
         //
-        put("AlgorithmParameterGenerator.DH", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DH");
-        put("AlgorithmParameterGenerator.DSA", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DSA");
-        put("AlgorithmParameterGenerator.GOST3410", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$GOST3410");
-        put("AlgorithmParameterGenerator.ELGAMAL", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$ElGamal");
-        put("AlgorithmParameterGenerator.DES", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
-        put("AlgorithmParameterGenerator.DESEDE", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
-        put("AlgorithmParameterGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
-        put("AlgorithmParameterGenerator." + OIWObjectIdentifiers.desCBC, "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
-        put("AlgorithmParameterGenerator.RC2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
-        put("AlgorithmParameterGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
+        put("AlgorithmParameterGenerator.DH", "org.spongycastle.jce.provider.JDKAlgorithmParameterGenerator$DH");
+        put("AlgorithmParameterGenerator.DSA", "org.spongycastle.jce.provider.JDKAlgorithmParameterGenerator$DSA");
+        put("AlgorithmParameterGenerator.GOST3410", "org.spongycastle.jce.provider.JDKAlgorithmParameterGenerator$GOST3410");
+        put("AlgorithmParameterGenerator.ELGAMAL", "org.spongycastle.jce.provider.JDKAlgorithmParameterGenerator$ElGamal");
+        put("AlgorithmParameterGenerator.DES", "org.spongycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
+        put("AlgorithmParameterGenerator.DESEDE", "org.spongycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
+        put("AlgorithmParameterGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.spongycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
+        put("AlgorithmParameterGenerator." + OIWObjectIdentifiers.desCBC, "org.spongycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
+        put("AlgorithmParameterGenerator.RC2", "org.spongycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
+        put("AlgorithmParameterGenerator.1.2.840.113549.3.2", "org.spongycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
 
         put("Alg.Alias.AlgorithmParameterGenerator.DIFFIEHELLMAN", "DH");
         put("Alg.Alias.AlgorithmParameterGenerator.GOST-3410", "GOST3410");
         //
         // algorithm parameters
         //
-        put("AlgorithmParameters.OAEP", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$OAEP");
-        put("AlgorithmParameters.PSS", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PSS");
-        put("AlgorithmParameters.DH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$DH");
+        put("AlgorithmParameters.OAEP", "org.spongycastle.jce.provider.JDKAlgorithmParameters$OAEP");
+        put("AlgorithmParameters.PSS", "org.spongycastle.jce.provider.JDKAlgorithmParameters$PSS");
+        put("AlgorithmParameters.DH", "org.spongycastle.jce.provider.JDKAlgorithmParameters$DH");
         put("Alg.Alias.AlgorithmParameters.DIFFIEHELLMAN", "DH");
-        put("AlgorithmParameters.DSA", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$DSA");
-        put("AlgorithmParameters.ELGAMAL", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$ElGamal");
-        put("AlgorithmParameters.IES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IES");
-        put("AlgorithmParameters.PKCS12PBE", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PKCS12PBE");
-        put("AlgorithmParameters." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("AlgorithmParameters." + PKCSObjectIdentifiers.id_PBKDF2, "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PBKDF2");
+        put("AlgorithmParameters.DSA", "org.spongycastle.jce.provider.JDKAlgorithmParameters$DSA");
+        put("AlgorithmParameters.ELGAMAL", "org.spongycastle.jce.provider.JDKAlgorithmParameters$ElGamal");
+        put("AlgorithmParameters.IES", "org.spongycastle.jce.provider.JDKAlgorithmParameters$IES");
+        put("AlgorithmParameters.PKCS12PBE", "org.spongycastle.jce.provider.JDKAlgorithmParameters$PKCS12PBE");
+        put("AlgorithmParameters." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.spongycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
+        put("AlgorithmParameters." + PKCSObjectIdentifiers.id_PBKDF2, "org.spongycastle.jce.provider.JDKAlgorithmParameters$PBKDF2");
 
-        put("AlgorithmParameters.GOST3410", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$GOST3410");
+        put("AlgorithmParameters.GOST3410", "org.spongycastle.jce.provider.JDKAlgorithmParameters$GOST3410");
         put("Alg.Alias.AlgorithmParameters.GOST-3410", "GOST3410");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHA1ANDRC2", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND3-KEYTRIPLEDES", "PKCS12PBE");
@@ -227,54 +227,54 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-256AND192BITAES-CBC-BC","PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-256AND256BITAES-CBC-BC","PKCS12PBE");
 
-        put("AlgorithmParameters.SHA1WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
-        put("AlgorithmParameters.SHA224WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
-        put("AlgorithmParameters.SHA256WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
-        put("AlgorithmParameters.SHA384WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
-        put("AlgorithmParameters.SHA512WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
+        put("AlgorithmParameters.SHA1WITHECDSA", "org.spongycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
+        put("AlgorithmParameters.SHA224WITHECDSA", "org.spongycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
+        put("AlgorithmParameters.SHA256WITHECDSA", "org.spongycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
+        put("AlgorithmParameters.SHA384WITHECDSA", "org.spongycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
+        put("AlgorithmParameters.SHA512WITHECDSA", "org.spongycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");
         
         //
         // key agreement
         //
-        put("KeyAgreement.DH", "org.bouncycastle.jce.provider.JCEDHKeyAgreement");
+        put("KeyAgreement.DH", "org.spongycastle.jce.provider.JCEDHKeyAgreement");
         put("Alg.Alias.KeyAgreement.DIFFIEHELLMAN", "DH");
         
         //
         // cipher engines
         //
-        put("Cipher.DES", "org.bouncycastle.jce.provider.JCEBlockCipher$DES");
-        put("Cipher." + OIWObjectIdentifiers.desCBC, "org.bouncycastle.jce.provider.JCEBlockCipher$DESCBC");
+        put("Cipher.DES", "org.spongycastle.jce.provider.JCEBlockCipher$DES");
+        put("Cipher." + OIWObjectIdentifiers.desCBC, "org.spongycastle.jce.provider.JCEBlockCipher$DESCBC");
 
-        put("Cipher.RC2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2");
-        put("Cipher.RC2WRAP", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
-        put("Cipher.1.2.840.113549.1.9.16.3.7", "org.bouncycastle.jce.provider.WrapCipherSpi$RC2Wrap");
+        put("Cipher.RC2", "org.spongycastle.jce.provider.JCEBlockCipher$RC2");
+        put("Cipher.RC2WRAP", "org.spongycastle.jce.provider.WrapCipherSpi$RC2Wrap");
+        put("Cipher.1.2.840.113549.1.9.16.3.7", "org.spongycastle.jce.provider.WrapCipherSpi$RC2Wrap");
 
-        put("Cipher.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2CBC");
+        put("Cipher.1.2.840.113549.3.2", "org.spongycastle.jce.provider.JCEBlockCipher$RC2CBC");
         
         put("Alg.Alias.Cipher.PBEWithSHAAnd3KeyTripleDES",  "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
         
-        put("Cipher.GOST28147", "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147");
+        put("Cipher.GOST28147", "org.spongycastle.jce.provider.JCEBlockCipher$GOST28147");
         put("Alg.Alias.Cipher.GOST", "GOST28147");
         put("Alg.Alias.Cipher.GOST-28147", "GOST28147");
-        put("Cipher." + CryptoProObjectIdentifiers.gostR28147_cbc, "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147cbc");
+        put("Cipher." + CryptoProObjectIdentifiers.gostR28147_cbc, "org.spongycastle.jce.provider.JCEBlockCipher$GOST28147cbc");
 
-        put("Cipher.RSA", "org.bouncycastle.jce.provider.JCERSACipher$NoPadding");
-        put("Cipher.RSA/RAW", "org.bouncycastle.jce.provider.JCERSACipher$NoPadding");
-        put("Cipher.RSA/PKCS1", "org.bouncycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding");
-        put("Cipher.1.2.840.113549.1.1.1", "org.bouncycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding");
-        put("Cipher.2.5.8.1.1", "org.bouncycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding");
-        put("Cipher.RSA/1", "org.bouncycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding_PrivateOnly");
-        put("Cipher.RSA/2", "org.bouncycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding_PublicOnly");
-        put("Cipher.RSA/OAEP", "org.bouncycastle.jce.provider.JCERSACipher$OAEPPadding");
-        put("Cipher." + PKCSObjectIdentifiers.id_RSAES_OAEP, "org.bouncycastle.jce.provider.JCERSACipher$OAEPPadding");
-        put("Cipher.RSA/ISO9796-1", "org.bouncycastle.jce.provider.JCERSACipher$ISO9796d1Padding");
+        put("Cipher.RSA", "org.spongycastle.jce.provider.JCERSACipher$NoPadding");
+        put("Cipher.RSA/RAW", "org.spongycastle.jce.provider.JCERSACipher$NoPadding");
+        put("Cipher.RSA/PKCS1", "org.spongycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding");
+        put("Cipher.1.2.840.113549.1.1.1", "org.spongycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding");
+        put("Cipher.2.5.8.1.1", "org.spongycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding");
+        put("Cipher.RSA/1", "org.spongycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding_PrivateOnly");
+        put("Cipher.RSA/2", "org.spongycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding_PublicOnly");
+        put("Cipher.RSA/OAEP", "org.spongycastle.jce.provider.JCERSACipher$OAEPPadding");
+        put("Cipher." + PKCSObjectIdentifiers.id_RSAES_OAEP, "org.spongycastle.jce.provider.JCERSACipher$OAEPPadding");
+        put("Cipher.RSA/ISO9796-1", "org.spongycastle.jce.provider.JCERSACipher$ISO9796d1Padding");
 
-        put("Cipher.ECIES", "org.bouncycastle.jce.provider.JCEIESCipher$ECIES");
-        put("Cipher.BrokenECIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenECIES");
-        put("Cipher.IES", "org.bouncycastle.jce.provider.JCEIESCipher$IES");
-        put("Cipher.BrokenIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenIES");
-        put("Cipher.ELGAMAL", "org.bouncycastle.jce.provider.JCEElGamalCipher$NoPadding");
-        put("Cipher.ELGAMAL/PKCS1", "org.bouncycastle.jce.provider.JCEElGamalCipher$PKCS1v1_5Padding");
+        put("Cipher.ECIES", "org.spongycastle.jce.provider.JCEIESCipher$ECIES");
+        put("Cipher.BrokenECIES", "org.spongycastle.jce.provider.JCEIESCipher$BrokenECIES");
+        put("Cipher.IES", "org.spongycastle.jce.provider.JCEIESCipher$IES");
+        put("Cipher.BrokenIES", "org.spongycastle.jce.provider.JCEIESCipher$BrokenIES");
+        put("Cipher.ELGAMAL", "org.spongycastle.jce.provider.JCEElGamalCipher$NoPadding");
+        put("Cipher.ELGAMAL/PKCS1", "org.spongycastle.jce.provider.JCEElGamalCipher$PKCS1v1_5Padding");
 
         put("Alg.Alias.Cipher.RSA//RAW", "RSA");
         put("Alg.Alias.Cipher.RSA//NOPADDING", "RSA");
@@ -286,21 +286,21 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Cipher.ELGAMAL/NONE/PKCS1PADDING", "ELGAMAL/PKCS1");
         put("Alg.Alias.Cipher.ELGAMAL/NONE/NOPADDING", "ELGAMAL");
 
-        put("Cipher.PBEWITHMD5ANDDES", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithMD5AndDES");
-        put("Cipher.BROKENPBEWITHMD5ANDDES", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$BrokePBEWithMD5AndDES");
-        put("Cipher.PBEWITHMD5ANDRC2", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithMD5AndRC2");
-        put("Cipher.PBEWITHSHA1ANDDES", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHA1AndDES");
-        put("Cipher.BROKENPBEWITHSHA1ANDDES", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$BrokePBEWithSHA1AndDES");
-        put("Cipher.PBEWITHSHA1ANDRC2", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHA1AndRC2");
-        put("Cipher.PBEWITHSHAAND3-KEYTRIPLEDES-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAndDES3Key");
-        put("Cipher.BROKENPBEWITHSHAAND3-KEYTRIPLEDES-CBC", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$BrokePBEWithSHAAndDES3Key");
-        put("Cipher.OLDPBEWITHSHAAND3-KEYTRIPLEDES-CBC", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$OldPBEWithSHAAndDES3Key");
-        put("Cipher.PBEWITHSHAAND2-KEYTRIPLEDES-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAndDES2Key");
-        put("Cipher.BROKENPBEWITHSHAAND2-KEYTRIPLEDES-CBC", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$BrokePBEWithSHAAndDES2Key");
-        put("Cipher.PBEWITHSHAAND128BITRC2-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAnd128BitRC2");
-        put("Cipher.PBEWITHSHAAND40BITRC2-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAnd40BitRC2");
-        put("Cipher.PBEWITHSHAAND128BITRC4", "org.bouncycastle.jce.provider.JCEStreamCipher$PBEWithSHAAnd128BitRC4");
-        put("Cipher.PBEWITHSHAAND40BITRC4", "org.bouncycastle.jce.provider.JCEStreamCipher$PBEWithSHAAnd40BitRC4");
+        put("Cipher.PBEWITHMD5ANDDES", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithMD5AndDES");
+        put("Cipher.BROKENPBEWITHMD5ANDDES", "org.spongycastle.jce.provider.BrokenJCEBlockCipher$BrokePBEWithMD5AndDES");
+        put("Cipher.PBEWITHMD5ANDRC2", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithMD5AndRC2");
+        put("Cipher.PBEWITHSHA1ANDDES", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithSHA1AndDES");
+        put("Cipher.BROKENPBEWITHSHA1ANDDES", "org.spongycastle.jce.provider.BrokenJCEBlockCipher$BrokePBEWithSHA1AndDES");
+        put("Cipher.PBEWITHSHA1ANDRC2", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithSHA1AndRC2");
+        put("Cipher.PBEWITHSHAAND3-KEYTRIPLEDES-CBC", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithSHAAndDES3Key");
+        put("Cipher.BROKENPBEWITHSHAAND3-KEYTRIPLEDES-CBC", "org.spongycastle.jce.provider.BrokenJCEBlockCipher$BrokePBEWithSHAAndDES3Key");
+        put("Cipher.OLDPBEWITHSHAAND3-KEYTRIPLEDES-CBC", "org.spongycastle.jce.provider.BrokenJCEBlockCipher$OldPBEWithSHAAndDES3Key");
+        put("Cipher.PBEWITHSHAAND2-KEYTRIPLEDES-CBC", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithSHAAndDES2Key");
+        put("Cipher.BROKENPBEWITHSHAAND2-KEYTRIPLEDES-CBC", "org.spongycastle.jce.provider.BrokenJCEBlockCipher$BrokePBEWithSHAAndDES2Key");
+        put("Cipher.PBEWITHSHAAND128BITRC2-CBC", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithSHAAnd128BitRC2");
+        put("Cipher.PBEWITHSHAAND40BITRC2-CBC", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithSHAAnd40BitRC2");
+        put("Cipher.PBEWITHSHAAND128BITRC4", "org.spongycastle.jce.provider.JCEStreamCipher$PBEWithSHAAnd128BitRC4");
+        put("Cipher.PBEWITHSHAAND40BITRC4", "org.spongycastle.jce.provider.JCEStreamCipher$PBEWithSHAAnd40BitRC4");
 
         put("Alg.Alias.Cipher.PBEWITHSHA1AND3-KEYTRIPLEDES-CBC", "Cipher.PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND2-KEYTRIPLEDES-CBC", "Cipher.PBEWITHSHAAND2-KEYTRIPLEDES-CBC");
@@ -316,12 +316,12 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes192_cbc.getId(), "PBEWITHSHA256AND192BITAES-CBC-BC");
         put("Alg.Alias.Cipher." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes256_cbc.getId(), "PBEWITHSHA256AND256BITAES-CBC-BC");
 
-        put("Cipher.PBEWITHSHAAND128BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
-        put("Cipher.PBEWITHSHAAND192BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
-        put("Cipher.PBEWITHSHAAND256BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
-        put("Cipher.PBEWITHSHA256AND128BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
-        put("Cipher.PBEWITHSHA256AND192BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
-        put("Cipher.PBEWITHSHA256AND256BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
+        put("Cipher.PBEWITHSHAAND128BITAES-CBC-BC", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
+        put("Cipher.PBEWITHSHAAND192BITAES-CBC-BC", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
+        put("Cipher.PBEWITHSHAAND256BITAES-CBC-BC", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
+        put("Cipher.PBEWITHSHA256AND128BITAES-CBC-BC", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
+        put("Cipher.PBEWITHSHA256AND192BITAES-CBC-BC", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
+        put("Cipher.PBEWITHSHA256AND256BITAES-CBC-BC", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND128BITAES-CBC-BC","PBEWITHSHAAND128BITAES-CBC-BC");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND192BITAES-CBC-BC","PBEWITHSHAAND192BITAES-CBC-BC");
         put("Alg.Alias.Cipher.PBEWITHSHA1AND256BITAES-CBC-BC","PBEWITHSHAAND256BITAES-CBC-BC");
@@ -332,12 +332,12 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Cipher.PBEWITHSHA-256AND192BITAES-CBC-BC","PBEWITHSHA256AND192BITAES-CBC-BC");
         put("Alg.Alias.Cipher.PBEWITHSHA-256AND256BITAES-CBC-BC","PBEWITHSHA256AND256BITAES-CBC-BC");
         
-        put("Cipher.PBEWITHMD5AND128BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
-        put("Cipher.PBEWITHMD5AND192BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
-        put("Cipher.PBEWITHMD5AND256BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
+        put("Cipher.PBEWITHMD5AND128BITAES-CBC-OPENSSL", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
+        put("Cipher.PBEWITHMD5AND192BITAES-CBC-OPENSSL", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
+        put("Cipher.PBEWITHMD5AND256BITAES-CBC-OPENSSL", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");
         
-        put("Cipher.PBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAndTwofish");
-        put("Cipher.OLDPBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$OldPBEWithSHAAndTwofish");
+        put("Cipher.PBEWITHSHAANDTWOFISH-CBC", "org.spongycastle.jce.provider.JCEBlockCipher$PBEWithSHAAndTwofish");
+        put("Cipher.OLDPBEWITHSHAANDTWOFISH-CBC", "org.spongycastle.jce.provider.BrokenJCEBlockCipher$OldPBEWithSHAAndTwofish");
 
         put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, "PBEWITHMD2ANDDES");
         put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithMD2AndRC2_CBC, "PBEWITHMD2ANDRC2");
@@ -356,13 +356,13 @@ public final class BouncyCastleProvider extends Provider
         //
         // key generators.
         //
-        put("KeyGenerator.DES", "org.bouncycastle.jce.provider.JCEKeyGenerator$DES");
+        put("KeyGenerator.DES", "org.spongycastle.jce.provider.JCEKeyGenerator$DES");
         put("Alg.Alias.KeyGenerator." + OIWObjectIdentifiers.desCBC, "DES");
 
-        put("KeyGenerator.RC2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
-        put("KeyGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
+        put("KeyGenerator.RC2", "org.spongycastle.jce.provider.JCEKeyGenerator$RC2");
+        put("KeyGenerator.1.2.840.113549.3.2", "org.spongycastle.jce.provider.JCEKeyGenerator$RC2");
 
-        put("KeyGenerator.GOST28147", "org.bouncycastle.jce.provider.JCEKeyGenerator$GOST28147");
+        put("KeyGenerator.GOST28147", "org.spongycastle.jce.provider.JCEKeyGenerator$GOST28147");
         put("Alg.Alias.KeyGenerator.GOST", "GOST28147");
         put("Alg.Alias.KeyGenerator.GOST-28147", "GOST28147");
         put("Alg.Alias.KeyGenerator." + CryptoProObjectIdentifiers.gostR28147_cbc, "GOST28147");
@@ -370,35 +370,35 @@ public final class BouncyCastleProvider extends Provider
         //
         // key pair generators.
         //
-        put("KeyPairGenerator.RSA", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$RSA");
-        put("KeyPairGenerator.DH", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$DH");
-        put("KeyPairGenerator.DSA", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$DSA");
-        put("KeyPairGenerator.ELGAMAL", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$ElGamal");
+        put("KeyPairGenerator.RSA", "org.spongycastle.jce.provider.JDKKeyPairGenerator$RSA");
+        put("KeyPairGenerator.DH", "org.spongycastle.jce.provider.JDKKeyPairGenerator$DH");
+        put("KeyPairGenerator.DSA", "org.spongycastle.jce.provider.JDKKeyPairGenerator$DSA");
+        put("KeyPairGenerator.ELGAMAL", "org.spongycastle.jce.provider.JDKKeyPairGenerator$ElGamal");
 
         put("Alg.Alias.KeyPairGenerator.1.2.840.113549.1.1.1", "RSA");
         put("Alg.Alias.KeyPairGenerator.DIFFIEHELLMAN", "DH");
         
-        put("KeyPairGenerator.GOST3410", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$GOST3410");
+        put("KeyPairGenerator.GOST3410", "org.spongycastle.jce.provider.JDKKeyPairGenerator$GOST3410");
         put("Alg.Alias.KeyPairGenerator.GOST-3410", "GOST3410");
         put("Alg.Alias.KeyPairGenerator.GOST-3410-94", "GOST3410");
 
         //
         // key factories
         //
-        put("KeyFactory.RSA", "org.bouncycastle.jce.provider.JDKKeyFactory$RSA");
-        put("KeyFactory.DH", "org.bouncycastle.jce.provider.JDKKeyFactory$DH");
-        put("KeyFactory.DSA", "org.bouncycastle.jce.provider.JDKKeyFactory$DSA");
-        put("KeyFactory.ELGAMAL", "org.bouncycastle.jce.provider.JDKKeyFactory$ElGamal");
-        put("KeyFactory.ElGamal", "org.bouncycastle.jce.provider.JDKKeyFactory$ElGamal");
+        put("KeyFactory.RSA", "org.spongycastle.jce.provider.JDKKeyFactory$RSA");
+        put("KeyFactory.DH", "org.spongycastle.jce.provider.JDKKeyFactory$DH");
+        put("KeyFactory.DSA", "org.spongycastle.jce.provider.JDKKeyFactory$DSA");
+        put("KeyFactory.ELGAMAL", "org.spongycastle.jce.provider.JDKKeyFactory$ElGamal");
+        put("KeyFactory.ElGamal", "org.spongycastle.jce.provider.JDKKeyFactory$ElGamal");
 
-        put("KeyFactory.X.509", "org.bouncycastle.jce.provider.JDKKeyFactory$X509");
+        put("KeyFactory.X.509", "org.spongycastle.jce.provider.JDKKeyFactory$X509");
         
         put("Alg.Alias.KeyFactory.1.2.840.113549.1.1.1", "RSA");
         put("Alg.Alias.KeyFactory.1.2.840.10040.4.1", "DSA");
 
         put("Alg.Alias.KeyFactory.DIFFIEHELLMAN", "DH");
 
-        put("KeyFactory.GOST3410", "org.bouncycastle.jce.provider.JDKKeyFactory$GOST3410");
+        put("KeyFactory.GOST3410", "org.spongycastle.jce.provider.JDKKeyFactory$GOST3410");
         put("Alg.Alias.KeyFactory.GOST-3410", "GOST3410");
         put("Alg.Alias.KeyFactory.GOST-3410-94", "GOST3410");
         put("Alg.Alias.KeyFactory." + CryptoProObjectIdentifiers.gostR3410_94, "GOST3410");
@@ -406,18 +406,18 @@ public final class BouncyCastleProvider extends Provider
         //
         // Algorithm parameters
         //
-        put("AlgorithmParameters.DES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
+        put("AlgorithmParameters.DES", "org.spongycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
         put("Alg.Alias.AlgorithmParameters." + OIWObjectIdentifiers.desCBC, "DES");
-        put("AlgorithmParameters.DESEDE", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("AlgorithmParameters." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
-        put("AlgorithmParameters.RC2", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$RC2AlgorithmParameters");
-        put("AlgorithmParameters.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$RC2AlgorithmParameters");
+        put("AlgorithmParameters.DESEDE", "org.spongycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
+        put("AlgorithmParameters." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.spongycastle.jce.provider.JDKAlgorithmParameters$IVAlgorithmParameters");
+        put("AlgorithmParameters.RC2", "org.spongycastle.jce.provider.JDKAlgorithmParameters$RC2AlgorithmParameters");
+        put("AlgorithmParameters.1.2.840.113549.3.2", "org.spongycastle.jce.provider.JDKAlgorithmParameters$RC2AlgorithmParameters");
         
         //
         // secret key factories.
         //
-        put("SecretKeyFactory.DES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$DES");
-        put("SecretKeyFactory.PBEWITHMD2ANDDES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD2AndDES");
+        put("SecretKeyFactory.DES", "org.spongycastle.jce.provider.JCESecretKeyFactory$DES");
+        put("SecretKeyFactory.PBEWITHMD2ANDDES", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithMD2AndDES");
 
         put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, "PBEWITHMD2ANDDES");
         put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD2AndRC2_CBC, "PBEWITHMD2ANDRC2");
@@ -426,25 +426,25 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithSHA1AndDES_CBC, "PBEWITHSHA1ANDDES");
         put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithSHA1AndRC2_CBC, "PBEWITHSHA1ANDRC2");
 
-        put("SecretKeyFactory.PBEWITHMD2ANDRC2", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD2AndRC2");
-        put("SecretKeyFactory.PBEWITHMD5ANDDES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5AndDES");
-        put("SecretKeyFactory.PBEWITHMD5ANDRC2", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5AndRC2");
-        put("SecretKeyFactory.PBEWITHSHA1ANDDES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA1AndDES");
-        put("SecretKeyFactory.PBEWITHSHA1ANDRC2", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA1AndRC2");
-        put("SecretKeyFactory.PBEWITHSHAAND3-KEYTRIPLEDES-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAndDES3Key");
-        put("SecretKeyFactory.PBEWITHSHAAND2-KEYTRIPLEDES-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAndDES2Key");
-        put("SecretKeyFactory.PBEWITHSHAAND128BITRC4", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd128BitRC4");
-        put("SecretKeyFactory.PBEWITHSHAAND40BITRC4", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd40BitRC4");
-        put("SecretKeyFactory.PBEWITHSHAAND128BITRC2-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd128BitRC2");
-        put("SecretKeyFactory.PBEWITHSHAAND40BITRC2-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd40BitRC2");
-        put("SecretKeyFactory.PBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAndTwofish");
-        put("SecretKeyFactory.PBEWITHHMACRIPEMD160", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithRIPEMD160");
-        put("SecretKeyFactory.PBEWITHHMACSHA1", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA");
-        put("SecretKeyFactory.PBEWITHHMACTIGER", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithTiger");
+        put("SecretKeyFactory.PBEWITHMD2ANDRC2", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithMD2AndRC2");
+        put("SecretKeyFactory.PBEWITHMD5ANDDES", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5AndDES");
+        put("SecretKeyFactory.PBEWITHMD5ANDRC2", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5AndRC2");
+        put("SecretKeyFactory.PBEWITHSHA1ANDDES", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA1AndDES");
+        put("SecretKeyFactory.PBEWITHSHA1ANDRC2", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA1AndRC2");
+        put("SecretKeyFactory.PBEWITHSHAAND3-KEYTRIPLEDES-CBC", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAndDES3Key");
+        put("SecretKeyFactory.PBEWITHSHAAND2-KEYTRIPLEDES-CBC", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAndDES2Key");
+        put("SecretKeyFactory.PBEWITHSHAAND128BITRC4", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd128BitRC4");
+        put("SecretKeyFactory.PBEWITHSHAAND40BITRC4", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd40BitRC4");
+        put("SecretKeyFactory.PBEWITHSHAAND128BITRC2-CBC", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd128BitRC2");
+        put("SecretKeyFactory.PBEWITHSHAAND40BITRC2-CBC", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd40BitRC2");
+        put("SecretKeyFactory.PBEWITHSHAANDTWOFISH-CBC", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAndTwofish");
+        put("SecretKeyFactory.PBEWITHHMACRIPEMD160", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithRIPEMD160");
+        put("SecretKeyFactory.PBEWITHHMACSHA1", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA");
+        put("SecretKeyFactory.PBEWITHHMACTIGER", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithTiger");
         
-        put("SecretKeyFactory.PBEWITHMD5AND128BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5And128BitAESCBCOpenSSL");
-        put("SecretKeyFactory.PBEWITHMD5AND192BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5And192BitAESCBCOpenSSL");
-        put("SecretKeyFactory.PBEWITHMD5AND256BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5And256BitAESCBCOpenSSL");
+        put("SecretKeyFactory.PBEWITHMD5AND128BITAES-CBC-OPENSSL", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5And128BitAESCBCOpenSSL");
+        put("SecretKeyFactory.PBEWITHMD5AND192BITAES-CBC-OPENSSL", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5And192BitAESCBCOpenSSL");
+        put("SecretKeyFactory.PBEWITHMD5AND256BITAES-CBC-OPENSSL", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5And256BitAESCBCOpenSSL");
 
         put("Alg.Alias.SecretKeyFactory.PBE", "PBE/PKCS5");
 
@@ -478,12 +478,12 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.SecretKeyFactory.1.3.14.3.2.26", "PBEWITHHMACSHA1");
         put("Alg.Alias.SecretKeyFactory.PBEWithSHAAnd3KeyTripleDES", "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
         
-        put("SecretKeyFactory.PBEWITHSHAAND128BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd128BitAESBC");
-        put("SecretKeyFactory.PBEWITHSHAAND192BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd192BitAESBC");
-        put("SecretKeyFactory.PBEWITHSHAAND256BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd256BitAESBC");
-        put("SecretKeyFactory.PBEWITHSHA256AND128BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA256And128BitAESBC");
-        put("SecretKeyFactory.PBEWITHSHA256AND192BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA256And192BitAESBC");
-        put("SecretKeyFactory.PBEWITHSHA256AND256BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA256And256BitAESBC");
+        put("SecretKeyFactory.PBEWITHSHAAND128BITAES-CBC-BC", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd128BitAESBC");
+        put("SecretKeyFactory.PBEWITHSHAAND192BITAES-CBC-BC", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd192BitAESBC");
+        put("SecretKeyFactory.PBEWITHSHAAND256BITAES-CBC-BC", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd256BitAESBC");
+        put("SecretKeyFactory.PBEWITHSHA256AND128BITAES-CBC-BC", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA256And128BitAESBC");
+        put("SecretKeyFactory.PBEWITHSHA256AND192BITAES-CBC-BC", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA256And192BitAESBC");
+        put("SecretKeyFactory.PBEWITHSHA256AND256BITAES-CBC-BC", "org.spongycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA256And256BitAESBC");
         put("Alg.Alias.SecretKeyFactory.PBEWITHSHA1AND128BITAES-CBC-BC","PBEWITHSHAAND128BITAES-CBC-BC");
         put("Alg.Alias.SecretKeyFactory.PBEWITHSHA1AND192BITAES-CBC-BC","PBEWITHSHAAND192BITAES-CBC-BC");
         put("Alg.Alias.SecretKeyFactory.PBEWITHSHA1AND256BITAES-CBC-BC","PBEWITHSHAAND256BITAES-CBC-BC");
@@ -507,15 +507,15 @@ public final class BouncyCastleProvider extends Provider
         addSignatureAlgorithms();
 
     // Certification Path API
-        put("CertPathValidator.RFC3281", "org.bouncycastle.jce.provider.PKIXAttrCertPathValidatorSpi");
-        put("CertPathBuilder.RFC3281", "org.bouncycastle.jce.provider.PKIXAttrCertPathBuilderSpi");
-        put("CertPathValidator.RFC3280", "org.bouncycastle.jce.provider.PKIXCertPathValidatorSpi");
-        put("CertPathBuilder.RFC3280", "org.bouncycastle.jce.provider.PKIXCertPathBuilderSpi");
-        put("CertPathValidator.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathValidatorSpi");
-        put("CertPathBuilder.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathBuilderSpi");
-        put("CertStore.Collection", "org.bouncycastle.jce.provider.CertStoreCollectionSpi");
-        put("CertStore.LDAP", "org.bouncycastle.jce.provider.X509LDAPCertStoreSpi");
-        put("CertStore.Multi", "org.bouncycastle.jce.provider.MultiCertStoreSpi");
+        put("CertPathValidator.RFC3281", "org.spongycastle.jce.provider.PKIXAttrCertPathValidatorSpi");
+        put("CertPathBuilder.RFC3281", "org.spongycastle.jce.provider.PKIXAttrCertPathBuilderSpi");
+        put("CertPathValidator.RFC3280", "org.spongycastle.jce.provider.PKIXCertPathValidatorSpi");
+        put("CertPathBuilder.RFC3280", "org.spongycastle.jce.provider.PKIXCertPathBuilderSpi");
+        put("CertPathValidator.PKIX", "org.spongycastle.jce.provider.PKIXCertPathValidatorSpi");
+        put("CertPathBuilder.PKIX", "org.spongycastle.jce.provider.PKIXCertPathBuilderSpi");
+        put("CertStore.Collection", "org.spongycastle.jce.provider.CertStoreCollectionSpi");
+        put("CertStore.LDAP", "org.spongycastle.jce.provider.X509LDAPCertStoreSpi");
+        put("CertStore.Multi", "org.spongycastle.jce.provider.MultiCertStoreSpi");
         put("Alg.Alias.CertStore.X509LDAP", "LDAP");
     }
 
@@ -577,59 +577,59 @@ public final class BouncyCastleProvider extends Provider
     //
     private void addMacAlgorithms()
     {
-        put("Mac.DESMAC", "org.bouncycastle.jce.provider.JCEMac$DES");
+        put("Mac.DESMAC", "org.spongycastle.jce.provider.JCEMac$DES");
         put("Alg.Alias.Mac.DES", "DESMAC");
-        put("Mac.DESMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$DESCFB8");
+        put("Mac.DESMAC/CFB8", "org.spongycastle.jce.provider.JCEMac$DESCFB8");
         put("Alg.Alias.Mac.DES/CFB8", "DESMAC/CFB8");
 
-        put("Mac.DESWITHISO9797", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3");
+        put("Mac.DESWITHISO9797", "org.spongycastle.jce.provider.JCEMac$DES9797Alg3");
         put("Alg.Alias.Mac.DESISO9797MAC", "DESWITHISO9797");
 
-        put("Mac.ISO9797ALG3MAC", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3");
+        put("Mac.ISO9797ALG3MAC", "org.spongycastle.jce.provider.JCEMac$DES9797Alg3");
         put("Alg.Alias.Mac.ISO9797ALG3", "ISO9797ALG3MAC");
-        put("Mac.ISO9797ALG3WITHISO7816-4PADDING", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3with7816d4");
+        put("Mac.ISO9797ALG3WITHISO7816-4PADDING", "org.spongycastle.jce.provider.JCEMac$DES9797Alg3with7816d4");
         put("Alg.Alias.Mac.ISO9797ALG3MACWITHISO7816-4PADDING", "ISO9797ALG3WITHISO7816-4PADDING");
 
-        put("Mac.RC2MAC", "org.bouncycastle.jce.provider.JCEMac$RC2");
+        put("Mac.RC2MAC", "org.spongycastle.jce.provider.JCEMac$RC2");
         put("Alg.Alias.Mac.RC2", "RC2MAC");
-        put("Mac.RC2MAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$RC2CFB8");
+        put("Mac.RC2MAC/CFB8", "org.spongycastle.jce.provider.JCEMac$RC2CFB8");
         put("Alg.Alias.Mac.RC2/CFB8", "RC2MAC/CFB8");
 
 
-        put("Mac.GOST28147MAC", "org.bouncycastle.jce.provider.JCEMac$GOST28147");
+        put("Mac.GOST28147MAC", "org.spongycastle.jce.provider.JCEMac$GOST28147");
         put("Alg.Alias.Mac.GOST28147", "GOST28147MAC");
 
-        put("Mac.OLDHMACSHA384", "org.bouncycastle.jce.provider.JCEMac$OldSHA384");
+        put("Mac.OLDHMACSHA384", "org.spongycastle.jce.provider.JCEMac$OldSHA384");
 
-        put("Mac.OLDHMACSHA512", "org.bouncycastle.jce.provider.JCEMac$OldSHA512");
+        put("Mac.OLDHMACSHA512", "org.spongycastle.jce.provider.JCEMac$OldSHA512");
 
-        addHMACAlgorithm("MD2", "org.bouncycastle.jce.provider.JCEMac$MD2", "org.bouncycastle.jce.provider.JCEKeyGenerator$MD2HMAC");
-        addHMACAlgorithm("MD4", "org.bouncycastle.jce.provider.JCEMac$MD4", "org.bouncycastle.jce.provider.JCEKeyGenerator$MD4HMAC");
-        addHMACAlgorithm("MD5", "org.bouncycastle.jce.provider.JCEMac$MD5", "org.bouncycastle.jce.provider.JCEKeyGenerator$MD5HMAC");
+        addHMACAlgorithm("MD2", "org.spongycastle.jce.provider.JCEMac$MD2", "org.spongycastle.jce.provider.JCEKeyGenerator$MD2HMAC");
+        addHMACAlgorithm("MD4", "org.spongycastle.jce.provider.JCEMac$MD4", "org.spongycastle.jce.provider.JCEKeyGenerator$MD4HMAC");
+        addHMACAlgorithm("MD5", "org.spongycastle.jce.provider.JCEMac$MD5", "org.spongycastle.jce.provider.JCEKeyGenerator$MD5HMAC");
         addHMACAlias("MD5", IANAObjectIdentifiers.hmacMD5);
 
-        addHMACAlgorithm("SHA1", "org.bouncycastle.jce.provider.JCEMac$SHA1", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA1");
+        addHMACAlgorithm("SHA1", "org.spongycastle.jce.provider.JCEMac$SHA1", "org.spongycastle.jce.provider.JCEKeyGenerator$HMACSHA1");
         addHMACAlias("SHA1", PKCSObjectIdentifiers.id_hmacWithSHA1);
         addHMACAlias("SHA1", IANAObjectIdentifiers.hmacSHA1);
-        addHMACAlgorithm("SHA224", "org.bouncycastle.jce.provider.JCEMac$SHA224", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA224");
+        addHMACAlgorithm("SHA224", "org.spongycastle.jce.provider.JCEMac$SHA224", "org.spongycastle.jce.provider.JCEKeyGenerator$HMACSHA224");
         addHMACAlias("SHA224", PKCSObjectIdentifiers.id_hmacWithSHA224);
-        addHMACAlgorithm("SHA256", "org.bouncycastle.jce.provider.JCEMac$SHA256", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA256");
+        addHMACAlgorithm("SHA256", "org.spongycastle.jce.provider.JCEMac$SHA256", "org.spongycastle.jce.provider.JCEKeyGenerator$HMACSHA256");
         addHMACAlias("SHA256", PKCSObjectIdentifiers.id_hmacWithSHA256);
-        addHMACAlgorithm("SHA384", "org.bouncycastle.jce.provider.JCEMac$SHA384", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA384");
+        addHMACAlgorithm("SHA384", "org.spongycastle.jce.provider.JCEMac$SHA384", "org.spongycastle.jce.provider.JCEKeyGenerator$HMACSHA384");
         addHMACAlias("SHA384", PKCSObjectIdentifiers.id_hmacWithSHA384);
-        addHMACAlgorithm("SHA512", "org.bouncycastle.jce.provider.JCEMac$SHA512", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACSHA512");
+        addHMACAlgorithm("SHA512", "org.spongycastle.jce.provider.JCEMac$SHA512", "org.spongycastle.jce.provider.JCEKeyGenerator$HMACSHA512");
         addHMACAlias("SHA512", PKCSObjectIdentifiers.id_hmacWithSHA512);
 
-        addHMACAlgorithm("RIPEMD128", "org.bouncycastle.jce.provider.JCEMac$RIPEMD128", "org.bouncycastle.jce.provider.JCEKeyGenerator$RIPEMD128HMAC");
-        addHMACAlgorithm("RIPEMD160", "org.bouncycastle.jce.provider.JCEMac$RIPEMD160", "org.bouncycastle.jce.provider.JCEKeyGenerator$RIPEMD160HMAC");
+        addHMACAlgorithm("RIPEMD128", "org.spongycastle.jce.provider.JCEMac$RIPEMD128", "org.spongycastle.jce.provider.JCEKeyGenerator$RIPEMD128HMAC");
+        addHMACAlgorithm("RIPEMD160", "org.spongycastle.jce.provider.JCEMac$RIPEMD160", "org.spongycastle.jce.provider.JCEKeyGenerator$RIPEMD160HMAC");
         addHMACAlias("RIPEMD160", IANAObjectIdentifiers.hmacRIPEMD160);
 
-        addHMACAlgorithm("TIGER", "org.bouncycastle.jce.provider.JCEMac$Tiger", "org.bouncycastle.jce.provider.JCEKeyGenerator$HMACTIGER");
+        addHMACAlgorithm("TIGER", "org.spongycastle.jce.provider.JCEMac$Tiger", "org.spongycastle.jce.provider.JCEKeyGenerator$HMACTIGER");
         addHMACAlias("TIGER", IANAObjectIdentifiers.hmacTIGER);
 
-        put("Mac.PBEWITHHMACSHA", "org.bouncycastle.jce.provider.JCEMac$PBEWithSHA");
-        put("Mac.PBEWITHHMACSHA1", "org.bouncycastle.jce.provider.JCEMac$PBEWithSHA");
-        put("Mac.PBEWITHHMACRIPEMD160", "org.bouncycastle.jce.provider.JCEMac$PBEWithRIPEMD160");
+        put("Mac.PBEWITHHMACSHA", "org.spongycastle.jce.provider.JCEMac$PBEWithSHA");
+        put("Mac.PBEWITHHMACSHA1", "org.spongycastle.jce.provider.JCEMac$PBEWithSHA");
+        put("Mac.PBEWITHHMACRIPEMD160", "org.spongycastle.jce.provider.JCEMac$PBEWithRIPEMD160");
         put("Alg.Alias.Mac.1.3.14.3.2.26", "PBEWITHHMACSHA");
     }
 
@@ -663,41 +663,41 @@ public final class BouncyCastleProvider extends Provider
     //
     private void addMessageDigestAlgorithms()
     {
-        put("MessageDigest.SHA-1", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA1");
+        put("MessageDigest.SHA-1", "org.spongycastle.jce.provider.JDKMessageDigest$SHA1");
         put("Alg.Alias.MessageDigest.SHA1", "SHA-1");
         put("Alg.Alias.MessageDigest.SHA", "SHA-1");
         put("Alg.Alias.MessageDigest." + OIWObjectIdentifiers.idSHA1, "SHA-1");
-        put("MessageDigest.SHA-224", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA224");
+        put("MessageDigest.SHA-224", "org.spongycastle.jce.provider.JDKMessageDigest$SHA224");
         put("Alg.Alias.MessageDigest.SHA224", "SHA-224");
         put("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha224, "SHA-224");
-        put("MessageDigest.SHA-256", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA256");
+        put("MessageDigest.SHA-256", "org.spongycastle.jce.provider.JDKMessageDigest$SHA256");
         put("Alg.Alias.MessageDigest.SHA256", "SHA-256");
         put("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha256, "SHA-256");
-        put("MessageDigest.SHA-384", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA384");
+        put("MessageDigest.SHA-384", "org.spongycastle.jce.provider.JDKMessageDigest$SHA384");
         put("Alg.Alias.MessageDigest.SHA384", "SHA-384");
         put("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha384, "SHA-384");
-        put("MessageDigest.SHA-512", "org.bouncycastle.jce.provider.JDKMessageDigest$SHA512");
+        put("MessageDigest.SHA-512", "org.spongycastle.jce.provider.JDKMessageDigest$SHA512");
         put("Alg.Alias.MessageDigest.SHA512", "SHA-512");
         put("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha512, "SHA-512");
         
-        put("MessageDigest.MD2", "org.bouncycastle.jce.provider.JDKMessageDigest$MD2");
+        put("MessageDigest.MD2", "org.spongycastle.jce.provider.JDKMessageDigest$MD2");
         put("Alg.Alias.MessageDigest." + PKCSObjectIdentifiers.md2, "MD2");
-        put("MessageDigest.MD4", "org.bouncycastle.jce.provider.JDKMessageDigest$MD4");
+        put("MessageDigest.MD4", "org.spongycastle.jce.provider.JDKMessageDigest$MD4");
         put("Alg.Alias.MessageDigest." + PKCSObjectIdentifiers.md4, "MD4");
-        put("MessageDigest.MD5", "org.bouncycastle.jce.provider.JDKMessageDigest$MD5");
+        put("MessageDigest.MD5", "org.spongycastle.jce.provider.JDKMessageDigest$MD5");
         put("Alg.Alias.MessageDigest." + PKCSObjectIdentifiers.md5, "MD5");
-        put("MessageDigest.RIPEMD128", "org.bouncycastle.jce.provider.JDKMessageDigest$RIPEMD128");
+        put("MessageDigest.RIPEMD128", "org.spongycastle.jce.provider.JDKMessageDigest$RIPEMD128");
         put("Alg.Alias.MessageDigest." + TeleTrusTObjectIdentifiers.ripemd128, "RIPEMD128");
-        put("MessageDigest.RIPEMD160", "org.bouncycastle.jce.provider.JDKMessageDigest$RIPEMD160");
+        put("MessageDigest.RIPEMD160", "org.spongycastle.jce.provider.JDKMessageDigest$RIPEMD160");
         put("Alg.Alias.MessageDigest." + TeleTrusTObjectIdentifiers.ripemd160, "RIPEMD160");
-        put("MessageDigest.RIPEMD256", "org.bouncycastle.jce.provider.JDKMessageDigest$RIPEMD256");
+        put("MessageDigest.RIPEMD256", "org.spongycastle.jce.provider.JDKMessageDigest$RIPEMD256");
         put("Alg.Alias.MessageDigest." + TeleTrusTObjectIdentifiers.ripemd256, "RIPEMD256");
-        put("MessageDigest.RIPEMD320", "org.bouncycastle.jce.provider.JDKMessageDigest$RIPEMD320");
-        put("MessageDigest.Tiger", "org.bouncycastle.jce.provider.JDKMessageDigest$Tiger");
+        put("MessageDigest.RIPEMD320", "org.spongycastle.jce.provider.JDKMessageDigest$RIPEMD320");
+        put("MessageDigest.Tiger", "org.spongycastle.jce.provider.JDKMessageDigest$Tiger");
         
-        put("MessageDigest.WHIRLPOOL", "org.bouncycastle.jce.provider.JDKMessageDigest$Whirlpool");
+        put("MessageDigest.WHIRLPOOL", "org.spongycastle.jce.provider.JDKMessageDigest$Whirlpool");
         
-        put("MessageDigest.GOST3411", "org.bouncycastle.jce.provider.JDKMessageDigest$GOST3411");
+        put("MessageDigest.GOST3411", "org.spongycastle.jce.provider.JDKMessageDigest$GOST3411");
         put("Alg.Alias.MessageDigest.GOST", "GOST3411");
         put("Alg.Alias.MessageDigest.GOST-3411", "GOST3411");
         put("Alg.Alias.MessageDigest." + CryptoProObjectIdentifiers.gostR3411, "GOST3411");
@@ -708,33 +708,33 @@ public final class BouncyCastleProvider extends Provider
     //
     private void addSignatureAlgorithms()
     {
-        put("Signature.MD2WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$MD2WithRSAEncryption");
-        put("Signature.MD4WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$MD4WithRSAEncryption");
-        put("Signature.MD5WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$MD5WithRSAEncryption");
-        put("Signature.SHA1WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA1WithRSAEncryption");
-        put("Signature.SHA224WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA224WithRSAEncryption");
-        put("Signature.SHA256WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA256WithRSAEncryption");
-        put("Signature.SHA384WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA384WithRSAEncryption");
-        put("Signature.SHA512WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA512WithRSAEncryption");
-        put("Signature.RIPEMD160WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$RIPEMD160WithRSAEncryption");
-        put("Signature.RIPEMD128WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$RIPEMD128WithRSAEncryption");
-        put("Signature.RIPEMD256WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$RIPEMD256WithRSAEncryption");
-        put("Signature.DSA", "org.bouncycastle.jce.provider.JDKDSASigner$stdDSA");
-        put("Signature.NONEWITHDSA", "org.bouncycastle.jce.provider.JDKDSASigner$noneDSA");
-        put("Signature.SHA1withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$SHA1WithRSAEncryption");
-        put("Signature.MD5withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$MD5WithRSAEncryption");
-        put("Signature.RIPEMD160withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$RIPEMD160WithRSAEncryption");
+        put("Signature.MD2WithRSAEncryption", "org.spongycastle.jce.provider.JDKDigestSignature$MD2WithRSAEncryption");
+        put("Signature.MD4WithRSAEncryption", "org.spongycastle.jce.provider.JDKDigestSignature$MD4WithRSAEncryption");
+        put("Signature.MD5WithRSAEncryption", "org.spongycastle.jce.provider.JDKDigestSignature$MD5WithRSAEncryption");
+        put("Signature.SHA1WithRSAEncryption", "org.spongycastle.jce.provider.JDKDigestSignature$SHA1WithRSAEncryption");
+        put("Signature.SHA224WithRSAEncryption", "org.spongycastle.jce.provider.JDKDigestSignature$SHA224WithRSAEncryption");
+        put("Signature.SHA256WithRSAEncryption", "org.spongycastle.jce.provider.JDKDigestSignature$SHA256WithRSAEncryption");
+        put("Signature.SHA384WithRSAEncryption", "org.spongycastle.jce.provider.JDKDigestSignature$SHA384WithRSAEncryption");
+        put("Signature.SHA512WithRSAEncryption", "org.spongycastle.jce.provider.JDKDigestSignature$SHA512WithRSAEncryption");
+        put("Signature.RIPEMD160WithRSAEncryption", "org.spongycastle.jce.provider.JDKDigestSignature$RIPEMD160WithRSAEncryption");
+        put("Signature.RIPEMD128WithRSAEncryption", "org.spongycastle.jce.provider.JDKDigestSignature$RIPEMD128WithRSAEncryption");
+        put("Signature.RIPEMD256WithRSAEncryption", "org.spongycastle.jce.provider.JDKDigestSignature$RIPEMD256WithRSAEncryption");
+        put("Signature.DSA", "org.spongycastle.jce.provider.JDKDSASigner$stdDSA");
+        put("Signature.NONEWITHDSA", "org.spongycastle.jce.provider.JDKDSASigner$noneDSA");
+        put("Signature.SHA1withRSA/ISO9796-2", "org.spongycastle.jce.provider.JDKISOSignature$SHA1WithRSAEncryption");
+        put("Signature.MD5withRSA/ISO9796-2", "org.spongycastle.jce.provider.JDKISOSignature$MD5WithRSAEncryption");
+        put("Signature.RIPEMD160withRSA/ISO9796-2", "org.spongycastle.jce.provider.JDKISOSignature$RIPEMD160WithRSAEncryption");
 
-        put("Signature.RSASSA-PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$PSSwithRSA");
-        put("Signature." + PKCSObjectIdentifiers.id_RSASSA_PSS, "org.bouncycastle.jce.provider.JDKPSSSigner$PSSwithRSA");
-        put("Signature.SHA1withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA1withRSA");
-        put("Signature.SHA224withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA224withRSA");
-        put("Signature.SHA256withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA256withRSA");
-        put("Signature.SHA384withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA384withRSA");
-        put("Signature.SHA512withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA512withRSA");
+        put("Signature.RSASSA-PSS", "org.spongycastle.jce.provider.JDKPSSSigner$PSSwithRSA");
+        put("Signature." + PKCSObjectIdentifiers.id_RSASSA_PSS, "org.spongycastle.jce.provider.JDKPSSSigner$PSSwithRSA");
+        put("Signature.SHA1withRSA/PSS", "org.spongycastle.jce.provider.JDKPSSSigner$SHA1withRSA");
+        put("Signature.SHA224withRSA/PSS", "org.spongycastle.jce.provider.JDKPSSSigner$SHA224withRSA");
+        put("Signature.SHA256withRSA/PSS", "org.spongycastle.jce.provider.JDKPSSSigner$SHA256withRSA");
+        put("Signature.SHA384withRSA/PSS", "org.spongycastle.jce.provider.JDKPSSSigner$SHA384withRSA");
+        put("Signature.SHA512withRSA/PSS", "org.spongycastle.jce.provider.JDKPSSSigner$SHA512withRSA");
 
-        put("Signature.RSA", "org.bouncycastle.jce.provider.JDKDigestSignature$noneRSA");
-        put("Signature.RAWRSASSA-PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$nonePSS");
+        put("Signature.RSA", "org.spongycastle.jce.provider.JDKDigestSignature$noneRSA");
+        put("Signature.RAWRSASSA-PSS", "org.spongycastle.jce.provider.JDKPSSSigner$nonePSS");
 
         put("Alg.Alias.Signature.RAWDSA", "NONEWITHDSA");
 
@@ -829,10 +829,10 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature.RMD160WITHRSA", "RIPEMD160WithRSAEncryption");
         put("Alg.Alias.Signature.RIPEMD160WITHRSA", "RIPEMD160WithRSAEncryption");
 
-        addSignatureAlgorithm("SHA224", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa224", NISTObjectIdentifiers.dsa_with_sha224);
-        addSignatureAlgorithm("SHA256", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa256", NISTObjectIdentifiers.dsa_with_sha256);
-        addSignatureAlgorithm("SHA384", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa384", NISTObjectIdentifiers.dsa_with_sha384);
-        addSignatureAlgorithm("SHA512", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa512", NISTObjectIdentifiers.dsa_with_sha512);
+        addSignatureAlgorithm("SHA224", "DSA", "org.spongycastle.jce.provider.JDKDSASigner$dsa224", NISTObjectIdentifiers.dsa_with_sha224);
+        addSignatureAlgorithm("SHA256", "DSA", "org.spongycastle.jce.provider.JDKDSASigner$dsa256", NISTObjectIdentifiers.dsa_with_sha256);
+        addSignatureAlgorithm("SHA384", "DSA", "org.spongycastle.jce.provider.JDKDSASigner$dsa384", NISTObjectIdentifiers.dsa_with_sha384);
+        addSignatureAlgorithm("SHA512", "DSA", "org.spongycastle.jce.provider.JDKDSASigner$dsa512", NISTObjectIdentifiers.dsa_with_sha512);
 
         put("Alg.Alias.Signature.SHA/DSA", "DSA");
         put("Alg.Alias.Signature.SHA1withDSA", "DSA");
@@ -848,7 +848,7 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature.SHA1WithRSA/ISO9796-2", "SHA1withRSA/ISO9796-2");
         put("Alg.Alias.Signature.RIPEMD160WithRSA/ISO9796-2", "RIPEMD160withRSA/ISO9796-2");
         
-        put("Signature.ECGOST3410", "org.bouncycastle.jce.provider.JDKGOST3410Signer$ecgost3410");
+        put("Signature.ECGOST3410", "org.spongycastle.jce.provider.JDKGOST3410Signer$ecgost3410");
         put("Alg.Alias.Signature.ECGOST-3410", "ECGOST3410");
         put("Alg.Alias.Signature.GOST-3410-2001", "ECGOST3410");
         put("Alg.Alias.Signature.GOST3411withECGOST3410", "ECGOST3410");
@@ -856,7 +856,7 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature.GOST3411WithECGOST3410", "ECGOST3410");
         put("Alg.Alias.Signature." + CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001, "ECGOST3410");
         
-        put("Signature.GOST3410", "org.bouncycastle.jce.provider.JDKGOST3410Signer$gost3410");
+        put("Signature.GOST3410", "org.spongycastle.jce.provider.JDKGOST3410Signer$gost3410");
         put("Alg.Alias.Signature.GOST-3410", "GOST3410");
         put("Alg.Alias.Signature.GOST-3410-94", "GOST3410");
         put("Alg.Alias.Signature.GOST3411withGOST3410", "GOST3410");

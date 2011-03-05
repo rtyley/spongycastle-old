@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.cert;
+package org.spongycastle.jce.cert;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,22 +20,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.util.ASN1Dump;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jce.PrincipalUtil;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.ASN1TaggedObject;
+import org.spongycastle.asn1.DERGeneralizedTime;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DEROutputStream;
+import org.spongycastle.asn1.util.ASN1Dump;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.ExtendedKeyUsage;
+import org.spongycastle.asn1.x509.KeyPurposeId;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.asn1.x509.X509Extensions;
+import org.spongycastle.asn1.x509.X509Name;
+import org.spongycastle.jce.PrincipalUtil;
 
 /**
  * A <code>CertSelector</code> that selects
@@ -74,18 +74,18 @@ import org.bouncycastle.jce.PrincipalUtil;
  * <b>TODO: implement name constraints</b>
  * <b>TODO: implement match check for path to names</b><br />
  * <br />
- * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
- * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
- * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
- * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream},
- * {@link org.bouncycastle.asn1.DERObject DERObject},
- * {@link org.bouncycastle.asn1.OIDTokenizer OIDTokenizer},
- * {@link org.bouncycastle.asn1.x509.X509Name X509Name},
- * {@link org.bouncycastle.asn1.x509.X509Extensions X509Extensions},
- * {@link org.bouncycastle.asn1.x509.ExtendedKeyUsage ExtendedKeyUsage},
- * {@link org.bouncycastle.asn1.x509.KeyPurposeId KeyPurposeId},
- * {@link org.bouncycastle.asn1.x509.SubjectPublicKeyInfo SubjectPublicKeyInfo},
- * {@link org.bouncycastle.asn1.x509.AlgorithmIdentifier AlgorithmIdentifier}
+ * Uses {@link org.spongycastle.asn1.ASN1InputStream ASN1InputStream},
+ * {@link org.spongycastle.asn1.ASN1Sequence ASN1Sequence},
+ * {@link org.spongycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
+ * {@link org.spongycastle.asn1.DEROutputStream DEROutputStream},
+ * {@link org.spongycastle.asn1.DERObject DERObject},
+ * {@link org.spongycastle.asn1.OIDTokenizer OIDTokenizer},
+ * {@link org.spongycastle.asn1.x509.X509Name X509Name},
+ * {@link org.spongycastle.asn1.x509.X509Extensions X509Extensions},
+ * {@link org.spongycastle.asn1.x509.ExtendedKeyUsage ExtendedKeyUsage},
+ * {@link org.spongycastle.asn1.x509.KeyPurposeId KeyPurposeId},
+ * {@link org.spongycastle.asn1.x509.SubjectPublicKeyInfo SubjectPublicKeyInfo},
+ * {@link org.spongycastle.asn1.x509.AlgorithmIdentifier AlgorithmIdentifier}
  */
 public class X509CertSelector implements CertSelector
 {
@@ -208,7 +208,7 @@ public class X509CertSelector implements CertSelector
      * If <code>issuerDN</code> is not <code>null</code>, it should contain
      * a distinguished name, in RFC 2253 format.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.x509.X509Name X509Name} for parsing the
+     * Uses {@link org.spongycastle.asn1.x509.X509Name X509Name} for parsing the
      * issuerDN.
      * 
      * @param issuerDN
@@ -281,10 +281,10 @@ public class X509CertSelector implements CertSelector
      * Note that the byte array specified here is cloned to protect against
      * subsequent modifications.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
-     * {@link org.bouncycastle.asn1.DERObject DERObject},
-     * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
-     * {@link org.bouncycastle.asn1.x509.X509Name X509Name}
+     * Uses {@link org.spongycastle.asn1.ASN1InputStream ASN1InputStream},
+     * {@link org.spongycastle.asn1.DERObject DERObject},
+     * {@link org.spongycastle.asn1.ASN1Sequence ASN1Sequence},
+     * {@link org.spongycastle.asn1.x509.X509Name X509Name}
      * 
      * @param issuerDN -
      *            a byte array containing the distinguished name in ASN.1 DER
@@ -325,7 +325,7 @@ public class X509CertSelector implements CertSelector
      * If <code>subjectDN</code> is not <code>null</code>, it should
      * contain a distinguished name, in RFC 2253 format.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.x509.X509Name X509Name} for parsing the
+     * Uses {@link org.spongycastle.asn1.x509.X509Name X509Name} for parsing the
      * subjectDN.
      * 
      * @param subjectDN
@@ -368,10 +368,10 @@ public class X509CertSelector implements CertSelector
      * the ASN.1 notation for this structure, see
      * {@link #setIssuer(byte []) setIssuer(byte [] issuerDN)}.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
-     * {@link org.bouncycastle.asn1.DERObject DERObject},
-     * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
-     * {@link org.bouncycastle.asn1.x509.X509Name X509Name}
+     * Uses {@link org.spongycastle.asn1.ASN1InputStream ASN1InputStream},
+     * {@link org.spongycastle.asn1.DERObject DERObject},
+     * {@link org.spongycastle.asn1.ASN1Sequence ASN1Sequence},
+     * {@link org.spongycastle.asn1.x509.X509Name X509Name}
      * 
      * @param subjectDN
      *            a byte array containing the distinguished name in ASN.1 DER
@@ -707,7 +707,7 @@ public class X509CertSelector implements CertSelector
      * <br />
      * Note that the Set is cloned to protect against subsequent modifications.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.x509.KeyPurposeId KeyPurposeId}
+     * Uses {@link org.spongycastle.asn1.x509.KeyPurposeId KeyPurposeId}
      * 
      * @param keyPurposeSet
      *            a <code>Set</code> of key purpose OIDs in string format (or
@@ -1320,7 +1320,7 @@ public class X509CertSelector implements CertSelector
      * If the value returned is not <code>null</code>, it is a distinguished
      * name, in RFC 2253 format.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.x509.X509Name X509Name} for formatiing
+     * Uses {@link org.spongycastle.asn1.x509.X509Name X509Name} for formatiing
      * byte[] issuerDN to String.
      * 
      * @return the required issuer distinguished name in RFC 2253 format (or
@@ -1354,8 +1354,8 @@ public class X509CertSelector implements CertSelector
      * Note that the byte array returned is cloned to protect against subsequent
      * modifications.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream},
-     * {@link org.bouncycastle.asn1.x509.X509Name X509Name} to gnerate byte[]
+     * Uses {@link org.spongycastle.asn1.DEROutputStream DEROutputStream},
+     * {@link org.spongycastle.asn1.x509.X509Name X509Name} to gnerate byte[]
      * output for String issuerDN.
      * 
      * @return a byte array containing the required issuer distinguished name in
@@ -1393,7 +1393,7 @@ public class X509CertSelector implements CertSelector
      * If the value returned is not <code>null</code>, it is a distinguished
      * name, in RFC 2253 format.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.x509.X509Name X509Name} for formatiing
+     * Uses {@link org.spongycastle.asn1.x509.X509Name X509Name} for formatiing
      * byte[] subjectDN to String.
      * 
      * @return the required subject distinguished name in RFC 2253 format (or
@@ -1427,8 +1427,8 @@ public class X509CertSelector implements CertSelector
      * Note that the byte array returned is cloned to protect against subsequent
      * modifications.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream},
-     * {@link org.bouncycastle.asn1.x509.X509Name X509Name} to gnerate byte[]
+     * Uses {@link org.spongycastle.asn1.DEROutputStream DEROutputStream},
+     * {@link org.spongycastle.asn1.x509.X509Name X509Name} to gnerate byte[]
      * output for String subjectDN.
      * 
      * @return a byte array containing the required subject distinguished name
@@ -1859,9 +1859,9 @@ public class X509CertSelector implements CertSelector
      * <b>TODO: implement output for currently unsupported options(name
      * constraints)</b><br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
-     * {@link org.bouncycastle.asn1.DERObject DERObject},
-     * {@link org.bouncycastle.asn1.x509.KeyPurposeId KeyPurposeId}
+     * Uses {@link org.spongycastle.asn1.ASN1InputStream ASN1InputStream},
+     * {@link org.spongycastle.asn1.DERObject DERObject},
+     * {@link org.spongycastle.asn1.x509.KeyPurposeId KeyPurposeId}
      * 
      * @return a <code>String</code> describing the contents of the
      *         <code>CertSelector</code>
@@ -2002,17 +2002,17 @@ public class X509CertSelector implements CertSelector
      * <br />
      * <b>TODO: implement missing tests (name constraints and path to names)</b><br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
-     * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
-     * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
-     * {@link org.bouncycastle.asn1.DERObject DERObject},
-     * {@link org.bouncycastle.asn1.DERGeneralizedTime DERGeneralizedTime},
-     * {@link org.bouncycastle.asn1.x509.X509Name X509Name},
-     * {@link org.bouncycastle.asn1.x509.X509Extensions X509Extensions},
-     * {@link org.bouncycastle.asn1.x509.ExtendedKeyUsage ExtendedKeyUsage},
-     * {@link org.bouncycastle.asn1.x509.KeyPurposeId KeyPurposeId},
-     * {@link org.bouncycastle.asn1.x509.SubjectPublicKeyInfo SubjectPublicKeyInfo},
-     * {@link org.bouncycastle.asn1.x509.AlgorithmIdentifier AlgorithmIdentifier}
+     * Uses {@link org.spongycastle.asn1.ASN1InputStream ASN1InputStream},
+     * {@link org.spongycastle.asn1.ASN1Sequence ASN1Sequence},
+     * {@link org.spongycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
+     * {@link org.spongycastle.asn1.DERObject DERObject},
+     * {@link org.spongycastle.asn1.DERGeneralizedTime DERGeneralizedTime},
+     * {@link org.spongycastle.asn1.x509.X509Name X509Name},
+     * {@link org.spongycastle.asn1.x509.X509Extensions X509Extensions},
+     * {@link org.spongycastle.asn1.x509.ExtendedKeyUsage ExtendedKeyUsage},
+     * {@link org.spongycastle.asn1.x509.KeyPurposeId KeyPurposeId},
+     * {@link org.spongycastle.asn1.x509.SubjectPublicKeyInfo SubjectPublicKeyInfo},
+     * {@link org.spongycastle.asn1.x509.AlgorithmIdentifier AlgorithmIdentifier}
      * to access X509 extensions
      * 
      * @param cert

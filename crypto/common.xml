@@ -183,43 +183,43 @@
 	<property name="doctitle" value="&lt;b&gt; ${bc} API &lt;/b&gt;" />
 
 	<property name="lw-jdoc-packages" value="
-                org.bouncycastle.asn1,
-                org.bouncycastle.asn1.cmp,
-                org.bouncycastle.asn1.cms,
-                org.bouncycastle.asn1.cryptopro,
-                org.bouncycastle.asn1.ess,
-                org.bouncycastle.asn1.misc,
-                org.bouncycastle.asn1.mozilla,
-                org.bouncycastle.asn1.nist,
-                org.bouncycastle.asn1.ocsp,
-                org.bouncycastle.asn1.oiw,
-                org.bouncycastle.asn1.pkcs,
-                org.bouncycastle.asn1.sec,
-                org.bouncycastle.asn1.smime,
-                org.bouncycastle.asn1.teletrust,
-                org.bouncycastle.asn1.test,
-                org.bouncycastle.asn1.tsp,
-                org.bouncycastle.asn1.util,
-                org.bouncycastle.asn1.x509,
-                org.bouncycastle.asn1.x9,
-		org.bouncycastle.math.ec,
-		org.bouncycastle.crypto,
-		org.bouncycastle.crypto.agreement,
-		org.bouncycastle.crypto.digests,
-		org.bouncycastle.crypto.encodings,
-		org.bouncycastle.crypto.engines,
-		org.bouncycastle.crypto.generators,
-		org.bouncycastle.crypto.io,
-		org.bouncycastle.crypto.macs,
-		org.bouncycastle.crypto.modes,
-		org.bouncycastle.crypto.params,
-		org.bouncycastle.crypto.signers,
-		org.bouncycastle.crypto.test,
-		org.bouncycastle.crypto.examples,
-		org.bouncycastle.util.encoders,
-		org.bouncycastle.util.test" />
+                org.spongycastle.asn1,
+                org.spongycastle.asn1.cmp,
+                org.spongycastle.asn1.cms,
+                org.spongycastle.asn1.cryptopro,
+                org.spongycastle.asn1.ess,
+                org.spongycastle.asn1.misc,
+                org.spongycastle.asn1.mozilla,
+                org.spongycastle.asn1.nist,
+                org.spongycastle.asn1.ocsp,
+                org.spongycastle.asn1.oiw,
+                org.spongycastle.asn1.pkcs,
+                org.spongycastle.asn1.sec,
+                org.spongycastle.asn1.smime,
+                org.spongycastle.asn1.teletrust,
+                org.spongycastle.asn1.test,
+                org.spongycastle.asn1.tsp,
+                org.spongycastle.asn1.util,
+                org.spongycastle.asn1.x509,
+                org.spongycastle.asn1.x9,
+		org.spongycastle.math.ec,
+		org.spongycastle.crypto,
+		org.spongycastle.crypto.agreement,
+		org.spongycastle.crypto.digests,
+		org.spongycastle.crypto.encodings,
+		org.spongycastle.crypto.engines,
+		org.spongycastle.crypto.generators,
+		org.spongycastle.crypto.io,
+		org.spongycastle.crypto.macs,
+		org.spongycastle.crypto.modes,
+		org.spongycastle.crypto.params,
+		org.spongycastle.crypto.signers,
+		org.spongycastle.crypto.test,
+		org.spongycastle.crypto.examples,
+		org.spongycastle.util.encoders,
+		org.spongycastle.util.test" />
 
-	<property name="jce-jdoc-packages" value="org.bouncycastle.*, javax.*" />
+	<property name="jce-jdoc-packages" value="org.spongycastle.*, javax.*" />
 
 	<target name="lw-jdoc" if="is.lw" >
 		<javadoc packagenames="${lw-jdoc-packages}" 
@@ -231,9 +231,9 @@
 			windowtitle="${windowtitle}"
 			doctitle="${doctitle}"
 			failonerror = "yes">
-			<group title="Core Packages" packages="org.bouncycastle.*" />
+			<group title="Core Packages" packages="org.spongycastle.*" />
 			<group title="Example Packages" 
-				packages="org.bouncycastle.crypto.examples.*" />
+				packages="org.spongycastle.crypto.examples.*" />
 		</javadoc>
 	</target>
 
@@ -247,43 +247,43 @@
 			windowtitle="${windowtitle}"
 			doctitle="${doctitle}"
 			failonerror = "yes">
-			<group title="Core Packages" packages="org.bouncycastle.*" />
+			<group title="Core Packages" packages="org.spongycastle.*" />
 			<group title="Example Packages" 
-				packages="org.bouncycastle.crypto.examples.*" />
+				packages="org.spongycastle.crypto.examples.*" />
 		</javadoc>
 	</target>
 
 	<!-- testing -->
 	<target name="lw-test" depends="compile" if="is.lw" >
-		<java classname="org.bouncycastle.crypto.test.RegressionTest" 
+		<java classname="org.spongycastle.crypto.test.RegressionTest"
 			fork="yes" >
 			<classpath refid = "compile.cp" />
 		</java>
 	</target>
 
 	<target name="jce-test" depends="compile" if="is.jce" >
-		<java classname="org.bouncycastle.crypto.test.RegressionTest" 
+		<java classname="org.spongycastle.crypto.test.RegressionTest"
 			fork="yes" >
 			<classpath refid = "compile.cp" />
 		</java>
 	</target>
 	
 	<target name="asn1-test" >
-		<java classname="org.bouncycastle.asn1.test.RegressionTest" 
+		<java classname="org.spongycastle.asn1.test.RegressionTest"
 			fork="yes" >
 			<classpath refid = "compile.cp" />
 		</java>
 	</target>
 	
 	<target name="cms-test" if="is.jce" >
-		<java classname="org.bouncycastle.cms.test.AllTests" 
+		<java classname="org.spongycastle.cms.test.AllTests"
 			fork="yes" >
 			<classpath refid = "compile.cp" />
 		</java>
 	</target>
 	
 	<target name="smime-test" if="is.jce" >
-		<java classname="org.bouncycastle.mail.smime.test.AllTests" 
+		<java classname="org.spongycastle.mail.smime.test.AllTests"
 			fork="yes" >
 			<classpath refid = "compile.cp" />
 		</java>

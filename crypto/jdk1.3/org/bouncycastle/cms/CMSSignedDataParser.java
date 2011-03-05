@@ -1,4 +1,4 @@
-package org.bouncycastle.cms;
+package org.spongycastle.cms;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -8,8 +8,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CertStoreException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -17,42 +17,42 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Generator;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1OctetStringParser;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1SequenceParser;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.ASN1SetParser;
-import org.bouncycastle.asn1.ASN1StreamParser;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.BERSequenceGenerator;
-import org.bouncycastle.asn1.BERSetParser;
-import org.bouncycastle.asn1.BERTaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERTags;
-import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.ContentInfoParser;
-import org.bouncycastle.asn1.cms.SignedDataParser;
-import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.AttributeCertificate;
-import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.cert.X509AttributeCertificateHolder;
-import org.bouncycastle.cert.X509CRLHolder;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
-import org.bouncycastle.util.CollectionStore;
-import org.bouncycastle.util.Store;
-import org.bouncycastle.util.io.Streams;
-import org.bouncycastle.x509.NoSuchStoreException;
-import org.bouncycastle.x509.X509Store;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1Generator;
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
+import org.spongycastle.asn1.ASN1OctetStringParser;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.ASN1SequenceParser;
+import org.spongycastle.asn1.ASN1Set;
+import org.spongycastle.asn1.ASN1SetParser;
+import org.spongycastle.asn1.ASN1StreamParser;
+import org.spongycastle.asn1.ASN1TaggedObject;
+import org.spongycastle.asn1.BERSequenceGenerator;
+import org.spongycastle.asn1.BERSetParser;
+import org.spongycastle.asn1.BERTaggedObject;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DERSet;
+import org.spongycastle.asn1.DERTaggedObject;
+import org.spongycastle.asn1.DERTags;
+import org.spongycastle.asn1.cms.CMSObjectIdentifiers;
+import org.spongycastle.asn1.cms.ContentInfoParser;
+import org.spongycastle.asn1.cms.SignedDataParser;
+import org.spongycastle.asn1.cms.SignerInfo;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.AttributeCertificate;
+import org.spongycastle.asn1.x509.CertificateList;
+import org.spongycastle.asn1.x509.X509CertificateStructure;
+import org.spongycastle.cert.X509AttributeCertificateHolder;
+import org.spongycastle.cert.X509CRLHolder;
+import org.spongycastle.cert.X509CertificateHolder;
+import org.spongycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.spongycastle.operator.SignatureAlgorithmIdentifierFinder;
+import org.spongycastle.util.CollectionStore;
+import org.spongycastle.util.Store;
+import org.spongycastle.util.io.Streams;
+import org.spongycastle.x509.NoSuchStoreException;
+import org.spongycastle.x509.X509Store;
 
 /**
  * Parsing class for an CMS Signed Data object from an input stream.
@@ -292,7 +292,7 @@ public class CMSSignedDataParser
      * @param provider name of provider to use
      * @return a store of attribute certificates
      * @exception NoSuchProviderException if the provider requested isn't available.
-     * @exception org.bouncycastle.x509.NoSuchStoreException if the store type isn't available.
+     * @exception org.spongycastle.x509.NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
      */
     public X509Store getAttributeCertificates(
@@ -310,7 +310,7 @@ public class CMSSignedDataParser
      * @param type type of store to create
      * @param provider provider to use
      * @return a store of attribute certificates
-     * @exception org.bouncycastle.x509.NoSuchStoreException if the store type isn't available.
+     * @exception org.spongycastle.x509.NoSuchStoreException if the store type isn't available.
      * @exception CMSException if a general exception prevents creation of the X509Store
      */
     public X509Store getAttributeCertificates(

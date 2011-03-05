@@ -1,4 +1,4 @@
-package org.bouncycastle.cms;
+package org.spongycastle.cms;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -9,36 +9,36 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.Signature;
 import java.security.cert.CRLException;
-import org.bouncycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CertStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
+import org.spongycastle.jce.cert.CollectionCertStoreParameters;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.x509.NoSuchStoreException;
-import org.bouncycastle.x509.X509CollectionStoreParameters;
-import org.bouncycastle.x509.X509Store;
-import org.bouncycastle.x509.X509V2AttributeCertificate;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.ASN1Set;
+import org.spongycastle.asn1.ASN1TaggedObject;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERNull;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.spongycastle.asn1.eac.EACObjectIdentifiers;
+import org.spongycastle.asn1.nist.NISTObjectIdentifiers;
+import org.spongycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.X509ObjectIdentifiers;
+import org.spongycastle.asn1.x9.X9ObjectIdentifiers;
+import org.spongycastle.x509.NoSuchStoreException;
+import org.spongycastle.x509.X509CollectionStoreParameters;
+import org.spongycastle.x509.X509Store;
+import org.spongycastle.x509.X509V2AttributeCertificate;
 
 class CMSSignedHelper
 {

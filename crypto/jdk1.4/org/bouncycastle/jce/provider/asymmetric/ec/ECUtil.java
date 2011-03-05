@@ -1,21 +1,21 @@
-package org.bouncycastle.jce.provider.asymmetric.ec;
+package org.spongycastle.jce.provider.asymmetric.ec;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
-import org.bouncycastle.asn1.nist.NISTNamedCurves;
-import org.bouncycastle.asn1.sec.SECNamedCurves;
-import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
-import org.bouncycastle.asn1.x9.X962NamedCurves;
-import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.params.ECDomainParameters;
-import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
-import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle.jce.interfaces.ECPrivateKey;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.provider.ProviderUtil;
-import org.bouncycastle.jce.provider.JCEECPublicKey;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.cryptopro.ECGOST3410NamedCurves;
+import org.spongycastle.asn1.nist.NISTNamedCurves;
+import org.spongycastle.asn1.sec.SECNamedCurves;
+import org.spongycastle.asn1.teletrust.TeleTrusTNamedCurves;
+import org.spongycastle.asn1.x9.X962NamedCurves;
+import org.spongycastle.asn1.x9.X9ECParameters;
+import org.spongycastle.crypto.params.AsymmetricKeyParameter;
+import org.spongycastle.crypto.params.ECDomainParameters;
+import org.spongycastle.crypto.params.ECPrivateKeyParameters;
+import org.spongycastle.crypto.params.ECPublicKeyParameters;
+import org.spongycastle.jce.interfaces.ECPrivateKey;
+import org.spongycastle.jce.interfaces.ECPublicKey;
+import org.spongycastle.jce.spec.ECParameterSpec;
+import org.spongycastle.jce.provider.ProviderUtil;
+import org.spongycastle.jce.provider.JCEECPublicKey;
 
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
@@ -23,7 +23,7 @@ import java.security.PublicKey;
 
 /**
  * utility class for converting jce/jca ECDSA, ECDH, and ECDHC
- * objects into their org.bouncycastle.crypto counterparts.
+ * objects into their org.spongycastle.crypto counterparts.
  */
 public class ECUtil
 {

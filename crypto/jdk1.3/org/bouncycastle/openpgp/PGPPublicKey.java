@@ -1,4 +1,4 @@
-package org.bouncycastle.openpgp;
+package org.spongycastle.openpgp;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -20,22 +20,22 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bouncycastle.bcpg.BCPGKey;
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.ContainedPacket;
-import org.bouncycastle.bcpg.DSAPublicBCPGKey;
-import org.bouncycastle.bcpg.ElGamalPublicBCPGKey;
-import org.bouncycastle.bcpg.MPInteger;
-import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
-import org.bouncycastle.bcpg.PublicKeyPacket;
-import org.bouncycastle.bcpg.RSAPublicBCPGKey;
-import org.bouncycastle.bcpg.TrustPacket;
-import org.bouncycastle.bcpg.UserAttributePacket;
-import org.bouncycastle.bcpg.UserIDPacket;
-import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
-import org.bouncycastle.jce.spec.ElGamalParameterSpec;
-import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
-import org.bouncycastle.util.Arrays;
+import org.spongycastle.bcpg.BCPGKey;
+import org.spongycastle.bcpg.BCPGOutputStream;
+import org.spongycastle.bcpg.ContainedPacket;
+import org.spongycastle.bcpg.DSAPublicBCPGKey;
+import org.spongycastle.bcpg.ElGamalPublicBCPGKey;
+import org.spongycastle.bcpg.MPInteger;
+import org.spongycastle.bcpg.PublicKeyAlgorithmTags;
+import org.spongycastle.bcpg.PublicKeyPacket;
+import org.spongycastle.bcpg.RSAPublicBCPGKey;
+import org.spongycastle.bcpg.TrustPacket;
+import org.spongycastle.bcpg.UserAttributePacket;
+import org.spongycastle.bcpg.UserIDPacket;
+import org.spongycastle.jce.interfaces.ElGamalPublicKey;
+import org.spongycastle.jce.spec.ElGamalParameterSpec;
+import org.spongycastle.jce.spec.ElGamalPublicKeySpec;
+import org.spongycastle.util.Arrays;
 
 /**
  * general class to handle a PGP public key object.

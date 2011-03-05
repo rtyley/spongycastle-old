@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -22,13 +22,13 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.TBSCertList;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.jce.X509Principal;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DEROutputStream;
+import org.spongycastle.asn1.x509.CertificateList;
+import org.spongycastle.asn1.x509.TBSCertList;
+import org.spongycastle.asn1.x509.X509Extension;
+import org.spongycastle.asn1.x509.X509Extensions;
+import org.spongycastle.jce.X509Principal;
 
 /**
  * The following extensions are listed in RFC 2459 as relevant to CRLs

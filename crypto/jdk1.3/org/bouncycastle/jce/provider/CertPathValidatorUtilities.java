@@ -1,40 +1,40 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREnumerated;
-import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.isismtt.ISISMTTObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.CRLDistPoint;
-import org.bouncycastle.asn1.x509.CRLNumber;
-import org.bouncycastle.asn1.x509.CRLReason;
-import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.DistributionPoint;
-import org.bouncycastle.asn1.x509.DistributionPointName;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.PolicyInformation;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.exception.ExtCertPathValidatorException;
-import org.bouncycastle.util.Selector;
-import org.bouncycastle.util.StoreException;
-import org.bouncycastle.x509.ExtendedPKIXParameters;
-import org.bouncycastle.x509.X509AttributeCertificate;
-import org.bouncycastle.x509.X509CRLStoreSelector;
-import org.bouncycastle.x509.X509Store;
-import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
-import org.bouncycastle.x509.X509CertStoreSelector;
-import org.bouncycastle.x509.X509AttributeCertStoreSelector;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1OutputStream;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DEREnumerated;
+import org.spongycastle.asn1.DERGeneralizedTime;
+import org.spongycastle.asn1.DERIA5String;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.isismtt.ISISMTTObjectIdentifiers;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.CRLDistPoint;
+import org.spongycastle.asn1.x509.CRLNumber;
+import org.spongycastle.asn1.x509.CRLReason;
+import org.spongycastle.asn1.x509.CertificateList;
+import org.spongycastle.asn1.x509.DistributionPoint;
+import org.spongycastle.asn1.x509.DistributionPointName;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.GeneralNames;
+import org.spongycastle.asn1.x509.PolicyInformation;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.asn1.x509.X509Extensions;
+import org.spongycastle.jce.PrincipalUtil;
+import org.spongycastle.jce.X509Principal;
+import org.spongycastle.jce.exception.ExtCertPathValidatorException;
+import org.spongycastle.util.Selector;
+import org.spongycastle.util.StoreException;
+import org.spongycastle.x509.ExtendedPKIXParameters;
+import org.spongycastle.x509.X509AttributeCertificate;
+import org.spongycastle.x509.X509CRLStoreSelector;
+import org.spongycastle.x509.X509Store;
+import org.spongycastle.x509.ExtendedPKIXBuilderParameters;
+import org.spongycastle.x509.X509CertStoreSelector;
+import org.spongycastle.x509.X509AttributeCertStoreSelector;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,20 +42,20 @@ import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.GeneralSecurityException;
-import java.security.cert.CRL;
-import org.bouncycastle.jce.cert.CertPath;
-import org.bouncycastle.jce.cert.CertPathValidatorException;
-import org.bouncycastle.jce.cert.CertSelector;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
+
+import org.spongycastle.jce.cert.CertPath;
+import org.spongycastle.jce.cert.CertPathValidatorException;
+import org.spongycastle.jce.cert.CertSelector;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CertStoreException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateParsingException;
-import org.bouncycastle.jce.cert.PKIXParameters;
-import org.bouncycastle.jce.cert.PolicyQualifierInfo;
-import org.bouncycastle.jce.cert.TrustAnchor;
+import org.spongycastle.jce.cert.PKIXParameters;
+import org.spongycastle.jce.cert.PolicyQualifierInfo;
+import org.spongycastle.jce.cert.TrustAnchor;
 import java.security.cert.X509CRL;
-import org.bouncycastle.jce.cert.X509CRLSelector;
-import org.bouncycastle.jce.cert.X509CertSelector;
+import org.spongycastle.jce.cert.X509CRLSelector;
+import org.spongycastle.jce.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPublicKey;
@@ -369,7 +369,7 @@ public class CertPathValidatorUtilities
      * @param crlSelect a {@link X509CRLStoreSelector} object that will be used
      *            to select the CRLs
      * @param crlStores a List containing only
-     *            {@link org.bouncycastle.x509.X509Store  X509Store} objects.
+     *            {@link org.spongycastle.x509.X509Store  X509Store} objects.
      *            These are used to search for CRLs
      *
      * @return a Collection of all found {@link X509CRL X509CRL} objects. May be
@@ -771,7 +771,7 @@ public class CertPathValidatorUtilities
      *            are used to search for certificates.
      *
      * @return a Collection of all found {@link X509Certificate} or
-     *         {@link org.bouncycastle.x509.X509AttributeCertificate} objects.
+     *         {@link org.spongycastle.x509.X509AttributeCertificate} objects.
      *         May be empty but never <code>null</code>.
      */
     protected static Collection findCertificates(X509CertStoreSelector certSelect,
@@ -1195,7 +1195,7 @@ public class CertPathValidatorUtilities
      *
      * @param dp The distribution point for which the complete CRL
      * @param cert The <code>X509Certificate</code> or
-     *            {@link org.bouncycastle.x509.X509AttributeCertificate} for
+     *            {@link org.spongycastle.x509.X509AttributeCertificate} for
      *            which the CRL should be searched.
      * @param currentDate The date for which the delta CRLs must be valid.
      * @param paramsPKIX The extended PKIX parameters.

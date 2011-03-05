@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -17,27 +17,25 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.interfaces.DHKey;
 
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.BufferedAsymmetricBlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA224Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA384Digest;
-import org.bouncycastle.crypto.digests.SHA512Digest;
-import org.bouncycastle.crypto.encodings.ISO9796d1Encoding;
-import org.bouncycastle.crypto.encodings.OAEPEncoding;
-import org.bouncycastle.crypto.encodings.PKCS1Encoding;
-import org.bouncycastle.crypto.engines.ElGamalEngine;
-import org.bouncycastle.crypto.engines.RSAEngine;
-import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.jce.interfaces.ElGamalKey;
-import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
-import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
-import org.bouncycastle.util.Strings;
+import org.spongycastle.crypto.AsymmetricBlockCipher;
+import org.spongycastle.crypto.BufferedAsymmetricBlockCipher;
+import org.spongycastle.crypto.CipherParameters;
+import org.spongycastle.crypto.InvalidCipherTextException;
+import org.spongycastle.crypto.digests.MD5Digest;
+import org.spongycastle.crypto.digests.SHA1Digest;
+import org.spongycastle.crypto.digests.SHA224Digest;
+import org.spongycastle.crypto.digests.SHA256Digest;
+import org.spongycastle.crypto.digests.SHA384Digest;
+import org.spongycastle.crypto.digests.SHA512Digest;
+import org.spongycastle.crypto.encodings.ISO9796d1Encoding;
+import org.spongycastle.crypto.encodings.OAEPEncoding;
+import org.spongycastle.crypto.encodings.PKCS1Encoding;
+import org.spongycastle.crypto.engines.ElGamalEngine;
+import org.spongycastle.crypto.params.ParametersWithRandom;
+import org.spongycastle.jce.interfaces.ElGamalKey;
+import org.spongycastle.jce.interfaces.ElGamalPrivateKey;
+import org.spongycastle.jce.interfaces.ElGamalPublicKey;
+import org.spongycastle.util.Strings;
 
 public class JCEElGamalCipher extends WrapCipherSpi
 {

@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.asymmetric.ec;
+package org.spongycastle.jce.provider.asymmetric.ec;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidParameterException;
@@ -7,18 +7,18 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Hashtable;
 
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
-import org.bouncycastle.crypto.params.ECDomainParameters;
-import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
-import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
-import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.provider.JCEECPrivateKey;
-import org.bouncycastle.jce.provider.JCEECPublicKey;
-import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
-import org.bouncycastle.jce.provider.ProviderUtil;
-import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.spongycastle.crypto.AsymmetricCipherKeyPair;
+import org.spongycastle.crypto.generators.ECKeyPairGenerator;
+import org.spongycastle.crypto.params.ECDomainParameters;
+import org.spongycastle.crypto.params.ECKeyGenerationParameters;
+import org.spongycastle.crypto.params.ECPrivateKeyParameters;
+import org.spongycastle.crypto.params.ECPublicKeyParameters;
+import org.spongycastle.jce.ECNamedCurveTable;
+import org.spongycastle.jce.provider.JCEECPrivateKey;
+import org.spongycastle.jce.provider.JCEECPublicKey;
+import org.spongycastle.jce.provider.JDKKeyPairGenerator;
+import org.spongycastle.jce.provider.ProviderUtil;
+import org.spongycastle.jce.spec.ECParameterSpec;
 
 public abstract class KeyPairGenerator
     extends JDKKeyPairGenerator

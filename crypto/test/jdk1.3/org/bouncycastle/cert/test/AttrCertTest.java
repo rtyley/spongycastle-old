@@ -1,4 +1,4 @@
-package org.bouncycastle.cert.test;
+package org.spongycastle.cert.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -17,30 +17,30 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERString;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.Attribute;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.cert.AttributeCertificateHolder;
-import org.bouncycastle.cert.AttributeCertificateIssuer;
-import org.bouncycastle.cert.X509AttributeCertificateHolder;
-import org.bouncycastle.cert.X509v2AttributeCertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaCertStore;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
-import org.bouncycastle.util.Store;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTest;
+import org.spongycastle.asn1.ASN1Encodable;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.DERString;
+import org.spongycastle.asn1.x500.X500Name;
+import org.spongycastle.asn1.x509.Attribute;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.GeneralNames;
+import org.spongycastle.asn1.x509.X509Extension;
+import org.spongycastle.cert.AttributeCertificateHolder;
+import org.spongycastle.cert.AttributeCertificateIssuer;
+import org.spongycastle.cert.X509AttributeCertificateHolder;
+import org.spongycastle.cert.X509v2AttributeCertificateBuilder;
+import org.spongycastle.cert.jcajce.JcaCertStore;
+import org.spongycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.operator.ContentSigner;
+import org.spongycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.spongycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.spongycastle.util.Store;
+import org.spongycastle.util.encoders.Base64;
+import org.spongycastle.util.test.SimpleTest;
 
 public class AttrCertTest
     extends SimpleTest

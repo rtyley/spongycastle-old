@@ -1,6 +1,6 @@
-package org.bouncycastle.x509;
+package org.spongycastle.x509;
 
-import org.bouncycastle.util.Selector;
+import org.spongycastle.util.Selector;
 
 import java.security.cert.X509CertSelector;
 import java.security.cert.Certificate;

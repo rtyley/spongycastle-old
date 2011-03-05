@@ -1,19 +1,17 @@
-package org.bouncycastle.crypto.examples;
+package org.spongycastle.crypto.examples;
 
-import java.io.*;
 import java.lang.*;
 
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.lcdui.*;
 
-import org.bouncycastle.util.test.*;
-import org.bouncycastle.util.encoders.*;
+import org.spongycastle.util.encoders.*;
 
-import org.bouncycastle.crypto.*;
-import org.bouncycastle.crypto.paddings.*;
-import org.bouncycastle.crypto.engines.*;
-import org.bouncycastle.crypto.modes.*;
-import org.bouncycastle.crypto.params.*;
+import org.spongycastle.crypto.*;
+import org.spongycastle.crypto.paddings.*;
+import org.spongycastle.crypto.engines.*;
+import org.spongycastle.crypto.modes.*;
+import org.spongycastle.crypto.params.*;
 
 /**
  * MIDP is a simple graphics application for the J2ME CLDC/MIDP.
@@ -31,7 +29,7 @@ public class MIDPTest extends MIDlet
     private boolean             doneEncrypt = false;
 
     private String              key         = "0123456789abcdef0123456789abcdef";
-    private String              plainText   = "www.bouncycastle.org";
+    private String              plainText   = "www.spongycastle.org";
     private byte[]              keyBytes    = null;
     private byte[]              cipherText  = null;
     private BufferedBlockCipher cipher      = null;

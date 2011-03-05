@@ -1,4 +1,4 @@
-package org.bouncycastle.ocsp;
+package org.spongycastle.ocsp;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,25 +12,24 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bouncycastle.jce.X509Principal;
+import org.spongycastle.jce.X509Principal;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.ocsp.OCSPRequest;
-import org.bouncycastle.asn1.ocsp.Request;
-import org.bouncycastle.asn1.ocsp.Signature;
-import org.bouncycastle.asn1.ocsp.TBSRequest;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.jce.X509Principal;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.ASN1OutputStream;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DERBitString;
+import org.spongycastle.asn1.DERNull;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.ocsp.OCSPRequest;
+import org.spongycastle.asn1.ocsp.Request;
+import org.spongycastle.asn1.ocsp.Signature;
+import org.spongycastle.asn1.ocsp.TBSRequest;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.asn1.x509.X509CertificateStructure;
+import org.spongycastle.asn1.x509.X509Extensions;
 
 public class OCSPReqGenerator
 {

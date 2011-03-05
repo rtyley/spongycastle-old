@@ -1,4 +1,4 @@
-package org.bouncycastle.cms;
+package org.spongycastle.cms;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,8 +8,8 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.Security;
 import java.security.cert.CRLException;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
@@ -18,27 +18,27 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BEROctetStringGenerator;
-import org.bouncycastle.asn1.BERSet;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.cert.X509AttributeCertificateHolder;
-import org.bouncycastle.cert.X509CRLHolder;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.util.Store;
-import org.bouncycastle.util.io.Streams;
-import org.bouncycastle.util.io.TeeInputStream;
-import org.bouncycastle.util.io.TeeOutputStream;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.ASN1Set;
+import org.spongycastle.asn1.BEROctetStringGenerator;
+import org.spongycastle.asn1.BERSet;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERSet;
+import org.spongycastle.asn1.DERTaggedObject;
+import org.spongycastle.asn1.cms.ContentInfo;
+import org.spongycastle.asn1.cms.IssuerAndSerialNumber;
+import org.spongycastle.asn1.x509.CertificateList;
+import org.spongycastle.asn1.x509.TBSCertificateStructure;
+import org.spongycastle.asn1.x509.X509CertificateStructure;
+import org.spongycastle.cert.X509AttributeCertificateHolder;
+import org.spongycastle.cert.X509CRLHolder;
+import org.spongycastle.cert.X509CertificateHolder;
+import org.spongycastle.util.Store;
+import org.spongycastle.util.io.Streams;
+import org.spongycastle.util.io.TeeInputStream;
+import org.spongycastle.util.io.TeeOutputStream;
 
 class CMSUtils
 {

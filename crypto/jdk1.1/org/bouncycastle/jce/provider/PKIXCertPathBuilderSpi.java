@@ -1,10 +1,10 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.PublicKey;
 import java.security.cert.*;
-import org.bouncycastle.jce.*;
+import org.spongycastle.jce.*;
 
 import java.util.ArrayList;
 import java.util.Collection;

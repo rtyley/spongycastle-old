@@ -1,4 +1,4 @@
-package org.bouncycastle.x509.examples;
+package org.spongycastle.x509.examples;
 
 import java.security.cert.*;
 import java.security.spec.RSAPrivateCrtKeySpec;
@@ -9,14 +9,14 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.provider.*;
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
-import org.bouncycastle.asn1.misc.NetscapeCertType;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.x509.*;
+import org.spongycastle.jce.PrincipalUtil;
+import org.spongycastle.jce.X509Principal;
+import org.spongycastle.jce.provider.*;
+import org.spongycastle.asn1.*;
+import org.spongycastle.asn1.misc.MiscObjectIdentifiers;
+import org.spongycastle.asn1.misc.NetscapeCertType;
+import org.spongycastle.asn1.x509.GeneralName;
+import org.spongycastle.x509.*;
 
 /**
  * A simple exmple that generates an attribute certificate.
@@ -89,7 +89,7 @@ public class AttrCertExample
         attrs.put(X509Principal.O, "The Legion of the Bouncy Castle");
         attrs.put(X509Principal.L, "Melbourne");
         attrs.put(X509Principal.CN, "Eric H. Echidna");
-        attrs.put(X509Principal.EmailAddress, "feedback-crypto@bouncycastle.org");
+        attrs.put(X509Principal.EmailAddress, "feedback-crypto@spongycastle.org");
 
         order.addElement(X509Principal.C);
         order.addElement(X509Principal.O);

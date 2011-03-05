@@ -1,4 +1,4 @@
-package org.bouncycastle.jcajce;
+package org.spongycastle.jcajce;
 
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
@@ -20,11 +20,11 @@ import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.operator.AsymmetricKeyUnwrapper;
-import org.bouncycastle.operator.SymmetricKeyUnwrapper;
-import org.bouncycastle.operator.jcajce.JceAsymmetricKeyUnwrapper;
-import org.bouncycastle.operator.jcajce.JceSymmetricKeyUnwrapper;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.operator.AsymmetricKeyUnwrapper;
+import org.spongycastle.operator.SymmetricKeyUnwrapper;
+import org.spongycastle.operator.jcajce.JceAsymmetricKeyUnwrapper;
+import org.spongycastle.operator.jcajce.JceSymmetricKeyUnwrapper;
 
 public class ProviderJcaJceHelper
     implements JcaJceHelper

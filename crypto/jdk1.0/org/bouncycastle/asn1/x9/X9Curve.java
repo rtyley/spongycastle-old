@@ -1,17 +1,17 @@
-package org.bouncycastle.asn1.x9;
+package org.spongycastle.asn1.x9;
 
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECCurveFp;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DERBitString;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERInteger;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.math.ec.ECCurve;
+import org.spongycastle.math.ec.ECCurveFp;
 
 /**
  * ASN.1 def for Elliptic-Curve Curve structure. See

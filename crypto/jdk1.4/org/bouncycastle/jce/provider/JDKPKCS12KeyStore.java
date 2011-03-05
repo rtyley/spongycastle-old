@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -32,44 +32,44 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BERConstructedOctetString;
-import org.bouncycastle.asn1.BEROutputStream;
-import org.bouncycastle.asn1.DERBMPString;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.pkcs.AuthenticatedSafe;
-import org.bouncycastle.asn1.pkcs.CertBag;
-import org.bouncycastle.asn1.pkcs.ContentInfo;
-import org.bouncycastle.asn1.pkcs.EncryptedData;
-import org.bouncycastle.asn1.pkcs.MacData;
-import org.bouncycastle.asn1.pkcs.PKCS12PBEParams;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.Pfx;
-import org.bouncycastle.asn1.pkcs.SafeBag;
-import org.bouncycastle.asn1.util.ASN1Dump;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.DigestInfo;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
-import org.bouncycastle.jce.interfaces.BCKeyStore;
-import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.Strings;
-import org.bouncycastle.util.encoders.Hex;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.ASN1Set;
+import org.spongycastle.asn1.BERConstructedOctetString;
+import org.spongycastle.asn1.BEROutputStream;
+import org.spongycastle.asn1.DERBMPString;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERNull;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.DERSet;
+import org.spongycastle.asn1.pkcs.AuthenticatedSafe;
+import org.spongycastle.asn1.pkcs.CertBag;
+import org.spongycastle.asn1.pkcs.ContentInfo;
+import org.spongycastle.asn1.pkcs.EncryptedData;
+import org.spongycastle.asn1.pkcs.MacData;
+import org.spongycastle.asn1.pkcs.PKCS12PBEParams;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.pkcs.Pfx;
+import org.spongycastle.asn1.pkcs.SafeBag;
+import org.spongycastle.asn1.util.ASN1Dump;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.spongycastle.asn1.x509.DigestInfo;
+import org.spongycastle.asn1.x509.SubjectKeyIdentifier;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.asn1.x509.X509Extensions;
+import org.spongycastle.asn1.x509.X509ObjectIdentifiers;
+import org.spongycastle.jce.interfaces.BCKeyStore;
+import org.spongycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+import org.spongycastle.util.Arrays;
+import org.spongycastle.util.Strings;
+import org.spongycastle.util.encoders.Hex;
 
 public class JDKPKCS12KeyStore
     extends KeyStoreSpi
@@ -739,7 +739,7 @@ public class JDKPKCS12KeyStore
                         SafeBag b = new SafeBag((ASN1Sequence)seq.getObjectAt(j));
                         if (b.getBagId().equals(pkcs8ShroudedKeyBag))
                         {
-                            org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo eIn = new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo((ASN1Sequence)b.getBagValue());
+                            org.spongycastle.asn1.pkcs.EncryptedPrivateKeyInfo eIn = new org.spongycastle.asn1.pkcs.EncryptedPrivateKeyInfo((ASN1Sequence)b.getBagValue());
                             PrivateKey              privKey = unwrapKey(eIn.getEncryptionAlgorithm(), eIn.getEncryptedData(), password, wrongPKCS12Zero);
 
                             //
@@ -838,7 +838,7 @@ public class JDKPKCS12KeyStore
                         }
                         else if (b.getBagId().equals(pkcs8ShroudedKeyBag))
                         {
-                            org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo eIn = new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo((ASN1Sequence)b.getBagValue());
+                            org.spongycastle.asn1.pkcs.EncryptedPrivateKeyInfo eIn = new org.spongycastle.asn1.pkcs.EncryptedPrivateKeyInfo((ASN1Sequence)b.getBagValue());
                             PrivateKey              privKey = unwrapKey(eIn.getEncryptionAlgorithm(), eIn.getEncryptedData(), password, wrongPKCS12Zero);
 
                             //
@@ -900,7 +900,7 @@ public class JDKPKCS12KeyStore
                         }
                         else if (b.getBagId().equals(keyBag))
                         {
-                            org.bouncycastle.asn1.pkcs.PrivateKeyInfo pIn = new org.bouncycastle.asn1.pkcs.PrivateKeyInfo((ASN1Sequence)b.getBagValue());
+                            org.spongycastle.asn1.pkcs.PrivateKeyInfo pIn = new org.spongycastle.asn1.pkcs.PrivateKeyInfo((ASN1Sequence)b.getBagValue());
                             PrivateKey              privKey = JDKKeyFactory.createPrivateKeyFromPrivateKeyInfo(pIn);
 
                             //
@@ -1107,7 +1107,7 @@ public class JDKPKCS12KeyStore
             PKCS12PBEParams         kParams = new PKCS12PBEParams(kSalt, MIN_ITERATIONS);
             byte[]                  kBytes = wrapKey(keyAlgorithm.getId(), privKey, kParams, password);
             AlgorithmIdentifier     kAlgId = new AlgorithmIdentifier(keyAlgorithm, kParams.getDERObject());
-            org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo kInfo = new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo(kAlgId, kBytes);
+            org.spongycastle.asn1.pkcs.EncryptedPrivateKeyInfo kInfo = new org.spongycastle.asn1.pkcs.EncryptedPrivateKeyInfo(kAlgId, kBytes);
             boolean                 attrSet = false;
             ASN1EncodableVector     kName = new ASN1EncodableVector();
 

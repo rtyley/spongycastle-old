@@ -1,9 +1,9 @@
-package org.bouncycastle.crypto.engines;
+package org.spongycastle.crypto.engines;
 
-import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.DataLengthException;
-import org.bouncycastle.crypto.params.KeyParameter;
+import org.spongycastle.crypto.BlockCipher;
+import org.spongycastle.crypto.CipherParameters;
+import org.spongycastle.crypto.DataLengthException;
+import org.spongycastle.crypto.params.KeyParameter;
 
 /**
  * A class that provides Blowfish key encryption operations,

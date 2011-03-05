@@ -1,11 +1,11 @@
-package org.bouncycastle.asn1.x9;
+package org.spongycastle.asn1.x9;
 
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECPoint;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.math.ec.ECCurve;
+import org.spongycastle.math.ec.ECPoint;
 
 /**
  * class for describing an ECPoint as a DER object.

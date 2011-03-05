@@ -4,12 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.util.ASN1Dump;
+import org.spongycastle.asn1.ASN1InputStream;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DERObject;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.asn1.DEROutputStream;
+import org.spongycastle.asn1.util.ASN1Dump;
 
 /**
  * An immutable policy qualifier represented by the ASN.1 PolicyQualifierInfo 
@@ -59,12 +59,12 @@ import org.bouncycastle.asn1.util.ASN1Dump;
  * allows them to be passed around to various pieces of code without 
  * worrying about coordinating access.<br />
  * <br />
- * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
- * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
- * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
- * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream},
- * {@link org.bouncycastle.asn1.DERObject DERObject} and
- * {@link org.bouncycastle.asn1.util.ASN1Dump#dumpAsString dumpAsString}
+ * Uses {@link org.spongycastle.asn1.ASN1InputStream ASN1InputStream},
+ * {@link org.spongycastle.asn1.ASN1Sequence ASN1Sequence},
+ * {@link org.spongycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
+ * {@link org.spongycastle.asn1.DEROutputStream DEROutputStream},
+ * {@link org.spongycastle.asn1.DERObject DERObject} and
+ * {@link org.spongycastle.asn1.util.ASN1Dump#dumpAsString dumpAsString}
  **/
 public final class PolicyQualifierInfo
 {
@@ -76,10 +76,10 @@ public final class PolicyQualifierInfo
      * Creates an instance of <code>PolicyQualifierInfo</code> from the
      * encoded bytes. The encoded byte array is copied on construction.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
-     * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
-     * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier} and
-     * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream}
+     * Uses {@link org.spongycastle.asn1.ASN1InputStream ASN1InputStream},
+     * {@link org.spongycastle.asn1.ASN1Sequence ASN1Sequence},
+     * {@link org.spongycastle.asn1.DERObjectIdentifier DERObjectIdentifier} and
+     * {@link org.spongycastle.asn1.DEROutputStream DEROutputStream}
      *
      * @param encoded a byte array containing the qualifier in DER encoding
      *
@@ -153,9 +153,9 @@ public final class PolicyQualifierInfo
      * Return a printable representation of this 
      * <code>PolicyQualifierInfo</code>.<br />
      * <br />
-     * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
-     * {@link org.bouncycastle.asn1.DERObject DERObject} and
-     * {@link org.bouncycastle.asn1.util.ASN1Dump#dumpAsString dumpAsString}
+     * Uses {@link org.spongycastle.asn1.ASN1InputStream ASN1InputStream},
+     * {@link org.spongycastle.asn1.DERObject DERObject} and
+     * {@link org.spongycastle.asn1.util.ASN1Dump#dumpAsString dumpAsString}
      *
      * @return a <code>String</code> describing the contents of this
      *         <code>PolicyQualifierInfo</code>

@@ -1,4 +1,4 @@
-package org.bouncycastle.cavp;
+package org.spongycastle.cavp;
 
 import java.security.GeneralSecurityException;
 import java.security.Security;
@@ -7,15 +7,15 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.bouncycastle.cavp.jca.JcaDigestProcessorFactory;
-import org.bouncycastle.cavp.jce.JceCryptoProcessorFactory;
-import org.bouncycastle.cavp.test.AesTest;
-import org.bouncycastle.cavp.test.CryptoProcessorFactory;
-import org.bouncycastle.cavp.test.DigestProcessorFactory;
-import org.bouncycastle.cavp.test.DsaTest;
-import org.bouncycastle.cavp.test.ProcessorFactoryProducer;
-import org.bouncycastle.cavp.test.ShaTest;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.cavp.jca.JcaDigestProcessorFactory;
+import org.spongycastle.cavp.jce.JceCryptoProcessorFactory;
+import org.spongycastle.cavp.test.AesTest;
+import org.spongycastle.cavp.test.CryptoProcessorFactory;
+import org.spongycastle.cavp.test.DigestProcessorFactory;
+import org.spongycastle.cavp.test.DsaTest;
+import org.spongycastle.cavp.test.ProcessorFactoryProducer;
+import org.spongycastle.cavp.test.ShaTest;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
 
 public class ProviderTest
     extends TestCase

@@ -1,4 +1,4 @@
-package org.bouncycastle.operator.jcajce;
+package org.spongycastle.operator.jcajce;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,15 +10,15 @@ import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.jcajce.DefaultJcaJceHelper;
-import org.bouncycastle.jcajce.NamedJcaJceHelper;
-import org.bouncycastle.jcajce.ProviderJcaJceHelper;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.OperatorStreamException;
-import org.bouncycastle.operator.RuntimeOperatorException;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.jcajce.DefaultJcaJceHelper;
+import org.spongycastle.jcajce.NamedJcaJceHelper;
+import org.spongycastle.jcajce.ProviderJcaJceHelper;
+import org.spongycastle.operator.ContentSigner;
+import org.spongycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.spongycastle.operator.OperatorCreationException;
+import org.spongycastle.operator.OperatorStreamException;
+import org.spongycastle.operator.RuntimeOperatorException;
 
 public class JcaContentSignerBuilder
 {

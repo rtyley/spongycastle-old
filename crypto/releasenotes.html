@@ -64,7 +64,12 @@ So there are four things useful to know about this release:
 <li>It's not a simple drop in like previous releases, if you wish migrate to it you will need to recompile your application.</li>
 <li>If you avoid deprecated methods it should be relatively painless to move to version 2.0</li>
 <li>The X509Name class will utlimately be replacde with the X500Name class, the getInstance() methods on both these classes allow conversion from one type to another.</li>
-<li>The org.bouncycastle.cms.RecipientId class now has a collection of subclasses to allow for more specific recipient matching. If you are creating your own recipient ids you should use the constructors for the subclasses rather than relying on the set methods inherited from X509CertSelector. The dependencies on X509CertSelector and CertStore will be removed from the version 2 CMS API.</li>
+<li>The org.spongycastle.cms.RecipientId class now has a collection of
+    subclasses to allow for more specific recipient matching. If you are
+    creating your own recipient ids you should use the constructors for the
+    subclasses rather than relying on the set methods inherited from
+    X509CertSelector. The dependencies on X509CertSelector and CertStore will be
+    removed from the version 2 CMS API.</li>
 </ul>
 </p>
 <h3>2.2.1 Version</h3>
@@ -397,8 +402,12 @@ Bleichenbacher's RSA signature forgery attack. This has been fixed.
 <li>X509V2CRLGenerator can now be loaded from an existing CRL.
 <li>The CMS enveloped data generators will now attempt to use the default provider for encryption if the passed in provider can only handle key exchange.
 <li>OpenPGP file processing has been substantially speeded up.
-<li>The PKCS1Encoder would accept PKCS1 packets which were one byte oversize. By default this will now cause an error. However, as there are still implementations which still produce such packets the older behaviour can be turned on by setting the VM system property org.bouncycastle.pkcs1.strict to false before creating an RSA cipher using PKCS1 encoding.
-<li>A target has been added to the bc-build.xml to zip up the source code rather than leaving it in a directory tree.
+<li>The PKCS1Encoder would accept PKCS1 packets which were one byte oversize. By
+    default this will now cause an error. However, as there are still
+    implementations which still produce such packets the older behaviour can be
+    turned on by setting the VM system property org.spongycastle.pkcs1.strict to
+    false before creating an RSA cipher using PKCS1 encoding.
+    <li>A target has been added to the bc-build.xml to zip up the source code rather than leaving it in a directory tree.
 The build scripts now run this target by default.
 <li>Use of toUpperCase and toLowerCase has been replaced with a locale independent converter where appropriate.
 <li>Support for retrieving the issuers of indirect CRLs has been added.
@@ -485,8 +494,9 @@ This has been fixed.
 <h3>2.16.3 Additional Features and Functionality</h3>
 <ul>
 <li>The SMIME package now supports the large file streaming model as well.
-<li>Additional ASN.1 message support has been added for RFC 3739 in the org.bouncycastle.x509.qualified package.
-<li>Support has been added for Mac algorithm 3 from ISO 9797 to both the lightweight APIs and the provider.
+<li>Additional ASN.1 message support has been added for RFC 3739 in the
+    org.spongycastle.x509.qualified package.
+    <li>Support has been added for Mac algorithm 3 from ISO 9797 to both the lightweight APIs and the provider.
 <li>The provider now supports the DESEDE64 MAC algorithm.
 <li>CertPathValidator has been updated to better support path validation as defined in RFC 3280.
 </ul>
@@ -571,10 +581,14 @@ Release 1.28
 </ul>
 <h3>2.19.4 Notes</h3>
 <ul>
-<li>Patches for S/MIME binary signatures and canonicalization were actually applied in 1.27, but a couple of days after the release - if the class 
-CMSProcessableBodyPartOutbound is present in the package org.bouncycastle.mail.smime you have the patched 1.27. We would recommend upgrading to 1.28 in any case
-as some S/MIME 3.1 recommendations have also been introduced for header creation.
-<li>GOST private keys are probably not encoding correctly and can be expected to change.
+<li>Patches for S/MIME binary signatures and canonicalization were actually
+    applied in 1.27, but a couple of days after the release - if the class
+    CMSProcessableBodyPartOutbound is present in the package
+    org.spongycastle.mail.smime you have the patched 1.27. We would recommend
+    upgrading to 1.28 in any case
+    as some S/MIME 3.1 recommendations have also been introduced for header
+    creation.
+    <li>GOST private keys are probably not encoding correctly and can be expected to change.
 </ul>
 <h3>2.20.1 Version</h3>
 Release 1.27
@@ -605,11 +619,14 @@ prevent applications being vunerable to oracle attacks.
 </ul>
 <h3>2.20.4 Changes that may affect compatibility</h3>
 <ul>
-<li>org.bouncycastle.jce.interfaces.ElGamalKey.getParams() has been changed to getParameters() to avoid clashes with
-a JCE interface with the same method signature.
-<li>org.bouncycastle.jce.interfaces.ECKey.getParams() has been changed in JDK 1.5 to getParameters() to avoid clashes
-with a JCE interface with the same method signature. The getParams() method in pre-1.5 has been deprecated.
-<li>SHA256WithRSAEncryption, SHA384WithRSAEncryption, SHA512WithRSAEncryption now refer to their PKCS #1 V1.5 implementations. If you
+<li>org.spongycastle.jce.interfaces.ElGamalKey.getParams() has been changed to
+    getParameters() to avoid clashes with
+    a JCE interface with the same method signature.
+    <li>org.spongycastle.jce.interfaces.ECKey.getParams() has been changed in
+        JDK 1.5 to getParameters() to avoid clashes
+        with a JCE interface with the same method signature. The getParams()
+        method in pre-1.5 has been deprecated.
+    <li>SHA256WithRSAEncryption, SHA384WithRSAEncryption, SHA512WithRSAEncryption now refer to their PKCS #1 V1.5 implementations. If you
 were using these previously you should use SHA256WithRSAAndMGF1, SHA384WithRSAAndMGF1, or SHA512WithRSAAndMGF1.
 </ul>
 <h3>2.21.1 Version</h3>
@@ -1130,20 +1147,24 @@ This has been fixed.
 <li>ISO9796-2 signatures have been added to the JCE and lightweight API.
 <li>A more general paddings packge for use with MACs and block ciphers had been aded to the lightweight API. MACs now allow you to specify padding.
 <li>X9.23 Padding has been added to the JCE and lightwieght API. The old
-PaddedBlockCipher class is now deprecated see org.bouncycastle.crypto.paddings for details.
-<li>SHA-256, SHA-384, and SHA-512 are now added. Note: while the public review
+    PaddedBlockCipher class is now deprecated see
+    org.spongycastle.crypto.paddings for details.
+    <li>SHA-256, SHA-384, and SHA-512 are now added. Note: while the public review
 period has finished, these algorithms have not yet been standardised, in the
 event that final standardisation changes the algorithms these implementations
 will be changed.
-<li>It's now possible to set bag attributes on items to go into a PKCS12 store,
-using the org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier interface.
-<li>More classses have been added to the ASN.1 package for dealing with
+<li>It&apos;s now possible to set bag attributes on items to go into a PKCS12
+    store,
+    using the org.spongycastle.jce.interfaces.PKCS12BagAttributeCarrier
+    interface.
+    <li>More classses have been added to the ASN.1 package for dealing with
 certificate extensions and CRLs including a CRL generator. Note: the
 CRL generators should be regarded as under development and subject to change.
-<li>There's now an examples package for the JCE (in addition to the examples
-in org.bouncycastle.jce.provider.test) - org.bouncycastle.jce.examples. It
-currently consists of a class showing how to generate a PKCS12 file.
-<li>The X.509 CertificateFactory now includes CRL support.  DER or PEM CRLs may be processed.
+<li>There&amp;apos;s now an examples package for the JCE (in addition to the
+    examples
+    inspongycastleastle.jce.provider.test) - org.spongycastle.jce.examples. It
+    currently consists of a class showing how to generate a PKCS12 file.
+    <li>The X.509 CertificateFactory now includes CRL support.  DER or PEM CRLs may be processed.
 <li>The BigInteger library has been written with a view to making it less
 resource hungry and faster - whether it's fast enough remains to be seen!
 </ul>
@@ -1237,8 +1258,8 @@ This has been fixed.
 </ul>
 <h3>2.42.3 Additional Functionality</h3>
 <ul>
-<li>There is now an org.bouncycastle.jce.netscape package which has
-a class in for dealing with Netscape Certificate Request objects.
+<li>There is now an org.spongycastle.jce.netscape package which has
+    a class in for dealing with Netscape Certificate Request objects.
 </ul>
 <h3>2.42.4 Additional Notes</h3>
 <p>

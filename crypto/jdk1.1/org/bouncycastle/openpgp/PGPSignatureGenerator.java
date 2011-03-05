@@ -1,9 +1,9 @@
-package org.bouncycastle.openpgp;
+package org.spongycastle.openpgp;
 
-import org.bouncycastle.bcpg.*;
-import org.bouncycastle.bcpg.sig.IssuerKeyID;
-import org.bouncycastle.bcpg.sig.SignatureCreationTime;
-import org.bouncycastle.util.Strings;
+import org.spongycastle.bcpg.*;
+import org.spongycastle.bcpg.sig.IssuerKeyID;
+import org.spongycastle.bcpg.sig.SignatureCreationTime;
+import org.spongycastle.util.Strings;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

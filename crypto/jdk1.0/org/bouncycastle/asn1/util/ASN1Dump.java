@@ -1,9 +1,9 @@
-package org.bouncycastle.asn1.util;
+package org.spongycastle.asn1.util;
 
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.util.encoders.Hex;
+import org.spongycastle.asn1.*;
+import org.spongycastle.util.encoders.Hex;
 
 public class ASN1Dump
 {

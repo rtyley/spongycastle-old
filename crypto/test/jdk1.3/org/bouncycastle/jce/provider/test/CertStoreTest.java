@@ -1,24 +1,24 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
  
 import java.io.ByteArrayInputStream;
 import java.security.Security;
 
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.cert.CertStore;
+import org.spongycastle.jce.PrincipalUtil;
+import org.spongycastle.jce.cert.CertStore;
 import java.security.cert.CertificateFactory;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
+import org.spongycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509CRL;
-import org.bouncycastle.jce.cert.X509CRLSelector;
-import org.bouncycastle.jce.cert.X509CertSelector;
+import org.spongycastle.jce.cert.X509CRLSelector;
+import org.spongycastle.jce.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 public class CertStoreTest
     implements Test

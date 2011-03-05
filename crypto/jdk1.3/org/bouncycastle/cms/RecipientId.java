@@ -1,8 +1,8 @@
-package org.bouncycastle.cms;
+package org.spongycastle.cms;
 
-import org.bouncycastle.jce.cert.X509CertSelector;
+import org.spongycastle.jce.cert.X509CertSelector;
 
-import org.bouncycastle.util.Selector;
+import org.spongycastle.util.Selector;
 
 public abstract class RecipientId
     extends X509CertSelector

@@ -77,7 +77,7 @@
 	<!-- override the standard lw-compile due to the extra midp reqs -->
     <target name="local-compile" depends="init" if="is.lw" >
         <echo message="Checking environment" />
-        <whichresource class="org.bouncycastle.crypto.BlockCipher" 
+        <whichresource class="org.spongycastle.crypto.BlockCipher"
             property="foundBC" />
 
         <fail if="foundBC" 
@@ -212,14 +212,14 @@
 	</target>
 
 	<target name="blowfish">
-		<java classname="org.bouncycastle.crypto.test.BlowfishTest"
+		<java classname="org.spongycastle.crypto.test.BlowfishTest"
 			fork="yes">
 			<classpath refid="compile.cp" />
 		</java>
 	</target>
 		
 	<target name="rsa">
-		<java classname="org.bouncycastle.crypto.test.RSATest"
+		<java classname="org.spongycastle.crypto.test.RSATest"
             newenvironment="true"
 			fork="yes">
 			<classpath refid="compile.cp" />
@@ -242,13 +242,13 @@
 	<target name="local-test">
 		<antcall target="zipmaker" />
 		<echo message="Doing classpath based regression tests (crypto)" />
-		<java classname="org.bouncycastle.crypto.test.RegressionTest"
+		<java classname="org.spongycastle.crypto.test.RegressionTest"
 			fork="yes">
 			<classpath refid="compile.cp" />
         </java>
 
 		<echo message="Doing classpath based regression tests (asn1)" />
-		<java classname="org.bouncycastle.asn1.test.RegressionTest"
+		<java classname="org.spongycastle.asn1.test.RegressionTest"
 			fork="yes">
 			<classpath refid="compile.cp" />
         </java>
@@ -257,7 +257,7 @@
 
     <target name="biginteger-test" >
         <!-- uses the current classes -->
-        <java classname="org.bouncycastle.crypto.test.BigIntegerTest"
+        <java classname="org.spongycastle.crypto.test.BigIntegerTest"
             fork="yes" >
             <classpath refid="compile.cp" />
         </java>

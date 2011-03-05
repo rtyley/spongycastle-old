@@ -1,4 +1,4 @@
-package org.bouncycastle.openssl.test;
+package org.spongycastle.openssl.test;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -18,14 +18,14 @@ import java.security.Signature;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 
-import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PEMWriter;
-import org.bouncycastle.openssl.PasswordFinder;
-import org.bouncycastle.util.test.SimpleTest;
+import org.spongycastle.asn1.cms.CMSObjectIdentifiers;
+import org.spongycastle.asn1.cms.ContentInfo;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.spongycastle.openssl.PEMReader;
+import org.spongycastle.openssl.PEMWriter;
+import org.spongycastle.openssl.PasswordFinder;
+import org.spongycastle.util.test.SimpleTest;
 
 /**
  * basic class for reading test.pem - the password is "secret"

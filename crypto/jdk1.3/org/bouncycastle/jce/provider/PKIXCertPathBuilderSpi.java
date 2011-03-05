@@ -1,26 +1,25 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
-import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.PublicKey;
-import org.bouncycastle.jce.cert.CertPath;
-import org.bouncycastle.jce.cert.CertPathBuilderException;
-import org.bouncycastle.jce.cert.CertPathBuilderResult;
-import org.bouncycastle.jce.cert.CertPathBuilderSpi;
-import org.bouncycastle.jce.cert.CertPathParameters;
-import org.bouncycastle.jce.cert.CertPathValidator;
-import org.bouncycastle.jce.cert.CertPathValidatorException;
-import org.bouncycastle.jce.cert.CertSelector;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
+import org.spongycastle.jce.cert.CertPath;
+import org.spongycastle.jce.cert.CertPathBuilderException;
+import org.spongycastle.jce.cert.CertPathBuilderResult;
+import org.spongycastle.jce.cert.CertPathBuilderSpi;
+import org.spongycastle.jce.cert.CertPathParameters;
+import org.spongycastle.jce.cert.CertPathValidator;
+import org.spongycastle.jce.cert.CertPathValidatorException;
+import org.spongycastle.jce.cert.CertSelector;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CertStoreException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import org.bouncycastle.jce.cert.CertificateFactory;
-import org.bouncycastle.jce.cert.PKIXBuilderParameters;
-import org.bouncycastle.jce.cert.PKIXCertPathBuilderResult;
-import org.bouncycastle.jce.cert.PKIXCertPathValidatorResult;
-import org.bouncycastle.jce.cert.TrustAnchor;
-import org.bouncycastle.jce.cert.X509CertSelector;
+import org.spongycastle.jce.cert.CertificateFactory;
+import org.spongycastle.jce.cert.PKIXBuilderParameters;
+import org.spongycastle.jce.cert.PKIXCertPathBuilderResult;
+import org.spongycastle.jce.cert.PKIXCertPathValidatorResult;
+import org.spongycastle.jce.cert.TrustAnchor;
+import org.spongycastle.jce.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,8 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.PrincipalUtil;
+import org.spongycastle.jce.X509Principal;
+import org.spongycastle.jce.PrincipalUtil;
 
 /**
  * Implements the PKIX CertPathBuilding algorithem for BouncyCastle.

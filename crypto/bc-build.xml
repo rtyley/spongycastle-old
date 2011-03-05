@@ -290,10 +290,10 @@
             </jarFileSet>
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
-                <attribute name="Extension-Name" value="org.bouncycastle.bcprovider" />
+                <attribute name="Extension-Name" value="org.spongycastle.bcprovider" />
                 <attribute name="Specification-Vendor" value="BouncyCastle.org" />
                 <attribute name="Specification-Version" value="1.1" />
-                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor-Id" value="org.spongycastle" />
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
                 <attribute name="Trusted-Library" value="true" />
@@ -304,10 +304,10 @@
             <manifest-element>
                 <manifest>
                     <attribute name="Manifest-Version" value="1.0" />
-                    <attribute name="Extension-Name" value="org.bouncycastle.bcproviderext" />
+                    <attribute name="Extension-Name" value="org.spongycastle.bcproviderext" />
                     <attribute name="Specification-Vendor" value="BouncyCastle.org" />
                     <attribute name="Specification-Version" value="1.1" />
-                    <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                    <attribute name="Implementation-Vendor-Id" value="org.spongycastle" />
                     <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                     <attribute name="Implementation-Version" value="${release.name}.0" />
                     <attribute name="Trusted-Library" value="true" />
@@ -373,10 +373,10 @@
             </jarFileSet>
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
-                <attribute name="Extension-Name" value="org.bouncycastle.bcjce" />
+                <attribute name="Extension-Name" value="org.spongycastle.bcjce" />
                 <attribute name="Specification-Vendor" value="BouncyCastle.org" />
                 <attribute name="Specification-Version" value="1.1" />
-                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor-Id" value="org.spongycastle" />
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
                 <attribute name="Trusted-Library" value="true" />
@@ -387,10 +387,10 @@
             <manifest-element>
                 <manifest>
                     <attribute name="Manifest-Version" value="1.0" />
-                    <attribute name="Extension-Name" value="org.bouncycastle.bcjceext" />
+                    <attribute name="Extension-Name" value="org.spongycastle.bcjceext" />
                     <attribute name="Specification-Vendor" value="BouncyCastle.org" />
                     <attribute name="Specification-Version" value="1.1" />
-                    <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                    <attribute name="Implementation-Vendor-Id" value="org.spongycastle" />
                     <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                     <attribute name="Implementation-Version" value="${release.name}.0" />
                     <attribute name="Trusted-Library" value="true" />
@@ -437,10 +437,10 @@
             </jarFileSet>
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
-                <attribute name="Extension-Name" value="org.bouncycastle.bcmail" />
+                <attribute name="Extension-Name" value="org.spongycastle.bcmail" />
                 <attribute name="Specification-Vendor" value="BouncyCastle.org" />
                 <attribute name="Specification-Version" value="1.1" />
-                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor-Id" value="org.spongycastle" />
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
                 <attribute name="Trusted-Library" value="true" />
@@ -473,10 +473,10 @@
             </jarFileSet>
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
-                <attribute name="Extension-Name" value="org.bouncycastle.bctsp" />
+                <attribute name="Extension-Name" value="org.spongycastle.bctsp" />
                 <attribute name="Specification-Vendor" value="BouncyCastle.org" />
                 <attribute name="Specification-Version" value="1.1" />
-                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor-Id" value="org.spongycastle" />
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
                 <attribute name="Trusted-Library" value="true" />
@@ -518,10 +518,10 @@
             </jarFileSet>
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
-                <attribute name="Extension-Name" value="org.bouncycastle.bcpg" />
+                <attribute name="Extension-Name" value="org.spongycastle.bcpg" />
                 <attribute name="Specification-Vendor" value="BouncyCastle.org" />
                 <attribute name="Specification-Version" value="1.1" />
-                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor-Id" value="org.spongycastle" />
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
                 <attribute name="Trusted-Library" value="true" />
@@ -563,10 +563,10 @@
         <compile-test target="${test.target}">
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
-                <attribute name="Extension-Name" value="org.bouncycastle.bctest" />
+                <attribute name="Extension-Name" value="org.spongycastle.bctest" />
                 <attribute name="Specification-Vendor" value="BouncyCastle.org" />
                 <attribute name="Specification-Version" value="1.1" />
-                <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
+                <attribute name="Implementation-Vendor-Id" value="org.spongycastle" />
                 <attribute name="Implementation-Vendor" value="BouncyCastle.org" />
                 <attribute name="Implementation-Version" value="${release.name}.0" />
                 <attribute name="Trusted-Library" value="true" />
@@ -649,20 +649,20 @@
 
         <compile-doc srcDir="${provider.target.src.dir}" docsDir="${artifacts.docs.dir}/bcprov">
             <docElements>
-                <package name="org.bouncycastle.asn1.*" />
-                <package name="org.bouncycastle.crypto.*" />
-                <package name="org.bouncycastle.jce.*" />
-                <package name="org.bouncycastle.openssl.*" />
-                <package name="org.bouncycastle.mozilla.*" />
-                <package name="org.bouncycastle.x509.*" />
-                <package name="org.bouncycastle.ocsp.*" />
-                <package name="org.bouncycastle.util.*" />
-                <group title="JCE Utility and Extension Packages" packages="org.bouncycastle.jce*" />
-                <group title="OCSP and OpenSSL PEM Support Packages" packages="org.bouncycastle.ocsp*:org.bouncycastle.openssl*" />
-                <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
-                <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
-                <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
-                <group title="JCE Provider and Test Classes" packages="org.bouncycastle.jce.provider*" />
+                <package name="org.spongycastle.asn1.*" />
+                <package name="org.spongycastle.crypto.*" />
+                <package name="org.spongycastle.jce.*" />
+                <package name="org.spongycastle.openssl.*" />
+                <package name="org.spongycastle.mozilla.*" />
+                <package name="org.spongycastle.x509.*" />
+                <package name="org.spongycastle.ocsp.*" />
+                <package name="org.spongycastle.util.*" />
+                <group title="JCE Utility and Extension Packages" packages="org.spongycastle.jce*" />
+                <group title="OCSP and OpenSSL PEM Support Packages" packages="org.spongycastle.ocsp*:org.spongycastle.openssl*" />
+                <group title="ASN.1 Support Packages" packages="org.spongycastle.asn1*" />
+                <group title="Lightweight Crypto Packages" packages="org.spongycastle.crypto*" />
+                <group title="Utility Packages" packages="org.spongycastle.util*:org.spongycastle.math*" />
+                <group title="JCE Provider and Test Classes" packages="org.spongycastle.jce.provider*" />
             </docElements>
         </compile-doc>
 
@@ -684,22 +684,22 @@
 
         <compile-doc srcDir="${jce.target.src.dir}" docsDir="${artifacts.docs.dir}/jce">
             <docElements>
-                <package name="org.bouncycastle.asn1.*" />
-                <package name="org.bouncycastle.crypto.*" />
-                <package name="org.bouncycastle.jce.*" />
-                <package name="org.bouncycastle.openssl.*" />
-                <package name="org.bouncycastle.mozilla.*" />
-                <package name="org.bouncycastle.x509.*" />
-                <package name="org.bouncycastle.ocsp.*" />
-                <package name="org.bouncycastle.util.*" />
+                <package name="org.spongycastle.asn1.*" />
+                <package name="org.spongycastle.crypto.*" />
+                <package name="org.spongycastle.jce.*" />
+                <package name="org.spongycastle.openssl.*" />
+                <package name="org.spongycastle.mozilla.*" />
+                <package name="org.spongycastle.x509.*" />
+                <package name="org.spongycastle.ocsp.*" />
+                <package name="org.spongycastle.util.*" />
                 <package name="javax.crypto.*" />
                 <group title="JCE Package" packages="javax.crypto*" />
-                <group title="JCE Utility and Extension Packages" packages="org.bouncycastle.jce*" />
-                <group title="OCSP and OpenSSL PEM Support Packages" packages="org.bouncycastle.ocsp*:org.bouncycastle.openssl*" />
-                <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
-                <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
-                <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
-                <group title="JCE Provider and Test Classes" packages="org.bouncycastle.jce.provider*" />
+                <group title="JCE Utility and Extension Packages" packages="org.spongycastle.jce*" />
+                <group title="OCSP and OpenSSL PEM Support Packages" packages="org.spongycastle.ocsp*:org.spongycastle.openssl*" />
+                <group title="ASN.1 Support Packages" packages="org.spongycastle.asn1*" />
+                <group title="Lightweight Crypto Packages" packages="org.spongycastle.crypto*" />
+                <group title="Utility Packages" packages="org.spongycastle.util*:org.spongycastle.math*" />
+                <group title="JCE Provider and Test Classes" packages="org.spongycastle.jce.provider*" />
             </docElements>
         </compile-doc>
 
@@ -729,15 +729,15 @@
 
         <compile-doc srcDir="${mail.target.src.dir}" docsDir="${artifacts.docs.dir}/bcmail">
             <docElements>
-                <package name="org.bouncycastle.cms.*" />
-                <package name="org.bouncycastle.mail.*" />
-                <package name="org.bouncycastle.cert.*" />
-                <package name="org.bouncycastle.pkcs.*" />
-                <package name="org.bouncycastle.operator.*" />
-                <group title="CMS Packages" packages="org.bouncycastle.cms*" />
-                <group title="S/MIME Packages" packages="org.bouncycastle.mail.smime*" />
-                <group title="Certificate Packages" packages="org.bouncycastle.cert*" />
-                <group title="PKCS Packages" packages="org.bouncycastle.pkcs*" />
+                <package name="org.spongycastle.cms.*" />
+                <package name="org.spongycastle.mail.*" />
+                <package name="org.spongycastle.cert.*" />
+                <package name="org.spongycastle.pkcs.*" />
+                <package name="org.spongycastle.operator.*" />
+                <group title="CMS Packages" packages="org.spongycastle.cms*" />
+                <group title="S/MIME Packages" packages="org.spongycastle.mail.smime*" />
+                <group title="Certificate Packages" packages="org.spongycastle.cert*" />
+                <group title="PKCS Packages" packages="org.spongycastle.pkcs*" />
             </docElements>
         </compile-doc>
 
@@ -759,8 +759,8 @@
 
         <compile-doc srcDir="${tsp.target.src.dir}" docsDir="${artifacts.docs.dir}/bctsp">
             <docElements>
-                <package name="org.bouncycastle.tsp.*" />
-                <group title="TSP Packages" packages="org.bouncycastle.tsp*" />
+                <package name="org.spongycastle.tsp.*" />
+                <group title="TSP Packages" packages="org.spongycastle.tsp*" />
             </docElements>
         </compile-doc>
 
@@ -784,10 +784,10 @@
 
         <compile-doc srcDir="${pg.target.src.dir}" docsDir="${artifacts.docs.dir}/bcpg">
             <docElements>
-                <package name="org.bouncycastle.openpgp.*" />
-                <package name="org.bouncycastle.bcpg.*" />
-                <group title="BCPG Support Packages" packages="org.bouncycastle.bcpg*" />
-                <group title="OpenPGP Packages" packages="org.bouncycastle.openpgp*" />
+                <package name="org.spongycastle.openpgp.*" />
+                <package name="org.spongycastle.bcpg.*" />
+                <group title="BCPG Support Packages" packages="org.spongycastle.bcpg*" />
+                <group title="OpenPGP Packages" packages="org.spongycastle.openpgp*" />
             </docElements>
         </compile-doc>
 
@@ -809,13 +809,13 @@
 
         <compile-doc srcDir="${lcrypto.target.src.dir}" docsDir="${artifacts.docs.dir}/lcrypto">
             <docElements>
-                <package name="org.bouncycastle.asn1.*" />
-                <package name="org.bouncycastle.crypto.*" />
-                <package name="org.bouncycastle.math.*" />
-                <package name="org.bouncycastle.util.*" />
-                <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
-                <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
-                <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
+                <package name="org.spongycastle.asn1.*" />
+                <package name="org.spongycastle.crypto.*" />
+                <package name="org.spongycastle.math.*" />
+                <package name="org.spongycastle.util.*" />
+                <group title="Lightweight Crypto Packages" packages="org.spongycastle.crypto*" />
+                <group title="ASN.1 Support Packages" packages="org.spongycastle.asn1*" />
+                <group title="Utility Packages" packages="org.spongycastle.util*:org.spongycastle.math*" />
             </docElements>
         </compile-doc>
 

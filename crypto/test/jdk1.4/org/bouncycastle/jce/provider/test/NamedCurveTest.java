@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -11,15 +11,15 @@ import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.KeyAgreement;
 
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.interfaces.ECPrivateKey;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.jce.ECNamedCurveTable;
+import org.spongycastle.jce.interfaces.ECPrivateKey;
+import org.spongycastle.jce.interfaces.ECPublicKey;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.spongycastle.jce.spec.ECParameterSpec;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 public class NamedCurveTest
     implements Test

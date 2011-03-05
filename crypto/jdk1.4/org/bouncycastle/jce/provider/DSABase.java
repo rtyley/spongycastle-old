@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.math.BigInteger;
 import java.security.SignatureException;
@@ -8,10 +8,10 @@ import java.security.InvalidKeyException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
-import org.bouncycastle.crypto.DSA;
-import org.bouncycastle.crypto.Digest;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.x509.X509ObjectIdentifiers;
+import org.spongycastle.crypto.DSA;
+import org.spongycastle.crypto.Digest;
 
 public abstract class DSABase
     extends Signature

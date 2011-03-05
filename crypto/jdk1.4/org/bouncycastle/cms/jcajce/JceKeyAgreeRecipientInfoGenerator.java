@@ -1,4 +1,4 @@
-package org.bouncycastle.cms.jcajce;
+package org.spongycastle.cms.jcajce;
 
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
@@ -10,8 +10,8 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.spongycastle.jce.interfaces.ECPublicKey;
+import org.spongycastle.jce.spec.ECParameterSpec;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,29 +19,29 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.cms.KeyAgreeRecipientIdentifier;
-import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
-import org.bouncycastle.asn1.cms.RecipientKeyIdentifier;
-import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.cms.CMSAlgorithm;
-import org.bouncycastle.cms.CMSEnvelopedGenerator;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.KeyAgreeRecipientInfoGenerator;
-import org.bouncycastle.jcajce.DefaultJcaJceHelper;
-import org.bouncycastle.jcajce.NamedJcaJceHelper;
-import org.bouncycastle.jcajce.ProviderJcaJceHelper;
-import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
-import org.bouncycastle.jce.spec.MQVPublicKeySpec;
-import org.bouncycastle.operator.GenericKey;
+import org.spongycastle.asn1.ASN1Encodable;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.DEROctetString;
+import org.spongycastle.asn1.DERSequence;
+import org.spongycastle.asn1.cms.KeyAgreeRecipientIdentifier;
+import org.spongycastle.asn1.cms.RecipientEncryptedKey;
+import org.spongycastle.asn1.cms.RecipientKeyIdentifier;
+import org.spongycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.cms.CMSAlgorithm;
+import org.spongycastle.cms.CMSEnvelopedGenerator;
+import org.spongycastle.cms.CMSException;
+import org.spongycastle.cms.KeyAgreeRecipientInfoGenerator;
+import org.spongycastle.jcajce.DefaultJcaJceHelper;
+import org.spongycastle.jcajce.NamedJcaJceHelper;
+import org.spongycastle.jcajce.ProviderJcaJceHelper;
+import org.spongycastle.jce.spec.MQVPrivateKeySpec;
+import org.spongycastle.jce.spec.MQVPublicKeySpec;
+import org.spongycastle.operator.GenericKey;
 
 public class JceKeyAgreeRecipientInfoGenerator
     extends KeyAgreeRecipientInfoGenerator

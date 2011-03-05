@@ -1,4 +1,4 @@
-package org.bouncycastle.cms;
+package org.spongycastle.cms;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -19,23 +19,23 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
-import org.bouncycastle.asn1.cms.KeyAgreeRecipientIdentifier;
-import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
-import org.bouncycastle.asn1.cms.OriginatorIdentifierOrKey;
-import org.bouncycastle.asn1.cms.OriginatorPublicKey;
-import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
-import org.bouncycastle.asn1.cms.RecipientKeyIdentifier;
-import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
-import org.bouncycastle.jce.spec.MQVPublicKeySpec;
+import org.spongycastle.asn1.ASN1Object;
+import org.spongycastle.asn1.ASN1OctetString;
+import org.spongycastle.asn1.ASN1Sequence;
+import org.spongycastle.asn1.cms.IssuerAndSerialNumber;
+import org.spongycastle.asn1.cms.KeyAgreeRecipientIdentifier;
+import org.spongycastle.asn1.cms.KeyAgreeRecipientInfo;
+import org.spongycastle.asn1.cms.OriginatorIdentifierOrKey;
+import org.spongycastle.asn1.cms.OriginatorPublicKey;
+import org.spongycastle.asn1.cms.RecipientEncryptedKey;
+import org.spongycastle.asn1.cms.RecipientKeyIdentifier;
+import org.spongycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
+import org.spongycastle.asn1.pkcs.PrivateKeyInfo;
+import org.spongycastle.asn1.x509.AlgorithmIdentifier;
+import org.spongycastle.asn1.x509.SubjectKeyIdentifier;
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.spongycastle.jce.spec.MQVPrivateKeySpec;
+import org.spongycastle.jce.spec.MQVPublicKeySpec;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message

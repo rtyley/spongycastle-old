@@ -1,19 +1,19 @@
-package org.bouncycastle.jce.provider.test;
+package org.spongycastle.jce.provider.test;
  
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.Security;
-import org.bouncycastle.jce.cert.CertPath;
-import org.bouncycastle.jce.cert.CertPathBuilder;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertificateFactory;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
-import org.bouncycastle.jce.cert.PKIXBuilderParameters;
-import org.bouncycastle.jce.cert.PKIXCertPathBuilderResult;
-import org.bouncycastle.jce.cert.TrustAnchor;
+import org.spongycastle.jce.cert.CertPath;
+import org.spongycastle.jce.cert.CertPathBuilder;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CertificateFactory;
+import org.spongycastle.jce.cert.CollectionCertStoreParameters;
+import org.spongycastle.jce.cert.PKIXBuilderParameters;
+import org.spongycastle.jce.cert.PKIXCertPathBuilderResult;
+import org.spongycastle.jce.cert.TrustAnchor;
 import java.security.cert.X509CRL;
-import org.bouncycastle.jce.cert.X509CertSelector;
+import org.spongycastle.jce.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -23,11 +23,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.jce.PrincipalUtil;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 public class CertPathBuilderTest
     implements Test
@@ -139,7 +139,7 @@ public class CertPathBuilderTest
     }
     
     /* (non-Javadoc)
-     * @see org.bouncycastle.util.test.Test#perform()
+     * @see org.spongycastle.util.test.Test#perform()
      */
     public TestResult perform()
     {

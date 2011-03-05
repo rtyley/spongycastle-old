@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.cert;
+package org.spongycastle.jce.cert;
 
 /**
  * Parameters used as input for the LDAP <code>CertStore</code> algorithm.<br />

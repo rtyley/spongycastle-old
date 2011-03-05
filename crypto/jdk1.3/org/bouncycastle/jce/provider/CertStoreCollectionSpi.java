@@ -1,14 +1,14 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CRL;
-import org.bouncycastle.jce.cert.CRLSelector;
-import org.bouncycastle.jce.cert.CertSelector;
-import org.bouncycastle.jce.cert.CertStoreException;
-import org.bouncycastle.jce.cert.CertStoreParameters;
-import org.bouncycastle.jce.cert.CertStoreSpi;
+import org.spongycastle.jce.cert.CRLSelector;
+import org.spongycastle.jce.cert.CertSelector;
+import org.spongycastle.jce.cert.CertStoreException;
+import org.spongycastle.jce.cert.CertStoreParameters;
+import org.spongycastle.jce.cert.CertStoreSpi;
 import java.security.cert.Certificate;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
+import org.spongycastle.jce.cert.CollectionCertStoreParameters;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -25,7 +25,7 @@ public class CertStoreCollectionSpi extends CertStoreSpi
 
         if (!(params instanceof CollectionCertStoreParameters))
         {
-            throw new InvalidAlgorithmParameterException("org.bouncycastle.jce.provider.CertStoreCollectionSpi: parameter must be a CollectionCertStoreParameters object\n" +  params.toString());
+            throw new InvalidAlgorithmParameterException("org.spongycastle.jce.provider.CertStoreCollectionSpi: parameter must be a CollectionCertStoreParameters object\n" +  params.toString());
         }
 
         this.params = (CollectionCertStoreParameters)params;

@@ -1,4 +1,4 @@
-package org.bouncycastle.cavp.test;
+package org.spongycastle.cavp.test;
 
 public interface DigestProcessor
 {

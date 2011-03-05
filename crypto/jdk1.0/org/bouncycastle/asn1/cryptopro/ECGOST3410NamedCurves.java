@@ -1,12 +1,11 @@
-package org.bouncycastle.asn1.cryptopro;
+package org.spongycastle.asn1.cryptopro;
 
 import java.math.BigInteger;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.crypto.params.ECDomainParameters;
-import org.bouncycastle.math.ec.*;
+import org.spongycastle.asn1.DERObjectIdentifier;
+import org.spongycastle.crypto.params.ECDomainParameters;
 
 /**
  * table of the available named parameters for GOST 3410-2001.

@@ -1,20 +1,20 @@
-package org.bouncycastle.crypto.test;
+package org.spongycastle.crypto.test;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.agreement.DHAgreement;
-import org.bouncycastle.crypto.agreement.DHBasicAgreement;
-import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
-import org.bouncycastle.crypto.generators.DHKeyPairGenerator;
-import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
-import org.bouncycastle.crypto.params.DHParameters;
-import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
-import org.bouncycastle.crypto.params.DHPublicKeyParameters;
-import org.bouncycastle.util.test.SimpleTestResult;
-import org.bouncycastle.util.test.Test;
-import org.bouncycastle.util.test.TestResult;
+import org.spongycastle.crypto.AsymmetricCipherKeyPair;
+import org.spongycastle.crypto.agreement.DHAgreement;
+import org.spongycastle.crypto.agreement.DHBasicAgreement;
+import org.spongycastle.crypto.generators.DHBasicKeyPairGenerator;
+import org.spongycastle.crypto.generators.DHKeyPairGenerator;
+import org.spongycastle.crypto.params.DHKeyGenerationParameters;
+import org.spongycastle.crypto.params.DHParameters;
+import org.spongycastle.crypto.params.DHPrivateKeyParameters;
+import org.spongycastle.crypto.params.DHPublicKeyParameters;
+import org.spongycastle.util.test.SimpleTestResult;
+import org.spongycastle.util.test.Test;
+import org.spongycastle.util.test.TestResult;
 
 public class DHTest
     implements Test

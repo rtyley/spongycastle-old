@@ -83,7 +83,7 @@
 
 
 	<target name="mini-test" depends="compile" if="is.lw" >
-		<java classname="org.bouncycastle.crypto.test.CAST6Test" 
+		<java classname="org.spongycastle.crypto.test.CAST6Test"
 			fork="yes" >
 			<classpath refid = "compile.cp" />
 		</java>

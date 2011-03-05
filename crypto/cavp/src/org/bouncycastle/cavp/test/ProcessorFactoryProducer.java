@@ -1,4 +1,4 @@
-package org.bouncycastle.cavp.test;
+package org.spongycastle.cavp.test;
 
 import java.security.GeneralSecurityException;
 

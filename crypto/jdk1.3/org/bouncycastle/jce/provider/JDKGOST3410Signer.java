@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -9,20 +9,20 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.AlgorithmParameterSpec;
 
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.DSA;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.GOST3411Digest;
-import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.crypto.signers.ECGOST3410Signer;
-import org.bouncycastle.crypto.signers.GOST3410Signer;
-import org.bouncycastle.jce.interfaces.ECKey;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.interfaces.GOST3410Key;
+import org.spongycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.spongycastle.asn1.x509.X509ObjectIdentifiers;
+import org.spongycastle.crypto.CipherParameters;
+import org.spongycastle.crypto.DSA;
+import org.spongycastle.crypto.Digest;
+import org.spongycastle.crypto.digests.GOST3411Digest;
+import org.spongycastle.crypto.params.ParametersWithRandom;
+import org.spongycastle.crypto.signers.ECGOST3410Signer;
+import org.spongycastle.crypto.signers.GOST3410Signer;
+import org.spongycastle.jce.interfaces.ECKey;
+import org.spongycastle.jce.interfaces.ECPublicKey;
+import org.spongycastle.jce.interfaces.GOST3410Key;
 
-import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
+import org.spongycastle.jce.provider.asymmetric.ec.ECUtil;
 
 public class JDKGOST3410Signer
     extends Signature implements PKCSObjectIdentifiers, X509ObjectIdentifiers

@@ -1,4 +1,4 @@
-package org.bouncycastle.mail.smime.test;
+package org.spongycastle.mail.smime.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -6,8 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.KeyPair;
 import java.security.Security;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
+import org.spongycastle.jce.cert.CertStore;
+import org.spongycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,20 +28,20 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
-import org.bouncycastle.asn1.smime.SMIMECapability;
-import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.cms.test.CMSTestUtil;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
-import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
-import org.bouncycastle.mail.smime.SMIMESigned;
-import org.bouncycastle.mail.smime.SMIMESignedGenerator;
-import org.bouncycastle.mail.smime.SMIMESignedParser;
+import org.spongycastle.asn1.ASN1EncodableVector;
+import org.spongycastle.asn1.cms.AttributeTable;
+import org.spongycastle.asn1.smime.SMIMECapabilitiesAttribute;
+import org.spongycastle.asn1.smime.SMIMECapability;
+import org.spongycastle.asn1.smime.SMIMECapabilityVector;
+import org.spongycastle.cms.SignerInformation;
+import org.spongycastle.cms.SignerInformationStore;
+import org.spongycastle.cms.test.CMSTestUtil;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.mail.smime.SMIMECompressedGenerator;
+import org.spongycastle.mail.smime.SMIMEEnvelopedGenerator;
+import org.spongycastle.mail.smime.SMIMESigned;
+import org.spongycastle.mail.smime.SMIMESignedGenerator;
+import org.spongycastle.mail.smime.SMIMESignedParser;
 
 public class SMIMEMiscTest
     extends TestCase
@@ -76,7 +76,7 @@ public class SMIMEMiscTest
             signKP   = CMSTestUtil.makeKeyPair();
             signCert = CMSTestUtil.makeCertificate(signKP, signDN, signKP, signDN);
     
-            origDN   = "CN=Eric H. Echidna, E=eric@bouncycastle.org, O=Bouncy Castle, C=AU";
+            origDN   = "CN=Eric H. Echidna, E=eric@spongycastle.org, O=Bouncy Castle, C=AU";
             origKP   = CMSTestUtil.makeKeyPair();
             origCert = CMSTestUtil.makeCertificate(origKP, origDN, signKP, signDN);
         }
@@ -265,8 +265,8 @@ public class SMIMEMiscTest
         Properties props = System.getProperties();
         Session session = Session.getDefaultInstance(props, null);
 
-        Address fromUser = new InternetAddress("\"Eric H. Echidna\"<eric@bouncycastle.org>");
-        Address toUser = new InternetAddress("example@bouncycastle.org");
+        Address fromUser = new InternetAddress("\"Eric H. Echidna\"<eric@spongycastle.org>");
+        Address toUser = new InternetAddress("example@spongycastle.org");
 
         MimeMessage body = new MimeMessage(session);
         body.setFrom(fromUser);

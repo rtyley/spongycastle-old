@@ -1,7 +1,7 @@
-package org.bouncycastle.asn1.util;
+package org.spongycastle.asn1.util;
 
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
+import org.spongycastle.asn1.DEREncodable;
+import org.spongycastle.asn1.DERObject;
 
 /**
  * @deprecated use ASN1Dump.

@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.spongycastle.jce.provider;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CRL;
@@ -25,7 +25,7 @@ public class CertStoreCollectionSpi extends CertStoreSpi
 
         if (!(params instanceof CollectionCertStoreParameters))
         {
-            throw new InvalidAlgorithmParameterException( "org.bouncycastle.jce.provider.CertStoreCollectionSpi: parameter must be a CollectionCertStoreParameters object\n" +  params.toString() );
+            throw new InvalidAlgorithmParameterException( "org.spongycastle.jce.provider.CertStoreCollectionSpi: parameter must be a CollectionCertStoreParameters object\n" +  params.toString() );
         }
 
         this.params = (CollectionCertStoreParameters)params;
