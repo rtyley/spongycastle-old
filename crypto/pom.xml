@@ -47,17 +47,17 @@
 					<source>1.5</source>
 					<target>1.5</target>
 					<excludes>
-						<exclude>org/bouncycastle/mail/**/*.java</exclude>
-						<exclude>org/bouncycastle/mail/**/*.properties</exclude>
-						<exclude>org/bouncycastle/cms/**/*.java</exclude>
-						<exclude>org/bouncycastle/cert/**/*.java</exclude>
-						<exclude>org/bouncycastle/pkcs/**/*.java</exclude>
-						<exclude>org/bouncycastle/operator/**/*.java</exclude>
-						<exclude>org/bouncycastle/jcajce/**/*.java</exclude>
-						<exclude>org/bouncycastle/sasn1/**/*.java</exclude>
-						<exclude>org/bouncycastle/tsp/**/*.java</exclude>
-						<exclude>org/bouncycastle/openpgp/**/*.java</exclude>
-						<exclude>org/bouncycastle/bcpg/**/*.java</exclude>
+						<exclude>org/*castle/mail/**/*.java</exclude>
+						<exclude>org/*castle/mail/**/*.properties</exclude>
+						<exclude>org/*castle/cms/**/*.java</exclude>
+						<exclude>org/*castle/cert/**/*.java</exclude>
+						<exclude>org/*castle/pkcs/**/*.java</exclude>
+						<exclude>org/*castle/operator/**/*.java</exclude>
+						<exclude>org/*castle/jcajce/**/*.java</exclude>
+						<exclude>org/*castle/sasn1/**/*.java</exclude>
+						<exclude>org/*castle/tsp/**/*.java</exclude>
+						<exclude>org/*castle/openpgp/**/*.java</exclude>
+						<exclude>org/*castle/bcpg/**/*.java</exclude>
 					</excludes>
 				</configuration>
 
@@ -67,17 +67,17 @@
 						<phase>test-compile</phase>
 						<configuration>
 							<testExcludes>
-								<exclude>org/bouncycastle/mail/**/*.java</exclude>
-								<exclude>org/bouncycastle/mail/**/*.properties</exclude>
-								<exclude>org/bouncycastle/cms/**/*.java</exclude>
-								<exclude>org/bouncycastle/cert/**/*.java</exclude>
-								<exclude>org/bouncycastle/pkcs/**/*.java</exclude>
-								<exclude>org/bouncycastle/operator/**/*.java</exclude>
-								<exclude>org/bouncycastle/jcajce/**/*.java</exclude>
-								<exclude>org/bouncycastle/sasn1/**/*.java</exclude>
-								<exclude>org/bouncycastle/tsp/**/*.java</exclude>
-								<exclude>org/bouncycastle/openpgp/**/*.java</exclude>
-								<exclude>org/bouncycastle/bcpg/**/*.java</exclude>
+								<exclude>org/*castle/mail/**/*.java</exclude>
+								<exclude>org/*castle/mail/**/*.properties</exclude>
+								<exclude>org/*castle/cms/**/*.java</exclude>
+								<exclude>org/*castle/cert/**/*.java</exclude>
+								<exclude>org/*castle/pkcs/**/*.java</exclude>
+								<exclude>org/*castle/operator/**/*.java</exclude>
+								<exclude>org/*castle/jcajce/**/*.java</exclude>
+								<exclude>org/*castle/sasn1/**/*.java</exclude>
+								<exclude>org/*castle/tsp/**/*.java</exclude>
+								<exclude>org/*castle/openpgp/**/*.java</exclude>
+								<exclude>org/*castle/bcpg/**/*.java</exclude>
 							</testExcludes>
 						</configuration>
 						<goals>
