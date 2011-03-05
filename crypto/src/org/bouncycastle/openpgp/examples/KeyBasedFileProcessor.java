@@ -115,7 +115,7 @@ public class KeyBasedFileProcessor
                 throw new IllegalArgumentException("secret key for message not found.");
             }
     
-            InputStream         clear = pbe.getDataStream(sKey, "BC");
+            InputStream         clear = pbe.getDataStream(sKey, BouncyCastleProvider.PROVIDER_NAME);
             
             PGPObjectFactory    plainFact = new PGPObjectFactory(clear);
             
@@ -213,7 +213,7 @@ public class KeyBasedFileProcessor
             byte[] bytes = PGPExampleUtil.compressFile(fileName, CompressionAlgorithmTags.ZIP);
 
             PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
-                PGPEncryptedData.CAST5, withIntegrityCheck, new SecureRandom(), "BC");
+					PGPEncryptedData.CAST5, withIntegrityCheck, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
             encGen.addMethod(encKey);
 
             OutputStream cOut = encGen.open(out, bytes.length);

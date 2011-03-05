@@ -101,7 +101,7 @@ public class RSATest
             SecureRandom        rand = new FixedSecureRandom();
 
 
-            fact = KeyFactory.getInstance("RSA", "BC");
+            fact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
             PrivateKey  privKey = fact.generatePrivate(privKeySpec);
             PublicKey   pubKey = fact.generatePublic(pubKeySpec);
@@ -109,7 +109,7 @@ public class RSATest
             //
             // No Padding
             //
-            Cipher c = Cipher.getInstance("RSA//NoPadding", "BC");
+            Cipher c = Cipher.getInstance("RSA//NoPadding", BouncyCastleProvider.PROVIDER_NAME);
 
             c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -132,7 +132,7 @@ public class RSATest
             //
             // PKCS1 V 1.5
             //
-            c = Cipher.getInstance("RSA//PKCS1Padding", "BC");
+            c = Cipher.getInstance("RSA//PKCS1Padding", BouncyCastleProvider.PROVIDER_NAME);
 
             c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -155,7 +155,7 @@ public class RSATest
             //
             // OAEP
             //
-            c = Cipher.getInstance("RSA//OAEPPadding", "BC");
+            c = Cipher.getInstance("RSA//OAEPPadding", BouncyCastleProvider.PROVIDER_NAME);
 
             c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 

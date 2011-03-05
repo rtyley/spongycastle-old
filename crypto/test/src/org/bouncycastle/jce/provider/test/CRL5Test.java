@@ -220,7 +220,7 @@ public class CRL5Test
     public void indirectCRLTest()
         throws Exception
     {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
         ByteArrayInputStream in = new ByteArrayInputStream(inDirectCrl);
         X509CRL crl = (X509CRL) cf.generateCRL(in);
         Set set = crl.getRevokedCertificates();
@@ -237,7 +237,7 @@ public class CRL5Test
     public void directCRLTest()
         throws Exception
     {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
         ByteArrayInputStream in = new ByteArrayInputStream(directCRL);
         X509CRL crl = (X509CRL) cf.generateCRL(in);
         Set set = crl.getRevokedCertificates();

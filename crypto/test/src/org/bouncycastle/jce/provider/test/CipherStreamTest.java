@@ -84,15 +84,15 @@ public class CipherStreamTest
 
         if (name.indexOf('/') < 0)
         {
-            kGen = KeyGenerator.getInstance(name, "BC");
+            kGen = KeyGenerator.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
         }
         else
         {
-            kGen = KeyGenerator.getInstance(name.substring(0, name.indexOf('/')), "BC");
+            kGen = KeyGenerator.getInstance(name.substring(0, name.indexOf('/')), BouncyCastleProvider.PROVIDER_NAME);
         }
 
-        Cipher                  in = Cipher.getInstance(name, "BC");
-        Cipher                  out = Cipher.getInstance(name, "BC");
+        Cipher                  in = Cipher.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
+        Cipher                  out = Cipher.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
         Key                     key = kGen.generateKey();
         ByteArrayInputStream    bIn = new ByteArrayInputStream(lCode.getBytes());
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
@@ -134,8 +134,8 @@ public class CipherStreamTest
         throws Exception
     {
         SecretKey key = new SecretKeySpec(keyBytes, name);
-        Cipher    in = Cipher.getInstance(name, "BC");
-        Cipher    out = Cipher.getInstance(name, "BC");
+        Cipher    in = Cipher.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
+        Cipher    out = Cipher.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
 
         if (iv != null)
         {
@@ -194,7 +194,7 @@ public class CipherStreamTest
             }
 
             SecretKeySpec cipherKey = new SecretKeySpec(keyBytes, name);
-            Cipher ecipher = Cipher.getInstance(name, "BC");
+            Cipher ecipher = Cipher.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
             ecipher.init(Cipher.ENCRYPT_MODE, cipherKey);
 
             byte[] cipherText = new byte[0];
@@ -217,7 +217,7 @@ public class CipherStreamTest
             
             try
             {
-                Cipher c = Cipher.getInstance(name, "BC");
+                Cipher c = Cipher.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
     
                 Key k = new PublicKey()
                 {
@@ -250,7 +250,7 @@ public class CipherStreamTest
             
             try
             {
-                Cipher c = Cipher.getInstance(name, "BC");
+                Cipher c = Cipher.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
     
                 Key k = new PrivateKey()
                 {

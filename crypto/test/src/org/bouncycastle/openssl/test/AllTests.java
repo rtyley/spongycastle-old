@@ -49,7 +49,7 @@ public class
     public void testPKCS8Encrypted()
         throws Exception
     {
-        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         kpGen.initialize(1024);
 
@@ -64,8 +64,8 @@ public class
         throws NoSuchProviderException, NoSuchAlgorithmException, IOException
     {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        PEMWriter pWrt = new PEMWriter(new OutputStreamWriter(bOut), "BC");
-        PKCS8Generator pkcs8 = new PKCS8Generator(key, algorithm, "BC");
+        PEMWriter pWrt = new PEMWriter(new OutputStreamWriter(bOut), BouncyCastleProvider.PROVIDER_NAME);
+        PKCS8Generator pkcs8 = new PKCS8Generator(key, algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
         pkcs8.setPassword("hello".toCharArray());
         
@@ -89,7 +89,7 @@ public class
     public void testPKCS8Plain()
         throws Exception
     {
-        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         kpGen.initialize(1024);
 

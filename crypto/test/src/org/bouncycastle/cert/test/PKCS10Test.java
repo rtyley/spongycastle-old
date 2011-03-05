@@ -105,7 +105,7 @@ public class PKCS10Test
     private void generationTest(int keySize, String keyName, String sigName, String provider)
         throws Exception
     {
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance(keyName, "BC");
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance(keyName, BouncyCastleProvider.PROVIDER_NAME);
 
         kpg.initialize(keySize);
 
@@ -146,7 +146,7 @@ public class PKCS10Test
         throws Exception
     {
         ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec(curveOid.getId());
-        KeyPairGenerator ecGen = KeyPairGenerator.getInstance("ECDSA", "BC");
+        KeyPairGenerator ecGen = KeyPairGenerator.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
 
         ecGen.initialize(spec);
 
@@ -208,7 +208,7 @@ public class PKCS10Test
             fail("ECDSA parameters incorrect.");
         }
         
-        Signature sig = Signature.getInstance(algorithm, "BC");
+        Signature sig = Signature.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
         
         sig.initVerify(pubKey);
         
@@ -247,7 +247,7 @@ public class PKCS10Test
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyFactory     fact = KeyFactory.getInstance("ECDSA", "BC");
+        KeyFactory     fact = KeyFactory.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
 
         privKey = fact.generatePrivate(privKeySpec);
         pubKey = fact.generatePublic(pubKeySpec);
@@ -309,7 +309,7 @@ public class PKCS10Test
         throws Exception
     {
         String           algorithm = "GOST3411withECGOST3410";
-        KeyPairGenerator ecGostKpg = KeyPairGenerator.getInstance("ECGOST3410", "BC");
+        KeyPairGenerator ecGostKpg = KeyPairGenerator.getInstance("ECGOST3410", BouncyCastleProvider.PROVIDER_NAME);
 
         ecGostKpg.initialize(ECGOST3410NamedCurveTable.getParameterSpec("GostR3410-2001-CryptoPro-A"), new SecureRandom());
 
@@ -343,7 +343,7 @@ public class PKCS10Test
             fail("ECGOST parameters incorrect.");
         }
 
-        Signature sig = Signature.getInstance(algorithm, "BC");
+        Signature sig = Signature.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initVerify(pubKey);
 
@@ -372,7 +372,7 @@ public class PKCS10Test
             new BigInteger("1a8b38f398fa712049898d7fb79ee0a77668791299cdfa09efc0e507acb21ed74301ef5bfd48be455eaeb6e1678255827580a8e4e8e14151d1510a82a3f2e729",16),
             new BigInteger("27156aba4126d24a81f3a528cbfb27f56886f840a9f6e86e17a44b94fe9319584b8e22fdde1e5a2e3bd8aa5ba8d8584194eb2190acf832b847f13a3d24a79f4d",16));
 
-        KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  fact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         PrivateKey privKey = fact.generatePrivate(privKeySpec);
         PublicKey pubKey = fact.generatePublic(pubKeySpec);
@@ -400,7 +400,7 @@ public class PKCS10Test
             fail("PSS parameters incorrect.");
         }
 
-        Signature sig = Signature.getInstance(algorithm, "BC");
+        Signature sig = Signature.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initVerify(pubKey);
 
@@ -416,7 +416,7 @@ public class PKCS10Test
     private void nullPointerTest()
         throws Exception
     {
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
         keyGen.initialize(1024, new SecureRandom());
         KeyPair pair = keyGen.generateKeyPair();
 
@@ -483,8 +483,8 @@ public class PKCS10Test
     public void performTest()
         throws Exception
     {
-        generationTest(512, "RSA", "SHA1withRSA", "BC");       
-        generationTest(512, "GOST3410", "GOST3411withGOST3410", "BC");
+        generationTest(512, "RSA", "SHA1withRSA", BouncyCastleProvider.PROVIDER_NAME);
+        generationTest(512, "GOST3410", "GOST3411withGOST3410", BouncyCastleProvider.PROVIDER_NAME);
         
         if (Security.getProvider("SunRsaSign") != null)
         {
@@ -527,7 +527,7 @@ public class PKCS10Test
         }
 
         // elliptic curve openSSL
-        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
 
         ECCurve curve = new ECCurve.Fp(
             new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q

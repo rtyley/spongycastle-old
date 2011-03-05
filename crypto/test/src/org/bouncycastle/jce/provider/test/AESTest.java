@@ -60,8 +60,8 @@ public class AESTest
 
         key = new SecretKeySpec(keyBytes, "AES");
 
-        in = Cipher.getInstance("AES/ECB/NoPadding", "BC");
-        out = Cipher.getInstance("AES/ECB/NoPadding", "BC");
+        in = Cipher.getInstance("AES/ECB/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
+        out = Cipher.getInstance("AES/ECB/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
         
         try
         {
@@ -154,8 +154,8 @@ public class AESTest
 
         key = new SecretKeySpec(K, "AES");
 
-        in = Cipher.getInstance("AES/EAX/NoPadding", "BC");
-        out = Cipher.getInstance("AES/EAX/NoPadding", "BC");
+        in = Cipher.getInstance("AES/EAX/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
+        out = Cipher.getInstance("AES/EAX/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
 
         in.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(N));
 
@@ -175,7 +175,7 @@ public class AESTest
 
         try
         {
-            in = Cipher.getInstance("AES/EAX/PKCS5Padding", "BC");
+            in = Cipher.getInstance("AES/EAX/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME);
 
             fail("bad padding missed in EAX");
         }
@@ -198,8 +198,8 @@ public class AESTest
 
         key = new SecretKeySpec(K, "AES");
 
-        in = Cipher.getInstance("AES/CCM/NoPadding", "BC");
-        out = Cipher.getInstance("AES/CCM/NoPadding", "BC");
+        in = Cipher.getInstance("AES/CCM/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
+        out = Cipher.getInstance("AES/CCM/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
 
         in.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(N));
 
@@ -219,7 +219,7 @@ public class AESTest
 
         try
         {
-            in = Cipher.getInstance("AES/CCM/PKCS5Padding", "BC");
+            in = Cipher.getInstance("AES/CCM/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME);
 
             fail("bad padding missed in CCM");
         }
@@ -255,8 +255,8 @@ public class AESTest
 
         key = new SecretKeySpec(K, "AES");
 
-        in = Cipher.getInstance("AES/GCM/NoPadding", "BC");
-        out = Cipher.getInstance("AES/GCM/NoPadding", "BC");
+        in = Cipher.getInstance("AES/GCM/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
+        out = Cipher.getInstance("AES/GCM/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
 
         in.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(N));
 
@@ -276,7 +276,7 @@ public class AESTest
 
         try
         {
-            in = Cipher.getInstance("AES/GCM/PKCS5Padding", "BC");
+            in = Cipher.getInstance("AES/GCM/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME);
     
             fail("bad padding missed in GCM");
         }

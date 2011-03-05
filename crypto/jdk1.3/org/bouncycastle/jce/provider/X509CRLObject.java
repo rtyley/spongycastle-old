@@ -168,7 +168,7 @@ public class X509CRLObject
         throws CRLException,  NoSuchAlgorithmException,
             InvalidKeyException, NoSuchProviderException, SignatureException
     {
-        verify(key, "BC");
+        verify(key, BouncyCastleProvider.PROVIDER_NAME);
     }
 
     public void verify(PublicKey key, String sigProvider)

@@ -1396,12 +1396,12 @@ public class PGPKeyRingTest
                 if (k.getKeyID() == -4049084404703773049L
                      || k.getKeyID() == -1413891222336124627L)
                 {
-                    k.extractPrivateKey(sec2pass1, "BC");
+                    k.extractPrivateKey(sec2pass1, BouncyCastleProvider.PROVIDER_NAME);
                 }
                 else if (k.getKeyID() == -6498553574938125416L
                     || k.getKeyID() == 59034765524361024L)
                 {
-                    k.extractPrivateKey(sec2pass2, "BC");
+                    k.extractPrivateKey(sec2pass2, BouncyCastleProvider.PROVIDER_NAME);
                 }
             }
             
@@ -1491,7 +1491,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                k.extractPrivateKey(sec3pass1, "BC");
+                k.extractPrivateKey(sec3pass1, BouncyCastleProvider.PROVIDER_NAME);
             }
             
             if (keyCount != 2)
@@ -1537,7 +1537,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                k.extractPrivateKey(sec3pass1, "BC");
+                k.extractPrivateKey(sec3pass1, BouncyCastleProvider.PROVIDER_NAME);
             }
             
             if (keyCount != 2)
@@ -1629,7 +1629,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                k.extractPrivateKey(sec5pass1, "BC");
+                k.extractPrivateKey(sec5pass1, BouncyCastleProvider.PROVIDER_NAME);
             }
             
             if (keyCount != 2)
@@ -1648,7 +1648,7 @@ public class PGPKeyRingTest
     {
         try
         {
-            Cipher.getInstance("IDEA", "BC");
+            Cipher.getInstance("IDEA", BouncyCastleProvider.PROVIDER_NAME);
 
             return false;
         }
@@ -1725,7 +1725,7 @@ public class PGPKeyRingTest
                 fail("wrong number of revocations in test7.");
             }
 
-            sig.initVerify(masterKey, "BC");
+            sig.initVerify(masterKey, BouncyCastleProvider.PROVIDER_NAME);
                                                                             
             if (!sig.verifyCertification(k))
             {
@@ -1806,7 +1806,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                k.extractPrivateKey(sec8pass, "BC");
+                k.extractPrivateKey(sec8pass, BouncyCastleProvider.PROVIDER_NAME);
             }
             
             if (keyCount != 2)
@@ -1852,7 +1852,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                PGPPrivateKey   pKey = k.extractPrivateKey(sec9pass, "BC");
+                PGPPrivateKey   pKey = k.extractPrivateKey(sec9pass, BouncyCastleProvider.PROVIDER_NAME);
                 if (keyCount == 1 && pKey != null)
                 {
                     fail("primary secret key found, null expected");
@@ -1915,7 +1915,7 @@ public class PGPKeyRingTest
         throws Exception
     {
         char[]              passPhrase = "hello".toCharArray();
-        KeyPairGenerator    dsaKpg = KeyPairGenerator.getInstance("DSA", "BC");
+        KeyPairGenerator    dsaKpg = KeyPairGenerator.getInstance("DSA", BouncyCastleProvider.PROVIDER_NAME);
     
         dsaKpg.initialize(512);
     
@@ -1925,7 +1925,7 @@ public class PGPKeyRingTest
         //
         KeyPair                    dsaKp = dsaKpg.generateKeyPair();
     
-        KeyPairGenerator    elgKpg = KeyPairGenerator.getInstance("ELGAMAL", "BC");
+        KeyPairGenerator    elgKpg = KeyPairGenerator.getInstance("ELGAMAL", BouncyCastleProvider.PROVIDER_NAME);
         BigInteger             g = new BigInteger("153d5d6172adb43045b68ae8e1de1070b6137005686d29d3d73a7749199681ee5b212c9b96bfdcfa5b20cd5e3fd2044895d609cf9b410b7a0f12ca1cb9a428cc", 16);
         BigInteger             p = new BigInteger("9494fec095f3b85ee286542b3836fc81a5dd0a0349b4c239dd38744d488cf8e31db8bcb7d33b41abb9e5a33cca9144b1cef332c94bf0573bf047a3aca98cdf3b", 16);
         
@@ -1941,13 +1941,13 @@ public class PGPKeyRingTest
         PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date());
     
         PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, dsaKeyPair,
-                "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+				"test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
     
         keyRingGen.addSubKey(elgKeyPair);
     
         PGPSecretKeyRing       keyRing = keyRingGen.generateSecretKeyRing();
         
-        keyRing.getSecretKey().extractPrivateKey(passPhrase, "BC");
+        keyRing.getSecretKey().extractPrivateKey(passPhrase, BouncyCastleProvider.PROVIDER_NAME);
         
         PGPPublicKeyRing        pubRing = keyRingGen.generatePublicKeyRing();
         
@@ -1976,7 +1976,7 @@ public class PGPKeyRingTest
             if (sig.getKeyID() == vKey.getKeyID()
                 && sig.getSignatureType() == PGPSignature.SUBKEY_BINDING)
             {
-                sig.initVerify(vKey, "BC");
+                sig.initVerify(vKey, BouncyCastleProvider.PROVIDER_NAME);
 
                 if (!sig.verifyCertification(vKey, sKey))
                 {
@@ -1990,7 +1990,7 @@ public class PGPKeyRingTest
         throws Exception
     {
         char[]              passPhrase = "hello".toCharArray();
-        KeyPairGenerator    rsaKpg = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator    rsaKpg = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         rsaKpg.initialize(512);
 
@@ -2003,11 +2003,11 @@ public class PGPKeyRingTest
         PGPKeyPair        rsaKeyPair2 = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, rsaKp, new Date());
 
         PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, rsaKeyPair1,
-                "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+				"test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
         PGPSecretKeyRing       secRing1 = keyRingGen.generateSecretKeyRing();
         PGPPublicKeyRing       pubRing1 = keyRingGen.generatePublicKeyRing();
         keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, rsaKeyPair2,
-                "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+				"test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
         PGPSecretKeyRing       secRing2 = keyRingGen.generateSecretKeyRing();
         PGPPublicKeyRing       pubRing2 = keyRingGen.generatePublicKeyRing();
 
@@ -2042,7 +2042,7 @@ public class PGPKeyRingTest
         throws Exception
     {
         char[]              passPhrase = "hello".toCharArray();
-        KeyPairGenerator    dsaKpg = KeyPairGenerator.getInstance("DSA", "BC");
+        KeyPairGenerator    dsaKpg = KeyPairGenerator.getInstance("DSA", BouncyCastleProvider.PROVIDER_NAME);
     
         dsaKpg.initialize(512);
     
@@ -2052,7 +2052,7 @@ public class PGPKeyRingTest
         //
         KeyPair                    dsaKp = dsaKpg.generateKeyPair();
     
-        KeyPairGenerator    elgKpg = KeyPairGenerator.getInstance("ELGAMAL", "BC");
+        KeyPairGenerator    elgKpg = KeyPairGenerator.getInstance("ELGAMAL", BouncyCastleProvider.PROVIDER_NAME);
         BigInteger             g = new BigInteger("153d5d6172adb43045b68ae8e1de1070b6137005686d29d3d73a7749199681ee5b212c9b96bfdcfa5b20cd5e3fd2044895d609cf9b410b7a0f12ca1cb9a428cc", 16);
         BigInteger             p = new BigInteger("9494fec095f3b85ee286542b3836fc81a5dd0a0349b4c239dd38744d488cf8e31db8bcb7d33b41abb9e5a33cca9144b1cef332c94bf0573bf047a3aca98cdf3b", 16);
         
@@ -2068,13 +2068,13 @@ public class PGPKeyRingTest
         PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date());
     
         PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, dsaKeyPair,
-                "test", PGPEncryptedData.AES_256, passPhrase, true, null, null, new SecureRandom(), "BC");
+				"test", PGPEncryptedData.AES_256, passPhrase, true, null, null, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
     
         keyRingGen.addSubKey(elgKeyPair);
     
         PGPSecretKeyRing       keyRing = keyRingGen.generateSecretKeyRing();
         
-        keyRing.getSecretKey().extractPrivateKey(passPhrase, "BC");
+        keyRing.getSecretKey().extractPrivateKey(passPhrase, BouncyCastleProvider.PROVIDER_NAME);
         
         PGPPublicKeyRing        pubRing = keyRingGen.generatePublicKeyRing();
         
@@ -2103,7 +2103,7 @@ public class PGPKeyRingTest
             if (sig.getKeyID() == vKey.getKeyID()
                 && sig.getSignatureType() == PGPSignature.SUBKEY_BINDING)
             {
-                sig.initVerify(vKey, "BC");
+                sig.initVerify(vKey, BouncyCastleProvider.PROVIDER_NAME);
     
                 if (!sig.verifyCertification(vKey, sKey))
                 {
@@ -2154,15 +2154,15 @@ public class PGPKeyRingTest
                 // re-encrypt the key with an empty password
                 pgpPriv = PGPSecretKeyRing.removeSecretKey(pgpPriv, pgpKey);
                 pgpKey = PGPSecretKey.copyWithNewPassword(pgpKey,
-                                    rewrapPass,
-                                    null,
-                                    PGPEncryptedData.NULL,
-                                    rand,
-                                    "BC");
+						rewrapPass,
+						null,
+						PGPEncryptedData.NULL,
+						rand,
+						BouncyCastleProvider.PROVIDER_NAME);
                 pgpPriv = PGPSecretKeyRing.insertSecretKey(pgpPriv, pgpKey);
             
                 // this should succeed
-                PGPPrivateKey privTmp = pgpKey.extractPrivateKey(null, "BC");
+                PGPPrivateKey privTmp = pgpKey.extractPrivateKey(null, BouncyCastleProvider.PROVIDER_NAME);
             }
         }
     }

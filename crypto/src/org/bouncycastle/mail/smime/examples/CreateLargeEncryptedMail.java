@@ -16,6 +16,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 
 /**
@@ -45,7 +46,7 @@ public class CreateLargeEncryptedMail
         //
         // Open the key store
         //
-        KeyStore    ks = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore    ks = KeyStore.getInstance("PKCS12", BouncyCastleProvider.PROVIDER_NAME);
         String      keyAlias = ExampleUtils.findKeyAlias(ks, args[0], args[1].toCharArray());
 
         Certificate[]   chain = ks.getCertificateChain(keyAlias);
@@ -79,7 +80,7 @@ public class CreateLargeEncryptedMail
         msg.setHeader("Content-Type", "application/octet-stream");
         msg.setHeader("Content-Transfer-Encoding", "binary");
 
-        MimeBodyPart mp = gen.generate(msg, SMIMEEnvelopedGenerator.RC2_CBC, "BC");
+        MimeBodyPart mp = gen.generate(msg, SMIMEEnvelopedGenerator.RC2_CBC, BouncyCastleProvider.PROVIDER_NAME);
         
         //
         // Get a Session object and create the mail message

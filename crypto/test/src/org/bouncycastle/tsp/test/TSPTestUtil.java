@@ -29,6 +29,7 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
@@ -62,22 +63,22 @@ public class TSPTestUtil
         {
             rand = new SecureRandom();
 
-            kpg = KeyPairGenerator.getInstance("RSA", "BC");
+            kpg = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
             kpg.initialize(1024, rand);
 
-            desede128kg = KeyGenerator.getInstance("DESEDE", "BC");
+            desede128kg = KeyGenerator.getInstance("DESEDE", BouncyCastleProvider.PROVIDER_NAME);
             desede128kg.init(112, rand);
 
-            desede192kg = KeyGenerator.getInstance("DESEDE", "BC");
+            desede192kg = KeyGenerator.getInstance("DESEDE", BouncyCastleProvider.PROVIDER_NAME);
             desede192kg.init(168, rand);
 
-            rc240kg = KeyGenerator.getInstance("RC2", "BC");
+            rc240kg = KeyGenerator.getInstance("RC2", BouncyCastleProvider.PROVIDER_NAME);
             rc240kg.init(40, rand);
 
-            rc264kg = KeyGenerator.getInstance("RC2", "BC");
+            rc264kg = KeyGenerator.getInstance("RC2", BouncyCastleProvider.PROVIDER_NAME);
             rc264kg.init(64, rand);
 
-            rc2128kg = KeyGenerator.getInstance("RC2", "BC");
+            rc2128kg = KeyGenerator.getInstance("RC2", BouncyCastleProvider.PROVIDER_NAME);
             rc2128kg.init(128, rand);
 
             serialNumber = new BigInteger("1");

@@ -71,11 +71,7 @@ import org.bouncycastle.i18n.LocaleString;
 import org.bouncycastle.i18n.filter.TrustedInput;
 import org.bouncycastle.i18n.filter.UntrustedInput;
 import org.bouncycastle.i18n.filter.UntrustedUrlInput;
-import org.bouncycastle.jce.provider.AnnotatedException;
-import org.bouncycastle.jce.provider.CertPathValidatorUtilities;
-import org.bouncycastle.jce.provider.PKIXNameConstraintValidator;
-import org.bouncycastle.jce.provider.PKIXNameConstraintValidatorException;
-import org.bouncycastle.jce.provider.PKIXPolicyNode;
+import org.bouncycastle.jce.provider.*;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**
@@ -2188,7 +2184,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             {
                 try
                 {
-                    crl.verify(workingPublicKey, "BC");
+                    crl.verify(workingPublicKey, BouncyCastleProvider.PROVIDER_NAME);
                 }
                 catch (Exception e)
                 {
@@ -2471,7 +2467,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 conn.connect();
                 if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
                 {
-                    CertificateFactory cf = CertificateFactory.getInstance("X.509","BC");
+                    CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
                     result = (X509CRL) cf.generateCRL(conn.getInputStream());
                 }
                 else

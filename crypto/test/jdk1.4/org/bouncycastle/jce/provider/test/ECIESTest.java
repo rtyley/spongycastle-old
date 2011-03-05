@@ -62,7 +62,7 @@ public class ECIESTest
 
         try 
         {
-            KeyPairGenerator    g = KeyPairGenerator.getInstance("ECIES", "BC");
+            KeyPairGenerator    g = KeyPairGenerator.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
 
             ECCurve curve = new ECCurve.Fp(
                     new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
@@ -82,7 +82,7 @@ public class ECIESTest
                 return res;
             }
 
-            g = KeyPairGenerator.getInstance("ECIES", "BC");
+            g = KeyPairGenerator.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
 
             g.initialize(192, new SecureRandom());
 
@@ -92,7 +92,7 @@ public class ECIESTest
                 return res;
             }
 
-            g = KeyPairGenerator.getInstance("ECIES", "BC");
+            g = KeyPairGenerator.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
 
             g.initialize(239, new SecureRandom());
 
@@ -102,7 +102,7 @@ public class ECIESTest
                 return res;
             }
 
-            g = KeyPairGenerator.getInstance("ECIES", "BC");
+            g = KeyPairGenerator.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
 
             g.initialize(256, new SecureRandom());
 
@@ -148,8 +148,8 @@ public class ECIESTest
             //
             // stream test
             //
-            Cipher c1 = Cipher.getInstance("ECIES", "BC");
-            Cipher c2 = Cipher.getInstance("ECIES", "BC");
+            Cipher c1 = Cipher.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
+            Cipher c2 = Cipher.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
 
             IEKeySpec   c1Key = new IEKeySpec(aPriv, bPub);
             IEKeySpec   c2Key = new IEKeySpec(bPriv, aPub);
@@ -204,8 +204,8 @@ public class ECIESTest
             //
             // stream test
             //
-            Cipher c1 = Cipher.getInstance("ECIES", "BC");
-            Cipher c2 = Cipher.getInstance("ECIES", "BC");
+            Cipher c1 = Cipher.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
+            Cipher c2 = Cipher.getInstance("ECIES", BouncyCastleProvider.PROVIDER_NAME);
 
             IEKeySpec   c1Key = new IEKeySpec(aPriv, bPub);
             IEKeySpec   c2Key = new IEKeySpec(bPriv, aPub);

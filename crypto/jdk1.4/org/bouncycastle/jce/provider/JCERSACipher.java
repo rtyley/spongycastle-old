@@ -114,7 +114,7 @@ public class JCERSACipher extends WrapCipherSpi
             {
                 try
                 {
-                    engineParams = AlgorithmParameters.getInstance("OAEP", "BC");
+                    engineParams = AlgorithmParameters.getInstance("OAEP", BouncyCastleProvider.PROVIDER_NAME);
                     engineParams.init(paramSpec);
                 }
                 catch (Exception e)

@@ -39,7 +39,7 @@ public class AllTests
     {
         TestSuite suite = new TestSuite("Cert Tests");
 
-        if (Security.getProvider("BC") == null)
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null)
         {
             Security.addProvider(new BouncyCastleProvider());
         }

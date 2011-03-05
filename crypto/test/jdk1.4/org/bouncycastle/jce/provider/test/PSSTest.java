@@ -92,12 +92,12 @@ public class PSSTest
     {
         try
         {
-            KeyFactory fact = KeyFactory.getInstance("RSA", "BC");
+            KeyFactory fact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
             PrivateKey  privKey = fact.generatePrivate(privKeySpec);
             PublicKey   pubKey = fact.generatePublic(pubKeySpec);
 
-            Signature s = Signature.getInstance("SHA1withRSA/PSS", "BC");
+            Signature s = Signature.getInstance("SHA1withRSA/PSS", BouncyCastleProvider.PROVIDER_NAME);
 
             s.initSign(privKey, new FixedRandom(slt1a));
             s.update(msg1a);
@@ -108,7 +108,7 @@ public class PSSTest
                 return new SimpleTestResult(false, "PSS Sign test expected " + new String(Hex.encode(sig1a)) + " got " + new String(Hex.encode(sig)));
             }
 
-            s = Signature.getInstance("SHA1withRSAandMGF1", "BC");
+            s = Signature.getInstance("SHA1withRSAandMGF1", BouncyCastleProvider.PROVIDER_NAME);
             
             s.initVerify(pubKey);
             s.update(msg1a);
@@ -117,7 +117,7 @@ public class PSSTest
                 return new SimpleTestResult(false, "SHA1 signature verification failed");
             }
 
-            s = Signature.getInstance("SHA1withRSAandMGF1", "BC");
+            s = Signature.getInstance("SHA1withRSAandMGF1", BouncyCastleProvider.PROVIDER_NAME);
             
             s.setParameter(new PSSParameterSpec(20));
             
@@ -134,7 +134,7 @@ public class PSSTest
                 return new SimpleTestResult(false, "failed default encoding test.");
             }
             
-            s = Signature.getInstance("SHA256withRSA/PSS", "BC");
+            s = Signature.getInstance("SHA256withRSA/PSS", BouncyCastleProvider.PROVIDER_NAME);
 
             s.initSign(privKey, new FixedRandom(slt1a));
             s.update(msg1a);
@@ -147,7 +147,7 @@ public class PSSTest
                 return new SimpleTestResult(false, "PSS Sign test expected " + new String(Hex.encode(sig1b)) + " got " + new String(Hex.encode(sig)));
             }
 
-            s = Signature.getInstance("SHA256withRSAandMGF1", "BC");
+            s = Signature.getInstance("SHA256withRSAandMGF1", BouncyCastleProvider.PROVIDER_NAME);
             
             s.setParameter(pss.getParameterSpec(PSSParameterSpec.class));
             
@@ -161,7 +161,7 @@ public class PSSTest
             //
             // 512 test -with zero salt length
             //
-            s = Signature.getInstance("SHA512withRSAandMGF1", "BC");
+            s = Signature.getInstance("SHA512withRSAandMGF1", BouncyCastleProvider.PROVIDER_NAME);
             
             s.setParameter(new PSSParameterSpec(0));
             s.initSign(privKey);
@@ -176,7 +176,7 @@ public class PSSTest
                 return new SimpleTestResult(false, "PSS Sign test expected " + new String(Hex.encode(sig1c)) + " got " + new String(Hex.encode(sig)));
             }
 
-            s = Signature.getInstance("SHA512withRSAandMGF1", "BC");
+            s = Signature.getInstance("SHA512withRSAandMGF1", BouncyCastleProvider.PROVIDER_NAME);
             
             s.setParameter(pss.getParameterSpec(PSSParameterSpec.class));
             

@@ -16,7 +16,7 @@ import org.bouncycastle.util.test.TestResult;
 public class SealedTest
     implements Test
 {
-    final static String provider = "BC";
+	final static String provider = BouncyCastleProvider.PROVIDER_NAME;
 
     public String getName()
     {

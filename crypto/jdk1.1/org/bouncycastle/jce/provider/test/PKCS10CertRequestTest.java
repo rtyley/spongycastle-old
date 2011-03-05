@@ -32,7 +32,7 @@ public class PKCS10CertRequestTest
     {
         try
         {
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", "BC");
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
             kpg.initialize(512);
 

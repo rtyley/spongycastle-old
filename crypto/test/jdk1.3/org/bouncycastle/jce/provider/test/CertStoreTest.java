@@ -29,7 +29,7 @@ public class CertStoreTest
         try
         {
             CertificateFactory cf = CertificateFactory.getInstance("X.509",
-                    "BC");
+					BouncyCastleProvider.PROVIDER_NAME);
 
             X509Certificate rootCert = (X509Certificate)cf
                     .generateCertificate(new ByteArrayInputStream(
@@ -55,7 +55,7 @@ public class CertStoreTest
             list.add(interCrl);
             CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(
                     list);
-            CertStore store = CertStore.getInstance("Collection", ccsp, "BC");
+            CertStore store = CertStore.getInstance("Collection", ccsp, BouncyCastleProvider.PROVIDER_NAME);
 
             // Searching for rootCert by subjectDN
             X509CertSelector targetConstraints = new X509CertSelector();

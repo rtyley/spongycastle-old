@@ -15,9 +15,9 @@ public class ProviderUtil
     private static final long  MAX_MEMORY = Runtime.getRuntime().maxMemory();
 
     private static Permission BC_EC_LOCAL_PERMISSION = new ProviderConfigurationPermission(
-                                                   "BC", ConfigurableProvider.THREAD_LOCAL_EC_IMPLICITLY_CA);
+			BouncyCastleProvider.PROVIDER_NAME, ConfigurableProvider.THREAD_LOCAL_EC_IMPLICITLY_CA);
     private static Permission BC_EC_PERMISSION = new ProviderConfigurationPermission(
-                                                   "BC", ConfigurableProvider.EC_IMPLICITLY_CA);
+			BouncyCastleProvider.PROVIDER_NAME, ConfigurableProvider.EC_IMPLICITLY_CA);
 
     private static ThreadLocal threadSpec = new ThreadLocal();
     private static volatile ECParameterSpec ecImplicitCaParams;

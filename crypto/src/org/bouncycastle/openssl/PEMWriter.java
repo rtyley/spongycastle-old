@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.bouncycastle.util.io.pem.PemObjectGenerator;
 import org.bouncycastle.util.io.pem.PemWriter;
@@ -24,7 +25,7 @@ public class PEMWriter
      */
     public PEMWriter(Writer out)
     {
-        this(out, "BC");
+        this(out, BouncyCastleProvider.PROVIDER_NAME);
     }
 
     public PEMWriter(

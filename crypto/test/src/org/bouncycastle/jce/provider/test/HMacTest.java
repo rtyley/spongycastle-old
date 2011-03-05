@@ -51,7 +51,7 @@ public class HMacTest
         byte[]              out;
         Mac                 mac;
 
-        mac = Mac.getInstance(hmacName, "BC");
+        mac = Mac.getInstance(hmacName, BouncyCastleProvider.PROVIDER_NAME);
 
         mac.init(key);
 
@@ -72,7 +72,7 @@ public class HMacTest
             return;
         }
 
-        KeyGenerator kGen = KeyGenerator.getInstance(hmacName, "BC");
+        KeyGenerator kGen = KeyGenerator.getInstance(hmacName, BouncyCastleProvider.PROVIDER_NAME);
 
         mac.init(kGen.generateKey());
 
@@ -86,7 +86,7 @@ public class HMacTest
     {
         Mac mac = null;
 
-        mac = Mac.getInstance("HmacSHA1", "BC");
+        mac = Mac.getInstance("HmacSHA1", BouncyCastleProvider.PROVIDER_NAME);
 
         byte [] b = {(byte)1, (byte)2, (byte)3, (byte)4, (byte)5};
         SecretKeySpec sks = new SecretKeySpec(b, "HmacSHA1");

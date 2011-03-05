@@ -109,7 +109,7 @@ public class RSATest
         SecureRandom        rand = new FixedSecureRandom();
 
 
-        fact = KeyFactory.getInstance("RSA", "BC");
+        fact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         PrivateKey  privKey = fact.generatePrivate(privKeySpec);
         PublicKey   pubKey = fact.generatePublic(pubKeySpec);
@@ -120,7 +120,7 @@ public class RSATest
         //
         // No Padding
         //
-        Cipher c = Cipher.getInstance("RSA", "BC");
+        Cipher c = Cipher.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -143,7 +143,7 @@ public class RSATest
         //
         // No Padding - incremental
         //
-        c = Cipher.getInstance("RSA", "BC");
+        c = Cipher.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -168,7 +168,7 @@ public class RSATest
         //
         // No Padding - maximum length
         //
-        c = Cipher.getInstance("RSA", "BC");
+        c = Cipher.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         byte[]  modBytes = ((RSAPublicKey)pubKey).getModulus().toByteArray();
         byte[]  maxInput = new byte[modBytes.length - 1];
@@ -191,7 +191,7 @@ public class RSATest
         //
         // PKCS1 V 1.5
         //
-        c = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
+        c = Cipher.getInstance("RSA/ECB/PKCS1Padding", BouncyCastleProvider.PROVIDER_NAME);
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -214,7 +214,7 @@ public class RSATest
         //
         // OAEP - SHA1
         //
-        c = Cipher.getInstance("RSA/NONE/OAEPPadding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPPadding", BouncyCastleProvider.PROVIDER_NAME);
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -225,7 +225,7 @@ public class RSATest
             fail("OAEP test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
         }
 
-        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", BouncyCastleProvider.PROVIDER_NAME);
         
         c.init(Cipher.DECRYPT_MODE, privKey);
 
@@ -239,7 +239,7 @@ public class RSATest
         //
         // OAEP - SHA224
         //
-        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA224AndMGF1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA224AndMGF1Padding", BouncyCastleProvider.PROVIDER_NAME);
 
         c.init(Cipher.ENCRYPT_MODE, pub2048Key, rand);
 
@@ -262,7 +262,7 @@ public class RSATest
         //
         // OAEP - SHA 256
         //
-        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding", BouncyCastleProvider.PROVIDER_NAME);
 
         c.init(Cipher.ENCRYPT_MODE, pub2048Key, rand);
 
@@ -285,7 +285,7 @@ public class RSATest
         //
         // OAEP - SHA 384
         //
-        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA384AndMGF1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA384AndMGF1Padding", BouncyCastleProvider.PROVIDER_NAME);
 
         c.init(Cipher.ENCRYPT_MODE, pub2048Key, rand);
 
@@ -308,7 +308,7 @@ public class RSATest
         //
         // OAEP - MD5
         //
-        c = Cipher.getInstance("RSA/NONE/OAEPWithMD5AndMGF1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPWithMD5AndMGF1Padding", BouncyCastleProvider.PROVIDER_NAME);
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -335,7 +335,7 @@ public class RSATest
         PrivateKey  isoPrivKey = fact.generatePrivate(isoPrivKeySpec);
         PublicKey   isoPubKey = fact.generatePublic(isoPubKeySpec);
 
-        c = Cipher.getInstance("RSA/NONE/ISO9796-1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/ISO9796-1Padding", BouncyCastleProvider.PROVIDER_NAME);
 
         c.init(Cipher.ENCRYPT_MODE, isoPrivKey);
 
@@ -360,7 +360,7 @@ public class RSATest
         // generation with parameters test.
         //
         KeyPairGenerator keyPairGen =
-                KeyPairGenerator.getInstance("RSA", "BC");
+                KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // 768 bit RSA with e = 2^16-1

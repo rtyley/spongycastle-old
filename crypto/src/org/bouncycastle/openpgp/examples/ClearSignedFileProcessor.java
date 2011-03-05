@@ -146,7 +146,7 @@ public class ClearSignedFileProcessor
         PGPSignatureList           p3 = (PGPSignatureList)pgpFact.nextObject();
         PGPSignature               sig = p3.get(0);
 
-        sig.initVerify(pgpRings.getPublicKey(sig.getKeyID()), "BC");
+        sig.initVerify(pgpRings.getPublicKey(sig.getKeyID()), BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // read the input, making sure we ignore the last newline.
@@ -236,8 +236,8 @@ public class ClearSignedFileProcessor
         }
         
         PGPSecretKey                    pgpSecKey = PGPExampleUtil.readSecretKey(keyIn);
-        PGPPrivateKey                   pgpPrivKey = pgpSecKey.extractPrivateKey(pass, "BC");        
-        PGPSignatureGenerator           sGen = new PGPSignatureGenerator(pgpSecKey.getPublicKey().getAlgorithm(), digest, "BC");
+        PGPPrivateKey                   pgpPrivKey = pgpSecKey.extractPrivateKey(pass, BouncyCastleProvider.PROVIDER_NAME);
+        PGPSignatureGenerator           sGen = new PGPSignatureGenerator(pgpSecKey.getPublicKey().getAlgorithm(), digest, BouncyCastleProvider.PROVIDER_NAME);
         PGPSignatureSubpacketGenerator  spGen = new PGPSignatureSubpacketGenerator();
         
         sGen.initSign(PGPSignature.CANONICAL_TEXT_DOCUMENT, pgpPrivKey);

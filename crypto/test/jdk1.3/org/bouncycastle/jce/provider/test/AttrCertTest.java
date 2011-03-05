@@ -131,11 +131,11 @@ public class AttrCertTest
         throws Exception
     {
         X509AttributeCertificate    aCert = new X509V2AttributeCertificate(attrCert);
-        CertificateFactory          fact = CertificateFactory.getInstance("X.509","BC");
+        CertificateFactory          fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
         
         X509Certificate             sCert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(signCert));
         
-        aCert.verify(sCert.getPublicKey(), "BC");
+        aCert.verify(sCert.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
         
         //
         // search test
@@ -165,7 +165,7 @@ public class AttrCertTest
         //
         aCert = new X509V2AttributeCertificate(aCert.getEncoded());
         
-        aCert.verify(sCert.getPublicKey(), "BC");
+        aCert.verify(sCert.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
         
         X509AttributeCertificate saCert = new X509V2AttributeCertificate(new ByteArrayInputStream(aCert.getEncoded()));
         
@@ -199,7 +199,7 @@ public class AttrCertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyFactory  kFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  kFact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         privKey = kFact.generatePrivate(privKeySpec);
         pubKey = kFact.generatePublic(pubKeySpec);
@@ -214,11 +214,11 @@ public class AttrCertTest
         gen.setSerialNumber(aCert.getSerialNumber());
         gen.setSignatureAlgorithm("SHA1WithRSAEncryption");
         
-        aCert = gen.generateCertificate(privKey, "BC");
+        aCert = gen.generateCertificate(privKey, BouncyCastleProvider.PROVIDER_NAME);
         
         aCert.checkValidity();
         
-        aCert.verify(pubKey, "BC");
+        aCert.verify(pubKey, BouncyCastleProvider.PROVIDER_NAME);
         
         // as the issuer is the same this should still work (even though it is not
         // technically correct
@@ -240,7 +240,7 @@ public class AttrCertTest
         //
         aCert = new X509V2AttributeCertificate(aCert.getEncoded());
         
-        aCert.verify(pubKey, "BC");
+        aCert.verify(pubKey, BouncyCastleProvider.PROVIDER_NAME);
         
         AttributeCertificateIssuer  issuer = aCert.getIssuer();
         
@@ -267,7 +267,7 @@ public class AttrCertTest
         
         gen.addExtension("2.2", false, new DEROctetString(new byte[10]));
         
-        aCert = gen.generateCertificate(privKey, "BC");
+        aCert = gen.generateCertificate(privKey, BouncyCastleProvider.PROVIDER_NAME);
         
         Set exts = aCert.getCriticalExtensionOIDs();
         

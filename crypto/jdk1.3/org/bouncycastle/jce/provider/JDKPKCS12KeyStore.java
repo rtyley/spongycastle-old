@@ -545,7 +545,7 @@ public class JDKPKCS12KeyStore
         try
         {
             SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(
-                                                algorithm, "BC");
+					algorithm, BouncyCastleProvider.PROVIDER_NAME);
             PBEParameterSpec    defParams = new PBEParameterSpec(
                                                 pbeParams.getIV(),
                                                 pbeParams.getIterations().intValue());
@@ -554,7 +554,7 @@ public class JDKPKCS12KeyStore
             
             ((JCEPBEKey)k).setTryWrongPKCS12Zero(wrongPKCS12Zero);
 
-            Cipher cipher = Cipher.getInstance(algorithm, "BC");
+            Cipher cipher = Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
             cipher.init(Cipher.UNWRAP_MODE, k, defParams);
 
@@ -582,12 +582,12 @@ public class JDKPKCS12KeyStore
         try
         {
             SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(
-                                                algorithm, "BC");
+					algorithm, BouncyCastleProvider.PROVIDER_NAME);
             PBEParameterSpec    defParams = new PBEParameterSpec(
                                                 pbeParams.getIV(),
                                                 pbeParams.getIterations().intValue());
 
-            Cipher cipher = Cipher.getInstance(algorithm, "BC");
+            Cipher cipher = Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
             cipher.init(Cipher.WRAP_MODE, keyFact.generateSecret(pbeSpec), defParams);
 
@@ -615,7 +615,7 @@ public class JDKPKCS12KeyStore
 
         try
         {
-            SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithm, "BC");
+            SecretKeyFactory keyFact = SecretKeyFactory.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
             PBEParameterSpec defParams = new PBEParameterSpec(
                 pbeParams.getIV(),
                 pbeParams.getIterations().intValue());
@@ -623,7 +623,7 @@ public class JDKPKCS12KeyStore
 
             key.setTryWrongPKCS12Zero(wrongPKCS12Zero);
 
-            Cipher cipher = Cipher.getInstance(algorithm, "BC");
+            Cipher cipher = Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
             int mode = forEncryption ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
             cipher.init(mode, key, defParams);
             return cipher.doFinal(data);
@@ -1406,13 +1406,13 @@ public class JDKPKCS12KeyStore
         byte[]              data)
         throws Exception
     {
-        SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(oid.getId(), "BC");
+        SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(oid.getId(), BouncyCastleProvider.PROVIDER_NAME);
         PBEParameterSpec    defParams = new PBEParameterSpec(salt, itCount);
         PBEKeySpec          pbeSpec = new PBEKeySpec(password);
         JCEPBEKey           key = (JCEPBEKey) keyFact.generateSecret(pbeSpec);
         key.setTryWrongPKCS12Zero(wrongPkcs12Zero);
 
-        Mac mac = Mac.getInstance(oid.getId(), "BC");
+        Mac mac = Mac.getInstance(oid.getId(), BouncyCastleProvider.PROVIDER_NAME);
         mac.init(key, defParams);
         mac.update(data);
         return mac.doFinal();
@@ -1423,7 +1423,7 @@ public class JDKPKCS12KeyStore
     {
         public BCPKCS12KeyStore()
         {
-            super("BC", pbeWithSHAAnd3_KeyTripleDES_CBC, pbewithSHAAnd40BitRC2_CBC);
+            super(BouncyCastleProvider.PROVIDER_NAME, pbeWithSHAAnd3_KeyTripleDES_CBC, pbewithSHAAnd40BitRC2_CBC);
         }
     }
 
@@ -1432,7 +1432,7 @@ public class JDKPKCS12KeyStore
     {
         public BCPKCS12KeyStore3DES()
         {
-            super("BC", pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
+            super(BouncyCastleProvider.PROVIDER_NAME, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd3_KeyTripleDES_CBC);
         }
     }
 

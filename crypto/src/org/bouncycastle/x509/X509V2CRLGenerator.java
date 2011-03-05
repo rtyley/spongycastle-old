@@ -36,6 +36,7 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.X509CRLObject;
 
 /**
@@ -242,7 +243,7 @@ public class X509V2CRLGenerator
     {
         try
         {
-            return generateX509CRL(key, "BC", null);
+            return generateX509CRL(key, BouncyCastleProvider.PROVIDER_NAME, null);
         }
         catch (NoSuchProviderException e)
         {
@@ -263,7 +264,7 @@ public class X509V2CRLGenerator
     {
         try
         {
-            return generateX509CRL(key, "BC", random);
+            return generateX509CRL(key, BouncyCastleProvider.PROVIDER_NAME, random);
         }
         catch (NoSuchProviderException e)
         {

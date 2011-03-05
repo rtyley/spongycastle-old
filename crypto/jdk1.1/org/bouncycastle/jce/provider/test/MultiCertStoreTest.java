@@ -30,7 +30,7 @@ public class MultiCertStoreTest
     private void basicTest()
         throws Exception
     {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
         X509Certificate rootCert = (X509Certificate)cf
                 .generateCertificate(new ByteArrayInputStream(
@@ -55,8 +55,8 @@ public class MultiCertStoreTest
         list.add(rootCrl);
         list.add(interCrl);
         CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
-        CertStore store1 = CertStore.getInstance("Collection", ccsp, "BC");
-        CertStore store2 = CertStore.getInstance("Collection", ccsp, "BC");
+        CertStore store1 = CertStore.getInstance("Collection", ccsp, BouncyCastleProvider.PROVIDER_NAME);
+        CertStore store2 = CertStore.getInstance("Collection", ccsp, BouncyCastleProvider.PROVIDER_NAME);
 
         List storeList = new ArrayList();
         storeList.add(store1);

@@ -60,7 +60,7 @@ public class CertUniqueIDTest
       PrivateKey          privKey;
       PublicKey           pubKey;
 
-      KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
+      KeyFactory  fact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
       privKey = fact.generatePrivate(privKeySpec);
       pubKey = fact.generatePublic(pubKeySpec);

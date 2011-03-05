@@ -22,6 +22,7 @@ import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.bouncycastle.cms.test.CMSTestUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedParser;
@@ -102,7 +103,7 @@ public class SMIMEEnvelopedTest
         // we want encrypted.
         //
 
-        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
+        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, BouncyCastleProvider.PROVIDER_NAME);
 
         assertEquals("application/pkcs7-mime; name=\"smime.p7m\"; smime-type=enveloped-data", mp.getHeader("Content-Type")[0]);
         assertEquals("attachment; filename=\"smime.p7m\"", mp.getHeader("Content-Disposition")[0]);
@@ -144,7 +145,7 @@ public class SMIMEEnvelopedTest
     {
         try
         {
-            Cipher.getInstance(algorithm, "BC");
+            Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
             return true;
         }
@@ -210,7 +211,7 @@ public class SMIMEEnvelopedTest
         // create a subject key id - this has to be done the same way as
         // it is done in the certificate associated with the private key
         //
-        MessageDigest           dig = MessageDigest.getInstance("SHA1", "BC");
+        MessageDigest           dig = MessageDigest.getInstance("SHA1", BouncyCastleProvider.PROVIDER_NAME);
         dig.update(_reciCert.getPublicKey().getEncoded());
 
           
@@ -221,7 +222,7 @@ public class SMIMEEnvelopedTest
         // we want encrypted.
         //
 
-        MimeBodyPart         mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, "BC");
+        MimeBodyPart         mp = gen.generate(_msg, SMIMEEnvelopedGenerator.DES_EDE3_CBC, BouncyCastleProvider.PROVIDER_NAME);
 
         SMIMEEnveloped       m = new SMIMEEnveloped(mp);
 
@@ -232,7 +233,7 @@ public class SMIMEEnvelopedTest
         RecipientInformationStore  recipients = m.getRecipientInfos();
         RecipientInformation       recipient = recipients.get(recId);
 
-        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
+        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), BouncyCastleProvider.PROVIDER_NAME));
 
         verifyMessageBytes(_msg, res);
     }
@@ -248,7 +249,7 @@ public class SMIMEEnvelopedTest
         // create a subject key id - this has to be done the same way as
         // it is done in the certificate associated with the private key
         //
-        MessageDigest           dig = MessageDigest.getInstance("SHA1", "BC");
+        MessageDigest           dig = MessageDigest.getInstance("SHA1", BouncyCastleProvider.PROVIDER_NAME);
         dig.update(_reciCert.getPublicKey().getEncoded());
 
           
@@ -258,7 +259,7 @@ public class SMIMEEnvelopedTest
         // generate a MimeBodyPart object which encapsulates the content
         // we want encrypted.
         //
-        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.RC2_CBC, 40, "BC");
+        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.RC2_CBC, 40, BouncyCastleProvider.PROVIDER_NAME);
 
         SMIMEEnveloped       m = new SMIMEEnveloped(mp);
 
@@ -269,7 +270,7 @@ public class SMIMEEnvelopedTest
         RecipientInformationStore  recipients = m.getRecipientInfos();
         RecipientInformation       recipient = recipients.get(recId);
 
-        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
+        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), BouncyCastleProvider.PROVIDER_NAME));
 
         verifyMessageBytes(_msg, res);
     }
@@ -288,7 +289,7 @@ public class SMIMEEnvelopedTest
         // generate a MimeBodyPart object which encapsulates the content
         // we want encrypted.
         //
-        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.RC2_CBC, 40, "BC");
+        MimeBodyPart mp = gen.generate(_msg, SMIMEEnvelopedGenerator.RC2_CBC, 40, BouncyCastleProvider.PROVIDER_NAME);
 
         SMIMEEnvelopedParser       m = new SMIMEEnvelopedParser(mp);
 
@@ -297,7 +298,7 @@ public class SMIMEEnvelopedTest
         RecipientInformationStore  recipients = m.getRecipientInfos();
         RecipientInformation       recipient = recipients.get(recId);
         
-        FileBackedMimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContentStream(_reciKP2.getPrivate(), "BC"));
+        FileBackedMimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContentStream(_reciKP2.getPrivate(), BouncyCastleProvider.PROVIDER_NAME));
 
         verifyMessageBytes(_msg, res);
         
@@ -310,7 +311,7 @@ public class SMIMEEnvelopedTest
         recipients = m.getRecipientInfos();
         recipient = recipients.get(recId);
  
-        res = SMIMEUtil.toMimeBodyPart(recipient.getContentStream(_reciKP.getPrivate(), "BC"));
+        res = SMIMEUtil.toMimeBodyPart(recipient.getContentStream(_reciKP.getPrivate(), BouncyCastleProvider.PROVIDER_NAME));
 
         verifyMessageBytes(_msg, res);
         
@@ -331,14 +332,14 @@ public class SMIMEEnvelopedTest
         // we want encrypted.
         //
 
-        MimeBodyPart   mp = gen.generate(msg, algorithmOid, "BC");
+        MimeBodyPart   mp = gen.generate(msg, algorithmOid, BouncyCastleProvider.PROVIDER_NAME);
         SMIMEEnveloped m = new SMIMEEnveloped(mp);
         RecipientId    recId = getRecipientId(_reciCert);
 
         RecipientInformationStore  recipients = m.getRecipientInfos();
         RecipientInformation       recipient = recipients.get(recId);
 
-        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
+        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), BouncyCastleProvider.PROVIDER_NAME));
 
         verifyMessageBytes(msg, res);
     }
@@ -357,14 +358,14 @@ public class SMIMEEnvelopedTest
         // we want encrypted.
         //
 
-        MimeBodyPart         mp = gen.generate(msg, algorithmOid, "BC");
+        MimeBodyPart         mp = gen.generate(msg, algorithmOid, BouncyCastleProvider.PROVIDER_NAME);
         SMIMEEnvelopedParser m = new SMIMEEnvelopedParser(mp);
         RecipientId          recId = getRecipientId(_reciCert);
 
         RecipientInformationStore  recipients = m.getRecipientInfos();
         RecipientInformation       recipient = recipients.get(recId);
 
-        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), "BC"));
+        MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(_reciKP.getPrivate(), BouncyCastleProvider.PROVIDER_NAME));
 
         verifyMessageBytes(msg, res);
     }

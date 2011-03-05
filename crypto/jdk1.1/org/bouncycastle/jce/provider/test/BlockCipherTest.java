@@ -358,7 +358,7 @@ public class BlockCipherTest
                 return;
             }
 
-            keyGen = KeyGenerator.getInstance(baseAlgorithm, "BC");
+            keyGen = KeyGenerator.getInstance(baseAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
             if (!keyGen.getAlgorithm().equals(baseAlgorithm))
             {
                 fail("wrong key generator returned!");
@@ -367,8 +367,8 @@ public class BlockCipherTest
 
             key = keyGen.generateKey();
 
-            in = Cipher.getInstance(algorithm, "BC");
-            out = Cipher.getInstance(algorithm, "BC");
+            in = Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
+            out = Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
             if (!in.getAlgorithm().startsWith(baseAlgorithm))
             {
@@ -520,7 +520,7 @@ public class BlockCipherTest
     {
         try
         {
-            Cipher.getInstance("IDEA", "BC");
+            Cipher.getInstance("IDEA", BouncyCastleProvider.PROVIDER_NAME);
 
             return false;
         }
@@ -536,7 +536,7 @@ public class BlockCipherTest
         
         try
         {
-            skF = SecretKeyFactory.getInstance("DESede", "BC");
+            skF = SecretKeyFactory.getInstance("DESede", BouncyCastleProvider.PROVIDER_NAME);
         }
         catch (Exception e)
         {
@@ -591,7 +591,7 @@ public class BlockCipherTest
         
         try
         {
-            KeyGenerator kg = KeyGenerator.getInstance("DESede", "BC");
+            KeyGenerator kg = KeyGenerator.getInstance("DESede", BouncyCastleProvider.PROVIDER_NAME);
             try
             {
                 kg.init(Integer.MIN_VALUE, new SecureRandom());
@@ -614,7 +614,7 @@ public class BlockCipherTest
 
         try
         {
-            skF = SecretKeyFactory.getInstance("DESede", "BC");
+            skF = SecretKeyFactory.getInstance("DESede", BouncyCastleProvider.PROVIDER_NAME);
 
             try
             {
@@ -643,7 +643,7 @@ public class BlockCipherTest
 
             SecretKeySpec cipherKey = new SecretKeySpec(rawDESKey, "DES");
 
-            Cipher cipher = Cipher.getInstance("DES/CBC/NoPadding", "BC");
+            Cipher cipher = Cipher.getInstance("DES/CBC/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
             
             try
             {
@@ -671,7 +671,7 @@ public class BlockCipherTest
             byte[] rawDESKey = { -128, -125, -123, -122, -119, -118 };
 
             SecretKeySpec cipherKey = new SecretKeySpec(rawDESKey, "DES");
-            Cipher cipher = Cipher.getInstance("DES/ECB/NoPadding", "BC");
+            Cipher cipher = Cipher.getInstance("DES/ECB/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
             try
             {
                 // According specification engineInit(int opmode, Key key,
@@ -696,7 +696,7 @@ public class BlockCipherTest
             byte[] rawDESKey = { -128, -125, -123, -122, -119, -118, -117, -115, -114 };
 
             SecretKeySpec cipherKey = new SecretKeySpec(rawDESKey, "DES");
-            Cipher cipher = Cipher.getInstance("DES/ECB/NoPadding", "BC");
+            Cipher cipher = Cipher.getInstance("DES/ECB/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
             try
             {
                 // According specification engineInit(int opmode, Key key,
@@ -723,7 +723,7 @@ public class BlockCipherTest
                     (byte)137, (byte)138, (byte)140, (byte)143 };
 
             SecretKeySpec cipherKey = new SecretKeySpec(rawDESKey, "DES");
-            Cipher ecipher = Cipher.getInstance("DES/ECB/PKCS5Padding", "BC");
+            Cipher ecipher = Cipher.getInstance("DES/ECB/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME);
             ecipher.init(Cipher.ENCRYPT_MODE, cipherKey);
 
             byte[] cipherText = new byte[0];
@@ -751,7 +751,7 @@ public class BlockCipherTest
 
         try
         {
-            KeyGenerator keyGen = KeyGenerator.getInstance("DES", "BC");
+            KeyGenerator keyGen = KeyGenerator.getInstance("DES", BouncyCastleProvider.PROVIDER_NAME);
 
             keyGen.init((SecureRandom)null);
 
@@ -772,7 +772,7 @@ public class BlockCipherTest
         {
             try
             {
-                Cipher c = Cipher.getInstance("DES", "BC");
+                Cipher c = Cipher.getInstance("DES", BouncyCastleProvider.PROVIDER_NAME);
     
                 Key k = new PublicKey()
                 {
@@ -805,7 +805,7 @@ public class BlockCipherTest
             
             try
             {
-                Cipher c = Cipher.getInstance("DES", "BC");
+                Cipher c = Cipher.getInstance("DES", BouncyCastleProvider.PROVIDER_NAME);
     
                 Key k = new PrivateKey()
                 {
@@ -859,7 +859,7 @@ public class BlockCipherTest
         //
         try
         {
-            Cipher c = Cipher.getInstance("AES/CTS/NoPadding", "BC");
+            Cipher c = Cipher.getInstance("AES/CTS/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
             
             c.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(new byte[16], "AES"));
             

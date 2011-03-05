@@ -42,7 +42,7 @@ public class ImplicitlyCaTest
         throws Exception
     {
 
-        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
 
         ECCurve curve = new ECCurve.Fp(
             new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
@@ -54,7 +54,7 @@ public class ImplicitlyCaTest
             curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
             new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
 
-        ConfigurableProvider config = (ConfigurableProvider)Security.getProvider("BC");
+        ConfigurableProvider config = (ConfigurableProvider)Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
 
         config.setParameter(ConfigurableProvider.EC_IMPLICITLY_CA, ecSpec);
 
@@ -77,7 +77,7 @@ public class ImplicitlyCaTest
     private void testKeyFactory()
         throws Exception
     {
-        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
 
         ECCurve curve = new ECCurve.Fp(
             new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
@@ -89,7 +89,7 @@ public class ImplicitlyCaTest
             curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
             new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
 
-        ConfigurableProvider config = (ConfigurableProvider)Security.getProvider("BC");
+        ConfigurableProvider config = (ConfigurableProvider)Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
 
         config.setParameter(ConfigurableProvider.EC_IMPLICITLY_CA, ecSpec);
 
@@ -100,7 +100,7 @@ public class ImplicitlyCaTest
         ECPrivateKey sKey = (ECPrivateKey)p.getPrivate();
         ECPublicKey vKey = (ECPublicKey)p.getPublic();
 
-        KeyFactory fact = KeyFactory.getInstance("ECDSA", "BC");
+        KeyFactory fact = KeyFactory.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
 
         vKey = (ECPublicKey)fact.generatePublic(new ECPublicKeySpec(vKey.getQ(), null));
         sKey = (ECPrivateKey)fact.generatePrivate(new ECPrivateKeySpec(sKey.getD(), null));
@@ -131,7 +131,7 @@ public class ImplicitlyCaTest
         throws Exception
     {
         byte[]           data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
-        Signature        s = Signature.getInstance("ECDSA", "BC");
+        Signature        s = Signature.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
 
         s.initSign(sKey);
 
@@ -139,7 +139,7 @@ public class ImplicitlyCaTest
 
         byte[] sigBytes = s.sign();
 
-        s = Signature.getInstance("ECDSA", "BC");
+        s = Signature.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
 
         s.initVerify(vKey);
 
@@ -156,7 +156,7 @@ public class ImplicitlyCaTest
         ECPublicKey pubKey)
         throws Exception
     {
-        KeyFactory kFact = KeyFactory.getInstance("ECDSA", "BC");
+        KeyFactory kFact = KeyFactory.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
 
         byte[] bytes = privKey.getEncoded();
 

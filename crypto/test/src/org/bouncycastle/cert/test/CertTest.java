@@ -1085,7 +1085,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
             Certificate cert = fact.generateCertificate(bIn);
 
@@ -1110,7 +1110,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
             X509Certificate cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -1139,7 +1139,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
             X509Certificate cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -1171,7 +1171,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
             Certificate cert = fact.generateCertificate(bIn);
 
@@ -1216,7 +1216,7 @@ public class CertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  fact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         privKey = fact.generatePrivate(privKeySpec);
         pubKey = fact.generatePublic(pubKeySpec);
@@ -1290,7 +1290,7 @@ public class CertTest
         }
 
         ByteArrayInputStream   bIn = new ByteArrayInputStream(cert.getEncoded());
-        CertificateFactory     certFact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory     certFact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
         cert = (X509Certificate)certFact.generateCertificate(bIn);
 
@@ -1331,7 +1331,7 @@ public class CertTest
         cert.verify(pubKey);
 
         bIn = new ByteArrayInputStream(cert.getEncoded());
-        certFact = CertificateFactory.getInstance("X.509", "BC");
+        certFact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
         cert = (X509Certificate)certFact.generateCertificate(bIn);
 

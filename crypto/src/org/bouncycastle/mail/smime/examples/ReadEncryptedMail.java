@@ -16,6 +16,7 @@ import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMEEnveloped;
 import org.bouncycastle.mail.smime.SMIMEUtil;
 
@@ -41,7 +42,7 @@ public class ReadEncryptedMail
         //
         // Open the key store
         //
-        KeyStore    ks = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore    ks = KeyStore.getInstance("PKCS12", BouncyCastleProvider.PROVIDER_NAME);
 
         ks.load(new FileInputStream(args[0]), args[1].toCharArray());
 
@@ -85,7 +86,7 @@ public class ReadEncryptedMail
         RecipientInformationStore   recipients = m.getRecipientInfos();
         RecipientInformation        recipient = recipients.get(recId);
 
-        MimeBodyPart        res = SMIMEUtil.toMimeBodyPart(recipient.getContent(new JceKeyTransEnvelopedRecipient((PrivateKey)ks.getKey(keyAlias, null)).setProvider("BC")));
+        MimeBodyPart        res = SMIMEUtil.toMimeBodyPart(recipient.getContent(new JceKeyTransEnvelopedRecipient((PrivateKey)ks.getKey(keyAlias, null)).setProvider(BouncyCastleProvider.PROVIDER_NAME)));
 
         System.out.println("Message Contents");
         System.out.println("----------------");

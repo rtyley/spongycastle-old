@@ -33,7 +33,7 @@ public class X509StoreTest
         throws Exception
     {
         CertificateFactory cf = CertificateFactory.getInstance("X.509",
-                "BC");
+				BouncyCastleProvider.PROVIDER_NAME);
 
         X509Certificate rootCert = (X509Certificate)cf
                 .generateCertificate(new ByteArrayInputStream(
@@ -54,7 +54,7 @@ public class X509StoreTest
 
         X509CollectionStoreParameters ccsp = new X509CollectionStoreParameters(certList);
 
-        X509Store certStore = X509Store.getInstance("CertificatePair/Collection", ccsp, "BC");
+        X509Store certStore = X509Store.getInstance("CertificatePair/Collection", ccsp, BouncyCastleProvider.PROVIDER_NAME);
         X509CertPairStoreSelector selector = new X509CertPairStoreSelector();
         X509CertStoreSelector fwSelector = new X509CertStoreSelector();
 
@@ -82,7 +82,7 @@ public class X509StoreTest
         throws Exception
     {
         CertificateFactory cf = CertificateFactory.getInstance("X.509",
-                "BC");
+				BouncyCastleProvider.PROVIDER_NAME);
 
         X509Certificate rootCert = (X509Certificate)cf
                 .generateCertificate(new ByteArrayInputStream(
@@ -105,7 +105,7 @@ public class X509StoreTest
         certList.add(interCert);
         certList.add(finalCert);
         X509CollectionStoreParameters ccsp = new X509CollectionStoreParameters(certList);
-        X509Store certStore = X509Store.getInstance("Certificate/Collection", ccsp, "BC");
+        X509Store certStore = X509Store.getInstance("Certificate/Collection", ccsp, BouncyCastleProvider.PROVIDER_NAME);
         // set default to be the same as for SUN X500 name
         X509Principal.DefaultReverse = true;
 
@@ -161,7 +161,7 @@ public class X509StoreTest
         crlList.add(rootCrl);
         crlList.add(interCrl);
         ccsp = new X509CollectionStoreParameters(crlList);
-        X509Store store = X509Store.getInstance("CRL/Collection", ccsp, "BC");
+        X509Store store = X509Store.getInstance("CRL/Collection", ccsp, BouncyCastleProvider.PROVIDER_NAME);
         X509CRLStoreSelector targetConstraintsCRL = new X509CRLStoreSelector();
         targetConstraintsCRL.setIssuers(Collections.singleton(rootCrl.getIssuerX500Principal()));
         Collection crls = store.getMatches(targetConstraintsCRL);
@@ -188,7 +188,7 @@ public class X509StoreTest
         attrList.add(attrCert);
         attrList.add(attrCert2);
         ccsp = new X509CollectionStoreParameters(attrList);
-        store = X509Store.getInstance("AttributeCertificate/Collection", ccsp, "BC");
+        store = X509Store.getInstance("AttributeCertificate/Collection", ccsp, BouncyCastleProvider.PROVIDER_NAME);
         X509AttributeCertStoreSelector attrSelector = new X509AttributeCertStoreSelector();
         attrSelector.setHolder(attrCert.getHolder());
         if (!attrSelector.getHolder().equals(attrCert.getHolder()))

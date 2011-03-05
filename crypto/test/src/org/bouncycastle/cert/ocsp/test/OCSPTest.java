@@ -225,7 +225,7 @@ public class OCSPTest
         + "vL7EIfjK13nUxf8d49GzZlFMNqGDMjfMp1FYrHBGLZBr8br/G/7em1Cprw7iR8cw"
         + "pddz+QXXFIrIz5Y9D/x1RrwoLibPw0kMrSwI2G4aCvoBySfbD6cpnJf6YHRctdSb"
         + "755zhdBW7XWTl6ReUVuEt0hTFms4F60kFAi5hIbDRSN1Slv5yP2b0EA=");
-    private static final String BC = "BC";
+	private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
 
     public String getName()
     {

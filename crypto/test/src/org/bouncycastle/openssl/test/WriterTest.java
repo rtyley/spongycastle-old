@@ -92,7 +92,7 @@ public class WriterTest
     public void performTest()
         throws Exception
     {
-        final String provider = "BC";
+		final String provider = BouncyCastleProvider.PROVIDER_NAME;
 
         KeyPairGenerator dsaKpg = KeyPairGenerator.getInstance("DSA", provider);
         dsaKpg.initialize(testDsaParams, random);
@@ -115,14 +115,14 @@ public class WriterTest
         doWriteReadTest(testEcDsaKey, provider);
         doWriteReadTests(testEcDsaKey, provider, algorithms);
 
-        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "BC");
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
 
         kpGen.initialize(239);
 
         PrivateKey privKey = kpGen.generateKeyPair().getPrivate();
 
         doWriteReadTest(privKey, provider);
-        doWriteReadTests(privKey, "BC", algorithms);
+        doWriteReadTests(privKey, BouncyCastleProvider.PROVIDER_NAME, algorithms);
 
         // override test
         PEMWriter pWrt = new PEMWriter(new OutputStreamWriter(new ByteArrayOutputStream()));

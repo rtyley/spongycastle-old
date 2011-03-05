@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.cmp.PKIStatus;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampResponse;
@@ -297,7 +298,7 @@ public class ParseTest
         
         try
         {
-            req.validate(TSPAlgorithms.ALLOWED, null, null, "BC");
+            req.validate(TSPAlgorithms.ALLOWED, null, null, BouncyCastleProvider.PROVIDER_NAME);
         }
         catch (Exception e)
         {
@@ -319,13 +320,13 @@ public class ParseTest
         TimeStampRequest  req = new TimeStampRequest(request);
         TimeStampResponse resp = new TimeStampResponse(response);
 
-        CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory  fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
                 
         X509Certificate cert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(signingCert));
 
         resp.validate(req);
 
-        resp.getTimeStampToken().validate(cert, "BC");
+        resp.getTimeStampToken().validate(cert, BouncyCastleProvider.PROVIDER_NAME);
     }
     
     private void unacceptableResponseParse(
@@ -387,10 +388,10 @@ public class ParseTest
     {
         TimeStampResponse response = new TimeStampResponse(encoded);
 
-        CertStore store = response.getTimeStampToken().getCertificatesAndCRLs("Collection", "BC");
+        CertStore store = response.getTimeStampToken().getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
         X509Certificate cert = (X509Certificate)store.getCertificates(response.getTimeStampToken().getSID()).iterator().next();
 
-        response.getTimeStampToken().validate(cert, "BC");
+        response.getTimeStampToken().validate(cert, BouncyCastleProvider.PROVIDER_NAME);
     }
 
     public void parse(

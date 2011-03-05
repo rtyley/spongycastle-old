@@ -1,5 +1,6 @@
 package org.bouncycastle.jce.provider.test;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.util.test.TestFailedException;
@@ -35,9 +36,9 @@ public abstract class BaseBlockCipherTest
 
         for (int i = 0; i != oids.length; i++)
         {
-            Cipher c1 = Cipher.getInstance(oids[i], "BC");
-            Cipher c2 = Cipher.getInstance(names[i], "BC");
-            KeyGenerator kg = KeyGenerator.getInstance(oids[i], "BC");
+            Cipher c1 = Cipher.getInstance(oids[i], BouncyCastleProvider.PROVIDER_NAME);
+            Cipher c2 = Cipher.getInstance(names[i], BouncyCastleProvider.PROVIDER_NAME);
+            KeyGenerator kg = KeyGenerator.getInstance(oids[i], BouncyCastleProvider.PROVIDER_NAME);
 
             SecretKey k = kg.generateKey();
 
@@ -73,9 +74,9 @@ public abstract class BaseBlockCipherTest
 
         for (int i = 0; i != oids.length; i++)
         {
-            Cipher c1 = Cipher.getInstance(oids[i], "BC");
-            Cipher c2 = Cipher.getInstance(name, "BC");
-            KeyGenerator kg = KeyGenerator.getInstance(oids[i], "BC");
+            Cipher c1 = Cipher.getInstance(oids[i], BouncyCastleProvider.PROVIDER_NAME);
+            Cipher c2 = Cipher.getInstance(name, BouncyCastleProvider.PROVIDER_NAME);
+            KeyGenerator kg = KeyGenerator.getInstance(oids[i], BouncyCastleProvider.PROVIDER_NAME);
 
             SecretKey k = kg.generateKey();
 
@@ -104,7 +105,7 @@ public abstract class BaseBlockCipherTest
         byte[]  out)
         throws Exception
     {
-        Cipher wrapper = Cipher.getInstance(wrappingAlgorithm, "BC");
+        Cipher wrapper = Cipher.getInstance(wrappingAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
 
         wrapper.init(Cipher.WRAP_MODE, new SecretKeySpec(kek, algorithm));
 

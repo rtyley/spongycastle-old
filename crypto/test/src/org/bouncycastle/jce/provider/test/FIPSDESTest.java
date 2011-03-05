@@ -93,8 +93,8 @@ public class FIPSDESTest
 
             key = new SecretKeySpec(Hex.decode("0123456789abcdef"), "DES");
 
-            in = Cipher.getInstance(algorithm, "BC");
-            out = Cipher.getInstance(algorithm, "BC");
+            in = Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
+            out = Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
             if (algorithm.startsWith("DES/ECB"))
             {

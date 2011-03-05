@@ -26,6 +26,7 @@ import org.bouncycastle.bcpg.MPInteger;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.bcpg.S2K;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 
 /**
@@ -34,7 +35,7 @@ import org.bouncycastle.util.encoders.Base64;
 public class PGPUtil
     implements HashAlgorithmTags
 {
-    private    static String    defProvider = "BC";
+	private static String defProvider = BouncyCastleProvider.PROVIDER_NAME;
 
     /**
      * Return the provider that will be used by factory classes in situations

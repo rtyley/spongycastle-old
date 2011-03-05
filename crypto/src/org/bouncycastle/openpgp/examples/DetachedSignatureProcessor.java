@@ -90,7 +90,7 @@ public class DetachedSignatureProcessor
         PGPSignature                sig = p3.get(0);
         PGPPublicKey                key = pgpPubRingCollection.getPublicKey(sig.getKeyID());
 
-        sig.initVerify(key, "BC");
+        sig.initVerify(key, BouncyCastleProvider.PROVIDER_NAME);
 
         int ch;
         while ((ch = dIn.read()) >= 0)
@@ -141,8 +141,8 @@ public class DetachedSignatureProcessor
         }
 
         PGPSecretKey             pgpSec = PGPExampleUtil.readSecretKey(keyIn);
-        PGPPrivateKey            pgpPrivKey = pgpSec.extractPrivateKey(pass, "BC");        
-        PGPSignatureGenerator    sGen = new PGPSignatureGenerator(pgpSec.getPublicKey().getAlgorithm(), PGPUtil.SHA1, "BC");
+        PGPPrivateKey            pgpPrivKey = pgpSec.extractPrivateKey(pass, BouncyCastleProvider.PROVIDER_NAME);
+        PGPSignatureGenerator    sGen = new PGPSignatureGenerator(pgpSec.getPublicKey().getAlgorithm(), PGPUtil.SHA1, BouncyCastleProvider.PROVIDER_NAME);
         
         sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
         

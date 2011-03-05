@@ -48,7 +48,7 @@ public class NamedCurveTest
                 return new SimpleTestResult(false, getName() + " no curve for " + name + " found.");
             }
 
-            KeyPairGenerator    g = KeyPairGenerator.getInstance("ECDH", "BC");
+            KeyPairGenerator    g = KeyPairGenerator.getInstance("ECDH", BouncyCastleProvider.PROVIDER_NAME);
 
             g.initialize(ecSpec, new SecureRandom());
 
@@ -57,7 +57,7 @@ public class NamedCurveTest
             //
             KeyPair aKeyPair = g.generateKeyPair();
 
-            KeyAgreement aKeyAgree = KeyAgreement.getInstance("ECDHC", "BC");
+            KeyAgreement aKeyAgree = KeyAgreement.getInstance("ECDHC", BouncyCastleProvider.PROVIDER_NAME);
 
             aKeyAgree.init(aKeyPair.getPrivate());
 
@@ -66,7 +66,7 @@ public class NamedCurveTest
             //
             KeyPair bKeyPair = g.generateKeyPair();
 
-            KeyAgreement bKeyAgree = KeyAgreement.getInstance("ECDHC", "BC");
+            KeyAgreement bKeyAgree = KeyAgreement.getInstance("ECDHC", BouncyCastleProvider.PROVIDER_NAME);
 
             bKeyAgree.init(bKeyPair.getPrivate());
 
@@ -88,7 +88,7 @@ public class NamedCurveTest
             // public key encoding test
             //
             byte[]              pubEnc = aKeyPair.getPublic().getEncoded();
-            KeyFactory          keyFac = KeyFactory.getInstance("ECDH", "BC");
+            KeyFactory          keyFac = KeyFactory.getInstance("ECDH", BouncyCastleProvider.PROVIDER_NAME);
             X509EncodedKeySpec  pubX509 = new X509EncodedKeySpec(pubEnc);
             ECPublicKey         pubKey = (ECPublicKey)keyFac.generatePublic(pubX509);
 

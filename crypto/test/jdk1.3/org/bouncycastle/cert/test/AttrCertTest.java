@@ -166,7 +166,7 @@ public class AttrCertTest
         throws Exception
     {
         X509AttributeCertificateHolder attrCert = new X509AttributeCertificateHolder(certWithBaseCertificateID);
-        CertificateFactory       fact = CertificateFactory.getInstance("X.509", "BC");   
+        CertificateFactory       fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
         X509Certificate          cert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(holderCertWithBaseCertificateID));
         
         AttributeCertificateHolder holder = attrCert.getHolder();
@@ -258,7 +258,7 @@ public class AttrCertTest
     private void testGenerateWithCert()
         throws Exception
     {
-        CertificateFactory          fact = CertificateFactory.getInstance("X.509","BC");
+        CertificateFactory          fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
         X509Certificate             iCert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(signCert));
         
         //
@@ -274,7 +274,7 @@ public class AttrCertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyFactory  kFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  kFact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         privKey = kFact.generatePrivate(RSA_PRIVATE_KEY_SPEC);
         pubKey = kFact.generatePublic(pubKeySpec);
@@ -372,7 +372,7 @@ public class AttrCertTest
     private void testGenerateWithPrincipal()
         throws Exception
     {
-        CertificateFactory          fact = CertificateFactory.getInstance("X.509","BC");
+        CertificateFactory          fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
         X509Certificate             iCert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(signCert));
         
         //
@@ -388,7 +388,7 @@ public class AttrCertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
     
-        KeyFactory  kFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  kFact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
     
         privKey = kFact.generatePrivate(RSA_PRIVATE_KEY_SPEC);
         pubKey = kFact.generatePublic(pubKeySpec);
@@ -459,7 +459,7 @@ public class AttrCertTest
         throws Exception
     {
         X509AttributeCertificateHolder    aCert = new X509AttributeCertificateHolder(attrCert);
-        CertificateFactory          fact = CertificateFactory.getInstance("X.509","BC");
+        CertificateFactory          fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
         X509Certificate             sCert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(signCert));
         
         if (!aCert.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider(BC).build(sCert)))
@@ -523,7 +523,7 @@ public class AttrCertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyFactory  kFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  kFact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         privKey = kFact.generatePrivate(privKeySpec);
         pubKey = kFact.generatePublic(pubKeySpec);

@@ -265,7 +265,7 @@ public class NISTCertPathTest
     {
         try
         {
-            fact = CertificateFactory.getInstance("X.509", "BC");
+            fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
             trustedCert = (X509Certificate)fact
                     .generateCertificate(new ByteArrayInputStream(Base64
                             .decode(Trust_Anchor_CP_01_01_crt)));
@@ -347,7 +347,7 @@ public class NISTCertPathTest
         }
 
         return CertStore.getInstance("Collection",
-                new CollectionCertStoreParameters(_vec2), "BC");
+				new CollectionCertStoreParameters(_vec2), BouncyCastleProvider.PROVIDER_NAME);
     }
 
     private void test(String _name, String[] _data, boolean _accept,
@@ -373,7 +373,7 @@ public class NISTCertPathTest
 
         try
         {
-            CertPathBuilder _cpb = CertPathBuilder.getInstance("PKIX", "BC");
+            CertPathBuilder _cpb = CertPathBuilder.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
             X509Certificate _ee = decodeCertificate(_data[_data.length - 1]);
             X509CertSelector _select = new X509CertSelector();
             _select.setSubject(_ee.getSubjectX500Principal().getEncoded());

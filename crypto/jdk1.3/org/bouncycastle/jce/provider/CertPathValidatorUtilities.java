@@ -1379,7 +1379,7 @@ public class CertPathValidatorUtilities
                 dsaPubKey.getY(), dsaParams.getP(), dsaParams.getQ(), dsaParams.getG());
             try
             {
-                KeyFactory keyFactory = KeyFactory.getInstance("DSA", "BC");
+                KeyFactory keyFactory = KeyFactory.getInstance("DSA", BouncyCastleProvider.PROVIDER_NAME);
                 return keyFactory.generatePublic(dsaPubKeySpec);
             }
             catch (Exception exception)

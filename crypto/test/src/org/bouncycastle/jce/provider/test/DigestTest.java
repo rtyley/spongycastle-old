@@ -10,7 +10,7 @@ import org.bouncycastle.util.test.SimpleTest;
 public class DigestTest
     extends SimpleTest
 {
-    final static String provider = "BC";
+	final static String provider = BouncyCastleProvider.PROVIDER_NAME;
 
     static private String[][] abcVectors =
     {

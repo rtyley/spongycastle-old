@@ -23,7 +23,7 @@ public class CertPathBuilderTest
     {
         try
         {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
                 // initialise CertStore
             X509Certificate rootCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(CertPathTest.rootCertBin));
@@ -46,7 +46,7 @@ public class CertPathBuilderTest
             Set trust = new HashSet();
             trust.add( new TrustAnchor( rootCert, null ) );
 
-            CertPathBuilder cpb = CertPathBuilder.getInstance("PKIX","BC");
+            CertPathBuilder cpb = CertPathBuilder.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
             X509CertSelector targetConstraints = new X509CertSelector();
             targetConstraints.setSubject(((X509Principal)rootCert.getSubjectDN()).getEncoded());
             PKIXBuilderParameters params = new PKIXBuilderParameters( trust, targetConstraints );

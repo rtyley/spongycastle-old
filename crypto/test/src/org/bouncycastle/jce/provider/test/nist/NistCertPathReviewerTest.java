@@ -6,6 +6,7 @@ import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
@@ -572,14 +573,14 @@ public class NistCertPathReviewerTest
         
         certsAndCrls.add(endCert);
     
-        CertPath certPath = CertificateFactory.getInstance("X.509","BC").generateCertPath(certsAndCrls);
+        CertPath certPath = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME).generateCertPath(certsAndCrls);
     
         for (int i = 0; i != crls.length; i++)
         {
             certsAndCrls.add(loadCrl(crls[i]));
         }
     
-        CertStore  store = CertStore.getInstance("Collection", new CollectionCertStoreParameters(certsAndCrls), "BC");
+        CertStore  store = CertStore.getInstance("Collection", new CollectionCertStoreParameters(certsAndCrls), BouncyCastleProvider.PROVIDER_NAME);
         
         //CertPathValidator validator = CertPathValidator.getInstance("PKIX","BC");
         PKIXCertPathReviewer reviewer;
@@ -613,7 +614,7 @@ public class NistCertPathReviewerTest
         {
             InputStream in = new FileInputStream(getPkitsHome() + "/certs/" + certName + ".crt");
             
-            CertificateFactory fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
             
             cert = (X509Certificate)fact.generateCertificate(in);
     
@@ -642,7 +643,7 @@ public class NistCertPathReviewerTest
         {
             InputStream in = new FileInputStream(getPkitsHome() + "/crls/" + crlName + ".crl");
             
-            CertificateFactory fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
             
             crl = (X509CRL)fact.generateCRL(in);
             
@@ -692,7 +693,7 @@ public class NistCertPathReviewerTest
     
     public void setUp()
     {
-        if (Security.getProvider("BC") == null)
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null)
         {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         }

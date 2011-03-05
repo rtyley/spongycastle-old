@@ -152,7 +152,7 @@ public class X509CRLObject
         InvalidKeyException, NoSuchProviderException,
         SignatureException
     {
-        verify(key, "BC");
+        verify(key, BouncyCastleProvider.PROVIDER_NAME);
     }
 
     public void verify(PublicKey key, String sigProvider)
@@ -261,7 +261,7 @@ public class X509CRLObject
 
     public String getSigAlgName()
     {
-        Provider    prov = Security.getProvider("BC");
+        Provider    prov = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
         String        algName = prov.getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
 
         if ( algName != null )

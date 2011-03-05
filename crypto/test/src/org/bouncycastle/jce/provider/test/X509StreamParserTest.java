@@ -68,19 +68,19 @@ public class X509StreamParserTest
     public void performTest()
         throws Exception
     {
-        X509StreamParser parser = X509StreamParser.getInstance("Certificate", "BC");
+        X509StreamParser parser = X509StreamParser.getInstance("Certificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(new ByteArrayInputStream(CertPathTest.rootCertBin));
         X509Certificate rootCert = (X509Certificate)parser.read();
 
-        parser = X509StreamParser.getInstance("CRL", "BC");
+        parser = X509StreamParser.getInstance("CRL", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(new ByteArrayInputStream(CertPathTest.rootCrlBin));
 
 
         X509CRL rootCrl = (X509CRL)parser.read();
 
-        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+        parser = X509StreamParser.getInstance("AttributeCertificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(new ByteArrayInputStream(attrCert));
 
@@ -92,7 +92,7 @@ public class X509StreamParserTest
         bOut.write(CertPathTest.interCertBin);
         bOut.write(CertPathTest.finalCertBin);
 
-        parser = X509StreamParser.getInstance("Certificate", "BC");
+        parser = X509StreamParser.getInstance("Certificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(bOut.toByteArray());
 
@@ -108,7 +108,7 @@ public class X509StreamParserTest
         bOut.write(CertPathTest.rootCrlBin);
         bOut.write(CertPathTest.interCrlBin);
 
-        parser = X509StreamParser.getInstance("CRL", "BC");
+        parser = X509StreamParser.getInstance("CRL", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(bOut.toByteArray());
 
@@ -124,7 +124,7 @@ public class X509StreamParserTest
         bOut.write(attrCert);
         bOut.write(attrCert);
 
-        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+        parser = X509StreamParser.getInstance("AttributeCertificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(bOut.toByteArray());
 
@@ -138,7 +138,7 @@ public class X509StreamParserTest
         //
         // PEM tests
         //
-        parser = X509StreamParser.getInstance("Certificate", "BC");
+        parser = X509StreamParser.getInstance("Certificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(PEMData.CERTIFICATE_1.getBytes("US-ASCII"));
 
@@ -149,7 +149,7 @@ public class X509StreamParserTest
             fail("wrong number of Certificates found");
         }
 
-        parser = X509StreamParser.getInstance("Certificate", "BC");
+        parser = X509StreamParser.getInstance("Certificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(PEMData.CERTIFICATE_2.getBytes("US-ASCII"));
 
@@ -160,7 +160,7 @@ public class X509StreamParserTest
             fail("wrong number of Certificates found");
         }
 
-        parser = X509StreamParser.getInstance("CRL", "BC");
+        parser = X509StreamParser.getInstance("CRL", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(PEMData.CRL_1.getBytes("US-ASCII"));
 
@@ -171,7 +171,7 @@ public class X509StreamParserTest
             fail("wrong number of CRLs found");
         }
 
-        parser = X509StreamParser.getInstance("CRL", "BC");
+        parser = X509StreamParser.getInstance("CRL", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(PEMData.CRL_2.getBytes("US-ASCII"));
 
@@ -182,7 +182,7 @@ public class X509StreamParserTest
             fail("wrong number of CRLs found");
         }
 
-        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+        parser = X509StreamParser.getInstance("AttributeCertificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(PEMData.ATTRIBUTE_CERTIFICATE_1.getBytes("US-ASCII"));
 
@@ -193,7 +193,7 @@ public class X509StreamParserTest
             fail("wrong number of Attribute Certificates found");
         }
 
-        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+        parser = X509StreamParser.getInstance("AttributeCertificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(PEMData.ATTRIBUTE_CERTIFICATE_2.getBytes("US-ASCII"));
 
@@ -216,7 +216,7 @@ public class X509StreamParserTest
         //
         // cross certificate pairs
         //
-        parser = X509StreamParser.getInstance("CertificatePair", "BC");
+        parser = X509StreamParser.getInstance("CertificatePair", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(new X509CertificatePair(rootCert, rootCert).getEncoded());
 
@@ -234,7 +234,7 @@ public class X509StreamParserTest
 
         ContentInfo info = new ContentInfo(CMSObjectIdentifiers.signedData, sigData);
 
-        parser = X509StreamParser.getInstance("Certificate", "BC");
+        parser = X509StreamParser.getInstance("Certificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(info.getEncoded());
 
@@ -245,7 +245,7 @@ public class X509StreamParserTest
             fail("wrong number of Certificates found");
         }
 
-        parser = X509StreamParser.getInstance("CRL", "BC");
+        parser = X509StreamParser.getInstance("CRL", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(info.getEncoded());
 
@@ -256,7 +256,7 @@ public class X509StreamParserTest
             fail("wrong number of CRLs found");
         }
 
-        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+        parser = X509StreamParser.getInstance("AttributeCertificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(info.getEncoded());
 
@@ -273,7 +273,7 @@ public class X509StreamParserTest
 
         info = new ContentInfo(CMSObjectIdentifiers.signedData, sigData);
 
-        parser = X509StreamParser.getInstance("Certificate", "BC");
+        parser = X509StreamParser.getInstance("Certificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(info.getEncoded());
 
@@ -284,7 +284,7 @@ public class X509StreamParserTest
             fail("wrong number of Certificates found - expected 0");
         }
 
-        parser = X509StreamParser.getInstance("CRL", "BC");
+        parser = X509StreamParser.getInstance("CRL", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(info.getEncoded());
 
@@ -295,7 +295,7 @@ public class X509StreamParserTest
             fail("wrong number of CRLs found - expected 0");
         }
 
-        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+        parser = X509StreamParser.getInstance("AttributeCertificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(info.getEncoded());
 
@@ -311,7 +311,7 @@ public class X509StreamParserTest
 
         info = new ContentInfo(CMSObjectIdentifiers.signedData, sigData);
 
-        parser = X509StreamParser.getInstance("Certificate", "BC");
+        parser = X509StreamParser.getInstance("Certificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(info.getEncoded());
 
@@ -322,7 +322,7 @@ public class X509StreamParserTest
             fail("wrong number of Certificates found - expected 0");
         }
 
-        parser = X509StreamParser.getInstance("CRL", "BC");
+        parser = X509StreamParser.getInstance("CRL", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(info.getEncoded());
 
@@ -333,7 +333,7 @@ public class X509StreamParserTest
             fail("wrong number of CRLs found - expected 0");
         }
 
-        parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+        parser = X509StreamParser.getInstance("AttributeCertificate", BouncyCastleProvider.PROVIDER_NAME);
 
         parser.init(info.getEncoded());
 

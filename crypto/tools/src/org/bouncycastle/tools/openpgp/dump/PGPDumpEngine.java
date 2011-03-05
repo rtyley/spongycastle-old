@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPEncryptedDataList;
 import org.bouncycastle.openpgp.PGPException;
@@ -94,7 +95,7 @@ public class PGPDumpEngine implements ProcessingEngine
         PGPObjectFactory plainObjectFactory = null;
         Object message = null;
 
-        decryptedDataList = pked.getDataStream(pgpSecKey.extractPrivateKey(passPhrase, "BC"), "BC");
+        decryptedDataList = pked.getDataStream(pgpSecKey.extractPrivateKey(passPhrase, BouncyCastleProvider.PROVIDER_NAME), BouncyCastleProvider.PROVIDER_NAME);
         plainFact = new PGPObjectFactory(decryptedDataList);
 
         message = plainFact.nextObject();

@@ -199,7 +199,7 @@ public  class PKIXCertPath
                 ByteArrayOutputStream outStream;
                 DEROutputStream derOutStream;
                 certificates = new ArrayList();
-                CertificateFactory certFactory= CertificateFactory.getInstance( "X.509", "BC" );
+                CertificateFactory certFactory= CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
                 while ( e.hasMoreElements() ) {
                     outStream = new ByteArrayOutputStream();
                     derOutStream = new DEROutputStream(outStream);
@@ -215,7 +215,7 @@ public  class PKIXCertPath
             {
                 inStream = new BufferedInputStream(inStream);
                 certificates = new ArrayList();
-                CertificateFactory certFactory= CertificateFactory.getInstance( "X.509", "BC" );
+                CertificateFactory certFactory= CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
                 Certificate cert = null;
                 while ((cert = certFactory.generateCertificate(inStream)) != null)
                 {

@@ -15,6 +15,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 
 /**
@@ -44,7 +45,7 @@ public class CreateEncryptedMail
         //
         // Open the key store
         //
-        KeyStore    ks = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore    ks = KeyStore.getInstance("PKCS12", BouncyCastleProvider.PROVIDER_NAME);
 
         ks.load(new FileInputStream(args[0]), args[1].toCharArray());
 
@@ -96,7 +97,7 @@ public class CreateEncryptedMail
 
         msg.setText("Hello world!");
 
-        MimeBodyPart mp = gen.generate(msg, SMIMEEnvelopedGenerator.RC2_CBC, "BC");
+        MimeBodyPart mp = gen.generate(msg, SMIMEEnvelopedGenerator.RC2_CBC, BouncyCastleProvider.PROVIDER_NAME);
         //
         // Get a Session object and create the mail message
         //

@@ -28,6 +28,7 @@ import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.test.CMSTestUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMECompressed;
 import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
 import org.bouncycastle.mail.smime.SMIMECompressedParser;
@@ -156,7 +157,7 @@ public class SMIMECompressedTest
         certList.add(signCert);
 
         CertStore      certs = CertStore.getInstance("Collection",
-                                       new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         ASN1EncodableVector         signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector       caps = new SMIMECapabilityVector();
@@ -173,7 +174,7 @@ public class SMIMECompressedTest
 
         gen.addCertificatesAndCRLs(certs);
 
-        MimeMultipart smp = gen.generate(msg, "BC");
+        MimeMultipart smp = gen.generate(msg, BouncyCastleProvider.PROVIDER_NAME);
 
         MimeMessage bp2 = new MimeMessage((Session)null);                          
 
@@ -202,7 +203,7 @@ public class SMIMECompressedTest
         
         assertEquals(true, Arrays.areEqual(_msgBytes, _resBytes));
 
-        certs = s.getCertificatesAndCRLs("Collection", "BC");
+        certs = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
 
         SignerInformationStore  signers = s.getSignerInfos();
         Collection              c = signers.getSigners();
@@ -216,7 +217,7 @@ public class SMIMECompressedTest
             Iterator            certIt = certCollection.iterator();
             X509Certificate     cert = (X509Certificate)certIt.next();
 
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
         }
     }
 }

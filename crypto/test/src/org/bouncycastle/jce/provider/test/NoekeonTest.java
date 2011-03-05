@@ -49,8 +49,8 @@ public class NoekeonTest
 
         key = new SecretKeySpec(keyBytes, "Noekeon");
 
-        in = Cipher.getInstance("Noekeon/ECB/NoPadding", "BC");
-        out = Cipher.getInstance("Noekeon/ECB/NoPadding", "BC");
+        in = Cipher.getInstance("Noekeon/ECB/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
+        out = Cipher.getInstance("Noekeon/ECB/NoPadding", BouncyCastleProvider.PROVIDER_NAME);
 
         try
         {

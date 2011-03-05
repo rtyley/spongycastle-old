@@ -151,11 +151,11 @@ public class PGPDSAElGamalTest implements Test
         try
         {
             String file = null;
-            KeyFactory fact = KeyFactory.getInstance("DSA", "BC");
+            KeyFactory fact = KeyFactory.getInstance("DSA", BouncyCastleProvider.PROVIDER_NAME);
             PGPPublicKey pubKey = null;
             PrivateKey privKey = null;
             
-            PGPUtil.setDefaultProvider("BC");
+            PGPUtil.setDefaultProvider(BouncyCastleProvider.PROVIDER_NAME);
 
             //
             // Read the public key
@@ -170,7 +170,7 @@ public class PGPDSAElGamalTest implements Test
             // Read the private key
             //
             PGPSecretKeyRing    sKey = new PGPSecretKeyRing(testPrivKeyRing);
-            PGPPrivateKey        pgpPrivKey = sKey.getSecretKey().extractPrivateKey(pass, "BC");
+            PGPPrivateKey        pgpPrivKey = sKey.getSecretKey().extractPrivateKey(pass, BouncyCastleProvider.PROVIDER_NAME);
             
             //
             // signature generation
@@ -178,7 +178,7 @@ public class PGPDSAElGamalTest implements Test
             String                                data = "hello world!";
             ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
             ByteArrayInputStream        testIn = new ByteArrayInputStream(data.getBytes());
-            PGPSignatureGenerator    sGen = new PGPSignatureGenerator(PGPPublicKey.DSA, PGPUtil.SHA1, "BC");
+            PGPSignatureGenerator    sGen = new PGPSignatureGenerator(PGPPublicKey.DSA, PGPUtil.SHA1, BouncyCastleProvider.PROVIDER_NAME);
         
             sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
 
@@ -222,7 +222,7 @@ public class PGPDSAElGamalTest implements Test
 
             InputStream    dIn = p2.getInputStream();
 
-            ops.initVerify(pubKey, "BC");
+            ops.initVerify(pubKey, BouncyCastleProvider.PROVIDER_NAME);
             
             while ((ch = dIn.read()) >= 0)
             {
@@ -254,7 +254,7 @@ public class PGPDSAElGamalTest implements Test
                 if (pgpKey.getAlgorithm() == PGPPublicKey.ELGAMAL_ENCRYPT
                     || pgpKey.getAlgorithm() == PGPPublicKey.ELGAMAL_GENERAL)
                 {
-                    pKey = pgpKey.getKey("BC");
+                    pKey = pgpKey.getKey(BouncyCastleProvider.PROVIDER_NAME);
                     pgpKeyID = pgpKey.getKeyID();
                     
                     //
@@ -264,7 +264,7 @@ public class PGPDSAElGamalTest implements Test
                 }
             }
              
-            Cipher c = Cipher.getInstance("ElGamal/None/PKCS1Padding", "BC");
+            Cipher c = Cipher.getInstance("ElGamal/None/PKCS1Padding", BouncyCastleProvider.PROVIDER_NAME);
 
             c.init(Cipher.ENCRYPT_MODE, pKey);
             
@@ -272,7 +272,7 @@ public class PGPDSAElGamalTest implements Test
 
             byte[]  out = c.doFinal(in);
             
-            pgpPrivKey = sKey.getSecretKey(pgpKeyID).extractPrivateKey(pass, "BC");
+            pgpPrivKey = sKey.getSecretKey(pgpKeyID).extractPrivateKey(pass, BouncyCastleProvider.PROVIDER_NAME);
             
             c.init(Cipher.DECRYPT_MODE, pgpPrivKey.getKey());
             
@@ -294,7 +294,7 @@ public class PGPDSAElGamalTest implements Test
         
             PGPPublicKeyEncryptedData    encP = (PGPPublicKeyEncryptedData)encList.get(0);
 
-            InputStream clear = encP.getDataStream(pgpPrivKey, "BC");
+            InputStream clear = encP.getDataStream(pgpPrivKey, BouncyCastleProvider.PROVIDER_NAME);
                      
             pgpFact = new PGPObjectFactory(clear);
 
@@ -332,7 +332,7 @@ public class PGPDSAElGamalTest implements Test
         
             encP = (PGPPublicKeyEncryptedData)encList.get(0);
 
-            clear = encP.getDataStream(pgpPrivKey, "BC");
+            clear = encP.getDataStream(pgpPrivKey, BouncyCastleProvider.PROVIDER_NAME);
                      
             pgpFact = new PGPObjectFactory(clear);
 
@@ -358,7 +358,7 @@ public class PGPDSAElGamalTest implements Test
             //
             // note: we use the DSA public key here.
             //
-            ops.initVerify(pgpPub.getPublicKey(), "BC");
+            ops.initVerify(pgpPub.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
             
             while ((ch = inLd.read()) >= 0)
             {
@@ -382,7 +382,7 @@ public class PGPDSAElGamalTest implements Test
             // encrypt
             //
             ByteArrayOutputStream        cbOut = new ByteArrayOutputStream();
-            PGPEncryptedDataGenerator    cPk = new PGPEncryptedDataGenerator(SymmetricKeyAlgorithmTags.TRIPLE_DES, new SecureRandom(), "BC");            
+            PGPEncryptedDataGenerator    cPk = new PGPEncryptedDataGenerator(SymmetricKeyAlgorithmTags.TRIPLE_DES, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
             PGPPublicKey                        puK = sKey.getSecretKey(pgpKeyID).getPublicKey();
             
             cPk.addMethod(puK);
@@ -399,9 +399,9 @@ public class PGPDSAElGamalTest implements Test
         
             encP = (PGPPublicKeyEncryptedData)encList.get(0);
             
-            pgpPrivKey = sKey.getSecretKey(pgpKeyID).extractPrivateKey(pass, "BC");
+            pgpPrivKey = sKey.getSecretKey(pgpKeyID).extractPrivateKey(pass, BouncyCastleProvider.PROVIDER_NAME);
 
-            clear = encP.getDataStream(pgpPrivKey, "BC");
+            clear = encP.getDataStream(pgpPrivKey, BouncyCastleProvider.PROVIDER_NAME);
             
             bOut.reset();
             

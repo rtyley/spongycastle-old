@@ -22,7 +22,7 @@ public class AlgorithmParametersTest
     private void basicTest(String algorithm, Class algorithmParameterSpec, byte[] asn1Encoded)
         throws Exception
     {
-        AlgorithmParameters alg = AlgorithmParameters.getInstance(algorithm, "BC");
+        AlgorithmParameters alg = AlgorithmParameters.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
         alg.init(asn1Encoded);
 
@@ -68,15 +68,15 @@ public class AlgorithmParametersTest
             // expected unknown object
         }
 
-        alg = AlgorithmParameters.getInstance(algorithm, "BC");
+        alg = AlgorithmParameters.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
         alg.init(asn1Encoded, "ASN.1");
 
-        alg = AlgorithmParameters.getInstance(algorithm, "BC");
+        alg = AlgorithmParameters.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
         alg.init(asn1Encoded, null);
 
-        alg = AlgorithmParameters.getInstance(algorithm, "BC");
+        alg = AlgorithmParameters.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
         try
         {

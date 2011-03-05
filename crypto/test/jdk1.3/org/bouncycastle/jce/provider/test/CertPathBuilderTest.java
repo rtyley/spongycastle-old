@@ -37,7 +37,7 @@ public class CertPathBuilderTest
     {
         try
         {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
                 // initialise CertStore
             X509Certificate rootCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(CertPathTest.rootCertBin));
@@ -52,7 +52,7 @@ public class CertPathBuilderTest
             list.add(rootCrl);
             list.add(interCrl);
             CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
-            CertStore store = CertStore.getInstance("Collection", ccsp, "BC");
+            CertStore store = CertStore.getInstance("Collection", ccsp, BouncyCastleProvider.PROVIDER_NAME);
             Calendar validDate = Calendar.getInstance();
             validDate.set(2002,2,21,2,21,10);
 
@@ -60,7 +60,7 @@ public class CertPathBuilderTest
             Set trust = new HashSet();
             trust.add(new TrustAnchor(rootCert, null));
 
-            CertPathBuilder cpb = CertPathBuilder.getInstance("PKIX","BC");
+            CertPathBuilder cpb = CertPathBuilder.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
             X509CertSelector targetConstraints = new X509CertSelector();
             targetConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(finalCert).getEncoded());
             PKIXBuilderParameters params = new PKIXBuilderParameters(trust, targetConstraints);
@@ -112,7 +112,7 @@ public class CertPathBuilderTest
             CertStore                     store = CertStore.getInstance("Collection", params);
     
             // build the path
-            CertPathBuilder  builder = CertPathBuilder.getInstance("PKIX", "BC");
+            CertPathBuilder  builder = CertPathBuilder.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
             X509CertSelector pathConstraints = new X509CertSelector();
             
             pathConstraints.setSubject(PrincipalUtil.getSubjectX509Principal(endCert).getEncoded());

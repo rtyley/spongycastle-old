@@ -102,9 +102,9 @@ public class DirectKeySignature
             out = new ArmoredOutputStream(out);
         }
 
-        PGPPrivateKey pgpPrivKey = secretKey.extractPrivateKey(secretKeyPass.toCharArray(), "BC");
+        PGPPrivateKey pgpPrivKey = secretKey.extractPrivateKey(secretKeyPass.toCharArray(), BouncyCastleProvider.PROVIDER_NAME);
 
-        PGPSignatureGenerator       sGen = new PGPSignatureGenerator(secretKey.getPublicKey().getAlgorithm(), PGPUtil.SHA1, "BC");
+        PGPSignatureGenerator       sGen = new PGPSignatureGenerator(secretKey.getPublicKey().getAlgorithm(), PGPUtil.SHA1, BouncyCastleProvider.PROVIDER_NAME);
 
         sGen.initSign(PGPSignature.DIRECT_KEY, pgpPrivKey);
 

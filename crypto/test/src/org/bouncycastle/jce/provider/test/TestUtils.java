@@ -27,6 +27,7 @@ import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
@@ -44,7 +45,7 @@ class TestUtils
     public static KeyPair generateRSAKeyPair()
         throws Exception
     {
-        KeyPairGenerator  kpGen = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator  kpGen = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
     
         kpGen.initialize(1024, new SecureRandom());
     
@@ -64,7 +65,7 @@ class TestUtils
         certGen.setPublicKey(pair.getPublic());
         certGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
     
-        return certGen.generate(pair.getPrivate(), "BC");
+        return certGen.generate(pair.getPrivate(), BouncyCastleProvider.PROVIDER_NAME);
     }
     
     public static X509Certificate generateIntermediateCert(PublicKey intKey, PrivateKey caKey, X509Certificate caCert)
@@ -85,7 +86,7 @@ class TestUtils
         certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(0));
         certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyCertSign | KeyUsage.cRLSign));
 
-        return certGen.generate(caKey, "BC");
+        return certGen.generate(caKey, BouncyCastleProvider.PROVIDER_NAME);
     }
     
     public static X509Certificate generateEndEntityCert(PublicKey entityKey, PrivateKey caKey, X509Certificate caCert)
@@ -106,7 +107,7 @@ class TestUtils
         certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
         certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
 
-        return certGen.generate(caKey, "BC");
+        return certGen.generate(caKey, BouncyCastleProvider.PROVIDER_NAME);
     }
     
     public static X509CRL createCRL(
@@ -130,7 +131,7 @@ class TestUtils
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
         crlGen.addExtension(X509Extensions.CRLNumber, false, new CRLNumber(BigInteger.valueOf(1)));
         
-        return crlGen.generate(caKey, "BC");
+        return crlGen.generate(caKey, BouncyCastleProvider.PROVIDER_NAME);
     }
 
     public static X509Certificate createExceptionCertificate(boolean exceptionOnEncode)

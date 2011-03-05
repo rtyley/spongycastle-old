@@ -216,9 +216,9 @@ public class X509LDAPCertStoreTest extends SimpleTest
 
     private void certStoretest() throws Exception
     {
-        CertStore cs = CertStore.getInstance("X509LDAP", params1, "BC");
+        CertStore cs = CertStore.getInstance("X509LDAP", params1, BouncyCastleProvider.PROVIDER_NAME);
         X509CertSelector sl = new X509CertSelector();
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
         X509Certificate xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(cert1));
         sl.setCertificate(xcert);
@@ -248,7 +248,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         }
         // System.out.println(coll.toArray()[0]);
 
-        cs = CertStore.getInstance("X509LDAP", params2, "BC");
+        cs = CertStore.getInstance("X509LDAP", params2, BouncyCastleProvider.PROVIDER_NAME);
         sl = new X509CertSelector();
         xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(cert2));
@@ -261,7 +261,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
 
         // System.out.println(coll.toArray()[0]);
 
-        cs = CertStore.getInstance("X509LDAP", params3, "BC");
+        cs = CertStore.getInstance("X509LDAP", params3, BouncyCastleProvider.PROVIDER_NAME);
         sl = new X509CertSelector();
         xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(cert3));
@@ -329,10 +329,10 @@ public class X509LDAPCertStoreTest extends SimpleTest
 
     private void x509StoreTest() throws Exception
     {
-        X509Store cs = X509Store.getInstance("CERTIFICATE/LDAP", params1, "BC");
+        X509Store cs = X509Store.getInstance("CERTIFICATE/LDAP", params1, BouncyCastleProvider.PROVIDER_NAME);
 
         X509CertStoreSelector sl = new X509CertStoreSelector();
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
         X509Certificate xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(cert1));
         sl.setCertificate(xcert);
@@ -355,7 +355,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         X509CRL crl = (X509CRL)cf.generateCRL(new
             ByteArrayInputStream(directCRL));
         sl2.setIssuers(Collections.singleton(crl.getIssuerX500Principal()));
-        cs = X509Store.getInstance("CRL/LDAP", params1, "BC");
+        cs = X509Store.getInstance("CRL/LDAP", params1, BouncyCastleProvider.PROVIDER_NAME);
         coll = cs.getMatches(sl2);
         if (!coll.iterator().hasNext())
         {
@@ -363,7 +363,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
         }
         // System.out.println(coll.toArray()[0]);
 
-        cs = X509Store.getInstance("CERTIFICATE/LDAP", params2, "BC");
+        cs = X509Store.getInstance("CERTIFICATE/LDAP", params2, BouncyCastleProvider.PROVIDER_NAME);
         sl = new X509CertStoreSelector();
         xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(cert2));
@@ -376,7 +376,7 @@ public class X509LDAPCertStoreTest extends SimpleTest
 
         // System.out.println(coll.toArray()[0]);
 
-        cs = X509Store.getInstance("CERTIFICATE/LDAP", params3, "BC");
+        cs = X509Store.getInstance("CERTIFICATE/LDAP", params3, BouncyCastleProvider.PROVIDER_NAME);
         sl = new X509CertStoreSelector();
         xcert = (X509Certificate)cf
             .generateCertificate(new ByteArrayInputStream(cert3));

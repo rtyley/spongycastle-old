@@ -179,7 +179,7 @@ public class AttrCertExample
         //
         // set up the keys
         //
-        KeyFactory          fact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory          fact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
         PrivateKey          caPrivKey = fact.generatePrivate(caPrivKeySpec);
         PublicKey           caPubKey = fact.generatePublic(caPubKeySpec);
         PrivateKey          privKey = fact.generatePrivate(privKeySpec);
@@ -234,7 +234,7 @@ public class AttrCertExample
 
         //      finally create the AC
         X509V2AttributeCertificate att = (X509V2AttributeCertificate)acGen
-                .generate(caPrivKey, "BC");
+                .generate(caPrivKey, BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // starting here, we parse the newly generated AC
@@ -288,7 +288,7 @@ public class AttrCertExample
 
         try
         {
-            att.verify(caPubKey, "BC");
+            att.verify(caPubKey, BouncyCastleProvider.PROVIDER_NAME);
         }
         catch (Exception e)
         {

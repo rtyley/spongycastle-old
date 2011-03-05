@@ -32,7 +32,7 @@ public class CertPathTest
     {
         try
         {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
             X509Certificate rootCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(rootCertBin));
             X509Certificate interCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(interCertBin));

@@ -60,7 +60,7 @@ public class PGPPubringDump
         PGPPublicKey pubKey = null;
         PrivateKey privKey = null;
         
-        PGPUtil.setDefaultProvider("BC");
+        PGPUtil.setDefaultProvider(BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // Read the public key rings

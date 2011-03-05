@@ -57,6 +57,7 @@ import org.bouncycastle.i18n.filter.TrustedInput;
 import org.bouncycastle.i18n.filter.UntrustedInput;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.x509.CertPathReviewerException;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
@@ -174,7 +175,7 @@ public class SignedMailValidator
             }
 
             // save certstore and signerInformationStore
-            certs = s.getCertificatesAndCRLs("Collection", "BC");
+            certs = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
             signers = s.getSignerInfos();
 
             // save "from" addresses from message
@@ -267,7 +268,7 @@ public class SignedMailValidator
                 boolean validSignature = false;
                 try
                 {
-                    validSignature = signer.verify(cert.getPublicKey(), "BC");
+                    validSignature = signer.verify(cert.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
                     if (!validSignature)
                     {
                         ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
@@ -693,7 +694,7 @@ public class SignedMailValidator
                     {
                         try
                         {
-                            cert.verify(anchorCert.getPublicKey(), "BC");
+                            cert.verify(anchorCert.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
                             trustAnchorFound = true;
                             taCert = anchorCert;
                             break;
@@ -711,7 +712,7 @@ public class SignedMailValidator
                     {
                         try
                         {
-                            cert.verify(anchor.getCAPublicKey(), "BC");
+                            cert.verify(anchor.getCAPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
                             trustAnchorFound = true;
                             break;
                         }
@@ -804,7 +805,7 @@ public class SignedMailValidator
                 {
                     try
                     {
-                        cert.verify(taCert.getPublicKey(), "BC");
+                        cert.verify(taCert.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
                         certSet.add(taCert);
                         userProvidedList.add(new Boolean(userProvided));
                     }
@@ -816,7 +817,7 @@ public class SignedMailValidator
             }
         }
         
-        CertPath certPath = CertificateFactory.getInstance("X.509", "BC").generateCertPath(new ArrayList(certSet));
+        CertPath certPath = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME).generateCertPath(new ArrayList(certSet));
         return new Object[] {certPath, userProvidedList};
     }
 

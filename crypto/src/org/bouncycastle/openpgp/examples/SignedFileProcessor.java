@@ -79,7 +79,7 @@ public class SignedFileProcessor
         PGPPublicKey                key = pgpRing.getPublicKey(ops.getKeyID());
         FileOutputStream            out = new FileOutputStream(p2.getFileName());
 
-        ops.initVerify(key, "BC");
+        ops.initVerify(key, BouncyCastleProvider.PROVIDER_NAME);
             
         while ((ch = dIn.read()) >= 0)
         {
@@ -129,8 +129,8 @@ public class SignedFileProcessor
         }
 
         PGPSecretKey                pgpSec = PGPExampleUtil.readSecretKey(keyIn);
-        PGPPrivateKey               pgpPrivKey = pgpSec.extractPrivateKey(pass, "BC");        
-        PGPSignatureGenerator       sGen = new PGPSignatureGenerator(pgpSec.getPublicKey().getAlgorithm(), PGPUtil.SHA1, "BC");
+        PGPPrivateKey               pgpPrivKey = pgpSec.extractPrivateKey(pass, BouncyCastleProvider.PROVIDER_NAME);
+        PGPSignatureGenerator       sGen = new PGPSignatureGenerator(pgpSec.getPublicKey().getAlgorithm(), PGPUtil.SHA1, BouncyCastleProvider.PROVIDER_NAME);
         
         sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
         

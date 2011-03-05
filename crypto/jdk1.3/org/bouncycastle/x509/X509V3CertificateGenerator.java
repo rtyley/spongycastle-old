@@ -17,6 +17,7 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
@@ -285,7 +286,7 @@ public class X509V3CertificateGenerator
     {
         try
         {
-            return generateX509Certificate(key, "BC", null);
+            return generateX509Certificate(key, BouncyCastleProvider.PROVIDER_NAME, null);
         }
         catch (NoSuchProviderException e)
         {
@@ -306,7 +307,7 @@ public class X509V3CertificateGenerator
     {
         try
         {
-            return generateX509Certificate(key, "BC", random);
+            return generateX509Certificate(key, BouncyCastleProvider.PROVIDER_NAME, random);
         }
         catch (NoSuchProviderException e)
         {

@@ -43,7 +43,7 @@ public final class BouncyCastleProvider extends Provider
 {
     private static String info = "BouncyCastle Security Provider v1.46b";
 
-    public static String PROVIDER_NAME = "BC";
+	public static String PROVIDER_NAME = org.bouncycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
 
     /*
      * Configurable symmetric ciphers

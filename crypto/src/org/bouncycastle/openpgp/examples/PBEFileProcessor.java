@@ -77,7 +77,7 @@ public class PBEFileProcessor
 
         PGPPBEEncryptedData     pbe = (PGPPBEEncryptedData)enc.get(0);
 
-        InputStream clear = pbe.getDataStream(passPhrase, "BC");
+        InputStream clear = pbe.getDataStream(passPhrase, BouncyCastleProvider.PROVIDER_NAME);
         
         PGPObjectFactory        pgpFact = new PGPObjectFactory(clear);
 
@@ -153,7 +153,7 @@ public class PBEFileProcessor
             byte[] compressedData = PGPExampleUtil.compressFile(fileName, CompressionAlgorithmTags.ZIP);
 
             PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5,
-                withIntegrityCheck, new SecureRandom(), "BC");
+					withIntegrityCheck, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
             encGen.addMethod(passPhrase);
 
             OutputStream encOut = encGen.open(out, compressedData.length);

@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Iterator;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPEncryptedData;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPKeyPair;
@@ -613,12 +614,12 @@ public class PGPKeyRingTest
                     if (k.getKeyID() == -4049084404703773049L
                          || k.getKeyID() == -1413891222336124627L)
                     {
-                        k.extractPrivateKey(sec2pass1, "BC");
+                        k.extractPrivateKey(sec2pass1, BouncyCastleProvider.PROVIDER_NAME);
                     }
                     else if (k.getKeyID() == -6498553574938125416L
                         || k.getKeyID() == 59034765524361024L)
                     {
-                        k.extractPrivateKey(sec2pass2, "BC");
+                        k.extractPrivateKey(sec2pass2, BouncyCastleProvider.PROVIDER_NAME);
                     }
                 }
                 
@@ -725,7 +726,7 @@ public class PGPKeyRingTest
 
                     PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                    k.extractPrivateKey(sec3pass1, "BC");
+                    k.extractPrivateKey(sec3pass1, BouncyCastleProvider.PROVIDER_NAME);
                 }
                 
                 if (keyCount != 2)
@@ -786,7 +787,7 @@ public class PGPKeyRingTest
 
                     PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                    k.extractPrivateKey(sec3pass1, "BC");
+                    k.extractPrivateKey(sec3pass1, BouncyCastleProvider.PROVIDER_NAME);
                 }
                 
                 if (keyCount != 2)
@@ -888,7 +889,7 @@ public class PGPKeyRingTest
 
                     PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                    k.extractPrivateKey(sec5pass1, "BC");
+                    k.extractPrivateKey(sec5pass1, BouncyCastleProvider.PROVIDER_NAME);
                 }
                 
                 if (keyCount != 2)

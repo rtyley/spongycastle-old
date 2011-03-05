@@ -42,7 +42,7 @@ public class SPKACTest
       spkac = new SignedPublicKeyAndChallenge(req);
 
       PublicKeyAndChallenge pkac = spkac.getPublicKeyAndChallenge();
-      PublicKey pubKey = spkac.getPublicKey("BC");
+      PublicKey pubKey = spkac.getPublicKey(BouncyCastleProvider.PROVIDER_NAME);
       DERObject obj = pkac.getDERObject();
       if (obj == null)
       {
@@ -92,7 +92,7 @@ public class SPKACTest
           }
       }
 
-      if (!spkac.verify("BC"))
+      if (!spkac.verify(BouncyCastleProvider.PROVIDER_NAME))
       {
           fail(testName + " verification failed");
       }

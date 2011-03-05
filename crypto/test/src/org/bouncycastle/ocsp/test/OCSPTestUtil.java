@@ -22,6 +22,7 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 public class OCSPTestUtil
@@ -44,12 +45,12 @@ public class OCSPTestUtil
         {
             rand = new SecureRandom();
 
-            kpg  = KeyPairGenerator.getInstance("RSA", "BC");
+            kpg  = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
             kpg.initialize(1024, rand);
 
             serialNumber = new BigInteger("1");
 
-            eckpg = KeyPairGenerator.getInstance("ECDSA", "BC");
+            eckpg = KeyPairGenerator.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
             eckpg.initialize(192, rand);
         }
         catch(Exception ex)

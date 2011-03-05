@@ -323,7 +323,7 @@ public class PKCS12Example
         //
         // set up the keys
         //
-        KeyFactory          fact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory          fact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
         PrivateKey          caPrivKey = fact.generatePrivate(caPrivKeySpec);
         PublicKey           caPubKey = fact.generatePublic(caPubKeySpec);
         PrivateKey          intPrivKey = fact.generatePrivate(intPrivKeySpec);
@@ -360,7 +360,7 @@ public class PKCS12Example
         //
         // store the key and the certificate chain
         //
-        KeyStore store = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore store = KeyStore.getInstance("PKCS12", BouncyCastleProvider.PROVIDER_NAME);
 
         store.load(null, null);
 

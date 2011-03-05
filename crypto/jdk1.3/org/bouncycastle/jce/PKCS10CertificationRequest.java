@@ -21,6 +21,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.Strings;
 
 import java.io.ByteArrayInputStream;
@@ -235,7 +236,7 @@ public class PKCS10CertificationRequest
         throws NoSuchAlgorithmException, NoSuchProviderException,
                 InvalidKeyException, SignatureException
     {
-        this(signatureAlgorithm, subject, key, attributes, signingKey, "BC");
+        this(signatureAlgorithm, subject, key, attributes, signingKey, BouncyCastleProvider.PROVIDER_NAME);
     }
 
     /**
@@ -323,7 +324,7 @@ public class PKCS10CertificationRequest
     public PublicKey getPublicKey()
         throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
     {
-        return getPublicKey("BC");
+        return getPublicKey(BouncyCastleProvider.PROVIDER_NAME);
     }
 
     public PublicKey getPublicKey(
@@ -369,7 +370,7 @@ public class PKCS10CertificationRequest
         throws NoSuchAlgorithmException, NoSuchProviderException,
                 InvalidKeyException, SignatureException
     {
-        return verify("BC");
+        return verify(BouncyCastleProvider.PROVIDER_NAME);
     }
 
     /**

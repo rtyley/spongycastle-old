@@ -28,8 +28,8 @@ public class SigTest
      */
     private void testBadSig(PrivateKey priv, PublicKey pub) throws Exception
     {
-        MessageDigest sha1 = MessageDigest.getInstance("SHA1", "BC");
-        Cipher signer = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
+        MessageDigest sha1 = MessageDigest.getInstance("SHA1", BouncyCastleProvider.PROVIDER_NAME);
+        Cipher signer = Cipher.getInstance("RSA/ECB/PKCS1Padding", BouncyCastleProvider.PROVIDER_NAME);
         
         signer.init(Cipher.ENCRYPT_MODE, priv);
         
@@ -49,7 +49,7 @@ public class SigTest
         
         byte[] sig = signer.doFinal(block);
         
-        Signature verifier = Signature.getInstance("SHA1WithRSA", "BC");
+        Signature verifier = Signature.getInstance("SHA1WithRSA", BouncyCastleProvider.PROVIDER_NAME);
         
         verifier.initVerify(pub);
         
@@ -64,12 +64,12 @@ public class SigTest
     public void performTest()
         throws Exception
     {   
-        Signature           sig = Signature.getInstance("SHA1WithRSAEncryption", "BC");
+        Signature           sig = Signature.getInstance("SHA1WithRSAEncryption", BouncyCastleProvider.PROVIDER_NAME);
         KeyPairGenerator    fact;
         KeyPair             keyPair;
         byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
 
-        fact = KeyPairGenerator.getInstance("RSA", "BC");
+        fact = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         fact.initialize(768, new SecureRandom());
 
@@ -95,7 +95,7 @@ public class SigTest
             fail("SHA1 verification failed");
         }
 
-        sig = Signature.getInstance("MD2WithRSAEncryption", "BC");
+        sig = Signature.getInstance("MD2WithRSAEncryption", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(signingKey);
 
@@ -112,7 +112,7 @@ public class SigTest
             fail("MD2 verification failed");
         }
 
-        sig = Signature.getInstance("MD5WithRSAEncryption", "BC");
+        sig = Signature.getInstance("MD5WithRSAEncryption", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(signingKey);
 
@@ -129,7 +129,7 @@ public class SigTest
             fail("MD5 verification failed");
         }
 
-        sig = Signature.getInstance("RIPEMD160WithRSAEncryption", "BC");
+        sig = Signature.getInstance("RIPEMD160WithRSAEncryption", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(signingKey);
 
@@ -149,7 +149,7 @@ public class SigTest
         //
         // RIPEMD-128
         //
-        sig = Signature.getInstance("RIPEMD128WithRSAEncryption", "BC");
+        sig = Signature.getInstance("RIPEMD128WithRSAEncryption", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(signingKey);
 
@@ -169,7 +169,7 @@ public class SigTest
         //
         // RIPEMD256
         //
-        sig = Signature.getInstance("RIPEMD256WithRSAEncryption", "BC");
+        sig = Signature.getInstance("RIPEMD256WithRSAEncryption", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(signingKey);
 
@@ -189,7 +189,7 @@ public class SigTest
         //
         // SHA-224
         //
-        sig = Signature.getInstance("SHA224WithRSAEncryption", "BC");
+        sig = Signature.getInstance("SHA224WithRSAEncryption", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(signingKey);
 
@@ -209,7 +209,7 @@ public class SigTest
         //
         // SHA-256
         //
-        sig = Signature.getInstance("SHA256WithRSAEncryption", "BC");
+        sig = Signature.getInstance("SHA256WithRSAEncryption", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(signingKey);
 
@@ -229,7 +229,7 @@ public class SigTest
         //
         // SHA-384
         //
-        sig = Signature.getInstance("SHA384WithRSAEncryption", "BC");
+        sig = Signature.getInstance("SHA384WithRSAEncryption", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(signingKey);
 
@@ -249,7 +249,7 @@ public class SigTest
         //
         // SHA-512
         //
-        sig = Signature.getInstance("SHA512WithRSAEncryption", "BC");
+        sig = Signature.getInstance("SHA512WithRSAEncryption", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(signingKey);
 
@@ -269,7 +269,7 @@ public class SigTest
         //
         // ISO Sigs.
         //
-        sig = Signature.getInstance("MD5WithRSA/ISO9796-2", "BC");
+        sig = Signature.getInstance("MD5WithRSA/ISO9796-2", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(signingKey);
 
@@ -286,7 +286,7 @@ public class SigTest
             fail("MD5/ISO verification failed");
         }
 
-        sig = Signature.getInstance("SHA1WithRSA/ISO9796-2", "BC");
+        sig = Signature.getInstance("SHA1WithRSA/ISO9796-2", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(signingKey);
 
@@ -303,7 +303,7 @@ public class SigTest
             fail("SHA1/ISO verification failed");
         }
 
-        sig = Signature.getInstance("RIPEMD160WithRSA/ISO9796-2", "BC");
+        sig = Signature.getInstance("RIPEMD160WithRSA/ISO9796-2", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(signingKey);
 
@@ -327,7 +327,7 @@ public class SigTest
         BigInteger  pub = new BigInteger("03", 16);
         BigInteger  pri = new BigInteger("2aaaaaaa942920e38120ee965168302fd0301d73a4e60c7143ceb0adf0bf30b9352f50e8b9e4ceedd65343b2179005b2f099915e4b0c37e41314bb0821ad8330d23cba7f589e0f129b04c46b67dfce9d", 16);
 
-        KeyFactory  f = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  f = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         PrivateKey  privKey = f.generatePrivate(new RSAPrivateKeySpec(mod, pri));
         PublicKey   pubKey = f.generatePublic(new RSAPublicKeySpec(mod, pub));
@@ -335,7 +335,7 @@ public class SigTest
 
         data = Hex.decode("fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210");
 
-        sig = Signature.getInstance("RIPEMD160WithRSA/ISO9796-2", "BC");
+        sig = Signature.getInstance("RIPEMD160WithRSA/ISO9796-2", BouncyCastleProvider.PROVIDER_NAME);
 
         sig.initSign(privKey);
 

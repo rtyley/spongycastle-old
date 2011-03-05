@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.security.NoSuchProviderException;
 import java.util.Iterator;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPLiteralData;
@@ -54,7 +55,7 @@ class PGPExampleUtil
             return null;
         }
 
-        return pgpSecKey.extractPrivateKey(pass, "BC");
+        return pgpSecKey.extractPrivateKey(pass, BouncyCastleProvider.PROVIDER_NAME);
     }
 
     static PGPPublicKey readPublicKey(String fileName) throws IOException, PGPException

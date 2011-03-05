@@ -859,7 +859,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 {
                     // (a) (1)
                     //
-                    cert.verify(workingPublicKey, "BC");
+                    cert.verify(workingPublicKey, BouncyCastleProvider.PROVIDER_NAME);
                 }
                 catch (Exception e)
                 {
@@ -1879,7 +1879,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
                 try
                 {
-                    crl.verify(workingPublicKey, "BC");
+                    crl.verify(workingPublicKey, BouncyCastleProvider.PROVIDER_NAME);
                 }
                 catch (Exception e)
                 {

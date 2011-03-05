@@ -421,7 +421,7 @@ public class PGPRSATest
 
         ByteArrayOutputStream bcOut = new ByteArrayOutputStream();
 
-        PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(SymmetricKeyAlgorithmTags.AES_128, true, new SecureRandom(), "BC");
+        PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(SymmetricKeyAlgorithmTags.AES_128, true, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
 
         encGen.addMethod(pgpPubKey);
 
@@ -444,7 +444,7 @@ public class PGPRSATest
 
         PGPPublicKeyEncryptedData  encP = (PGPPublicKeyEncryptedData)encList.get(0);
 
-        InputStream clear = encP.getDataStream(pgpPrivKey, "BC");
+        InputStream clear = encP.getDataStream(pgpPrivKey, BouncyCastleProvider.PROVIDER_NAME);
 
         PGPObjectFactory pgpFact = new PGPObjectFactory(clear);
 
@@ -459,7 +459,7 @@ public class PGPRSATest
 
         PGPPBEEncryptedData encPbe = (PGPPBEEncryptedData)encList.get(1);
 
-        clear = encPbe.getDataStream("password".toCharArray(), "BC");
+        clear = encPbe.getDataStream("password".toCharArray(), BouncyCastleProvider.PROVIDER_NAME);
 
         pgpF = new PGPObjectFactory(clear);
 
@@ -509,7 +509,7 @@ public class PGPRSATest
             {
                 PGPSignature sig = (PGPSignature)sigs.next();
 
-                sig.initVerify(pubKey, "BC");
+                sig.initVerify(pubKey, BouncyCastleProvider.PROVIDER_NAME);
 
                 if (!sig.verifyCertification(attributes, pubKey))
                 {
@@ -546,9 +546,9 @@ public class PGPRSATest
 
         PGPUserAttributeSubpacketVector uVec = vGen.generate();
 
-        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1, "BC");
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1, BouncyCastleProvider.PROVIDER_NAME);
 
-        sGen.initSign(PGPSignature.POSITIVE_CERTIFICATION, pgpSec.getSecretKey().extractPrivateKey(pass, "BC"));
+        sGen.initSign(PGPSignature.POSITIVE_CERTIFICATION, pgpSec.getSecretKey().extractPrivateKey(pass, BouncyCastleProvider.PROVIDER_NAME));
 
         PGPSignature sig = sGen.generateCertification(uVec, pubKey);
 
@@ -566,7 +566,7 @@ public class PGPRSATest
             {
                 PGPSignature s = (PGPSignature)sigs.next();
 
-                s.initVerify(pubKey, "BC");
+                s.initVerify(pubKey, BouncyCastleProvider.PROVIDER_NAME);
 
                 if (!s.verifyCertification(attributes, pubKey))
                 {
@@ -610,7 +610,7 @@ public class PGPRSATest
         //
         PGPPublicKeyRing        pgpPub = new PGPPublicKeyRing(testPubKey);
 
-        pubKey = pgpPub.getPublicKey().getKey("BC");
+        pubKey = pgpPub.getPublicKey().getKey(BouncyCastleProvider.PROVIDER_NAME);
 
         Iterator    it = pgpPub.getPublicKey().getUserIDs();
         
@@ -620,7 +620,7 @@ public class PGPRSATest
         
         PGPSignature    sig = (PGPSignature)it.next();
         
-        sig.initVerify(pgpPub.getPublicKey(), "BC");
+        sig.initVerify(pgpPub.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
         
         if (!sig.verifyCertification(uid, pgpPub.getPublicKey()))
         {
@@ -644,7 +644,7 @@ public class PGPRSATest
         // Read the public key
         //
         PGPPublicKeyRing     pgpPubV3 = new PGPPublicKeyRing(testPubKeyV3);
-        PublicKey            pubKeyV3 = pgpPub.getPublicKey().getKey("BC");
+        PublicKey            pubKeyV3 = pgpPub.getPublicKey().getKey(BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // write a V3 public key
@@ -662,7 +662,7 @@ public class PGPRSATest
         if (!noIDEA())
         {
             PGPSecretKeyRing        pgpPriv = new PGPSecretKeyRing(testPrivKeyV3);
-            PGPPrivateKey           pgpPrivKey = pgpPriv.getSecretKey().extractPrivateKey(passP, "BC");
+            PGPPrivateKey           pgpPrivKey = pgpPriv.getSecretKey().extractPrivateKey(passP, BouncyCastleProvider.PROVIDER_NAME);
 
             //
             // write a v3 private key
@@ -682,7 +682,7 @@ public class PGPRSATest
         // Read the private key
         //
         PGPSecretKeyRing pgpPriv = new PGPSecretKeyRing(testPrivKey);
-        PGPPrivateKey pgpPrivKey = pgpPriv.getSecretKey().extractPrivateKey(pass, "BC");
+        PGPPrivateKey pgpPrivKey = pgpPriv.getSecretKey().extractPrivateKey(pass, BouncyCastleProvider.PROVIDER_NAME);
         
         //
         // write a private key
@@ -701,7 +701,7 @@ public class PGPRSATest
         //
         // test encryption
         //
-        Cipher c = Cipher.getInstance("RSA", "BC");
+        Cipher c = Cipher.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         c.init(Cipher.ENCRYPT_MODE, pubKey);
         
@@ -736,7 +736,7 @@ public class PGPRSATest
         InputStream                dIn = p2.getInputStream();
         int                        ch;
 
-        ops.initVerify(pgpPub.getPublicKey(ops.getKeyID()), "BC");
+        ops.initVerify(pgpPub.getPublicKey(ops.getKeyID()), BouncyCastleProvider.PROVIDER_NAME);
         
         while ((ch = dIn.read()) >= 0)
         {
@@ -766,9 +766,9 @@ public class PGPRSATest
     
         PGPPublicKeyEncryptedData    encP = (PGPPublicKeyEncryptedData)encList.get(0);
         
-        pgpPrivKey = pgpPriv.getSecretKey(encP.getKeyID()).extractPrivateKey(pass, "BC");
+        pgpPrivKey = pgpPriv.getSecretKey(encP.getKeyID()).extractPrivateKey(pass, BouncyCastleProvider.PROVIDER_NAME);
 
-        InputStream clear = encP.getDataStream(pgpPrivKey, "BC");
+        InputStream clear = encP.getDataStream(pgpPrivKey, BouncyCastleProvider.PROVIDER_NAME);
                  
         pgpFact = new PGPObjectFactory(clear);
 
@@ -803,7 +803,7 @@ public class PGPRSATest
         byte[]    shortText = { (byte)'h', (byte)'e', (byte)'l', (byte)'l', (byte)'o' };
     
         ByteArrayOutputStream        cbOut = new ByteArrayOutputStream();
-        PGPEncryptedDataGenerator    cPk = new PGPEncryptedDataGenerator(SymmetricKeyAlgorithmTags.CAST5, new SecureRandom(), "BC");            
+        PGPEncryptedDataGenerator    cPk = new PGPEncryptedDataGenerator(SymmetricKeyAlgorithmTags.CAST5, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
         PGPPublicKey                 puK = pgpPriv.getSecretKey(encP.getKeyID()).getPublicKey();
         
         cPk.addMethod(puK);
@@ -820,14 +820,14 @@ public class PGPRSATest
     
         encP = (PGPPublicKeyEncryptedData)encList.get(0);
         
-        pgpPrivKey = pgpPriv.getSecretKey(encP.getKeyID()).extractPrivateKey(pass, "BC");
+        pgpPrivKey = pgpPriv.getSecretKey(encP.getKeyID()).extractPrivateKey(pass, BouncyCastleProvider.PROVIDER_NAME);
 
-        if (encP.getSymmetricAlgorithm(pgpPrivKey, "BC") != SymmetricKeyAlgorithmTags.CAST5)
+        if (encP.getSymmetricAlgorithm(pgpPrivKey, BouncyCastleProvider.PROVIDER_NAME) != SymmetricKeyAlgorithmTags.CAST5)
         {
             fail("symmetric algorithm mismatch");
         }
 
-        clear = encP.getDataStream(pgpPrivKey, "BC");
+        clear = encP.getDataStream(pgpPrivKey, BouncyCastleProvider.PROVIDER_NAME);
         
         bOut.reset();
         
@@ -847,7 +847,7 @@ public class PGPRSATest
         // encrypt
         //
         cbOut = new ByteArrayOutputStream();
-        cPk = new PGPEncryptedDataGenerator(SymmetricKeyAlgorithmTags.CAST5, new SecureRandom(), "BC");            
+        cPk = new PGPEncryptedDataGenerator(SymmetricKeyAlgorithmTags.CAST5, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
         puK = pgpPriv.getSecretKey(encP.getKeyID()).getPublicKey();
         
         cPk.addMethod(puK);
@@ -864,9 +864,9 @@ public class PGPRSATest
     
         encP = (PGPPublicKeyEncryptedData)encList.get(0);
         
-        pgpPrivKey = pgpPriv.getSecretKey(encP.getKeyID()).extractPrivateKey(pass, "BC");
+        pgpPrivKey = pgpPriv.getSecretKey(encP.getKeyID()).extractPrivateKey(pass, BouncyCastleProvider.PROVIDER_NAME);
 
-        clear = encP.getDataStream(pgpPrivKey, "BC");
+        clear = encP.getDataStream(pgpPrivKey, BouncyCastleProvider.PROVIDER_NAME);
         
         bOut.reset();
         
@@ -898,13 +898,13 @@ public class PGPRSATest
         //
         char[]                    passPhrase = "hello".toCharArray();
         
-        KeyPairGenerator    kpg = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator    kpg = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
     
         kpg.initialize(1024);
     
         KeyPair                    kp = kpg.generateKeyPair();
 
-        PGPSecretKey    secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, PublicKeyAlgorithmTags.RSA_GENERAL, kp.getPublic(), kp.getPrivate(), new Date(), "fred", SymmetricKeyAlgorithmTags.CAST5, passPhrase, null, null, new SecureRandom(), "BC");
+        PGPSecretKey    secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, PublicKeyAlgorithmTags.RSA_GENERAL, kp.getPublic(), kp.getPrivate(), new Date(), "fred", SymmetricKeyAlgorithmTags.CAST5, passPhrase, null, null, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
     
         PGPPublicKey    key = secretKey.getPublicKey();
 
@@ -916,14 +916,14 @@ public class PGPRSATest
 
         sig = (PGPSignature)it.next();
 
-        sig.initVerify(key, "BC");
+        sig.initVerify(key, BouncyCastleProvider.PROVIDER_NAME);
 
         if (!sig.verifyCertification(uid, key))
         {
             fail("failed to verify certification");
         }
 
-        pgpPrivKey = secretKey.extractPrivateKey(passPhrase, "BC");
+        pgpPrivKey = secretKey.extractPrivateKey(passPhrase, BouncyCastleProvider.PROVIDER_NAME);
         
         key = PGPPublicKey.removeCertification(key, uid, sig);
         
@@ -938,9 +938,9 @@ public class PGPRSATest
         
         keyEnc = key.getEncoded();
 
-        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1, "BC");
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1, BouncyCastleProvider.PROVIDER_NAME);
         
-        sGen.initSign(PGPSignature.KEY_REVOCATION, secretKey.extractPrivateKey(passPhrase, "BC"));
+        sGen.initSign(PGPSignature.KEY_REVOCATION, secretKey.extractPrivateKey(passPhrase, BouncyCastleProvider.PROVIDER_NAME));
 
         sig = sGen.generateCertification(key);
 
@@ -956,7 +956,7 @@ public class PGPRSATest
 
         sig = (PGPSignature)sgIt.next();
 
-        sig.initVerify(key, "BC");
+        sig.initVerify(key, BouncyCastleProvider.PROVIDER_NAME);
 
         if (!sig.verifyCertification(key))
         {
@@ -981,9 +981,9 @@ public class PGPRSATest
         //
         kp = kpg.generateKeyPair();
 
-        secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, PublicKeyAlgorithmTags.RSA_GENERAL, kp.getPublic(), kp.getPrivate(), new Date(), "fred", SymmetricKeyAlgorithmTags.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+        secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, PublicKeyAlgorithmTags.RSA_GENERAL, kp.getPublic(), kp.getPrivate(), new Date(), "fred", SymmetricKeyAlgorithmTags.AES_256, passPhrase, null, null, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
     
-        secretKey.extractPrivateKey(passPhrase, "BC");
+        secretKey.extractPrivateKey(passPhrase, BouncyCastleProvider.PROVIDER_NAME);
         
         secretKey.encode(new ByteArrayOutputStream());
         
@@ -992,9 +992,9 @@ public class PGPRSATest
         //
         String  newPass = "newPass";
         
-        secretKey = PGPSecretKey.copyWithNewPassword(secretKey, passPhrase, newPass.toCharArray(), secretKey.getKeyEncryptionAlgorithm(), new SecureRandom(), "BC");
+        secretKey = PGPSecretKey.copyWithNewPassword(secretKey, passPhrase, newPass.toCharArray(), secretKey.getKeyEncryptionAlgorithm(), new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
         
-        secretKey.extractPrivateKey(newPass.toCharArray(), "BC");
+        secretKey.extractPrivateKey(newPass.toCharArray(), BouncyCastleProvider.PROVIDER_NAME);
         
         secretKey.encode(new ByteArrayOutputStream());
         
@@ -1010,14 +1010,14 @@ public class PGPRSATest
 
         sig = (PGPSignature)it.next();
 
-        sig.initVerify(key, "BC");
+        sig.initVerify(key, BouncyCastleProvider.PROVIDER_NAME);
 
         if (!sig.verifyCertification(uid, key))
         {
             fail("failed to verify certification");
         }
 
-        pgpPrivKey = secretKey.extractPrivateKey(newPass.toCharArray(), "BC");
+        pgpPrivKey = secretKey.extractPrivateKey(newPass.toCharArray(), BouncyCastleProvider.PROVIDER_NAME);
         
         //
         // signature generation
@@ -1028,7 +1028,7 @@ public class PGPRSATest
         
         ByteArrayInputStream        testIn = new ByteArrayInputStream(data.getBytes());
         
-        sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1, "BC");
+        sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1, BouncyCastleProvider.PROVIDER_NAME);
     
         sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
 
@@ -1083,7 +1083,7 @@ public class PGPRSATest
 
         dIn = p2.getInputStream();
 
-        ops.initVerify(secretKey.getPublicKey(), "BC");
+        ops.initVerify(secretKey.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
         
         while ((ch = dIn.read()) >= 0)
         {
@@ -1103,7 +1103,7 @@ public class PGPRSATest
         bOut = new ByteArrayOutputStream();
         
         testIn = new ByteArrayInputStream(data.getBytes());
-        PGPV3SignatureGenerator    sGenV3 = new PGPV3SignatureGenerator(PGPPublicKey.RSA_GENERAL, PGPUtil.SHA1, "BC");
+        PGPV3SignatureGenerator    sGenV3 = new PGPV3SignatureGenerator(PGPPublicKey.RSA_GENERAL, PGPUtil.SHA1, BouncyCastleProvider.PROVIDER_NAME);
     
         sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
 
@@ -1155,7 +1155,7 @@ public class PGPRSATest
 
         dIn = p2.getInputStream();
 
-        ops.initVerify(secretKey.getPublicKey(), "BC");
+        ops.initVerify(secretKey.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
         
         while ((ch = dIn.read()) >= 0)
         {
@@ -1176,7 +1176,7 @@ public class PGPRSATest
         
         secretKey = pgpPriv.getSecretKey();
         
-        pgpPrivKey = secretKey.extractPrivateKey(pgp8Pass, "BC");
+        pgpPrivKey = secretKey.extractPrivateKey(pgp8Pass, BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // expiry
@@ -1218,7 +1218,7 @@ public class PGPRSATest
     {
         try
         {
-            Cipher.getInstance("IDEA", "BC");
+            Cipher.getInstance("IDEA", BouncyCastleProvider.PROVIDER_NAME);
 
             return false;
         }

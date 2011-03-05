@@ -38,11 +38,11 @@ public class KeyStoreTest
     {
         try
         {
-            KeyStore store = KeyStore.getInstance(storeName, "BC");
+            KeyStore store = KeyStore.getInstance(storeName, BouncyCastleProvider.PROVIDER_NAME);
 
             store.load(null, null);
 
-            KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "BC");
+            KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
             gen.initialize(1024, new SecureRandom());
 
@@ -92,7 +92,7 @@ public class KeyStoreTest
                 cert.verify(pubKey);
 
                 ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getEncoded());
-                CertificateFactory      fact = CertificateFactory.getInstance("X.509", "BC");
+                CertificateFactory      fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
                 cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -117,7 +117,7 @@ public class KeyStoreTest
             //
             // start with a new key store
             //
-            store = KeyStore.getInstance(storeName, "BC");
+            store = KeyStore.getInstance(storeName, BouncyCastleProvider.PROVIDER_NAME);
 
             store.load(bIn, passwd);
             

@@ -48,7 +48,7 @@ public class ElGamalTest
         throws Exception
     {
         DHParameterSpec  elParams = new DHParameterSpec(p, g, privateValueSize);
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ElGamal", "BC");
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ElGamal", BouncyCastleProvider.PROVIDER_NAME);
         byte[]           in = "This is a test".getBytes();
 
         keyGen.initialize(elParams);
@@ -58,7 +58,7 @@ public class ElGamalTest
 
         checkKeySize(privateValueSize, keyPair);
 
-        Cipher  cipher = Cipher.getInstance("ElGamal", "BC");
+        Cipher  cipher = Cipher.getInstance("ElGamal", BouncyCastleProvider.PROVIDER_NAME);
         
         cipher.init(Cipher.ENCRYPT_MODE, keyPair.getPublic(), rand);
         
@@ -101,8 +101,8 @@ public class ElGamalTest
         // encrypt/decrypt
         //
 
-        Cipher  c1 = Cipher.getInstance("ElGamal", "BC");
-        Cipher  c2 = Cipher.getInstance("ElGamal", "BC");
+        Cipher  c1 = Cipher.getInstance("ElGamal", BouncyCastleProvider.PROVIDER_NAME);
+        Cipher  c2 = Cipher.getInstance("ElGamal", BouncyCastleProvider.PROVIDER_NAME);
 
         c1.init(Cipher.ENCRYPT_MODE, keyPair.getPublic(), rand);
 
@@ -137,7 +137,7 @@ public class ElGamalTest
         // public key encoding test
         //
         byte[]                  pubEnc = keyPair.getPublic().getEncoded();
-        KeyFactory              keyFac = KeyFactory.getInstance("ElGamal", "BC");
+        KeyFactory              keyFac = KeyFactory.getInstance("ElGamal", BouncyCastleProvider.PROVIDER_NAME);
         X509EncodedKeySpec      pubX509 = new X509EncodedKeySpec(pubEnc);
         DHPublicKey             pubKey = (DHPublicKey)keyFac.generatePublic(pubX509);
         DHParameterSpec         spec = pubKey.getParams();
@@ -237,13 +237,13 @@ public class ElGamalTest
         int         size)
         throws Exception
     {
-        AlgorithmParameterGenerator a = AlgorithmParameterGenerator.getInstance("ElGamal", "BC");
+        AlgorithmParameterGenerator a = AlgorithmParameterGenerator.getInstance("ElGamal", BouncyCastleProvider.PROVIDER_NAME);
         a.init(size, new SecureRandom());
         AlgorithmParameters params = a.generateParameters();
 
         byte[] encodeParams = params.getEncoded();
 
-        AlgorithmParameters a2 = AlgorithmParameters.getInstance("ElGamal", "BC");
+        AlgorithmParameters a2 = AlgorithmParameters.getInstance("ElGamal", BouncyCastleProvider.PROVIDER_NAME);
         a2.init(encodeParams);
 
         // a and a2 should be equivalent!

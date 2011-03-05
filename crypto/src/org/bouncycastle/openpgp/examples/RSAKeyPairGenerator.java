@@ -47,7 +47,7 @@ public class RSAKeyPairGenerator
             secretOut = new ArmoredOutputStream(secretOut);
         }
 
-        PGPSecretKey    secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, PGPPublicKey.RSA_GENERAL, publicKey, privateKey, new Date(), identity, PGPEncryptedData.CAST5, passPhrase, null, null, new SecureRandom(), "BC");
+        PGPSecretKey    secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, PGPPublicKey.RSA_GENERAL, publicKey, privateKey, new Date(), identity, PGPEncryptedData.CAST5, passPhrase, null, null, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
         
         secretKey.encode(secretOut);
         
@@ -71,7 +71,7 @@ public class RSAKeyPairGenerator
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        KeyPairGenerator    kpg = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator    kpg = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
         
         kpg.initialize(1024);
         

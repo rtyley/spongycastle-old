@@ -74,8 +74,8 @@ public class PKIXCertPathBuilderSpi
 
         try
         {
-            cFact = CertificateFactory.getInstance("X.509", "BC");
-            validator = CertPathValidator.getInstance("PKIX", "BC");
+            cFact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
+            validator = CertPathValidator.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
         }
         catch (Exception e)
         {

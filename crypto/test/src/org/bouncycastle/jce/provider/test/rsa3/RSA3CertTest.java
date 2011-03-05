@@ -3,6 +3,7 @@ package org.bouncycastle.jce.provider.test.rsa3;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
 
 import java.io.InputStreamReader;
@@ -19,7 +20,7 @@ public class RSA3CertTest
 {
     public void setUp()
     {
-        if (Security.getProvider("BC") == null)
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null)
         {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         }
@@ -97,7 +98,7 @@ public class RSA3CertTest
     {
         X509Certificate  cert = loadCert(certName);
         byte[]           tbs = cert.getTBSCertificate();
-        Signature        sig = Signature.getInstance(cert.getSigAlgName(), "BC");
+        Signature        sig = Signature.getInstance(cert.getSigAlgName(), BouncyCastleProvider.PROVIDER_NAME);
         
         sig.initVerify(cert.getPublicKey());
         

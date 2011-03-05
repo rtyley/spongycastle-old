@@ -3,6 +3,7 @@ package org.bouncycastle.cms.test;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.Security;
 
@@ -20,7 +21,7 @@ class CMSTestSetup extends TestSetup
 
     protected void tearDown()
     {
-        Security.removeProvider("BC");
+        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
     }
 
 }

@@ -72,7 +72,7 @@ public class ByteArrayHandler
 
         PGPPBEEncryptedData pbe = (PGPPBEEncryptedData)enc.get(0);
 
-        InputStream clear = pbe.getDataStream(passPhrase, "BC");
+        InputStream clear = pbe.getDataStream(passPhrase, BouncyCastleProvider.PROVIDER_NAME);
 
         PGPObjectFactory        pgpFact = new PGPObjectFactory(clear);
 
@@ -131,7 +131,7 @@ public class ByteArrayHandler
             out = new ArmoredOutputStream(out);
         }
 
-        PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(algorithm, new SecureRandom(), "BC");
+        PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(algorithm, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
         encGen.addMethod(passPhrase);
 
         OutputStream encOut = encGen.open(out, compressedData.length);

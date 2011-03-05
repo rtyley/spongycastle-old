@@ -35,7 +35,7 @@ public class MQVTest
     private void testECMQV()
         throws Exception
     {
-        KeyPairGenerator g = KeyPairGenerator.getInstance("ECMQV", "BC");
+        KeyPairGenerator g = KeyPairGenerator.getInstance("ECMQV", BouncyCastleProvider.PROVIDER_NAME);
 
         EllipticCurve curve = new EllipticCurve(
                 new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
@@ -56,7 +56,7 @@ public class MQVTest
         KeyPair U1 = g.generateKeyPair();
         KeyPair U2 = g.generateKeyPair();
 
-        KeyAgreement uAgree = KeyAgreement.getInstance("ECMQV", "BC");
+        KeyAgreement uAgree = KeyAgreement.getInstance("ECMQV", BouncyCastleProvider.PROVIDER_NAME);
         uAgree.init(new MQVPrivateKeySpec(U1.getPrivate(), U2.getPrivate(), U2.getPublic()));
 
         //
@@ -65,7 +65,7 @@ public class MQVTest
         KeyPair V1 = g.generateKeyPair();
         KeyPair V2 = g.generateKeyPair();
 
-        KeyAgreement vAgree = KeyAgreement.getInstance("ECMQV", "BC");
+        KeyAgreement vAgree = KeyAgreement.getInstance("ECMQV", BouncyCastleProvider.PROVIDER_NAME);
         vAgree.init(new MQVPrivateKeySpec(V1.getPrivate(), V2.getPrivate(), V2.getPublic()));
 
         //

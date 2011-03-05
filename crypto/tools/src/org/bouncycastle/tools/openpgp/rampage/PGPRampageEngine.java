@@ -16,6 +16,7 @@ import java.util.Iterator;
 import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPEncryptedData;
@@ -309,7 +310,7 @@ public class PGPRampageEngine implements ProcessingEngine
                 throw new PGPException("Signing key (0x"+keyId+") has been revoked");
             }
 
-            PGPPrivateKey   privateKey = secretKey.extractPrivateKey(passwd, "BC");
+            PGPPrivateKey   privateKey = secretKey.extractPrivateKey(passwd, BouncyCastleProvider.PROVIDER_NAME);
 
             // Sign the data into an in-memory stream
             ByteArrayOutputStream bOut = new ByteArrayOutputStream();
@@ -322,8 +323,8 @@ public class PGPRampageEngine implements ProcessingEngine
 
             // Now encrypt the result
             PGPEncryptedDataGenerator cPk = oldFormat?
-               new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, new SecureRandom(), oldFormat, "BC"):
-               new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, withIntegrityCheck, new SecureRandom(), "BC");
+               new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, new SecureRandom(), oldFormat, BouncyCastleProvider.PROVIDER_NAME):
+               new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, withIntegrityCheck, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
 
             cPk.addMethod(encKey);
 
@@ -383,8 +384,8 @@ public class PGPRampageEngine implements ProcessingEngine
 
             // Now encrypt the result
             PGPEncryptedDataGenerator cPk = oldFormat?
-               new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, new SecureRandom(), oldFormat, "BC"):
-               new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, withIntegrityCheck, new SecureRandom(), "BC");
+               new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, new SecureRandom(), oldFormat, BouncyCastleProvider.PROVIDER_NAME):
+               new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, withIntegrityCheck, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
 
             cPk.addMethod(encKey);
 
@@ -452,7 +453,7 @@ public class PGPRampageEngine implements ProcessingEngine
                 throw new PGPException("Signing key (0x"+keyId+") has been revoked");
             }
 
-            PGPPrivateKey   privateKey = secretKey.extractPrivateKey(passwd, "BC");
+            PGPPrivateKey   privateKey = secretKey.extractPrivateKey(passwd, BouncyCastleProvider.PROVIDER_NAME);
 
             OutputStream out  = new FileOutputStream(outputFilename);
             OutputStream aOut = armor? new ArmoredOutputStream(out): out;
@@ -495,7 +496,7 @@ public class PGPRampageEngine implements ProcessingEngine
             PGPLiteralDataGenerator    lGen = new PGPLiteralDataGenerator(true);
 
             PGPV3SignatureGenerator    s3Gen =
-                    new PGPV3SignatureGenerator(publicKey.getAlgorithm(), PGPUtil.SHA1, "BC");
+                    new PGPV3SignatureGenerator(publicKey.getAlgorithm(), PGPUtil.SHA1, BouncyCastleProvider.PROVIDER_NAME);
 
             s3Gen.initSign(PGPSignature.BINARY_DOCUMENT, privateKey);
 
@@ -550,7 +551,7 @@ public class PGPRampageEngine implements ProcessingEngine
             PGPLiteralDataGenerator    lGen = new PGPLiteralDataGenerator();
 
             PGPSignatureGenerator sGen = 
-                    new PGPSignatureGenerator(publicKey.getAlgorithm(), PGPUtil.SHA1, "BC");
+                    new PGPSignatureGenerator(publicKey.getAlgorithm(), PGPUtil.SHA1, BouncyCastleProvider.PROVIDER_NAME);
 
             sGen.initSign(PGPSignature.BINARY_DOCUMENT, privateKey);
 
@@ -715,7 +716,7 @@ public class PGPRampageEngine implements ProcessingEngine
                     // throw new PGPException("Encryption key (0x"+keyId+") has been revoked");
                 }
 
-                InputStream clear = pked.getDataStream(pgpSecKey.extractPrivateKey(passwd, "BC"), "BC");
+                InputStream clear = pked.getDataStream(pgpSecKey.extractPrivateKey(passwd, BouncyCastleProvider.PROVIDER_NAME), BouncyCastleProvider.PROVIDER_NAME);
    
                 pgpFact = new PGPObjectFactory(clear);
 
@@ -899,7 +900,7 @@ public class PGPRampageEngine implements ProcessingEngine
 
                 try
                 {
-                    clear = pbe.getDataStream(passPhrase, "BC");
+                    clear = pbe.getDataStream(passPhrase, BouncyCastleProvider.PROVIDER_NAME);
                 }
                 catch (PGPKeyValidationException e)
                 {
@@ -1129,7 +1130,7 @@ public class PGPRampageEngine implements ProcessingEngine
                 // throw new PGPException("Signing key (0x"+keyId+") has been revoked");
             }
 
-            sig.initVerify(key, "BC");
+            sig.initVerify(key, BouncyCastleProvider.PROVIDER_NAME);
 
             sig.update(bOut.toByteArray());
 
@@ -1193,7 +1194,7 @@ public class PGPRampageEngine implements ProcessingEngine
 
             InputStream dataIn = ld.getInputStream();
 
-            ops.initVerify(key, "BC");
+            ops.initVerify(key, BouncyCastleProvider.PROVIDER_NAME);
 
             int ch;
             while ((ch = dataIn.read()) >= 0)
@@ -1266,7 +1267,7 @@ public class PGPRampageEngine implements ProcessingEngine
 
             InputStream dataIn = ld.getInputStream();
 
-            sig.initVerify(key, "BC");
+            sig.initVerify(key, BouncyCastleProvider.PROVIDER_NAME);
 
             int ch;
             while ((ch = dataIn.read()) >= 0)

@@ -36,6 +36,7 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.test.CMSTestUtil;
 import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.validator.SignedMailValidator;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
@@ -216,14 +217,14 @@ public class SignedMailValidatorTest extends TestCase
         certList.add(signCert);
 
         CertStore certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
 
         gen.addSigner(signKP.getPrivate(), signCert, SMIMESignedGenerator.DIGEST_SHA1);
         gen.addCertificatesAndCRLs(certs);
 
-        MimeMultipart signedMsg = gen.generate(baseMsg, "BC");
+        MimeMultipart signedMsg = gen.generate(baseMsg, BouncyCastleProvider.PROVIDER_NAME);
 
         Properties props = System.getProperties();
         Session session = Session.getDefaultInstance(props, null);
@@ -430,7 +431,7 @@ public class SignedMailValidatorTest extends TestCase
         X509Certificate cert = null;
         InputStream in = getClass().getResourceAsStream(certfile);
 
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
         cert = (X509Certificate) cf.generateCertificate(in);
         return cert;
     }
@@ -440,14 +441,14 @@ public class SignedMailValidatorTest extends TestCase
         X509CRL crl = null;
         InputStream in = this.getClass().getResourceAsStream(crlfile);
         
-        CertificateFactory cf = CertificateFactory.getInstance("x.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("x.509", BouncyCastleProvider.PROVIDER_NAME);
         crl = (X509CRL) cf.generateCRL(in);
         return crl;
     }
 
     public void setUp()
     {
-        if (Security.getProvider("BC") == null)
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null)
         {
             Security
                     .addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());

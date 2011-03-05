@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPLiteralData;
 import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
@@ -37,7 +38,7 @@ public class DSA2Test
 
     public void setUp()
     {
-        if (Security.getProvider("BC") == null)
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null)
         {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         }
@@ -141,9 +142,9 @@ public class DSA2Test
         String                data = "hello world!";
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         ByteArrayInputStream  testIn = new ByteArrayInputStream(data.getBytes());
-        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.DSA, digest, "BC");
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.DSA, digest, BouncyCastleProvider.PROVIDER_NAME);
 
-        sGen.initSign(PGPSignature.BINARY_DOCUMENT, secRing.getSecretKey().extractPrivateKey("test".toCharArray(), "BC"));
+        sGen.initSign(PGPSignature.BINARY_DOCUMENT, secRing.getSecretKey().extractPrivateKey("test".toCharArray(), BouncyCastleProvider.PROVIDER_NAME));
 
         BCPGOutputStream bcOut = new BCPGOutputStream(bOut);
 
@@ -185,7 +186,7 @@ public class DSA2Test
 
         InputStream             dIn = p2.getInputStream();
 
-        ops.initVerify(pubRing.getPublicKey(), "BC");
+        ops.initVerify(pubRing.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
 
         while ((ch = dIn.read()) >= 0)
         {
@@ -220,7 +221,7 @@ public class DSA2Test
 
         InputStream dIn = p2.getInputStream();
 
-        ops.initVerify(publicKey.getPublicKey(), "BC");
+        ops.initVerify(publicKey.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
 
         int ch;
         while ((ch = dIn.read()) >= 0)

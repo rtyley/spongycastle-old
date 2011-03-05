@@ -40,6 +40,7 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.x509.X509AttributeCertificate;
@@ -443,7 +444,7 @@ public class SignedDataTest
     private void verifySignatures(CMSSignedData s, byte[] contentDigest) 
         throws Exception
     {
-        CertStore               certStore = s.getCertificatesAndCRLs("Collection", "BC");
+        CertStore               certStore = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
         SignerInformationStore  signers = s.getSignerInfos();
         
         Collection              c = signers.getSigners();
@@ -457,7 +458,7 @@ public class SignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
     
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
             
             if (contentDigest != null)
             {
@@ -468,8 +469,8 @@ public class SignedDataTest
         Collection certColl = certStore.getCertificates(null);
         Collection crlColl = certStore.getCRLs(null);
 
-        assertEquals(certColl.size(), s.getCertificates("Collection", "BC").getMatches(null).size());
-        assertEquals(crlColl.size(), s.getCRLs("Collection", "BC").getMatches(null).size());
+        assertEquals(certColl.size(), s.getCertificates("Collection", BouncyCastleProvider.PROVIDER_NAME).getMatches(null).size());
+        assertEquals(crlColl.size(), s.getCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME).getMatches(null).size());
     }
 
     private void verifySignatures(CMSSignedData s) 
@@ -489,7 +490,7 @@ public class SignedDataTest
         certList.add(_signCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -499,10 +500,10 @@ public class SignedDataTest
 
         gen.addCertificatesAndCRLs(certs);
 
-        CMSSignedData s = gen.generate(msg, "BC");
+        CMSSignedData s = gen.generate(msg, BouncyCastleProvider.PROVIDER_NAME);
 
-        MessageDigest sha1 = MessageDigest.getInstance("SHA1", "BC");
-        MessageDigest md5 = MessageDigest.getInstance("MD5", "BC");
+        MessageDigest sha1 = MessageDigest.getInstance("SHA1", BouncyCastleProvider.PROVIDER_NAME);
+        MessageDigest md5 = MessageDigest.getInstance("MD5", BouncyCastleProvider.PROVIDER_NAME);
         Map hashes = new HashMap();
         byte[] sha1Hash = sha1.digest(data);
         byte[] md5Hash = md5.digest(data);
@@ -525,7 +526,7 @@ public class SignedDataTest
         certList.add(_signCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -535,14 +536,14 @@ public class SignedDataTest
         
         gen.addCertificatesAndCRLs(certs);
 
-        CMSSignedData s = gen.generate(msg, true, "BC");
+        CMSSignedData s = gen.generate(msg, true, BouncyCastleProvider.PROVIDER_NAME);
 
         ByteArrayInputStream bIn = new ByteArrayInputStream(s.getEncoded());
         ASN1InputStream      aIn = new ASN1InputStream(bIn);
         
         s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
 
-        certs = s.getCertificatesAndCRLs("Collection", "BC");
+        certs = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
 
         SignerInformationStore  signers = s.getSignerInfos();
         
@@ -562,7 +563,7 @@ public class SignedDataTest
 
             sid = signer.getSID();
             
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
 
             //
             // check content digest
@@ -589,16 +590,16 @@ public class SignedDataTest
            
         gen.addSigners(s.getSignerInfos());
         
-        gen.addCertificatesAndCRLs(s.getCertificatesAndCRLs("Collection", "BC"));
+        gen.addCertificatesAndCRLs(s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME));
            
-        s = gen.generate(msg, true, "BC");
+        s = gen.generate(msg, true, BouncyCastleProvider.PROVIDER_NAME);
 
         bIn = new ByteArrayInputStream(s.getEncoded());
         aIn = new ASN1InputStream(bIn);
 
         s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
 
-        certs = s.getCertificatesAndCRLs("Collection", "BC");
+        certs = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
 
         signers = s.getSignerInfos();
         c = signers.getSigners();
@@ -614,7 +615,7 @@ public class SignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
 
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
         }
         
         checkSignerStoreReplacement(s, signers);
@@ -630,7 +631,7 @@ public class SignedDataTest
         certList.add(_signCert);
     
         CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
     
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
     
@@ -638,12 +639,12 @@ public class SignedDataTest
     
         gen.addCertificatesAndCRLs(certs);
     
-        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, "BC", false);
+        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, BouncyCastleProvider.PROVIDER_NAME, false);
     
         //
         // compute expected content digest
         //
-        MessageDigest md = MessageDigest.getInstance("SHA1", "BC");
+        MessageDigest md = MessageDigest.getInstance("SHA1", BouncyCastleProvider.PROVIDER_NAME);
         
         verifySignatures(s, md.digest("Hello world!".getBytes()));
     }
@@ -651,7 +652,7 @@ public class SignedDataTest
     public void testSHA1WithRSAAndAttributeTable()
         throws Exception
     {
-        MessageDigest       md = MessageDigest.getInstance("SHA1", "BC");
+        MessageDigest       md = MessageDigest.getInstance("SHA1", BouncyCastleProvider.PROVIDER_NAME);
         List                certList = new ArrayList();
         CMSProcessable      msg = new CMSProcessableByteArray("Hello world!".getBytes());
 
@@ -659,7 +660,7 @@ public class SignedDataTest
         certList.add(_signCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -677,7 +678,7 @@ public class SignedDataTest
         gen.addCertificatesAndCRLs(certs);
 
 
-        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, null, false, "BC");
+        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, null, false, BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // the signature is detached, so need to add msg before passing on
@@ -797,7 +798,7 @@ public class SignedDataTest
     {
         X509EncodedKeySpec  pubSpec = new X509EncodedKeySpec(_signEcDsaKP.getPublic().getEncoded());
         PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(_signEcDsaKP.getPrivate().getEncoded());
-        KeyFactory          keyFact = KeyFactory.getInstance("EC", "BC");
+        KeyFactory          keyFact = KeyFactory.getInstance("EC", BouncyCastleProvider.PROVIDER_NAME);
         KeyPair             kp = new KeyPair(keyFact.generatePublic(pubSpec), keyFact.generatePrivate(privSpec));
         
         encapsulatedTest(kp, _signEcDsaCert, CMSSignedDataGenerator.DIGEST_SHA512);
@@ -839,7 +840,7 @@ public class SignedDataTest
         certList.add(_signCrl);
 
         CertStore           certsAndCrls = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -847,10 +848,10 @@ public class SignedDataTest
 
         gen.addCertificatesAndCRLs(certsAndCrls);
 
-        CMSSignedData s = gen.generate(msg, true, "BC");
+        CMSSignedData s = gen.generate(msg, true, BouncyCastleProvider.PROVIDER_NAME);
         SignerInformation origSigner = (SignerInformation)s.getSignerInfos().getSigners().toArray()[0];
-        SignerInformationStore counterSigners1 = gen.generateCounterSigners(origSigner, "BC");
-        SignerInformationStore counterSigners2 = gen.generateCounterSigners(origSigner, "BC");
+        SignerInformationStore counterSigners1 = gen.generateCounterSigners(origSigner, BouncyCastleProvider.PROVIDER_NAME);
+        SignerInformationStore counterSigners2 = gen.generateCounterSigners(origSigner, BouncyCastleProvider.PROVIDER_NAME);
 
         SignerInformation signer1 = SignerInformation.addCounterSigners(origSigner, counterSigners1);
         SignerInformation signer2 = SignerInformation.addCounterSigners(signer1, counterSigners2);
@@ -869,7 +870,7 @@ public class SignedDataTest
             X509Certificate cert = (X509Certificate)certIt.next();
 
             assertNull(cSigner.getSignedAttributes().get(PKCSObjectIdentifiers.pkcs_9_at_contentType));
-            assertEquals(true, cSigner.verify(cert, "BC"));
+            assertEquals(true, cSigner.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
         }
     }
 
@@ -883,7 +884,7 @@ public class SignedDataTest
         certList.add(_signCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -891,12 +892,12 @@ public class SignedDataTest
 
         gen.addCertificatesAndCRLs(certs);
 
-        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, "BC", false);
+        CMSSignedData s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, BouncyCastleProvider.PROVIDER_NAME, false);
 
         //
         // compute expected content digest
         //
-        MessageDigest md = MessageDigest.getInstance(digestName, "BC");
+        MessageDigest md = MessageDigest.getInstance(digestName, BouncyCastleProvider.PROVIDER_NAME);
 
         verifySignatures(s, md.digest("Hello world!".getBytes()));
     }
@@ -916,7 +917,7 @@ public class SignedDataTest
         certList.add(_signCrl);
 
         CertStore           certsAndCrls = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -924,14 +925,14 @@ public class SignedDataTest
 
         gen.addCertificatesAndCRLs(certsAndCrls);
 
-        CMSSignedData s = gen.generate(msg, true, "BC");
+        CMSSignedData s = gen.generate(msg, true, BouncyCastleProvider.PROVIDER_NAME);
 
         ByteArrayInputStream bIn = new ByteArrayInputStream(s.getEncoded());
         ASN1InputStream      aIn = new ASN1InputStream(bIn);
 
         s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
 
-        certsAndCrls = s.getCertificatesAndCRLs("Collection", "BC");
+        certsAndCrls = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
 
         SignerInformationStore  signers = s.getSignerInfos();
         Collection              c = signers.getSigners();
@@ -945,7 +946,7 @@ public class SignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
 
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
         }
 
         //
@@ -965,16 +966,16 @@ public class SignedDataTest
 
         gen.addSigners(s.getSignerInfos());
 
-        gen.addCertificatesAndCRLs(s.getCertificatesAndCRLs("Collection", "BC"));
+        gen.addCertificatesAndCRLs(s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME));
 
-        s = gen.generate(msg, true, "BC");
+        s = gen.generate(msg, true, BouncyCastleProvider.PROVIDER_NAME);
 
         bIn = new ByteArrayInputStream(s.getEncoded());
         aIn = new ASN1InputStream(bIn);
 
         s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
 
-        certsAndCrls = s.getCertificatesAndCRLs("Collection", "BC");
+        certsAndCrls = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
 
         signers = s.getSignerInfos();
         c = signers.getSigners();
@@ -988,7 +989,7 @@ public class SignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
 
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
         }
 
         checkSignerStoreReplacement(s, signers);
@@ -1009,7 +1010,7 @@ public class SignedDataTest
         certList.add(_signCrl);
 
         CertStore           certsAndCrls = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
     
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
     
@@ -1017,14 +1018,14 @@ public class SignedDataTest
     
         gen.addCertificatesAndCRLs(certsAndCrls);
     
-        CMSSignedData s = gen.generate(msg, true, "BC");
+        CMSSignedData s = gen.generate(msg, true, BouncyCastleProvider.PROVIDER_NAME);
     
         ByteArrayInputStream bIn = new ByteArrayInputStream(s.getEncoded());
         ASN1InputStream      aIn = new ASN1InputStream(bIn);
         
         s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
     
-        certsAndCrls = s.getCertificatesAndCRLs("Collection", "BC");
+        certsAndCrls = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
     
         SignerInformationStore  signers = s.getSignerInfos();
         Collection              c = signers.getSigners();
@@ -1038,7 +1039,7 @@ public class SignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
     
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
         }
 
         //
@@ -1058,16 +1059,16 @@ public class SignedDataTest
            
         gen.addSigners(s.getSignerInfos());
         
-        gen.addCertificatesAndCRLs(s.getCertificatesAndCRLs("Collection", "BC"));
+        gen.addCertificatesAndCRLs(s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME));
            
-        s = gen.generate(msg, true, "BC");
+        s = gen.generate(msg, true, BouncyCastleProvider.PROVIDER_NAME);
     
         bIn = new ByteArrayInputStream(s.getEncoded());
         aIn = new ASN1InputStream(bIn);
     
         s = new CMSSignedData(ContentInfo.getInstance(aIn.readObject()));
     
-        certsAndCrls = s.getCertificatesAndCRLs("Collection", "BC");
+        certsAndCrls = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
     
         signers = s.getSignerInfos();
         c = signers.getSigners();
@@ -1081,7 +1082,7 @@ public class SignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
     
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
         }
         
         checkSignerStoreReplacement(s, signers);
@@ -1097,7 +1098,7 @@ public class SignedDataTest
     {
         CMSSignedData s = CMSSignedData.replaceSigners(orig, signers);
         
-        CertStore certs = s.getCertificatesAndCRLs("Collection", "BC");
+        CertStore certs = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
         
         signers = s.getSignerInfos();
         Collection c = signers.getSigners();
@@ -1111,7 +1112,7 @@ public class SignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
     
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
         }
     }
     
@@ -1120,7 +1121,7 @@ public class SignedDataTest
     {
         CMSSignedData s = new CMSSignedData(new CMSProcessableByteArray(disorderedMessage), disorderedSet);
 
-        CertStore certs = s.getCertificatesAndCRLs("Collection", "BC");
+        CertStore certs = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
 
         SignerInformationStore  signers = s.getSignerInfos();
         Collection              c = signers.getSigners();
@@ -1134,7 +1135,7 @@ public class SignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
 
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
         }
     }
     
@@ -1147,7 +1148,7 @@ public class SignedDataTest
         certList.add(_signCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -1155,7 +1156,7 @@ public class SignedDataTest
 
         gen.addCertificatesAndCRLs(certs);
 
-        CMSSignedData s = gen.generate(null, false, "BC");
+        CMSSignedData s = gen.generate(null, false, BouncyCastleProvider.PROVIDER_NAME);
 
         ByteArrayInputStream bIn = new ByteArrayInputStream(s.getEncoded());
         ASN1InputStream      aIn = new ASN1InputStream(bIn);
@@ -1175,7 +1176,7 @@ public class SignedDataTest
         certList.add(_signDsaCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -1186,15 +1187,15 @@ public class SignedDataTest
         X509AttributeCertificate attrCert = CMSTestUtil.getAttributeCertificate();
 
         X509Store store = X509Store.getInstance("AttributeCertificate/Collection",
-                                    new X509CollectionStoreParameters(Collections.singleton(attrCert)), "BC");
+				new X509CollectionStoreParameters(Collections.singleton(attrCert)), BouncyCastleProvider.PROVIDER_NAME);
 
         gen.addAttributeCertificates(store);
 
-        CMSSignedData sd = gen.generate(msg, "BC");
+        CMSSignedData sd = gen.generate(msg, BouncyCastleProvider.PROVIDER_NAME);
 
         assertEquals(4, sd.getVersion());
 
-        store = sd.getAttributeCertificates("Collection", "BC");
+        store = sd.getAttributeCertificates("Collection", BouncyCastleProvider.PROVIDER_NAME);
 
         Collection coll = store.getMatches(null);
 
@@ -1210,7 +1211,7 @@ public class SignedDataTest
         certList.add(_signCert);
 
         certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
 
         //
@@ -1231,7 +1232,7 @@ public class SignedDataTest
         certList.add(_signDsaCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -1239,7 +1240,7 @@ public class SignedDataTest
 
         gen.addCertificatesAndCRLs(certs);
 
-        CMSSignedData sd = gen.generate(msg, "BC");
+        CMSSignedData sd = gen.generate(msg, BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // create new certstore
@@ -1249,7 +1250,7 @@ public class SignedDataTest
         certList.add(_signCert);
 
         certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // replace certs
@@ -1269,7 +1270,7 @@ public class SignedDataTest
         certList.add(_signDsaCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -1277,7 +1278,7 @@ public class SignedDataTest
 
         gen.addCertificatesAndCRLs(certs);
 
-        CMSSignedData sd = gen.generate(msg, true, "BC");
+        CMSSignedData sd = gen.generate(msg, true, BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // create new certstore
@@ -1287,7 +1288,7 @@ public class SignedDataTest
         certList.add(_signCert);
 
         certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // replace certs
@@ -1308,7 +1309,7 @@ public class SignedDataTest
         certList.add(_signDsaCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -1316,9 +1317,9 @@ public class SignedDataTest
 
         gen.addCertificatesAndCRLs(certs);
 
-        CMSSignedData sd = gen.generate(msg, true, "BC");
+        CMSSignedData sd = gen.generate(msg, true, BouncyCastleProvider.PROVIDER_NAME);
 
-        certs = sd.getCertificatesAndCRLs("Collection", "BC");
+        certs = sd.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
         Iterator it = certs.getCertificates(null).iterator();
 
         assertEquals(_origCert, it.next());
@@ -1337,7 +1338,7 @@ public class SignedDataTest
         certList.add(_origCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -1345,9 +1346,9 @@ public class SignedDataTest
 
         gen.addCertificatesAndCRLs(certs);
 
-        CMSSignedData sd = gen.generate(msg, true, "BC");
+        CMSSignedData sd = gen.generate(msg, true, BouncyCastleProvider.PROVIDER_NAME);
 
-        certs = sd.getCertificatesAndCRLs("Collection", "BC");
+        certs = sd.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
         Iterator it = certs.getCertificates(null).iterator();
 
         assertEquals(_signCert, it.next());
@@ -1365,7 +1366,7 @@ public class SignedDataTest
         certList.add(_signCert);
 
         CertStore           certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -1373,7 +1374,7 @@ public class SignedDataTest
 
         gen.addCertificatesAndCRLs(certs);
 
-        CMSSignedData original = gen.generate(msg, true, "BC");
+        CMSSignedData original = gen.generate(msg, true, BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // create new Signer
@@ -1384,7 +1385,7 @@ public class SignedDataTest
 
         gen.addCertificatesAndCRLs(certs);
 
-        CMSSignedData newSD = gen.generate(msg, true, "BC");
+        CMSSignedData newSD = gen.generate(msg, true, BouncyCastleProvider.PROVIDER_NAME);
 
         //
         // replace signer
@@ -1461,7 +1462,7 @@ public class SignedDataTest
     private void verifySignatures(CMSSignedDataParser sp)
         throws Exception
     {
-        CertStore               certs = sp.getCertificatesAndCRLs("Collection", "BC");
+        CertStore               certs = sp.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
         SignerInformationStore  signers = sp.getSignerInfos();
 
         Collection              c = signers.getSigners();
@@ -1475,7 +1476,7 @@ public class SignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
 
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
         }
     }
 }

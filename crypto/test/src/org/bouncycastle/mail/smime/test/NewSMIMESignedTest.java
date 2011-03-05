@@ -55,6 +55,7 @@ import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.cms.test.CMSTestUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.mail.smime.SMIMESignedParser;
@@ -97,7 +98,7 @@ public class NewSMIMESignedTest
 
     KeyPair         dsaOrigKP;
     X509Certificate dsaOrigCert;
-    private static final String BC = "BC";
+	private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
 
     static
     {
@@ -695,7 +696,7 @@ public class NewSMIMESignedTest
 
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").build("SHA1withDSA", dsaOrigKP.getPrivate(), dsaOrigCert));
+        gen.addSignerInfoGenerator(new JcaSimpleSignerInfoGeneratorBuilder().setProvider(BouncyCastleProvider.PROVIDER_NAME).build("SHA1withDSA", dsaOrigKP.getPrivate(), dsaOrigCert));
         gen.addCertificates(certs);
 
         MimeMultipart smm = gen.generate(msg);

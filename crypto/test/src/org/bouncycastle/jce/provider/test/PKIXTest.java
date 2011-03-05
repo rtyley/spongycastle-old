@@ -198,16 +198,16 @@ public class PKIXTest
     {
         try
         {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
             X509Certificate rootCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(rootCertBin));
             X509Certificate userCert1 = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(userCert1Bin));
             X509Certificate userCert2 = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(userCert2Bin));
             X509CRL crl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(crlBin));
-            rootCert.verify(rootCert.getPublicKey(), "BC");
-            userCert1.verify(rootCert.getPublicKey(), "BC");
+            rootCert.verify(rootCert.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
+            userCert1.verify(rootCert.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
 
-            crl.verify(rootCert.getPublicKey(), "BC");
+            crl.verify(rootCert.getPublicKey(), BouncyCastleProvider.PROVIDER_NAME);
 
             if (!crl.isRevoked(userCert1))
             {

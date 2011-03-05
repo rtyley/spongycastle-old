@@ -66,7 +66,7 @@ public class CertPathTest
         try
         {
             CertificateFactory cFac = CertificateFactory.getInstance("X.509",
-                    "BC");
+					BouncyCastleProvider.PROVIDER_NAME);
             arr = os.toByteArray();
             is = new ByteArrayInputStream(arr);
             cFac.generateCertPath(is);
@@ -89,7 +89,7 @@ public class CertPathTest
         try
         {
             CertificateFactory cf = CertificateFactory.getInstance("X.509",
-                    "BC");
+					BouncyCastleProvider.PROVIDER_NAME);
 
             X509Certificate rootCert = (X509Certificate)cf
                     .generateCertificate(new ByteArrayInputStream(rootCertBin));

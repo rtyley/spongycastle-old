@@ -26,6 +26,7 @@ import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  *
@@ -95,7 +96,7 @@ public class NetscapeCertRequest implements DEREncodable
 
             keyAlg = pubkeyinfo.getAlgorithmId ();
             pubkey =
-                KeyFactory.getInstance(keyAlg.getObjectId().getId (),"BC").generatePublic(xspec);
+                KeyFactory.getInstance(keyAlg.getObjectId().getId(), BouncyCastleProvider.PROVIDER_NAME).generatePublic(xspec);
             
             
         } catch (Exception e) {
@@ -164,7 +165,7 @@ public class NetscapeCertRequest implements DEREncodable
         // by someone who knew the associated private key
         //
         Signature    sig =
-            Signature.getInstance (sigAlg.getObjectId ().getId(),"BC");
+            Signature.getInstance(sigAlg.getObjectId().getId(), BouncyCastleProvider.PROVIDER_NAME);
         sig.initVerify (pubkey);
         sig.update (content.getBytes());
         if (sig.verify (sigBits))
@@ -186,7 +187,7 @@ public class NetscapeCertRequest implements DEREncodable
             SignatureException, NoSuchProviderException, InvalidKeySpecException
     {
         Signature    sig =
-            Signature.getInstance (sigAlg.getObjectId ().getId(),"BC");
+            Signature.getInstance(sigAlg.getObjectId().getId(), BouncyCastleProvider.PROVIDER_NAME);
         
         sig.initSign (priv_key);
 

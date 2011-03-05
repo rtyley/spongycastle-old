@@ -138,7 +138,7 @@ public class CertPathValidatorTest
     public void performTest()
         throws Exception
     {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 
             // initialise CertStore
         X509Certificate rootCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(CertPathTest.rootCertBin));
@@ -161,11 +161,11 @@ public class CertPathValidatorTest
         List certchain = new ArrayList();
         certchain.add(finalCert);
         certchain.add(interCert);
-        CertPath cp = CertificateFactory.getInstance("X.509","BC").generateCertPath(certchain);
+        CertPath cp = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME).generateCertPath(certchain);
         Set trust = new HashSet();
         trust.add(new TrustAnchor(rootCert, null));
 
-        CertPathValidator cpv = CertPathValidator.getInstance("PKIX","BC");
+        CertPathValidator cpv = CertPathValidator.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
         PKIXParameters param = new PKIXParameters(trust);
         param.addCertStore(store);
         param.setDate(validDate.getTime());
@@ -203,11 +203,11 @@ public class CertPathValidatorTest
             certchain = new ArrayList();
             certchain.add(finalCert);
             certchain.add(interCert);
-            cp = CertificateFactory.getInstance("X.509","BC").generateCertPath(certchain);
+            cp = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME).generateCertPath(certchain);
             trust = new HashSet();
             trust.add(new TrustAnchor(rootCert, null));
 
-            cpv = CertPathValidator.getInstance("PKIX","BC");
+            cpv = CertPathValidator.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
             param = new PKIXParameters(trust);
             param.addCertStore(store);
             param.setRevocationEnabled(false);

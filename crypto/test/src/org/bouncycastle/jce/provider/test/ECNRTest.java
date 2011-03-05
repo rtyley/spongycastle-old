@@ -65,8 +65,8 @@ public class ECNRTest
             curve.decodePoint(Hex.decode("025b6dc53bc61a2548ffb0f671472de6c9521a9d2d2534e65abfcbd5fe0c70")), // Q
             spec);
 
-        Signature           sgr = Signature.getInstance("SHA1withECNR", "BC");
-        KeyFactory          f = KeyFactory.getInstance("ECDSA", "BC");
+        Signature           sgr = Signature.getInstance("SHA1withECNR", BouncyCastleProvider.PROVIDER_NAME);
+        KeyFactory          f = KeyFactory.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
 
         byte[] message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
         
@@ -109,8 +109,8 @@ public class ECNRTest
             curve.decodePoint(Hex.decode("0262B12D60690CDCF330BABAB6E69763B471F994DD702D16A5")), // Q
             spec);
 
-        Signature           sgr = Signature.getInstance("SHA1withECNR", "BC");
-        KeyFactory          f = KeyFactory.getInstance("ECDSA", "BC");
+        Signature           sgr = Signature.getInstance("SHA1withECNR", BouncyCastleProvider.PROVIDER_NAME);
+        KeyFactory          f = KeyFactory.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
 
         byte[] message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
         
@@ -153,7 +153,7 @@ public class ECNRTest
             curve.decodePoint(Hex.decode("026BFDD2C9278B63C92D6624F151C9D7A822CC75BD983B17D25D74C26740380022D3D8FAF304781E416175EADF4ED6E2B47142D2454A7AC7801DD803CF44A4D1F0AC")), // Q
             spec);
 
-        Signature           sgr = Signature.getInstance("SHA512withECNR", "BC");
+        Signature           sgr = Signature.getInstance("SHA512withECNR", BouncyCastleProvider.PROVIDER_NAME);
         byte[] message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
         
         checkSignature(521, priKey, pubKey, sgr, k, message, r, s);
@@ -170,7 +170,7 @@ public class ECNRTest
         BigInteger s)
         throws Exception
     {
-        KeyFactory          f = KeyFactory.getInstance("ECDSA", "BC");
+        KeyFactory          f = KeyFactory.getInstance("ECDSA", BouncyCastleProvider.PROVIDER_NAME);
         PrivateKey          sKey = f.generatePrivate(priKey);
         PublicKey           vKey = f.generatePublic(pubKey);
 

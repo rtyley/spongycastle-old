@@ -3,6 +3,7 @@ package org.bouncycastle.openpgp.test;
 import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPPrivateKey;
@@ -215,7 +216,7 @@ public class PGPClearSignedSignatureTest
         PGPSignatureList           p3 = (PGPSignatureList)pgpFact.nextObject();
         PGPSignature               sig = p3.get(0);
         
-        sig.initVerify(pgpRings.getPublicKey(sig.getKeyID()), "BC");
+        sig.initVerify(pgpRings.getPublicKey(sig.getKeyID()), BouncyCastleProvider.PROVIDER_NAME);
 
         ByteArrayOutputStream lineOut = new ByteArrayOutputStream();
         InputStream           sigIn = new ByteArrayInputStream(bOut.toByteArray());
@@ -286,8 +287,8 @@ public class PGPClearSignedSignatureTest
         throws Exception
     {
         PGPSecretKey                    pgpSecKey = readSecretKey(new ByteArrayInputStream(secretKey));
-        PGPPrivateKey                   pgpPrivKey = pgpSecKey.extractPrivateKey("".toCharArray(), "BC");
-        PGPSignatureGenerator           sGen = new PGPSignatureGenerator(pgpSecKey.getPublicKey().getAlgorithm(), PGPUtil.SHA256, "BC");
+        PGPPrivateKey                   pgpPrivKey = pgpSecKey.extractPrivateKey("".toCharArray(), BouncyCastleProvider.PROVIDER_NAME);
+        PGPSignatureGenerator           sGen = new PGPSignatureGenerator(pgpSecKey.getPublicKey().getAlgorithm(), PGPUtil.SHA256, BouncyCastleProvider.PROVIDER_NAME);
         PGPSignatureSubpacketGenerator  spGen = new PGPSignatureSubpacketGenerator();
 
         sGen.initSign(PGPSignature.CANONICAL_TEXT_DOCUMENT, pgpPrivKey);

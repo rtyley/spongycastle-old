@@ -3,6 +3,7 @@ package org.bouncycastle.mail.smime.test;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
@@ -44,7 +45,7 @@ class SMIMETestSetup extends TestSetup
     {
         CommandMap.setDefaultCommandMap(originalMap);
         originalMap = null;
-        Security.removeProvider("BC");
+        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
     }
 
 

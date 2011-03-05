@@ -126,7 +126,7 @@ public class NewTSPTest
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        tsToken.validate(cert, "BC");
+        tsToken.validate(cert, BouncyCastleProvider.PROVIDER_NAME);
         
         //
         // check validation
@@ -449,7 +449,7 @@ public class NewTSPTest
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        tsToken.validate(cert, "BC");
+        tsToken.validate(cert, BouncyCastleProvider.PROVIDER_NAME);
         
         //
         // check validation
@@ -518,7 +518,7 @@ public class NewTSPTest
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        tsToken.validate(cert, "BC");
+        tsToken.validate(cert, BouncyCastleProvider.PROVIDER_NAME);
         
         //
         // check validation
@@ -582,7 +582,7 @@ public class NewTSPTest
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        tsToken.validate(cert, "BC");
+        tsToken.validate(cert, BouncyCastleProvider.PROVIDER_NAME);
         
         //
         // check validation

@@ -84,23 +84,23 @@ public class PBETest implements Test
                 
                 if (baseAlgorithm.equals("RC4"))
                 {
-                    c = Cipher.getInstance(baseAlgorithm, "BC");
+                    c = Cipher.getInstance(baseAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
                     
                     c.init(Cipher.ENCRYPT_MODE, encKey);
                 }
                 else
                 {
-                    c = Cipher.getInstance(baseAlgorithm + "/CBC/PKCS7Padding", "BC");
+                    c = Cipher.getInstance(baseAlgorithm + "/CBC/PKCS7Padding", BouncyCastleProvider.PROVIDER_NAME);
                     
                     c.init(Cipher.ENCRYPT_MODE, encKey, new IvParameterSpec(params.getIV()));
                 }
                 
                 byte[]              enc = c.doFinal(salt);
                 
-                c = Cipher.getInstance(algorithm, "BC");
+                c = Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
                 
                 PBEKeySpec          keySpec = new PBEKeySpec(password);
-                SecretKeyFactory    fact = SecretKeyFactory.getInstance(algorithm, "BC");
+                SecretKeyFactory    fact = SecretKeyFactory.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
                 
                 c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec), new PBEParameterSpec(salt, iCount));
                 
@@ -174,23 +174,23 @@ public class PBETest implements Test
                 
                 if (baseAlgorithm.equals("RC4"))
                 {
-                    c = Cipher.getInstance(baseAlgorithm, "BC");
+                    c = Cipher.getInstance(baseAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
                     
                     c.init(Cipher.ENCRYPT_MODE, encKey);
                 }
                 else
                 {
-                    c = Cipher.getInstance(baseAlgorithm + "/CBC/PKCS7Padding", "BC");
+                    c = Cipher.getInstance(baseAlgorithm + "/CBC/PKCS7Padding", BouncyCastleProvider.PROVIDER_NAME);
                     
                     c.init(Cipher.ENCRYPT_MODE, encKey, new IvParameterSpec(params.getIV()));
                 }
                 
                 byte[]          enc = c.doFinal(salt);
                 
-                c = Cipher.getInstance(algorithm, "BC");
+                c = Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
                 
                 PBEKeySpec          keySpec = new PBEKeySpec(password);
-                SecretKeyFactory    fact = SecretKeyFactory.getInstance(algorithm, "BC");
+                SecretKeyFactory    fact = SecretKeyFactory.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
                 
                 c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec), new PBEParameterSpec(salt, iCount));
                 
@@ -275,10 +275,10 @@ public class PBETest implements Test
         throws Exception
     {
         PBEKeySpec          pbeSpec = new PBEKeySpec(password);
-        SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(algorithm, "BC");
+        SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
         PBEParameterSpec    defParams = new PBEParameterSpec(salt, iterationCount);
 
-        Cipher cipher = Cipher.getInstance(algorithm, "BC");
+        Cipher cipher = Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
 
         cipher.init(mode, keyFact.generateSecret(pbeSpec), defParams);
 
@@ -315,11 +315,11 @@ public class PBETest implements Test
 
         try
         {
-            SecretKeyFactory    fact = SecretKeyFactory.getInstance(hmacName, "BC");
+            SecretKeyFactory    fact = SecretKeyFactory.getInstance(hmacName, BouncyCastleProvider.PROVIDER_NAME);
 
             key = fact.generateSecret(new PBEKeySpec("hello".toCharArray()));
             
-            mac = Mac.getInstance(hmacName, "BC");
+            mac = Mac.getInstance(hmacName, BouncyCastleProvider.PROVIDER_NAME);
         }
         catch (Exception e)
         {
@@ -358,7 +358,7 @@ public class PBETest implements Test
             //
             // DES
             //
-            Cipher  cEnc = Cipher.getInstance("DES/CBC/PKCS7Padding", "BC");
+            Cipher  cEnc = Cipher.getInstance("DES/CBC/PKCS7Padding", BouncyCastleProvider.PROVIDER_NAME);
 
             cEnc.init(Cipher.ENCRYPT_MODE,
                 new SecretKeySpec(Hex.decode("30e69252758e5346"), "DES"),
@@ -385,7 +385,7 @@ public class PBETest implements Test
             //
             // DESede
             //
-            cEnc = Cipher.getInstance("DESede/CBC/PKCS7Padding", "BC");
+            cEnc = Cipher.getInstance("DESede/CBC/PKCS7Padding", BouncyCastleProvider.PROVIDER_NAME);
 
             cEnc.init(Cipher.ENCRYPT_MODE,
                 new SecretKeySpec(Hex.decode("732f2d33c801732b7206756cbd44f9c1c103ddd97c7cbe8e"), "DES"),
@@ -410,7 +410,7 @@ public class PBETest implements Test
             //
             // 40Bit RC2
             //
-            cEnc = Cipher.getInstance("RC2/CBC/PKCS7Padding", "BC");
+            cEnc = Cipher.getInstance("RC2/CBC/PKCS7Padding", BouncyCastleProvider.PROVIDER_NAME);
 
             cEnc.init(Cipher.ENCRYPT_MODE,
                 new SecretKeySpec(Hex.decode("732f2d33c8"), "RC2"),
@@ -435,7 +435,7 @@ public class PBETest implements Test
             //
             // 128bit RC4
             //
-            cEnc = Cipher.getInstance("RC4", "BC");
+            cEnc = Cipher.getInstance("RC4", BouncyCastleProvider.PROVIDER_NAME);
 
             cEnc.init(Cipher.ENCRYPT_MODE,
                 new SecretKeySpec(Hex.decode("732f2d33c801732b7206756cbd44f9c1"), "RC4"));

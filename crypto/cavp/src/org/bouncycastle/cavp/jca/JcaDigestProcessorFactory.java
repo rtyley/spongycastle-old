@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 
 import org.bouncycastle.cavp.test.DigestProcessor;
 import org.bouncycastle.cavp.test.DigestProcessorFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class JcaDigestProcessorFactory
     implements DigestProcessorFactory
@@ -14,7 +15,7 @@ public class JcaDigestProcessorFactory
     public JcaDigestProcessorFactory(String algorithm)
         throws GeneralSecurityException
     {
-        this.digest = MessageDigest.getInstance(algorithm, "BC");
+        this.digest = MessageDigest.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
     }
 
     public DigestProcessor getProcessor()

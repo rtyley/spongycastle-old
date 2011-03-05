@@ -16,6 +16,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class CertificateID
 {
@@ -66,7 +67,7 @@ public class CertificateID
         BigInteger      number)
         throws OCSPException
     {
-        this(hashAlgorithm, issuerCert, number, "BC");
+        this(hashAlgorithm, issuerCert, number, BouncyCastleProvider.PROVIDER_NAME);
     }
 
     public String getHashAlgOID()

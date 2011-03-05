@@ -98,7 +98,7 @@ public class AttrCertSelectorTest
 
     private X509AttributeCertificate createAttrCert() throws Exception
     {
-        CertificateFactory fact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
         X509Certificate iCert = (X509Certificate) fact
             .generateCertificate(new ByteArrayInputStream(holderCert));
 
@@ -115,7 +115,7 @@ public class AttrCertSelectorTest
         //
         PrivateKey privKey;
 
-        KeyFactory kFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory kFact = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
 
         privKey = kFact.generatePrivate(RSA_PRIVATE_KEY_SPEC);
 
@@ -152,7 +152,7 @@ public class AttrCertSelectorTest
         gen.addExtension(X509Extensions.TargetInformation.getId(), true,
             targetInformation);
 
-        return gen.generate(privKey, "BC");
+        return gen.generate(privKey, BouncyCastleProvider.PROVIDER_NAME);
     }
 
     public void testSelector() throws Exception
@@ -186,7 +186,7 @@ public class AttrCertSelectorTest
         }
         sel.setIssuer(null);
 
-        CertificateFactory fact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory fact = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
         X509Certificate iCert = (X509Certificate) fact
             .generateCertificate(new ByteArrayInputStream(holderCert));
         match = aCert.getHolder().match(iCert);

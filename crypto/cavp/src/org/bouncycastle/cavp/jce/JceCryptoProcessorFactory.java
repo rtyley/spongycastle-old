@@ -8,6 +8,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.cavp.test.CryptoProcessor;
 import org.bouncycastle.cavp.test.CryptoProcessorFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class JceCryptoProcessorFactory
     implements CryptoProcessorFactory
@@ -19,7 +20,7 @@ public class JceCryptoProcessorFactory
         throws GeneralSecurityException
     {
         this.algorithm = algorithm;
-        this.cipher = Cipher.getInstance(algorithm, "BC");
+        this.cipher = Cipher.getInstance(algorithm, BouncyCastleProvider.PROVIDER_NAME);
     }
 
     public CryptoProcessor getDecryptor()

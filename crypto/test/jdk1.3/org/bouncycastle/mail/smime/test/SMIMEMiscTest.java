@@ -118,13 +118,13 @@ public class SMIMEMiscTest
         certList.add(signCert);
     
         CertStore certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
     
         SMIMEEnvelopedGenerator  encGen = new SMIMEEnvelopedGenerator();
         
         encGen.addKeyTransRecipient(origCert);
 
-        MimeBodyPart   mp = encGen.generate(msg, SMIMEEnvelopedGenerator.AES128_CBC, "BC");
+        MimeBodyPart   mp = encGen.generate(msg, SMIMEEnvelopedGenerator.AES128_CBC, BouncyCastleProvider.PROVIDER_NAME);
         ASN1EncodableVector signedAttrs = generateSignedAttributes();
     
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
@@ -132,14 +132,14 @@ public class SMIMEMiscTest
         gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA256, new AttributeTable(signedAttrs), null);   
         gen.addCertificatesAndCRLs(certs);
 
-        MimeMultipart     smm = gen.generate(mp, "BC");
+        MimeMultipart     smm = gen.generate(mp, BouncyCastleProvider.PROVIDER_NAME);
         File              tmpFile = File.createTempFile("bcTest", ".mime");
 
         MimeMessage       msg = createMimeMessage(tmpFile, smm);
         
         SMIMESignedParser s = new SMIMESignedParser((MimeMultipart)msg.getContent());
 
-        certs = s.getCertificatesAndCRLs("Collection", "BC");
+        certs = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
 
         verifyMessageBytes(mp, s.getContent());
     
@@ -157,7 +157,7 @@ public class SMIMEMiscTest
         certList.add(signCert);
     
         CertStore certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
     
         SMIMECompressedGenerator  cGen = new SMIMECompressedGenerator();
         
@@ -170,14 +170,14 @@ public class SMIMEMiscTest
         gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA256, new AttributeTable(signedAttrs), null);   
         gen.addCertificatesAndCRLs(certs);
     
-        MimeMultipart     smm = gen.generate(mp, "BC");
+        MimeMultipart     smm = gen.generate(mp, BouncyCastleProvider.PROVIDER_NAME);
         File              tmpFile = File.createTempFile("bcTest", ".mime");
 
         MimeMessage       msg = createMimeMessage(tmpFile, smm);
         
         SMIMESigned       s = new SMIMESigned((MimeMultipart)msg.getContent());
     
-        certs = s.getCertificatesAndCRLs("Collection", "BC");
+        certs = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
     
         verifyMessageBytes(mp, s.getContent());
     
@@ -193,7 +193,7 @@ public class SMIMEMiscTest
         certList.add(signCert);
     
         CertStore certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+				new CollectionCertStoreParameters(certList), BouncyCastleProvider.PROVIDER_NAME);
     
         SMIMECompressedGenerator  cGen = new SMIMECompressedGenerator();
         
@@ -206,14 +206,14 @@ public class SMIMEMiscTest
         gen.addSigner(origKP.getPrivate(), origCert, SMIMESignedGenerator.DIGEST_SHA256, new AttributeTable(signedAttrs), null);   
         gen.addCertificatesAndCRLs(certs);
     
-        MimeMultipart     smm = gen.generate(mp, "BC");
+        MimeMultipart     smm = gen.generate(mp, BouncyCastleProvider.PROVIDER_NAME);
         File              tmpFile = File.createTempFile("bcTest", ".mime");
 
         MimeMessage       msg = createMimeMessage(tmpFile, smm);
         
         SMIMESignedParser s = new SMIMESignedParser((MimeMultipart)msg.getContent());
 
-        certs = s.getCertificatesAndCRLs("Collection", "BC");
+        certs = s.getCertificatesAndCRLs("Collection", BouncyCastleProvider.PROVIDER_NAME);
     
         verifyMessageBytes(mp, s.getContent());
     
@@ -234,7 +234,7 @@ public class SMIMEMiscTest
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
     
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, BouncyCastleProvider.PROVIDER_NAME));
         }
     }
     
