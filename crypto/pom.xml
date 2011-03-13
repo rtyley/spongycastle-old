@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.madgag</groupId>
-	<artifactId>bcprov-jdk15</artifactId>
+	<artifactId>scprov-jdk15</artifactId>
 	<version>1.46.99.0-UNOFFICIAL-ROBERTO-RELEASE-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Bouncy Castle Provider - hacked about, unofficial release by Roberto Tyley</name>
