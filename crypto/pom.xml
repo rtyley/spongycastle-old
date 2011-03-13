@@ -6,8 +6,8 @@
 	<artifactId>scprov-jdk15</artifactId>
 	<version>1.46.99.0-UNOFFICIAL-ROBERTO-RELEASE-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>Bouncy Castle Provider - hacked about, unofficial release by Roberto Tyley</name>
-	<description>The Bouncy Castle Crypto package is a Java implementation of cryptographic algorithms. This jar contains JCE provider and lightweight API for the Bouncy Castle Cryptography APIs for JDK 1.5.</description>
+	<name>Spongy Castle Provider - hacked about, unofficial release of Bouncy Castle</name>
+	<description>Spongy Castle is a package-rename of Bouncy Castle intended for Android. This jar contains JCE provider and lightweight API for the Bouncy Castle Cryptography APIs for JDK 1.5.</description>
 	<url>http://www.bouncycastle.org/java.html</url>
 	<licenses>
 		<license>
