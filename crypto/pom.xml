@@ -16,6 +16,11 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+    <scm>
+        <connection>scm:git:git@github.com:rtyley/spongycastle.git</connection>
+        <developerConnection>scm:git:git@github.com:rtyley/spongycastle.git</developerConnection>
+        <url>git@github.com:rtyley/spongycastle.git</url>
+    </scm>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
