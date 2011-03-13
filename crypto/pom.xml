@@ -6,6 +6,11 @@
 	<artifactId>scprov-jdk15</artifactId>
 	<version>1.46.99.0-UNOFFICIAL-ROBERTO-RELEASE-SNAPSHOT</version>
 	<packaging>jar</packaging>
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>4</version>
+    </parent>
 	<name>Spongy Castle Provider - hacked about, unofficial release of Bouncy Castle</name>
 	<description>Spongy Castle is a package-rename of Bouncy Castle intended for Android. This jar contains JCE provider and lightweight API for the Bouncy Castle Cryptography APIs for JDK 1.5.</description>
 	<url>http://www.bouncycastle.org/java.html</url>
@@ -21,6 +26,21 @@
         <developerConnection>scm:git:git@github.com:rtyley/spongycastle.git</developerConnection>
         <url>git@github.com:rtyley/spongycastle.git</url>
     </scm>
+    <developers>
+        <developer>
+            <id>bouncy-castle-dev</id>
+            <name>Bouncy Castle contributors</name>
+            <url>http://www.bouncycastle.org/contributors.html</url>
+        </developer>
+        <developer>
+            <id>roberto</id>
+            <name>Roberto Tyley</name>
+            <timezone>0</timezone>
+        </developer>
+    </developers>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
