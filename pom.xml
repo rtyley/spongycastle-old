@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.madgag</groupId>
 	<artifactId>scprov-jdk15</artifactId>
-	<version>1.46.99.2-UNOFFICIAL-ROBERTO-RELEASE</version>
+	<version>1.46.99.3-UNOFFICIAL-ROBERTO-RELEASE-SNAPSHOT</version>
 	<packaging>jar</packaging>
     <parent>
         <groupId>org.sonatype.oss</groupId>
