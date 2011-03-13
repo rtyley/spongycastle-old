@@ -12,7 +12,12 @@
         <version>4</version>
     </parent>
 	<name>Spongy Castle Provider - hacked about, unofficial release of Bouncy Castle</name>
-	<description>Spongy Castle is a package-rename of Bouncy Castle intended for Android. This jar contains JCE provider and lightweight API for the Bouncy Castle Cryptography APIs for JDK 1.5.</description>
+	<description>
+        Spongy Castle is a package-rename (org.bouncycastle.* to org.spongycastle.*) of Bouncy Castle intended for Android.
+        Android ships with a stripped-down version of Bouncy Castle - this causes classloader collisions if you try to add
+        an alternative (updated/complete) Bouncy Castle jar.
+        
+        This jar contains JCE provider and lightweight API for the Bouncy Castle Cryptography APIs for JDK 1.5.</description>
 	<url>http://www.bouncycastle.org/java.html</url>
 	<licenses>
 		<license>
