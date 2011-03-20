@@ -125,11 +125,6 @@ public class CertTemplate
         return publicKey;
     }
 
-    public void setPublicKey(SubjectPublicKeyInfo spki)
-    {
-        publicKey = spki;
-    }
-
     public DERBitString getIssuerUID()
     {
         return issuerUID;
