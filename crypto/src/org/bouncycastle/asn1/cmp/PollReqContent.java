@@ -36,13 +36,13 @@ public class PollReqContent
 
         for (int i = 0; i != result.length; i++)
         {
-            result[i] = seqenceToDERIntegerArray((ASN1Sequence)content.getObjectAt(i));
+            result[i] = sequenceToDERIntegerArray((ASN1Sequence)content.getObjectAt(i));
         }
 
         return result;
     }
 
-    private DERInteger[] seqenceToDERIntegerArray(ASN1Sequence seq)
+    private static DERInteger[] sequenceToDERIntegerArray(ASN1Sequence seq)
     {
          DERInteger[] result = new DERInteger[seq.size()];
 
