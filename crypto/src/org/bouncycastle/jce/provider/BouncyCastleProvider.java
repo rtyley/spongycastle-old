@@ -43,7 +43,7 @@ import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 public final class BouncyCastleProvider extends Provider
     implements ConfigurableProvider
 {
-    private static String info = "BouncyCastle Security Provider v1.46";
+    private static String info = "BouncyCastle Security Provider v1.47b";
 
     public static String PROVIDER_NAME = "BC";
 
@@ -73,7 +73,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.46, info);
+        super(PROVIDER_NAME, 1.465, info);
 
         AccessController.doPrivileged(new PrivilegedAction()
         {
@@ -588,6 +588,8 @@ public final class BouncyCastleProvider extends Provider
     {
         put("Mac.DESMAC", "org.bouncycastle.jce.provider.JCEMac$DES");
         put("Alg.Alias.Mac.DES", "DESMAC");
+        put("Mac.DESMAC64", "org.bouncycastle.jce.provider.JCEMac$DES64");
+        put("Alg.Alias.Mac.DES64", "DESMAC64");
         put("Mac.DESMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$DESCFB8");
         put("Alg.Alias.Mac.DES/CFB8", "DESMAC/CFB8");
 

@@ -1,14 +1,15 @@
 package org.bouncycastle.jce.provider.test;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTest;
+import java.security.Security;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.Security;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.SimpleTest;
 
 /**
  * MAC tester - vectors from 
@@ -165,6 +166,9 @@ public class MacTest
 
         aliasTest(new SecretKeySpec(keyBytesISO9797, "DESede"), "ISO9797ALG3WITHISO7816-4PADDING",
             new String[] { "ISO9797ALG3MACWITHISO7816-4PADDING" });
+
+        aliasTest(new SecretKeySpec(keyBytes, "DES"), "DES64",
+            new String[] { "DESMAC64" });
     }
 
     public String getName()

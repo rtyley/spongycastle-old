@@ -156,6 +156,18 @@ public class JCEMac
     }
 
     /**
+     * DES 64 bit MAC
+     */
+    public static class DES64
+        extends JCEMac
+    {
+        public DES64()
+        {
+            super(new CBCBlockCipherMac(new DESEngine(), 64));
+        }
+    }
+
+    /**
      * RC2
      */
     public static class RC2
