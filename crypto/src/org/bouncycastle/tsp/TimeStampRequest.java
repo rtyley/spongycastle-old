@@ -128,6 +128,7 @@ public class TimeStampRequest
      * @param extensions if non-null a set of extensions we are willing to accept.
      * @param provider the provider to confirm the digest size against.
      * @throws TSPException if the request is invalid, or processing fails.
+     * @deprecated use validate method without provider argument.
      */
     public void validate(
         Set     algorithms,

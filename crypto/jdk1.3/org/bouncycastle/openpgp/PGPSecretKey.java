@@ -9,9 +9,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Provider;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.DSAPrivateKeySpec;
@@ -409,7 +409,7 @@ public class PGPSecretKey
         {
             try
             {
-                c = Cipher.getInstance(cName + "/CFB/NoPadding", provider);
+                c = Cipher.getInstance(cName + "/CFB/NoPadding", provider.getName());
             }
             catch (Exception e)
             {
