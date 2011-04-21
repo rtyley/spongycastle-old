@@ -5,6 +5,8 @@ import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.Provider;
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -13,6 +15,7 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
@@ -22,6 +25,31 @@ import org.bouncycastle.operator.OutputEncryptor;
 
 public class JceCMSContentEncryptorBuilder
 {
+    private static Map keySizes = new HashMap();
+
+    static
+    {
+        keySizes.put(CMSAlgorithm.AES128_CBC, new Integer(128));
+        keySizes.put(CMSAlgorithm.AES192_CBC, new Integer(192));
+        keySizes.put(CMSAlgorithm.AES256_CBC, new Integer(256));
+
+        keySizes.put(CMSAlgorithm.CAMELLIA128_CBC, new Integer(128));
+        keySizes.put(CMSAlgorithm.CAMELLIA192_CBC, new Integer(192));
+        keySizes.put(CMSAlgorithm.CAMELLIA256_CBC, new Integer(256));
+    }
+
+    private static int getKeySize(ASN1ObjectIdentifier oid)
+    {
+        Integer size = (Integer)keySizes.get(oid);
+
+        if (size != null)
+        {
+            return size.intValue();
+        }
+
+        return -1;
+    }
+
     private final ASN1ObjectIdentifier encryptionOID;
     private final int                  keySize;
 
@@ -30,7 +58,7 @@ public class JceCMSContentEncryptorBuilder
 
     public JceCMSContentEncryptorBuilder(ASN1ObjectIdentifier encryptionOID)
     {
-        this(encryptionOID, -1);
+        this(encryptionOID, getKeySize(encryptionOID));
     }
 
     public JceCMSContentEncryptorBuilder(ASN1ObjectIdentifier encryptionOID, int keySize)

@@ -60,6 +60,7 @@ import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JcePasswordEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JcePasswordRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.OutputEncryptor;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -479,55 +480,55 @@ public class NewEnvelopedDataTest
         }
     }
 
-    public void testKeyTransCAST5()
+   public void testKeyTransCAST5()
         throws Exception
     {
-        tryKeyTrans(CMSEnvelopedDataGenerator.CAST5_CBC, new DERObjectIdentifier(CMSEnvelopedDataGenerator.CAST5_CBC), ASN1Sequence.class);
+        tryKeyTrans(CMSAlgorithm.CAST5_CBC, CMSAlgorithm.CAST5_CBC, 16, ASN1Sequence.class);
     }
 
     public void testKeyTransAES128()
         throws Exception
     {
-        tryKeyTrans(CMSEnvelopedDataGenerator.AES128_CBC, NISTObjectIdentifiers.id_aes128_CBC, DEROctetString.class);
+        tryKeyTrans(CMSAlgorithm.AES128_CBC, NISTObjectIdentifiers.id_aes128_CBC, 16, DEROctetString.class);
     }
 
     public void testKeyTransAES192()
         throws Exception
     {
-        tryKeyTrans(CMSEnvelopedDataGenerator.AES192_CBC, NISTObjectIdentifiers.id_aes192_CBC, DEROctetString.class);
+        tryKeyTrans(CMSAlgorithm.AES192_CBC, NISTObjectIdentifiers.id_aes192_CBC, 24, DEROctetString.class);
     }
 
     public void testKeyTransAES256()
         throws Exception
     {
-        tryKeyTrans(CMSEnvelopedDataGenerator.AES256_CBC, NISTObjectIdentifiers.id_aes256_CBC, DEROctetString.class);
+        tryKeyTrans(CMSAlgorithm.AES256_CBC, NISTObjectIdentifiers.id_aes256_CBC, 32, DEROctetString.class);
     }
 
     public void testKeyTransSEED()
         throws Exception
     {
-        tryKeyTrans(CMSEnvelopedDataGenerator.SEED_CBC, KISAObjectIdentifiers.id_seedCBC, DEROctetString.class);
+        tryKeyTrans(CMSAlgorithm.SEED_CBC, KISAObjectIdentifiers.id_seedCBC, 16, DEROctetString.class);
     }
 
     public void testKeyTransCamellia128()
         throws Exception
     {
-        tryKeyTrans(CMSEnvelopedDataGenerator.CAMELLIA128_CBC, NTTObjectIdentifiers.id_camellia128_cbc, DEROctetString.class);
+        tryKeyTrans(CMSAlgorithm.CAMELLIA128_CBC, NTTObjectIdentifiers.id_camellia128_cbc, 16, DEROctetString.class);
     }
 
     public void testKeyTransCamellia192()
         throws Exception
     {
-        tryKeyTrans(CMSEnvelopedDataGenerator.CAMELLIA192_CBC, NTTObjectIdentifiers.id_camellia192_cbc, DEROctetString.class);
+        tryKeyTrans(CMSAlgorithm.CAMELLIA192_CBC, NTTObjectIdentifiers.id_camellia192_cbc, 24, DEROctetString.class);
     }
 
     public void testKeyTransCamellia256()
         throws Exception
     {
-        tryKeyTrans(CMSEnvelopedDataGenerator.CAMELLIA256_CBC, NTTObjectIdentifiers.id_camellia256_cbc, DEROctetString.class);
+        tryKeyTrans(CMSAlgorithm.CAMELLIA256_CBC, NTTObjectIdentifiers.id_camellia256_cbc, 32, DEROctetString.class);
     }
 
-    private void tryKeyTrans(String generatorOID, DERObjectIdentifier checkOID, Class asn1Params)
+    private void tryKeyTrans(ASN1ObjectIdentifier generatorOID, ASN1ObjectIdentifier checkOID, int keySize, Class asn1Params)
         throws Exception
     {
         byte[]          data     = "WallaWallaWashington".getBytes();
@@ -536,13 +537,15 @@ public class NewEnvelopedDataTest
 
         edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
+        OutputEncryptor encryptor = new JceCMSContentEncryptorBuilder(generatorOID).setProvider(BC).build();
         CMSEnvelopedData ed = edGen.generate(
-                                new CMSProcessableByteArray(data),
-                                new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(generatorOID)).setProvider(BC).build());
+            new CMSProcessableByteArray(data),
+            encryptor);
 
         RecipientInformationStore  recipients = ed.getRecipientInfos();
 
         assertEquals(checkOID.getId(), ed.getEncryptionAlgOID());
+        assertEquals(keySize, ((SecretKey)encryptor.getKey().getRepresentation()).getEncoded().length);
 
         if (asn1Params != null)
         {
