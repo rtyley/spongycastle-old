@@ -44,7 +44,7 @@ public class DESedeEngine
 
         byte[] keyMaster = ((KeyParameter)params).getKey();
 
-        if (keyMaster.length != 24 || keyMaster.length != 16)
+        if (keyMaster.length != 24 && keyMaster.length != 16)
         {
             throw new IllegalArgumentException("key size must be 16 or 24 bytes.");
         }
