@@ -74,7 +74,7 @@ import org.bouncycastle.x509.X509Store;
  *
  *      sp.getSignedContent().drain();
  *
- *      CertStore               certs = sp.getCertificatesAndCRLs("Collection", "BC");
+ *      Store                   certStore = sp.getCertificates();
  *      SignerInformationStore  signers = sp.getSignerInfos();
  *      
  *      Collection              c = signers.getSigners();
