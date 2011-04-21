@@ -431,7 +431,7 @@ public class SignedMailValidator
 
                 if (o.getTagNo() == 1)
                 {
-                    String email = DERIA5String.getInstance(o, true)
+                    String email = DERIA5String.getInstance(o, false)
                             .getString().toLowerCase();
                     addresses.add(email);
                 }
