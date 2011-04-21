@@ -9,6 +9,7 @@ import org.bouncycastle.bcpg.SignatureSubpacket;
 import org.bouncycastle.bcpg.SignatureSubpacketTags;
 import org.bouncycastle.bcpg.sig.EmbeddedSignature;
 import org.bouncycastle.bcpg.sig.Exportable;
+import org.bouncycastle.bcpg.sig.Features;
 import org.bouncycastle.bcpg.sig.KeyExpirationTime;
 import org.bouncycastle.bcpg.sig.KeyFlags;
 import org.bouncycastle.bcpg.sig.NotationData;
@@ -44,7 +45,14 @@ public class PGPSignatureSubpacketGenerator
     {
         list.add(new Exportable(isCritical, isExportable));
     }
-    
+
+    public void setFeature(
+        boolean isCritical,
+        byte feature)
+    {
+        list.add(new Features(isCritical, feature));
+    }
+
     /**
      * Add a TrustSignature packet to the signature. The values for 
      * depth and trust are largely installation dependent but there

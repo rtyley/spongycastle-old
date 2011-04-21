@@ -1,16 +1,36 @@
 package org.bouncycastle.openpgp.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.util.Date;
+import java.util.Iterator;
+
+import javax.crypto.Cipher;
+
 import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.bcpg.attr.ImageAttribute;
+import org.bouncycastle.bcpg.sig.Features;
+import org.bouncycastle.bcpg.sig.KeyFlags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
+import org.bouncycastle.openpgp.PGPEncryptedData;
 import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
 import org.bouncycastle.openpgp.PGPEncryptedDataList;
 import org.bouncycastle.openpgp.PGPKeyPair;
+import org.bouncycastle.openpgp.PGPKeyRingGenerator;
 import org.bouncycastle.openpgp.PGPLiteralData;
 import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
 import org.bouncycastle.openpgp.PGPObjectFactory;
@@ -26,28 +46,17 @@ import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.bouncycastle.openpgp.PGPSignatureGenerator;
 import org.bouncycastle.openpgp.PGPSignatureList;
+import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
+import org.bouncycastle.openpgp.PGPSignatureSubpacketVector;
 import org.bouncycastle.openpgp.PGPUserAttributeSubpacketVector;
 import org.bouncycastle.openpgp.PGPUserAttributeSubpacketVectorGenerator;
 import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.PGPV3SignatureGenerator;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.util.test.UncloseableOutputStream;
-
-import javax.crypto.Cipher;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.util.Date;
-import java.util.Iterator;
 
 public class PGPRSATest
     extends SimpleTest
@@ -597,6 +606,121 @@ public class PGPRSATest
         if (count != 0)
         {
             fail("found attributes where none expected");
+        }
+    }
+
+    private void sigsubpacketTest()
+        throws Exception
+    {
+        char[] passPhrase = "test".toCharArray();
+        String identity = "TEST <test@test.org>";
+        Date date = new Date();
+        Security.addProvider(new BouncyCastleProvider());
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", "BC");
+        kpg.initialize(2048);
+        KeyPair kpSgn = kpg.generateKeyPair();
+        KeyPair kpEnc = kpg.generateKeyPair();
+
+        PGPKeyPair sgnKeyPair = new PGPKeyPair(PGPPublicKey.RSA_SIGN, kpSgn, date);
+        PGPKeyPair encKeyPair = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, kpEnc, date);
+
+        PGPSignatureSubpacketVector unhashedPcks = null;
+        PGPSignatureSubpacketGenerator svg = new PGPSignatureSubpacketGenerator();
+        svg.setKeyExpirationTime(true, 86400L * 366 * 2);
+        svg.setPrimaryUserID(true, true);
+        int[] encAlgs = {SymmetricKeyAlgorithmTags.AES_256,
+            SymmetricKeyAlgorithmTags.AES_192,
+            SymmetricKeyAlgorithmTags.TRIPLE_DES};
+        svg.setPreferredSymmetricAlgorithms(true, encAlgs);
+        int[] hashAlgs = {HashAlgorithmTags.SHA1,
+            HashAlgorithmTags.SHA512,
+            HashAlgorithmTags.SHA384,
+            HashAlgorithmTags.SHA256,
+            HashAlgorithmTags.RIPEMD160};
+        svg.setPreferredHashAlgorithms(true, hashAlgs);
+        int[] comprAlgs = {CompressionAlgorithmTags.ZLIB,
+            CompressionAlgorithmTags.BZIP2,
+            CompressionAlgorithmTags.ZIP};
+        svg.setPreferredCompressionAlgorithms(true, comprAlgs);
+        svg.setFeature(true, Features.FEATURE_MODIFICATION_DETECTION);
+        svg.setKeyFlags(true, KeyFlags.CERTIFY_OTHER + KeyFlags.SIGN_DATA);
+        PGPSignatureSubpacketVector hashedPcks = svg.generate();
+
+        PGPKeyRingGenerator keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION,
+            sgnKeyPair, identity, PGPEncryptedData.AES_256, passPhrase,
+            true, hashedPcks, unhashedPcks, new SecureRandom(), "BC");
+
+        svg = new PGPSignatureSubpacketGenerator();
+        svg.setKeyExpirationTime(true, 86400L * 366 * 2);
+        svg.setKeyFlags(true, KeyFlags.ENCRYPT_COMMS + KeyFlags.ENCRYPT_STORAGE);
+        svg.setPrimaryUserID(true, false);
+        svg.setFeature(true, Features.FEATURE_MODIFICATION_DETECTION);
+        hashedPcks = svg.generate();
+
+        keyRingGen.addSubKey(encKeyPair, hashedPcks, unhashedPcks);
+
+        byte[] encodedKeyRing = keyRingGen.generatePublicKeyRing().getEncoded();
+
+        PGPPublicKeyRing keyRing = new PGPPublicKeyRing(encodedKeyRing);
+
+        for (Iterator it = keyRing.getPublicKeys(); it.hasNext();)
+        {
+            PGPPublicKey pKey = (PGPPublicKey)it.next();
+
+            if (pKey.isEncryptionKey())
+            {
+                for (Iterator sit = pKey.getSignatures(); sit.hasNext();)
+                {
+                    PGPSignature sig = (PGPSignature)sit.next();
+                    PGPSignatureSubpacketVector v = sig.getHashedSubPackets();
+
+                    if (v.getKeyExpirationTime() != 86400L * 366 * 2)
+                    {
+                        fail("key expiration time wrong");
+                    }
+                    if (!v.getFeatures().supportsFeature(Features.FEATURE_MODIFICATION_DETECTION))
+                    {
+                        fail("features wrong");
+                    }
+                    if (v.isPrimaryUserID())
+                    {
+                        fail("primary userID flag wrong");
+                    }
+                    if (v.getKeyFlags() != KeyFlags.ENCRYPT_COMMS + KeyFlags.ENCRYPT_STORAGE)
+                    {
+                        fail("keyFlags wrong");
+                    }
+                }
+            }
+            else
+            {
+                for (Iterator sit = pKey.getSignatures(); sit.hasNext();)
+                {
+                    PGPSignature sig = (PGPSignature)sit.next();
+                    PGPSignatureSubpacketVector v = sig.getHashedSubPackets();
+
+                    if (!Arrays.areEqual(v.getPreferredSymmetricAlgorithms(), encAlgs))
+                    {
+                        fail("preferred encryption algs don't match");
+                    }
+                    if (!Arrays.areEqual(v.getPreferredHashAlgorithms(), hashAlgs))
+                    {
+                        fail("preferred hash algs don't match");
+                    }
+                    if (!Arrays.areEqual(v.getPreferredCompressionAlgorithms(), comprAlgs))
+                    {
+                        fail("preferred compression algs don't match");
+                    }
+                    if (!v.getFeatures().supportsFeature(Features.FEATURE_MODIFICATION_DETECTION))
+                    {
+                        fail("features wrong");
+                    }
+                    if (v.getKeyFlags() != KeyFlags.CERTIFY_OTHER + KeyFlags.SIGN_DATA)
+                    {
+                        fail("keyFlags wrong");
+                    }
+                }
+            }
         }
     }
 
@@ -1186,6 +1310,7 @@ public class PGPRSATest
         fingerPrintTest();
         existingEmbeddedJpegTest();
         embeddedJpegTest();
+        sigsubpacketTest();
     }
     
     private void testExpiry(
