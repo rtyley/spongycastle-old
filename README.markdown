@@ -36,5 +36,5 @@ I suggest you use the [maven-android-plugin](http://code.google.com/p/maven-andr
 
 #### Licence
 
-Bouncy Castle use an (adaptation of the MIT X11 License)[http://www.bouncycastle.org/licence.html] and as Spongy Castle is a simple re-package of Bouncy Castle, you should consider it to be licenced under those same terms.
+Bouncy Castle uses an [adaptation of the MIT X11 License](http://www.bouncycastle.org/licence.html) and as Spongy Castle is a simple re-package of Bouncy Castle, you should consider it to be licenced under those same terms.
 
