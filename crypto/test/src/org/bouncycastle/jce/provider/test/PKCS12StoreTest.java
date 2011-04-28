@@ -499,6 +499,18 @@ public class PKCS12StoreTest
             {
                 pName = n;
             }
+            else
+            {
+                // the store's we're using here are consistent so this test will pass - it's actually
+                // possible for this test to fail in other circumstances as PKCS#12 allows certificates
+                // to be stored multiple times under different aliases.
+                X509Certificate cert = (X509Certificate)store.getCertificate(n);
+
+                if (!store.getCertificateAlias(cert).equals(n))
+                {
+                    fail("certificate alias check fails");
+                }
+            }
         }
 
         PrivateKey key = (PrivateKey)store.getKey(pName, null);

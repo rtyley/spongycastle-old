@@ -1187,6 +1187,18 @@ public class CertTest
 
     }
 
+
+    /**
+     * Test a generated certificate with the sun provider
+     */
+    private void sunProviderCheck(byte[] encoding)
+        throws CertificateException
+    {
+        CertificateFactory certFact = CertificateFactory.getInstance("X.509");
+
+        certFact.generateCertificate(new ByteArrayInputStream(encoding));
+    }
+
     /**
      * we generate a self signed certificate for the sake of testing - RSA
      */
@@ -1248,6 +1260,8 @@ public class CertTest
 
         cert.verify(pubKey);
 
+        cert.verify(cert.getPublicKey());
+
         Set dummySet = cert.getNonCriticalExtensionOIDs();
         if (dummySet != null)
         {
@@ -1273,7 +1287,11 @@ public class CertTest
             .addExtension(new ASN1ObjectIdentifier("2.5.29.37"), true,
                 new DERSequence(KeyPurposeId.anyExtendedKeyUsage))
             .addExtension(new ASN1ObjectIdentifier("2.5.29.17"), true,
-                new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
+                new GeneralNames(new GeneralName[]
+                    {
+                        new GeneralName(GeneralName.rfc822Name, "test@test.test"),
+                        new GeneralName(GeneralName.dNSName, "dom.test.test")
+                    }));
 
         X509CertificateHolder certHolder = certGen.build(sigGen);
 
@@ -1282,6 +1300,7 @@ public class CertTest
         cert.checkValidity(new Date());
 
         cert.verify(pubKey);
+        cert.verify(cert.getPublicKey());
 
         ContentVerifierProvider contentVerifierProvider = new JcaContentVerifierProviderBuilder().setProvider(BC).build(pubKey);
         if (!certHolder.isSignatureValid(contentVerifierProvider))
@@ -1310,11 +1329,14 @@ public class CertTest
         while (it.hasNext())
         {
             List    gn = (List)it.next();
-            if (!gn.get(1).equals("test@test.test"))
+            if (!gn.get(1).equals("test@test.test") && !gn.get(1).equals("dom.test.test"))
             {
                 fail("failed subject alternative names test");
             }
         }
+
+        sunProviderCheck(certHolder.getEncoded());
+        sunProviderCheck(cert.getEncoded());
 
         // System.out.println(cert);
 
@@ -1329,6 +1351,7 @@ public class CertTest
         cert.checkValidity(new Date());
 
         cert.verify(pubKey);
+        cert.verify(cert.getPublicKey());
 
         bIn = new ByteArrayInputStream(cert.getEncoded());
         certFact = CertificateFactory.getInstance("X.509", "BC");
@@ -1341,6 +1364,8 @@ public class CertTest
             fail("name comparison fails");
         }
 
+        sunProviderCheck(certHolder.getEncoded());
+        sunProviderCheck(cert.getEncoded());
 //
         // a lightweight key pair.
         //

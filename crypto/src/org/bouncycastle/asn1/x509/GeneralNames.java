@@ -44,7 +44,14 @@ public class GeneralNames
     {
         this.names = new GeneralName[] { name };
     }
-    
+
+
+    public GeneralNames(
+        GeneralName[]  names)
+    {
+        this.names = names;
+    }
+
     public GeneralNames(
         ASN1Sequence  seq)
     {
