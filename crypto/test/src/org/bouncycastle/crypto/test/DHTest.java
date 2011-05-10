@@ -1,5 +1,8 @@
 package org.bouncycastle.crypto.test;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
+
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.agreement.DHAgreement;
 import org.bouncycastle.crypto.agreement.DHBasicAgreement;
@@ -12,9 +15,6 @@ import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.util.test.SimpleTest;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
 
 public class DHTest
     extends SimpleTest
@@ -295,6 +295,24 @@ public class DHTest
             fail("basic with " + size + " bit 2-way test failed");
         }
     }
+    private void testBounds()
+    {
+         BigInteger p1 = new BigInteger("00C8028E9151C6B51BCDB35C1F6B2527986A72D8546AE7A4BF41DC4289FF9837EE01592D36C324A0F066149B8B940C86C87D194206A39038AE3396F8E12435BB74449B70222D117B8A2BB77CB0D67A5D664DDE7B75E0FEC13CE0CAF258DAF3ADA0773F6FF0F2051D1859929AAA53B07809E496B582A89C3D7DA8B6E38305626621", 16);
+         BigInteger g1 = new BigInteger("1F869713181464577FE4026B47102FA0D7675503A4FCDA810881FAEC3524E6DBAEA9B96561EF7F8BEA76466DF11C2F3EB1A90CC5851735BF860606481257EECE6418C0204E61004E85D7131CE54BCBC7AD67E53C79DCB715E7C8D083DCD85D728283EC8F96839B4C9FA7C0727C472BEB94E4613CAFA8D580119C0AF4BF8AF252", 16);
+         int l1 = 1023;
+
+         BigInteger p2 = new BigInteger("00B333C98720220CC3946F494E25231B3E19F9AD5F6B19F4E7ABF80D8826C491C3224D4F7415A14A7C11D1BE584405FED12C3554F103E56A72D986CA5E325BB9DE07AC37D1EAE5E5AC724D32EF638F0E4462D4C1FC7A45B9FD3A5DF5EC36A1FA4DAA3FBB66AA42B1B71DF416AB547E987513426C7BB8634F5F4D37705514FDC1E1", 16);
+         BigInteger g2 = new BigInteger("2592F5A99FE46313650CCE66C94C15DBED9F4A45BD05C329986CF5D3E12139F0405A47C6385FEA27BFFEDC4CBABC5BB151F3BEE7CC3D51567F1E2B12A975AA9F48A70BDAAE7F5B87E70ADCF902490A3CBEFEDA41EBA8E12E02B56120B5FDEFBED07F5EAD3AE020DF3C8233216F8F0D35E13A7AE4DA5CBCC0D91EADBF20C281C6", 16);
+         int l2 = 1024;
+
+        DHKeyGenerationParameters   params1 = new DHKeyGenerationParameters(new SecureRandom(), new DHParameters(p1, g1, null, l1));
+        DHKeyGenerationParameters   params2 = new DHKeyGenerationParameters(new SecureRandom(), new DHParameters(p2, g2, null, l2));
+
+        DHBasicKeyPairGenerator     kpGen = new DHBasicKeyPairGenerator();
+
+        kpGen.init(params1);
+        kpGen.init(params2);
+    }
 
     public void performTest()
     {
@@ -309,6 +327,8 @@ public class DHTest
         testDH(512, g512, p512);
         testDH(768, g768, p768);
         testDH(1024, g1024, p1024);
+
+        testBounds();
 
         //
         // generation test.
