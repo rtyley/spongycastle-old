@@ -7,14 +7,19 @@ import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
 
 public class SignerInformationVerifier
 {
     private ContentVerifierProvider verifierProvider;
     private DigestCalculatorProvider digestProvider;
+    private SignatureAlgorithmIdentifierFinder sigAlgorithmFinder;
+    private CMSSignatureAlgorithmNameGenerator sigNameGenerator;
 
-    public SignerInformationVerifier(ContentVerifierProvider verifierProvider, DigestCalculatorProvider digestProvider)
+    public SignerInformationVerifier(CMSSignatureAlgorithmNameGenerator sigNameGenerator, SignatureAlgorithmIdentifierFinder sigAlgorithmFinder, ContentVerifierProvider verifierProvider, DigestCalculatorProvider digestProvider)
     {
+        this.sigNameGenerator = sigNameGenerator;
+        this.sigAlgorithmFinder = sigAlgorithmFinder;
         this.verifierProvider = verifierProvider;
         this.digestProvider = digestProvider;
     }
@@ -29,10 +34,12 @@ public class SignerInformationVerifier
         return verifierProvider.getAssociatedCertificate();
     }
 
-    public ContentVerifier getContentVerifier(AlgorithmIdentifier algorithmIdentifier)
+    public ContentVerifier getContentVerifier(AlgorithmIdentifier signingAlgorithm, AlgorithmIdentifier digestAlgorithm)
         throws OperatorCreationException
     {
-        return verifierProvider.get(algorithmIdentifier);
+        String          signatureName = sigNameGenerator.getSignatureName(digestAlgorithm, signingAlgorithm);
+
+        return verifierProvider.get(sigAlgorithmFinder.find(signatureName));
     }
 
     public DigestCalculator getDigestCalculator(AlgorithmIdentifier algorithmIdentifier)

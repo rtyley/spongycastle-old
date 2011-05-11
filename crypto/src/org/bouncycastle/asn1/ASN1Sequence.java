@@ -22,6 +22,10 @@ public abstract class ASN1Sequence
         {
             return (ASN1Sequence)obj;
         }
+        else if (obj instanceof ASN1SequenceParser)
+        {
+            return ASN1Sequence.getInstance(((ASN1SequenceParser)obj).getDERObject());
+        }
         else if (obj instanceof byte[])
         {
             try

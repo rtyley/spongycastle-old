@@ -6,8 +6,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cms.DefaultCMSSignatureAlgorithmNameGenerator;
 import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
@@ -34,19 +36,19 @@ public class JcaSimpleSignerInfoVerifierBuilder
     public SignerInformationVerifier build(X509CertificateHolder certHolder)
         throws OperatorCreationException, CertificateException
     {
-        return new SignerInformationVerifier(helper.createContentVerifierProvider(certHolder), helper.createDigestCalculatorProvider());
+        return new SignerInformationVerifier(new DefaultCMSSignatureAlgorithmNameGenerator(), new DefaultSignatureAlgorithmIdentifierFinder(), helper.createContentVerifierProvider(certHolder), helper.createDigestCalculatorProvider());
     }
 
     public SignerInformationVerifier build(X509Certificate certificate)
         throws OperatorCreationException
     {
-        return new SignerInformationVerifier(helper.createContentVerifierProvider(certificate), helper.createDigestCalculatorProvider());
+        return new SignerInformationVerifier(new DefaultCMSSignatureAlgorithmNameGenerator(), new DefaultSignatureAlgorithmIdentifierFinder(), helper.createContentVerifierProvider(certificate), helper.createDigestCalculatorProvider());
     }
 
     public SignerInformationVerifier build(PublicKey pubKey)
         throws OperatorCreationException
     {
-        return new SignerInformationVerifier(helper.createContentVerifierProvider(pubKey), helper.createDigestCalculatorProvider());
+        return new SignerInformationVerifier(new DefaultCMSSignatureAlgorithmNameGenerator(), new DefaultSignatureAlgorithmIdentifierFinder(), helper.createContentVerifierProvider(pubKey), helper.createDigestCalculatorProvider());
     }
 
     private class Helper

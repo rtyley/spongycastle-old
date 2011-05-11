@@ -12,14 +12,12 @@ import org.bouncycastle.operator.OperatorCreationException;
 public class BcDigestCalculatorProvider
     implements DigestCalculatorProvider
 {
-    private DigestOutputStream stream;
-
     public DigestCalculator get(final AlgorithmIdentifier algorithm)
         throws OperatorCreationException
     {
         Digest dig = BcUtil.createDigest(algorithm);
 
-        stream = new DigestOutputStream(dig);
+        final DigestOutputStream stream = new DigestOutputStream(dig);
 
         return new DigestCalculator()
         {

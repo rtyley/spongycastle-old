@@ -35,6 +35,7 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.util.io.TeeInputStream;
@@ -315,11 +316,10 @@ class CMSUtils
     static InputStream attachDigestsToInputStream(Collection digests, InputStream s)
     {
         InputStream result = s;
-        Iterator it = digests.iterator();
-        while (it.hasNext())
+        for (Iterator it = digests.iterator(); it.hasNext();)
         {
-            MessageDigest digest = (MessageDigest)it.next();
-            result = new TeeInputStream(result, new DigOutputStream(digest));
+            DigestCalculator digest = (DigestCalculator)it.next();
+            result = new TeeInputStream(result, digest.getOutputStream());
         }
         return result;
     }

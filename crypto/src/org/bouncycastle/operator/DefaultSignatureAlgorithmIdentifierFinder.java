@@ -5,10 +5,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -28,12 +28,12 @@ public class DefaultSignatureAlgorithmIdentifierFinder
     private static Set pkcs15RsaEncryption = new HashSet();
     private static Map digestOids = new HashMap();
 
-    private static final DERObjectIdentifier  ENCRYPTION_RSA = PKCSObjectIdentifiers.rsaEncryption;
-    private static final DERObjectIdentifier  ENCRYPTION_DSA = X9ObjectIdentifiers.id_dsa_with_sha1;
-    private static final DERObjectIdentifier ENCRYPTION_ECDSA = X9ObjectIdentifiers.ecdsa_with_SHA1;
-    private static final DERObjectIdentifier  ENCRYPTION_RSA_PSS = PKCSObjectIdentifiers.id_RSASSA_PSS;
-    private static final DERObjectIdentifier  ENCRYPTION_GOST3410 = CryptoProObjectIdentifiers.gostR3410_94;
-    private static final DERObjectIdentifier ENCRYPTION_ECGOST3410 = CryptoProObjectIdentifiers.gostR3410_2001;
+    private static final ASN1ObjectIdentifier ENCRYPTION_RSA = PKCSObjectIdentifiers.rsaEncryption;
+    private static final ASN1ObjectIdentifier ENCRYPTION_DSA = X9ObjectIdentifiers.id_dsa_with_sha1;
+    private static final ASN1ObjectIdentifier ENCRYPTION_ECDSA = X9ObjectIdentifiers.ecdsa_with_SHA1;
+    private static final ASN1ObjectIdentifier ENCRYPTION_RSA_PSS = PKCSObjectIdentifiers.id_RSASSA_PSS;
+    private static final ASN1ObjectIdentifier ENCRYPTION_GOST3410 = CryptoProObjectIdentifiers.gostR3410_94;
+    private static final ASN1ObjectIdentifier ENCRYPTION_ECGOST3410 = CryptoProObjectIdentifiers.gostR3410_2001;
 
     static
     {
@@ -117,19 +117,19 @@ public class DefaultSignatureAlgorithmIdentifierFinder
         // explicit params
         //
         AlgorithmIdentifier sha1AlgId = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull());
-        params.put("SHA1WITHRSAANDMGF1", creatPSSParams(sha1AlgId, 20));
+        params.put("SHA1WITHRSAANDMGF1", createPSSParams(sha1AlgId, 20));
 
         AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, new DERNull());
-        params.put("SHA224WITHRSAANDMGF1", creatPSSParams(sha224AlgId, 28));
+        params.put("SHA224WITHRSAANDMGF1", createPSSParams(sha224AlgId, 28));
 
         AlgorithmIdentifier sha256AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, new DERNull());
-        params.put("SHA256WITHRSAANDMGF1", creatPSSParams(sha256AlgId, 32));
+        params.put("SHA256WITHRSAANDMGF1", createPSSParams(sha256AlgId, 32));
 
         AlgorithmIdentifier sha384AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, new DERNull());
-        params.put("SHA384WITHRSAANDMGF1", creatPSSParams(sha384AlgId, 48));
+        params.put("SHA384WITHRSAANDMGF1", createPSSParams(sha384AlgId, 48));
 
         AlgorithmIdentifier sha512AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512, new DERNull());
-        params.put("SHA512WITHRSAANDMGF1", creatPSSParams(sha512AlgId, 64));
+        params.put("SHA512WITHRSAANDMGF1", createPSSParams(sha512AlgId, 64));
 
         //
         // digests
@@ -156,7 +156,7 @@ public class DefaultSignatureAlgorithmIdentifierFinder
         AlgorithmIdentifier digAlgId;
 
         String algorithmName = Strings.toUpperCase(signatureAlgorithm);
-        DERObjectIdentifier sigOID = (DERObjectIdentifier)algorithms.get(algorithmName);
+        ASN1ObjectIdentifier sigOID = (ASN1ObjectIdentifier)algorithms.get(algorithmName);
         if (sigOID == null)
         {
             throw new IllegalArgumentException("Unknown signature type requested: " + algorithmName);
@@ -190,19 +190,19 @@ public class DefaultSignatureAlgorithmIdentifierFinder
         }
         else
         {
-            digAlgId = new AlgorithmIdentifier((DERObjectIdentifier)digestOids.get(sigOID), new DERNull());
+            digAlgId = new AlgorithmIdentifier((ASN1ObjectIdentifier)digestOids.get(sigOID), new DERNull());
         }
 
         return sigAlgId;
     }
 
-    private static RSASSAPSSparams creatPSSParams(AlgorithmIdentifier hashAlgId, int saltSize)
+    private static RSASSAPSSparams createPSSParams(AlgorithmIdentifier hashAlgId, int saltSize)
     {
         return new RSASSAPSSparams(
             hashAlgId,
             new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, hashAlgId),
-            new DERInteger(saltSize),
-            new DERInteger(1));
+            new ASN1Integer(saltSize),
+            new ASN1Integer(1));
     }
 
     public AlgorithmIdentifier find(String sigAlgName)

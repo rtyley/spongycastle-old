@@ -1,10 +1,13 @@
 package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 
 public class CMSAlgorithm
@@ -32,5 +35,16 @@ public class CMSAlgorithm
 
     public static final ASN1ObjectIdentifier  ECDH_SHA1KDF    = X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme;
     public static final ASN1ObjectIdentifier  ECMQV_SHA1KDF   = X9ObjectIdentifiers.mqvSinglePass_sha1kdf_scheme;
+
+    public static final ASN1ObjectIdentifier  SHA1 = OIWObjectIdentifiers.idSHA1;
+    public static final ASN1ObjectIdentifier  SHA224 = NISTObjectIdentifiers.id_sha224;
+    public static final ASN1ObjectIdentifier  SHA256 = NISTObjectIdentifiers.id_sha256;
+    public static final ASN1ObjectIdentifier  SHA384 = NISTObjectIdentifiers.id_sha384;
+    public static final ASN1ObjectIdentifier  SHA512 = NISTObjectIdentifiers.id_sha512;
+    public static final ASN1ObjectIdentifier  MD5 = PKCSObjectIdentifiers.md5;
+    public static final ASN1ObjectIdentifier  GOST3411 = CryptoProObjectIdentifiers.gostR3411;
+    public static final ASN1ObjectIdentifier  RIPEMD128 = TeleTrusTObjectIdentifiers.ripemd128;
+    public static final ASN1ObjectIdentifier  RIPEMD160 = TeleTrusTObjectIdentifiers.ripemd160;
+    public static final ASN1ObjectIdentifier  RIPEMD256 = TeleTrusTObjectIdentifiers.ripemd256;
 
 }

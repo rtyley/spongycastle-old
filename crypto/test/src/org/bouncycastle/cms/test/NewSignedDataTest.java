@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -22,6 +22,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
@@ -36,16 +37,18 @@ import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaCRLStore;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
+import org.bouncycastle.cert.jcajce.JcaX509AttributeCertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CRLHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.CMSAbsentContent;
-import org.bouncycastle.cms.CMSConfig;
-import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.cms.CMSAlgorithm;
+import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSTypedData;
+import org.bouncycastle.cms.DefaultCMSSignatureAlgorithmNameGenerator;
 import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInfoGeneratorBuilder;
@@ -71,7 +74,6 @@ import org.bouncycastle.util.CollectionStore;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.Streams;
-import org.bouncycastle.x509.X509AttributeCertificate;
 
 public class NewSignedDataTest
     extends TestCase
@@ -440,7 +442,12 @@ public class NewSignedDataTest
         if (!_initialised)
         {
             _initialised = true;
-            
+
+            if (Security.getProvider(BC) == null)
+            {
+                Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            }
+
             _origDN   = "O=Bouncy Castle, C=AU";
             _origKP   = CMSTestUtil.makeKeyPair();  
             _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _origKP, _origDN);
@@ -448,13 +455,13 @@ public class NewSignedDataTest
             _signDN   = "CN=Bob, OU=Sales, O=Bouncy Castle, C=AU";
             _signKP   = CMSTestUtil.makeKeyPair();
             _signCert = CMSTestUtil.makeCertificate(_signKP, _signDN, _origKP, _origDN);
-            
+
             _signGostKP   = CMSTestUtil.makeGostKeyPair();
             _signGostCert = CMSTestUtil.makeCertificate(_signGostKP, _signDN, _origKP, _origDN);
     
             _signDsaKP   = CMSTestUtil.makeDsaKeyPair();
             _signDsaCert = CMSTestUtil.makeCertificate(_signDsaKP, _signDN, _origKP, _origDN);
-            
+
             _signEcDsaKP   = CMSTestUtil.makeEcDsaKeyPair();
             _signEcDsaCert = CMSTestUtil.makeCertificate(_signEcDsaKP, _signDN, _origKP, _origDN);
 
@@ -486,7 +493,7 @@ public class NewSignedDataTest
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
-            assertEquals(true, signer.verify(new BcRSASignerInfoVerifierBuilder(new DefaultDigestAlgorithmIdentifierFinder(), new BcDigestCalculatorProvider()).build(cert)));
+            assertEquals(true, signer.verify(new BcRSASignerInfoVerifierBuilder(new DefaultCMSSignatureAlgorithmNameGenerator(), new DefaultSignatureAlgorithmIdentifierFinder(), new DefaultDigestAlgorithmIdentifierFinder(), new BcDigestCalculatorProvider()).build(cert)));
 
             if (contentDigest != null)
             {
@@ -524,8 +531,8 @@ public class NewSignedDataTest
         Collection certColl = certStore.getMatches(null);
         Collection crlColl = crlStore.getMatches(null);
 
-        assertEquals(certColl.size(), s.getCertificates("Collection", BC).getMatches(null).size());
-        assertEquals(crlColl.size(), s.getCRLs("Collection", BC).getMatches(null).size());
+        assertEquals(certColl.size(), s.getCertificates().getMatches(null).size());
+        assertEquals(crlColl.size(), s.getCRLs().getMatches(null).size());
     }
 
     private void verifySignatures(CMSSignedData s) 
@@ -539,7 +546,7 @@ public class NewSignedDataTest
     {
         byte[]              data = "Hello World!".getBytes();
         List                certList = new ArrayList();
-        CMSProcessable      msg = new CMSProcessableByteArray(data);
+        CMSTypedData        msg = new CMSProcessableByteArray(data);
 
         certList.add(_origCert);
         certList.add(_signCert);
@@ -558,7 +565,7 @@ public class NewSignedDataTest
 
         gen.addCertificates(certs);
 
-        CMSSignedData s = gen.generate(msg, BC);
+        CMSSignedData s = gen.generate(msg);
 
         MessageDigest sha1 = MessageDigest.getInstance("SHA1", BC);
         MessageDigest md5 = MessageDigest.getInstance("MD5", BC);
@@ -566,8 +573,8 @@ public class NewSignedDataTest
         byte[] sha1Hash = sha1.digest(data);
         byte[] md5Hash = md5.digest(data);
 
-        hashes.put(CMSSignedDataGenerator.DIGEST_SHA1, sha1Hash);
-        hashes.put(CMSSignedDataGenerator.DIGEST_MD5, md5Hash);
+        hashes.put(CMSAlgorithm.SHA1, sha1Hash);
+        hashes.put(CMSAlgorithm.MD5, md5Hash);
 
         s = new CMSSignedData(hashes, s.getEncoded());
 
@@ -651,7 +658,7 @@ public class NewSignedDataTest
         
         gen.addCertificates(s.getCertificates());
            
-        s = gen.generate(msg, true, BC);
+        s = gen.generate(msg, true);
 
         bIn = new ByteArrayInputStream(s.getEncoded());
         aIn = new ASN1InputStream(bIn);
@@ -744,8 +751,8 @@ public class NewSignedDataTest
     public void testSHA1WithRSAViaConfig()
         throws Exception
     {
-        List                certList = new ArrayList();
-        CMSProcessable      msg = new CMSProcessableByteArray("Hello world!".getBytes());
+        List              certList = new ArrayList();
+        CMSTypedData      msg = new CMSProcessableByteArray("Hello world!".getBytes());
 
         certList.add(_origCert);
         certList.add(_signCert);
@@ -753,8 +760,10 @@ public class NewSignedDataTest
         Store           certs = new JcaCertStore(certList);
 
         // set some bogus mappings.
-        CMSConfig.setSigningEncryptionAlgorithmMapping(PKCSObjectIdentifiers.rsaEncryption.getId(), "XXXX");
-        CMSConfig.setSigningDigestAlgorithmMapping(OIWObjectIdentifiers.idSHA1.getId(), "YYYY");
+        TestCMSSignatureAlgorithmNameGenerator sigAlgNameGen = new TestCMSSignatureAlgorithmNameGenerator();
+
+        sigAlgNameGen.setEncryptionAlgorithmMapping(PKCSObjectIdentifiers.rsaEncryption, "XXXX");
+        sigAlgNameGen.setDigestAlgorithmMapping(OIWObjectIdentifiers.idSHA1, "YYYY");
 
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
@@ -769,9 +778,9 @@ public class NewSignedDataTest
         try
         {
             // try the bogus mappings
-            s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, BC, false);
+            s = gen.generate(msg, false);
         }
-        catch (NoSuchAlgorithmException e)
+        catch (CMSException e)
         {
             if (!e.getMessage().startsWith("no such algorithm: YYYYwithXXXX"))
             {
@@ -781,11 +790,11 @@ public class NewSignedDataTest
         finally
         {
             // reset to the real ones
-            CMSConfig.setSigningEncryptionAlgorithmMapping(PKCSObjectIdentifiers.rsaEncryption.getId(), "RSA");
-            CMSConfig.setSigningDigestAlgorithmMapping(OIWObjectIdentifiers.idSHA1.getId(), "SHA1"); 
+            sigAlgNameGen.setEncryptionAlgorithmMapping(PKCSObjectIdentifiers.rsaEncryption, "RSA");
+            sigAlgNameGen.setDigestAlgorithmMapping(OIWObjectIdentifiers.idSHA1, "SHA1");
         }
 
-        s = gen.generate(CMSSignedDataGenerator.DATA, msg, false, BC, false);
+        s = gen.generate(msg, false);
 
         //
         // compute expected content digest
@@ -800,7 +809,7 @@ public class NewSignedDataTest
     {
         MessageDigest       md = MessageDigest.getInstance("SHA1", BC);
         List                certList = new ArrayList();
-        CMSProcessable      msg = new CMSProcessableByteArray("Hello world!".getBytes());
+        CMSTypedData        msg = new CMSProcessableByteArray("Hello world!".getBytes());
 
         certList.add(_origCert);
         certList.add(_signCert);
@@ -843,7 +852,7 @@ public class NewSignedDataTest
     {
         MessageDigest       md = MessageDigest.getInstance("SHA1", BC);
         List                certList = new ArrayList();
-        CMSProcessable      msg = new CMSProcessableByteArray("Hello world!".getBytes());
+        CMSTypedData        msg = new CMSProcessableByteArray("Hello world!".getBytes());
 
         certList.add(_origCert);
         certList.add(_signCert);
@@ -890,7 +899,7 @@ public class NewSignedDataTest
     {
         MessageDigest       md = MessageDigest.getInstance("SHA1", BC);
         List                certList = new ArrayList();
-        CMSProcessable      msg = new CMSProcessableByteArray("Hello world!".getBytes());
+        CMSTypedData        msg = new CMSProcessableByteArray("Hello world!".getBytes());
 
         certList.add(_origCert);
         certList.add(_signCert);
@@ -1396,8 +1405,7 @@ public class NewSignedDataTest
         {
             SignerInformation   signer = (SignerInformation)it.next();
             Collection          certCollection = certs.getMatches(signer.getSID());
-
-            Iterator        certIt = certCollection.iterator();
+            Iterator              certIt = certCollection.iterator();
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
             assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
@@ -1435,8 +1443,8 @@ public class NewSignedDataTest
     public void testWithAttributeCertificate()
         throws Exception
     {
-        List                  certList = new ArrayList();
-        CMSProcessable        msg = new CMSProcessableByteArray("Hello World!".getBytes());
+        List                certList = new ArrayList();
+        CMSTypedData        msg = new CMSProcessableByteArray("Hello World!".getBytes());
 
 
         certList.add(_signDsaCert);
@@ -1452,7 +1460,7 @@ public class NewSignedDataTest
 
         gen.addCertificates(certs);
 
-        X509AttributeCertificate attrCert = CMSTestUtil.getAttributeCertificate();
+        X509AttributeCertificateHolder attrCert = new JcaX509AttributeCertificateHolder(CMSTestUtil.getAttributeCertificate());
         List attrList = new ArrayList();
 
         attrList.add(new X509AttributeCertificateHolder(attrCert.getEncoded()));
@@ -1461,7 +1469,7 @@ public class NewSignedDataTest
 
         gen.addAttributeCertificates(store);
 
-        CMSSignedData sd = gen.generate(msg, BC);
+        CMSSignedData sd = gen.generate(msg);
 
         assertEquals(4, sd.getVersion());
 
@@ -1668,11 +1676,11 @@ public class NewSignedDataTest
 
         SignerInformation signer = (SignerInformation)sd.getSignerInfos().getSigners().iterator().next();
 
-        assertEquals(CMSSignedDataGenerator.DIGEST_SHA224, signer.getDigestAlgOID());
+        assertEquals(CMSAlgorithm.SHA224.getId(), signer.getDigestAlgOID());
 
         // we use a parser here as it requires the digests to be correct in the digest set, if it
         // isn't we'll get a NullPointerException
-        CMSSignedDataParser sp = new CMSSignedDataParser(sd.getEncoded());
+        CMSSignedDataParser sp = new CMSSignedDataParser(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build(), sd.getEncoded());
 
         sp.getSignedContent().drain();
 
@@ -1780,6 +1788,20 @@ public class NewSignedDataTest
             X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
             assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
+        }
+    }
+
+    private class TestCMSSignatureAlgorithmNameGenerator
+        extends DefaultCMSSignatureAlgorithmNameGenerator
+    {
+        void setDigestAlgorithmMapping(ASN1ObjectIdentifier oid, String algName)
+        {
+            super.setSigningDigestAlgorithmMapping(oid, algName);
+        }
+
+        void setEncryptionAlgorithmMapping(ASN1ObjectIdentifier oid, String algName)
+        {
+            super.setSigningEncryptionAlgorithmMapping(oid, algName);
         }
     }
 }

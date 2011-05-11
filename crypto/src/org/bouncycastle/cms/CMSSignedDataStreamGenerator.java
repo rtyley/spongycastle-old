@@ -1135,6 +1135,7 @@ public class CMSSignedDataStreamGenerator
     
                     byte[] calculatedDigest = holder.digest.digest();
                     digests.put(holder.digestOID, calculatedDigest.clone());
+
                     AlgorithmIdentifier digestAlgorithm = holder.getDigestAlgorithm();
     
                     signerInfos.add(holder.signerInf.generate(_contentOID, digestAlgorithm, calculatedDigest));
