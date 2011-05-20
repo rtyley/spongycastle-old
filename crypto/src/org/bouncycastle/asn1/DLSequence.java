@@ -50,7 +50,7 @@ public class DLSequence
         if (out instanceof ASN1OutputStream)
         {
             ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-            DLOutputStream         dOut = new DLOutputStream(bOut);
+            ASN1OutputStream       dOut = new ASN1OutputStream(bOut);
             Enumeration            e = this.getObjects();
 
             while (e.hasMoreElements())
