@@ -1076,6 +1076,23 @@ public class PGPKeyRingTest
             + "n3pjONa4PKrePkEsCUhRbIySqXIHuNwZumDOlKzZHDpCUw72LaC6S6zwuoEf"
             + "ucOcxTeGIUViANWXyTIKkHfo7HfigixJIL8nsAFn");
 
+    private static final byte[] umlautKeySig = Base64.decode(
+        "mI0ETdvOgQEEALoI2a39TRk1HReEB6DP9Bu3ShZUce+/Oeg9RIL9aUFuCsNdhu02" +
+        "REEHjO29Jz8daPgrnJDfFepNLD6iKKru2m9P30qnhsHMIAshO2Ozfh6wKwuHRqR3" +
+        "L4gBDu7cCB6SLwPoD8AYG0yQSM+Do10Td87RlStxCgxpMK6R3TsRkxcFABEBAAG0" +
+        "OlVNTEFVVFNUQVJUOsOEw6TDlsO2w5zDvMOfOlVNTEFURU5ERSA8YXNkbGFrc2Rs" +
+        "QGFrc2RqLmNvbT6IuAQTAQIAIgUCTdvOgQIbAwYLCQgHAwIGFQgCCQoLBBYCAwEC" +
+        "HgECF4AACgkQP8kDwm8AOFiArAP/ZXrlZJB1jFEjyBb04ckpE6F/aJuSYIXf0Yx5" +
+        "T2eS+lA69vYuqKRC1qNROBrAn/WGNOQBFNEgGoy3F3gV5NgpIphnyIEZdZWGY2rv" +
+        "yjunKWlioZjWc/xbSbvpvJ3Q8RyfDXBOkDEB6uF1ksimw2eJSOUTkF9AQfS5f4rT" +
+        "5gs013G4jQRN286BAQQApVbjd8UhsQLB4TpeKn9+dDXAfikGgxDOb19XisjRiWxA" +
+        "+bKFxu5tRt6fxXl6BGSGT7DhoVbNkcJGVQFYcbR31UGKCVYcWSL3yfz+PiVuf1UB" +
+        "Rp44cXxxqxrLqKp1rk3dGvV4Ayy8lkk3ncDGPez6lIKvj3832yVtAzUOX1QOg9EA" +
+        "EQEAAYifBBgBAgAJBQJN286BAhsMAAoJED/JA8JvADhYQ80D/R3TX0FBMHs/xqEh" +
+        "tiS86XP/8pW6eMm2eaAYINxoDY3jmDMv2HFQ+YgrYXgqGr6eVGqDMNPj4W8VBoOt" +
+        "iYW7+SWY76AAl+gmWIMm2jbN8bZXFk4jmIxpycHCrtoXX8rUk/0+se8NvbmAdMGK" +
+        "POOoD7oxdRmJSU5hSspOCHrCwCa3");
+
     public void test1()
         throws Exception
     {
@@ -2185,6 +2202,62 @@ public class PGPKeyRingTest
         checkSecretKeyRingWithPersonalCertificate(secRing.getEncoded());
     }
 
+    private void testUmlaut()
+        throws Exception
+    {
+        PGPPublicKeyRing pubRing = new PGPPublicKeyRing(umlautKeySig);
+
+        PGPPublicKey pub = pubRing.getPublicKey();
+        String       userID = (String)pub.getUserIDs().next();
+
+        for (Iterator it = pub.getSignatures(); it.hasNext();)
+        {
+            PGPSignature sig = (PGPSignature)it.next();
+
+            if (sig.getSignatureType() == PGPSignature.POSITIVE_CERTIFICATION)
+            {
+                sig.initVerify(pub, "BC");
+
+                if (!sig.verifyCertification(userID, pub))
+                {
+                    fail("failed UTF8 userID test");
+                }
+            }
+        }
+
+        //
+        // this is quicker because we are using pregenerated parameters.
+        //
+        KeyPairGenerator  rsaKpg = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPair           rsaKp = rsaKpg.generateKeyPair();
+        PGPKeyPair        rsaKeyPair1 = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, rsaKp, new Date());
+                          rsaKp = rsaKpg.generateKeyPair();
+        PGPKeyPair        rsaKeyPair2 = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, rsaKp, new Date());
+        char[]            passPhrase = "passwd".toCharArray();
+
+        PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, rsaKeyPair1,
+                userID, PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+
+        PGPPublicKeyRing       pubRing1 = keyRingGen.generatePublicKeyRing();
+
+        pub = pubRing1.getPublicKey();
+
+        for (Iterator it = pub.getSignatures(); it.hasNext();)
+        {
+            PGPSignature sig = (PGPSignature)it.next();
+
+            if (sig.getSignatureType() == PGPSignature.POSITIVE_CERTIFICATION)
+            {
+                sig.initVerify(pub, "BC");
+
+                if (!sig.verifyCertification(userID, pub))
+                {
+                    fail("failed UTF8 userID creation test");
+                }
+            }
+        }
+    }
+
     private void checkSecretKeyRingWithPersonalCertificate(byte[] keyRing)
         throws Exception
     {
@@ -2267,6 +2340,7 @@ public class PGPKeyRingTest
             testPublicKeyRingWithX509();
             testSecretKeyRingWithPersonalCertificate();
             insertMasterTest();
+            testUmlaut();
         }
         catch (PGPException e)
         {

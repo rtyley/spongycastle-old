@@ -1,21 +1,27 @@
 package org.bouncycastle.openpgp;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.bcpg.*;
-import org.bouncycastle.util.BigIntegers;
-import org.bouncycastle.util.Strings;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchProviderException;
+import java.security.Provider;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.Provider;
 import java.util.Date;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.bcpg.BCPGInputStream;
+import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.MPInteger;
+import org.bouncycastle.bcpg.SignaturePacket;
+import org.bouncycastle.bcpg.SignatureSubpacket;
+import org.bouncycastle.bcpg.TrustPacket;
+import org.bouncycastle.bcpg.UserAttributeSubpacket;
+import org.bouncycastle.util.BigIntegers;
+import org.bouncycastle.util.Strings;
 
 /**
  *A PGP signature object.
@@ -295,7 +301,7 @@ public class PGPSignature
         //
         // hash in the id
         //
-        updateWithIdData(0xb4, Strings.toByteArray(id));
+        updateWithIdData(0xb4, Strings.toUTF8ByteArray(id));
 
         this.update(sigPck.getSignatureTrailer());
         

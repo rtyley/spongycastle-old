@@ -56,6 +56,7 @@ import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.ParametersWithSBox;
 import org.bouncycastle.crypto.params.RC2Parameters;
 import org.bouncycastle.crypto.params.RC5Parameters;
+import org.bouncycastle.jce.RepeatedKey;
 import org.bouncycastle.jce.spec.GOST28147ParameterSpec;
 import org.bouncycastle.util.Strings;
 
@@ -424,8 +425,16 @@ public class JCEBlockCipher extends WrapCipherSpi
                     throw new InvalidAlgorithmParameterException("IV must be " + ivLength + " bytes long.");
                 }
 
-                param = new ParametersWithIV(new KeyParameter(key.getEncoded()), p.getIV());
-                ivParam = (ParametersWithIV)param;
+                if (key instanceof RepeatedKey)
+                {
+                    param = new ParametersWithIV(null, p.getIV());
+                    ivParam = (ParametersWithIV)param;
+                }
+                else
+                {
+                    param = new ParametersWithIV(new KeyParameter(key.getEncoded()), p.getIV());
+                    ivParam = (ParametersWithIV)param;
+                }
             }
             else
             {

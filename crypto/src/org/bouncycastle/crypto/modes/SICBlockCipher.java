@@ -57,7 +57,12 @@ public class SICBlockCipher implements BlockCipher
           System.arraycopy(iv, 0, IV, 0, IV.length);
 
           reset();
-          cipher.init(true, ivParam.getParameters());
+
+          // if null it's an IV changed only.
+          if (ivParam.getParameters() != null)
+          {
+            cipher.init(true, ivParam.getParameters());
+          }
         }
         else
         {

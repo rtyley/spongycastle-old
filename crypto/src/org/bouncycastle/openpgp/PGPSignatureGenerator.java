@@ -1,15 +1,28 @@
 package org.bouncycastle.openpgp;
 
-import org.bouncycastle.bcpg.*;
-import org.bouncycastle.bcpg.sig.IssuerKeyID;
-import org.bouncycastle.bcpg.sig.SignatureCreationTime;
-import org.bouncycastle.util.Strings;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.util.Date;
+
+import org.bouncycastle.bcpg.MPInteger;
+import org.bouncycastle.bcpg.OnePassSignaturePacket;
+import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
+import org.bouncycastle.bcpg.SignaturePacket;
+import org.bouncycastle.bcpg.SignatureSubpacket;
+import org.bouncycastle.bcpg.SignatureSubpacketTags;
+import org.bouncycastle.bcpg.UserAttributeSubpacket;
+import org.bouncycastle.bcpg.sig.IssuerKeyID;
+import org.bouncycastle.bcpg.sig.SignatureCreationTime;
+import org.bouncycastle.util.Strings;
 
 /**
  * Generator for PGP Signatures.
@@ -359,7 +372,7 @@ public class PGPSignatureGenerator
         //
         // hash in the id
         //
-        updateWithIdData(0xb4, Strings.toByteArray(id));
+        updateWithIdData(0xb4, Strings.toUTF8ByteArray(id));
 
         return this.generate();
     }

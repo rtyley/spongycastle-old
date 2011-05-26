@@ -1,7 +1,11 @@
 package org.bouncycastle.crypto.test;
 
 import org.bouncycastle.crypto.BlockCipher;
+import org.bouncycastle.crypto.BufferedBlockCipher;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.modes.SICBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.encoders.Hex;
@@ -15,6 +19,12 @@ import org.bouncycastle.util.test.SimpleTest;
 public class AESTest
     extends CipherTest
 {
+    private static byte[] tData   = Hex.decode("AAFE47EE82411A2BF3F6752AE8D7831138F041560631B114F3F6752AE8D7831138F041560631B1145A01020304050607");
+    private static byte[] outCBC1 = Hex.decode("a444a9a4d46eb30cb7ed34d62873a89f8fdf2bf8a54e1aeadd06fd85c9cb46f021ee7cd4f418fa0bb72e9d07c70d5d20");
+    private static byte[] outCBC2 = Hex.decode("585681354f0e01a86b32f94ebb6a675045d923cf201263c2aaecca2b4de82da0edd74ca5efd654c688f8a58e61955b11");
+    private static byte[] outSIC1 = Hex.decode("82a1744e8ebbd053ca72362d5e570326e0b6fdaf824ab673fbf029042886b23c75129a015852913790f81f94447475a0");
+    private static byte[] outSIC2 = Hex.decode("146cbb581d9e12c3333dd9c736fbb93043c92019f78580da48f81f80b3f551d58ea836fed480fc6912fefa9c5c89cc24");
+
     static SimpleTest[]  tests = 
             {
                 new BlockCipherVectorTest(0, new AESEngine(),
@@ -103,6 +113,68 @@ public class AESTest
         return "AES";
     }
 
+    private void testNullSIC()
+        throws InvalidCipherTextException
+    {
+        BufferedBlockCipher b = new BufferedBlockCipher(new SICBlockCipher(new AESEngine()));
+        KeyParameter kp = new KeyParameter(Hex.decode("5F060D3716B345C253F6749ABAC10917"));
+
+        b.init(true, new ParametersWithIV(kp, new byte[16]));
+
+        byte[] out = new byte[b.getOutputSize(tData.length)];
+
+        int len = b.processBytes(tData, 0, tData.length, out, 0);
+
+        len += b.doFinal(out, len);
+
+        if (!areEqual(outSIC1, out))
+        {
+            fail("no match on first nullSIC check");
+        }
+
+        b.init(true, new ParametersWithIV(null, Hex.decode("000102030405060708090a0b0c0d0e0f")));
+
+        len = b.processBytes(tData, 0, tData.length, out, 0);
+
+        len += b.doFinal(out, len);
+
+        if (!areEqual(outSIC2, out))
+        {
+            fail("no match on second nullSIC check");
+        }
+    }
+
+    private void testNullCBC()
+        throws InvalidCipherTextException
+    {
+        BufferedBlockCipher b = new BufferedBlockCipher(new CBCBlockCipher(new AESEngine()));
+        KeyParameter kp = new KeyParameter(Hex.decode("5F060D3716B345C253F6749ABAC10917"));
+
+        b.init(true, new ParametersWithIV(kp, new byte[16]));
+
+        byte[] out = new byte[b.getOutputSize(tData.length)];
+
+        int len = b.processBytes(tData, 0, tData.length, out, 0);
+
+        len += b.doFinal(out, len);
+
+        if (!areEqual(outCBC1, out))
+        {
+            fail("no match on first nullCBC check");
+        }
+
+        b.init(true, new ParametersWithIV(null, Hex.decode("000102030405060708090a0b0c0d0e0f")));
+
+        len = b.processBytes(tData, 0, tData.length, out, 0);
+
+        len += b.doFinal(out, len);
+
+        if (!areEqual(outCBC2, out))
+        {
+            fail("no match on second nullCBC check");
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -140,6 +212,9 @@ public class AESTest
         {
             // expected 
         }
+
+        testNullCBC();
+        testNullSIC();
     }
 
     public static void main(

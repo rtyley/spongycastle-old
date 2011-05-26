@@ -77,7 +77,11 @@ public class CBCBlockCipher
 
                 reset();
 
-                cipher.init(encrypting, ivParam.getParameters());
+                // if null it's an IV changed only.
+                if (ivParam.getParameters() != null)
+                {
+                    cipher.init(encrypting, ivParam.getParameters());
+                }
         }
         else
         {

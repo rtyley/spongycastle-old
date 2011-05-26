@@ -7,6 +7,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.jce.RepeatedKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
@@ -138,6 +139,22 @@ public class AESSICTest
         if (!areEqual(crypt, Hex.decode("12345678")))
         {
             fail("AESSIC failed partial test");
+        }
+
+        // null key test
+        sk = new RepeatedKey("AES");
+
+        c.init(
+                Cipher.ENCRYPT_MODE, sk,
+        new IvParameterSpec(Hex.decode("F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF")));
+
+        for (int j = 0; j != plain.length; j++)
+        {
+            crypt = c.update(plain[j]);
+            if (!areEqual(crypt, cipher[0][j]))
+            {
+                fail("AESSIC encrypt failed: key " + 0 + " block " + j);
+            }
         }
     }
 
