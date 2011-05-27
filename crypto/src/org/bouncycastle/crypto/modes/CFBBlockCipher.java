@@ -87,7 +87,11 @@ public class CFBBlockCipher
 
                 reset();
 
-                cipher.init(true, ivParam.getParameters());
+                // if null it's an IV changed only.
+                if (ivParam.getParameters() != null)
+                {
+                    cipher.init(true, ivParam.getParameters());
+                }
         }
         else
         {

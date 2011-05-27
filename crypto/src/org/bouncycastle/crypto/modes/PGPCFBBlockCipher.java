@@ -188,7 +188,7 @@ public class PGPCFBBlockCipher
     /**
      * Encrypt one byte of data according to CFB mode.
      * @param data the byte to encrypt
-     * @param where am i in the current block, determines when to resync the block
+     * @param blockOff where am i in the current block, determines when to resync the block
      * @returns the encrypted byte
      */
     private byte encryptByte(byte data, int blockOff)
