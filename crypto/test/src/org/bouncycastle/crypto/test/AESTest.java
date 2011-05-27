@@ -5,6 +5,8 @@ import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.modes.CFBBlockCipher;
+import org.bouncycastle.crypto.modes.OFBBlockCipher;
 import org.bouncycastle.crypto.modes.SICBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
@@ -19,11 +21,15 @@ import org.bouncycastle.util.test.SimpleTest;
 public class AESTest
     extends CipherTest
 {
-    private static byte[] tData   = Hex.decode("AAFE47EE82411A2BF3F6752AE8D7831138F041560631B114F3F6752AE8D7831138F041560631B1145A01020304050607");
-    private static byte[] outCBC1 = Hex.decode("a444a9a4d46eb30cb7ed34d62873a89f8fdf2bf8a54e1aeadd06fd85c9cb46f021ee7cd4f418fa0bb72e9d07c70d5d20");
-    private static byte[] outCBC2 = Hex.decode("585681354f0e01a86b32f94ebb6a675045d923cf201263c2aaecca2b4de82da0edd74ca5efd654c688f8a58e61955b11");
-    private static byte[] outSIC1 = Hex.decode("82a1744e8ebbd053ca72362d5e570326e0b6fdaf824ab673fbf029042886b23c75129a015852913790f81f94447475a0");
-    private static byte[] outSIC2 = Hex.decode("146cbb581d9e12c3333dd9c736fbb93043c92019f78580da48f81f80b3f551d58ea836fed480fc6912fefa9c5c89cc24");
+    private static final byte[] tData   = Hex.decode("AAFE47EE82411A2BF3F6752AE8D7831138F041560631B114F3F6752AE8D7831138F041560631B1145A01020304050607");
+    private static final byte[] outCBC1 = Hex.decode("a444a9a4d46eb30cb7ed34d62873a89f8fdf2bf8a54e1aeadd06fd85c9cb46f021ee7cd4f418fa0bb72e9d07c70d5d20");
+    private static final byte[] outCBC2 = Hex.decode("585681354f0e01a86b32f94ebb6a675045d923cf201263c2aaecca2b4de82da0edd74ca5efd654c688f8a58e61955b11");
+    private static final byte[] outSIC1 = Hex.decode("82a1744e8ebbd053ca72362d5e570326e0b6fdaf824ab673fbf029042886b23c75129a015852913790f81f94447475a0");
+    private static final byte[] outSIC2 = Hex.decode("146cbb581d9e12c3333dd9c736fbb93043c92019f78580da48f81f80b3f551d58ea836fed480fc6912fefa9c5c89cc24");
+    private static final byte[] outCFB1 = Hex.decode("82a1744e8ebbd053ca72362d5e5703264b4182de3208c374b8ac4fa36af9c5e5f4f87d1e3b67963d06acf5eb13914c90");
+    private static final byte[] outCFB2 = Hex.decode("146cbb581d9e12c3333dd9c736fbb9303c8a3eb5185e2809e9d3c28e25cc2d2b6f5c11ee28d6530f72c412b1438a816a");
+    private static final byte[] outOFB1 = Hex.decode("82a1744e8ebbd053ca72362d5e5703261ebf1fdbec05e57b3465b583132f84b43bf95b2c89040ad1677b22d42db69a7a");
+    private static final byte[] outOFB2 = Hex.decode("146cbb581d9e12c3333dd9c736fbb9309ea4c2a7696c84959a2dada49f2f1c5905db1f0cec3a31acbc4701e74ab05e1f");
 
     static SimpleTest[]  tests = 
             {
@@ -175,6 +181,68 @@ public class AESTest
         }
     }
 
+    private void testNullOFB()
+        throws InvalidCipherTextException
+    {
+        BufferedBlockCipher b = new BufferedBlockCipher(new OFBBlockCipher(new AESEngine(), 128));
+        KeyParameter kp = new KeyParameter(Hex.decode("5F060D3716B345C253F6749ABAC10917"));
+
+        b.init(true, new ParametersWithIV(kp, new byte[16]));
+
+        byte[] out = new byte[b.getOutputSize(tData.length)];
+
+        int len = b.processBytes(tData, 0, tData.length, out, 0);
+
+        len += b.doFinal(out, len);
+
+        if (!areEqual(outOFB1, out))
+        {
+            fail("no match on first nullOFB check");
+        }
+
+        b.init(true, new ParametersWithIV(null, Hex.decode("000102030405060708090a0b0c0d0e0f")));
+
+        len = b.processBytes(tData, 0, tData.length, out, 0);
+
+        len += b.doFinal(out, len);
+
+        if (!areEqual(outOFB2, out))
+        {
+            fail("no match on second nullOFB check");
+        }
+    }
+
+    private void testNullCFB()
+        throws InvalidCipherTextException
+    {
+        BufferedBlockCipher b = new BufferedBlockCipher(new CFBBlockCipher(new AESEngine(), 128));
+        KeyParameter kp = new KeyParameter(Hex.decode("5F060D3716B345C253F6749ABAC10917"));
+
+        b.init(true, new ParametersWithIV(kp, new byte[16]));
+
+        byte[] out = new byte[b.getOutputSize(tData.length)];
+
+        int len = b.processBytes(tData, 0, tData.length, out, 0);
+
+        len += b.doFinal(out, len);
+
+        if (!areEqual(outCFB1, out))
+        {
+            fail("no match on first nullCFB check");
+        }
+
+        b.init(true, new ParametersWithIV(null, Hex.decode("000102030405060708090a0b0c0d0e0f")));
+
+        len = b.processBytes(tData, 0, tData.length, out, 0);
+
+        len += b.doFinal(out, len);
+
+        if (!areEqual(outCFB2, out))
+        {
+            fail("no match on second nullCFB check");
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -215,6 +283,8 @@ public class AESTest
 
         testNullCBC();
         testNullSIC();
+        testNullOFB();
+        testNullCFB();
     }
 
     public static void main(
