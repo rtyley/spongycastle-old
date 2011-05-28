@@ -15,7 +15,12 @@ class ReasonsMask
      * 
      * @param reasons The reasons.
      */
-    ReasonsMask(int reasons)
+    ReasonsMask(ReasonFlags reasons)
+    {
+        _reasons = reasons.intValue();
+    }
+
+    private ReasonsMask(int reasons)
     {
         _reasons = reasons;
     }
