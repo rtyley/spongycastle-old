@@ -7,8 +7,8 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.jce.RepeatedKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.RepeatedSecretKeySpec;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
@@ -142,7 +142,7 @@ public class AESSICTest
         }
 
         // null key test
-        sk = new RepeatedKey("AES");
+        sk = new RepeatedSecretKeySpec("AES");
 
         c.init(
                 Cipher.ENCRYPT_MODE, sk,
