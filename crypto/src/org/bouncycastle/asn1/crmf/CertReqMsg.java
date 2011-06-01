@@ -13,7 +13,7 @@ public class CertReqMsg
     extends ASN1Encodable
 {
     private CertRequest certReq;
-    private ProofOfPossession popo;
+    private ProofOfPossession pop;
     private ASN1Sequence regInfo;
 
     private CertReqMsg(ASN1Sequence seq)
@@ -27,7 +27,7 @@ public class CertReqMsg
 
             if (o instanceof ASN1TaggedObject || o instanceof ProofOfPossession)
             {
-                popo = ProofOfPossession.getInstance(o);
+                pop = ProofOfPossession.getInstance(o);
             }
             else
             {
@@ -53,12 +53,12 @@ public class CertReqMsg
     /**
      * Creates a new CertReqMsg.
      * @param certReq CertRequest
-     * @param popo may be null
+     * @param pop may be null
      * @param regInfo may be null
      */
     public CertReqMsg(
         CertRequest certReq,
-        ProofOfPossession popo,
+        ProofOfPossession pop,
         AttributeTypeAndValue[] regInfo)
     {
         if (certReq == null)
@@ -67,7 +67,7 @@ public class CertReqMsg
         }
 
         this.certReq = certReq;
-        this.popo = popo;
+        this.pop = pop;
 
         if (regInfo != null)
         {
@@ -80,17 +80,18 @@ public class CertReqMsg
         return certReq;
     }
 
-    /**
-     * @deprecated use getPopo
-     */
+
     public ProofOfPossession getPop()
     {
-        return popo;
+        return pop;
     }
 
+    /**
+     * @deprecated use getPop
+     */
     public ProofOfPossession getPopo()
     {
-        return popo;
+        return pop;
     }
 
     public AttributeTypeAndValue[] getRegInfo()
@@ -126,7 +127,7 @@ public class CertReqMsg
 
         v.add(certReq);
 
-        addOptional(v, popo);
+        addOptional(v, pop);
         addOptional(v, regInfo);
 
         return new DERSequence(v);
