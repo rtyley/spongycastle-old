@@ -13,8 +13,8 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 public class POPOSigningKeyInput
     extends ASN1Encodable
 {
-    private GeneralName          sender;
-    private PKMACValue           publicKeyMAC;
+    private GeneralName sender;
+    private PKMACValue publicKeyMAC;
     private SubjectPublicKeyInfo publicKey;
 
     private POPOSigningKeyInput(ASN1Sequence seq)
@@ -54,7 +54,9 @@ public class POPOSigningKeyInput
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
-    /** Creates a new POPOSigningKeyInput with sender name as authInfo. */
+    /**
+     *  Creates a new POPOSigningKeyInput with sender name as authInfo.
+     */
     public POPOSigningKeyInput(
         GeneralName sender,
         SubjectPublicKeyInfo spki)
@@ -63,7 +65,9 @@ public class POPOSigningKeyInput
         this.publicKey = spki;
     }
 
-    /** Creates a new POPOSigningKeyInput using password-based MAC. */
+    /**
+     * Creates a new POPOSigningKeyInput using password-based MAC.
+     */
     public POPOSigningKeyInput(
         PKMACValue pkmac,
         SubjectPublicKeyInfo spki)
@@ -72,13 +76,17 @@ public class POPOSigningKeyInput
         this.publicKey = spki;
     }
 
-    /** Returns the sender field, or null if authInfo is publicKeyMAC */
+    /**
+     * Returns the sender field, or null if authInfo is publicKeyMAC
+     */
     public GeneralName getSender()
     {
         return sender;
     }
 
-    /** Returns the publicKeyMAC field, or null if authInfo is sender */
+    /**
+     * Returns the publicKeyMAC field, or null if authInfo is sender
+     */
     public PKMACValue getPublicKeyMAC()
     {
         return publicKeyMAC;

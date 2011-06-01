@@ -216,7 +216,7 @@ public class CertificateRequestMessage
         {
             POPOSigningKey popoSign = POPOSigningKey.getInstance(pop.getObject());
 
-            if (popoSign.getPoposkInput().getPublicKeyMAC() != null)
+            if (popoSign.getPoposkInput() != null && popoSign.getPoposkInput().getPublicKeyMAC() != null)
             {
                 throw new IllegalStateException("verification requires password check");
             }
@@ -248,7 +248,7 @@ public class CertificateRequestMessage
         {
             POPOSigningKey popoSign = POPOSigningKey.getInstance(pop.getObject());
 
-            if (popoSign.getPoposkInput().getSender() != null)
+            if (popoSign.getPoposkInput() == null || popoSign.getPoposkInput().getSender() != null)
             {
                 throw new IllegalStateException("no PKMAC present in proof of possession");
             }
@@ -283,8 +283,14 @@ public class CertificateRequestMessage
             throw new CRMFException("unable to create verifier: " + e.getMessage(), e);
         }
 
-        CRMFUtil.derEncodeToStream(popoSign.getPoposkInput(), verifier.getOutputStream());
-
+        if (popoSign.getPoposkInput() != null)
+        {
+            CRMFUtil.derEncodeToStream(popoSign.getPoposkInput(), verifier.getOutputStream());
+        }
+        else
+        {
+            CRMFUtil.derEncodeToStream(certReqMsg.getCertReq().getCertTemplate(), verifier.getOutputStream());
+        }
         return verifier.verify(popoSign.getSignature().getBytes());
     }
 

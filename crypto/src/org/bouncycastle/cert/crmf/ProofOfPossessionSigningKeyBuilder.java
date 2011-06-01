@@ -1,6 +1,7 @@
 package org.bouncycastle.cert.crmf;
 
 import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.crmf.CertTemplate;
 import org.bouncycastle.asn1.crmf.PKMACValue;
 import org.bouncycastle.asn1.crmf.POPOSigningKey;
 import org.bouncycastle.asn1.crmf.POPOSigningKeyInput;
@@ -10,9 +11,16 @@ import org.bouncycastle.operator.ContentSigner;
 
 public class ProofOfPossessionSigningKeyBuilder
 {
+    private CertTemplate certTemplate;
     private SubjectPublicKeyInfo pubKeyInfo;
     private GeneralName name;
     private PKMACValue publicKeyMAC;
+
+    public ProofOfPossessionSigningKeyBuilder(CertTemplate certTemplate)
+    {
+        this.certTemplate = certTemplate;
+    }
+
 
     public ProofOfPossessionSigningKeyBuilder(SubjectPublicKeyInfo pubKeyInfo)
     {
@@ -43,16 +51,24 @@ public class ProofOfPossessionSigningKeyBuilder
 
         POPOSigningKeyInput popo;
 
-        if (name != null)
+        if (certTemplate != null)
+        {
+            popo = null;
+
+            CRMFUtil.derEncodeToStream(certTemplate, signer.getOutputStream());
+        }
+        else if (name != null)
         {
             popo = new POPOSigningKeyInput(name, pubKeyInfo);
+
+            CRMFUtil.derEncodeToStream(popo, signer.getOutputStream());
         }
         else
         {
             popo = new POPOSigningKeyInput(publicKeyMAC, pubKeyInfo);
-        }
 
-        CRMFUtil.derEncodeToStream(popo, signer.getOutputStream());
+            CRMFUtil.derEncodeToStream(popo, signer.getOutputStream());
+        }
 
         return new POPOSigningKey(popo, signer.getAlgorithmIdentifier(), new DERBitString(signer.getSignature()));
     }

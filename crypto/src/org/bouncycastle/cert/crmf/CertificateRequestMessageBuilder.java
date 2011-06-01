@@ -16,6 +16,7 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.crmf.AttributeTypeAndValue;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.asn1.crmf.CertRequest;
+import org.bouncycastle.asn1.crmf.CertTemplate;
 import org.bouncycastle.asn1.crmf.CertTemplateBuilder;
 import org.bouncycastle.asn1.crmf.POPOPrivKey;
 import org.bouncycastle.asn1.crmf.ProofOfPossession;
@@ -208,21 +209,32 @@ public class CertificateRequestMessageBuilder
 
         if (popSigner != null)
         {
-            SubjectPublicKeyInfo pubKeyInfo = request.getCertTemplate().getPublicKey();
-            ProofOfPossessionSigningKeyBuilder builder = new ProofOfPossessionSigningKeyBuilder(pubKeyInfo);
+            CertTemplate template = request.getCertTemplate();
 
-            if (sender != null)
+            if (template.getSubject() == null || template.getPublicKey() == null)
             {
-                builder.setSender(sender);
+                SubjectPublicKeyInfo pubKeyInfo = request.getCertTemplate().getPublicKey();
+                ProofOfPossessionSigningKeyBuilder builder = new ProofOfPossessionSigningKeyBuilder(pubKeyInfo);
+
+                if (sender != null)
+                {
+                    builder.setSender(sender);
+                }
+                else
+                {
+                    PKMACValueGenerator pkmacGenerator = new PKMACValueGenerator(pkmacBuilder);
+
+                    builder.setPublicKeyMac(pkmacGenerator, password);
+                }
+
+                v.add(new ProofOfPossession(builder.build(popSigner)));
             }
             else
             {
-                PKMACValueGenerator pkmacGenerator = new PKMACValueGenerator(pkmacBuilder);
+                ProofOfPossessionSigningKeyBuilder builder = new ProofOfPossessionSigningKeyBuilder(template);
 
-                builder.setPublicKeyMac(pkmacGenerator, password);
+                v.add(new ProofOfPossession(builder.build(popSigner)));
             }
-
-            v.add(new ProofOfPossession(builder.build(popSigner)));
         }
         else if (popoPrivKey != null)
         {
