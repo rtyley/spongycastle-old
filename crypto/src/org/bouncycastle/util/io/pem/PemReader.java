@@ -24,7 +24,12 @@ public class PemReader
     {
         String line = readLine();
 
-        if (line != null && line.startsWith(BEGIN))
+        while (line != null && !line.startsWith(BEGIN))
+        {
+            line = readLine();
+        }
+
+        if (line != null)
         {
             line = line.substring(BEGIN.length());
             int index = line.indexOf('-');

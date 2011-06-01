@@ -16,6 +16,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
@@ -86,6 +87,17 @@ public class ReaderTest
             else
             {
                 //System.out.println(o.toString());
+            }
+        }
+
+        // test bogus lines before begin are ignored.
+        pemRd = openPEMResource("extratest.pem", pGet);
+
+        while ((o = pemRd.readObject()) != null)
+        {
+            if (!(o instanceof X509Certificate))
+            {
+                fail("wrong object found");
             }
         }
 
