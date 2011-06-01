@@ -81,14 +81,15 @@ public class CertReqMsg
     }
 
 
+    /**
+     * @deprecated use getPopo
+     */
     public ProofOfPossession getPop()
     {
         return pop;
     }
 
-    /**
-     * @deprecated use getPop
-     */
+
     public ProofOfPossession getPopo()
     {
         return pop;
@@ -115,7 +116,7 @@ public class CertReqMsg
      * <pre>
      * CertReqMsg ::= SEQUENCE {
      *                    certReq   CertRequest,
-     *                    pop       ProofOfPossession  OPTIONAL,
+     *                    popo       ProofOfPossession  OPTIONAL,
      *                    -- content depends upon key type
      *                    regInfo   SEQUENCE SIZE(1..MAX) OF AttributeTypeAndValue OPTIONAL }
      * </pre>
