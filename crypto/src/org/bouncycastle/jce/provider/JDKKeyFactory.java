@@ -141,7 +141,7 @@ public abstract class JDKKeyFactory
            return new DHPublicKeySpec(k.getY(), k.getParams().getP(), k.getParams().getG());
        }
 
-       throw new RuntimeException("not implemented yet " + key + " " + spec);
+       throw new InvalidKeySpecException("not implemented yet " + key + " " + spec);
     }
 
     protected Key engineTranslateKey(
