@@ -7,7 +7,6 @@ import java.security.cert.X509Certificate;
 
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.KeyTransRecipientInfoGenerator;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JceAsymmetricKeyWrapper;
 
 public class JceKeyTransRecipientInfoGenerator
@@ -25,7 +24,6 @@ public class JceKeyTransRecipientInfoGenerator
     }
 
     public JceKeyTransRecipientInfoGenerator setProvider(String providerName)
-        throws OperatorCreationException
     {
         ((JceAsymmetricKeyWrapper)this.wrapper).setProvider(providerName);
 
@@ -33,7 +31,6 @@ public class JceKeyTransRecipientInfoGenerator
     }
 
     public JceKeyTransRecipientInfoGenerator setProvider(Provider provider)
-        throws OperatorCreationException
     {
         ((JceAsymmetricKeyWrapper)this.wrapper).setProvider(provider);
 
