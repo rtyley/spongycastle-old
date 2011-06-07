@@ -231,7 +231,7 @@ public class CertificateRequestMessageBuilder
             }
             else
             {
-                ProofOfPossessionSigningKeyBuilder builder = new ProofOfPossessionSigningKeyBuilder(template);
+                ProofOfPossessionSigningKeyBuilder builder = new ProofOfPossessionSigningKeyBuilder(request);
 
                 v.add(new ProofOfPossession(builder.build(popSigner)));
             }

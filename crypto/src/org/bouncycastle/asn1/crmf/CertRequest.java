@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.crmf;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
@@ -10,13 +11,13 @@ import org.bouncycastle.asn1.DERSequence;
 public class CertRequest
     extends ASN1Encodable
 {
-    private DERInteger certReqId;
+    private ASN1Integer certReqId;
     private CertTemplate certTemplate;
     private Controls controls;
 
     private CertRequest(ASN1Sequence seq)
     {
-        certReqId = DERInteger.getInstance(seq.getObjectAt(0));
+        certReqId = new ASN1Integer(DERInteger.getInstance(seq.getObjectAt(0)).getValue());
         certTemplate = CertTemplate.getInstance(seq.getObjectAt(1));
         if (seq.size() > 2)
         {
@@ -43,11 +44,11 @@ public class CertRequest
         CertTemplate certTemplate,
         Controls controls)
     {
-        this(new DERInteger(certReqId), certTemplate, controls);
+        this(new ASN1Integer(certReqId), certTemplate, controls);
     }
 
     public CertRequest(
-        DERInteger certReqId,
+        ASN1Integer certReqId,
         CertTemplate certTemplate,
         Controls controls)
     {
@@ -56,7 +57,7 @@ public class CertRequest
         this.controls = controls;
     }
 
-    public DERInteger getCertReqId()
+    public ASN1Integer getCertReqId()
     {
         return certReqId;
     }
