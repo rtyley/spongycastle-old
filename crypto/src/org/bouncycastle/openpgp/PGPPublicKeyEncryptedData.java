@@ -1,25 +1,18 @@
 package org.bouncycastle.openpgp;
 
+import java.io.EOFException;
+import java.io.InputStream;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+
 import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.InputStreamPacket;
 import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
 import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
-import org.bouncycastle.jce.interfaces.ElGamalKey;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.EOFException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.security.DigestInputStream;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
+import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.bouncycastle.openpgp.operator.PGPDataDecryptor;
+import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactoryBuilder;
+import org.bouncycastle.util.io.TeeInputStream;
 
 /**
  * A public key encrypted data object.
@@ -37,36 +30,7 @@ public class PGPPublicKeyEncryptedData
         
         this.keyData = keyData;
     }
-    
-    private static Cipher getKeyCipher(
-        int       algorithm,
-        Provider  provider)
-        throws PGPException
-    {
-        try
-        {
-            switch (algorithm)
-            {
-            case PGPPublicKey.RSA_ENCRYPT:
-            case PGPPublicKey.RSA_GENERAL:
-                return Cipher.getInstance("RSA/ECB/PKCS1Padding", provider);
-            case PGPPublicKey.ELGAMAL_ENCRYPT:
-            case PGPPublicKey.ELGAMAL_GENERAL:
-                return Cipher.getInstance("ElGamal/ECB/PKCS1Padding", provider);
-            default:
-                throw new PGPException("unknown asymmetric algorithm: " + algorithm);
-            }
-        }
-        catch (PGPException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new PGPException("Exception creating cipher", e);
-        }
-    }
-    
+
     private boolean confirmCheckSum(
         byte[]    sessionInfo)
     {
@@ -109,7 +73,14 @@ public class PGPPublicKeyEncryptedData
         Provider       provider)
         throws PGPException, NoSuchProviderException
     {
-        byte[] plain = fetchSymmetricKeyData(privKey, provider);
+        return getSymmetricAlgorithm(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider(provider).setContentProvider(provider).build(privKey));
+    }
+
+    public int getSymmetricAlgorithm(
+        PublicKeyDataDecryptorFactory dataDecryptorFactory)
+        throws PGPException, NoSuchProviderException
+    {
+        byte[] plain = dataDecryptorFactory.recoverSessionData(keyData.getAlgorithm(), keyData.getEncSessionKey());
 
         return plain[0];
     }
@@ -122,6 +93,7 @@ public class PGPPublicKeyEncryptedData
      * @return InputStream
      * @throws PGPException
      * @throws NoSuchProviderException
+     * @deprecated use method that takes a PublicKeyDataDecryptorFactory
      */
     public InputStream getDataStream(
         PGPPrivateKey  privKey,
@@ -131,6 +103,14 @@ public class PGPPublicKeyEncryptedData
         return getDataStream(privKey, provider, provider);
     }
 
+        /**
+     *
+     * @param privKey
+     * @param provider
+     * @return
+     * @throws PGPException
+     *  @deprecated use method that takes a PublicKeyDataDecryptorFactory
+     */
     public InputStream getDataStream(
         PGPPrivateKey  privKey,
         Provider       provider)
@@ -148,6 +128,7 @@ public class PGPPublicKeyEncryptedData
      * @return InputStream
      * @throws PGPException
      * @throws NoSuchProviderException
+     *  @deprecated use method that takes a PublicKeyDataDecryptorFactory
      */
     public InputStream getDataStream(
         PGPPrivateKey  privKey,
@@ -158,97 +139,96 @@ public class PGPPublicKeyEncryptedData
         return getDataStream(privKey, PGPUtil.getProvider(asymProvider), PGPUtil.getProvider(provider));
     }
 
+    /**
+     *
+     * @param privKey
+     * @param asymProvider
+     * @param provider
+     * @return
+     * @throws PGPException
+     *  @deprecated use method that takes a PublicKeyDataDecryptorFactory
+     */
     public InputStream getDataStream(
         PGPPrivateKey  privKey,
         Provider       asymProvider,
         Provider       provider)
         throws PGPException
     {
-        byte[] plain = fetchSymmetricKeyData(privKey, asymProvider);
-        
-        Cipher         c2;
-        
-        try
+        return getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider(asymProvider).setContentProvider(provider).build(privKey));
+    }
+
+    public InputStream getDataStream(
+        PublicKeyDataDecryptorFactory dataDecryptorFactory)
+        throws PGPException
+    {
+        byte[] sessionData = dataDecryptorFactory.recoverSessionData(keyData.getAlgorithm(), keyData.getEncSessionKey());
+
+        if (!confirmCheckSum(sessionData))
         {
-            if (encData instanceof SymmetricEncIntegrityPacket)
-            {
-                c2 =
-                    Cipher.getInstance(
-                        PGPUtil.getSymmetricCipherName(plain[0]) + "/CFB/NoPadding",
-                            provider);
-            }
-            else
-            {
-                c2 =
-                    Cipher.getInstance(
-                        PGPUtil.getSymmetricCipherName(plain[0]) + "/OpenPGPCFB/NoPadding",
-                        provider);
-            }
+            throw new PGPKeyValidationException("key checksum failed");
         }
-        catch (PGPException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new PGPException("exception creating cipher", e);
-        }
-        
-        if (c2 != null)
+
+        if (sessionData[0] != SymmetricKeyAlgorithmTags.NULL)
         {
             try
             {
-                SecretKey    key = new SecretKeySpec(plain, 1, plain.length - 3, PGPUtil.getSymmetricCipherName(plain[0]));
-                
-                byte[]       iv = new byte[c2.getBlockSize()];
-                
-                c2.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+                boolean      withIntegrityPacket = encData instanceof SymmetricEncIntegrityPacket;
+                byte[]       sessionKey = new byte[sessionData.length - 3];
 
-                encStream = new BCPGInputStream(new CipherInputStream(encData.getInputStream(), c2));
-                
-                if (encData instanceof SymmetricEncIntegrityPacket)
+                System.arraycopy(sessionData, 1, sessionKey, 0, sessionKey.length);
+
+                PGPDataDecryptor dataDecryptor = dataDecryptorFactory.createDataDecryptor(withIntegrityPacket, sessionData[0] & 0xff, sessionKey);
+
+                encStream = new BCPGInputStream(dataDecryptor.getInputStream(encData.getInputStream()));
+
+                if (withIntegrityPacket)
                 {
                     truncStream = new TruncatedStream(encStream);
-                    encStream = new DigestInputStream(truncStream, MessageDigest.getInstance(PGPUtil.getDigestName(HashAlgorithmTags.SHA1), provider));
+
+                    integrityCalculator = dataDecryptor.getIntegrityCalculator();
+
+                    encStream = new TeeInputStream(truncStream, integrityCalculator.getOutputStream());
                 }
-                
+
+                byte[] iv = new byte[dataDecryptor.getBlockSize()];
+
                 for (int i = 0; i != iv.length; i++)
                 {
                     int    ch = encStream.read();
-                    
+
                     if (ch < 0)
                     {
                         throw new EOFException("unexpected end of stream.");
                     }
-                    
+
                     iv[i] = (byte)ch;
                 }
-                
+
                 int    v1 = encStream.read();
                 int    v2 = encStream.read();
-                
+
                 if (v1 < 0 || v2 < 0)
                 {
                     throw new EOFException("unexpected end of stream.");
                 }
-                
+
                 //
                 // some versions of PGP appear to produce 0 for the extra
                 // bytes rather than repeating the two previous bytes
                 //
                 /*
-                 * Commented out in the light of the oracle attack.
-                if (iv[iv.length - 2] != (byte)v1 && v1 != 0)
-                {
-                    throw new PGPDataValidationException("data check failed.");
-                }
-                
-                if (iv[iv.length - 1] != (byte)v2 && v2 != 0)
-                {
-                    throw new PGPDataValidationException("data check failed.");
-                }
-                */
-                
+                             * Commented out in the light of the oracle attack.
+                            if (iv[iv.length - 2] != (byte)v1 && v1 != 0)
+                            {
+                                throw new PGPDataValidationException("data check failed.");
+                            }
+
+                            if (iv[iv.length - 1] != (byte)v2 && v2 != 0)
+                            {
+                                throw new PGPDataValidationException("data check failed.");
+                            }
+                            */
+
                 return encStream;
             }
             catch (PGPException e)
@@ -264,87 +244,5 @@ public class PGPPublicKeyEncryptedData
         {
             return encData.getInputStream();
         }
-    }
-
-    private byte[] fetchSymmetricKeyData(PGPPrivateKey privKey, Provider asymProvider)
-        throws PGPException
-    {
-        Cipher c1 = getKeyCipher(keyData.getAlgorithm(), asymProvider);
-
-        try
-        {
-            c1.init(Cipher.DECRYPT_MODE, privKey.getKey());
-        }
-        catch (InvalidKeyException e)
-        {
-            throw new PGPException("error setting asymmetric cipher", e);
-        }
-
-        BigInteger[]    keyD = keyData.getEncSessionKey();
-
-        if (keyData.getAlgorithm() == PGPPublicKey.RSA_ENCRYPT
-            || keyData.getAlgorithm() == PGPPublicKey.RSA_GENERAL)
-        {
-            byte[]    bi = keyD[0].toByteArray();
-
-            if (bi[0] == 0)
-            {
-                c1.update(bi, 1, bi.length - 1);
-            }
-            else
-            {
-                c1.update(bi);
-            }
-        }
-        else
-        {
-            ElGamalKey k = (ElGamalKey)privKey.getKey();
-            int           size = (k.getParameters().getP().bitLength() + 7) / 8;
-            byte[]        tmp = new byte[size];
-
-            byte[]        bi = keyD[0].toByteArray();
-            if (bi.length > size)
-            {
-                c1.update(bi, 1, bi.length - 1);
-            }
-            else
-            {
-                System.arraycopy(bi, 0, tmp, tmp.length - bi.length, bi.length);
-                c1.update(tmp);
-            }
-
-            bi = keyD[1].toByteArray();
-            for (int i = 0; i != tmp.length; i++)
-            {
-                tmp[i] = 0;
-            }
-
-            if (bi.length > size)
-            {
-                c1.update(bi, 1, bi.length - 1);
-            }
-            else
-            {
-                System.arraycopy(bi, 0, tmp, tmp.length - bi.length, bi.length);
-                c1.update(tmp);
-            }
-        }
-
-        byte[] plain;
-        try
-        {
-            plain = c1.doFinal();
-        }
-        catch (Exception e)
-        {
-            throw new PGPException("exception decrypting secret key", e);
-        }
-
-        if (!confirmCheckSum(plain))
-        {
-            throw new PGPKeyValidationException("key checksum failed");
-        }
-
-        return plain;
     }
 }

@@ -3,12 +3,14 @@ package org.bouncycastle.openpgp;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 
 import org.bouncycastle.bcpg.InputStreamPacket;
 import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
+import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
 import org.bouncycastle.util.Arrays;
 
 public abstract class PGPEncryptedData
@@ -75,7 +77,8 @@ public abstract class PGPEncryptedData
     InputStreamPacket        encData;
     InputStream              encStream;
     TruncatedStream          truncStream;
-    
+    PGPDigestCalculator      integrityCalculator;
+
     PGPEncryptedData(
         InputStreamPacket    encData)
     {
@@ -114,7 +117,37 @@ public abstract class PGPEncryptedData
         {
             throw new PGPException("data not integrity protected.");
         }
-        
+
+        if (integrityCalculator != null)
+        {
+            //
+            // make sure we are at the end.
+            //
+            while (encStream.read() >= 0)
+            {
+                // do nothing
+            }
+
+            //
+            // process the MDC packet
+            //
+            int[]    lookAhead = truncStream.getLookAhead();
+
+            OutputStream dOut = integrityCalculator.getOutputStream();
+
+            dOut.write((byte)lookAhead[0]);
+            dOut.write((byte)lookAhead[1]);
+
+            byte[]    digest = integrityCalculator.getDigest();
+            byte[]  streamDigest = new byte[digest.length];
+
+            for (int i = 0; i != streamDigest.length; i++)
+            {
+                streamDigest[i] = (byte)lookAhead[i + 2];
+            }
+
+            return Arrays.constantTimeAreEqual(digest, streamDigest);
+        }
         DigestInputStream    dIn = (DigestInputStream)encStream;
 
         //

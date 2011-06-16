@@ -4,7 +4,15 @@ import java.security.KeyPair;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.DSAPrivateKey;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.util.Date;
+
+import org.bouncycastle.bcpg.BCPGKey;
+import org.bouncycastle.bcpg.DSASecretBCPGKey;
+import org.bouncycastle.bcpg.ElGamalSecretBCPGKey;
+import org.bouncycastle.bcpg.RSASecretBCPGKey;
+import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
 
 
 /**
@@ -65,7 +73,33 @@ public class PGPKeyPair
         throws PGPException
     {
         this.pub = new PGPPublicKey(algorithm, pubKey, time);
-        this.priv = new PGPPrivateKey(privKey, pub.getKeyID());
+
+        BCPGKey privPk;
+
+        switch (pub.getAlgorithm())
+        {
+        case PGPPublicKey.RSA_ENCRYPT:
+        case PGPPublicKey.RSA_SIGN:
+        case PGPPublicKey.RSA_GENERAL:
+            RSAPrivateCrtKey rsK = (RSAPrivateCrtKey)privKey;
+
+            privPk = new RSASecretBCPGKey(rsK.getPrivateExponent(), rsK.getPrimeP(), rsK.getPrimeQ());
+            break;
+        case PGPPublicKey.DSA:
+            DSAPrivateKey dsK = (DSAPrivateKey)privKey;
+
+            privPk = new DSASecretBCPGKey(dsK.getX());
+            break;
+        case PGPPublicKey.ELGAMAL_ENCRYPT:
+        case PGPPublicKey.ELGAMAL_GENERAL:
+            ElGamalPrivateKey esK = (ElGamalPrivateKey)privKey;
+
+            privPk = new ElGamalSecretBCPGKey(esK.getX());
+            break;
+        default:
+            throw new PGPException("unknown key class");
+        }
+        this.priv = new PGPPrivateKey(pub.getKeyID(), pub.getPublicKeyPacket(), privPk);
     }
 
     /**

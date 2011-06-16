@@ -4,18 +4,15 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Provider;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.spec.DSAPrivateKeySpec;
-import java.security.spec.RSAPrivateCrtKeySpec;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -29,13 +26,10 @@ import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.BCPGObject;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.ContainedPacket;
-import org.bouncycastle.bcpg.DSAPublicBCPGKey;
 import org.bouncycastle.bcpg.DSASecretBCPGKey;
-import org.bouncycastle.bcpg.ElGamalPublicBCPGKey;
 import org.bouncycastle.bcpg.ElGamalSecretBCPGKey;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.PublicKeyPacket;
-import org.bouncycastle.bcpg.RSAPublicBCPGKey;
 import org.bouncycastle.bcpg.RSASecretBCPGKey;
 import org.bouncycastle.bcpg.S2K;
 import org.bouncycastle.bcpg.SecretKeyPacket;
@@ -44,8 +38,6 @@ import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.bcpg.UserAttributePacket;
 import org.bouncycastle.bcpg.UserIDPacket;
 import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
-import org.bouncycastle.jce.spec.ElGamalParameterSpec;
-import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
 
 /**
  * general class to handle a PGP secret key object.
@@ -319,7 +311,7 @@ public class PGPSecretKey
         String                      provider)
         throws PGPException, NoSuchProviderException
     {
-        this(certificationLevel, new PGPKeyPair(algorithm,pubKey, privKey, time), id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, provider);
+        this(certificationLevel, new PGPKeyPair(algorithm, pubKey, privKey, time), id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, provider);
     }
 
     /**
@@ -566,48 +558,27 @@ public class PGPSecretKey
 
         try
         {
-            KeyFactory         fact;
             byte[]             data = extractKeyData(passPhrase, provider);
             BCPGInputStream    in = new BCPGInputStream(new ByteArrayInputStream(data));
-        
+
+
             switch (pubPk.getAlgorithm())
             {
             case PGPPublicKey.RSA_ENCRYPT:
             case PGPPublicKey.RSA_GENERAL:
             case PGPPublicKey.RSA_SIGN:
-                RSAPublicBCPGKey        rsaPub = (RSAPublicBCPGKey)pubPk.getKey();
                 RSASecretBCPGKey        rsaPriv = new RSASecretBCPGKey(in);
-                RSAPrivateCrtKeySpec    rsaPrivSpec = new RSAPrivateCrtKeySpec(
-                                                    rsaPriv.getModulus(), 
-                                                    rsaPub.getPublicExponent(),
-                                                    rsaPriv.getPrivateExponent(),
-                                                    rsaPriv.getPrimeP(),
-                                                    rsaPriv.getPrimeQ(),
-                                                    rsaPriv.getPrimeExponentP(),
-                                                    rsaPriv.getPrimeExponentQ(),
-                                                    rsaPriv.getCrtCoefficient());
-                                    
-                fact = KeyFactory.getInstance("RSA", provider);
 
-                return new PGPPrivateKey(fact.generatePrivate(rsaPrivSpec), this.getKeyID());    
+                return new PGPPrivateKey(this.getKeyID(), pubPk, rsaPriv);
             case PGPPublicKey.DSA:
-                DSAPublicBCPGKey    dsaPub = (DSAPublicBCPGKey)pubPk.getKey();
                 DSASecretBCPGKey    dsaPriv = new DSASecretBCPGKey(in);
-                DSAPrivateKeySpec   dsaPrivSpec =
-                                            new DSAPrivateKeySpec(dsaPriv.getX(), dsaPub.getP(), dsaPub.getQ(), dsaPub.getG());
 
-                fact = KeyFactory.getInstance("DSA", provider);
-
-                return new PGPPrivateKey(fact.generatePrivate(dsaPrivSpec), this.getKeyID());
+                return new PGPPrivateKey(this.getKeyID(), pubPk, dsaPriv);
             case PGPPublicKey.ELGAMAL_ENCRYPT:
             case PGPPublicKey.ELGAMAL_GENERAL:
-                ElGamalPublicBCPGKey    elPub = (ElGamalPublicBCPGKey)pubPk.getKey();
                 ElGamalSecretBCPGKey    elPriv = new ElGamalSecretBCPGKey(in);
-                ElGamalPrivateKeySpec   elSpec = new ElGamalPrivateKeySpec(elPriv.getX(), new ElGamalParameterSpec(elPub.getP(), elPub.getG()));
-            
-                fact = KeyFactory.getInstance("ElGamal", provider);
-            
-                return new PGPPrivateKey(fact.generatePrivate(elSpec), this.getKeyID());
+
+                return new PGPPrivateKey(this.getKeyID(), pubPk, elPriv);
             default:
                 throw new PGPException("unknown public key algorithm encountered");
             }

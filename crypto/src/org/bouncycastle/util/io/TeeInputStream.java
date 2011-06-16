@@ -54,4 +54,9 @@ public class TeeInputStream
         this.input.close();
         this.output.close();
     }
+
+    public OutputStream getOutputStream()
+    {
+        return output;
+    }
 }

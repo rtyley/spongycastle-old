@@ -2,6 +2,10 @@ package org.bouncycastle.openpgp;
 
 import java.security.PrivateKey;
 
+import org.bouncycastle.bcpg.BCPGKey;
+import org.bouncycastle.bcpg.PublicKeyPacket;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPKeyConverter;
+
 /**
  * general class to contain a private key for use with other openPGP
  * objects.
@@ -10,6 +14,8 @@ public class PGPPrivateKey
 {
     private long          keyID;
     private PrivateKey    privateKey;
+    private PublicKeyPacket publicKeyPacket;
+    private BCPGKey privateKeyDataPacket;
 
     /**
      * Create a PGPPrivateKey from a regular private key and the keyID of its associated
@@ -24,6 +30,16 @@ public class PGPPrivateKey
     {
         this.privateKey = privateKey;
         this.keyID = keyID;
+    }
+
+    PGPPrivateKey(
+        long              keyID,
+        PublicKeyPacket   publicKeyPacket,
+        BCPGKey           privateKeyDataPacket)
+    {
+        this.keyID = keyID;
+        this.publicKeyPacket = publicKeyPacket;
+        this.privateKeyDataPacket = privateKeyDataPacket;
     }
 
     /**
@@ -43,6 +59,28 @@ public class PGPPrivateKey
      */
     public PrivateKey getKey()
     {
-        return privateKey;
+        if (privateKey != null)
+        {
+            return privateKey;
+        }
+
+        try
+        {
+            return new JcaPGPKeyConverter().setProvider(PGPUtil.getDefaultProvider()).getPrivateKey(this);
+        }
+        catch (PGPException e)
+        {
+            throw new IllegalStateException("unable to convert key: " + e.toString());
+        }
+    }
+
+    public PublicKeyPacket getPublicKeyPacket()
+    {
+        return publicKeyPacket;
+    }
+
+    public BCPGKey getPrivateKeyDataPacket()
+    {
+        return privateKeyDataPacket;
     }
 }

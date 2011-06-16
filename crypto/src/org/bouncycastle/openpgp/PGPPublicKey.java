@@ -668,7 +668,12 @@ public class PGPPublicKey
             return subSigs.iterator();
         }
     }
-    
+
+    public PublicKeyPacket getPublicKeyPacket()
+    {
+        return publicPk;
+    }
+
     public byte[] getEncoded() 
         throws IOException
     {
