@@ -31,7 +31,6 @@ import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKEKRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.OutputEncryptor;
 
 /**
@@ -514,20 +513,13 @@ public class SMIMEEnvelopedGenerator
                 {
                     RecipientInfoGenerator rd = (RecipientInfoGenerator)it.next();
 
-                    try
+                    if (rd instanceof JceKeyTransRecipientInfoGenerator)
                     {
-                        if (rd instanceof JceKeyTransRecipientInfoGenerator)
-                        {
-                            ((JceKeyTransRecipientInfoGenerator)rd).setProvider(provider);
-                        }
-                        else if (rd instanceof JceKEKRecipientInfoGenerator)
-                        {
-                            ((JceKEKRecipientInfoGenerator)rd).setProvider(provider);
-                        }
+                        ((JceKeyTransRecipientInfoGenerator)rd).setProvider(provider);
                     }
-                    catch (OperatorCreationException e)
+                    else if (rd instanceof JceKEKRecipientInfoGenerator)
                     {
-                        throw new CMSException("cannot create recipient: " + e.getMessage(), e);
+                        ((JceKEKRecipientInfoGenerator)rd).setProvider(provider);
                     }
                 }
             }
