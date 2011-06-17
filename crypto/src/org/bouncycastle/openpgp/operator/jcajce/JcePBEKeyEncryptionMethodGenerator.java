@@ -68,7 +68,7 @@ public class JcePBEKeyEncryptionMethodGenerator
      * @param random  the secure random to be used.
      * @return  the current generator.
      */
-    public JcePBEKeyEncryptionMethodGenerator setSecureRandom(SecureRandom random)
+    public PBEKeyEncryptionMethodGenerator setSecureRandom(SecureRandom random)
     {
         super.setSecureRandom(random);
 

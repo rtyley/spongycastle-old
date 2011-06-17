@@ -42,7 +42,7 @@ public class BcPBEKeyEncryptionMethodGenerator
      * @param random  the secure random to be used.
      * @return  the current generator.
      */
-    public BcPBEKeyEncryptionMethodGenerator setSecureRandom(SecureRandom random)
+    public PBEKeyEncryptionMethodGenerator setSecureRandom(SecureRandom random)
     {
         super.setSecureRandom(random);
 
