@@ -398,105 +398,94 @@ public class PGPSecretKey
         byte[] encData = secret.getSecretKeyData();
         byte[] data = null;
 
-        try
+        if (secret.getEncAlgorithm() != SymmetricKeyAlgorithmTags.NULL)
         {
-            if (secret.getEncAlgorithm() != SymmetricKeyAlgorithmTags.NULL)
+            try
             {
-                try
+                if (secret.getPublicKeyPacket().getVersion() == 4)
                 {
-                    if (secret.getPublicKeyPacket().getVersion() == 4)
+                    byte[] key = decryptorFactory.makeKeyFromPassPhrase(secret.getEncAlgorithm(), secret.getS2K());
+
+                    data = decryptorFactory.recoverKeyData(secret.getEncAlgorithm(), key, secret.getIV(), encData, 0, encData.length);
+
+                    boolean useSHA1 = secret.getS2KUsage() == SecretKeyPacket.USAGE_SHA1;
+                    byte[] check = checksum(useSHA1, data, (useSHA1) ? data.length - 20 : data.length - 2);
+
+                    for (int i = 0; i != check.length; i++)
                     {
-                        byte[] key = decryptorFactory.makeKeyFromPassPhrase(secret.getEncAlgorithm(), secret.getS2K());
-
-                        data = decryptorFactory.recoverKeyData(secret.getEncAlgorithm(), key, secret.getIV(), encData, 0, encData.length);
-
-                        boolean useSHA1 = secret.getS2KUsage() == SecretKeyPacket.USAGE_SHA1;
-                        byte[] check = checksum(useSHA1, data, (useSHA1) ? data.length - 20 : data.length - 2);
-
-                        for (int i = 0; i != check.length; i++)
+                        if (check[i] != data[data.length - check.length + i])
                         {
-                            if (check[i] != data[data.length - check.length + i])
-                            {
-                                throw new PGPException("checksum mismatch at " + i + " of " + check.length);
-                            }
-                        }
-                    }
-                    else // version 2 or 3, RSA only.
-                    {
-                        byte[] key = decryptorFactory.makeKeyFromPassPhrase(secret.getEncAlgorithm(), secret.getS2K());
-
-                        data = new byte[encData.length];
-
-                        byte[] iv = new byte[secret.getIV().length];
-
-                        System.arraycopy(secret.getIV(), 0, iv, 0, iv.length);
-
-                        //
-                        // read in the four numbers
-                        //
-                        int pos = 0;
-
-                        for (int i = 0; i != 4; i++)
-                        {
-                            int encLen = (((encData[pos] << 8) | (encData[pos + 1] & 0xff)) + 7) / 8;
-
-                            data[pos] = encData[pos];
-                            data[pos + 1] = encData[pos + 1];
-
-                            byte[] tmp = decryptorFactory.recoverKeyData(secret.getEncAlgorithm(), key, iv, encData, pos + 2, encLen);
-                            System.arraycopy(tmp, 0, data, pos + 2, tmp.length);
-                            pos += 2 + encLen;
-
-                            if (i != 3)
-                            {
-                                System.arraycopy(encData, pos - iv.length, iv, 0, iv.length);
-                            }
-                        }
-
-                        //
-                        // verify checksum
-                        //
-
-                        int cs = ((encData[pos] << 8) & 0xff00) | (encData[pos + 1] & 0xff);
-                        int calcCs = 0;
-                        for (int j = 0; j < data.length - 2; j++)
-                        {
-                            calcCs += data[j] & 0xff;
-                        }
-
-                        calcCs &= 0xffff;
-                        if (calcCs != cs)
-                        {
-                            throw new PGPException("checksum mismatch: passphrase wrong, expected "
-                                + Integer.toHexString(cs)
-                                + " found " + Integer.toHexString(calcCs));
+                            throw new PGPException("checksum mismatch at " + i + " of " + check.length);
                         }
                     }
                 }
-                catch (PGPException e)
+                else // version 2 or 3, RSA only.
                 {
-                    throw e;
-                }
-                catch (Exception e)
-                {
-                    throw new PGPException("Exception decrypting key", e);
-                }
-            }
-            else
-            {
-                data = encData;
-            }
+                    byte[] key = decryptorFactory.makeKeyFromPassPhrase(secret.getEncAlgorithm(), secret.getS2K());
 
-            return data;
+                    data = new byte[encData.length];
+
+                    byte[] iv = new byte[secret.getIV().length];
+
+                    System.arraycopy(secret.getIV(), 0, iv, 0, iv.length);
+
+                    //
+                    // read in the four numbers
+                    //
+                    int pos = 0;
+
+                    for (int i = 0; i != 4; i++)
+                    {
+                        int encLen = (((encData[pos] << 8) | (encData[pos + 1] & 0xff)) + 7) / 8;
+
+                        data[pos] = encData[pos];
+                        data[pos + 1] = encData[pos + 1];
+
+                        byte[] tmp = decryptorFactory.recoverKeyData(secret.getEncAlgorithm(), key, iv, encData, pos + 2, encLen);
+                        System.arraycopy(tmp, 0, data, pos + 2, tmp.length);
+                        pos += 2 + encLen;
+
+                        if (i != 3)
+                        {
+                            System.arraycopy(encData, pos - iv.length, iv, 0, iv.length);
+                        }
+                    }
+
+                    //
+                    // verify checksum
+                    //
+
+                    int cs = ((encData[pos] << 8) & 0xff00) | (encData[pos + 1] & 0xff);
+                    int calcCs = 0;
+                    for (int j = 0; j < data.length - 2; j++)
+                    {
+                        calcCs += data[j] & 0xff;
+                    }
+
+                    calcCs &= 0xffff;
+                    if (calcCs != cs)
+                    {
+                        throw new PGPException("checksum mismatch: passphrase wrong, expected "
+                            + Integer.toHexString(cs)
+                            + " found " + Integer.toHexString(calcCs));
+                    }
+                }
+            }
+            catch (PGPException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new PGPException("Exception decrypting key", e);
+            }
         }
-        catch (PGPException e)
+        else
         {
-            throw e;
+            data = encData;
         }
-        catch (Exception e)
-        {
-            throw new PGPException("Exception constructing key", e);
-        }
+
+        return data;
     }
 
     /**
