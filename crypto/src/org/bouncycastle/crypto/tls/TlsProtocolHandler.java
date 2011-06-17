@@ -443,6 +443,14 @@ public class TlsProtocolHandler
             case HandshakeType.server_hello_done:
                 switch (connection_state)
                 {
+                    case CS_SERVER_HELLO_RECEIVED:
+
+                        // There was no server certificate message; check it's OK
+                        this.keyExchange.skipServerCertificate();
+                        this.authentication = null;
+
+                        // NB: Fall through to next case label
+
                     case CS_SERVER_CERTIFICATE_RECEIVED:
 
                         // There was no server key exchange message; check it's OK
