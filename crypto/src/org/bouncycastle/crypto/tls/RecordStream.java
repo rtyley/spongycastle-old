@@ -47,7 +47,7 @@ class RecordStream
     public void readData() throws IOException
     {
         short type = TlsUtils.readUint8(is);
-        TlsUtils.checkVersion(is, handler);
+        TlsUtils.checkVersion(is);
         int size = TlsUtils.readUint16(is);
         byte[] buf = decodeAndVerify(type, is, size);
         handler.processData(type, buf, 0, buf.length);

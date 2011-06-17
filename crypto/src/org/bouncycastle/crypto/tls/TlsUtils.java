@@ -204,7 +204,7 @@ public class TlsUtils
         return value;
     }
 
-    protected static void checkVersion(byte[] readVersion, TlsProtocolHandler handler)
+    protected static void checkVersion(byte[] readVersion)
         throws IOException
     {
         if ((readVersion[0] != 3) || (readVersion[1] != 1))
@@ -213,7 +213,7 @@ public class TlsUtils
         }
     }
 
-    protected static void checkVersion(InputStream is, TlsProtocolHandler handler)
+    protected static void checkVersion(InputStream is)
         throws IOException
     {
         int i1 = is.read();

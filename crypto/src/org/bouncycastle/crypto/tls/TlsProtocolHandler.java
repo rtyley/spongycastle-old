@@ -278,7 +278,7 @@ public class TlsProtocolHandler
                         /*
                          * Read the server hello message
                          */
-                        TlsUtils.checkVersion(is, this);
+                        TlsUtils.checkVersion(is);
 
                         /*
                          * Read the server random
