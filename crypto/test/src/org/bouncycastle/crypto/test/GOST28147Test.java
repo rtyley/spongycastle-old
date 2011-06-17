@@ -1,18 +1,18 @@
 package org.bouncycastle.crypto.test;
 
-import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.crypto.BufferedBlockCipher;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.digests.GOST3411Digest;
 import org.bouncycastle.crypto.engines.GOST28147Engine;
+import org.bouncycastle.crypto.modes.CBCBlockCipher;
+import org.bouncycastle.crypto.modes.CFBBlockCipher;
+import org.bouncycastle.crypto.modes.GOFBBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.params.ParametersWithSBox;
-import org.bouncycastle.crypto.modes.CFBBlockCipher;
-import org.bouncycastle.crypto.modes.GOFBBlockCipher;
-import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.BufferedBlockCipher;
-import org.bouncycastle.crypto.CryptoException;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class GOST28147Test
      extends CipherTest
@@ -271,6 +271,29 @@ public class GOST28147Test
                                      Hex.decode("1234567890abcdef")); //IV
 
         cipher = new BufferedBlockCipher(new GOFBBlockCipher(new GOST28147Engine()));
+
+        cipher.init(true, param);
+        len1 = cipher.processBytes(in, 0, in.length, out, 0);
+
+        cipher.doFinal(out, len1);
+
+        if (out.length != output.length)
+        {
+            fail("failed - " + "expected "
+                    + new String(Hex.encode(output)) + " got "
+                    + new String(Hex.encode(out)));
+        }
+        for (int i = 0; i != out.length; i++)
+        {
+            if (out[i] != output[i])
+            {
+                fail("failed - " + "expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
+            }
+        }
+
+        // key reuse test
+        param = new ParametersWithIV(null, // key and sbox reused
+                           Hex.decode("1234567890abcdef")); //IV
 
         cipher.init(true, param);
         len1 = cipher.processBytes(in, 0, in.length, out, 0);

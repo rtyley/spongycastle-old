@@ -79,32 +79,40 @@ public class GOFBBlockCipher
 
         if (params instanceof ParametersWithIV)
         {
-                ParametersWithIV ivParam = (ParametersWithIV)params;
-                byte[]      iv = ivParam.getIV();
+            ParametersWithIV ivParam = (ParametersWithIV)params;
+            byte[] iv = ivParam.getIV();
 
-                if (iv.length < IV.length)
+            if (iv.length < IV.length)
+            {
+                // prepend the supplied IV with zeros (per FIPS PUB 81)
+                System.arraycopy(iv, 0, IV, IV.length - iv.length, iv.length);
+                for (int i = 0; i < IV.length - iv.length; i++)
                 {
-                    // prepend the supplied IV with zeros (per FIPS PUB 81)
-                    System.arraycopy(iv, 0, IV, IV.length - iv.length, iv.length); 
-                    for (int i = 0; i < IV.length - iv.length; i++)
-                    {
-                        IV[i] = 0;
-                    }
+                    IV[i] = 0;
                 }
-                else
-                {
-                    System.arraycopy(iv, 0, IV, 0, IV.length);
-                }
+            }
+            else
+            {
+                System.arraycopy(iv, 0, IV, 0, IV.length);
+            }
 
-                reset();
+            reset();
 
+            // if params is null we reuse the current working key.
+            if (ivParam.getParameters() != null)
+            {
                 cipher.init(true, ivParam.getParameters());
+            }
         }
         else
         {
-                reset();
+            reset();
 
+            // if params is null we reuse the current working key.
+            if (params != null)
+            {
                 cipher.init(true, params);
+            }
         }
     }
 

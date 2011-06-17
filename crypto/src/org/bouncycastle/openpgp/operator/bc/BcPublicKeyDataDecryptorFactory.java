@@ -11,9 +11,12 @@ import org.bouncycastle.jce.interfaces.ElGamalKey;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PublicKeyDataDecryptorFactory;
 import org.bouncycastle.openpgp.operator.PGPDataDecryptor;
+import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
 
+/**
+ * A decryptor factory for handling public key decryption operations.
+ */
 public class BcPublicKeyDataDecryptorFactory
     implements PublicKeyDataDecryptorFactory
 {

@@ -29,6 +29,9 @@ import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPPublicKeyEncryptedData;
 import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
 import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.operator.jcajce.JcePGPDataEncryptorBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactoryBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyKeyEncryptionMethodGenerator;
 import org.bouncycastle.util.io.Streams;
 
 /**
@@ -115,7 +118,7 @@ public class KeyBasedFileProcessor
                 throw new IllegalArgumentException("secret key for message not found.");
             }
     
-            InputStream         clear = pbe.getDataStream(sKey, "BC");
+            InputStream         clear = pbe.getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(sKey));
             
             PGPObjectFactory    plainFact = new PGPObjectFactory(clear);
             
@@ -213,8 +216,9 @@ public class KeyBasedFileProcessor
             byte[] bytes = PGPExampleUtil.compressFile(fileName, CompressionAlgorithmTags.ZIP);
 
             PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
-                PGPEncryptedData.CAST5, withIntegrityCheck, new SecureRandom(), "BC");
-            encGen.addMethod(encKey);
+                new JcePGPDataEncryptorBuilder(PGPEncryptedData.CAST5).setWithIntegrityPacket(withIntegrityCheck).setSecureRandom(new SecureRandom()).setProvider("BC"));
+
+            encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(encKey).setProvider("BC"));
 
             OutputStream cOut = encGen.open(out, bytes.length);
 

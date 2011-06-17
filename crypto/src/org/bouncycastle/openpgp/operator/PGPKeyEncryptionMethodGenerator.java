@@ -1,6 +1,7 @@
-package org.bouncycastle.openpgp;
+package org.bouncycastle.openpgp.operator;
 
 import org.bouncycastle.bcpg.ContainedPacket;
+import org.bouncycastle.openpgp.PGPException;
 
 public abstract class PGPKeyEncryptionMethodGenerator
 {

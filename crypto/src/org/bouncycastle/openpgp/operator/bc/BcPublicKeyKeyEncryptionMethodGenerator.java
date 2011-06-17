@@ -8,19 +8,33 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PublicKeyKeyEncryptionMethodGenerator;
+import org.bouncycastle.openpgp.operator.PublicKeyKeyEncryptionMethodGenerator;
 
+/**
+ * A method generator for supporting public key based encryption operations.
+ */
 public class BcPublicKeyKeyEncryptionMethodGenerator
     extends PublicKeyKeyEncryptionMethodGenerator
 {
     private SecureRandom random;
     private BcPGPKeyConverter keyConverter = new BcPGPKeyConverter();
 
+    /**
+     * Create a public key encryption method generator with the method to be based on the passed in key.
+     *
+     * @param key   the public key to use for encryption.
+     */
     public BcPublicKeyKeyEncryptionMethodGenerator(PGPPublicKey key)
     {
         super(key);
     }
 
+    /**
+     * Provide a user defined source of randomness.
+     *
+     * @param random  the secure random to be used.
+     * @return  the current generator.
+     */
     public BcPublicKeyKeyEncryptionMethodGenerator setSecureRandom(SecureRandom random)
     {
         this.random = random;

@@ -11,6 +11,7 @@ import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
 import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.openpgp.operator.PGPDataDecryptor;
+import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
 import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactoryBuilder;
 import org.bouncycastle.util.io.TeeInputStream;
 
@@ -59,6 +60,7 @@ public class PGPPublicKeyEncryptedData
      * Return the algorithm code for the symmetric algorithm used to encrypt the data.
      *
      * @return integer algorithm code
+     * @deprecated use the method taking a PublicKeyDataDecryptorFactory
      */
     public int getSymmetricAlgorithm(
         PGPPrivateKey  privKey,
@@ -68,6 +70,10 @@ public class PGPPublicKeyEncryptedData
         return getSymmetricAlgorithm(privKey, PGPUtil.getProvider(provider));
     }
 
+    /**
+     *
+     * @deprecated use the method taking a PublicKeyDataDecryptorFactory
+     */
     public int getSymmetricAlgorithm(
         PGPPrivateKey  privKey,
         Provider       provider)
@@ -76,9 +82,16 @@ public class PGPPublicKeyEncryptedData
         return getSymmetricAlgorithm(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider(provider).setContentProvider(provider).build(privKey));
     }
 
+    /**
+     * Return the symmetric key algorithm required to decrypt the data protected by this object.
+     *
+     * @param dataDecryptorFactory   decryptor factory to use to recover the session data.
+     * @return  the integer encryption algorithm code.
+     * @throws PGPException if the session data cannot be recovered.
+     */
     public int getSymmetricAlgorithm(
         PublicKeyDataDecryptorFactory dataDecryptorFactory)
-        throws PGPException, NoSuchProviderException
+        throws PGPException
     {
         byte[] plain = dataDecryptorFactory.recoverSessionData(keyData.getAlgorithm(), keyData.getEncSessionKey());
 
@@ -140,12 +153,6 @@ public class PGPPublicKeyEncryptedData
     }
 
     /**
-     *
-     * @param privKey
-     * @param asymProvider
-     * @param provider
-     * @return
-     * @throws PGPException
      *  @deprecated use method that takes a PublicKeyDataDecryptorFactory
      */
     public InputStream getDataStream(
@@ -157,6 +164,13 @@ public class PGPPublicKeyEncryptedData
         return getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider(asymProvider).setContentProvider(provider).build(privKey));
     }
 
+    /**
+     * Open an input stream which will provide the decrypted data protected by this object.
+     *
+     * @param dataDecryptorFactory  decryptor factory to use to recover the session data and provide the stream.
+     * @return  the resulting input stream
+     * @throws PGPException  if the session data cannot be recovered or the stream cannot be created.
+     */
     public InputStream getDataStream(
         PublicKeyDataDecryptorFactory dataDecryptorFactory)
         throws PGPException

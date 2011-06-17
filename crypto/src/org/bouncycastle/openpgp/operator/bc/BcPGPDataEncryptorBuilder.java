@@ -28,6 +28,12 @@ public class BcPGPDataEncryptorBuilder
         }
     }
 
+   /**
+     * Determine whether or not the resulting encrypted data will be protected using an integrity packet.
+     *
+     * @param withIntegrityPacket true if an integrity packet is to be included, false otherwise.
+     * @return  the current builder.
+     */
     public BcPGPDataEncryptorBuilder setWithIntegrityPacket(boolean withIntegrityPacket)
     {
         this.withIntegrityPacket = withIntegrityPacket;
@@ -35,6 +41,12 @@ public class BcPGPDataEncryptorBuilder
         return this;
     }
 
+    /**
+     * Provide a user defined source of randomness.
+     *
+     * @param random  the secure random to be used.
+     * @return  the current builder.
+     */
     public BcPGPDataEncryptorBuilder setSecureRandom(SecureRandom random)
     {
         this.random = random;

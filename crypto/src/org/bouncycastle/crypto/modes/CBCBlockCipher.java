@@ -61,33 +61,47 @@ public class CBCBlockCipher
         CipherParameters    params)
         throws IllegalArgumentException
     {
+        boolean oldEncrypting = this.encrypting;
+
         this.encrypting = encrypting;
-        
+
         if (params instanceof ParametersWithIV)
         {
-                ParametersWithIV ivParam = (ParametersWithIV)params;
-                byte[]      iv = ivParam.getIV();
+            ParametersWithIV ivParam = (ParametersWithIV)params;
+            byte[] iv = ivParam.getIV();
 
-                if (iv.length != blockSize)
-                {
-                    throw new IllegalArgumentException("initialisation vector must be the same length as block size");
-                }
+            if (iv.length != blockSize)
+            {
+                throw new IllegalArgumentException("initialisation vector must be the same length as block size");
+            }
 
-                System.arraycopy(iv, 0, IV, 0, iv.length);
+            System.arraycopy(iv, 0, IV, 0, iv.length);
 
-                reset();
+            reset();
 
-                // if null it's an IV changed only.
-                if (ivParam.getParameters() != null)
-                {
-                    cipher.init(encrypting, ivParam.getParameters());
-                }
+            // if null it's an IV changed only.
+            if (ivParam.getParameters() != null)
+            {
+                cipher.init(encrypting, ivParam.getParameters());
+            }
+            else if (oldEncrypting != encrypting)
+            {
+                throw new IllegalArgumentException("cannot change encrypting state without providing key.");
+            }
         }
         else
         {
-                reset();
+            reset();
 
+            // if it;s null key is to be reused.
+            if (params != null)
+            {
                 cipher.init(encrypting, params);
+            }
+            else if (oldEncrypting != encrypting)
+            {
+                throw new IllegalArgumentException("cannot change encrypting state without providing key.");
+            }
         }
     }
 

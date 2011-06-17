@@ -9,6 +9,7 @@ import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.InputStreamPacket;
 import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
 import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
+import org.bouncycastle.openpgp.operator.PBEDataDecryptorFactory;
 import org.bouncycastle.openpgp.operator.PGPDataDecryptor;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBEDataDecryptorFactoryBuilder;
@@ -76,6 +77,30 @@ public class PGPPBEEncryptedData
         return getDataStream(new JcePBEDataDecryptorFactoryBuilder(new JcaPGPDigestCalculatorProviderBuilder().setProvider(provider).build()).setProvider(provider).build(passPhrase));
     }
 
+   /**
+     * Return the symmetric key algorithm required to decrypt the data protected by this object.
+     *
+     * @param dataDecryptorFactory   decryptor factory to use to recover the session data.
+     * @return  the integer encryption algorithm code.
+     * @throws PGPException if the session data cannot be recovered.
+     */
+    public int getSymmetricAlgorithm(
+        PBEDataDecryptorFactory dataDecryptorFactory)
+        throws PGPException
+    {
+        byte[]       key = dataDecryptorFactory.makeKeyFromPassPhrase(keyData.getEncAlgorithm(), keyData.getS2K());
+        byte[]       sessionData = dataDecryptorFactory.recoverSessionData(keyData.getEncAlgorithm(), key, keyData.getSecKeyData());
+
+        return sessionData[0];
+    }
+
+   /**
+     * Open an input stream which will provide the decrypted data protected by this object.
+     *
+     * @param dataDecryptorFactory  decryptor factory to use to recover the session data and provide the stream.
+     * @return  the resulting input stream
+     * @throws PGPException  if the session data cannot be recovered or the stream cannot be created.
+     */
     public InputStream getDataStream(
         PBEDataDecryptorFactory dataDecryptorFactory)
         throws PGPException

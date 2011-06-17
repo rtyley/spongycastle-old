@@ -1,6 +1,6 @@
-package org.bouncycastle.openpgp;
+package org.bouncycastle.openpgp.operator;
 
-import org.bouncycastle.openpgp.operator.PGPDataDecryptor;
+import org.bouncycastle.openpgp.PGPException;
 
 public interface PGPDataDecryptorFactory
 {

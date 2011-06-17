@@ -36,6 +36,12 @@ public class JcePGPDataEncryptorBuilder
         }
     }
 
+    /**
+     * Determine whether or not the resulting encrypted data will be protected using an integrity packet.
+     *
+     * @param withIntegrityPacket true if an integrity packet is to be included, false otherwise.
+     * @return  the current builder.
+     */
     public JcePGPDataEncryptorBuilder setWithIntegrityPacket(boolean withIntegrityPacket)
     {
         this.withIntegrityPacket = withIntegrityPacket;
@@ -57,6 +63,12 @@ public class JcePGPDataEncryptorBuilder
         return this;
     }
 
+    /**
+     * Provide a user defined source of randomness.
+     *
+     * @param random  the secure random to be used.
+     * @return  the current builder.
+     */
     public JcePGPDataEncryptorBuilder setSecureRandom(SecureRandom random)
     {
         this.random = random;

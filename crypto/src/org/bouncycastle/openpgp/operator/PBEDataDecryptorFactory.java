@@ -1,7 +1,7 @@
-package org.bouncycastle.openpgp;
+package org.bouncycastle.openpgp.operator;
 
 import org.bouncycastle.bcpg.S2K;
-import org.bouncycastle.openpgp.operator.PGPDigestCalculatorProvider;
+import org.bouncycastle.openpgp.PGPException;
 
 public abstract class PBEDataDecryptorFactory
     implements PGPDataDecryptorFactory
@@ -15,7 +15,7 @@ public abstract class PBEDataDecryptorFactory
         this.calculatorProvider = calculatorProvider;
     }
 
-    byte[] makeKeyFromPassPhrase(int keyAlgorithm, S2K s2k)
+    public byte[] makeKeyFromPassPhrase(int keyAlgorithm, S2K s2k)
         throws PGPException
     {
         return PGPUtil.makeKeyFromPassPhrase(calculatorProvider, keyAlgorithm, s2k, passPhrase);

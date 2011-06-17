@@ -15,23 +15,37 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
-import org.bouncycastle.openpgp.PBEKeyEncryptionMethodGenerator;
 import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.operator.PBEKeyEncryptionMethodGenerator;
 import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
 
+/**
+ * JCE based generator for password based encryption (PBE) data protection methods.
+ */
 public class JcePBEKeyEncryptionMethodGenerator
     extends PBEKeyEncryptionMethodGenerator
 {
     private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceHelper());
 
+    /**
+     *  Create a PBE encryption method generator using the provided calculator for key calculation.
+     *
+     * @param passPhrase  the passphrase to use as the primary source of key material.
+     * @param s2kDigestCalculator  the digest calculator to use for key calculation.
+     */
     public JcePBEKeyEncryptionMethodGenerator(char[] passPhrase, PGPDigestCalculator s2kDigestCalculator)
     {
         super(passPhrase, s2kDigestCalculator);
     }
 
+    /**
+     * Create a PBE encryption method generator using the default SHA-1 digest calculator for key calculation.
+     *
+     * @param passPhrase  the passphrase to use as the primary source of key material.
+     */
     public JcePBEKeyEncryptionMethodGenerator(char[] passPhrase)
     {
-        super(passPhrase, new SHA1PGPDigestCalculator());
+        this(passPhrase, new SHA1PGPDigestCalculator());
     }
 
     public JcePBEKeyEncryptionMethodGenerator setProvider(Provider provider)
@@ -48,6 +62,12 @@ public class JcePBEKeyEncryptionMethodGenerator
         return this;
     }
 
+    /**
+     * Provide a user defined source of randomness.
+     *
+     * @param random  the secure random to be used.
+     * @return  the current generator.
+     */
     public JcePBEKeyEncryptionMethodGenerator setSecureRandom(SecureRandom random)
     {
         super.setSecureRandom(random);

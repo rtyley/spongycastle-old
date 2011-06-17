@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.test;
 
+import java.security.SecureRandom;
+
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.modes.AEADBlockCipher;
@@ -11,8 +13,6 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
-
-import java.security.SecureRandom;
 
 public class EAXTest
     extends SimpleTest
@@ -170,6 +170,14 @@ public class EAXTest
         EAXBlockCipher decEax = new EAXBlockCipher(new AESFastEngine());
 
         AEADParameters parameters = new AEADParameters(new KeyParameter(k), macSize, n, a);
+        encEax.init(true, parameters);
+        decEax.init(false, parameters);
+
+        runCheckVectors(count, encEax, decEax, p, t, c);
+        runCheckVectors(count, encEax, decEax, p, t, c);
+
+        // key reuse test
+        parameters = new AEADParameters(null, macSize, n, a);
         encEax.init(true, parameters);
         decEax.init(false, parameters);
 

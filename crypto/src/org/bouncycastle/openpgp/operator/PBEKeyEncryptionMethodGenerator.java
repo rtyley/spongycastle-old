@@ -1,11 +1,11 @@
-package org.bouncycastle.openpgp;
+package org.bouncycastle.openpgp.operator;
 
 import java.security.SecureRandom;
 
 import org.bouncycastle.bcpg.ContainedPacket;
 import org.bouncycastle.bcpg.S2K;
 import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
-import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
+import org.bouncycastle.openpgp.PGPException;
 
 public abstract class PBEKeyEncryptionMethodGenerator
     extends PGPKeyEncryptionMethodGenerator

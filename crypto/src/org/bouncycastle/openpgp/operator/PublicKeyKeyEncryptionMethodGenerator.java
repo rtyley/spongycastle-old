@@ -1,9 +1,11 @@
-package org.bouncycastle.openpgp;
+package org.bouncycastle.openpgp.operator;
 
 import java.math.BigInteger;
 
 import org.bouncycastle.bcpg.ContainedPacket;
 import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
+import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPPublicKey;
 
 public abstract class PublicKeyKeyEncryptionMethodGenerator
     extends PGPKeyEncryptionMethodGenerator

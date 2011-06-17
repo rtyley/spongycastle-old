@@ -31,7 +31,6 @@ public class GCMBlockCipher
     private int                 macSize;
     private byte[]              nonce;
     private byte[]              A;
-    private KeyParameter        keyParam;
     private byte[]              H;
     private byte[]              initS;
     private byte[]              J0;
@@ -83,6 +82,8 @@ public class GCMBlockCipher
         this.forEncryption = forEncryption;
         this.macBlock = null;
 
+        KeyParameter        keyParam;
+
         if (params instanceof AEADParameters)
         {
             AEADParameters param = (AEADParameters)params;
@@ -128,7 +129,11 @@ public class GCMBlockCipher
         }
 
         // Cipher always used in forward mode
-        cipher.init(true, keyParam);
+        // if keyParam is null we're reusing the last key.
+        if (keyParam != null)
+        {
+            cipher.init(true, keyParam);
+        }
 
         // TODO This should be configurable by init parameters
         // (but must be 16 if nonce length not 12) (BLOCK_SIZE?)

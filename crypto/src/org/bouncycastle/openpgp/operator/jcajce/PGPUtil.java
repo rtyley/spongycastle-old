@@ -1,15 +1,9 @@
 package org.bouncycastle.openpgp.operator.jcajce;
 
-import java.io.IOException;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
-import org.bouncycastle.bcpg.MPInteger;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.openpgp.PGPException;
@@ -18,40 +12,7 @@ import org.bouncycastle.openpgp.PGPException;
  * Basic utility class
  */
 class PGPUtil
-    implements HashAlgorithmTags
 {
-    private    static String    defProvider = "BC";
-
-
-    static MPInteger[] dsaSigToMpi(
-        byte[] encoding) 
-        throws PGPException
-    {
-        ASN1InputStream aIn = new ASN1InputStream(encoding);
-
-        DERInteger i1;
-        DERInteger i2;
-
-        try
-        {
-            ASN1Sequence s = (ASN1Sequence)aIn.readObject();
-
-            i1 = (DERInteger)s.getObjectAt(0);
-            i2 = (DERInteger)s.getObjectAt(1);
-        }
-        catch (IOException e)
-        {
-            throw new PGPException("exception encoding signature", e);
-        }
-
-        MPInteger[] values = new MPInteger[2];
-        
-        values[0] = new MPInteger(i1.getValue());
-        values[1] = new MPInteger(i2.getValue());
-        
-        return values;
-    }
-    
     static String getDigestName(
         int        hashAlgorithm)
         throws PGPException
@@ -145,7 +106,7 @@ class PGPUtil
         byte[]          keyBytes)
         throws PGPException
     {
-        String    algName = null;
+        String    algName;
         
         switch (algorithm)
         {

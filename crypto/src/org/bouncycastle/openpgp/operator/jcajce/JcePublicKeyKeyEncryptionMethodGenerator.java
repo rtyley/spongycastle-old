@@ -14,7 +14,7 @@ import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PublicKeyKeyEncryptionMethodGenerator;
+import org.bouncycastle.openpgp.operator.PublicKeyKeyEncryptionMethodGenerator;
 
 public class JcePublicKeyKeyEncryptionMethodGenerator
     extends PublicKeyKeyEncryptionMethodGenerator
@@ -23,6 +23,11 @@ public class JcePublicKeyKeyEncryptionMethodGenerator
     private SecureRandom random;
     private JcaPGPKeyConverter keyConverter = new JcaPGPKeyConverter();
 
+    /**
+     * Create a public key encryption method generator with the method to be based on the passed in key.
+     *
+     * @param key   the public key to use for encryption.
+     */
     public JcePublicKeyKeyEncryptionMethodGenerator(PGPPublicKey key)
     {
         super(key);
@@ -46,6 +51,12 @@ public class JcePublicKeyKeyEncryptionMethodGenerator
         return this;
     }
 
+    /**
+     * Provide a user defined source of randomness.
+     *
+     * @param random  the secure random to be used.
+     * @return  the current generator.
+     */
     public JcePublicKeyKeyEncryptionMethodGenerator setSecureRandom(SecureRandom random)
     {
         this.random = random;
@@ -58,25 +69,7 @@ public class JcePublicKeyKeyEncryptionMethodGenerator
     {
         try
         {
-            Cipher c;
-
-            switch (pubKey.getAlgorithm())
-            {
-            case PGPPublicKey.RSA_ENCRYPT:
-            case PGPPublicKey.RSA_GENERAL:
-                c = helper.createCipher("RSA/ECB/PKCS1Padding");
-                break;
-            case PGPPublicKey.ELGAMAL_ENCRYPT:
-            case PGPPublicKey.ELGAMAL_GENERAL:
-                c = helper.createCipher("ElGamal/ECB/PKCS1Padding");
-                break;
-            case PGPPublicKey.DSA:
-                throw new PGPException("Can't use DSA for encryption.");
-            case PGPPublicKey.ECDSA:
-                throw new PGPException("Can't use ECDSA for encryption.");
-            default:
-                throw new PGPException("unknown asymmetric algorithm: " + pubKey.getAlgorithm());
-            }
+            Cipher c = helper.createPublicKeyCipher(pubKey.getAlgorithm());
 
             Key key = keyConverter.getPublicKey(pubKey);
 

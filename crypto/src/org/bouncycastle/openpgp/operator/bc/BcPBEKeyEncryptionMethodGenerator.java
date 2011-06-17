@@ -5,23 +5,43 @@ import java.security.SecureRandom;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.openpgp.PBEKeyEncryptionMethodGenerator;
 import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.operator.PBEKeyEncryptionMethodGenerator;
 import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
 
+/**
+ * A BC lightweight method generator for supporting PBE based encryption operations.
+ */
 public class BcPBEKeyEncryptionMethodGenerator
     extends PBEKeyEncryptionMethodGenerator
 {
+    /**
+     *  Create a PBE encryption method generator using the provided calculator for key calculation.
+     *
+     * @param passPhrase  the passphrase to use as the primary source of key material.
+     * @param s2kDigestCalculator  the digest calculator to use for key calculation.
+     */
     public BcPBEKeyEncryptionMethodGenerator(char[] passPhrase, PGPDigestCalculator s2kDigestCalculator)
     {
         super(passPhrase, s2kDigestCalculator);
     }
 
+    /**
+     * Create a PBE encryption method generator using the default SHA-1 digest calculator for key calculation.
+     *
+     * @param passPhrase  the passphrase to use as the primary source of key material.
+     */
     public BcPBEKeyEncryptionMethodGenerator(char[] passPhrase)
     {
-        super(passPhrase, new SHA1PGPDigestCalculator());
+        this(passPhrase, new SHA1PGPDigestCalculator());
     }
 
+    /**
+     * Provide a user defined source of randomness.
+     *
+     * @param random  the secure random to be used.
+     * @return  the current generator.
+     */
     public BcPBEKeyEncryptionMethodGenerator setSecureRandom(SecureRandom random)
     {
         super.setSecureRandom(random);

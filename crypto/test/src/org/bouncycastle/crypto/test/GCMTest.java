@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.test;
 
+import java.security.SecureRandom;
+
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
@@ -11,8 +13,6 @@ import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
-
-import java.security.SecureRandom;
 
 /**
  * Test vectors from "The Galois/Counter Mode of Operation (GCM)", McGrew/Viega, Appendix B
@@ -480,6 +480,25 @@ public class GCMTest
         }
 
         byte[] decT = cipher.getMac();
+        if (!areEqual(encT, decT))
+        {
+            fail("decryption produced different mac from encryption");
+        }
+
+        //
+        // key  reuse test
+        //
+        cipher.init(false, new AEADParameters(null, parameters.getMacSize(), parameters.getNonce(), parameters.getAssociatedText()));
+        decP = new byte[cipher.getOutputSize(C.length)];
+        len = cipher.processBytes(C, 0, C.length, decP, 0);
+        len += cipher.doFinal(decP, len);
+
+        if (!areEqual(P, decP))
+        {
+            fail("incorrect decrypt in randomised test");
+        }
+
+        decT = cipher.getMac();
         if (!areEqual(encT, decT))
         {
             fail("decryption produced different mac from encryption");
