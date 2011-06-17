@@ -7,11 +7,7 @@ import java.io.OutputStream;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.encodings.PKCS1Encoding;
-import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 
@@ -115,29 +111,8 @@ class TlsRSAKeyExchange implements TlsKeyExchange
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
     {
-        /*
-         * Choose a PremasterSecret and send it encrypted to the server
-         */
-        premasterSecret = new byte[48];
-        context.getSecureRandom().nextBytes(premasterSecret);
-        TlsUtils.writeVersion(premasterSecret, 0);
-
-        PKCS1Encoding encoding = new PKCS1Encoding(new RSABlindedEngine());
-        encoding.init(true, new ParametersWithRandom(this.rsaServerPublicKey, context.getSecureRandom()));
-
-        try
-        {
-            byte[] keData = encoding.processBlock(premasterSecret, 0, premasterSecret.length);
-            TlsUtils.writeUint24(keData.length + 2, os);
-            TlsUtils.writeOpaque16(keData, os);
-        }
-        catch (InvalidCipherTextException e)
-        {
-            /*
-             * This should never happen, only during decryption.
-             */
-            throw new TlsFatalAlert(AlertDescription.internal_error);
-        }
+        this.premasterSecret = TlsRSAUtils.generateEncryptedPreMasterSecret(context.getSecureRandom(),
+            this.rsaServerPublicKey, os);
     }
 
     public byte[] generatePremasterSecret() throws IOException
