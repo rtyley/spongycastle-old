@@ -291,6 +291,16 @@ public class TlsUtils
         return buf;
     }
 
+    static byte[] PRF_1_2(Digest digest, byte[] secret, String asciiLabel, byte[] seed, int size)
+    {
+        byte[] label = Strings.toByteArray(asciiLabel);
+        byte[] labelSeed = concat(label, seed);
+
+        byte[] buf = new byte[size];
+        hmac_hash(digest, secret, labelSeed, buf);
+        return buf;
+    }
+
     static byte[] concat(byte[] a, byte[] b)
     {
         byte[] c = new byte[a.length + b.length];
