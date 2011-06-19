@@ -6,20 +6,22 @@ import java.util.Hashtable;
 public abstract class PSKTlsClient implements TlsClient
 {
     protected TlsCipherFactory cipherFactory;
+    protected TlsPSKIdentity pskIdentity;
 
     protected TlsClientContext context;
 
     protected int selectedCompressionMethod;
     protected int selectedCipherSuite;
 
-    public PSKTlsClient()
+    public PSKTlsClient(TlsPSKIdentity pskIdentity)
     {
-        this(new DefaultTlsCipherFactory());
+        this(new DefaultTlsCipherFactory(), pskIdentity);
     }
 
-    public PSKTlsClient(TlsCipherFactory cipherFactory)
+    public PSKTlsClient(TlsCipherFactory cipherFactory, TlsPSKIdentity pskIdentity)
     {
         this.cipherFactory = cipherFactory;
+        this.pskIdentity = pskIdentity;
     }
 
     public void init(TlsClientContext context)
@@ -167,6 +169,6 @@ public abstract class PSKTlsClient implements TlsClient
 
     protected TlsKeyExchange createPSKKeyExchange(int keyExchange)
     {
-        return new TlsPSKKeyExchange(context, keyExchange);
+        return new TlsPSKKeyExchange(context, keyExchange, pskIdentity);
     }
 }

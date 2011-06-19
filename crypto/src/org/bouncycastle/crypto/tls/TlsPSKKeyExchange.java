@@ -15,10 +15,9 @@ class TlsPSKKeyExchange implements TlsKeyExchange
 {
     protected TlsClientContext context;
     protected int keyExchange;
+    protected TlsPSKIdentity pskIdentity;
 
     protected byte[] psk_identity_hint = null;
-    protected byte[] psk_identity = null;
-    protected byte[] psk = null;
 
     protected DHPublicKeyParameters dhAgreeServerPublicKey = null;
     protected DHPrivateKeyParameters dhAgreeClientPrivateKey = null;
@@ -26,7 +25,7 @@ class TlsPSKKeyExchange implements TlsKeyExchange
     protected RSAKeyParameters rsaServerPublicKey = null;
     protected byte[] premasterSecret;
 
-    TlsPSKKeyExchange(TlsClientContext context, int keyExchange)
+    TlsPSKKeyExchange(TlsClientContext context, int keyExchange, TlsPSKIdentity pskIdentity)
     {
         switch (keyExchange)
         {
@@ -40,6 +39,7 @@ class TlsPSKKeyExchange implements TlsKeyExchange
 
         this.context = context;
         this.keyExchange = keyExchange;
+        this.pskIdentity = pskIdentity;
     }
 
     public void skipServerCertificate() throws IOException
@@ -89,18 +89,26 @@ class TlsPSKKeyExchange implements TlsKeyExchange
 
     public void skipClientCredentials() throws IOException
     {
-        // TODO Insist on something like a TlsPSKCredentials?
+    	// OK
     }
 
     public void processClientCredentials(TlsCredentials clientCredentials) throws IOException
     {
-        // TODO Accept something like a TlsPSKCredentials?
         throw new TlsFatalAlert(AlertDescription.internal_error);
     }
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
     {
-        // TODO Pass psk_identity_hint to credentials, get back psk_identity and psk
+    	if (psk_identity_hint == null || psk_identity_hint.length == 0)
+    	{
+    		pskIdentity.skipIdentityHint();
+    	}
+    	else
+    	{
+    		pskIdentity.notifyIdentityHint(psk_identity_hint);
+    	}
+
+    	byte[] psk_identity = pskIdentity.getPSKIdentity();
 
         TlsUtils.writeOpaque16(psk_identity, os);
 
@@ -118,14 +126,16 @@ class TlsPSKKeyExchange implements TlsKeyExchange
 
     public byte[] generatePremasterSecret() throws IOException
     {
-        byte[] other_secret = generateOtherSecret();
+        byte[] psk = pskIdentity.getPSK();
+        byte[] other_secret = generateOtherSecret(psk.length);
+
         ByteArrayOutputStream buf = new ByteArrayOutputStream(4 + other_secret.length + psk.length);
         TlsUtils.writeOpaque16(other_secret, buf);
         TlsUtils.writeOpaque16(psk, buf);
         return buf.toByteArray();
     }
 
-    protected byte[] generateOtherSecret()
+    protected byte[] generateOtherSecret(int pskLength)
     {
         if (this.keyExchange == KeyExchangeAlgorithm.DHE_PSK)
         {
@@ -137,6 +147,6 @@ class TlsPSKKeyExchange implements TlsKeyExchange
             return this.premasterSecret;
         }
 
-        return new byte[psk.length];
+        return new byte[pskLength];
     }
 }
