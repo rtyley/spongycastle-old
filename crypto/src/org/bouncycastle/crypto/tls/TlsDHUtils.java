@@ -43,7 +43,6 @@ public class TlsDHUtils
 
         BigInteger Yc = ((DHPublicKeyParameters)dhAgreeClientKeyPair.getPublic()).getY();
         byte[] keData = BigIntegers.asUnsignedByteArray(Yc);
-        TlsUtils.writeUint24(keData.length + 2, os);
         TlsUtils.writeOpaque16(keData, os);
 
         return dhAgreeClientPrivateKey;

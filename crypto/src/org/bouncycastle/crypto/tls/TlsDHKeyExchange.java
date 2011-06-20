@@ -165,11 +165,7 @@ class TlsDHKeyExchange implements TlsKeyExchange
          * Diffie-Hellman key, then Yc is implicit and does not need to be sent again. In
          * this case, the Client Key Exchange message will be sent, but will be empty.
          */
-        if (agreementCredentials != null)
-        {
-            TlsUtils.writeUint24(0, os);
-        }
-        else
+        if (agreementCredentials == null)
         {
             generateEphemeralClientKeyExchange(dhAgreeServerPublicKey.getParameters(), os);
         }

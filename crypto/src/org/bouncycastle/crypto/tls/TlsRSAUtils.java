@@ -28,7 +28,6 @@ public class TlsRSAUtils
         try
         {
             byte[] keData = encoding.processBlock(premasterSecret, 0, premasterSecret.length);
-            TlsUtils.writeUint24(keData.length + 2, os);
             TlsUtils.writeOpaque16(keData, os);
         }
         catch (InvalidCipherTextException e)

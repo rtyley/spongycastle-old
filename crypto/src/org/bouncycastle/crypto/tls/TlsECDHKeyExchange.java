@@ -167,11 +167,7 @@ class TlsECDHKeyExchange implements TlsKeyExchange
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
     {
-        if (agreementCredentials != null)
-        {
-            TlsUtils.writeUint24(0, os);
-        }
-        else
+        if (agreementCredentials == null)
         {
             generateEphemeralClientKeyExchange(ecAgreeServerPublicKey.getParameters(), os);
         }
@@ -223,7 +219,6 @@ class TlsECDHKeyExchange implements TlsKeyExchange
         this.ecAgreeClientPrivateKey = (ECPrivateKeyParameters)ecAgreeClientKeyPair.getPrivate();
 
         byte[] keData = externalizeKey((ECPublicKeyParameters)ecAgreeClientKeyPair.getPublic());
-        TlsUtils.writeUint24(keData.length + 1, os);
         TlsUtils.writeOpaque8(keData, os);
     }
 

@@ -766,8 +766,15 @@ public class TlsProtocolHandler
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         TlsUtils.writeUint8(HandshakeType.certificate, bos);
+
+        // Reserve space for length
+        TlsUtils.writeUint24(0, bos);
+
         clientCert.encode(bos);
         byte[] message = bos.toByteArray();
+
+        // Patch actual length back in
+        TlsUtils.writeUint24(message.length - 4, message, 1);
 
         rs.writeMessage(ContentType.handshake, message, 0, message.length);
     }
@@ -775,9 +782,17 @@ public class TlsProtocolHandler
     private void sendClientKeyExchange() throws IOException
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
         TlsUtils.writeUint8(HandshakeType.client_key_exchange, bos);
+        
+        // Reserve space for length
+        TlsUtils.writeUint24(0, bos);
+
         this.keyExchange.generateClientKeyExchange(bos);
         byte[] message = bos.toByteArray();
+
+        // Patch actual length back in
+        TlsUtils.writeUint24(message.length - 4, message, 1);
 
         rs.writeMessage(ContentType.handshake, message, 0, message.length);
     }

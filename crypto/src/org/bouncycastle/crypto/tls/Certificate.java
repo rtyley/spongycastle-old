@@ -80,7 +80,6 @@ public class Certificate
             totalSize += encCert.length + 3;
         }
 
-        TlsUtils.writeUint24(totalSize + 3, os);
         TlsUtils.writeUint24(totalSize, os);
 
         for (int i = 0; i < encCerts.size(); ++i)

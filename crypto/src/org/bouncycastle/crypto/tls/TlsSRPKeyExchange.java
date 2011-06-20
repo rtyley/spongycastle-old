@@ -177,7 +177,6 @@ class TlsSRPKeyExchange implements TlsKeyExchange
     {
         byte[] keData = BigIntegers.asUnsignedByteArray(srpClient.generateClientCredentials(s,
             this.identity, this.password));
-        TlsUtils.writeUint24(keData.length + 2, os);
         TlsUtils.writeOpaque16(keData, os);
     }
 
