@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.util.Arrays;
 
 /**
  * A generic TLS MAC implementation, which can be used with any kind of Digest to act as
@@ -14,6 +15,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 public class TlsMac
 {
     protected long seqNo;
+    protected byte[] secret;
     protected HMac mac;
 
     /**
@@ -26,11 +28,39 @@ public class TlsMac
      */
     public TlsMac(Digest digest, byte[] key_block, int offset, int len)
     {
-        this.mac = new HMac(digest);
-        KeyParameter param = new KeyParameter(key_block, offset, len);
-        this.mac.init(param);
         this.seqNo = 0;
+
+        KeyParameter param = new KeyParameter(key_block, offset, len);
+
+        this.secret = Arrays.clone(param.getKey());
+
+        this.mac = new HMac(digest);
+        this.mac.init(param);
     }
+
+	/**
+	 * @return the MAC write secret
+	 */
+	public byte[] getMACSecret()
+	{
+		return this.secret;
+	}
+
+	/**
+	 * @return the current write sequence number
+	 */
+	public long getSequenceNumber()
+	{
+		return this.seqNo;
+	}
+
+	/**
+	 * Increment the current write sequence number
+	 */
+	public void incSequenceNumber()
+	{
+		this.seqNo++;
+	}
 
     /**
      * @return The Keysize of the mac.

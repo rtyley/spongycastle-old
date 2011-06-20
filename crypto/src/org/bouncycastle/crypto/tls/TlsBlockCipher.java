@@ -22,6 +22,16 @@ public class TlsBlockCipher implements TlsCipher
     protected TlsMac writeMac;
     protected TlsMac readMac;
 
+	public TlsMac getWriteMac()
+	{
+		return writeMac;
+	}
+
+	public TlsMac getReadMac()
+	{
+		return readMac;
+	}
+
     public TlsBlockCipher(TlsClientContext context, BlockCipher encryptCipher,
         BlockCipher decryptCipher, Digest writeDigest, Digest readDigest, int cipherKeySize)
     {
