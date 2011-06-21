@@ -162,7 +162,10 @@ public class TimeStampResponse
 
             if (scV1 != null && scV2 != null)
             {
-                throw new TSPValidationException("conflicting signing certificate attributes present.");
+                /*
+                 * RFC 5035 5.4. If both attributes exist in a single message,
+                 * they are independently evaluated. 
+                 */
             }
 
             if (request.getReqPolicy() != null && !request.getReqPolicy().equals(tstInfo.getPolicy()))
