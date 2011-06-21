@@ -111,7 +111,7 @@ class TlsRSAKeyExchange implements TlsKeyExchange
 
     public void generateClientKeyExchange(OutputStream os) throws IOException
     {
-        this.premasterSecret = TlsRSAUtils.generateEncryptedPreMasterSecret(context.getSecureRandom(),
+        this.premasterSecret = TlsRSAUtils.generateEncryptedPreMasterSecret(context,
             this.rsaServerPublicKey, os);
     }
 

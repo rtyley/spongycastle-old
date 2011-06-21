@@ -52,9 +52,9 @@ public class TlsBlockCipher implements TlsCipher
         int offset = 0;
 
         // Init MACs
-        writeMac = new TlsMac(writeDigest, key_block, offset, writeDigest.getDigestSize());
+        writeMac = new TlsMac(context, writeDigest, key_block, offset, writeDigest.getDigestSize());
         offset += writeDigest.getDigestSize();
-        readMac = new TlsMac(readDigest, key_block, offset, readDigest.getDigestSize());
+        readMac = new TlsMac(context, readDigest, key_block, offset, readDigest.getDigestSize());
         offset += readDigest.getDigestSize();
 
         // Init Ciphers

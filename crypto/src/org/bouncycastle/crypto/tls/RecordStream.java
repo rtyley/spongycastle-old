@@ -11,6 +11,7 @@ import java.io.OutputStream;
 class RecordStream
 {
     private TlsProtocolHandler handler;
+    private TlsClientContext context = null;
     private InputStream is;
     private OutputStream os;
     private CombinedHash hash;
@@ -32,6 +33,11 @@ class RecordStream
         this.writeCipher = this.readCipher;
     }
 
+    void init(TlsClientContext context)
+    {
+        this.context = context;
+    }
+
     void clientCipherSpecDecided(TlsCompression tlsCompression, TlsCipher tlsCipher)
     {
         this.writeCompression = tlsCompression;
@@ -47,7 +53,14 @@ class RecordStream
     public void readData() throws IOException
     {
         short type = TlsUtils.readUint8(is);
-        TlsUtils.checkVersion(is);
+
+        // TODO In light of versioning and SSLv3, what should we expect here?
+        ProtocolVersion expectedVersion = ProtocolVersion.TLSv10; //context.getServerVersion();
+        if (!expectedVersion.equals(TlsUtils.readVersion(is)))
+        {
+            throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+        }
+
         int size = TlsUtils.readUint16(is);
         byte[] buf = decodeAndVerify(type, is, size);
         handler.processData(type, buf, 0, buf.length);
@@ -95,7 +108,9 @@ class RecordStream
 
         byte[] writeMessage = new byte[ciphertext.length + 5];
         TlsUtils.writeUint8(type, writeMessage, 0);
-        TlsUtils.writeVersion(writeMessage, 1);
+        // TODO In light of versioning, what should we send here?
+//        TlsUtils.writeVersion(context.getServerVersion(), writeMessage, 1);
+        TlsUtils.writeVersion(ProtocolVersion.TLSv10, writeMessage, 1);
         TlsUtils.writeUint16(ciphertext.length, writeMessage, 3);
         System.arraycopy(ciphertext, 0, writeMessage, 5, ciphertext.length);
         os.write(writeMessage);

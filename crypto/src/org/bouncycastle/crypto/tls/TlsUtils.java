@@ -204,24 +204,16 @@ public class TlsUtils
         return value;
     }
 
-    protected static void checkVersion(byte[] readVersion)
-        throws IOException
+    static ProtocolVersion readVersion(byte[] buf) throws IOException
     {
-        if ((readVersion[0] != 3) || (readVersion[1] != 1))
-        {
-            throw new TlsFatalAlert(AlertDescription.protocol_version);
-        }
+        return ProtocolVersion.get(buf[0], buf[1]);
     }
 
-    protected static void checkVersion(InputStream is)
-        throws IOException
+    static ProtocolVersion readVersion(InputStream is) throws IOException
     {
         int i1 = is.read();
         int i2 = is.read();
-        if ((i1 != 3) || (i2 != 1))
-        {
-            throw new TlsFatalAlert(AlertDescription.protocol_version);
-        }
+        return ProtocolVersion.get(i1, i2);
     }
 
     protected static void writeGMTUnixTime(byte[] buf, int offset)
@@ -233,16 +225,16 @@ public class TlsUtils
         buf[offset + 3] = (byte)t;
     }
 
-    protected static void writeVersion(OutputStream os) throws IOException
+    static void writeVersion(ProtocolVersion version, OutputStream os) throws IOException
     {
-        os.write(3);
-        os.write(1);
+        os.write(version.getMajorVersion());
+        os.write(version.getMinorVersion());
     }
 
-    protected static void writeVersion(byte[] buf, int offset) throws IOException
+    static void writeVersion(ProtocolVersion version, byte[] buf, int offset) throws IOException
     {
-        buf[offset] = 3;
-        buf[offset + 1] = 1;
+        buf[offset] = (byte)version.getMajorVersion();
+        buf[offset + 1] = (byte)version.getMinorVersion();
     }
 
     private static void hmac_hash(Digest digest, byte[] secret, byte[] seed, byte[] out)

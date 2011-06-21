@@ -7,12 +7,16 @@ public interface TlsClient
 {
     void init(TlsClientContext context);
 
+    ProtocolVersion getClientVersion();
+
     int[] getCipherSuites();
 
     short[] getCompressionMethods();
 
     // Hashtable is (Integer -> byte[])
     Hashtable getClientExtensions() throws IOException;
+
+    void notifyServerVersion(ProtocolVersion selectedVersion) throws IOException;
 
     void notifySessionID(byte[] sessionID);
 

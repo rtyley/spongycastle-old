@@ -7,6 +7,8 @@ class TlsClientContextImpl implements TlsClientContext
     private SecureRandom secureRandom;
     private SecurityParameters securityParameters;
 
+    private ProtocolVersion clientVersion = null;
+    private ProtocolVersion serverVersion = null;
     private Object userObject = null;
 
     TlsClientContextImpl(SecureRandom secureRandom, SecurityParameters securityParameters)
@@ -23,6 +25,26 @@ class TlsClientContextImpl implements TlsClientContext
     public SecurityParameters getSecurityParameters()
     {
         return securityParameters;
+    }
+
+    public ProtocolVersion getClientVersion()
+    {
+        return clientVersion;
+    }
+
+    public void setClientVersion(ProtocolVersion clientVersion)
+    {
+        this.clientVersion = clientVersion;
+    }
+
+    public ProtocolVersion getServerVersion()
+    {
+        return serverVersion;
+    }
+
+    public void setServerVersion(ProtocolVersion serverVersion)
+    {
+        this.serverVersion = serverVersion;
     }
 
     public Object getUserObject()

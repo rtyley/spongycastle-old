@@ -12,7 +12,8 @@ public class AlertDescription
     public static final short record_overflow = 22;
     public static final short decompression_failure = 30;
     public static final short handshake_failure = 40;
-    /* 41 is not defined, for historical reasons */
+    /* no_certificate(41) is specific to SSLv3 */
+    public static final short no_certificate = 41;
     public static final short bad_certificate = 42;
     public static final short unsupported_certificate = 43;
     public static final short certificate_revoked = 44;

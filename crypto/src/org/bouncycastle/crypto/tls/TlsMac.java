@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.Arrays;
@@ -14,20 +15,23 @@ import org.bouncycastle.util.Arrays;
  */
 public class TlsMac
 {
+    protected TlsClientContext context;
     protected long seqNo;
     protected byte[] secret;
-    protected HMac mac;
+    protected Mac mac;
 
     /**
      * Generate a new instance of an TlsMac.
      * 
+     * @param context the TLS client context
      * @param digest The digest to use.
      * @param key_block A byte-array where the key for this mac is located.
      * @param offset The number of bytes to skip, before the key starts in the buffer.
      * @param len The length of the key.
      */
-    public TlsMac(Digest digest, byte[] key_block, int offset, int len)
+    public TlsMac(TlsClientContext context, Digest digest, byte[] key_block, int offset, int len)
     {
+        this.context = context;
         this.seqNo = 0;
 
         KeyParameter param = new KeyParameter(key_block, offset, len);
@@ -83,12 +87,20 @@ public class TlsMac
      */
     public byte[] calculateMac(short type, byte[] message, int offset, int len)
     {
-        ByteArrayOutputStream bosMac = new ByteArrayOutputStream(13);
+        ProtocolVersion serverVersion = context.getServerVersion();
+        boolean isTls = serverVersion.getFullVersion() >= ProtocolVersion.TLSv10.getFullVersion();
+
+        ByteArrayOutputStream bosMac = new ByteArrayOutputStream(isTls ? 13 : 11);
         try
         {
             TlsUtils.writeUint64(seqNo++, bosMac);
             TlsUtils.writeUint8(type, bosMac);
-            TlsUtils.writeVersion(bosMac);
+
+            if (isTls)
+            {
+                TlsUtils.writeVersion(serverVersion, bosMac);
+            }
+
             TlsUtils.writeUint16(len, bosMac);
         }
         catch (IOException e)

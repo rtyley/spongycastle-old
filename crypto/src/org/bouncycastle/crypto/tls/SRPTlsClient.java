@@ -36,6 +36,11 @@ public abstract class SRPTlsClient implements TlsClient
         this.context = context;
     }
 
+    public ProtocolVersion getClientVersion()
+    {
+        return ProtocolVersion.TLSv10;
+    }
+
     public int[] getCipherSuites()
     {
         return new int[] {
@@ -64,6 +69,14 @@ public abstract class SRPTlsClient implements TlsClient
     public short[] getCompressionMethods()
     {
         return new short[] { CompressionMethod.NULL };
+    }
+
+    public void notifyServerVersion(ProtocolVersion serverVersion) throws IOException
+    {
+        if (!ProtocolVersion.TLSv10.equals(serverVersion))
+        {
+            throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+        }
     }
 
     public void notifySessionID(byte[] sessionID)

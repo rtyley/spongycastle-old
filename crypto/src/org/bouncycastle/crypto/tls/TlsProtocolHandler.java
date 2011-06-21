@@ -278,7 +278,14 @@ public class TlsProtocolHandler
                         /*
                          * Read the server hello message
                          */
-                        TlsUtils.checkVersion(is);
+                        ProtocolVersion server_version = TlsUtils.readVersion(is);
+                        if (server_version.getFullVersion() > this.tlsClientContext.getClientVersion().getFullVersion())
+                        {
+                            this.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
+                        }
+
+                        this.tlsClientContext.setServerVersion(server_version);
+                        this.tlsClient.notifyServerVersion(server_version);
 
                         /*
                          * Read the server random
@@ -854,11 +861,20 @@ public class TlsProtocolHandler
         TlsUtils.writeGMTUnixTime(securityParameters.clientRandom, 0);
 
         this.tlsClientContext = new TlsClientContextImpl(random, securityParameters);
+
+        this.rs.init(tlsClientContext);
+
         this.tlsClient = tlsClient;
         this.tlsClient.init(tlsClientContext);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        TlsUtils.writeVersion(os);
+
+        ProtocolVersion client_version = this.tlsClient.getClientVersion();
+        this.tlsClientContext.setClientVersion(client_version);
+        // TODO For SSLv3 support, server version needs to be set to ProtocolVersion.SSLv3
+        this.tlsClientContext.setServerVersion(client_version);
+        TlsUtils.writeVersion(client_version, os);
+
         os.write(securityParameters.clientRandom);
 
         /*

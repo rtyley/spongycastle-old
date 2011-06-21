@@ -114,7 +114,7 @@ class TlsPSKKeyExchange implements TlsKeyExchange
 
         if (this.keyExchange == KeyExchangeAlgorithm.RSA_PSK)
         {
-            this.premasterSecret = TlsRSAUtils.generateEncryptedPreMasterSecret(context.getSecureRandom(),
+            this.premasterSecret = TlsRSAUtils.generateEncryptedPreMasterSecret(context,
                 this.rsaServerPublicKey, os);
         }
         else if (this.keyExchange == KeyExchangeAlgorithm.DHE_PSK)
