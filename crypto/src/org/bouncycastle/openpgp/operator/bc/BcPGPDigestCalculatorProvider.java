@@ -14,7 +14,7 @@ public class BcPGPDigestCalculatorProvider
     public PGPDigestCalculator get(final int algorithm)
         throws PGPException
     {
-        Digest dig = BcImplProvider.createDigest(algorithm);
+        final Digest dig = BcImplProvider.createDigest(algorithm);
 
         final DigestOutputStream stream = new DigestOutputStream(dig);
 
@@ -33,6 +33,11 @@ public class BcPGPDigestCalculatorProvider
             public byte[] getDigest()
             {
                 return stream.getDigest();
+            }
+
+            public void reset()
+            {
+                dig.reset();
             }
         };
     }

@@ -44,10 +44,11 @@ public class JcaPGPDigestCalculatorProviderBuilder
                 throws PGPException
             {
                 final DigestOutputStream stream;
+                final MessageDigest dig;
 
                 try
                 {
-                    MessageDigest dig = helper.createDigest(algorithm);
+                    dig = helper.createDigest(algorithm);
 
                     stream = new DigestOutputStream(dig);
                 }
@@ -71,6 +72,11 @@ public class JcaPGPDigestCalculatorProviderBuilder
                     public byte[] getDigest()
                     {
                         return stream.getDigest();
+                    }
+
+                    public void reset()
+                    {
+                        dig.reset();
                     }
                 };
             }

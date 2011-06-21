@@ -3,7 +3,6 @@ package org.bouncycastle.openpgp;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -12,8 +11,6 @@ import java.security.PublicKey;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.DSAPublicKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -34,7 +31,7 @@ import org.bouncycastle.bcpg.UserAttributePacket;
 import org.bouncycastle.bcpg.UserIDPacket;
 import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
-import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPKeyConverter;
 import org.bouncycastle.util.Arrays;
 
 /**
@@ -487,57 +484,16 @@ public class PGPPublicKey
         String provider)
         throws PGPException, NoSuchProviderException
     {
-        return getKey(PGPUtil.getProvider(provider));
+        return new JcaPGPKeyConverter().setProvider(provider).getPublicKey(this);
     }
 
     public PublicKey getKey(
         Provider provider)
         throws PGPException
     {
-        KeyFactory                        fact;
-        
-        try
-        {
-            switch (publicPk.getAlgorithm())
-            {
-            case RSA_ENCRYPT:
-            case RSA_GENERAL:
-            case RSA_SIGN:
-                RSAPublicBCPGKey    rsaK = (RSAPublicBCPGKey)publicPk.getKey();
-                RSAPublicKeySpec    rsaSpec = new RSAPublicKeySpec(rsaK.getModulus(), rsaK.getPublicExponent());
-    
-                fact = KeyFactory.getInstance("RSA", provider);
-                
-                return fact.generatePublic(rsaSpec);
-            case DSA:
-                DSAPublicBCPGKey    dsaK = (DSAPublicBCPGKey)publicPk.getKey();
-                DSAPublicKeySpec    dsaSpec = new DSAPublicKeySpec(dsaK.getY(), dsaK.getP(), dsaK.getQ(), dsaK.getG());
-            
-                fact = KeyFactory.getInstance("DSA", provider);
-                
-                return fact.generatePublic(dsaSpec);
-            case ELGAMAL_ENCRYPT:
-            case ELGAMAL_GENERAL:
-                ElGamalPublicBCPGKey    elK = (ElGamalPublicBCPGKey)publicPk.getKey();
-                ElGamalPublicKeySpec    elSpec = new ElGamalPublicKeySpec(elK.getY(), new ElGamalParameterSpec(elK.getP(), elK.getG()));
-                
-                fact = KeyFactory.getInstance("ElGamal", provider);
-                
-                return fact.generatePublic(elSpec);
-            default:
-                throw new PGPException("unknown public key algorithm encountered");
-            }
-        }
-        catch (PGPException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new PGPException("exception constructing public key", e);
-        }
+        return new JcaPGPKeyConverter().setProvider(provider).getPublicKey(this);
     }
-    
+
     /**
      * Return any userIDs associated with the key.
      * 

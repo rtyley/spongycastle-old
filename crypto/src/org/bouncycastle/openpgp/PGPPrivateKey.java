@@ -1,9 +1,15 @@
 package org.bouncycastle.openpgp;
 
 import java.security.PrivateKey;
+import java.security.interfaces.DSAPrivateKey;
+import java.security.interfaces.RSAPrivateCrtKey;
 
 import org.bouncycastle.bcpg.BCPGKey;
+import org.bouncycastle.bcpg.DSASecretBCPGKey;
+import org.bouncycastle.bcpg.ElGamalSecretBCPGKey;
 import org.bouncycastle.bcpg.PublicKeyPacket;
+import org.bouncycastle.bcpg.RSASecretBCPGKey;
+import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPKeyConverter;
 
 /**
@@ -30,6 +36,30 @@ public class PGPPrivateKey
     {
         this.privateKey = privateKey;
         this.keyID = keyID;
+
+        if (privateKey instanceof  RSAPrivateCrtKey)
+        {
+            RSAPrivateCrtKey rsK = (RSAPrivateCrtKey)privateKey;
+
+            privateKeyDataPacket = new RSASecretBCPGKey(rsK.getPrivateExponent(), rsK.getPrimeP(), rsK.getPrimeQ());
+        }
+        else if (privateKey instanceof DSAPrivateKey)
+        {
+            DSAPrivateKey dsK = (DSAPrivateKey)privateKey;
+
+            privateKeyDataPacket = new DSASecretBCPGKey(dsK.getX());
+        }
+        else if (privateKey instanceof  ElGamalPrivateKey)
+        {
+            ElGamalPrivateKey esK = (ElGamalPrivateKey)privateKey;
+
+            privateKeyDataPacket = new ElGamalSecretBCPGKey(esK.getX());
+        }
+        else
+        {
+            throw new IllegalArgumentException("unknown key class");
+        }
+
     }
 
     PGPPrivateKey(

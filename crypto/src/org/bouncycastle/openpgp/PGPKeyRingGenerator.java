@@ -1,13 +1,17 @@
 package org.bouncycastle.openpgp;
 
 import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
 import java.security.Provider;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bouncycastle.bcpg.*;
+import org.bouncycastle.bcpg.HashAlgorithmTags;
+import org.bouncycastle.bcpg.PublicSubkeyPacket;
+import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
 
 /**
  * Generator for a PGP master and subkey ring. This class will generate
@@ -182,7 +186,7 @@ public class PGPKeyRingGenerator
             
             subSigs.add(sGen.generateCertification(masterKey.getPublicKey(), keyPair.getPublicKey()));
             
-            keys.add(new PGPSecretKey(keyPair.getPrivateKey(), new PGPPublicKey(keyPair.getPublicKey(), null, subSigs), encAlgorithm, passPhrase, useSHA1, rand, provider));
+            keys.add(new PGPSecretKey(keyPair.getPrivateKey(), new PGPPublicKey(keyPair.getPublicKey(), null, subSigs), convertSHA1Flag(useSHA1), new JcePBESecretKeyEncryptorBuilder(encAlgorithm).setProvider(provider).setSecureRandom(rand).build(passPhrase)));
         }
         catch (PGPException e)
         {
@@ -226,5 +230,11 @@ public class PGPKeyRingGenerator
         }
         
         return new PGPPublicKeyRing(pubKeys);
+    }
+
+    private static PGPDigestCalculator convertSHA1Flag(boolean useSHA1)
+        throws PGPException
+    {
+        return useSHA1 ? new JcaPGPDigestCalculatorProviderBuilder().build().get(HashAlgorithmTags.SHA1) : null;
     }
 }

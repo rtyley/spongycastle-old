@@ -342,7 +342,7 @@ public class PGPEncryptedDataGenerator
             }
             else
             {
-                key = PGPUtil.makeRandomKey(defAlgorithm, rand).getEncoded();
+                key = PGPUtil.makeRandomKey(defAlgorithm, rand);
                 byte[] sessionInfo = createSessionInfo(defAlgorithm, key);
                 PGPKeyEncryptionMethodGenerator m = (PGPKeyEncryptionMethodGenerator)methods.get(0);
 
@@ -351,7 +351,7 @@ public class PGPEncryptedDataGenerator
         }
         else // multiple methods
         {
-            key = PGPUtil.makeRandomKey(defAlgorithm, rand).getEncoded();
+            key = PGPUtil.makeRandomKey(defAlgorithm, rand);
             byte[] sessionInfo = createSessionInfo(defAlgorithm, key);
 
             for (int i = 0; i != methods.size(); i++)

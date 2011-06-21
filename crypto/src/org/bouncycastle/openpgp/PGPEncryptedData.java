@@ -4,8 +4,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
 
 import org.bouncycastle.bcpg.InputStreamPacket;
 import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
@@ -118,38 +116,6 @@ public abstract class PGPEncryptedData
             throw new PGPException("data not integrity protected.");
         }
 
-        if (integrityCalculator != null)
-        {
-            //
-            // make sure we are at the end.
-            //
-            while (encStream.read() >= 0)
-            {
-                // do nothing
-            }
-
-            //
-            // process the MDC packet
-            //
-            int[]    lookAhead = truncStream.getLookAhead();
-
-            OutputStream dOut = integrityCalculator.getOutputStream();
-
-            dOut.write((byte)lookAhead[0]);
-            dOut.write((byte)lookAhead[1]);
-
-            byte[]    digest = integrityCalculator.getDigest();
-            byte[]  streamDigest = new byte[digest.length];
-
-            for (int i = 0; i != streamDigest.length; i++)
-            {
-                streamDigest[i] = (byte)lookAhead[i + 2];
-            }
-
-            return Arrays.constantTimeAreEqual(digest, streamDigest);
-        }
-        DigestInputStream    dIn = (DigestInputStream)encStream;
-
         //
         // make sure we are at the end.
         //
@@ -158,19 +124,19 @@ public abstract class PGPEncryptedData
             // do nothing
         }
 
-        MessageDigest        hash = dIn.getMessageDigest();
-        
         //
         // process the MDC packet
         //
-        int[]    lookAhead = truncStream.getLookAhead();
+        int[] lookAhead = truncStream.getLookAhead();
 
-        hash.update((byte)lookAhead[0]);
-        hash.update((byte)lookAhead[1]);
+        OutputStream dOut = integrityCalculator.getOutputStream();
 
-        byte[]    digest = hash.digest();
-        byte[]  streamDigest = new byte[digest.length];
-        
+        dOut.write((byte)lookAhead[0]);
+        dOut.write((byte)lookAhead[1]);
+
+        byte[] digest = integrityCalculator.getDigest();
+        byte[] streamDigest = new byte[digest.length];
+
         for (int i = 0; i != streamDigest.length; i++)
         {
             streamDigest[i] = (byte)lookAhead[i + 2];

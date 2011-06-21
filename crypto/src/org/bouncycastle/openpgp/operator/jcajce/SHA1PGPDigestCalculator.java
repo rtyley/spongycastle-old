@@ -40,6 +40,11 @@ class SHA1PGPDigestCalculator
         return digest.digest();
     }
 
+    public void reset()
+    {
+        digest.reset();
+    }
+
     private class DigestOutputStream
         extends OutputStream
     {

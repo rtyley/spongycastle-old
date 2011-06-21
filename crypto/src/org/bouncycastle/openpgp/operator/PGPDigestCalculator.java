@@ -27,4 +27,9 @@ public interface PGPDigestCalculator
          * @return a digest.
          */
     byte[] getDigest();
+
+    /**
+     * Reset the underlying digest calculator
+     */
+    void reset();
 }

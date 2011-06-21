@@ -55,7 +55,7 @@ public class BcPBEKeyEncryptionMethodGenerator
         try
         {
             BlockCipher engine = BcImplProvider.createBlockCipher(encAlgorithm);
-            BufferedBlockCipher cipher = BcUtil.createSymmetricKeyWrapper(true, engine, key);
+            BufferedBlockCipher cipher = BcUtil.createSymmetricKeyWrapper(true, engine, key, new byte[engine.getBlockSize()]);
 
             byte[] out = new byte[sessionInfo.length];
 

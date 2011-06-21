@@ -64,11 +64,11 @@ class BcUtil
         };
     }
 
-    public static BufferedBlockCipher createSymmetricKeyWrapper(boolean forEncryption, BlockCipher engine, byte[] key)
+    public static BufferedBlockCipher createSymmetricKeyWrapper(boolean forEncryption, BlockCipher engine, byte[] key, byte[] iv)
     {
         BufferedBlockCipher c = new BufferedBlockCipher(new CFBBlockCipher(engine, engine.getBlockSize() * 8));
 
-        c.init(forEncryption, new ParametersWithIV(new KeyParameter(key), new byte[engine.getBlockSize()]));
+        c.init(forEncryption, new ParametersWithIV(new KeyParameter(key), iv));
 
         return c;
     }

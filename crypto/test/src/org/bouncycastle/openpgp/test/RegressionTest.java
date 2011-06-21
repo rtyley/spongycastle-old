@@ -9,6 +9,7 @@ public class RegressionTest
 {
     public static Test[]    tests = {
         new PGPKeyRingTest(),
+        new BcPGPKeyRingTest(),
         new PGPRSATest(),
         new BcPGPRSATest(),
         new PGPDSATest(),

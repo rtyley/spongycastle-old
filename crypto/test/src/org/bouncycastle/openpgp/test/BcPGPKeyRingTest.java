@@ -9,8 +9,6 @@ import java.security.Security;
 import java.util.Date;
 import java.util.Iterator;
 
-import javax.crypto.Cipher;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.openpgp.PGPEncryptedData;
@@ -25,13 +23,13 @@ import org.bouncycastle.openpgp.PGPSecretKey;
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
 import org.bouncycastle.openpgp.PGPSignature;
-import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBuilder;
-import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
-public class PGPKeyRingTest
+public class BcPGPKeyRingTest
     extends SimpleTest
 {
     byte[] pub1 = Base64.decode(
@@ -1415,12 +1413,12 @@ public class PGPKeyRingTest
                 if (k.getKeyID() == -4049084404703773049L
                      || k.getKeyID() == -1413891222336124627L)
                 {
-                    k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(sec2pass1));
+                    k.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(sec2pass1));
                 }
                 else if (k.getKeyID() == -6498553574938125416L
                     || k.getKeyID() == 59034765524361024L)
                 {
-                    k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(sec2pass2));
+                    k.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(sec2pass2));
                 }
             }
             
@@ -1648,7 +1646,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(sec5pass1));
+                k.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(sec5pass1));
             }
             
             if (keyCount != 2)
@@ -1665,16 +1663,7 @@ public class PGPKeyRingTest
 
     private boolean noIDEA()
     {
-        try
-        {
-            Cipher.getInstance("IDEA", "BC");
-
-            return false;
-        }
-        catch (Exception e)
-        {
-            return true;
-        }
+        return true;
     }
 
     public void test6()
@@ -1825,7 +1814,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(sec8pass));
+                k.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(sec8pass));
             }
             
             if (keyCount != 2)
@@ -1871,7 +1860,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                PGPPrivateKey   pKey = k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(sec9pass));
+                PGPPrivateKey   pKey = k.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(sec9pass));
                 if (keyCount == 1 && pKey != null)
                 {
                     fail("primary secret key found, null expected");
@@ -1966,7 +1955,7 @@ public class PGPKeyRingTest
     
         PGPSecretKeyRing       keyRing = keyRingGen.generateSecretKeyRing();
         
-        keyRing.getSecretKey().extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase));
+        keyRing.getSecretKey().extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(passPhrase));
         
         PGPPublicKeyRing        pubRing = keyRingGen.generatePublicKeyRing();
         
@@ -2093,7 +2082,7 @@ public class PGPKeyRingTest
     
         PGPSecretKeyRing       keyRing = keyRingGen.generateSecretKeyRing();
         
-        keyRing.getSecretKey().extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase));
+        keyRing.getSecretKey().extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(passPhrase));
         
         PGPPublicKeyRing        pubRing = keyRingGen.generatePublicKeyRing();
         
@@ -2174,7 +2163,7 @@ public class PGPKeyRingTest
                 pgpPriv = PGPSecretKeyRing.removeSecretKey(pgpPriv, pgpKey);
                 pgpKey = PGPSecretKey.copyWithNewPassword(
                                     pgpKey,
-                                    new JcePBESecretKeyDecryptorBuilder(new JcaPGPDigestCalculatorProviderBuilder().setProvider("BC").build()).setProvider("BC").build(rewrapPass),
+                                    new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(rewrapPass),
                                     null);
                 pgpPriv = PGPSecretKeyRing.insertSecretKey(pgpPriv, pgpKey);
             
@@ -2366,6 +2355,6 @@ public class PGPKeyRingTest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        runTest(new PGPKeyRingTest());
+        runTest(new BcPGPKeyRingTest());
     }
 }

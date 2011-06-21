@@ -14,6 +14,12 @@ public abstract class PBESecretKeyDecryptor
         this.calculatorProvider = calculatorProvider;
     }
 
+    public PGPDigestCalculator getChecksumCalculator(int hashAlgorithm)
+        throws PGPException
+    {
+        return calculatorProvider.get(hashAlgorithm);
+    }
+
     public byte[] makeKeyFromPassPhrase(int keyAlgorithm, S2K s2k)
         throws PGPException
     {

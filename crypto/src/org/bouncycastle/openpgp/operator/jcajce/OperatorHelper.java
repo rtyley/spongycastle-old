@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
+import java.security.Signature;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -11,6 +12,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.jcajce.JcaJceHelper;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
@@ -127,5 +129,43 @@ class OperatorHelper
         default:
             throw new PGPException("unknown asymmetric algorithm: " + encAlgorithm);
         }
+    }
+
+    private Signature createSignature(String cipherName)
+        throws PGPException
+    {
+        try
+        {
+            return helper.createSignature(cipherName);
+        }
+        catch (GeneralSecurityException e)
+        {
+            throw new PGPException("cannot create signature: " + e.getMessage(), e);
+        }
+    }
+
+    public Signature createSignature(int keyAlgorithm, int hashAlgorithm)
+        throws PGPException
+    {
+        String     encAlg;
+
+        switch (keyAlgorithm)
+        {
+        case PublicKeyAlgorithmTags.RSA_GENERAL:
+        case PublicKeyAlgorithmTags.RSA_SIGN:
+            encAlg = "RSA";
+            break;
+        case PublicKeyAlgorithmTags.DSA:
+            encAlg = "DSA";
+            break;
+        case PublicKeyAlgorithmTags.ELGAMAL_ENCRYPT: // in some malformed cases.
+        case PublicKeyAlgorithmTags.ELGAMAL_GENERAL:
+            encAlg = "ElGamal";
+            break;
+        default:
+            throw new PGPException("unknown algorithm tag in signature:" + keyAlgorithm);
+        }
+
+        return createSignature(PGPUtil.getDigestName(hashAlgorithm) + "with" + encAlg);
     }
 }
