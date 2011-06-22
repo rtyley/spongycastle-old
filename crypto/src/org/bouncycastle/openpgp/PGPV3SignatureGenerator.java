@@ -66,7 +66,7 @@ public class PGPV3SignatureGenerator
         throws NoSuchAlgorithmException, PGPException
     {
         this.providedKeyAlgorithm = keyAlgorithm;
-        this.contentSignerBuilder = new JcaPGPContentSignerBuilder(hashAlgorithm).setProvider(provider);
+        this.contentSignerBuilder = new JcaPGPContentSignerBuilder(keyAlgorithm, hashAlgorithm).setProvider(provider);
     }
 
     /**

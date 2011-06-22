@@ -26,9 +26,11 @@ public class JcaPGPContentSignerBuilder
     private JcaPGPKeyConverter          keyConverter = new JcaPGPKeyConverter();
     private int                         hashAlgorithm;
     private SecureRandom                random;
+    private int keyAlgorithm;
 
-    public JcaPGPContentSignerBuilder(int hashAlgorithm)
+    public JcaPGPContentSignerBuilder(int keyAlgorithm, int hashAlgorithm)
     {
+        this.keyAlgorithm = keyAlgorithm;
         this.hashAlgorithm = hashAlgorithm;
     }
 
@@ -74,7 +76,6 @@ public class JcaPGPContentSignerBuilder
     public PGPContentSigner build(final int signatureType, final PGPPrivateKey privateKey)
         throws PGPException
     {
-        final int                 keyAlgorithm = privateKey.getPublicKeyPacket().getAlgorithm();
         final PGPDigestCalculator digestCalculator = digestCalculatorProviderBuilder.build().get(hashAlgorithm);
         final Signature           signature = helper.createSignature(keyAlgorithm, hashAlgorithm);
 

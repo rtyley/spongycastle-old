@@ -1040,7 +1040,7 @@ public class BcPGPRSATest
     
         KeyPair                    kp = kpg.generateKeyPair();
 
-        PGPSecretKey    secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, PublicKeyAlgorithmTags.RSA_GENERAL, kp.getPublic(), kp.getPrivate(), new Date(), "fred", null, null, new JcaPGPContentSignerBuilder(HashAlgorithmTags.SHA1).setProvider("BC"), new BcPBESecretKeyEncryptorBuilder(SymmetricKeyAlgorithmTags.CAST5).build(passPhrase));
+        PGPSecretKey    secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, PublicKeyAlgorithmTags.RSA_GENERAL, kp.getPublic(), kp.getPrivate(), new Date(), "fred", null, null, new JcaPGPContentSignerBuilder(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1).setProvider("BC"), new BcPBESecretKeyEncryptorBuilder(SymmetricKeyAlgorithmTags.CAST5).build(passPhrase));
     
         PGPPublicKey    key = secretKey.getPublicKey();
 
@@ -1117,7 +1117,7 @@ public class BcPGPRSATest
         //
         kp = kpg.generateKeyPair();
 
-        secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, PublicKeyAlgorithmTags.RSA_GENERAL, kp.getPublic(), kp.getPrivate(), new Date(), "fred", null, null, new JcaPGPContentSignerBuilder(HashAlgorithmTags.SHA1).setProvider("BC"), new BcPBESecretKeyEncryptorBuilder(SymmetricKeyAlgorithmTags.AES_256).build(passPhrase));
+        secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, PublicKeyAlgorithmTags.RSA_GENERAL, kp.getPublic(), kp.getPrivate(), new Date(), "fred", null, null, new JcaPGPContentSignerBuilder(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1).setProvider("BC"), new BcPBESecretKeyEncryptorBuilder(SymmetricKeyAlgorithmTags.AES_256).build(passPhrase));
     
         secretKey.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(passPhrase));
         

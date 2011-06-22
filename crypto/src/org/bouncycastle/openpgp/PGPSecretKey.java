@@ -210,7 +210,7 @@ public class PGPSecretKey
         Provider                    provider)
         throws PGPException
     {
-        this(keyPair.getPrivateKey(), certifiedPublicKey(certificationLevel, keyPair, id, hashedPcks, unhashedPcks, new JcaPGPContentSignerBuilder(HashAlgorithmTags.SHA1).setProvider(provider)), convertSHA1Flag(useSHA1), true, new JcePBESecretKeyEncryptorBuilder(encAlgorithm, new JcaPGPDigestCalculatorProviderBuilder().build().get(HashAlgorithmTags.SHA1)).setProvider(provider).setSecureRandom(rand).build(passPhrase));
+        this(keyPair.getPrivateKey(), certifiedPublicKey(certificationLevel, keyPair, id, hashedPcks, unhashedPcks, new JcaPGPContentSignerBuilder(keyPair.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1).setProvider(provider)), convertSHA1Flag(useSHA1), true, new JcePBESecretKeyEncryptorBuilder(encAlgorithm, new JcaPGPDigestCalculatorProviderBuilder().build().get(HashAlgorithmTags.SHA1)).setProvider(provider).setSecureRandom(rand).build(passPhrase));
     }
 
     private static PGPDigestCalculator convertSHA1Flag(boolean useSHA1)
