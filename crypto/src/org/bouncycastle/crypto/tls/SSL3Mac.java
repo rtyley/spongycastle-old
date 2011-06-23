@@ -25,13 +25,16 @@ public class SSL3Mac implements Mac
 
     /**
      * Base constructor for one of the standard digest algorithms that the byteLength of
-     * the algorithm is know for. Pad length should be 48 for MD5 or 40 for SHA1.
+     * the algorithm is know for. Behaviour is undefined for digests other than MD5 or SHA1.
      * 
      * @param digest the digest.
      */
-    public SSL3Mac(Digest digest, int padLength)
+    public SSL3Mac(Digest digest)
     {
         this.digest = digest;
+
+        int padLength = digest.getDigestSize() == 20 ? 40 : 64 - digest.getDigestSize();
+
         this.ipad = genPad(IPAD, padLength);
         this.opad = genPad(OPAD, padLength);
     }

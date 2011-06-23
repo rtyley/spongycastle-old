@@ -38,7 +38,17 @@ public class TlsMac
 
         this.secret = Arrays.clone(param.getKey());
 
-        this.mac = new HMac(digest);
+        boolean isTls = context.getServerVersion().getFullVersion() >= ProtocolVersion.TLSv10.getFullVersion();
+
+        if (isTls)
+        {
+            this.mac = new HMac(digest);
+        }
+        else
+        {
+            this.mac = new SSL3Mac(digest);
+        }
+
         this.mac.init(param);
     }
 

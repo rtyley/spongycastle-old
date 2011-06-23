@@ -78,22 +78,28 @@ public class TlsBlockCipher implements TlsCipher
     public byte[] encodePlaintext(short type, byte[] plaintext, int offset, int len)
     {
         int blocksize = encryptCipher.getBlockSize();
-
-        // Add a random number of extra blocks worth of padding
         int minPaddingSize = blocksize - ((len + writeMac.getSize() + 1) % blocksize);
-        int maxExtraPadBlocks = (255 - minPaddingSize) / blocksize;
-        int actualExtraPadBlocks = chooseExtraPadBlocks(context.getSecureRandom(), maxExtraPadBlocks);
-        int paddingsize = minPaddingSize + (actualExtraPadBlocks * blocksize);
+        int paddingSize = minPaddingSize;
 
-        int totalsize = len + writeMac.getSize() + paddingsize + 1;
+        boolean isTls = context.getServerVersion().getFullVersion() >= ProtocolVersion.TLSv10.getFullVersion();
+
+        if (isTls)
+        {
+            // Add a random number of extra blocks worth of padding
+            int maxExtraPadBlocks = (255 - minPaddingSize) / blocksize;
+            int actualExtraPadBlocks = chooseExtraPadBlocks(context.getSecureRandom(), maxExtraPadBlocks);
+            paddingSize += (actualExtraPadBlocks * blocksize);
+        }
+
+        int totalsize = len + writeMac.getSize() + paddingSize + 1;
         byte[] outbuf = new byte[totalsize];
         System.arraycopy(plaintext, offset, outbuf, 0, len);
         byte[] mac = writeMac.calculateMac(type, plaintext, offset, len);
         System.arraycopy(mac, 0, outbuf, len, mac.length);
         int paddoffset = len + mac.length;
-        for (int i = 0; i <= paddingsize; i++)
+        for (int i = 0; i <= paddingSize; i++)
         {
-            outbuf[i + paddoffset] = (byte)paddingsize;
+            outbuf[i + paddoffset] = (byte)paddingSize;
         }
         for (int i = 0; i < totalsize; i += blocksize)
         {
@@ -145,16 +151,24 @@ public class TlsBlockCipher implements TlsCipher
         // Note: interpret as unsigned byte
         int paddingsize = paddingsizebyte & 0xff;
 
+        boolean isTls = context.getServerVersion().getFullVersion() >= ProtocolVersion.TLSv10.getFullVersion();
+
         int maxPaddingSize = len - minLength;
+        if (!isTls)
+        {
+            maxPaddingSize = Math.min(maxPaddingSize, blocksize);
+        }
+
         if (paddingsize > maxPaddingSize)
         {
             decrypterror = true;
             paddingsize = 0;
         }
-        else
+        else if (isTls)
         {
             /*
              * Now, check all the padding-bytes (constant-time comparison).
+             * (Skipped for SSLv3, where the padding may be anything)
              */
             byte diff = 0;
             for (int i = lastByteOffset - paddingsize; i < lastByteOffset; ++i)
