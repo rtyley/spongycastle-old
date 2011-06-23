@@ -14,6 +14,8 @@ import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.PacketTags;
 import org.bouncycastle.bcpg.PublicKeyPacket;
 import org.bouncycastle.bcpg.TrustPacket;
+import org.bouncycastle.openpgp.operator.KeyFingerPrintCalculator;
+import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 
 /**
  * Class to hold a single master public key and its subkeys.
@@ -25,14 +27,25 @@ public class PGPPublicKeyRing
     extends PGPKeyRing
 {
     List keys;
-    
+
+    /**
+     * @deprecated use version that takes a KeyFingerPrintCalculator
+     */
     public PGPPublicKeyRing(
         byte[]    encoding)
         throws IOException
     {
-        this(new ByteArrayInputStream(encoding));
+        this(new ByteArrayInputStream(encoding), new JcaKeyFingerprintCalculator());
     }
-    
+
+    public PGPPublicKeyRing(
+        byte[]    encoding,
+        KeyFingerPrintCalculator fingerPrintCalculator)
+        throws IOException
+    {
+        this(new ByteArrayInputStream(encoding), fingerPrintCalculator);
+    }
+
     /**
      * @param pubKeys
      */
@@ -42,8 +55,19 @@ public class PGPPublicKeyRing
         this.keys = pubKeys;
     }
 
+    /**
+     * @deprecated use version that takes a KeyFingerPrintCalculator
+     */
     public PGPPublicKeyRing(
         InputStream    in)
+        throws IOException
+    {
+        this(in, new JcaKeyFingerprintCalculator());
+    }
+
+    public PGPPublicKeyRing(
+        InputStream    in,
+        KeyFingerPrintCalculator fingerPrintCalculator)
         throws IOException
     {
         this.keys = new ArrayList();
@@ -69,13 +93,19 @@ public class PGPPublicKeyRing
         List idSigs = new ArrayList();
         readUserIDs(pIn, ids, idTrusts, idSigs);
 
-        keys.add(new PGPPublicKey(pubPk, trustPk, keySigs, ids, idTrusts, idSigs));
-
-
-        // Read subkeys
-        while (pIn.nextPacketTag() == PacketTags.PUBLIC_SUBKEY)
+        try
         {
-            keys.add(readSubkey(pIn));
+            keys.add(new PGPPublicKey(pubPk, trustPk, keySigs, ids, idTrusts, idSigs, fingerPrintCalculator));
+
+            // Read subkeys
+            while (pIn.nextPacketTag() == PacketTags.PUBLIC_SUBKEY)
+            {
+                keys.add(readSubkey(pIn, fingerPrintCalculator));
+            }
+        }
+        catch (PGPException e)
+        {
+            throw new IOException("processing exception: " + e.toString());
         }
     }
 
@@ -229,8 +259,8 @@ public class PGPPublicKeyRing
         return new PGPPublicKeyRing(keys);
     }
 
-    static PGPPublicKey readSubkey(BCPGInputStream in)
-        throws IOException
+    static PGPPublicKey readSubkey(BCPGInputStream in, KeyFingerPrintCalculator fingerPrintCalculator)
+        throws IOException, PGPException
     {
         PublicKeyPacket pk = (PublicKeyPacket)in.readPacket();
         TrustPacket     kTrust = readOptionalTrustPacket(in);
@@ -238,6 +268,6 @@ public class PGPPublicKeyRing
         // PGP 8 actually leaves out the signature.
         List sigList = readSignaturesAndTrust(in);
 
-        return new PGPPublicKey(pk, kTrust, sigList);
+        return new PGPPublicKey(pk, kTrust, sigList, fingerPrintCalculator);
     }
 }

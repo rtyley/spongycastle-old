@@ -2134,12 +2134,12 @@ public class PGPKeyRingTest
         }
 
         // check key id fetch
-        if (keyRing.getSecretKey(vKey.getKeyID()).getPublicKey().getKeyID() != vKey.getKeyID())
+        if (keyRing.getPublicKey(vKey.getKeyID()).getKeyID() != vKey.getKeyID())
         {
             fail("secret key public key mismatch - vKey");
         }
 
-        if (keyRing.getSecretKey(sKey.getKeyID()).getPublicKey().getKeyID() != sKey.getKeyID())
+        if (keyRing.getPublicKey(sKey.getKeyID()).getKeyID() != sKey.getKeyID())
         {
             fail("secret key public key mismatch - sKey");
         }

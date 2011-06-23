@@ -1,10 +1,12 @@
 package org.bouncycastle.openpgp.operator.bc;
 
 import org.bouncycastle.bcpg.HashAlgorithmTags;
+import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.digests.MD2Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
@@ -23,6 +25,9 @@ import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.ElGamalEngine;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
+import org.bouncycastle.crypto.signers.DSADigestSigner;
+import org.bouncycastle.crypto.signers.DSASigner;
+import org.bouncycastle.crypto.signers.RSADigestSigner;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
 
@@ -53,6 +58,21 @@ class BcImplProvider
             return new TigerDigest();
         default:
             throw new PGPException("cannot recognise digest");
+        }
+    }
+
+    static Signer createSigner(int keyAlgorithm, int hashAlgorithm)
+        throws PGPException
+    {
+        switch(keyAlgorithm)
+        {
+        case PublicKeyAlgorithmTags.RSA_GENERAL:
+        case PublicKeyAlgorithmTags.RSA_SIGN:
+            return new RSADigestSigner(createDigest(hashAlgorithm));
+        case PublicKeyAlgorithmTags.DSA:
+            return new DSADigestSigner(new DSASigner(), createDigest(hashAlgorithm));
+        default:
+            throw new PGPException("cannot recognise keyAlgorithm");
         }
     }
 

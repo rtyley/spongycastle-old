@@ -8,6 +8,8 @@ import java.util.List;
 
 import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.PacketTags;
+import org.bouncycastle.openpgp.operator.KeyFingerPrintCalculator;
+import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 
 /**
  * General class for reading a PGP object stream.
@@ -19,20 +21,48 @@ import org.bouncycastle.bcpg.PacketTags;
  */
 public class PGPObjectFactory
 {
-    BCPGInputStream in;
-    
+    private BCPGInputStream in;
+    private KeyFingerPrintCalculator fingerPrintCalculator;
+
     public PGPObjectFactory(
         InputStream in)
     {
-        this.in = new BCPGInputStream(in);
+        this(in, new JcaKeyFingerprintCalculator());
     }
-    
+
+    /**
+     * Create an object factor suitable for reading keys, key rings and key ring collections.
+     *
+     * @param in stream to read from
+     * @param fingerPrintCalculator  calculator to use in key finger print calculations.
+     */
+    public PGPObjectFactory(
+        InputStream              in,
+        KeyFingerPrintCalculator fingerPrintCalculator)
+    {
+        this.in = new BCPGInputStream(in);
+        this.fingerPrintCalculator = fingerPrintCalculator;
+    }
+
     public PGPObjectFactory(
         byte[] bytes)
     {
         this(new ByteArrayInputStream(bytes));
     }
-    
+
+    /**
+     * Create an object factor suitable for reading keys, key rings and key ring collections.
+     *
+     * @param bytes stream to read from
+     * @param fingerPrintCalculator  calculator to use in key finger print calculations.
+     */
+    public PGPObjectFactory(
+        byte[] bytes,
+        KeyFingerPrintCalculator fingerPrintCalculator)
+    {
+        this(new ByteArrayInputStream(bytes), fingerPrintCalculator);
+    }
+
     /**
      * Return the next object in the stream, or null if the end is reached.
      * 
@@ -67,16 +97,23 @@ public class PGPObjectFactory
         case PacketTags.SECRET_KEY:
             try
             {
-                return new PGPSecretKeyRing(in);
+                return new PGPSecretKeyRing(in, fingerPrintCalculator);
             }
             catch (PGPException e)
             {
                 throw new IOException("can't create secret key object: " + e);
             }
         case PacketTags.PUBLIC_KEY:
-            return new PGPPublicKeyRing(in);
+            return new PGPPublicKeyRing(in, fingerPrintCalculator);
         case PacketTags.PUBLIC_SUBKEY:
-            return PGPPublicKeyRing.readSubkey(in);
+            try
+            {
+                return PGPPublicKeyRing.readSubkey(in, fingerPrintCalculator);
+            }
+            catch (PGPException e)
+            {
+                throw new IOException("processing error: " + e.getMessage(), e);
+            }
         case PacketTags.COMPRESSED_DATA:
             return new PGPCompressedData(in);
         case PacketTags.LITERAL_DATA:

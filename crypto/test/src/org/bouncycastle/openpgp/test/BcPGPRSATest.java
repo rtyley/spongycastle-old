@@ -53,10 +53,13 @@ import org.bouncycastle.openpgp.PGPUserAttributeSubpacketVectorGenerator;
 import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.PGPV3SignatureGenerator;
 import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
+import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.bc.BcPBEDataDecryptorFactory;
 import org.bouncycastle.openpgp.operator.bc.BcPBEKeyEncryptionMethodGenerator;
 import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyEncryptorBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDataEncryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.bc.BcPublicKeyDataDecryptorFactory;
@@ -395,7 +398,7 @@ public class BcPGPRSATest
         //
         // version 3
         //
-        PGPPublicKeyRing        pgpPub = new PGPPublicKeyRing(fingerprintKey);
+        PGPPublicKeyRing        pgpPub = new PGPPublicKeyRing(fingerprintKey, new BcKeyFingerprintCalculator());
 
         PGPPublicKey            pubKey = pgpPub.getPublicKey();
 
@@ -407,7 +410,7 @@ public class BcPGPRSATest
         //
         // version 4
         //
-        pgpPub = new PGPPublicKeyRing(testPubKey);
+        pgpPub = new PGPPublicKeyRing(testPubKey, new BcKeyFingerprintCalculator());
 
         pubKey = pgpPub.getPublicKey();
 
@@ -512,7 +515,7 @@ public class BcPGPRSATest
     private void existingEmbeddedJpegTest()
         throws Exception
     {
-        PGPPublicKeyRing pgpPub = new PGPPublicKeyRing(embeddedJPEGKey);
+        PGPPublicKeyRing pgpPub = new PGPPublicKeyRing(embeddedJPEGKey, new BcKeyFingerprintCalculator());
 
         PGPPublicKey pubKey = pgpPub.getPublicKey();
 
@@ -554,8 +557,8 @@ public class BcPGPRSATest
     private void embeddedJpegTest()
         throws Exception
     {
-        PGPPublicKeyRing pgpPub = new PGPPublicKeyRing(testPubKey);
-        PGPSecretKeyRing pgpSec = new PGPSecretKeyRing(testPrivKey);
+        PGPPublicKeyRing pgpPub = new PGPPublicKeyRing(testPubKey, new BcKeyFingerprintCalculator());
+        PGPSecretKeyRing pgpSec = new PGPSecretKeyRing(testPrivKey, new BcKeyFingerprintCalculator());
 
         PGPPublicKey pubKey = pgpPub.getPublicKey();
 
@@ -565,7 +568,7 @@ public class BcPGPRSATest
 
         PGPUserAttributeSubpacketVector uVec = vGen.generate();
 
-        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1, "BC");
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1));
 
         sGen.initSign(PGPSignature.POSITIVE_CERTIFICATION, pgpSec.getSecretKey().extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(pass)));
 
@@ -671,7 +674,7 @@ public class BcPGPRSATest
 
         byte[] encodedKeyRing = keyRingGen.generatePublicKeyRing().getEncoded();
 
-        PGPPublicKeyRing keyRing = new PGPPublicKeyRing(encodedKeyRing);
+        PGPPublicKeyRing keyRing = new PGPPublicKeyRing(encodedKeyRing, new BcKeyFingerprintCalculator());
 
         for (Iterator it = keyRing.getPublicKeys(); it.hasNext();)
         {
@@ -742,7 +745,7 @@ public class BcPGPRSATest
         //
         // Read the public key
         //
-        PGPPublicKeyRing        pgpPub = new PGPPublicKeyRing(testPubKey);
+        PGPPublicKeyRing        pgpPub = new PGPPublicKeyRing(testPubKey, new BcKeyFingerprintCalculator());
 
         pubKey = pgpPub.getPublicKey().getKey("BC");
 
@@ -777,7 +780,7 @@ public class BcPGPRSATest
         //
         // Read the public key
         //
-        PGPPublicKeyRing     pgpPubV3 = new PGPPublicKeyRing(testPubKeyV3);
+        PGPPublicKeyRing     pgpPubV3 = new PGPPublicKeyRing(testPubKeyV3, new BcKeyFingerprintCalculator());
         PublicKey            pubKeyV3 = pgpPub.getPublicKey().getKey("BC");
 
         //
@@ -795,7 +798,7 @@ public class BcPGPRSATest
 
         if (!noIDEA())
         {
-            PGPSecretKeyRing        pgpPriv = new PGPSecretKeyRing(testPrivKeyV3);
+            PGPSecretKeyRing        pgpPriv = new PGPSecretKeyRing(testPrivKeyV3, new BcKeyFingerprintCalculator());
             PGPPrivateKey           pgpPrivKey = pgpPriv.getSecretKey().extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(passP));
 
             //
@@ -815,7 +818,7 @@ public class BcPGPRSATest
         //
         // Read the private key
         //
-        PGPSecretKeyRing pgpPriv = new PGPSecretKeyRing(testPrivKey);
+        PGPSecretKeyRing pgpPriv = new PGPSecretKeyRing(testPrivKey, new BcKeyFingerprintCalculator());
         PGPPrivateKey pgpPrivKey = pgpPriv.getSecretKey().extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(pass));
         
         //
@@ -855,11 +858,11 @@ public class BcPGPRSATest
         //
         // test signature message
         //
-        PGPObjectFactory           pgpFact = new PGPObjectFactory(sig1);
+        PGPObjectFactory           pgpFact = new PGPObjectFactory(sig1, new BcKeyFingerprintCalculator());
 
         PGPCompressedData          c1 = (PGPCompressedData)pgpFact.nextObject();
 
-        pgpFact = new PGPObjectFactory(c1.getDataStream());
+        pgpFact = new PGPObjectFactory(c1.getDataStream(), new BcKeyFingerprintCalculator());
         
         PGPOnePassSignatureList    p1 = (PGPOnePassSignatureList)pgpFact.nextObject();
         
@@ -870,7 +873,7 @@ public class BcPGPRSATest
         InputStream                dIn = p2.getInputStream();
         int                        ch;
 
-        ops.initVerify(pgpPub.getPublicKey(ops.getKeyID()), "BC");
+        ops.init(new BcPGPContentVerifierBuilderProvider(), pgpPub.getPublicKey(ops.getKeyID()));
         
         while ((ch = dIn.read()) >= 0)
         {
@@ -887,14 +890,14 @@ public class BcPGPRSATest
         //
         // encrypted message - read subkey
         //
-        pgpPriv = new PGPSecretKeyRing(subKey);
+        pgpPriv = new PGPSecretKeyRing(subKey, new BcKeyFingerprintCalculator());
 
         //
         // encrypted message
         //
         byte[]    text = { (byte)'h', (byte)'e', (byte)'l', (byte)'l', (byte)'o', (byte)' ', (byte)'w', (byte)'o', (byte)'r', (byte)'l', (byte)'d', (byte)'!', (byte)'\n' };
         
-        PGPObjectFactory pgpF = new PGPObjectFactory(enc1);
+        PGPObjectFactory pgpF = new PGPObjectFactory(enc1, new BcKeyFingerprintCalculator());
 
         PGPEncryptedDataList            encList = (PGPEncryptedDataList)pgpF.nextObject();
     
@@ -904,11 +907,11 @@ public class BcPGPRSATest
 
         InputStream clear = encP.getDataStream(new BcPublicKeyDataDecryptorFactory(pgpPrivKey));
                  
-        pgpFact = new PGPObjectFactory(clear);
+        pgpFact = new PGPObjectFactory(clear, new BcKeyFingerprintCalculator());
 
         c1 = (PGPCompressedData)pgpFact.nextObject();
 
-        pgpFact = new PGPObjectFactory(c1.getDataStream());
+        pgpFact = new PGPObjectFactory(c1.getDataStream(), new BcKeyFingerprintCalculator());
         
         PGPLiteralData    ld = (PGPLiteralData)pgpFact.nextObject();
     
@@ -948,7 +951,7 @@ public class BcPGPRSATest
 
         cOut.close();
 
-        pgpF = new PGPObjectFactory(cbOut.toByteArray());
+        pgpF = new PGPObjectFactory(cbOut.toByteArray(), new BcKeyFingerprintCalculator());
 
         encList = (PGPEncryptedDataList)pgpF.nextObject();
     
@@ -1021,7 +1024,7 @@ public class BcPGPRSATest
         //
         // read public key with sub key.
         //
-        pgpF = new PGPObjectFactory(subPubKey);
+        pgpF = new PGPObjectFactory(subPubKey, new BcKeyFingerprintCalculator());
         Object    o;
         
         while ((o = pgpFact.nextObject()) != null)
@@ -1074,7 +1077,7 @@ public class BcPGPRSATest
         
         keyEnc = key.getEncoded();
 
-        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1, "BC");
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1));
         
         sGen.initSign(PGPSignature.KEY_REVOCATION, secretKey.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(passPhrase)));
 
@@ -1084,7 +1087,7 @@ public class BcPGPRSATest
 
         keyEnc = key.getEncoded();
 
-        PGPPublicKeyRing    tmpRing = new PGPPublicKeyRing(keyEnc);
+        PGPPublicKeyRing    tmpRing = new PGPPublicKeyRing(keyEnc, new BcKeyFingerprintCalculator());
 
         key = tmpRing.getPublicKey();
 
@@ -1164,7 +1167,7 @@ public class BcPGPRSATest
         
         ByteArrayInputStream        testIn = new ByteArrayInputStream(data.getBytes());
         
-        sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1, "BC");
+        sGen = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1));
     
         sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
 
@@ -1219,7 +1222,7 @@ public class BcPGPRSATest
 
         dIn = p2.getInputStream();
 
-        ops.initVerify(secretKey.getPublicKey(), "BC");
+        ops.init(new BcPGPContentVerifierBuilderProvider(), secretKey.getPublicKey());
         
         while ((ch = dIn.read()) >= 0)
         {
@@ -1239,7 +1242,7 @@ public class BcPGPRSATest
         bOut = new ByteArrayOutputStream();
         
         testIn = new ByteArrayInputStream(data.getBytes());
-        PGPV3SignatureGenerator    sGenV3 = new PGPV3SignatureGenerator(PGPPublicKey.RSA_GENERAL, PGPUtil.SHA1, "BC");
+        PGPV3SignatureGenerator    sGenV3 = new PGPV3SignatureGenerator(new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, PGPUtil.SHA1));
     
         sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
 
@@ -1291,7 +1294,7 @@ public class BcPGPRSATest
 
         dIn = p2.getInputStream();
 
-        ops.initVerify(secretKey.getPublicKey(), "BC");
+        ops.init(new BcPGPContentVerifierBuilderProvider(), secretKey.getPublicKey());
         
         while ((ch = dIn.read()) >= 0)
         {
@@ -1308,7 +1311,7 @@ public class BcPGPRSATest
         //
         // extract PGP 8 private key
         //
-        pgpPriv = new PGPSecretKeyRing(pgp8Key);
+        pgpPriv = new PGPSecretKeyRing(pgp8Key, new BcKeyFingerprintCalculator());
         
         secretKey = pgpPriv.getSecretKey();
         
@@ -1331,7 +1334,7 @@ public class BcPGPRSATest
         int           subKeyDays)
         throws Exception
     {            
-        PGPPublicKeyRing pubRing = new PGPPublicKeyRing(encodedRing);
+        PGPPublicKeyRing pubRing = new PGPPublicKeyRing(encodedRing, new BcKeyFingerprintCalculator());
         PGPPublicKey k = pubRing.getPublicKey();
         
         if (k.getValidDays() != masterDays)

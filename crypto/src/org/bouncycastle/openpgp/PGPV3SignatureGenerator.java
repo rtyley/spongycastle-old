@@ -40,6 +40,7 @@ public class PGPV3SignatureGenerator
      * @throws NoSuchAlgorithmException
      * @throws NoSuchProviderException
      * @throws PGPException
+     * @deprecated   use constructor taking PGPContentSignerBuilder.
      */
      public PGPV3SignatureGenerator(
         int  keyAlgorithm,

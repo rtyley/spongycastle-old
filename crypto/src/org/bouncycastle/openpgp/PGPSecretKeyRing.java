@@ -19,6 +19,8 @@ import org.bouncycastle.bcpg.PublicSubkeyPacket;
 import org.bouncycastle.bcpg.SecretKeyPacket;
 import org.bouncycastle.bcpg.SecretSubkeyPacket;
 import org.bouncycastle.bcpg.TrustPacket;
+import org.bouncycastle.openpgp.operator.KeyFingerPrintCalculator;
+import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 
 /**
  * Class to hold a single master secret key and its subkeys.
@@ -43,15 +45,37 @@ public class PGPSecretKeyRing
         this.extraPubKeys = extraPubKeys;
     }
 
+    /**
+     * @deprecated use version that takes KeyFingerprintCalculator
+     */
     public PGPSecretKeyRing(
         byte[]    encoding)
         throws IOException, PGPException
     {
         this(new ByteArrayInputStream(encoding));
     }
-    
+
+    public PGPSecretKeyRing(
+        byte[]    encoding,
+        KeyFingerPrintCalculator fingerPrintCalculator)
+        throws IOException, PGPException
+    {
+        this(new ByteArrayInputStream(encoding), fingerPrintCalculator);
+    }
+
+    /**
+     * @deprecated use version that takes KeyFingerprintCalculator
+     */
     public PGPSecretKeyRing(
         InputStream    in)
+        throws IOException, PGPException
+    {
+        this(in, new JcaKeyFingerprintCalculator());
+    }
+
+    public PGPSecretKeyRing(
+        InputStream              in,
+        KeyFingerPrintCalculator fingerPrintCalculator)
         throws IOException, PGPException
     {
         this.keys = new ArrayList();
@@ -87,7 +111,7 @@ public class PGPSecretKeyRing
         List idSigs = new ArrayList();
         readUserIDs(pIn, ids, idTrusts, idSigs);
 
-        keys.add(new PGPSecretKey(secret, new PGPPublicKey(secret.getPublicKeyPacket(), trust, keySigs, ids, idTrusts, idSigs)));
+        keys.add(new PGPSecretKey(secret, new PGPPublicKey(secret.getPublicKeyPacket(), trust, keySigs, ids, idTrusts, idSigs, fingerPrintCalculator)));
 
 
         // Read subkeys
@@ -109,7 +133,7 @@ public class PGPSecretKeyRing
                 TrustPacket subTrust = readOptionalTrustPacket(pIn);
                 List        sigList = readSignaturesAndTrust(pIn);
 
-                keys.add(new PGPSecretKey(sub, new PGPPublicKey(sub.getPublicKeyPacket(), subTrust, sigList)));
+                keys.add(new PGPSecretKey(sub, new PGPPublicKey(sub.getPublicKeyPacket(), subTrust, sigList, fingerPrintCalculator)));
             }
             else
             {
@@ -118,7 +142,7 @@ public class PGPSecretKeyRing
                 TrustPacket subTrust = readOptionalTrustPacket(pIn);
                 List        sigList = readSignaturesAndTrust(pIn);
 
-                extraPubKeys.add(new PGPPublicKey(sub, subTrust, sigList));
+                extraPubKeys.add(new PGPPublicKey(sub, subTrust, sigList, fingerPrintCalculator));
             }
         }
     }

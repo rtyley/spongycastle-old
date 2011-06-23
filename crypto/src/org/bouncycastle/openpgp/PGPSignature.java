@@ -296,16 +296,7 @@ public class PGPSignature
             throw new PGPException("cannot encode subpacket array", e);
         }
 
-        try
-        {
-            sigOut.write(sigPck.getSignatureTrailer());
-
-            sigOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new SignatureException(e.getMessage());
-        }
+        addTrailer();
 
         return verifier.verify(this.getSignature());
     }
@@ -332,16 +323,7 @@ public class PGPSignature
         //
         updateWithIdData(0xb4, Strings.toUTF8ByteArray(id));
 
-        try
-        {
-            sigOut.write(sigPck.getSignatureTrailer());
-
-            sigOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new SignatureException(e.getMessage());
-        }
+        addTrailer();
 
         return verifier.verify(this.getSignature());
     }
@@ -363,7 +345,15 @@ public class PGPSignature
     {
         updateWithPublicKey(masterKey);
         updateWithPublicKey(pubKey);
-        
+
+        addTrailer();
+
+        return verifier.verify(this.getSignature());
+    }
+
+    private void addTrailer()
+        throws SignatureException
+    {
         try
         {
             sigOut.write(sigPck.getSignatureTrailer());
@@ -374,10 +364,8 @@ public class PGPSignature
         {
             throw new SignatureException(e.getMessage());
         }
-
-        return verifier.verify(this.getSignature());
     }
-    
+
     /**
      * Verify a key certification, such as a revocation, for the passed in key.
      * 
@@ -397,17 +385,8 @@ public class PGPSignature
         }
 
         updateWithPublicKey(pubKey);
-        
-        try
-        {
-            sigOut.write(sigPck.getSignatureTrailer());
 
-            sigOut.close();
-        }
-        catch (IOException e)
-        {
-            throw new SignatureException(e.getMessage());
-        }
+        addTrailer();
 
         return verifier.verify(this.getSignature());
     }

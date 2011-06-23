@@ -4,10 +4,14 @@ import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
+import java.security.interfaces.DSAParams;
+import java.security.interfaces.DSAPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.DSAPrivateKeySpec;
 import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Date;
 
 import org.bouncycastle.bcpg.BCPGKey;
 import org.bouncycastle.bcpg.DSAPublicBCPGKey;
@@ -21,16 +25,19 @@ import org.bouncycastle.bcpg.RSASecretBCPGKey;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
 import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.operator.KeyFingerPrintCalculator;
 
 public class JcaPGPKeyConverter
 {
     private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceHelper());
+    private KeyFingerPrintCalculator fingerPrintCalculator = new JcaKeyFingerprintCalculator();
 
     public JcaPGPKeyConverter setProvider(Provider provider)
     {
@@ -93,6 +100,50 @@ public class JcaPGPKeyConverter
         {
             throw new PGPException("exception constructing public key", e);
         }
+    }
+
+   /**
+     * Create a PGPPublicKey from the passed in JCA one.
+     * <p>
+     * Note: the time passed in affects the value of the key's keyID, so you probably only want
+     * to do this once for a JCA key, or make sure you keep track of the time you used.
+     *
+     * @param algorithm asymmetric algorithm type representing the public key.
+     * @param pubKey actual public key to associate.
+     * @param time date of creation.
+     * @throws PGPException on key creation problem.
+     */
+    public PGPPublicKey getPGPPublicKey(int algorithm, PublicKey pubKey, Date time)
+        throws PGPException
+    {
+        BCPGKey bcpgKey;
+
+        if (pubKey instanceof RSAPublicKey)
+        {
+            RSAPublicKey    rK = (RSAPublicKey)pubKey;
+
+            bcpgKey = new RSAPublicBCPGKey(rK.getModulus(), rK.getPublicExponent());
+        }
+        else if (pubKey instanceof DSAPublicKey)
+        {
+            DSAPublicKey    dK = (DSAPublicKey)pubKey;
+            DSAParams dP = dK.getParams();
+
+            bcpgKey = new DSAPublicBCPGKey(dP.getP(), dP.getQ(), dP.getG(), dK.getY());
+        }
+        else if (pubKey instanceof ElGamalPublicKey)
+        {
+            ElGamalPublicKey        eK = (ElGamalPublicKey)pubKey;
+            ElGamalParameterSpec    eS = eK.getParameters();
+
+            bcpgKey = new ElGamalPublicBCPGKey(eS.getP(), eS.getG(), eK.getY());
+        }
+        else
+        {
+            throw new PGPException("unknown key class");
+        }
+
+        return new PGPPublicKey(new PublicKeyPacket(algorithm, time, bcpgKey), fingerPrintCalculator);
     }
 
     public PrivateKey getPrivateKey(PGPPrivateKey privKey)
