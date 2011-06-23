@@ -23,6 +23,7 @@ import org.bouncycastle.openpgp.PGPSecretKey;
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.bouncycastle.openpgp.PGPSecretKeyRingCollection;
 import org.bouncycastle.openpgp.PGPSignature;
+import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.util.encoders.Base64;
@@ -1112,7 +1113,7 @@ public class BcPGPKeyRingTest
             
             byte[]    bytes = pgpPub.getEncoded();
             
-            pgpPub = new PGPPublicKeyRing(bytes);
+            pgpPub = new PGPPublicKeyRing(bytes, new BcKeyFingerprintCalculator());
             
             Iterator    it = pgpPub.getPublicKeys();
             while (it.hasNext())
@@ -1378,7 +1379,7 @@ public class BcPGPKeyRingTest
             
             byte[]    bytes = pgpSec.getEncoded();
             
-            pgpSec = new PGPSecretKeyRing(bytes);
+            pgpSec = new PGPSecretKeyRing(bytes, new BcKeyFingerprintCalculator());
             
             Iterator    it = pgpSec.getSecretKeys();
             while (it.hasNext())
@@ -1457,7 +1458,7 @@ public class BcPGPKeyRingTest
             
             byte[]    bytes = pgpPub.getEncoded();
             
-            pgpPub = new PGPPublicKeyRing(bytes);
+            pgpPub = new PGPPublicKeyRing(bytes, new BcKeyFingerprintCalculator());
             
             Iterator    it = pgpPub.getPublicKeys();
             while (it.hasNext())
@@ -1508,7 +1509,7 @@ public class BcPGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                k.extractPrivateKey(sec3pass1, "BC");
+                k.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(sec3pass1));
             }
             
             if (keyCount != 2)
@@ -1545,7 +1546,7 @@ public class BcPGPKeyRingTest
             
             byte[]    bytes = pgpSec.getEncoded();
             
-            pgpSec = new PGPSecretKeyRing(bytes);
+            pgpSec = new PGPSecretKeyRing(bytes, new BcKeyFingerprintCalculator());
             
             Iterator    it = pgpSec.getSecretKeys();
             while (it.hasNext())
@@ -1554,7 +1555,7 @@ public class BcPGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                k.extractPrivateKey(sec3pass1, "BC");
+                k.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(sec3pass1));
             }
             
             if (keyCount != 2)
@@ -1704,7 +1705,7 @@ public class BcPGPKeyRingTest
     public void test7()
         throws Exception
     {
-        PGPPublicKeyRing    pgpPub = new PGPPublicKeyRing(pub7);
+        PGPPublicKeyRing    pgpPub = new PGPPublicKeyRing(pub7, new BcKeyFingerprintCalculator());
         Iterator            it = pgpPub.getPublicKeys();
         PGPPublicKey        masterKey = null;
 
@@ -1765,7 +1766,7 @@ public class BcPGPKeyRingTest
             
             byte[]    bytes = pgpPub.getEncoded();
             
-            pgpPub = new PGPPublicKeyRing(bytes);
+            pgpPub = new PGPPublicKeyRing(bytes, new BcKeyFingerprintCalculator());
             
             Iterator    it = pgpPub.getPublicKeys();
             while (it.hasNext())
@@ -1805,7 +1806,7 @@ public class BcPGPKeyRingTest
             
             byte[]    bytes = pgpSec.getEncoded();
             
-            pgpSec = new PGPSecretKeyRing(bytes);
+            pgpSec = new PGPSecretKeyRing(bytes, new BcKeyFingerprintCalculator());
             
             Iterator    it = pgpSec.getSecretKeys();
             while (it.hasNext())
@@ -1851,7 +1852,7 @@ public class BcPGPKeyRingTest
             
             byte[]    bytes = pgpSec.getEncoded();
             
-            pgpSec = new PGPSecretKeyRing(bytes);
+            pgpSec = new PGPSecretKeyRing(bytes, new BcKeyFingerprintCalculator());
             
             Iterator    it = pgpSec.getSecretKeys();
             while (it.hasNext())
@@ -1882,7 +1883,7 @@ public class BcPGPKeyRingTest
     public void test10()
         throws Exception
     { 
-        PGPSecretKeyRing    secretRing = new PGPSecretKeyRing(sec10);
+        PGPSecretKeyRing    secretRing = new PGPSecretKeyRing(sec10, new BcKeyFingerprintCalculator());
         Iterator            secretKeys = secretRing.getSecretKeys();
         
         while (secretKeys.hasNext())
@@ -1900,7 +1901,7 @@ public class BcPGPKeyRingTest
             }
         }
         
-        PGPPublicKeyRing    publicRing = new PGPPublicKeyRing(pub10);
+        PGPPublicKeyRing    publicRing = new PGPPublicKeyRing(pub10, new BcKeyFingerprintCalculator());
         Iterator            publicKeys = publicRing.getPublicKeys();
         
         while (publicKeys.hasNext())
@@ -2124,7 +2125,7 @@ public class BcPGPKeyRingTest
     private void test11()
         throws Exception
     {
-        PGPPublicKeyRing pubRing = new PGPPublicKeyRing(subKeyBindingKey);
+        PGPPublicKeyRing pubRing = new PGPPublicKeyRing(subKeyBindingKey, new BcKeyFingerprintCalculator());
         Iterator         it = pubRing.getPublicKeys();
         
         while (it.hasNext())
@@ -2178,7 +2179,7 @@ public class BcPGPKeyRingTest
     {
         checkPublicKeyRingWithX509(pubWithX509);
 
-        PGPPublicKeyRing pubRing = new PGPPublicKeyRing(pubWithX509);
+        PGPPublicKeyRing pubRing = new PGPPublicKeyRing(pubWithX509, new BcKeyFingerprintCalculator());
 
         checkPublicKeyRingWithX509(pubRing.getEncoded());
     }
@@ -2194,7 +2195,7 @@ public class BcPGPKeyRingTest
     private void testUmlaut()
         throws Exception
     {
-        PGPPublicKeyRing pubRing = new PGPPublicKeyRing(umlautKeySig);
+        PGPPublicKeyRing pubRing = new PGPPublicKeyRing(umlautKeySig, new BcKeyFingerprintCalculator());
 
         PGPPublicKey pub = pubRing.getPublicKey();
         String       userID = (String)pub.getUserIDs().next();
