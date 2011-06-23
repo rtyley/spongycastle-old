@@ -484,19 +484,27 @@ public class TlsProtocolHandler
                         {
                             clientCreds = this.authentication.getClientCredentials(certificateRequest);
 
-                            Certificate clientCert;
                             if (clientCreds == null)
                             {
                                 this.keyExchange.skipClientCredentials();
-                                clientCert = Certificate.EMPTY_CHAIN;
+
+                                boolean isTls = tlsClientContext.getServerVersion().getFullVersion() >= ProtocolVersion.TLSv10.getFullVersion();
+
+                                if (isTls)
+                                {
+                                    sendClientCertificate(Certificate.EMPTY_CHAIN);
+                                }
+                                else
+                                {
+                                    sendAlert(AlertLevel.warning, AlertDescription.no_certificate);
+                                }
                             }
                             else
                             {
                                 this.keyExchange.processClientCredentials(clientCreds);
-                                clientCert = clientCreds.getCertificate();
-                            }
 
-                            sendClientCertificate(clientCert);
+                                sendClientCertificate(clientCreds.getCertificate());
+                            }
                         }
 
                         /*
