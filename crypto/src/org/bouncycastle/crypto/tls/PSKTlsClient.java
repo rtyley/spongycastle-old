@@ -3,7 +3,7 @@ package org.bouncycastle.crypto.tls;
 import java.io.IOException;
 import java.util.Hashtable;
 
-public abstract class PSKTlsClient implements TlsClient
+public class PSKTlsClient implements TlsClient
 {
     protected TlsCipherFactory cipherFactory;
     protected TlsPSKIdentity pskIdentity;
@@ -127,6 +127,11 @@ public abstract class PSKTlsClient implements TlsClient
                  */
                 throw new TlsFatalAlert(AlertDescription.internal_error);
         }
+    }
+
+    public TlsAuthentication getAuthentication() throws IOException
+    {
+        return null;
     }
 
     public TlsCompression getCompression() throws IOException
