@@ -5,28 +5,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.bouncycastle.crypto.Digest;
+
 /**
- * An implementation of the TLS 1.0 record layer.
+ * An implementation of the TLS 1.0 record layer, allowing downgrade to SSLv3.
  */
 class RecordStream
 {
     private TlsProtocolHandler handler;
-    private TlsClientContext context = null;
     private InputStream is;
     private OutputStream os;
-    private CombinedHash hash;
     private TlsCompression readCompression = null;
     private TlsCompression writeCompression = null;
     private TlsCipher readCipher = null;
     private TlsCipher writeCipher = null;
     private ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
+    private TlsClientContext context = null;
+    private CombinedHash hash = null;
+    
     RecordStream(TlsProtocolHandler handler, InputStream is, OutputStream os)
     {
         this.handler = handler;
         this.is = is;
         this.os = os;
-        this.hash = new CombinedHash();
         this.readCompression = new TlsNullCompression();
         this.writeCompression = this.readCompression;
         this.readCipher = new TlsNullCipher();
@@ -36,6 +38,7 @@ class RecordStream
     void init(TlsClientContext context)
     {
         this.context = context;
+        this.hash = new CombinedHash(context);
     }
 
     void clientCipherSpecDecided(TlsCompression tlsCompression, TlsCipher tlsCipher)
@@ -122,9 +125,24 @@ class RecordStream
         hash.update(message, offset, len);
     }
 
-    byte[] getCurrentHash()
+    /**
+     * 'sender' only relevant to SSLv3
+     */
+    byte[] getCurrentHash(byte[] sender)
     {
-        return doFinal(new CombinedHash(hash));
+        Digest d = new CombinedHash(hash);
+
+        boolean isTls = context.getServerVersion().getFullVersion() >= ProtocolVersion.TLSv10.getFullVersion();
+
+        if (!isTls)
+        {
+            if (sender != null)
+            {
+                d.update(sender, 0, sender.length);
+            }
+        }
+
+        return doFinal(d);
     }
 
     protected void close() throws IOException
@@ -164,10 +182,10 @@ class RecordStream
         return contents;
     }
 
-    private static byte[] doFinal(CombinedHash ch)
+    private static byte[] doFinal(Digest d)
     {
-        byte[] bs = new byte[ch.getDigestSize()];
-        ch.doFinal(bs, 0);
+        byte[] bs = new byte[d.getDigestSize()];
+        d.doFinal(bs, 0);
         return bs;
     }
 }

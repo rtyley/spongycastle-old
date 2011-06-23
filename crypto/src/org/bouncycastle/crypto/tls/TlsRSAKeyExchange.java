@@ -12,7 +12,7 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.util.PublicKeyFactory;
 
 /**
- * TLS 1.0 RSA key exchange.
+ * TLS 1.0 and SSLv3 RSA key exchange.
  */
 class TlsRSAKeyExchange implements TlsKeyExchange
 {

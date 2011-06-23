@@ -15,6 +15,7 @@ import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.io.Streams;
 
@@ -317,5 +318,121 @@ public class TlsUtils
                 }
             }
         }
+    }
+    
+    static byte[] calculateKeyBlock(TlsClientContext context, int size)
+    {
+        ProtocolVersion pv = context.getServerVersion();
+        SecurityParameters sp = context.getSecurityParameters();
+        byte[] random = concat(sp.serverRandom, sp.clientRandom);
+
+        boolean isTls = pv.getFullVersion() >= ProtocolVersion.TLSv10.getFullVersion();
+
+        if (isTls)
+        {
+            return PRF(sp.masterSecret, "key expansion", random, size);
+        }
+
+        Digest md5 = new MD5Digest();
+        Digest sha1 = new SHA1Digest();
+        int md5Size = md5.getDigestSize();
+        byte[] shatmp = new byte[sha1.getDigestSize()];
+        byte[] tmp = new byte[size + md5Size];
+
+        int i = 0, pos = 0;
+        while (pos < size)
+        {
+            byte[] ssl3Const = SSL3_CONST[i];
+
+            sha1.update(ssl3Const, 0, ssl3Const.length);
+            sha1.update(sp.masterSecret, 0, sp.masterSecret.length);
+            sha1.update(random, 0, random.length);
+            sha1.doFinal(shatmp, 0);
+
+            md5.update(sp.masterSecret, 0, sp.masterSecret.length);
+            md5.update(shatmp, 0, shatmp.length);
+            md5.doFinal(tmp, pos);
+
+            pos += md5Size;
+            ++i;
+        }
+
+        byte rval[] = new byte[size];
+        System.arraycopy(tmp, 0, rval, 0, size);
+        return rval;
+    }
+
+    static byte[] calculateMasterSecret(TlsClientContext context, byte[] pms)
+    {
+        ProtocolVersion pv = context.getServerVersion();
+        SecurityParameters sp = context.getSecurityParameters();
+        byte[] random = concat(sp.clientRandom, sp.serverRandom);
+
+        boolean isTls = pv.getFullVersion() >= ProtocolVersion.TLSv10.getFullVersion();
+
+        if (isTls)
+        {
+            return PRF(pms, "master secret", random, 48);
+        }
+
+        Digest md5 = new MD5Digest();
+        Digest sha1 = new SHA1Digest();
+        int md5Size = md5.getDigestSize();
+        byte[] shatmp = new byte[sha1.getDigestSize()];
+
+        byte[] rval = new byte[md5Size * 3];
+        int pos = 0;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            byte[] ssl3Const = SSL3_CONST[i];
+
+            sha1.update(ssl3Const, 0, ssl3Const.length);
+            sha1.update(pms, 0, pms.length);
+            sha1.update(random, 0, random.length);
+            sha1.doFinal(shatmp, 0);
+
+            md5.update(pms, 0, pms.length);
+            md5.update(shatmp, 0, shatmp.length);
+            md5.doFinal(rval, pos);
+
+            pos += md5Size;
+        }
+
+        return rval;
+    }
+
+    static byte[] calculateVerifyData(TlsClientContext context, String asciiLabel, byte[] handshakeHash)
+    {
+        ProtocolVersion pv = context.getServerVersion();
+        SecurityParameters sp = context.getSecurityParameters();
+
+        boolean isTls = pv.getFullVersion() >= ProtocolVersion.TLSv10.getFullVersion();
+
+        if (isTls)
+        {
+            return PRF(sp.masterSecret, asciiLabel, handshakeHash, 12);
+        }
+
+        return handshakeHash;
+    }
+
+    static final byte[] SSL_CLIENT = { 0x43, 0x4C, 0x4E, 0x54 };
+    static final byte[] SSL_SERVER = { 0x53, 0x52, 0x56, 0x52 };
+
+    // SSL3 magic mix constants ("A", "BB", "CCC", ...)
+    static final byte[][] SSL3_CONST = genConst();
+
+    private static byte[][] genConst()
+    {
+        int n = 10;
+        byte[][] arr = new byte[n][];
+        for (int i = 0; i < n; i++)
+        {
+            byte[] b = new byte[i + 1];
+            Arrays.fill(b, (byte)('A' + i));
+            arr[i] = b;
+        }
+        return arr;
     }
 }

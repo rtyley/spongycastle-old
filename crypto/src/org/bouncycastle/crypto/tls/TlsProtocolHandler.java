@@ -235,9 +235,12 @@ public class TlsProtocolHandler
                     case CS_SERVER_CHANGE_CIPHER_SPEC_RECEIVED:
                         /*
                          * Read the checksum from the finished message, it has always 12
-                         * bytes.
+                         * bytes for TLS 1.0 and 36 for SSLv3.
                          */
-                        byte[] serverVerifyData = new byte[12];
+                        boolean isTls = tlsClientContext.getServerVersion().getFullVersion() >= ProtocolVersion.TLSv10.getFullVersion();
+
+                        int checksumLength = isTls ? 12 : 36;
+                        byte[] serverVerifyData = new byte[checksumLength];
                         TlsUtils.readFully(serverVerifyData, is);
 
                         assertEmpty(is);
@@ -245,9 +248,8 @@ public class TlsProtocolHandler
                         /*
                          * Calculate our own checksum.
                          */
-                        byte[] expectedServerVerifyData = TlsUtils.PRF(
-                            securityParameters.masterSecret, "server finished",
-                            rs.getCurrentHash(), 12);
+                        byte[] expectedServerVerifyData = TlsUtils.calculateVerifyData(tlsClientContext,
+                            "server finished", rs.getCurrentHash(TlsUtils.SSL_SERVER));
 
                         /*
                          * Compare both checksums.
@@ -279,7 +281,8 @@ public class TlsProtocolHandler
                          * Read the server hello message
                          */
                         ProtocolVersion server_version = TlsUtils.readVersion(is);
-                        if (server_version.getFullVersion() > this.tlsClientContext.getClientVersion().getFullVersion())
+                        ProtocolVersion client_version = this.tlsClientContext.getClientVersion();
+                        if (server_version.getFullVersion() > client_version.getFullVersion())
                         {
                             this.failWithError(AlertLevel.fatal, AlertDescription.illegal_parameter);
                         }
@@ -504,10 +507,25 @@ public class TlsProtocolHandler
 
                         connection_state = CS_CLIENT_KEY_EXCHANGE_SEND;
 
+                        /*
+                         * Calculate the master_secret
+                         */
+                        byte[] pms = this.keyExchange.generatePremasterSecret();
+
+                        securityParameters.masterSecret = TlsUtils.calculateMasterSecret(
+                            this.tlsClientContext, pms);
+
+                        // TODO Is there a way to ensure the data is really overwritten?
+                        /*
+                         * RFC 2246 8.1. The pre_master_secret should be deleted from
+                         * memory once the master_secret has been computed.
+                         */
+                        Arrays.fill(pms, (byte)0);
+
                         if (clientCreds != null && clientCreds instanceof TlsSignerCredentials)
                         {
                             TlsSignerCredentials signerCreds = (TlsSignerCredentials)clientCreds;
-                            byte[] md5andsha1 = rs.getCurrentHash();
+                            byte[] md5andsha1 = rs.getCurrentHash(null);
                             byte[] clientCertificateSignature = signerCreds.generateCertificateSignature(
                                 md5andsha1);
                             sendCertificateVerify(clientCertificateSignature);
@@ -526,22 +544,6 @@ public class TlsProtocolHandler
                         connection_state = CS_CLIENT_CHANGE_CIPHER_SPEC_SEND;
 
                         /*
-                         * Calculate the master_secret
-                         */
-                        byte[] pms = this.keyExchange.generatePremasterSecret();
-
-                        securityParameters.masterSecret = TlsUtils.PRF(pms, "master secret",
-                            TlsUtils.concat(securityParameters.clientRandom,
-                                securityParameters.serverRandom), 48);
-
-                        // TODO Is there a way to ensure the data is really overwritten?
-                        /*
-                         * RFC 2246 8.1. The pre_master_secret should be deleted from
-                         * memory once the master_secret has been computed.
-                         */
-                        Arrays.fill(pms, (byte)0);
-
-                        /*
                          * Initialize our cipher suite
                          */
                         rs.clientCipherSpecDecided(tlsClient.getCompression(), tlsClient.getCipher());
@@ -549,8 +551,8 @@ public class TlsProtocolHandler
                         /*
                          * Send our finished message.
                          */
-                        byte[] clientVerifyData = TlsUtils.PRF(securityParameters.masterSecret,
-                            "client finished", rs.getCurrentHash(), 12);
+                        byte[] clientVerifyData = TlsUtils.calculateVerifyData(tlsClientContext,
+                            "client finished", rs.getCurrentHash(TlsUtils.SSL_CLIENT));
 
                         ByteArrayOutputStream bos = new ByteArrayOutputStream();
                         TlsUtils.writeUint8(HandshakeType.finished, bos);

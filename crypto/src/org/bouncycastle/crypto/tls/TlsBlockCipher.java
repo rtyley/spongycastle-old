@@ -10,7 +10,8 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.Arrays;
 
 /**
- * A generic TLS 1.0 block cipher. This can be used for AES or 3DES for example.
+ * A generic TLS 1.0 / SSLv3 block cipher.
+ * This can be used for AES or 3DES for example.
  */
 public class TlsBlockCipher implements TlsCipher
 {
@@ -39,15 +40,11 @@ public class TlsBlockCipher implements TlsCipher
         this.encryptCipher = encryptCipher;
         this.decryptCipher = decryptCipher;
 
-        int prfSize = (2 * cipherKeySize) + writeDigest.getDigestSize()
+        int key_block_size = (2 * cipherKeySize) + writeDigest.getDigestSize()
             + readDigest.getDigestSize() + encryptCipher.getBlockSize()
             + decryptCipher.getBlockSize();
 
-        SecurityParameters securityParameters = context.getSecurityParameters();
-
-        byte[] key_block = TlsUtils.PRF(securityParameters.masterSecret, "key expansion",
-            TlsUtils.concat(securityParameters.serverRandom, securityParameters.clientRandom),
-            prfSize);
+        byte[] key_block = TlsUtils.calculateKeyBlock(context, key_block_size);
 
         int offset = 0;
 

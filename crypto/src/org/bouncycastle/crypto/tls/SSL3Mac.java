@@ -18,6 +18,11 @@ public class SSL3Mac implements Mac
     private final static byte IPAD = (byte)0x36;
     private final static byte OPAD = (byte)0x5C;
 
+    static final byte[] MD5_IPAD = genPad(IPAD, 48);
+    static final byte[] MD5_OPAD = genPad(OPAD, 48);
+    static final byte[] SHA1_IPAD = genPad(IPAD, 40);
+    static final byte[] SHA1_OPAD = genPad(OPAD, 40);
+
     private Digest digest;
 
     private byte[] secret;
@@ -33,10 +38,16 @@ public class SSL3Mac implements Mac
     {
         this.digest = digest;
 
-        int padLength = digest.getDigestSize() == 20 ? 40 : 64 - digest.getDigestSize();
-
-        this.ipad = genPad(IPAD, padLength);
-        this.opad = genPad(OPAD, padLength);
+        if (digest.getDigestSize() == 20)
+        {
+            this.ipad = SHA1_IPAD;
+            this.opad = SHA1_OPAD;
+        }
+        else
+        {
+            this.ipad = MD5_IPAD;
+            this.opad = MD5_OPAD;
+        }
     }
 
     public String getAlgorithmName()

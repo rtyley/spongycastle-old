@@ -9,8 +9,9 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
  */
 class CombinedHash implements Digest
 {
-    private MD5Digest md5;
-    private SHA1Digest sha1;
+    protected TlsClientContext context;
+    protected MD5Digest md5;
+    protected SHA1Digest sha1;
 
     CombinedHash()
     {
@@ -18,8 +19,16 @@ class CombinedHash implements Digest
         this.sha1 = new SHA1Digest();
     }
 
+    CombinedHash(TlsClientContext context)
+    {
+        this.context = context;
+        this.md5 = new MD5Digest();
+        this.sha1 = new SHA1Digest();
+    }
+
     CombinedHash(CombinedHash t)
     {
+        this.context = t.context;
         this.md5 = new MD5Digest(t.md5);
         this.sha1 = new SHA1Digest(t.sha1);
     }
@@ -29,7 +38,7 @@ class CombinedHash implements Digest
      */
     public String getAlgorithmName()
     {
-        return md5.getAlgorithmName() + " and " + sha1.getAlgorithmName() + " for TLS 1.0";
+        return md5.getAlgorithmName() + " and " + sha1.getAlgorithmName();
     }
 
     /**
@@ -63,6 +72,17 @@ class CombinedHash implements Digest
      */
     public int doFinal(byte[] out, int outOff)
     {
+        if (context != null)
+        {
+            boolean isTls = context.getServerVersion().getFullVersion() >= ProtocolVersion.TLSv10.getFullVersion();
+    
+            if (!isTls)
+            {
+                ssl3Complete(md5, SSL3Mac.MD5_IPAD, SSL3Mac.MD5_OPAD);
+                ssl3Complete(sha1, SSL3Mac.SHA1_IPAD, SSL3Mac.SHA1_OPAD);
+            }
+        }
+
         int i1 = md5.doFinal(out, outOff);
         int i2 = sha1.doFinal(out, outOff + 16);
         return i1 + i2;
@@ -77,4 +97,18 @@ class CombinedHash implements Digest
         sha1.reset();
     }
 
+    protected void ssl3Complete(Digest d, byte[] ipad, byte[] opad)
+    {
+        byte[] secret = context.getSecurityParameters().masterSecret;
+
+        d.update(secret, 0, secret.length);
+        d.update(ipad, 0, ipad.length);
+
+        byte[] tmp = new byte[d.getDigestSize()];
+        d.doFinal(tmp, 0);
+
+        d.update(secret, 0, secret.length);
+        d.update(opad, 0, opad.length);
+        d.update(tmp, 0, tmp.length);
+    }
 }
