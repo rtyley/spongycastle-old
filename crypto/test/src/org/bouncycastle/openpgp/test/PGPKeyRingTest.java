@@ -1558,10 +1558,24 @@ public class PGPKeyRingTest
 
                 k.extractPrivateKey(sec3pass1, "BC");
             }
-            
+
             if (keyCount != 2)
             {
-                fail("wrong number of secret keys");
+                fail("test4 - wrong number of secret keys");
+            }
+
+            keyCount = 0;
+            it = pgpSec.getPublicKeys();
+            while (it.hasNext())
+            {
+                keyCount++;
+
+                PGPPublicKey    k = (PGPPublicKey)it.next(); // make sure it's what we think it is!
+            }
+
+            if (keyCount != 2)
+            {
+                fail("test4 - wrong number of public keys");
             }
         }
         
@@ -2094,7 +2108,12 @@ public class PGPKeyRingTest
         PGPSecretKeyRing       keyRing = keyRingGen.generateSecretKeyRing();
         
         keyRing.getSecretKey().extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase));
-        
+
+        if (!keyRing.getSecretKey().getPublicKey().equals(keyRing.getPublicKey()))
+        {
+            fail("secret key public key mismatch");
+        }
+
         PGPPublicKeyRing        pubRing = keyRingGen.generatePublicKeyRing();
         
         PGPPublicKey            vKey = null;
@@ -2113,7 +2132,18 @@ public class PGPKeyRingTest
                 sKey = pk;
             }
         }
-        
+
+        // check key id fetch
+        if (keyRing.getSecretKey(vKey.getKeyID()).getPublicKey().getKeyID() != vKey.getKeyID())
+        {
+            fail("secret key public key mismatch - vKey");
+        }
+
+        if (keyRing.getSecretKey(sKey.getKeyID()).getPublicKey().getKeyID() != sKey.getKeyID())
+        {
+            fail("secret key public key mismatch - sKey");
+        }
+
         Iterator    sIt = sKey.getSignatures();
         while (sIt.hasNext())
         {

@@ -133,6 +133,54 @@ public class PGPSecretKeyRing
         return ((PGPSecretKey)keys.get(0)).getPublicKey();
     }
 
+  /**
+     * Return the public key referred to by the passed in keyID if it
+     * is present.
+     *
+     * @param keyID
+     * @return PGPPublicKey
+     */
+    public PGPPublicKey getPublicKey(
+        long        keyID)
+    {
+        PGPSecretKey key = getSecretKey(keyID);
+        if (key != null)
+        {
+            return key.getPublicKey();
+        }
+
+        for (int i = 0; i != extraPubKeys.size(); i++)
+        {
+            PGPPublicKey    k = (PGPPublicKey)keys.get(i);
+
+            if (keyID == k.getKeyID())
+            {
+                return k;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Return an iterator containing all the public keys.
+     *
+     * @return Iterator
+     */
+    public Iterator getPublicKeys()
+    {
+        List pubKeys = new ArrayList();
+
+        for (Iterator it = getSecretKeys(); it.hasNext();)
+        {
+            pubKeys.add(((PGPSecretKey)it.next()).getPublicKey());
+        }
+
+        pubKeys.addAll(extraPubKeys);
+
+        return Collections.unmodifiableList(pubKeys).iterator();
+    }
+
     /**
      * Return the master private key.
      * 

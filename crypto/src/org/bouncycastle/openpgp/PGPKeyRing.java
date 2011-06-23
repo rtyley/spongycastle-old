@@ -1,5 +1,12 @@
 package org.bouncycastle.openpgp;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.Packet;
 import org.bouncycastle.bcpg.PacketTags;
@@ -7,11 +14,6 @@ import org.bouncycastle.bcpg.SignaturePacket;
 import org.bouncycastle.bcpg.TrustPacket;
 import org.bouncycastle.bcpg.UserAttributePacket;
 import org.bouncycastle.bcpg.UserIDPacket;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class PGPKeyRing
 {
@@ -89,4 +91,35 @@ public abstract class PGPKeyRing
             idSigs.add(readSignaturesAndTrust(pIn));
         }
     }
+
+    /**
+        * Return the first public key in the ring.  In the case of a {@link PGPSecretKeyRing}
+        * this is also the public key of the master key pair.
+        *
+        * @return PGPPublicKey
+        */
+    public abstract PGPPublicKey getPublicKey();
+
+    /**
+        * Return an iterator containing all the public keys.
+        *
+        * @return Iterator
+        */
+    public abstract Iterator getPublicKeys();
+
+    /**
+        * Return the public key referred to by the passed in keyID if it
+        * is present.
+        *
+        * @param keyID
+        * @return PGPPublicKey
+        */
+    public abstract PGPPublicKey getPublicKey(long keyID);
+
+    public abstract void encode(OutputStream outStream)
+        throws IOException;
+
+    public abstract byte[] getEncoded()
+        throws IOException;
+
 }
