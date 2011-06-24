@@ -133,8 +133,32 @@ public class PGPSignatureGenerator
      * @param signatureType
      * @param key
      * @throws PGPException
+     * @deprecated use init() method
      */
     public void initSign(
+        int             signatureType,
+        PGPPrivateKey   key)
+        throws PGPException
+    {
+        contentSigner = contentSignerBuilder.build(signatureType, key);
+        sigOut = contentSigner.getOutputStream();
+        sigType = contentSigner.getType();
+        lastb = 0;
+
+        if (providedKeyAlgorithm >= 0 && providedKeyAlgorithm != contentSigner.getKeyAlgorithm())
+        {
+            throw new PGPException("key algorithm mismatch");
+        }
+    }
+
+    /**
+     * Initialise the generator for signing.
+     *
+     * @param signatureType
+     * @param key
+     * @throws PGPException
+     */
+    public void init(
         int             signatureType,
         PGPPrivateKey   key)
         throws PGPException

@@ -411,6 +411,7 @@ public class PGPPublicKey
      * @return a JCE/JCA public key.
      * @throws PGPException if the key algorithm is not recognised.
      * @throws NoSuchProviderException if the provider cannot be found.
+     * @deprecated use a JcaPGPKeyConverter
      */
     public PublicKey getKey(
         String provider)
@@ -419,6 +420,15 @@ public class PGPPublicKey
         return new JcaPGPKeyConverter().setProvider(provider).getPublicKey(this);
     }
 
+    /**
+     * Return the public key contained in the object.
+     *
+     * @param provider provider to construct the key for.
+     * @return a JCE/JCA public key.
+     * @throws PGPException if the key algorithm is not recognised.
+     * @throws NoSuchProviderException if the provider cannot be found.
+     * @deprecated use a JcaPGPKeyConverter
+     */
     public PublicKey getKey(
         Provider provider)
         throws PGPException

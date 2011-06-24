@@ -108,6 +108,9 @@ public class PGPSignature
         return sigPck.getHashAlgorithm();
     }
 
+    /**
+     * @deprecated use init(PGPContentVerifierBuilderProvider, PGPPublicKey)
+     */
     public void initVerify(
         PGPPublicKey    pubKey,
         String          provider)
@@ -116,6 +119,9 @@ public class PGPSignature
         initVerify(pubKey, PGPUtil.getProvider(provider));
     }
 
+        /**
+     * @deprecated use init(PGPContentVerifierBuilderProvider, PGPPublicKey)
+     */
     public void initVerify(
         PGPPublicKey    pubKey,
         Provider        provider)

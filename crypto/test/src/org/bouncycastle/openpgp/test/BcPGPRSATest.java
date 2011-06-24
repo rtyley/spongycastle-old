@@ -531,7 +531,7 @@ public class BcPGPRSATest
             {
                 PGPSignature sig = (PGPSignature)sigs.next();
 
-                sig.initVerify(pubKey, "BC");
+                sig.init(new BcPGPContentVerifierBuilderProvider(), pubKey);
 
                 if (!sig.verifyCertification(attributes, pubKey))
                 {
@@ -570,7 +570,7 @@ public class BcPGPRSATest
 
         PGPSignatureGenerator sGen = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1));
 
-        sGen.initSign(PGPSignature.POSITIVE_CERTIFICATION, pgpSec.getSecretKey().extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(pass)));
+        sGen.init(PGPSignature.POSITIVE_CERTIFICATION, pgpSec.getSecretKey().extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(pass)));
 
         PGPSignature sig = sGen.generateCertification(uVec, pubKey);
 
@@ -588,7 +588,7 @@ public class BcPGPRSATest
             {
                 PGPSignature s = (PGPSignature)sigs.next();
 
-                s.initVerify(pubKey, "BC");
+                s.init(new BcPGPContentVerifierBuilderProvider(), pubKey);
 
                 if (!s.verifyCertification(attributes, pubKey))
                 {
@@ -757,7 +757,7 @@ public class BcPGPRSATest
         
         PGPSignature    sig = (PGPSignature)it.next();
         
-        sig.initVerify(pgpPub.getPublicKey(), "BC");
+        sig.init(new BcPGPContentVerifierBuilderProvider(), pgpPub.getPublicKey());
         
         if (!sig.verifyCertification(uid, pgpPub.getPublicKey()))
         {
@@ -1055,7 +1055,7 @@ public class BcPGPRSATest
 
         sig = (PGPSignature)it.next();
 
-        sig.initVerify(key, "BC");
+        sig.init(new BcPGPContentVerifierBuilderProvider(), key);
 
         if (!sig.verifyCertification(uid, key))
         {
@@ -1079,7 +1079,7 @@ public class BcPGPRSATest
 
         PGPSignatureGenerator sGen = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1));
         
-        sGen.initSign(PGPSignature.KEY_REVOCATION, secretKey.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(passPhrase)));
+        sGen.init(PGPSignature.KEY_REVOCATION, secretKey.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(passPhrase)));
 
         sig = sGen.generateCertification(key);
 
@@ -1095,7 +1095,7 @@ public class BcPGPRSATest
 
         sig = (PGPSignature)sgIt.next();
 
-        sig.initVerify(key, "BC");
+        sig.init(new BcPGPContentVerifierBuilderProvider(), key);
 
         if (!sig.verifyCertification(key))
         {
@@ -1149,7 +1149,7 @@ public class BcPGPRSATest
 
         sig = (PGPSignature)it.next();
 
-        sig.initVerify(key, "BC");
+        sig.init(new BcPGPContentVerifierBuilderProvider(), key);
 
         if (!sig.verifyCertification(uid, key))
         {
@@ -1169,7 +1169,7 @@ public class BcPGPRSATest
         
         sGen = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1));
     
-        sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
+        sGen.init(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
 
         PGPCompressedDataGenerator cGen = new PGPCompressedDataGenerator(
             PGPCompressedData.ZIP);
@@ -1244,7 +1244,7 @@ public class BcPGPRSATest
         testIn = new ByteArrayInputStream(data.getBytes());
         PGPV3SignatureGenerator    sGenV3 = new PGPV3SignatureGenerator(new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, PGPUtil.SHA1));
     
-        sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
+        sGen.init(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
 
         cGen = new PGPCompressedDataGenerator(
                                                                 PGPCompressedData.ZIP);

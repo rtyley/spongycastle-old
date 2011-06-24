@@ -86,6 +86,7 @@ public class PGPPrivateKey
      * Return the contained private key.
      * 
      * @return PrivateKey
+     * @deprecated use a JcaPGPKeyConverter
      */
     public PrivateKey getKey()
     {
