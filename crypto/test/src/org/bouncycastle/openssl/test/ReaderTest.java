@@ -219,6 +219,8 @@ public class ReaderTest
         doDudPasswordTest("bc0daf", 16, "corrupted stream detected");
         doDudPasswordTest("aaf9c4d",17, "corrupted stream - out of bounds length found");
 
+        doNoPasswordTest();
+
         // encrypted private key test
         pGet = new Password("password".toCharArray());
         pemRd = openPEMResource("enckey.pem", pGet);
@@ -382,6 +384,26 @@ public class ReaderTest
                                e.printStackTrace();
                fail("issue " + index + " exception thrown, but wrong message");
             }
+        }
+    }
+
+    private void doNoPasswordTest()
+        throws IOException
+    {
+        PasswordFinder pGet = new Password("".toCharArray());
+
+        PEMReader pemRd = openPEMResource("smimenopw.pem", pGet);
+        Object o;
+        PrivateKey key = null;
+
+        while ((o = pemRd.readObject()) != null)
+        {
+             key = (PrivateKey)o;
+        }
+
+        if (key == null)
+        {
+            fail("private key not detected");
         }
     }
 

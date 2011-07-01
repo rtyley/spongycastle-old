@@ -42,6 +42,11 @@ public class SignerId
      */
     public SignerId(byte[] subjectKeyId)
     {
+        setSubjectKeyID(subjectKeyId);
+    }
+
+    private void setSubjectKeyID(byte[] subjectKeyId)
+    {
         super.setSubjectKeyIdentifier(new DEROctetString(subjectKeyId).getDEREncoded());
 
         this.subjectKeyId = subjectKeyId;
@@ -56,6 +61,11 @@ public class SignerId
      */
     public SignerId(X500Name issuer, BigInteger serialNumber)
     {
+        setIssuerAndSerial(issuer, serialNumber);
+    }
+
+    private void setIssuerAndSerial(X500Name issuer, BigInteger serialNumber)
+    {
         this.issuer = issuer;
         this.serialNumber = serialNumber;
         try
@@ -67,6 +77,20 @@ public class SignerId
             throw new IllegalArgumentException("invalid issuer: " + e.getMessage());
         }
         this.setSerialNumber(serialNumber);
+    }
+
+    /**
+     * Construct a signer ID based on the issuer and serial number of the signer's associated
+     * certificate.
+     *
+     * @param issuer the issuer of the signer's associated certificate.
+     * @param serialNumber the serial number of the signer's associated certificate.
+     * @param subjectKeyId the subject key identifier to use to match the signers associated certificate.
+     */
+    public SignerId(X500Name issuer, BigInteger serialNumber, byte[] subjectKeyId)
+    {
+        setIssuerAndSerial(issuer, serialNumber);
+        setSubjectKeyID(subjectKeyId);
     }
 
     public int hashCode()

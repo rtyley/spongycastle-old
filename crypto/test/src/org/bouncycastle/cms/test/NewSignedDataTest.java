@@ -55,6 +55,7 @@ import org.bouncycastle.cms.SignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.bc.BcRSASignerInfoVerifierBuilder;
+import org.bouncycastle.cms.jcajce.JcaSignerId;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
@@ -1315,6 +1316,17 @@ public class NewSignedDataTest
     
             assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)));
         }
+
+        //
+        // check signer information lookup
+        //
+
+        SignerId sid = new JcaSignerId(signatureCert);
+
+        Collection collection = signers.getSigners(sid);
+
+        assertEquals(1, collection.size());
+        assertTrue(collection.iterator().next() instanceof SignerInformation);
 
         //
         // check for CRLs

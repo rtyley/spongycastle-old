@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -35,6 +36,7 @@ import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedData;
@@ -56,6 +58,7 @@ import org.bouncycastle.cms.jcajce.JceKeyAgreeEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipientId;
 import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JcePasswordEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JcePasswordRecipientInfoGenerator;
@@ -283,6 +286,7 @@ public class NewEnvelopedDataTest
         CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
 
         edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(ASN1OctetString.getInstance(_reciCert.getExtensionValue(X509Extension.subjectKeyIdentifier.getId())).getOctets(), _reciCert.getPublicKey()).setProvider(BC));
 
         CMSEnvelopedData ed = edGen.generate(
                                 new CMSProcessableByteArray(data),
@@ -295,7 +299,7 @@ public class NewEnvelopedDataTest
 
         Collection  c = recipients.getRecipients();
 
-        assertEquals(1, c.size());
+        assertEquals(2, c.size());
 
         Iterator    it = c.iterator();
 
@@ -309,6 +313,15 @@ public class NewEnvelopedDataTest
 
             assertEquals(true, Arrays.equals(data, recData));
         }
+
+        RecipientId id = new JceKeyTransRecipientId(_reciCert);
+
+        Collection collection = recipients.getRecipients(id);
+        if (collection.size() != 2)
+        {
+            fail("recipients not matched using general recipient ID.");
+        }
+        assertTrue(collection.iterator().next() instanceof RecipientInformation);
     }
 
     public void testKeyTransRC4()

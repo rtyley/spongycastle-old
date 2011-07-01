@@ -51,7 +51,17 @@ public abstract class ASN1OctetString
         {
             return (ASN1OctetString)obj;
         }
-
+        else if (obj instanceof byte[])
+        {
+            try
+            {
+                return ASN1OctetString.getInstance(ASN1Object.fromByteArray((byte[])obj));
+            }
+            catch (IOException e)
+            {
+                throw new IllegalArgumentException("failed to construct OCTET STRING from byte[]: " + e.getMessage());
+            }
+        }
         // TODO: this needs to be deleted in V2
         if (obj instanceof ASN1TaggedObject)
         {

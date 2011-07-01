@@ -29,7 +29,16 @@ public class KeyTransRecipientId
     public KeyTransRecipientId(byte[] subjectKeyId)
     {
         super(keyTrans);
-        super.setSubjectKeyIdentifier(new DEROctetString(subjectKeyId).getDEREncoded());
+
+        setSubjectKeyId(subjectKeyId);
+    }
+
+    private void setSubjectKeyId(byte[] subjectKeyId)
+    {
+        if (subjectKeyId != null)
+        {
+            super.setSubjectKeyIdentifier(new DEROctetString(subjectKeyId).getDEREncoded());
+        }
 
         this.subjectKeyId = subjectKeyId;
     }
@@ -44,6 +53,12 @@ public class KeyTransRecipientId
     public KeyTransRecipientId(X500Name issuer, BigInteger serialNumber)
     {
         super(keyTrans);
+
+        setIssuerSerial(issuer, serialNumber);
+    }
+
+    private void setIssuerSerial(X500Name issuer, BigInteger serialNumber)
+    {
         this.issuer = issuer;
         this.serialNumber = serialNumber;
 
@@ -56,6 +71,22 @@ public class KeyTransRecipientId
             throw new IllegalArgumentException("invalid issuer: " + e.getMessage());
         }
         this.setSerialNumber(serialNumber);
+    }
+
+    /**
+     * Construct a key trans recipient ID based on the issuer and serial number of the recipient's associated
+     * certificate.
+     *
+     * @param issuer the issuer of the recipient's associated certificate.
+     * @param serialNumber the serial number of the recipient's associated certificate.
+     * @param subjectKeyId the subject key identifier to use to match the recipients associated certificate.
+     */
+    public KeyTransRecipientId(X500Name issuer, BigInteger serialNumber, byte[] subjectKeyId)
+    {
+        super(keyTrans);
+
+        setIssuerSerial(issuer, serialNumber);
+        setSubjectKeyId(subjectKeyId);
     }
 
     public int hashCode()

@@ -23,22 +23,24 @@ import javax.crypto.SecretKey;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cert.X509v2CRLBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
-import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509StreamParser;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
-import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 
@@ -375,17 +377,17 @@ public class CMSTestUtil
         }
 
         v3CertGen.addExtension(
-            X509Extensions.SubjectKeyIdentifier,
+            X509Extension.subjectKeyIdentifier,
             false,
             createSubjectKeyId(subPub));
 
         v3CertGen.addExtension(
-            X509Extensions.AuthorityKeyIdentifier,
+            X509Extension.authorityKeyIdentifier,
             false,
             createAuthorityKeyId(issPub));
 
         v3CertGen.addExtension(
-            X509Extensions.BasicConstraints,
+            X509Extension.basicConstraints,
             false,
             new BasicConstraints(_ca));
 
@@ -400,20 +402,16 @@ public class CMSTestUtil
     public static X509CRL makeCrl(KeyPair pair)
         throws Exception
     {
-        X509V2CRLGenerator crlGen = new X509V2CRLGenerator();
         Date                 now = new Date();
+        X509v2CRLBuilder crlGen = new X509v2CRLBuilder(new X500Name("CN=Test CA"), now);
 
-        crlGen.setIssuerDN(new X509Principal("CN=Test CA"));
-
-        crlGen.setThisUpdate(now);
         crlGen.setNextUpdate(new Date(now.getTime() + 100000));
-        crlGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
 
         crlGen.addCRLEntry(BigInteger.ONE, now, CRLReason.privilegeWithdrawn);
 
-        crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
+        crlGen.addExtension(X509Extension.authorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
 
-        return crlGen.generate(pair.getPrivate(), "BC");
+        return new JcaX509CRLConverter().setProvider("BC").getCRL(crlGen.build(new JcaContentSignerBuilder("SHA256WithRSAEncryption").setProvider("BC").build(pair.getPrivate())));
     }
 
     /*  
