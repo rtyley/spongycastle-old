@@ -53,7 +53,7 @@ public class JceKeyTransRecipientId
 
         if (ext != null)
         {
-            return ASN1OctetString.getInstance(ext).getOctets();
+            return ASN1OctetString.getInstance(ASN1OctetString.getInstance(ext).getOctets()).getOctets();
         }
         else
         {

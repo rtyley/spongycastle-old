@@ -1,17 +1,21 @@
 package org.bouncycastle.mail.smime.test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.mail.MessagingException;
+import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -96,7 +100,23 @@ public class NewSMIMEEnvelopedTest
     {
         init();
     }
-    
+
+    private MimeMessage loadMessage(String name)
+        throws MessagingException, FileNotFoundException
+    {
+        Session session = Session.getDefaultInstance(System.getProperties(), null);
+
+        return new MimeMessage(session, getClass().getResourceAsStream(name));
+    }
+
+    private X509Certificate loadCert(String name)
+        throws Exception
+    {
+        Session session = Session.getDefaultInstance(System.getProperties(), null);
+
+        return (X509Certificate)CertificateFactory.getInstance("X.509", BC).generateCertificate(getClass().getResourceAsStream(name));
+    }
+
     public void testHeaders()
         throws Exception
     {
@@ -244,6 +264,18 @@ public class NewSMIMEEnvelopedTest
         MimeBodyPart    res = SMIMEUtil.toMimeBodyPart(recipient.getContent(new JceKeyTransEnvelopedRecipient(_reciKP.getPrivate()).setProvider(BC)));
 
         verifyMessageBytes(msg, res);
+    }
+
+    public void testDotNetEncMailMatch()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("dotnet_encrypted_mail.eml");
+
+        SMIMEEnveloped env = new SMIMEEnveloped(message);
+
+        RecipientInformationStore store = env.getRecipientInfos();
+
+        assertNotNull(store.get(new JceKeyTransRecipientId(loadCert("dotnet_enc_cert.pem"))));
     }
 
     public void testCapEncrypt()
