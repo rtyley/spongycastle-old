@@ -112,8 +112,6 @@ public class NewSMIMEEnvelopedTest
     private X509Certificate loadCert(String name)
         throws Exception
     {
-        Session session = Session.getDefaultInstance(System.getProperties(), null);
-
         return (X509Certificate)CertificateFactory.getInstance("X.509", BC).generateCertificate(getClass().getResourceAsStream(name));
     }
 
