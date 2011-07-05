@@ -1,4 +1,4 @@
-package org.bouncycastle.bcpg;
+package org.bouncycastle.bcpg.sig;
 
 public interface RevocationReasonTags
 {

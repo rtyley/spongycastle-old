@@ -1,4 +1,7 @@
-package org.bouncycastle.bcpg;
+package org.bouncycastle.bcpg.sig;
+
+import org.bouncycastle.bcpg.SignatureSubpacket;
+import org.bouncycastle.bcpg.SignatureSubpacketTags;
 
 /**
  * Represents revocation key OpenPGP signature sub packet.
