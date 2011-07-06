@@ -6,9 +6,11 @@ import java.security.cert.X509Certificate;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.operator.GenericKey;
 
 class CMSUtils
@@ -41,5 +43,20 @@ class CMSUtils
         X509CertificateStructure certStruct = X509CertificateStructure.getInstance(cert.getEncoded());
 
         return new IssuerAndSerialNumber(certStruct.getIssuer(), certStruct.getSerialNumber());
+    }
+
+
+    static byte[] getSubjectKeyId(X509Certificate cert)
+    {
+        byte[] ext = cert.getExtensionValue(X509Extension.subjectKeyIdentifier.getId());
+
+        if (ext != null)
+        {
+            return ASN1OctetString.getInstance(ASN1OctetString.getInstance(ext).getOctets()).getOctets();
+        }
+        else
+        {
+            return null;
+        }
     }
 }

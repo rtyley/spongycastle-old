@@ -5,9 +5,7 @@ import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.cms.KeyTransRecipientId;
 
 public class JceKeyTransRecipientId
@@ -21,7 +19,7 @@ public class JceKeyTransRecipientId
      */
     public JceKeyTransRecipientId(X509Certificate certificate)
     {
-        super(X500Name.getInstance(certificate.getIssuerX500Principal().getEncoded()), certificate.getSerialNumber(), getSubjectKeyId(certificate));
+        super(X500Name.getInstance(certificate.getIssuerX500Principal().getEncoded()), certificate.getSerialNumber(), CMSUtils.getSubjectKeyId(certificate));
     }
 
     /**
@@ -45,19 +43,5 @@ public class JceKeyTransRecipientId
     public JceKeyTransRecipientId(X500Principal issuer, BigInteger serialNumber, byte[] subjectKeyId)
     {
         super(X500Name.getInstance(issuer.getEncoded()), serialNumber, subjectKeyId);
-    }
-
-    private static byte[] getSubjectKeyId(X509Certificate cert)
-    {
-        byte[] ext = cert.getExtensionValue(X509Extension.subjectKeyIdentifier.getId());
-
-        if (ext != null)
-        {
-            return ASN1OctetString.getInstance(ASN1OctetString.getInstance(ext).getOctets()).getOctets();
-        }
-        else
-        {
-            return null;
-        }
     }
 }
