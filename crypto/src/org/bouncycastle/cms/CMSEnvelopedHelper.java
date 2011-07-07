@@ -8,7 +8,6 @@ import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.spec.InvalidParameterSpecException;
 import java.util.ArrayList;
@@ -80,27 +79,6 @@ class CMSEnvelopedHelper
         }
         
         return encryptionAlgOID;    
-    }
-
-    Cipher createAsymmetricCipher(
-        String encryptionOid,
-        String provName)
-        throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException
-    {
-        String asymName = getAsymmetricEncryptionAlgName(encryptionOid);
-        if (!asymName.equals(encryptionOid))
-        {
-            try
-            {
-                // this is reversed as the Sun policy files now allow unlimited strength RSA
-                return Cipher.getInstance(asymName, provName);
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                // Ignore
-            }
-        }
-        return Cipher.getInstance(encryptionOid, provName);
     }
 
     Cipher createAsymmetricCipher(

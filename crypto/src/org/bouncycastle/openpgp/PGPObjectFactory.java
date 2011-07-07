@@ -112,7 +112,7 @@ public class PGPObjectFactory
             }
             catch (PGPException e)
             {
-                throw new IOException("processing error: " + e.getMessage(), e);
+                throw new IOException("processing error: " + e.getMessage());
             }
         case PacketTags.COMPRESSED_DATA:
             return new PGPCompressedData(in);

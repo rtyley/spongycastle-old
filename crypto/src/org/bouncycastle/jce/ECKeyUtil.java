@@ -189,7 +189,7 @@ public class ECKeyUtil
 
                 params = new X962Parameters(curveParams);
 
-                info = new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), info.getPrivateKey());
+                info = new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), info.parsePrivateKey().toASN1Object());
 
                 KeyFactory keyFact = KeyFactory.getInstance(key.getAlgorithm(), provider);
 

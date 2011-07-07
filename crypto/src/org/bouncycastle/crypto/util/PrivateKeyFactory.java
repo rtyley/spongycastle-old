@@ -81,8 +81,8 @@ public class PrivateKeyFactory
 
         if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.rsaEncryption))
         {
-            RSAPrivateKeyStructure keyStructure = new RSAPrivateKeyStructure(
-                (ASN1Sequence)keyInfo.getPrivateKey());
+            RSAPrivateKeyStructure keyStructure = RSAPrivateKeyStructure.getInstance(
+                keyInfo.parsePrivateKey());
 
             return new RSAPrivateCrtKeyParameters(keyStructure.getModulus(),
                 keyStructure.getPublicExponent(), keyStructure.getPrivateExponent(),
@@ -91,11 +91,11 @@ public class PrivateKeyFactory
         }
         // TODO?
 //      else if (algId.getObjectId().equals(X9ObjectIdentifiers.dhpublicnumber))
-        else if (algId.getObjectId().equals(PKCSObjectIdentifiers.dhKeyAgreement))
+        else if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {
             DHParameter params = new DHParameter(
                 (ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
-            DERInteger derX = (DERInteger)keyInfo.getPrivateKey();
+            DERInteger derX = (DERInteger)keyInfo.parsePrivateKey();
 
             BigInteger lVal = params.getL();
             int l = lVal == null ? 0 : lVal.intValue();
@@ -103,18 +103,18 @@ public class PrivateKeyFactory
 
             return new DHPrivateKeyParameters(derX.getValue(), dhParams);
         }
-        else if (algId.getObjectId().equals(OIWObjectIdentifiers.elGamalAlgorithm))
+        else if (algId.getAlgorithm().equals(OIWObjectIdentifiers.elGamalAlgorithm))
         {
             ElGamalParameter params = new ElGamalParameter(
                 (ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
-            DERInteger derX = (DERInteger)keyInfo.getPrivateKey();
+            DERInteger derX = (DERInteger)keyInfo.parsePrivateKey();
 
             return new ElGamalPrivateKeyParameters(derX.getValue(), new ElGamalParameters(
                 params.getP(), params.getG()));
         }
-        else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_dsa))
+        else if (algId.getAlgorithm().equals(X9ObjectIdentifiers.id_dsa))
         {
-            DERInteger derX = (DERInteger)keyInfo.getPrivateKey();
+            DERInteger derX = (DERInteger)keyInfo.parsePrivateKey();
             DEREncodable de = keyInfo.getAlgorithmId().getParameters();
 
             DSAParameters parameters = null;
@@ -126,7 +126,7 @@ public class PrivateKeyFactory
 
             return new DSAPrivateKeyParameters(derX.getValue(), parameters);
         }
-        else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_ecPublicKey))
+        else if (algId.getAlgorithm().equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
             X962Parameters params = new X962Parameters(
                 (DERObject)keyInfo.getAlgorithmId().getParameters());
@@ -163,7 +163,7 @@ public class PrivateKeyFactory
             }
 
             ECPrivateKeyStructure ec = new ECPrivateKeyStructure(
-                (ASN1Sequence)keyInfo.getPrivateKey());
+                (ASN1Sequence)keyInfo.parsePrivateKey());
 
             return new ECPrivateKeyParameters(ec.getKey(), dParams);
         }

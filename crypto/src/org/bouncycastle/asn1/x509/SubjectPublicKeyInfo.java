@@ -90,6 +90,22 @@ public class SubjectPublicKeyInfo
      * @exception IOException - if the bit string doesn't represent a DER
      * encoded object.
      */
+    public DERObject parsePublicKey()
+        throws IOException
+    {
+        ASN1InputStream         aIn = new ASN1InputStream(keyData.getBytes());
+
+        return aIn.readObject();
+    }
+
+    /**
+     * for when the public key is an encoded object - if the bitstring
+     * can't be decoded this routine throws an IOException.
+     *
+     * @exception IOException - if the bit string doesn't represent a DER
+     * encoded object.
+     * @deprecated use parsePublicKey
+     */
     public DERObject getPublicKey()
         throws IOException
     {

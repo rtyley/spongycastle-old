@@ -2,7 +2,6 @@ package org.bouncycastle.cms;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -406,29 +405,11 @@ public class CMSAuthenticatedDataStreamGenerator
         Provider            encProvider = keyGen.getProvider();
         SecretKey           encKey = keyGen.generateKey();
         AlgorithmParameterSpec params = generateParameterSpec(macOID, encKey, encProvider);
-
-        Iterator it = oldRecipientInfoGenerators.iterator();
         ASN1EncodableVector recipientInfos = new ASN1EncodableVector();
 
-        while (it.hasNext())
-        {
-            IntRecipientInfoGenerator recipient = (IntRecipientInfoGenerator)it.next();
+        convertOldRecipients(rand, provider);
 
-            try
-            {
-                recipientInfos.add(recipient.generate(encKey, rand, provider));
-            }
-            catch (InvalidKeyException e)
-            {
-                throw new CMSException("key inappropriate for algorithm.", e);
-            }
-            catch (GeneralSecurityException e)
-            {
-                throw new CMSException("error making encrypted content.", e);
-            }
-        }
-
-        for (it = recipientInfoGenerators.iterator(); it.hasNext();)
+        for (Iterator it = recipientInfoGenerators.iterator(); it.hasNext();)
         {
             RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
 

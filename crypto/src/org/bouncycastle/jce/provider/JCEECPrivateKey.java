@@ -11,6 +11,7 @@ import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.EllipticCurve;
 import java.util.Enumeration;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
@@ -186,11 +187,13 @@ public class JCEECPrivateKey
 
     JCEECPrivateKey(
         PrivateKeyInfo      info)
+        throws IOException
     {
         populateFromPrivKeyInfo(info);
     }
 
     private void populateFromPrivKeyInfo(PrivateKeyInfo info)
+        throws IOException
     {
         X962Parameters params = new X962Parameters((DERObject)info.getAlgorithmId().getParameters());
 
@@ -245,15 +248,16 @@ public class JCEECPrivateKey
                 ecP.getH().intValue());
         }
 
-        if (info.getPrivateKey() instanceof DERInteger)
+        ASN1Encodable privKey = info.parsePrivateKey();
+        if (privKey instanceof DERInteger)
         {
-            DERInteger          derD = (DERInteger)info.getPrivateKey();
+            DERInteger          derD = DERInteger.getInstance(privKey);
 
             this.d = derD.getValue();
         }
         else
         {
-            ECPrivateKeyStructure ec = new ECPrivateKeyStructure((ASN1Sequence)info.getPrivateKey());
+            ECPrivateKeyStructure ec = new ECPrivateKeyStructure((ASN1Sequence)privKey);
 
             this.d = ec.getKey();
             this.publicKey = ec.getPublicKey();

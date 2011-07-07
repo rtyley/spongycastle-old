@@ -3,25 +3,18 @@ package org.bouncycastle.cms;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.InvalidParameterSpecException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
 import javax.crypto.KeyGenerator;
-import javax.crypto.Mac;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERConstructedOctetString;
@@ -32,9 +25,9 @@ import org.bouncycastle.asn1.cms.AuthenticatedData;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cms.jcajce.JceCMSMacCalculatorBuilder;
 import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.DigestCalculatorProvider;
-import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.MacCalculator;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.io.TeeOutputStream;
@@ -209,101 +202,34 @@ public class CMSAuthenticatedDataGenerator
      * @deprecated
      */
     private CMSAuthenticatedData generate(
-        CMSProcessable  content,
+        final CMSProcessable  content,
         String          macOID,
         KeyGenerator    keyGen,
         Provider        provider)
         throws NoSuchAlgorithmException, CMSException
     {
         Provider                encProvider = keyGen.getProvider();
-        ASN1EncodableVector     recipientInfos = new ASN1EncodableVector();
-        AlgorithmIdentifier     macAlgId;
-        SecretKey               encKey;
-        ASN1OctetString         encContent;
-        ASN1OctetString         macResult;
 
-        try
+        convertOldRecipients(rand, provider);
+
+        return generate(new CMSTypedData()
         {
-            Mac mac = CMSEnvelopedHelper.INSTANCE.getMac(macOID, encProvider);
-
-            AlgorithmParameterSpec params;
-
-            encKey = keyGen.generateKey();
-            params = generateParameterSpec(macOID, encKey, encProvider);
-
-            mac.init(encKey, params);
-
-            macAlgId = getAlgorithmIdentifier(macOID, params, encProvider);
-
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            OutputStream mOut = new TeeOutputStream(bOut, new MacOutputStream(mac));
-
-            content.write(mOut);
-
-            mOut.close();
-            bOut.close();
-
-            encContent = new BERConstructedOctetString(bOut.toByteArray());
-
-            macResult = new DEROctetString(mac.doFinal());
-        }
-        catch (InvalidKeyException e)
-        {
-            throw new CMSException("key invalid in message.", e);
-        }
-        catch (NoSuchPaddingException e)
-        {
-            throw new CMSException("required padding not supported.", e);
-        }
-        catch (InvalidAlgorithmParameterException e)
-        {
-            throw new CMSException("algorithm parameters invalid.", e);
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("exception decoding algorithm parameters.", e);
-        }
-        catch (InvalidParameterSpecException e)
-        {
-           throw new CMSException("exception setting up parameters.", e);
-        }
-
-        Iterator it = oldRecipientInfoGenerators.iterator();
-
-        while (it.hasNext())
-        {
-            IntRecipientInfoGenerator recipient = (IntRecipientInfoGenerator)it.next();
-
-            try
+            public ASN1ObjectIdentifier getContentType()
             {
-                recipientInfos.add(recipient.generate(encKey, rand, provider));
+                return CMSObjectIdentifiers.data;
             }
-            catch (InvalidKeyException e)
+
+            public void write(OutputStream out)
+                throws IOException, CMSException
             {
-                throw new CMSException("key inappropriate for algorithm.", e);
+                content.write(out);
             }
-            catch (GeneralSecurityException e)
+
+            public Object getContent()
             {
-                throw new CMSException("error making encrypted content.", e);
+                return content;
             }
-        }
-
-        for (it = recipientInfoGenerators.iterator(); it.hasNext();)
-        {
-            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
-
-            recipientInfos.add(recipient.generate(new GenericKey(encKey)));
-        }
-
-        ContentInfo  eci = new ContentInfo(
-                CMSObjectIdentifiers.data,
-                encContent);
-
-        ContentInfo contentInfo = new ContentInfo(
-                CMSObjectIdentifiers.authenticatedData,
-                new AuthenticatedData(null, new DERSet(recipientInfos), macAlgId, null, eci, null, macResult, null));
-
-        return new CMSAuthenticatedData(contentInfo);
+        }, new JceCMSMacCalculatorBuilder(new ASN1ObjectIdentifier(macOID)).setProvider(encProvider).setSecureRandom(rand).build());
     }
 
     /**
@@ -332,8 +258,6 @@ public class CMSAuthenticatedDataGenerator
         throws NoSuchAlgorithmException, CMSException
     {
         KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
-
-        keyGen.init(rand);
 
         return generate(content, encryptionOID, keyGen, provider);
     }

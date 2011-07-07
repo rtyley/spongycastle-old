@@ -87,17 +87,17 @@ public class PublicKeyFactory
     {
         AlgorithmIdentifier algId = keyInfo.getAlgorithmId();
 
-        if (algId.getObjectId().equals(PKCSObjectIdentifiers.rsaEncryption)
-            || algId.getObjectId().equals(X509ObjectIdentifiers.id_ea_rsa))
+        if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.rsaEncryption)
+            || algId.getAlgorithm().equals(X509ObjectIdentifiers.id_ea_rsa))
         {
             RSAPublicKeyStructure pubKey = new RSAPublicKeyStructure(
-                (ASN1Sequence)keyInfo.getPublicKey());
+                (ASN1Sequence)keyInfo.parsePublicKey());
 
             return new RSAKeyParameters(false, pubKey.getModulus(), pubKey.getPublicExponent());
         }
-        else if (algId.getObjectId().equals(X9ObjectIdentifiers.dhpublicnumber))
+        else if (algId.getAlgorithm().equals(X9ObjectIdentifiers.dhpublicnumber))
         {
-            DHPublicKey dhPublicKey = DHPublicKey.getInstance(keyInfo.getPublicKey());
+            DHPublicKey dhPublicKey = DHPublicKey.getInstance(keyInfo.parsePublicKey());
 
             BigInteger y = dhPublicKey.getY().getValue();
 
@@ -127,11 +127,11 @@ public class PublicKeyFactory
 
             return new DHPublicKeyParameters(y, new DHParameters(p, g, q, j, validation));
         }
-        else if (algId.getObjectId().equals(PKCSObjectIdentifiers.dhKeyAgreement))
+        else if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {
             DHParameter params = new DHParameter(
                 (ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
-            DERInteger derY = (DERInteger)keyInfo.getPublicKey();
+            DERInteger derY = (DERInteger)keyInfo.parsePublicKey();
 
             BigInteger lVal = params.getL();
             int l = lVal == null ? 0 : lVal.intValue();
@@ -139,19 +139,19 @@ public class PublicKeyFactory
 
             return new DHPublicKeyParameters(derY.getValue(), dhParams);
         }
-        else if (algId.getObjectId().equals(OIWObjectIdentifiers.elGamalAlgorithm))
+        else if (algId.getAlgorithm().equals(OIWObjectIdentifiers.elGamalAlgorithm))
         {
             ElGamalParameter params = new ElGamalParameter(
                 (ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
-            DERInteger derY = (DERInteger)keyInfo.getPublicKey();
+            DERInteger derY = (DERInteger)keyInfo.parsePublicKey();
 
             return new ElGamalPublicKeyParameters(derY.getValue(), new ElGamalParameters(
                 params.getP(), params.getG()));
         }
-        else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_dsa)
-            || algId.getObjectId().equals(OIWObjectIdentifiers.dsaWithSHA1))
+        else if (algId.getAlgorithm().equals(X9ObjectIdentifiers.id_dsa)
+            || algId.getAlgorithm().equals(OIWObjectIdentifiers.dsaWithSHA1))
         {
-            DERInteger derY = (DERInteger)keyInfo.getPublicKey();
+            DERInteger derY = (DERInteger)keyInfo.parsePublicKey();
             DEREncodable de = keyInfo.getAlgorithmId().getParameters();
 
             DSAParameters parameters = null;
@@ -163,7 +163,7 @@ public class PublicKeyFactory
 
             return new DSAPublicKeyParameters(derY.getValue(), parameters);
         }
-        else if (algId.getObjectId().equals(X9ObjectIdentifiers.id_ecPublicKey))
+        else if (algId.getAlgorithm().equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
             X962Parameters params = new X962Parameters(
                 (DERObject)keyInfo.getAlgorithmId().getParameters());

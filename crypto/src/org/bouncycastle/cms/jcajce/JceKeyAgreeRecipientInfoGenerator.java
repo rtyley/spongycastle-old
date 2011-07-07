@@ -56,7 +56,6 @@ public class JceKeyAgreeRecipientInfoGenerator
     private KeyPair ephemeralKP;
 
     public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID)
-        throws CMSException
     {
         super(keyAgreementOID, SubjectPublicKeyInfo.getInstance(senderPublicKey.getEncoded()), keyEncryptionOID);
 

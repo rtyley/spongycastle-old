@@ -66,7 +66,7 @@ public class JCEDHPublicKey
         DERInteger              derY;
         try
         {
-            derY = (DERInteger)info.getPublicKey();
+            derY = (DERInteger)info.parsePublicKey();
         }
         catch (IOException e)
         {
@@ -76,7 +76,7 @@ public class JCEDHPublicKey
         this.y = derY.getValue();
 
         ASN1Sequence seq = ASN1Sequence.getInstance(info.getAlgorithmId().getParameters());
-        DERObjectIdentifier id = info.getAlgorithmId().getObjectId();
+        DERObjectIdentifier id = info.getAlgorithmId().getAlgorithm();
 
         // we need the PKCS check to handle older keys marked with the X9 oid.
         if (id.equals(PKCSObjectIdentifiers.dhKeyAgreement) || isPKCSParam(seq))

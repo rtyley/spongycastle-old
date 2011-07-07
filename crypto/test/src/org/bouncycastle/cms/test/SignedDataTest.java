@@ -685,7 +685,7 @@ public class SignedDataTest
         }
         catch (NoSuchAlgorithmException e)
         {
-            if (!e.getMessage().startsWith("no such algorithm: YYYYwithXXXX"))
+            if (!e.getMessage().startsWith("Unknown signature type requested: YYYYWITHXXXX"))
             {
                 throw e;
             }

@@ -145,7 +145,7 @@ class OperatorHelper
 
         try
         {
-            dig = helper.createDigest(getSignatureName(digAlgId));
+            dig = helper.createDigest(getDigestAlgName(digAlgId.getAlgorithm()));
         }
         catch (NoSuchAlgorithmException e)
         {

@@ -1,45 +1,35 @@
 package org.bouncycastle.cms;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERConstructedOctetString;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
-import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -75,7 +65,7 @@ public class CMSSignedDataGenerator
     private class SignerInf
     {
         final PrivateKey                  key;
-        final SignerIdentifier            signerIdentifier;
+        final Object                      signerIdentifier;
         final String                      digestOID;
         final String                      encOID;
         final CMSAttributeTableGenerator  sAttr;
@@ -84,7 +74,7 @@ public class CMSSignedDataGenerator
 
         SignerInf(
             PrivateKey                 key,
-            SignerIdentifier           signerIdentifier,
+            Object                     signerIdentifier,
             String                     digestOID,
             String                     encOID,
             CMSAttributeTableGenerator sAttr,
@@ -100,95 +90,52 @@ public class CMSSignedDataGenerator
             this.baseSignedTable = baseSignedTable;
         }
 
-        AlgorithmIdentifier getDigestAlgorithmID()
-        {
-            return new AlgorithmIdentifier(new DERObjectIdentifier(digestOID), new DERNull());
-        }
-
-        SignerInfo toSignerInfo(
-            DERObjectIdentifier contentType,
-            CMSProcessable      content,
+        SignerInfoGenerator toSignerInfoGenerator(
             SecureRandom        random,
-            Provider            sigProvider,
+            Provider sigProvider,
             boolean             addDefaultAttributes)
-            throws IOException, SignatureException, InvalidKeyException, NoSuchAlgorithmException, CertificateEncodingException, CMSException
+            throws IOException, CertificateEncodingException, CMSException, OperatorCreationException, NoSuchAlgorithmException
         {
-            AlgorithmIdentifier digAlgId = getDigestAlgorithmID();
             String              digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
             String              signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
-            Signature           sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
-            MessageDigest       dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);               
-            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(encOID, sig);
 
-            if (content != null)
-            {
-                content.write(new DigOutputStream(dig));
-            }
+            JcaSignerInfoGeneratorBuilder builder = new JcaSignerInfoGeneratorBuilder(new BcDigestCalculatorProvider());
 
-            byte[] hash = dig.digest();
-            digests.put(digestOID, hash.clone());
-
-            AttributeTable signed;
             if (addDefaultAttributes)
             {
-                Map parameters = getBaseParameters(contentType, digAlgId, hash);
-                signed = (sAttr != null) ? sAttr.getAttributes(Collections.unmodifiableMap(parameters)) : null;
+                builder.setSignedAttributeGenerator(sAttr);
+            }
+            builder.setDirectSignature(!addDefaultAttributes);
+
+            builder.setUnsignedAttributeGenerator(unsAttr);
+
+            JcaContentSignerBuilder signerBuilder;
+
+            try
+            {
+                signerBuilder = new JcaContentSignerBuilder(signatureName).setSecureRandom(random);
+            }
+            catch (IllegalArgumentException e)
+            {
+                throw new NoSuchAlgorithmException(e.getMessage());
+            }
+
+            if (sigProvider != null)
+            {
+                signerBuilder.setProvider(sigProvider);
+            }
+
+            ContentSigner contentSigner = signerBuilder.build(key);
+            if (signerIdentifier instanceof X509Certificate)
+            {
+                return builder.build(contentSigner, (X509Certificate)signerIdentifier);
             }
             else
             {
-                signed = baseSignedTable;
+                return builder.build(contentSigner, (byte[])signerIdentifier);
             }
-
-            sig.initSign(key, random);
-            OutputStream sigStr = new BufferedOutputStream(new SigOutputStream(sig));
-
-            ASN1Set signedAttr = null;
-            if (signed != null)
-            {
-                if (contentType == null) //counter signature
-                {
-                    if (signed.get(CMSAttributes.contentType) != null)
-                    {
-                        Hashtable tmpSigned = signed.toHashtable();
-                        tmpSigned.remove(CMSAttributes.contentType);
-                        signed = new AttributeTable(tmpSigned);
-                    }
-                }
-
-                // TODO Validate proposed signed attributes
-
-                signedAttr = getAttributeSet(signed);
-
-                // sig must be composed from the DER encoding.
-                new DEROutputStream(sigStr).writeObject(signedAttr);
-            }
-            else if (content != null)
-            {
-                // TODO Use raw signature of the hash value instead
-                content.write(sigStr);
-            }
-
-            sigStr.close();
-            byte[] sigBytes = sig.sign();
-
-            ASN1Set unsignedAttr = null;
-            if (unsAttr != null)
-            {
-                Map parameters = getBaseParameters(contentType, digAlgId, hash);
-                parameters.put(CMSAttributeTableGenerator.SIGNATURE, sigBytes.clone());
-
-                AttributeTable unsigned = unsAttr.getAttributes(Collections.unmodifiableMap(parameters));
-
-                // TODO Validate proposed unsigned attributes
-
-                unsignedAttr = getAttributeSet(unsigned);
-            }
-
-            return new SignerInfo(signerIdentifier, digAlgId,
-                signedAttr, encAlgId, new DEROctetString(sigBytes), unsignedAttr);
         }
     }
-    
     /**
      * base constructor
      */
@@ -241,7 +188,7 @@ public class CMSSignedDataGenerator
         String          digestOID)
         throws IllegalArgumentException
     {
-        doAddSigner(key, getSignerIdentifier(cert), encryptionOID, digestOID,
+        doAddSigner(key, cert, encryptionOID, digestOID,
             new DefaultSignedAttributeTableGenerator(), null, null);
     }
 
@@ -271,7 +218,7 @@ public class CMSSignedDataGenerator
         String          digestOID)
         throws IllegalArgumentException
     {
-        doAddSigner(key, getSignerIdentifier(subjectKeyID), encryptionOID, digestOID,
+        doAddSigner(key, subjectKeyID, encryptionOID, digestOID,
             new DefaultSignedAttributeTableGenerator(), null, null);
     }
 
@@ -316,7 +263,7 @@ public class CMSSignedDataGenerator
         AttributeTable  unsignedAttr)
         throws IllegalArgumentException
     {
-        doAddSigner(key, getSignerIdentifier(cert), encryptionOID, digestOID,
+        doAddSigner(key, cert, encryptionOID, digestOID,
           new DefaultSignedAttributeTableGenerator(signedAttr),
           new SimpleAttributeTableGenerator(unsignedAttr), signedAttr);
     }
@@ -363,7 +310,7 @@ public class CMSSignedDataGenerator
         AttributeTable  unsignedAttr)
         throws IllegalArgumentException
     {
-        doAddSigner(key, getSignerIdentifier(subjectKeyID), encryptionOID, digestOID,
+        doAddSigner(key, subjectKeyID, encryptionOID, digestOID,
             new DefaultSignedAttributeTableGenerator(signedAttr),
             new SimpleAttributeTableGenerator(unsignedAttr), signedAttr);
     }
@@ -396,7 +343,7 @@ public class CMSSignedDataGenerator
         CMSAttributeTableGenerator  unsignedAttrGen)
         throws IllegalArgumentException
     {
-        doAddSigner(key, getSignerIdentifier(cert), encryptionOID, digestOID, signedAttrGen,
+        doAddSigner(key, cert, encryptionOID, digestOID, signedAttrGen,
             unsignedAttrGen, null);
     }
 
@@ -429,13 +376,13 @@ public class CMSSignedDataGenerator
         CMSAttributeTableGenerator  unsignedAttrGen)
         throws IllegalArgumentException
     {
-        doAddSigner(key, getSignerIdentifier(subjectKeyID), encryptionOID, digestOID,
+        doAddSigner(key, subjectKeyID, encryptionOID, digestOID,
             signedAttrGen, unsignedAttrGen, null);
     }
 
     private void doAddSigner(
         PrivateKey                  key,
-        SignerIdentifier            signerIdentifier,
+        Object                      signerIdentifier,
         String                      encryptionOID,
         String                      digestOID,
         CMSAttributeTableGenerator  signedAttrGen,
@@ -450,6 +397,7 @@ public class CMSSignedDataGenerator
     /**
      * generate a signed object that for a CMS Signed Data
      * object using the given provider.
+     * @deprecated use generate() method not taking provider.
      */
     public CMSSignedData generate(
         CMSProcessable content,
@@ -462,6 +410,7 @@ public class CMSSignedDataGenerator
     /**
      * generate a signed object that for a CMS Signed Data
      * object using the given provider.
+     * @deprecated use generate() method not taking provider.
      */
     public CMSSignedData generate(
         CMSProcessable content,
@@ -534,93 +483,17 @@ public class CMSSignedDataGenerator
     public CMSSignedData generate(
         String                  eContentType,
         // FIXME Avoid accessing more than once to support CMSProcessableInputStream
-        CMSProcessable          content,
+        final CMSProcessable          content,
         boolean                 encapsulate,
         Provider                sigProvider,
         boolean                 addDefaultAttributes)
         throws NoSuchAlgorithmException, CMSException
     {
-        // TODO
-//        if (signerInfs.isEmpty())
-//        {
-//            /* RFC 3852 5.2
-//             * "In the degenerate case where there are no signers, the
-//             * EncapsulatedContentInfo value being "signed" is irrelevant.  In this
-//             * case, the content type within the EncapsulatedContentInfo value being
-//             * "signed" MUST be id-data (as defined in section 4), and the content
-//             * field of the EncapsulatedContentInfo value MUST be omitted."
-//             */
-//            if (encapsulate)
-//            {
-//                throw new IllegalArgumentException("no signers, encapsulate must be false");
-//            }
-//            if (!DATA.equals(eContentType))
-//            {
-//                throw new IllegalArgumentException("no signers, eContentType must be id-data");
-//            }
-//        }
-//
-//        if (!DATA.equals(eContentType))
-//        {
-//            /* RFC 3852 5.3
-//             * [The 'signedAttrs']...
-//             * field is optional, but it MUST be present if the content type of
-//             * the EncapsulatedContentInfo value being signed is not id-data.
-//             */
-//            // TODO signedAttrs must be present for all signers
-//        }
-
-        ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
-        ASN1EncodableVector  signerInfos = new ASN1EncodableVector();
-
-        digests.clear();  // clear the current preserved digest state
-
-        //
-        // add the precalculated SignerInfo objects.
-        //
-        for (Iterator it = _signers.iterator(); it.hasNext();)
-        {
-            SignerInformation signer = (SignerInformation)it.next();
-            digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
-
-            // TODO Verify the content type and calculated digest match the precalculated SignerInfo
-            signerInfos.add(signer.toASN1Structure());
-        }
-        
-        //
-        // add the SignerInfo objects
-        //
         boolean isCounterSignature = (eContentType == null);
 
-        ASN1ObjectIdentifier contentTypeOID = isCounterSignature
+        final ASN1ObjectIdentifier contentTypeOID = isCounterSignature
             ?   null
             :   new ASN1ObjectIdentifier(eContentType);
-
-        for (Iterator it = signerGens.iterator(); it.hasNext();)
-        {
-            SignerInfoGenerator sGen = (SignerInfoGenerator)it.next();
-
-            if (content != null)
-            {
-                OutputStream cOut = sGen.getCalculatingOutputStream();
-
-                try
-                {
-                    content.write(cOut);
-
-                    cOut.close();
-                }
-                catch (IOException e)
-                {
-                    throw new CMSException("data processing exception: " + e.getMessage(), e);
-                }
-            }
-
-            SignerInfo inf = sGen.generate(contentTypeOID);
-
-            digestAlgs.add(inf.getDigestAlgorithm());
-            signerInfos.add(inf);
-        }
 
         for (Iterator it = signerInfs.iterator(); it.hasNext();)
         {
@@ -628,21 +501,16 @@ public class CMSSignedDataGenerator
 
             try
             {
-                digestAlgs.add(signer.getDigestAlgorithmID());
-                signerInfos.add(signer.toSignerInfo(contentTypeOID, content, rand, sigProvider,
+                signerGens.add(signer.toSignerInfoGenerator(rand, sigProvider,
                     addDefaultAttributes));
+            }
+            catch (OperatorCreationException e)
+            {
+                throw new CMSException("exception creating signerInf", e);
             }
             catch (IOException e)
             {
-                throw new CMSException("encoding error.", e);
-            }
-            catch (InvalidKeyException e)
-            {
-                throw new CMSException("key inappropriate for signature.", e);
-            }
-            catch (SignatureException e)
-            {
-                throw new CMSException("error creating signature.", e);
+                throw new CMSException("exception encoding attributes", e);
             }
             catch (CertificateEncodingException e)
             {
@@ -650,53 +518,33 @@ public class CMSSignedDataGenerator
             }
         }
 
-        ASN1Set certificates = null;
+        signerInfs.clear();
 
-        if (certs.size() != 0)
+        if (content != null)
         {
-            certificates = CMSUtils.createBerSetFromList(certs);
-        }
-
-        ASN1Set certrevlist = null;
-
-        if (crls.size() != 0)
-        {
-            certrevlist = CMSUtils.createBerSetFromList(crls);
-        }
-
-        ASN1OctetString octs = null;
-        if (encapsulate)
-        {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-
-            if (content != null)
+            return generate(new CMSTypedData()
             {
-                try
+                public ASN1ObjectIdentifier getContentType()
                 {
-                    content.write(bOut);
+                    return contentTypeOID;
                 }
-                catch (IOException e)
-                {
-                    throw new CMSException("encapsulation error.", e);
-                }
-            }
 
-            octs = new BERConstructedOctetString(bOut.toByteArray());
+                public void write(OutputStream out)
+                    throws IOException, CMSException
+                {
+                    content.write(out);
+                }
+
+                public Object getContent()
+                {
+                    return content.getContent();
+                }
+            }, encapsulate);
         }
-
-        ContentInfo encInfo = new ContentInfo(contentTypeOID, octs);
-
-        SignedData  sd = new SignedData(
-                                 new DERSet(digestAlgs),
-                                 encInfo, 
-                                 certificates, 
-                                 certrevlist, 
-                                 new DERSet(signerInfos));
-
-        ContentInfo contentInfo = new ContentInfo(
-            CMSObjectIdentifiers.signedData, sd);
-
-        return new CMSSignedData(content, contentInfo);
+        else
+        {
+            return generate(new CMSAbsentContent(contentTypeOID), encapsulate);
+        }
     }
     
     /**

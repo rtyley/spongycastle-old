@@ -3,7 +3,6 @@ package org.bouncycastle.cms;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -30,6 +29,7 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OutputEncryptor;
 
@@ -70,6 +70,7 @@ public class CMSEnvelopedDataStreamGenerator
     /**
      * constructor allowing specific source of randomness
      * @param rand instance of SecureRandom to use
+     * @deprecated no longer required - specify randomness via RecipientInfoGenerator or ContentEncryptor.
      */
     public CMSEnvelopedDataStreamGenerator(
         SecureRandom rand)
@@ -118,51 +119,34 @@ public class CMSEnvelopedDataStreamGenerator
     private OutputStream open(
         OutputStream out,
         String       encryptionOID,
-        KeyGenerator keyGen,
+        int          keySize,
+        Provider     encProvider,
         Provider     provider)
-        throws NoSuchAlgorithmException, CMSException
+        throws NoSuchAlgorithmException, CMSException, IOException
     {
-        Provider            encProvider = keyGen.getProvider();
-        SecretKey           encKey = keyGen.generateKey();
-        AlgorithmParameters params = generateParameters(encryptionOID, encKey, encProvider);
+        convertOldRecipients(rand, provider);
 
-        Iterator it = oldRecipientInfoGenerators.iterator();
-        ASN1EncodableVector recipientInfos = new ASN1EncodableVector();
-        
-        while (it.hasNext())
+        JceCMSContentEncryptorBuilder builder;
+
+        if (keySize != -1)
         {
-            IntRecipientInfoGenerator recipient = (IntRecipientInfoGenerator)it.next();
-
-            try
-            {
-                recipientInfos.add(recipient.generate(encKey, rand, provider));
-            }
-            catch (InvalidKeyException e)
-            {
-                throw new CMSException("key inappropriate for algorithm.", e);
-            }
-            catch (GeneralSecurityException e)
-            {
-                throw new CMSException("error making encrypted content.", e);
-            }
+            builder =  new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(encryptionOID), keySize);
+        }
+        else
+        {
+            builder = new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(encryptionOID));
         }
 
-        it = recipientInfoGenerators.iterator();
+        builder.setProvider(encProvider);
+        builder.setSecureRandom(rand);
 
-        while (it.hasNext())
-        {
-            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
-
-            recipientInfos.add(recipient.generate(new GenericKey(encKey)));
-        }
-
-        return open(out, encryptionOID, encKey, params, recipientInfos, encProvider);
+        return doOpen(CMSObjectIdentifiers.data, out, builder.build());
     }
 
     private OutputStream doOpen(
         ASN1ObjectIdentifier dataType,
         OutputStream         out,
-        OutputEncryptor encryptor)
+        OutputEncryptor      encryptor)
         throws IOException, CMSException
     {
         ASN1EncodableVector recipientInfos = new ASN1EncodableVector();
@@ -395,7 +379,7 @@ public class CMSEnvelopedDataStreamGenerator
 
         keyGen.init(rand);
 
-        return open(out, encryptionOID, keyGen, provider);
+        return open(out, encryptionOID, -1, keyGen.getProvider(), provider);
     }
 
     /**
@@ -429,7 +413,7 @@ public class CMSEnvelopedDataStreamGenerator
 
         keyGen.init(keySize, rand);
 
-        return open(out, encryptionOID, keyGen, provider);
+        return open(out, encryptionOID, -1, keyGen.getProvider(), provider);
     }
 
     /**

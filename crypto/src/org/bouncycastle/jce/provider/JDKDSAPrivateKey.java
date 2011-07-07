@@ -1,5 +1,16 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.security.interfaces.DSAParams;
+import java.security.interfaces.DSAPrivateKey;
+import java.security.spec.DSAParameterSpec;
+import java.security.spec.DSAPrivateKeySpec;
+import java.util.Enumeration;
+
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
@@ -10,16 +21,6 @@ import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.math.BigInteger;
-import java.security.interfaces.DSAParams;
-import java.security.interfaces.DSAPrivateKey;
-import java.security.spec.DSAParameterSpec;
-import java.security.spec.DSAPrivateKeySpec;
-import java.util.Enumeration;
 
 public class JDKDSAPrivateKey
     implements DSAPrivateKey, PKCS12BagAttributeCarrier
@@ -51,9 +52,10 @@ public class JDKDSAPrivateKey
 
     JDKDSAPrivateKey(
         PrivateKeyInfo  info)
+        throws IOException
     {
         DSAParameter    params = new DSAParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
-        DERInteger      derX = (DERInteger)info.getPrivateKey();
+        DERInteger      derX = ASN1Integer.getInstance(info.parsePrivateKey());
 
         this.x = derX.getValue();
         this.dsaSpec = new DSAParameterSpec(params.getP(), params.getQ(), params.getG());

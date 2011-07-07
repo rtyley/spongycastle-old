@@ -6,7 +6,7 @@ import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
@@ -21,7 +21,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class PrivateKeyInfo
     extends ASN1Encodable
 {
-    private DERObject               privKey;
+    private ASN1OctetString         privKey;
     private AlgorithmIdentifier     algId;
     private ASN1Set                 attributes;
 
@@ -59,7 +59,7 @@ public class PrivateKeyInfo
         DERObject           privateKey,
         ASN1Set             attributes)
     {
-        this.privKey = privateKey;
+        this.privKey = new DEROctetString(privateKey.getDEREncoded());
         this.algId = algId;
         this.attributes = attributes;
     }
@@ -75,18 +75,8 @@ public class PrivateKeyInfo
             throw new IllegalArgumentException("wrong version for private key info");
         }
 
-        algId = new AlgorithmIdentifier((ASN1Sequence)e.nextElement());
-
-        try
-        {
-            ASN1InputStream         aIn = new ASN1InputStream(((ASN1OctetString)e.nextElement()).getOctets());
-
-            privKey = aIn.readObject();
-        }
-        catch (IOException ex)
-        {
-            throw new IllegalArgumentException("Error recoverying private key from sequence");
-        }
+        algId = AlgorithmIdentifier.getInstance(e.nextElement());
+        privKey = ASN1OctetString.getInstance(e.nextElement());
         
         if (e.hasMoreElements())
         {
@@ -99,9 +89,25 @@ public class PrivateKeyInfo
         return algId;
     }
 
+    public ASN1Encodable parsePrivateKey()
+        throws IOException
+    {
+        return ASN1Object.fromByteArray(privKey.getOctets());
+    }
+
+    /**
+          * @deprecated use parsePrivateKey()
+     */
     public DERObject getPrivateKey()
     {
-        return privKey;
+        try
+        {
+            return parsePrivateKey().toASN1Object();
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException("unable to parse private key");
+        }
     }
     
     public ASN1Set getAttributes()
@@ -132,7 +138,7 @@ public class PrivateKeyInfo
 
         v.add(new DERInteger(0));
         v.add(algId);
-        v.add(new DEROctetString(privKey));
+        v.add(privKey);
 
         if (attributes != null)
         {

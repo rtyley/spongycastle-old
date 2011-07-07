@@ -79,7 +79,7 @@ public class JCEElGamalPublicKey
 
         try
         {
-            derY = (DERInteger)info.getPublicKey();
+            derY = (DERInteger)info.parsePublicKey();
         }
         catch (IOException e)
         {

@@ -279,8 +279,9 @@ public abstract class JDKKeyFactory
      */ 
     static PrivateKey createPrivateKeyFromPrivateKeyInfo(
         PrivateKeyInfo      info)
+        throws IOException
     {
-        DERObjectIdentifier     algOid = info.getAlgorithmId().getObjectId();
+        DERObjectIdentifier     algOid = info.getAlgorithmId().getAlgorithm();
         
         if (RSAUtil.isRsaOid(algOid))
         {

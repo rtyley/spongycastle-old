@@ -1,5 +1,14 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.security.interfaces.DSAParams;
+import java.security.interfaces.DSAPublicKey;
+import java.security.spec.DSAParameterSpec;
+import java.security.spec.DSAPublicKeySpec;
+
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
@@ -9,15 +18,6 @@ import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.math.BigInteger;
-import java.security.interfaces.DSAParams;
-import java.security.interfaces.DSAPublicKey;
-import java.security.spec.DSAParameterSpec;
-import java.security.spec.DSAPublicKeySpec;
 
 public class JDKDSAPublicKey
     implements DSAPublicKey
@@ -64,7 +64,7 @@ public class JDKDSAPublicKey
 
         try
         {
-            derY = (DERInteger)info.getPublicKey();
+            derY = (DERInteger)info.parsePublicKey();
         }
         catch (IOException e)
         {

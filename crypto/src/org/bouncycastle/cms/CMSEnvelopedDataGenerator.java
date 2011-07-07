@@ -3,10 +3,6 @@ package org.bouncycastle.cms;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
@@ -14,13 +10,10 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERConstructedOctetString;
@@ -32,6 +25,7 @@ import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.EncryptedContentInfo;
 import org.bouncycastle.asn1.cms.EnvelopedData;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OutputEncryptor;
 
@@ -79,121 +73,47 @@ public class CMSEnvelopedDataGenerator
      * object using the given provider and the passed in key generator.
      */
     private CMSEnvelopedData generate(
-        CMSProcessable  content,
+        final CMSProcessable  content,
         String          encryptionOID,
-        KeyGenerator    keyGen,
+        int             keySize,
+        Provider        encProvider,
         Provider        provider)
         throws NoSuchAlgorithmException, CMSException
     {
-        Provider                encProvider = keyGen.getProvider();
-        ASN1EncodableVector     recipientInfos = new ASN1EncodableVector();
-        AlgorithmIdentifier     encAlgId;
-        SecretKey               encKey;
-        ASN1OctetString         encContent;
+        convertOldRecipients(rand, provider);
 
-        try
+        JceCMSContentEncryptorBuilder builder;
+
+        if (keySize != -1)
         {
-            Cipher cipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(encryptionOID, encProvider);
-
-            AlgorithmParameters params;
-            
-            encKey = keyGen.generateKey();
-            params = generateParameters(encryptionOID, encKey, encProvider);
-
-            cipher.init(Cipher.ENCRYPT_MODE, encKey, params, rand);
-
-            //
-            // If params are null we try and second guess on them as some providers don't provide
-            // algorithm parameter generation explicity but instead generate them under the hood.
-            //
-            if (params == null)
-            {
-                params = cipher.getParameters();
-            }
-            
-            encAlgId = getAlgorithmIdentifier(encryptionOID, params);
-
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            CipherOutputStream      cOut = new CipherOutputStream(bOut, cipher);
-
-            content.write(cOut);
-
-            cOut.close();
-
-            encContent = new BERConstructedOctetString(bOut.toByteArray());
-        }
-        catch (InvalidKeyException e)
-        {
-            throw new CMSException("key invalid in message.", e);
-        }
-        catch (NoSuchPaddingException e)
-        {
-            throw new CMSException("required padding not supported.", e);
-        }
-        catch (InvalidAlgorithmParameterException e)
-        {
-            throw new CMSException("algorithm parameters invalid.", e);
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("exception decoding algorithm parameters.", e);
-        }
-
-        for (Iterator it = oldRecipientInfoGenerators.iterator(); it.hasNext();)
-        {
-            IntRecipientInfoGenerator recipient = (IntRecipientInfoGenerator)it.next();
-
-            try
-            {
-                recipientInfos.add(recipient.generate(encKey, rand, provider));
-            }
-            catch (InvalidKeyException e)
-            {
-                throw new CMSException("key inappropriate for algorithm.", e);
-            }
-            catch (GeneralSecurityException e)
-            {
-                throw new CMSException("error making encrypted content.", e);
-            }
-        }
-
-        for (Iterator it = recipientInfoGenerators.iterator(); it.hasNext();)
-        {
-            RecipientInfoGenerator recipient = (RecipientInfoGenerator)it.next();
-
-            recipientInfos.add(recipient.generate(new GenericKey(encKey)));
-        }
-
-        EncryptedContentInfo  eci;
-
-        if (content instanceof CMSTypedData)
-        {
-            eci = new EncryptedContentInfo(
-                        ((CMSTypedData)content).getContentType(),
-                        encAlgId,
-                        encContent);
+            builder =  new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(encryptionOID), keySize);
         }
         else
         {
-            eci = new EncryptedContentInfo(
-                        CMSObjectIdentifiers.data,
-                        encAlgId,
-                        encContent);
+            builder = new JceCMSContentEncryptorBuilder(new ASN1ObjectIdentifier(encryptionOID));
         }
 
-        ASN1Set unprotectedAttrSet = null;
-        if (unprotectedAttributeGenerator != null)
+        builder.setProvider(encProvider);
+        builder.setSecureRandom(rand);
+
+        return doGenerate(new CMSTypedData()
         {
-            AttributeTable attrTable = unprotectedAttributeGenerator.getAttributes(new HashMap());
+            public ASN1ObjectIdentifier getContentType()
+            {
+                return CMSObjectIdentifiers.data;
+            }
 
-            unprotectedAttrSet = new BERSet(attrTable.toASN1EncodableVector());
-        }
+            public void write(OutputStream out)
+                throws IOException, CMSException
+            {
+                content.write(out);
+            }
 
-        ContentInfo contentInfo = new ContentInfo(
-                CMSObjectIdentifiers.envelopedData,
-                new EnvelopedData(null, new DERSet(recipientInfos), eci, unprotectedAttrSet));
-
-        return new CMSEnvelopedData(contentInfo);
+            public Object getContent()
+            {
+                return content;
+            }
+        }, builder.build());
     }
 
     private CMSEnvelopedData doGenerate(
@@ -287,9 +207,7 @@ public class CMSEnvelopedDataGenerator
     {
         KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
 
-        keyGen.init(rand);
-
-        return generate(content, encryptionOID, keyGen, provider);
+        return generate(content, encryptionOID, -1, keyGen.getProvider(), provider);
     }
 
     /**
@@ -321,9 +239,7 @@ public class CMSEnvelopedDataGenerator
     {
         KeyGenerator keyGen = CMSEnvelopedHelper.INSTANCE.createSymmetricKeyGenerator(encryptionOID, provider);
 
-        keyGen.init(keySize, rand);
-
-        return generate(content, encryptionOID, keyGen, provider);
+        return generate(content, encryptionOID, keySize, keyGen.getProvider(), provider);
     }
 
     /**

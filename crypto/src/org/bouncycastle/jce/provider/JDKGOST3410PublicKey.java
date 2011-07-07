@@ -1,5 +1,8 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.IOException;
+import java.math.BigInteger;
+
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -13,9 +16,6 @@ import org.bouncycastle.jce.interfaces.GOST3410PublicKey;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeySpec;
-
-import java.io.IOException;
-import java.math.BigInteger;
 
 public class JDKGOST3410PublicKey
     implements GOST3410PublicKey
@@ -61,7 +61,7 @@ public class JDKGOST3410PublicKey
 
         try
         {
-            derY = (DEROctetString)info.getPublicKey();
+            derY = (DEROctetString)info.parsePublicKey();
             
             byte[]                  keyEnc = derY.getOctets();
             byte[]                  keyBytes = new byte[keyEnc.length];

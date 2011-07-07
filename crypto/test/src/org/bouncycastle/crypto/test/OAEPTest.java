@@ -1,8 +1,8 @@
 package org.bouncycastle.crypto.test;
 
 import java.io.ByteArrayInputStream;
-import java.security.SecureRandom;
 import java.math.BigInteger;
+import java.security.SecureRandom;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -314,7 +314,7 @@ public class OAEPTest
         //
         RSAPublicKeyStructure   pubStruct;
 
-        pubStruct = new RSAPublicKeyStructure((ASN1Sequence)new SubjectPublicKeyInfo((ASN1Sequence)dIn.readObject()).getPublicKey());
+        pubStruct = new RSAPublicKeyStructure((ASN1Sequence)new SubjectPublicKeyInfo((ASN1Sequence)dIn.readObject()).parsePublicKey());
 
 
         bIn = new ByteArrayInputStream(privKeyEnc);
@@ -325,7 +325,7 @@ public class OAEPTest
         //
         RSAPrivateKeyStructure privStruct;
 
-        privStruct = new RSAPrivateKeyStructure((ASN1Sequence)(new PrivateKeyInfo((ASN1Sequence)dIn.readObject()).getPrivateKey()));
+        privStruct = new RSAPrivateKeyStructure((ASN1Sequence)(new PrivateKeyInfo((ASN1Sequence)dIn.readObject()).parsePrivateKey()));
 
         RSAKeyParameters    pubParameters = new RSAKeyParameters(
                                                     false,

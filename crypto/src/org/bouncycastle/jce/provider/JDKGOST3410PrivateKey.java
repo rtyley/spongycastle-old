@@ -1,5 +1,10 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Enumeration;
+
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -15,9 +20,6 @@ import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PrivateKeySpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
-
-import java.math.BigInteger;
-import java.util.Enumeration;
 
 public class JDKGOST3410PrivateKey
     implements GOST3410PrivateKey, PKCS12BagAttributeCarrier
@@ -47,9 +49,10 @@ public class JDKGOST3410PrivateKey
 
     JDKGOST3410PrivateKey(
         PrivateKeyInfo  info)
+        throws IOException
     {
         GOST3410PublicKeyAlgParameters    params = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithmId().getParameters());
-        DEROctetString      derX = (DEROctetString)info.getPrivateKey();
+        ASN1OctetString      derX = ASN1OctetString.getInstance(info.parsePrivateKey());
         byte[]              keyEnc = derX.getOctets();
         byte[]              keyBytes = new byte[keyEnc.length];
         

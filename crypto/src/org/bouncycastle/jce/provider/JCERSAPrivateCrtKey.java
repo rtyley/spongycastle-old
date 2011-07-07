@@ -1,16 +1,16 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1Sequence;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.spec.RSAPrivateCrtKeySpec;
+
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
-
-import java.math.BigInteger;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.spec.RSAPrivateCrtKeySpec;
 
 /**
  * A provider representation for a RSA private key, with CRT factors included.
@@ -87,8 +87,9 @@ public class JCERSAPrivateCrtKey
      */
     JCERSAPrivateCrtKey(
         PrivateKeyInfo  info)
+        throws IOException
     {
-        this(new RSAPrivateKeyStructure((ASN1Sequence)info.getPrivateKey()));
+        this(RSAPrivateKeyStructure.getInstance(info.parsePrivateKey()));
     }
 
     /**

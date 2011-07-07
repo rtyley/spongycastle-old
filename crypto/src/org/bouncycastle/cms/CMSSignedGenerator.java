@@ -7,7 +7,6 @@ import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
-import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.ArrayList;
@@ -22,12 +21,10 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -304,15 +301,5 @@ public class CMSSignedGenerator
     public Map getGeneratedDigests()
     {
         return new HashMap(digests);
-    }
-
-    static SignerIdentifier getSignerIdentifier(X509Certificate cert)
-    {
-        return new SignerIdentifier(CMSUtils.getIssuerAndSerialNumber(cert));
-    }
-
-    static SignerIdentifier getSignerIdentifier(byte[] subjectKeyIdentifier)
-    {
-        return new SignerIdentifier(new DEROctetString(subjectKeyIdentifier));    
     }
 }
