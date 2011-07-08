@@ -74,7 +74,8 @@ public abstract class JceKeyAgreeRecipient
     }
 
     /**
-     * Set the provider to use for content processing.
+     * Set the provider to use for content processing.  If providerName is null a "no provider" search will be
+     *  used to satisfy getInstance calls.
      *
      * @param provider the provider to use.
      * @return this recipient.
@@ -87,7 +88,8 @@ public abstract class JceKeyAgreeRecipient
     }
 
     /**
-     * Set the provider to use for content processing.
+     * Set the provider to use for content processing. If providerName is null a "no provider" search will be
+     * used to satisfy getInstance calls.
      *
      * @param providerName the name of the provider to use.
      * @return this recipient.
