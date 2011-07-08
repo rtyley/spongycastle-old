@@ -227,10 +227,6 @@ public class SMIMEEnvelopedGenerator
         {
             throw new NoSuchAlgorithmException("cannot set up generator: " + e);
         }
-        catch (CMSException e)
-        {
-            throw new NoSuchAlgorithmException("cannot set up generator: " + e);
-        }
     }
 
     /**
