@@ -9,7 +9,6 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 
 import javax.crypto.Mac;
-import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -139,23 +138,6 @@ public abstract class RecipientInformation
         catch (IOException e)
         {
             throw new CMSException("can't find parse parameters", e);
-        }
-    }
-
-    protected CMSTypedStream getContentFromSessionKey(
-        Key sKey,
-        Provider provider)
-        throws CMSException
-    {
-        CMSReadable readable = secureReadable.getReadable((SecretKey)sKey, provider); 
-
-        try
-        {
-            return new CMSTypedStream(readable.getInputStream());
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("error getting .", e);
         }
     }
 
