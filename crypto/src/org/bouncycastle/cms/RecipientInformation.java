@@ -8,8 +8,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 
-import javax.crypto.Mac;
-
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.util.io.Streams;
@@ -196,31 +194,20 @@ public abstract class RecipientInformation
     {
         if (resultMac == null)
         {
-            if (operator != null)
+            if (operator.isMacBased())
             {
-                if (operator.isMacBased())
+                if (additionalData != null)
                 {
-                    if (additionalData != null)
+                    try
                     {
-                        try
-                        {
-                            Streams.drain(operator.getInputStream(new ByteArrayInputStream(additionalData.getAuthAttributes().getDEREncoded())));
-                        }
-                        catch (IOException e)
-                        {
-                            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                        }
+                        Streams.drain(operator.getInputStream(new ByteArrayInputStream(additionalData.getAuthAttributes().getDEREncoded())));
                     }
-                    resultMac = operator.getMac();
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
                 }
-            }
-            else
-            {
-                Object cryptoObject = secureReadable.getCryptoObject();
-                if (cryptoObject instanceof Mac)
-                {
-                    resultMac = ((Mac)cryptoObject).doFinal();
-                }
+                resultMac = operator.getMac();
             }
         }
 
