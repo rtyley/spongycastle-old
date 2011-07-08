@@ -1,18 +1,18 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.cms.KEKIdentifier;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cms.jcajce.JceKEKAuthenticatedRecipient;
+import org.bouncycastle.cms.jcajce.JceKEKEnvelopedRecipient;
+import org.bouncycastle.cms.jcajce.JceKEKRecipient;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message
@@ -51,6 +51,7 @@ public class KEKRecipientInformation
 
     /**
      * decrypt the content and return an input stream.
+     * @deprecated use getContentStream(Recipient)
      */
     public CMSTypedStream getContentStream(
         Key      key,
@@ -59,25 +60,27 @@ public class KEKRecipientInformation
     {
         try
         {
-            Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(
-                keyEncAlg.getObjectId().getId(), prov);
-            keyCipher.init(Cipher.UNWRAP_MODE, key);
-            Key sKey = keyCipher.unwrap(info.getEncryptedKey().getOctets(), getContentAlgorithmName(),
-                Cipher.SECRET_KEY);
+            JceKEKRecipient recipient;
 
-            return getContentFromSessionKey(sKey, prov);
+            if (secureReadable instanceof CMSEnvelopedHelper.CMSEnvelopedSecureReadable)
+            {
+                recipient = new JceKEKEnvelopedRecipient((SecretKey)key);
+            }
+            else
+            {
+                recipient = new JceKEKAuthenticatedRecipient((SecretKey)key);
+            }
+
+            if (prov != null)
+            {
+                recipient.setProvider(prov);
+            }
+
+            return getContentStream(recipient);
         }
-        catch (NoSuchAlgorithmException e)
+        catch (IOException e)
         {
-            throw new CMSException("can't find algorithm.", e);
-        }
-        catch (InvalidKeyException e)
-        {
-            throw new CMSException("key invalid in message.", e);
-        }
-        catch (NoSuchPaddingException e)
-        {
-            throw new CMSException("required padding not supported.", e);
+            throw new CMSException("encoding error: " + e.getMessage(), e);
         }
     }
 

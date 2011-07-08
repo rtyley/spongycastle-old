@@ -20,7 +20,7 @@ public abstract class RecipientInformation
     protected RecipientId rid;
     protected AlgorithmIdentifier   keyEncAlg;
     protected AlgorithmIdentifier messageAlgorithm;
-    private CMSSecureReadable     secureReadable;
+    protected CMSSecureReadable     secureReadable;
 
     private AuthAttributesProvider additionalData;
 

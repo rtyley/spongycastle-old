@@ -38,6 +38,7 @@ class OperatorHelper
     private static final Map oids = new HashMap();
     private static final Map asymmetricWrapperAlgNames = new HashMap();
     private static final Map symmetricWrapperAlgNames = new HashMap();
+    private static final Map symmetricKeyAlgNames = new HashMap();
 
     static
     {
@@ -75,6 +76,13 @@ class OperatorHelper
         symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia192_wrap, "CamilliaWrap");
         symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia256_wrap, "CamilliaWrap");
         symmetricWrapperAlgNames.put(KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap, "SEEDWrap");
+
+        symmetricKeyAlgNames.put(NISTObjectIdentifiers.aes, "AES");
+        symmetricKeyAlgNames.put(NISTObjectIdentifiers.id_aes128_CBC, "AES");
+        symmetricKeyAlgNames.put(NISTObjectIdentifiers.id_aes192_CBC, "AES");
+        symmetricKeyAlgNames.put(NISTObjectIdentifiers.id_aes256_CBC, "AES");
+        symmetricKeyAlgNames.put(PKCSObjectIdentifiers.des_EDE3_CBC, "DESede");
+        symmetricKeyAlgNames.put(PKCSObjectIdentifiers.RC2_CBC, "RC2");
     }
 
     private JcaJceHelper helper;
@@ -328,5 +336,18 @@ class OperatorHelper
         {
             return cause;
         }
+    }
+
+    String getKeyAlgorithmName(ASN1ObjectIdentifier oid)
+    {
+
+        String name = (String)symmetricKeyAlgNames.get(oid);
+
+        if (name != null)
+        {
+            return name;
+        }
+
+        return oid.getId();
     }
 }

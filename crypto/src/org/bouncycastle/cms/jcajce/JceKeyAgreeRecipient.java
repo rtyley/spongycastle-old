@@ -81,7 +81,7 @@ public abstract class JceKeyAgreeRecipient
      */
     public JceKeyAgreeRecipient setContentProvider(Provider provider)
     {
-        this.contentHelper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+        this.contentHelper = CMSUtils.createContentHelper(provider);
 
         return this;
     }
@@ -94,7 +94,7 @@ public abstract class JceKeyAgreeRecipient
      */
     public JceKeyAgreeRecipient setContentProvider(String providerName)
     {
-        this.contentHelper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
+        this.contentHelper = CMSUtils.createContentHelper(providerName);
 
         return this;
     }

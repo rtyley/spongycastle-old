@@ -59,7 +59,7 @@ public class JceAsymmetricKeyUnwrapper
             try
             {
                 keyCipher.init(Cipher.UNWRAP_MODE, privKey);
-                sKey = keyCipher.unwrap(encryptedKey, encryptedKeyAlgorithm.getAlgorithm().getId(), Cipher.SECRET_KEY);
+                sKey = keyCipher.unwrap(encryptedKey, helper.getKeyAlgorithmName(encryptedKeyAlgorithm.getAlgorithm()), Cipher.SECRET_KEY);
             }
             catch (GeneralSecurityException e)
             {

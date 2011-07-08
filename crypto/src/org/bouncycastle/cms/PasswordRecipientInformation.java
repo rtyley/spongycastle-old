@@ -2,27 +2,21 @@ package org.bouncycastle.cms;
 
 import java.io.IOException;
 import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cms.jcajce.JcePasswordAuthenticatedRecipient;
+import org.bouncycastle.cms.jcajce.JcePasswordEnvelopedRecipient;
+import org.bouncycastle.cms.jcajce.JcePasswordRecipient;
 import org.bouncycastle.crypto.PBEParametersGenerator;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
@@ -172,36 +166,30 @@ public class PasswordRecipientInformation
     {
         try
         {
-            CMSEnvelopedHelper  helper = CMSEnvelopedHelper.INSTANCE;
-            AlgorithmIdentifier kekAlg = AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm());
-            ASN1Sequence        kekAlgParams = (ASN1Sequence)kekAlg.getParameters();
-            String              kekAlgName = DERObjectIdentifier.getInstance(kekAlgParams.getObjectAt(0)).getId();
-            String              wrapAlgName = helper.getRFC3211WrapperName(kekAlgName);
+            CMSPBEKey pbeKey = (CMSPBEKey)key;
+            JcePasswordRecipient recipient;
 
-            Cipher keyCipher = helper.createSymmetricCipher(wrapAlgName, prov);
-            IvParameterSpec ivSpec = new IvParameterSpec(ASN1OctetString.getInstance(kekAlgParams.getObjectAt(1)).getOctets());
-            keyCipher.init(Cipher.UNWRAP_MODE, new SecretKeySpec(((CMSPBEKey)key).getEncoded(kekAlgName), kekAlgName), ivSpec);
+            if (secureReadable instanceof CMSEnvelopedHelper.CMSEnvelopedSecureReadable)
+            {
+                recipient = new JcePasswordEnvelopedRecipient(pbeKey.getPassword());
+            }
+            else
+            {
+                recipient = new JcePasswordAuthenticatedRecipient(pbeKey.getPassword());
+            }
 
-            Key sKey = keyCipher.unwrap(info.getEncryptedKey().getOctets(), getContentAlgorithmName(),
-                Cipher.SECRET_KEY);
+            recipient.setPasswordConversionScheme((pbeKey instanceof PKCS5Scheme2UTF8PBEKey) ? PasswordRecipient.PKCS5_SCHEME2_UTF8 : PasswordRecipient.PKCS5_SCHEME2);
 
-            return getContentFromSessionKey(sKey, prov);
+            if (prov != null)
+            {
+                recipient.setProvider(prov);
+            }
+
+            return getContentStream(recipient);
         }
-        catch (NoSuchAlgorithmException e)
+        catch (IOException e)
         {
-            throw new CMSException("can't find algorithm.", e);
-        }
-        catch (InvalidKeyException e)
-        {
-            throw new CMSException("key invalid in message.", e);
-        }
-        catch (NoSuchPaddingException e)
-        {
-            throw new CMSException("required padding not supported.", e);
-        }
-        catch (InvalidAlgorithmParameterException e)
-        {
-            throw new CMSException("invalid iv.", e);
+            throw new CMSException("encoding error: " + e.getMessage(), e);
         }
     }
 

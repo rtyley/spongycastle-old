@@ -1,25 +1,12 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Provider;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.List;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyAgreement;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -29,13 +16,12 @@ import org.bouncycastle.asn1.cms.OriginatorIdentifierOrKey;
 import org.bouncycastle.asn1.cms.OriginatorPublicKey;
 import org.bouncycastle.asn1.cms.RecipientEncryptedKey;
 import org.bouncycastle.asn1.cms.RecipientKeyIdentifier;
-import org.bouncycastle.asn1.cms.ecc.MQVuserKeyingMaterial;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
-import org.bouncycastle.jce.spec.MQVPublicKeySpec;
+import org.bouncycastle.cms.jcajce.JceKeyAgreeAuthenticatedRecipient;
+import org.bouncycastle.cms.jcajce.JceKeyAgreeEnvelopedRecipient;
+import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipient;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message
@@ -141,100 +127,6 @@ public class KeyAgreeRecipientInformation
         throw new CMSException("No support for 'originator' as IssuerAndSerialNumber or SubjectKeyIdentifier");
     }
 
-    private PublicKey getSenderPublicKey(Key receiverPrivateKey,
-        OriginatorIdentifierOrKey originator, Provider prov)
-        throws CMSException, GeneralSecurityException, IOException
-    {
-        SubjectPublicKeyInfo pubInfo = getSenderPublicKeyInfo(PrivateKeyInfo.getInstance(receiverPrivateKey.getEncoded()).getAlgorithmId(), originator);
-
-        X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
-        KeyFactory fact = KeyFactory.getInstance(keyEncAlg.getAlgorithm().getId(), prov);
-        return fact.generatePublic(pubSpec);
-    }
-
-    private PublicKey getPublicKeyFromOriginatorPublicKey(Key receiverPrivateKey,
-            OriginatorPublicKey originatorPublicKey, Provider prov)
-            throws CMSException, GeneralSecurityException, IOException
-    {
-        SubjectPublicKeyInfo pubInfo = getPublicKeyInfoFromOriginatorPublicKey(PrivateKeyInfo.getInstance(receiverPrivateKey.getEncoded()).getAlgorithmId(), originatorPublicKey);
-
-        X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
-        KeyFactory fact = KeyFactory.getInstance(keyEncAlg.getAlgorithm().getId(), prov);
-        return fact.generatePublic(pubSpec);
-    }
-
-    private SecretKey calculateAgreedWrapKey(String wrapAlg,
-        PublicKey senderPublicKey, PrivateKey receiverPrivateKey, Provider prov)
-        throws CMSException, GeneralSecurityException, IOException
-    {
-        String agreeAlg = keyEncAlg.getAlgorithm().getId();
-
-        if (agreeAlg.equals(CMSEnvelopedGenerator.ECMQV_SHA1KDF))
-        {
-            byte[] ukmEncoding = info.getUserKeyingMaterial().getOctets();
-            MQVuserKeyingMaterial ukm = MQVuserKeyingMaterial.getInstance(
-                ASN1Object.fromByteArray(ukmEncoding));
-
-            PublicKey ephemeralKey = getPublicKeyFromOriginatorPublicKey(receiverPrivateKey,
-                ukm.getEphemeralPublicKey(), prov);
-
-            senderPublicKey = new MQVPublicKeySpec(senderPublicKey, ephemeralKey);
-            receiverPrivateKey = new MQVPrivateKeySpec(receiverPrivateKey, receiverPrivateKey);
-        }
-
-        KeyAgreement agreement = KeyAgreement.getInstance(agreeAlg, prov);
-        agreement.init(receiverPrivateKey);
-        agreement.doPhase(senderPublicKey, true);
-        return agreement.generateSecret(wrapAlg);
-    }
-
-    private Key unwrapSessionKey(String wrapAlg, SecretKey agreedKey,
-        Provider prov)
-        throws GeneralSecurityException
-    {
-        Cipher keyCipher = CMSEnvelopedHelper.INSTANCE.createSymmetricCipher(wrapAlg, prov);
-        keyCipher.init(Cipher.UNWRAP_MODE, agreedKey);
-        return keyCipher.unwrap(encryptedKey.getOctets(), getContentAlgorithmName(), Cipher.SECRET_KEY);
-    }
-
-    protected Key getSessionKey(Key receiverPrivateKey, Provider prov)
-        throws CMSException
-    {
-        try
-        {
-            String wrapAlg = 
-                AlgorithmIdentifier.getInstance(keyEncAlg.getParameters()).getAlgorithm().getId();
-
-            PublicKey senderPublicKey = getSenderPublicKey(receiverPrivateKey,
-                info.getOriginator(), prov);
-
-            SecretKey agreedWrapKey = calculateAgreedWrapKey(wrapAlg,
-                senderPublicKey, (PrivateKey)receiverPrivateKey, prov);
-
-            return unwrapSessionKey(wrapAlg, agreedWrapKey, prov);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find algorithm.", e);
-        }
-        catch (InvalidKeyException e)
-        {
-            throw new CMSException("key invalid in message.", e);
-        }
-        catch (InvalidKeySpecException e)
-        {
-            throw new CMSException("originator key spec invalid.", e);
-        }
-        catch (NoSuchPaddingException e)
-        {
-            throw new CMSException("required padding not supported.", e);
-        }
-        catch (Exception e)
-        {
-            throw new CMSException("originator key invalid.", e);
-        }
-    }
-
     /**
      * decrypt the content and return it
      * @deprecated use getContentStream(Recipient) method
@@ -256,9 +148,34 @@ public class KeyAgreeRecipientInformation
         Provider prov)
         throws CMSException
     {
-        Key sKey = getSessionKey(key, prov);
+        try
+        {
+            JceKeyAgreeRecipient recipient;
 
-        return getContentFromSessionKey(sKey, prov);
+            if (secureReadable instanceof CMSEnvelopedHelper.CMSEnvelopedSecureReadable)
+            {
+                recipient = new JceKeyAgreeEnvelopedRecipient((PrivateKey)key);
+            }
+            else
+            {
+                recipient = new JceKeyAgreeAuthenticatedRecipient((PrivateKey)key);
+            }
+
+            if (prov != null)
+            {
+                recipient.setProvider(prov);
+                if (prov.getName().equalsIgnoreCase("SunJCE"))
+                {
+                    recipient.setContentProvider((String)null);    // need to fall back to generic search
+                }
+            }
+
+            return getContentStream(recipient);
+        }
+        catch (IOException e)
+        {
+            throw new CMSException("encoding error: " + e.getMessage(), e);
+        }
     }
 
     protected RecipientOperator getRecipientOperator(Recipient recipient)
