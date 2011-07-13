@@ -36,12 +36,6 @@ public abstract class RecipientInformation
         this.additionalData = additionalData;
     }
 
-    String getContentAlgorithmName()
-    {
-        AlgorithmIdentifier algorithm = secureReadable.getAlgorithm();
-        return CMSEnvelopedHelper.INSTANCE.getSymmetricCipherName(algorithm.getObjectId().getId());
-    }
-
     public RecipientId getRID()
     {
         return rid;

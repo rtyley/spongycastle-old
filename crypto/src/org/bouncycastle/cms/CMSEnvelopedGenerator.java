@@ -1,9 +1,7 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
-import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -20,7 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.RC2ParameterSpec;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -318,37 +315,6 @@ public class CMSEnvelopedGenerator
         return new AlgorithmIdentifier(
             new DERObjectIdentifier(encryptionOID),
             asn1Params);
-    }
-
-    protected AlgorithmParameters generateParameters(String encryptionOID, SecretKey encKey, Provider encProvider)
-        throws CMSException
-    {
-        try
-        {
-            AlgorithmParameterGenerator pGen = AlgorithmParameterGenerator.getInstance(encryptionOID, encProvider);
-
-            if (encryptionOID.equals(RC2_CBC))
-            {
-                byte[]  iv = new byte[8];
-
-                rand.nextBytes(iv);
-
-                try
-                {
-                    pGen.init(new RC2ParameterSpec(encKey.getEncoded().length * 8, iv), rand);
-                }
-                catch (InvalidAlgorithmParameterException e)
-                {
-                    throw new CMSException("parameters generation error: " + e, e);
-                }
-            }
-
-            return pGen.generateParameters();
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            return null;
-        }
     }
 
     protected void convertOldRecipients(SecureRandom rand, Provider provider)

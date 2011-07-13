@@ -56,15 +56,6 @@ class CMSAuthEnvelopedData
 //            authEncInfo.getEncryptedContent().getOctets());
         CMSSecureReadable secureReadable = new CMSSecureReadable()
         {
-            public AlgorithmIdentifier getAlgorithm()
-            {
-                return CMSAuthEnvelopedData.this.authEncAlg;
-            }
-
-            public Object getCryptoObject()
-            {
-                return null;
-            }
 
             public InputStream getInputStream()
                 throws IOException, CMSException

@@ -12,9 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
-import javax.crypto.Mac;
 
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
@@ -302,16 +300,6 @@ class CMSEnvelopedHelper
             this.readable = readable;
         }
 
-        public AlgorithmIdentifier getAlgorithm()
-        {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public Object getCryptoObject()
-        {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
         public InputStream getInputStream()
             throws IOException, CMSException
         {
@@ -354,23 +342,12 @@ class CMSEnvelopedHelper
     static class CMSAuthenticatedSecureReadable implements CMSSecureReadable
     {
         private AlgorithmIdentifier algorithm;
-        private Mac mac;
         private CMSReadable readable;
 
         CMSAuthenticatedSecureReadable(AlgorithmIdentifier algorithm, CMSReadable readable)
         {
             this.algorithm = algorithm;
             this.readable = readable;
-        }
-
-        public AlgorithmIdentifier getAlgorithm()
-        {
-            return this.algorithm;
-        }
-
-        public Object getCryptoObject()
-        {
-            return this.mac;
         }
 
         public InputStream getInputStream()
@@ -384,7 +361,6 @@ class CMSEnvelopedHelper
     static class CMSEnvelopedSecureReadable implements CMSSecureReadable
     {
         private AlgorithmIdentifier algorithm;
-        private Cipher cipher;
         private CMSReadable readable;
 
         CMSEnvelopedSecureReadable(AlgorithmIdentifier algorithm, CMSReadable readable)
@@ -393,18 +369,10 @@ class CMSEnvelopedHelper
             this.readable = readable;
         }
 
-        public AlgorithmIdentifier getAlgorithm()
-        {
-            return this.algorithm;
-        }
         public InputStream getInputStream()
             throws IOException, CMSException
         {
             return readable.getInputStream();
-        }
-        public Object getCryptoObject()
-        {
-            return this.cipher;
         }
 
     }
