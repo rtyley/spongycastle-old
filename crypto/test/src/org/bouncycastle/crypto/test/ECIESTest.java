@@ -1,5 +1,8 @@
 package org.bouncycastle.crypto.test;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
+
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.KeyGenerationParameters;
@@ -7,23 +10,20 @@ import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.engines.IESEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
-import org.bouncycastle.crypto.generators.KDF2BytesGenerator;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
+import org.bouncycastle.crypto.generators.KDF2BytesGenerator;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.IESParameters;
 import org.bouncycastle.crypto.params.IESWithCipherParameters;
-import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
 
 /**
  * test for ECIES - Elliptic Curve Integrated Encryption Scheme
@@ -86,7 +86,7 @@ public class ECIESTest
 
         byte[]   out1 = i1.processBlock(message, 0, message.length);
 
-        if (!areEqual(out1, Hex.decode("2442ae1fbf90dd9c06b0dcc3b27e69bd11c9aee4ad4cfc9e50eceb44")))
+        if (!areEqual(out1, Hex.decode("468d89877e8238802403ec4cb6b329faeccfa6f3a730f2cdb3c0a8e8")))
         {
             fail("stream cipher test failed on enc");
         }
@@ -126,7 +126,7 @@ public class ECIESTest
 
         out1 = i1.processBlock(message, 0, message.length);
 
-        if (!areEqual(out1, Hex.decode("2ea288651e21576215f2424bbb3f68816e282e3931b44bd1c429ebdb5f1b290cf1b13309")))
+        if (!areEqual(out1, Hex.decode("b8a06ea5c2b9df28b58a0a90a734cde8c9c02903e5c220021fe4417410d1e53a32a71696")))
         {
             fail("twofish cipher test failed on enc");
         }

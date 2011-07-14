@@ -1,5 +1,7 @@
 package org.bouncycastle.crypto.engines;
 
+import java.math.BigInteger;
+
 import org.bouncycastle.crypto.BasicAgreement;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
@@ -10,8 +12,6 @@ import org.bouncycastle.crypto.params.IESParameters;
 import org.bouncycastle.crypto.params.IESWithCipherParameters;
 import org.bouncycastle.crypto.params.KDFParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
-
-import java.math.BigInteger;
 
 /**
  * support class for constructing intergrated encryption ciphers
@@ -247,11 +247,27 @@ public class IESEngine
 
         if (forEncryption)
         {
-            return encryptBlock(in, inOff, inLen, z.toByteArray());
+            return encryptBlock(in, inOff, inLen, convert(z));
         }
         else
         {
-            return decryptBlock(in, inOff, inLen, z.toByteArray());
+            return decryptBlock(in, inOff, inLen, convert(z));
         }
+    }
+
+    private byte[] convert(BigInteger v)
+    {
+        byte[] bytes = v.toByteArray();
+
+        if (bytes[0] == 0) // added sign byte
+        {
+            byte[] tmp = new byte[bytes.length - 1];
+
+            System.arraycopy(bytes, 1, tmp, 0, tmp.length);
+
+            return tmp;
+        }
+
+        return bytes;
     }
 }
