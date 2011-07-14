@@ -160,7 +160,7 @@ public class PGPEncryptedDataGenerator
        *
        * @param encAlgorithm the symmetric algorithm to use.
        * @param rand source of randomness
-       * @param oldFormat PGP 2.6.x compatability required.
+       * @param oldFormat PGP 2.6.x compatibility required.
        * @param provider the provider to use for encryption algorithms.
        * @deprecated  use constructor that takes a PGPDataEncryptorBuilder
        */
@@ -173,11 +173,22 @@ public class PGPEncryptedDataGenerator
         this(new JcePGPDataEncryptorBuilder(encAlgorithm).setSecureRandom(rand).setProvider(provider), oldFormat);
     }
 
+   /**
+       * Base constructor.
+       *
+       * @param encryptorBuilder builder to create actual data encryptor.
+       */
     public PGPEncryptedDataGenerator(PGPDataEncryptorBuilder encryptorBuilder)
     {
         this(encryptorBuilder, false);
     }
 
+   /**
+       * Base constructor with the option to turn on formatting for PGP 2.6.x compatibility.
+       *
+       * @param encryptorBuilder builder to create actual data encryptor.
+       * @param oldFormat PGP 2.6.x compatibility required.
+       */
     public PGPEncryptedDataGenerator(PGPDataEncryptorBuilder encryptorBuilder, boolean oldFormat)
     {
         this.dataEncryptorBuilder = encryptorBuilder;
