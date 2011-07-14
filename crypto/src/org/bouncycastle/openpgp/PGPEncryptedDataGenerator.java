@@ -65,7 +65,7 @@ public class PGPEncryptedDataGenerator
     private List            methods = new ArrayList();
     private int             defAlgorithm;
     private SecureRandom    rand;
-    private Provider        defProvider = new BouncyCastleProvider();
+    private Provider        defProvider;
     
    /**
        * Base constructor.
@@ -218,7 +218,7 @@ public class PGPEncryptedDataGenerator
     {
         if (defProvider == null)
         {
-            throw new NoSuchProviderException("unable to find provider.");
+            defProvider = new BouncyCastleProvider();
         }
 
         addMethod(new JcePBEKeyEncryptionMethodGenerator(passPhrase, new JcaPGPDigestCalculatorProviderBuilder().setProvider(defProvider).build().get(s2kDigest)).setProvider(defProvider).setSecureRandom(rand));
@@ -243,7 +243,7 @@ public class PGPEncryptedDataGenerator
 
         if (defProvider == null)
         {
-            throw new NoSuchProviderException("unable to find provider.");
+            defProvider = new BouncyCastleProvider();
         }
 
         addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(key).setProvider(defProvider).setSecureRandom(rand));
