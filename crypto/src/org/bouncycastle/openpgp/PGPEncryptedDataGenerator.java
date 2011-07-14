@@ -317,11 +317,6 @@ public class PGPEncryptedDataGenerator
             throw new IllegalStateException("no encryption methods specified");
         }
 
-        if (defProvider == null)
-        {
-            throw new IllegalStateException("provider resolves to null");
-        }
-
         byte[] key = null;
 
         pOut = new BCPGOutputStream(out);
