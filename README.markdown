@@ -14,6 +14,9 @@ Spongy Castle is the stock Bouncy Castle libraries with a couple of small change
 
 No class names have been changed, so the BouncyCastleProvider class remains Bouncy, not Spongy, but moves to the org.spongycastle.jce.provider package. 
 
+#### Downloads
+
+You can directly download the latest jar [here](http://search.maven.org/remotecontent?filepath=com/madgag/scprov-jdk15/1.46.99.3-UNOFFICIAL-ROBERTO-RELEASE/scprov-jdk15-1.46.99.3-UNOFFICIAL-ROBERTO-RELEASE.jar) (this is just a link to the published artifact in Maven Central).
 
 #### Using Spongy Castle
 
