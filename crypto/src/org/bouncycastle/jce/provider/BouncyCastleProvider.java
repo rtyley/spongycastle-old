@@ -219,7 +219,8 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.AlgorithmParameters.RAWRSAPSS", "PSS");
         put("Alg.Alias.AlgorithmParameters.NONEWITHRSAPSS", "PSS");
         put("Alg.Alias.AlgorithmParameters.NONEWITHRSASSA-PSS", "PSS");
-        
+        put("Alg.Alias.AlgorithmParameters.NONEWITHRSAANDMGF1", "PSS");
+
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND128BITAES-CBC-BC", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND192BITAES-CBC-BC", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND256BITAES-CBC-BC", "PKCS12PBE");
@@ -754,6 +755,7 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Signature.RAWRSAPSS", "RAWRSASSA-PSS");
         put("Alg.Alias.Signature.NONEWITHRSAPSS", "RAWRSASSA-PSS");
         put("Alg.Alias.Signature.NONEWITHRSASSA-PSS", "RAWRSASSA-PSS");
+        put("Alg.Alias.Signature.NONEWITHRSAANDMGF1", "RAWRSASSA-PSS");
 
         put("Alg.Alias.Signature.RSAPSS", "RSASSA-PSS");
 

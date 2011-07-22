@@ -334,7 +334,7 @@ public class CMSSignedDataParser
 
                     byte[] hash = (byte[])hashes.get(info.getDigestAlgorithm().getAlgorithm());
 
-                    signerInfos.add(new SignerInformation(info, _signedContentType, null, new BaseDigestCalculator(hash)));
+                    signerInfos.add(new SignerInformation(info, _signedContentType, null, hash));
                 }
             }
             catch (IOException e)

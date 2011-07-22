@@ -2,6 +2,7 @@ package org.bouncycastle.operator.jcajce;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,6 +11,7 @@ import java.security.Signature;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.spec.PSSParameterSpec;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -211,10 +213,23 @@ class OperatorHelper
         try
         {
             String algName = getSignatureName(algorithm);
-    
+
             algName = "NONE" + algName.substring(algName.indexOf("WITH"));
 
             sig = helper.createSignature(algName);
+
+            // RFC 4056
+            // When the id-RSASSA-PSS algorithm identifier is used for a signature,
+            // the AlgorithmIdentifier parameters field MUST contain RSASSA-PSS-params.
+            if (algorithm.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
+            {
+                AlgorithmParameters params = helper.createAlgorithmParameters(algName);
+
+                params.init(algorithm.getParameters().getDERObject().getEncoded(), "ASN.1");
+
+                PSSParameterSpec spec = (PSSParameterSpec)params.getParameterSpec(PSSParameterSpec.class);
+                sig.setParameter(spec);
+            }
         }
         catch (Exception e)
         {
@@ -234,7 +249,7 @@ class OperatorHelper
             if (sigAlgId.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
             {
                 RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
-                return getDigestAlgName(rsaParams.getHashAlgorithm().getAlgorithm()) + "withRSAandMGF1";
+                return getDigestAlgName(rsaParams.getHashAlgorithm().getAlgorithm()) + "WITHRSAANDMGF1";
             }
         }
 

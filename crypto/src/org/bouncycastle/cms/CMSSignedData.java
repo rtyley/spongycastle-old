@@ -216,7 +216,7 @@ public class CMSSignedData
                     Object obj = hashes.keySet().iterator().next();
                     byte[] hash = (obj instanceof String) ? (byte[])hashes.get(info.getDigestAlgorithm().getAlgorithm().getId()) : (byte[])hashes.get(info.getDigestAlgorithm().getAlgorithm());
 
-                    signerInfos.add(new SignerInformation(info, contentType, null, new BaseDigestCalculator(hash)));
+                    signerInfos.add(new SignerInformation(info, contentType, null, hash));
                 }
             }
 

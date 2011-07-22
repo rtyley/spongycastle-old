@@ -56,7 +56,6 @@ public class SignerInformation
     private CMSProcessable          content;
     private byte[]                  signature;
     private ASN1ObjectIdentifier    contentType;
-    private IntDigestCalculator     digestCalculator;
     private byte[]                  resultDigest;
 
     // Derived
@@ -68,7 +67,7 @@ public class SignerInformation
         SignerInfo          info,
         ASN1ObjectIdentifier contentType,
         CMSProcessable      content,
-        IntDigestCalculator digestCalculator)
+        byte[]              resultDigest)
     {
         this.info = info;
         this.contentType = contentType;
@@ -96,7 +95,7 @@ public class SignerInformation
         this.signature = info.getEncryptedDigest().getOctets();
 
         this.content = content;
-        this.digestCalculator = digestCalculator;
+        this.resultDigest = resultDigest;
     }
 
     public boolean isCounterSignature()
@@ -296,9 +295,7 @@ public class SignerInformation
                 */
                 SignerInfo si = SignerInfo.getInstance(en.nextElement());
 
-                String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(si.getDigestAlgorithm().getObjectId().getId());
-                
-                counterSignatures.add(new SignerInformation(si, null, null, new CounterSignatureDigestCalculator(digestName, null, getSignature())));
+                counterSignatures.add(new SignerInformation(si, null, new CMSProcessableByteArray(getSignature()), null));
             }
         }
 
@@ -364,11 +361,7 @@ public class SignerInformation
 
         try
         {
-            if (digestCalculator != null)
-            {
-                resultDigest = digestCalculator.getDigest();
-            }
-            else
+            if (resultDigest == null)
             {
                 DigestCalculator calc = verifier.getDigestCalculator(this.getDigestAlgorithmID());
                 if (content != null)
@@ -391,10 +384,6 @@ public class SignerInformation
         catch (IOException e)
         {
             throw new CMSException("can't process mime object to create signature.", e);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find algorithm: " + e.getMessage(), e);
         }
         catch (OperatorCreationException e)
         {
@@ -493,7 +482,7 @@ public class SignerInformation
 
             if (signedAttributeSet == null)
             {
-                if (digestCalculator != null)
+                if (resultDigest != null)
                 {
                     if (contentVerifier instanceof RawContentVerifier)
                     {           

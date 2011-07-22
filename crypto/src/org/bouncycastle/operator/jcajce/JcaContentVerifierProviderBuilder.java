@@ -168,7 +168,10 @@ public class JcaContentVerifierProviderBuilder
         {
             rawSig = helper.createRawSignature(algorithm);
 
-            rawSig.initVerify(publicKey);
+            if (rawSig != null)
+            {
+                rawSig.initVerify(publicKey);
+            }
         }
         catch (Exception e)
         {
