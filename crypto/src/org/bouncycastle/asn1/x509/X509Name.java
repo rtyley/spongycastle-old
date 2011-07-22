@@ -406,7 +406,7 @@ public class X509Name
 
             for (int i = 0; i < set.size(); i++) 
             {
-                   ASN1Sequence s = ASN1Sequence.getInstance(set.getObjectAt(i));
+                   ASN1Sequence s = ASN1Sequence.getInstance(set.getObjectAt(i).getDERObject());
 
                    if (s.size() != 2)
                    {

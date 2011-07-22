@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTCTime;
+import org.bouncycastle.asn1.x500.X500Name;
 
 /**
  * PKIX RFC-2459 - TBSCertList object.
@@ -123,7 +124,7 @@ public class TBSCertList
 
     DERInteger              version;
     AlgorithmIdentifier     signature;
-    X509Name                issuer;
+    X500Name                issuer;
     Time                    thisUpdate;
     Time                    nextUpdate;
     ASN1Sequence            revokedCertificates;
@@ -173,7 +174,7 @@ public class TBSCertList
         }
 
         signature = AlgorithmIdentifier.getInstance(seq.getObjectAt(seqPos++));
-        issuer = X509Name.getInstance(seq.getObjectAt(seqPos++));
+        issuer = X500Name.getInstance(seq.getObjectAt(seqPos++));
         thisUpdate = Time.getInstance(seq.getObjectAt(seqPos++));
 
         if (seqPos < seq.size()
@@ -212,7 +213,7 @@ public class TBSCertList
         return signature;
     }
 
-    public X509Name getIssuer()
+    public X500Name getIssuer()
     {
         return issuer;
     }

@@ -9,17 +9,22 @@ import java.util.Vector;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.X500NameBuilder;
+import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.X509DefaultEntryConverter;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.util.Arrays;
@@ -567,6 +572,16 @@ public class X509NameTest
         {
             fail("telephonenumber escaped + not reduced properly");
         }
+
+        // migration
+        X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
+        builder.addMultiValuedRDN(new ASN1ObjectIdentifier[] { BCStyle.CN, BCStyle.SN }, new String[] { "Thomas", "CVR:12341233-UID:1111" });
+        builder.addRDN(BCStyle.O, "Test");
+        builder.addRDN(BCStyle.C, "DK");
+
+        X500Name subject = builder.build();
+        DERObject derObject = subject.getDERObject();
+        X509Name instance = X509Name.getInstance(derObject);
     }
 
     private boolean compareVectors(Vector a, Vector b)    // for compatibility with early JDKs

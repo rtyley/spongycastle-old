@@ -50,6 +50,7 @@ import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.util.Arrays;
@@ -148,7 +149,7 @@ public class X509CertificateObject
 
     public Principal getIssuerDN()
     {
-        return new X509Principal(c.getIssuer());
+        return new X509Principal(X509Name.getInstance(c.getIssuer().getDERObject()));
     }
 
     public X500Principal getIssuerX500Principal()
@@ -170,7 +171,7 @@ public class X509CertificateObject
 
     public Principal getSubjectDN()
     {
-        return new X509Principal(c.getSubject());
+        return new X509Principal(X509Name.getInstance(c.getSubject().getDERObject()));
     }
 
     public X500Principal getSubjectX500Principal()

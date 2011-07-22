@@ -297,7 +297,7 @@ public class TimeStampToken
 
             if (certID.getIssuerSerial() != null)
             {
-                IssuerAndSerialNumber issuerSerial = certHolder.getIssuerAndSerialNumber();
+                IssuerAndSerialNumber issuerSerial = new IssuerAndSerialNumber(certHolder.toASN1Structure());
 
                 if (!certID.getIssuerSerial().getSerial().equals(issuerSerial.getSerialNumber()))
                 {

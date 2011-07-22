@@ -32,9 +32,9 @@ public class V3TBSCertificateGenerator
 
     DERInteger              serialNumber;
     AlgorithmIdentifier     signature;
-    X509Name                issuer;
+    X500Name                issuer;
     Time                    startDate, endDate;
-    X509Name                subject;
+    X500Name                subject;
     SubjectPublicKeyInfo    subjectPublicKeyInfo;
     X509Extensions          extensions;
 
@@ -58,16 +58,19 @@ public class V3TBSCertificateGenerator
         this.signature = signature;
     }
 
+        /**
+     * @deprecated use X500Name method
+     */
     public void setIssuer(
         X509Name    issuer)
     {
-        this.issuer = issuer;
+        this.issuer = X500Name.getInstance(issuer);
     }
 
     public void setIssuer(
         X500Name issuer)
     {
-        this.issuer = X509Name.getInstance(issuer.getDERObject());
+        this.issuer = issuer;
     }
     
     public void setStartDate(
@@ -94,16 +97,19 @@ public class V3TBSCertificateGenerator
         this.endDate = endDate;
     }
 
+        /**
+     * @deprecated use X500Name method
+     */
     public void setSubject(
         X509Name    subject)
     {
-        this.subject = subject;
+        this.subject = X500Name.getInstance(subject.getDERObject());
     }
 
     public void setSubject(
         X500Name subject)
     {
-        this.subject = X509Name.getInstance(subject.getDERObject());
+        this.subject = subject;
     }
 
     public void setIssuerUniqueID(

@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x500.X500Name;
 
 /**
  * PKIX RFC-2459
@@ -98,7 +99,7 @@ public class CertificateList
         return tbsCertList.getVersion();
     }
 
-    public X509Name getIssuer()
+    public X500Name getIssuer()
     {
         return tbsCertList.getIssuer();
     }

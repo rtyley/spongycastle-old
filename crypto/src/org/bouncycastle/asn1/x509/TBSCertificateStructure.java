@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
 
 /**
  * The TBSCertificate object.
@@ -38,9 +39,9 @@ public class TBSCertificateStructure
     DERInteger              version;
     DERInteger              serialNumber;
     AlgorithmIdentifier     signature;
-    X509Name                issuer;
+    X500Name                issuer;
     Time                    startDate, endDate;
-    X509Name                subject;
+    X500Name                subject;
     SubjectPublicKeyInfo    subjectPublicKeyInfo;
     DERBitString            issuerUniqueId;
     DERBitString            subjectUniqueId;
@@ -91,7 +92,7 @@ public class TBSCertificateStructure
         serialNumber = DERInteger.getInstance(seq.getObjectAt(seqStart + 1));
 
         signature = AlgorithmIdentifier.getInstance(seq.getObjectAt(seqStart + 2));
-        issuer = X509Name.getInstance(seq.getObjectAt(seqStart + 3));
+        issuer = X500Name.getInstance(seq.getObjectAt(seqStart + 3));
 
         //
         // before and after dates
@@ -101,7 +102,7 @@ public class TBSCertificateStructure
         startDate = Time.getInstance(dates.getObjectAt(0));
         endDate = Time.getInstance(dates.getObjectAt(1));
 
-        subject = X509Name.getInstance(seq.getObjectAt(seqStart + 5));
+        subject = X500Name.getInstance(seq.getObjectAt(seqStart + 5));
 
         //
         // public key info.
@@ -146,7 +147,7 @@ public class TBSCertificateStructure
         return signature;
     }
 
-    public X509Name getIssuer()
+    public X500Name getIssuer()
     {
         return issuer;
     }
@@ -161,7 +162,7 @@ public class TBSCertificateStructure
         return endDate;
     }
 
-    public X509Name getSubject()
+    public X500Name getSubject()
     {
         return subject;
     }

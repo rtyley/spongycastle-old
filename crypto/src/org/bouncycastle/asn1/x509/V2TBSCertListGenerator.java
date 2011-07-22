@@ -42,7 +42,7 @@ public class V2TBSCertListGenerator
     DERInteger version = new DERInteger(1);
 
     AlgorithmIdentifier     signature;
-    X509Name                issuer;
+    X500Name                issuer;
     Time                    thisUpdate, nextUpdate=null;
     X509Extensions          extensions=null;
     private Vector          crlentries=null;
@@ -58,15 +58,18 @@ public class V2TBSCertListGenerator
         this.signature = signature;
     }
 
+    /**
+     * @deprecated use X500Name method
+     */
     public void setIssuer(
         X509Name    issuer)
     {
-        this.issuer = issuer;
+        this.issuer = X500Name.getInstance(issuer.getDERObject());
     }
 
     public void setIssuer(X500Name issuer)
     {
-        this.issuer = X509Name.getInstance(issuer);
+        this.issuer = issuer;
     }
 
     public void setThisUpdate(

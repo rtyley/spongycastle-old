@@ -103,7 +103,7 @@ public class KeyAgreeRecipientId
 
             if (this.getSerialNumber() != null)
             {
-                IssuerAndSerialNumber iAndS = certHldr.getIssuerAndSerialNumber();
+                IssuerAndSerialNumber iAndS = new IssuerAndSerialNumber(certHldr.toASN1Structure());
 
                 return iAndS.getName().equals(this.issuer)
                     && iAndS.getSerialNumber().getValue().equals(this.getSerialNumber());

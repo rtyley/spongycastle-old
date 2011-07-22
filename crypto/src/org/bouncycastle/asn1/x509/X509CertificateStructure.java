@@ -7,6 +7,7 @@ import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
 
 /**
  * an X509Certificate structure.
@@ -85,7 +86,7 @@ public class X509CertificateStructure
         return tbsCert.getSerialNumber();
     }
 
-    public X509Name getIssuer()
+    public X500Name getIssuer()
     {
         return tbsCert.getIssuer();
     }
@@ -100,7 +101,7 @@ public class X509CertificateStructure
         return tbsCert.getEndDate();
     }
 
-    public X509Name getSubject()
+    public X500Name getSubject()
     {
         return tbsCert.getSubject();
     }

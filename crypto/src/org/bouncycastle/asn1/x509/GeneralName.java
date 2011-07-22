@@ -202,7 +202,7 @@ public class GeneralName
             case x400Address:
                 throw new IllegalArgumentException("unknown tag: " + tag);
             case directoryName:
-                return new GeneralName(tag, X509Name.getInstance(tagObj, true));
+                return new GeneralName(tag, X500Name.getInstance(tagObj, true));
             case ediPartyName:
                 return new GeneralName(tag, ASN1Sequence.getInstance(tagObj, false));
             case uniformResourceIdentifier:
@@ -260,7 +260,7 @@ public class GeneralName
             buf.append(DERIA5String.getInstance(obj).getString());
             break;
         case directoryName:
-            buf.append(X509Name.getInstance(obj).toString());
+            buf.append(X500Name.getInstance(obj).toString());
             break;
         default:
             buf.append(obj.toString());

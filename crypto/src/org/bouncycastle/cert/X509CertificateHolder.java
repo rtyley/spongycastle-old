@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -131,11 +130,6 @@ public class X509CertificateHolder
     public Set getNonCriticalExtensionOIDs()
     {
         return CertUtils.getNonCriticalExtensionOIDs(extensions);
-    }
-
-    public IssuerAndSerialNumber getIssuerAndSerialNumber()
-    {
-        return new IssuerAndSerialNumber(x509Certificate.getIssuer(), x509Certificate.getSerialNumber());
     }
 
     /**

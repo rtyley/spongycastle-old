@@ -1,6 +1,7 @@
 package org.bouncycastle.cms;
 
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.ContentSigner;
@@ -77,7 +78,7 @@ public class SignerInfoGeneratorBuilder
     public SignerInfoGenerator build(ContentSigner contentSigner, X509CertificateHolder certHolder)
         throws OperatorCreationException
     {
-        SignerIdentifier sigId = new SignerIdentifier(certHolder.getIssuerAndSerialNumber());
+        SignerIdentifier sigId = new SignerIdentifier(new IssuerAndSerialNumber(certHolder.toASN1Structure()));
 
         SignerInfoGenerator sigInfoGen = createGenerator(contentSigner, sigId);
 

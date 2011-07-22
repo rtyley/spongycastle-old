@@ -46,7 +46,7 @@ class CMSUtils
     {
         X509CertificateStructure certStruct = X509CertificateStructure.getInstance(cert.getEncoded());
 
-        return new IssuerAndSerialNumber(certStruct.getIssuer(), certStruct.getSerialNumber());
+        return new IssuerAndSerialNumber(certStruct.getIssuer(), cert.getSerialNumber());
     }
 
 

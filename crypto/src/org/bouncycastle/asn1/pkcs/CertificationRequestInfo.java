@@ -34,7 +34,7 @@ public class CertificationRequestInfo
     extends ASN1Encodable
 {
     DERInteger              version = new DERInteger(0);
-    X509Name                subject;
+    X500Name                subject;
     SubjectPublicKeyInfo    subjectPKInfo;
     ASN1Set                 attributes = null;
 
@@ -58,7 +58,7 @@ public class CertificationRequestInfo
         SubjectPublicKeyInfo    pkInfo,
         ASN1Set                 attributes)
     {
-        this.subject = X509Name.getInstance(subject.getDERObject());
+        this.subject = subject;
         this.subjectPKInfo = pkInfo;
         this.attributes = attributes;
 
@@ -68,12 +68,15 @@ public class CertificationRequestInfo
         }
     }
 
+    /**
+     * @deprecated use X500Name method.
+     */
     public CertificationRequestInfo(
         X509Name                subject,
         SubjectPublicKeyInfo    pkInfo,
         ASN1Set                 attributes)
     {
-        this.subject = subject;
+        this.subject = X500Name.getInstance(subject.getDERObject());
         this.subjectPKInfo = pkInfo;
         this.attributes = attributes;
 
@@ -88,7 +91,7 @@ public class CertificationRequestInfo
     {
         version = (DERInteger)seq.getObjectAt(0);
 
-        subject = X509Name.getInstance(seq.getObjectAt(1));
+        subject = X500Name.getInstance(seq.getObjectAt(1));
         subjectPKInfo = SubjectPublicKeyInfo.getInstance(seq.getObjectAt(2));
 
         //
@@ -112,7 +115,7 @@ public class CertificationRequestInfo
         return version;
     }
 
-    public X509Name getSubject()
+    public X500Name getSubject()
     {
         return subject;
     }

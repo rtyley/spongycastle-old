@@ -9,6 +9,7 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Name;
 
 public class IssuerAndSerialNumber
@@ -16,6 +17,8 @@ public class IssuerAndSerialNumber
 {
     private X500Name    name;
     private DERInteger  serialNumber;
+
+
 
     public static IssuerAndSerialNumber getInstance(
         Object  obj)
@@ -38,6 +41,13 @@ public class IssuerAndSerialNumber
     {
         this.name = X500Name.getInstance(seq.getObjectAt(0));
         this.serialNumber = (DERInteger)seq.getObjectAt(1);
+    }
+
+    public IssuerAndSerialNumber(
+        X509CertificateStructure certificate)
+    {
+        this.name = certificate.getIssuer();
+        this.serialNumber = certificate.getSerialNumber();
     }
 
     public IssuerAndSerialNumber(
