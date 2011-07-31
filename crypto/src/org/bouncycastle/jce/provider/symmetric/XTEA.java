@@ -35,6 +35,11 @@ public final class XTEA
     public static class AlgParams
         extends JDKAlgorithmParameters.IVAlgorithmParameters
     {
+        public AlgParams()
+        {
+            super(8);
+        }
+
         protected String engineToString()
         {
             return "XTEA IV";

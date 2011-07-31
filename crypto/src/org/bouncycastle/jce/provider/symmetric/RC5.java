@@ -140,6 +140,11 @@ public final class RC5
     public static class AlgParams
         extends JDKAlgorithmParameters.IVAlgorithmParameters
     {
+        public AlgParams()
+        {
+            super(16);
+        }
+
         protected String engineToString()
         {
             return "RC5 IV";

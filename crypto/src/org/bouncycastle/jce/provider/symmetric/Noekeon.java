@@ -81,6 +81,11 @@ public final class Noekeon
     public static class AlgParams
         extends JDKAlgorithmParameters.IVAlgorithmParameters
     {
+        public AlgParams()
+        {
+            super(16);
+        }
+
         protected String engineToString()
         {
             return "Noekeon IV";

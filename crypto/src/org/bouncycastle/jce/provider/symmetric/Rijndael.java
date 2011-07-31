@@ -35,6 +35,11 @@ public final class Rijndael
     public static class AlgParams
         extends JDKAlgorithmParameters.IVAlgorithmParameters
     {
+        public AlgParams()
+        {
+            super(16);
+        }
+
         protected String engineToString()
         {
             return "Rijndael IV";

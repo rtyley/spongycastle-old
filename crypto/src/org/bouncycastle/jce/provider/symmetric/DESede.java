@@ -25,6 +25,7 @@ import org.bouncycastle.jce.provider.JCEBlockCipher;
 import org.bouncycastle.jce.provider.JCEKeyGenerator;
 import org.bouncycastle.jce.provider.JCEMac;
 import org.bouncycastle.jce.provider.JCESecretKeyFactory;
+import org.bouncycastle.jce.provider.JDKAlgorithmParameters;
 import org.bouncycastle.jce.provider.WrapCipherSpi;
 
 public final class DESede
@@ -187,6 +188,20 @@ public final class DESede
         }
     }
 
+    public static class AlgParams
+        extends JDKAlgorithmParameters.IVAlgorithmParameters
+    {
+        AlgParams()
+        {
+            super(8);
+        }
+
+        protected String engineToString()
+        {
+            return "DESEDE IV";
+        }
+    }
+
     static public class KeyFactory
         extends JCESecretKeyFactory
     {
@@ -283,6 +298,9 @@ public final class DESede
 
             put("Mac.DESEDEMAC64", "org.bouncycastle.jce.provider.symmetric.DESede$DESede64");
             put("Alg.Alias.Mac.DESEDE64", "DESEDEMAC64");
+
+            put("AlgorithmParameters.DESEDE", "org.bouncycastle.jce.provider.symmetric.DESede$AlgParams");
+            put("AlgorithmParameters." + PKCSObjectIdentifiers.des_EDE3_CBC, "org.bouncycastle.jce.provider.symmetric.DESede$AlgParams");
 
             put("Mac.DESEDEMAC64WITHISO7816-4PADDING", "org.bouncycastle.jce.provider.symmetric.DESede$DESede64with7816d4");
             put("Alg.Alias.Mac.DESEDE64WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");

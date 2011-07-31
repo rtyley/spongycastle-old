@@ -177,6 +177,11 @@ public final class AES
     public static class AlgParams
         extends JDKAlgorithmParameters.IVAlgorithmParameters
     {
+        AlgParams()
+        {
+            super(16);
+        }
+
         protected String engineToString()
         {
             return "AES IV";

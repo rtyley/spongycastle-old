@@ -1,7 +1,23 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.IOException;
+import java.security.AlgorithmParametersSpi;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.DSAParameterSpec;
+import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.PSSParameterSpec;
+
+import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.spec.PSource;
+import javax.crypto.spec.RC2ParameterSpec;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -13,12 +29,12 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
 import org.bouncycastle.asn1.pkcs.DHParameter;
+import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.pkcs.PKCS12PBEParams;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RC2CBCParameter;
 import org.bouncycastle.asn1.pkcs.RSAESOAEPparams;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
-import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
@@ -26,20 +42,6 @@ import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 import org.bouncycastle.jce.spec.IESParameterSpec;
 import org.bouncycastle.util.Arrays;
-
-import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.PSource;
-import javax.crypto.spec.RC2ParameterSpec;
-import java.io.IOException;
-import java.security.AlgorithmParametersSpi;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.DSAParameterSpec;
-import java.security.spec.InvalidParameterSpecException;
-import java.security.spec.MGF1ParameterSpec;
-import java.security.spec.PSSParameterSpec;
 
 public abstract class JDKAlgorithmParameters
     extends AlgorithmParametersSpi
@@ -67,6 +69,18 @@ public abstract class JDKAlgorithmParameters
     public static class IVAlgorithmParameters
         extends JDKAlgorithmParameters
     {
+        private int blockSize;
+
+        public IVAlgorithmParameters(int blockSize)
+        {
+            this.blockSize = blockSize;
+        }
+
+        public IVAlgorithmParameters()
+        {
+            this.blockSize = 8;
+        }
+
         private byte[]  iv;
 
         protected byte[] engineGetEncoded() 
@@ -143,9 +157,27 @@ public abstract class JDKAlgorithmParameters
             {
                 try
                 {
-                    ASN1OctetString oct = (ASN1OctetString)ASN1Object.fromByteArray(params);
+                    ASN1Object object = ASN1Object.fromByteArray(params);
 
-                    engineInit(oct.getOctets());
+                    if (object instanceof ASN1OctetString)
+                    {
+                        ASN1OctetString oct = (ASN1OctetString)object;
+
+                        this.iv = Arrays.clone(oct.getOctets());
+                    }
+                    else if (object instanceof ASN1Null)
+                    {
+                        // assume an iv of zeros
+                        this.iv = new byte[blockSize];
+                    }
+                    else
+                    {
+                        throw new IOException("unknown encoding for parameters");
+                    }
+                }
+                catch (IOException e)
+                {
+                    throw e;
                 }
                 catch (Exception e)
                 {
