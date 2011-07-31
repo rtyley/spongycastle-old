@@ -191,7 +191,7 @@ public final class DESede
     public static class AlgParams
         extends JDKAlgorithmParameters.IVAlgorithmParameters
     {
-        AlgParams()
+        public AlgParams()
         {
             super(8);
         }
