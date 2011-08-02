@@ -15,7 +15,7 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.util.Store;
 
 /**
- * Factory to create a CertStore from certificate and CRL stores.
+ * Builder to create a CertStore from certificate and CRL stores.
  */
 public class JcaCertStoreBuilder
 {
