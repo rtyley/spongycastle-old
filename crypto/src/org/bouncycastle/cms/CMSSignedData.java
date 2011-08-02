@@ -31,6 +31,7 @@ import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
+import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
@@ -432,7 +433,7 @@ public class CMSSignedData
 
                 if (obj instanceof ASN1Sequence)
                 {
-                    crlList.add(CertificateList.getInstance(obj));
+                    crlList.add(new X509CRLHolder(CertificateList.getInstance(obj)));
                 }
             }
 
