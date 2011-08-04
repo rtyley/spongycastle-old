@@ -21,6 +21,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPPrivateKey;
+import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPPublicKeyRingCollection;
 import org.bouncycastle.openpgp.PGPSecretKey;
 import org.bouncycastle.openpgp.PGPSignature;
@@ -28,6 +29,9 @@ import org.bouncycastle.openpgp.PGPSignatureGenerator;
 import org.bouncycastle.openpgp.PGPSignatureList;
 import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
 import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 
 /**
  * A simple utility class that creates clear signed files and verifies them.
@@ -146,7 +150,8 @@ public class ClearSignedFileProcessor
         PGPSignatureList           p3 = (PGPSignatureList)pgpFact.nextObject();
         PGPSignature               sig = p3.get(0);
 
-        sig.initVerify(pgpRings.getPublicKey(sig.getKeyID()), "BC");
+        PGPPublicKey publicKey = pgpRings.getPublicKey(sig.getKeyID());
+        sig.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), publicKey);
 
         //
         // read the input, making sure we ignore the last newline.
@@ -236,11 +241,11 @@ public class ClearSignedFileProcessor
         }
         
         PGPSecretKey                    pgpSecKey = PGPExampleUtil.readSecretKey(keyIn);
-        PGPPrivateKey                   pgpPrivKey = pgpSecKey.extractPrivateKey(pass, "BC");        
-        PGPSignatureGenerator           sGen = new PGPSignatureGenerator(pgpSecKey.getPublicKey().getAlgorithm(), digest, "BC");
+        PGPPrivateKey                   pgpPrivKey = pgpSecKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(pass));
+        PGPSignatureGenerator           sGen = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(pgpSecKey.getPublicKey().getAlgorithm(), digest).setProvider("BC"));
         PGPSignatureSubpacketGenerator  spGen = new PGPSignatureSubpacketGenerator();
         
-        sGen.initSign(PGPSignature.CANONICAL_TEXT_DOCUMENT, pgpPrivKey);
+        sGen.init(PGPSignature.CANONICAL_TEXT_DOCUMENT, pgpPrivKey);
         
         Iterator    it = pgpSecKey.getPublicKey().getUserIDs();
         if (it.hasNext())
