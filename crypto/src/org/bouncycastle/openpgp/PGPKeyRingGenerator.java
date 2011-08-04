@@ -9,7 +9,10 @@ import java.util.List;
 
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.PublicSubkeyPacket;
+import org.bouncycastle.openpgp.operator.PBESecretKeyEncryptor;
+import org.bouncycastle.openpgp.operator.PGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
 
@@ -20,17 +23,13 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
 public class PGPKeyRingGenerator
 {    
     List                                keys = new ArrayList();
-    
-    private String                      id;
-    private int                         encAlgorithm;
-    private int                         certificationLevel;
-    private char[]                      passPhrase;
-    private boolean                     useSHA1;
+
+    private PBESecretKeyEncryptor       keyEncryptor;
+    private PGPDigestCalculator checksumCalculator;
     private PGPKeyPair                  masterKey;
     private PGPSignatureSubpacketVector hashedPcks;
     private PGPSignatureSubpacketVector unhashedPcks;
-    private SecureRandom                rand;
-    private Provider                    provider;
+    private PGPContentSignerBuilder     keySignerBuilder;
     
     /**
      * Create a new key ring generator using old style checksumming. It is recommended to use
@@ -48,6 +47,7 @@ public class PGPKeyRingGenerator
      * 
      * @throws PGPException
      * @throws NoSuchProviderException
+     * @deprecated   use method taking PBESecretKeyDecryptor
      */
     public PGPKeyRingGenerator(
         int                            certificationLevel,
@@ -80,6 +80,7 @@ public class PGPKeyRingGenerator
      * 
      * @throws PGPException
      * @throws NoSuchProviderException
+     * @deprecated   use method taking PBESecretKeyDecryptor
      */
     public PGPKeyRingGenerator(
         int                            certificationLevel,
@@ -113,6 +114,7 @@ public class PGPKeyRingGenerator
      *
      * @throws PGPException
      * @throws NoSuchProviderException
+     * @deprecated  use method taking PBESecretKeyDecryptor
      */
     public PGPKeyRingGenerator(
         int                            certificationLevel,
@@ -127,18 +129,49 @@ public class PGPKeyRingGenerator
         Provider                       provider)
         throws PGPException, NoSuchProviderException
     {
-        this.certificationLevel = certificationLevel;
         this.masterKey = masterKey;
-        this.id = id;
-        this.encAlgorithm = encAlgorithm;
-        this.passPhrase = passPhrase;
-        this.useSHA1 = useSHA1;
         this.hashedPcks = hashedPcks;
         this.unhashedPcks = unhashedPcks;
-        this.rand = rand;
-        this.provider = provider;
+        this.keyEncryptor = new JcePBESecretKeyEncryptorBuilder(encAlgorithm).setProvider(provider).setSecureRandom(rand).build(passPhrase);
+        this.checksumCalculator = convertSHA1Flag(useSHA1);
+        this.keySignerBuilder = new JcaPGPContentSignerBuilder(masterKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1);
+        this.checksumCalculator = convertSHA1Flag(useSHA1);
 
-        keys.add(new PGPSecretKey(certificationLevel, masterKey, id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, provider));
+        keys.add(new PGPSecretKey(certificationLevel, masterKey, id, checksumCalculator, hashedPcks, unhashedPcks, keySignerBuilder, keyEncryptor));
+    }
+
+    /**
+     * Create a new key ring generator.
+     *
+     * @param certificationLevel
+     * @param masterKey
+     * @param id
+     * @param checksumCalculator
+     * @param hashedPcks
+     * @param unhashedPcks
+     * @param keySignerBuilder
+     * @param keyEncryptor
+     * @throws PGPException
+     */
+    public PGPKeyRingGenerator(
+        int                            certificationLevel,
+        PGPKeyPair                     masterKey,
+        String                         id,
+        PGPDigestCalculator checksumCalculator,
+        PGPSignatureSubpacketVector    hashedPcks,
+        PGPSignatureSubpacketVector    unhashedPcks,
+        PGPContentSignerBuilder        keySignerBuilder,
+        PBESecretKeyEncryptor          keyEncryptor)
+        throws PGPException
+    {
+        this.masterKey = masterKey;
+        this.keyEncryptor = keyEncryptor;
+        this.checksumCalculator = checksumCalculator;
+        this.keySignerBuilder = keySignerBuilder;
+        this.hashedPcks = hashedPcks;
+        this.unhashedPcks = unhashedPcks;
+
+        keys.add(new PGPSecretKey(certificationLevel, masterKey, id, checksumCalculator, hashedPcks, unhashedPcks, keySignerBuilder, keyEncryptor));
     }
 
     /**
@@ -172,12 +205,12 @@ public class PGPKeyRingGenerator
     {
         try
         {
-            PGPSignatureGenerator    sGen = new PGPSignatureGenerator(masterKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1, provider);
-
             //
             // generate the certification
             //
-            sGen.initSign(PGPSignature.SUBKEY_BINDING, masterKey.getPrivateKey());
+            PGPSignatureGenerator  sGen = new PGPSignatureGenerator(keySignerBuilder);
+
+            sGen.init(PGPSignature.SUBKEY_BINDING, masterKey.getPrivateKey());
 
             sGen.setHashedSubpackets(hashedPcks);
             sGen.setUnhashedSubpackets(unhashedPcks);
@@ -186,7 +219,7 @@ public class PGPKeyRingGenerator
             
             subSigs.add(sGen.generateCertification(masterKey.getPublicKey(), keyPair.getPublicKey()));
             
-            keys.add(new PGPSecretKey(keyPair.getPrivateKey(), new PGPPublicKey(keyPair.getPublicKey(), null, subSigs), convertSHA1Flag(useSHA1), new JcePBESecretKeyEncryptorBuilder(encAlgorithm).setProvider(provider).setSecureRandom(rand).build(passPhrase)));
+            keys.add(new PGPSecretKey(keyPair.getPrivateKey(), new PGPPublicKey(keyPair.getPublicKey(), null, subSigs), checksumCalculator, keyEncryptor));
         }
         catch (PGPException e)
         {
