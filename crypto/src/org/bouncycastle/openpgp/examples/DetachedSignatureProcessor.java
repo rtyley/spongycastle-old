@@ -24,6 +24,9 @@ import org.bouncycastle.openpgp.PGPSignature;
 import org.bouncycastle.openpgp.PGPSignatureGenerator;
 import org.bouncycastle.openpgp.PGPSignatureList;
 import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 
 /**
  * A simple utility class that creates seperate signatures for files and verifies them.
@@ -54,7 +57,7 @@ public class DetachedSignatureProcessor
         in.close();
     }
 
-    /**
+    /*
      * verify the signature in in against the file fileName.
      */
     private static void verifySignature(
@@ -66,7 +69,7 @@ public class DetachedSignatureProcessor
         in = PGPUtil.getDecoderStream(in);
         
         PGPObjectFactory    pgpFact = new PGPObjectFactory(in);
-        PGPSignatureList    p3 = null;
+        PGPSignatureList    p3;
 
         Object    o = pgpFact.nextObject();
         if (o instanceof PGPCompressedData)
@@ -90,7 +93,7 @@ public class DetachedSignatureProcessor
         PGPSignature                sig = p3.get(0);
         PGPPublicKey                key = pgpPubRingCollection.getPublicKey(sig.getKeyID());
 
-        sig.initVerify(key, "BC");
+        sig.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
 
         int ch;
         while ((ch = dIn.read()) >= 0)
@@ -141,10 +144,10 @@ public class DetachedSignatureProcessor
         }
 
         PGPSecretKey             pgpSec = PGPExampleUtil.readSecretKey(keyIn);
-        PGPPrivateKey            pgpPrivKey = pgpSec.extractPrivateKey(pass, "BC");        
-        PGPSignatureGenerator    sGen = new PGPSignatureGenerator(pgpSec.getPublicKey().getAlgorithm(), PGPUtil.SHA1, "BC");
+        PGPPrivateKey            pgpPrivKey = pgpSec.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(pass));
+        PGPSignatureGenerator    sGen = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(pgpSec.getPublicKey().getAlgorithm(), PGPUtil.SHA1).setProvider("BC"));
         
-        sGen.initSign(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
+        sGen.init(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
         
         BCPGOutputStream         bOut = new BCPGOutputStream(out);
         
