@@ -19,16 +19,7 @@ class IndefiniteLengthInputStream
     {
         super(in, limit);
 
-        _b1 = in.read();
-        _b2 = in.read();
-
-        if (_b2 < 0)
-        {
-            // Corrupted stream
-            throw new EOFException();
-        }
-
-        checkForEof();
+        readAhead();
     }
 
     void setEofOn00(
@@ -73,14 +64,7 @@ class IndefiniteLengthInputStream
         b[off] = (byte)_b1;
         b[off + 1] = (byte)_b2;
 
-        _b1 = _in.read();
-        _b2 = _in.read();
-
-        if (_b2 < 0)
-        {
-            // Corrupted stream
-            throw new EOFException();
-        }
+        readAhead();
 
         return numRead + 2;
     }
@@ -107,5 +91,17 @@ class IndefiniteLengthInputStream
         _b2 = b;
 
         return v;
+    }
+
+    private void readAhead() throws IOException
+    {
+        _b1 = _in.read();
+        _b2 = _in.read();
+
+        if (_b2 < 0)
+        {
+            // Corrupted stream
+            throw new EOFException();
+        }
     }
 }
