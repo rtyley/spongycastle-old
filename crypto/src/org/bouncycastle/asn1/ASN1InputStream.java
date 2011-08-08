@@ -101,14 +101,14 @@ public class ASN1InputStream
     protected int readLength()
         throws IOException
     {
-        return readLength(this, limit);
+        return readLength(this.in, limit);
     }
 
     protected void readFully(
         byte[]  bytes)
         throws IOException
     {
-        if (Streams.readFully(this, bytes) != bytes.length)
+        if (Streams.readFully(this.in, bytes) != bytes.length)
         {
             throw new EOFException("EOF encountered in middle of object");
         }
@@ -205,7 +205,7 @@ public class ASN1InputStream
         //
         // calculate tag number
         //
-        int tagNo = readTagNumber(this, tag);
+        int tagNo = readTagNumber(this.in, tag);
 
         boolean isConstructed = (tag & CONSTRUCTED) != 0;
 
