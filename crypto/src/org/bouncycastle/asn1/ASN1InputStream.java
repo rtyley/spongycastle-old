@@ -125,7 +125,7 @@ public class ASN1InputStream
     {
         boolean isConstructed = (tag & CONSTRUCTED) != 0;
 
-        DefiniteLengthInputStream defIn = new DefiniteLengthInputStream(this, length);
+        DefiniteLengthInputStream defIn = new DefiniteLengthInputStream(this.in, length);
 
         if ((tag & APPLICATION) != 0)
         {
@@ -221,7 +221,7 @@ public class ASN1InputStream
                 throw new IOException("indefinite length primitive encoding encountered");
             }
 
-            IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this, limit);
+            IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this.in, limit);
             ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
 
             if ((tag & APPLICATION) != 0)
