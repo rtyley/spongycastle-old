@@ -20,6 +20,7 @@ class IndefiniteLengthInputStream
         super(in, limit);
 
         readAhead();
+        checkForEof();
     }
 
     void setEofOn00(
