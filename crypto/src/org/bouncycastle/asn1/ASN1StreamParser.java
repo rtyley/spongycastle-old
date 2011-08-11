@@ -215,7 +215,7 @@ public class ASN1StreamParser
         }
     }
 
-    private void set00Check(boolean enabled)
+    private void set00Check(boolean enabled) throws IOException
     {
         if (_in instanceof IndefiniteLengthInputStream)
         {
