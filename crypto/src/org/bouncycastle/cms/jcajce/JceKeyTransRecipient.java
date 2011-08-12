@@ -89,7 +89,7 @@ public abstract class JceKeyTransRecipient
 
         try
         {
-            return CMSUtils.getJceKey(unwrapper.generateUnwrappedKey(encryptedKeyAlgorithm, encryptedEncryptionKey));
+            return helper.getJceKey(encryptedKeyAlgorithm.getAlgorithm(), unwrapper.generateUnwrappedKey(encryptedKeyAlgorithm, encryptedEncryptionKey));
         }
         catch (OperatorException e)
         {

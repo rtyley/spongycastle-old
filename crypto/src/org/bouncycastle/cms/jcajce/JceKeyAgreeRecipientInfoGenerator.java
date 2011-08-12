@@ -156,7 +156,7 @@ public class JceKeyAgreeRecipientInfoGenerator
 
                 keyEncryptionCipher.init(Cipher.WRAP_MODE, keyEncryptionKey, random);
 
-                byte[] encryptedKeyBytes = keyEncryptionCipher.wrap(CMSUtils.getJceKey(contentEncryptionKey));
+                byte[] encryptedKeyBytes = keyEncryptionCipher.wrap(helper.getJceKey(contentEncryptionKey));
 
                 ASN1OctetString encryptedKey = new DEROctetString(encryptedKeyBytes);
 

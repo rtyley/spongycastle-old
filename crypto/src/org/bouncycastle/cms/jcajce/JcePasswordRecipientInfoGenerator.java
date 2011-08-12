@@ -45,7 +45,7 @@ public class JcePasswordRecipientInfoGenerator
     public byte[] generateEncryptedBytes(AlgorithmIdentifier keyEncryptionAlgorithm, byte[] derivedKey, GenericKey contentEncryptionKey)
         throws CMSException
     {
-        Key contentEncryptionKeySpec = CMSUtils.getJceKey(contentEncryptionKey);
+        Key contentEncryptionKeySpec = helper.getJceKey(contentEncryptionKey);
         Cipher keyEncryptionCipher = helper.createRFC3211Wrapper(keyEncryptionAlgorithm.getAlgorithm());
 
         try

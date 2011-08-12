@@ -88,7 +88,7 @@ public abstract class JceKEKRecipient
 
         try
         {
-            return CMSUtils.getJceKey(unwrapper.generateUnwrappedKey(contentEncryptionAlgorithm, encryptedContentEncryptionKey));
+            return helper.getJceKey(contentEncryptionAlgorithm.getAlgorithm(), unwrapper.generateUnwrappedKey(contentEncryptionAlgorithm, encryptedContentEncryptionKey));
         }
         catch (OperatorException e)
         {

@@ -26,6 +26,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1Object;
@@ -43,6 +44,7 @@ import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.jcajce.JcaJceHelper;
 import org.bouncycastle.operator.AsymmetricKeyUnwrapper;
+import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.SymmetricKeyUnwrapper;
 
 class EnvelopedDataHelper
@@ -57,6 +59,12 @@ class EnvelopedDataHelper
         BASE_CIPHER_NAMES.put(CMSAlgorithm.AES128_CBC,  "AES");
         BASE_CIPHER_NAMES.put(CMSAlgorithm.AES192_CBC,  "AES");
         BASE_CIPHER_NAMES.put(CMSAlgorithm.AES256_CBC,  "AES");
+        BASE_CIPHER_NAMES.put(CMSAlgorithm.RC2_CBC,  "RC2");
+        BASE_CIPHER_NAMES.put(CMSAlgorithm.CAST5_CBC, "CAST5");
+        BASE_CIPHER_NAMES.put(CMSAlgorithm.CAMELLIA128_CBC, "Camellia");
+        BASE_CIPHER_NAMES.put(CMSAlgorithm.CAMELLIA192_CBC, "Camellia");
+        BASE_CIPHER_NAMES.put(CMSAlgorithm.CAMELLIA256_CBC, "Camellia");
+        BASE_CIPHER_NAMES.put(CMSAlgorithm.SEED_CBC, "SEED");
 
         CIPHER_ALG_NAMES.put(CMSAlgorithm.DES_EDE3_CBC,  "DESEDE/CBC/PKCS5Padding");
         CIPHER_ALG_NAMES.put(CMSAlgorithm.AES128_CBC,  "AES/CBC/PKCS5Padding");
@@ -132,7 +140,37 @@ class EnvelopedDataHelper
 
         return name;
     }
-    
+
+    Key getJceKey(GenericKey key)
+    {
+        if (key.getRepresentation() instanceof Key)
+        {
+            return (Key)key.getRepresentation();
+        }
+
+        if (key.getRepresentation() instanceof byte[])
+        {
+            return new SecretKeySpec((byte[])key.getRepresentation(), "ENC");
+        }
+
+        throw new IllegalArgumentException("unknown generic key type");
+    }
+
+    Key getJceKey(ASN1ObjectIdentifier algorithm, GenericKey key)
+    {
+        if (key.getRepresentation() instanceof Key)
+        {
+            return (Key)key.getRepresentation();
+        }
+
+        if (key.getRepresentation() instanceof byte[])
+        {
+            return new SecretKeySpec((byte[])key.getRepresentation(), getBaseCipherName(algorithm));
+        }
+
+        throw new IllegalArgumentException("unknown generic key type");
+    }
+
     Cipher createCipher(ASN1ObjectIdentifier algorithm)
         throws CMSException
     {

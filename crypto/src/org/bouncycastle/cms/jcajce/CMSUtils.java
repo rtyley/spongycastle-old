@@ -1,11 +1,8 @@
 package org.bouncycastle.cms.jcajce;
 
-import java.security.Key;
 import java.security.Provider;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-
-import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
@@ -15,7 +12,6 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
-import org.bouncycastle.operator.GenericKey;
 
 class CMSUtils
 {
@@ -24,21 +20,6 @@ class CMSUtils
         throws CertificateEncodingException
     {
             return TBSCertificateStructure.getInstance(cert.getTBSCertificate());
-    }
-
-    static Key getJceKey(GenericKey key)
-    {
-        if (key.getRepresentation() instanceof Key)
-        {
-            return (Key)key.getRepresentation();
-        }
-
-        if (key.getRepresentation() instanceof byte[])
-        {
-            return new SecretKeySpec((byte[])key.getRepresentation(), "ENC");
-        }
-
-        throw new IllegalArgumentException("unknown generic key type");
     }
 
     static IssuerAndSerialNumber getIssuerAndSerialNumber(X509Certificate cert)
