@@ -24,7 +24,7 @@ import org.bouncycastle.asn1.x500.X500Name;
  */
 public class V1TBSCertificateGenerator
 {
-    DERTaggedObject         version = new DERTaggedObject(0, new DERInteger(0));
+    DERTaggedObject         version = new DERTaggedObject(true, 0, new DERInteger(0));
 
     DERInteger              serialNumber;
     AlgorithmIdentifier     signature;
@@ -55,7 +55,7 @@ public class V1TBSCertificateGenerator
     public void setIssuer(
         X509Name    issuer)
     {
-        this.issuer = X500Name.getInstance(issuer.getASN1Primitive());
+        this.issuer = X500Name.getInstance(issuer.toASN1Primitive());
     }
 
     public void setIssuer(
@@ -94,7 +94,7 @@ public class V1TBSCertificateGenerator
     public void setSubject(
         X509Name    subject)
     {
-        this.subject = X500Name.getInstance(subject.getASN1Primitive());
+        this.subject = X500Name.getInstance(subject.toASN1Primitive());
     }
 
     public void setSubject(

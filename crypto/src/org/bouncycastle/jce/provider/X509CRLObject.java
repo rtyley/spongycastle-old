@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
@@ -70,7 +71,7 @@ public class X509CRLObject
             
             if (c.getSignatureAlgorithm().getParameters() != null)
             {
-                this.sigAlgParams = ((ASN1Encodable)c.getSignatureAlgorithm().getParameters()).getDEREncoded();
+                this.sigAlgParams = ((ASN1Encodable)c.getSignatureAlgorithm().getParameters()).toASN1Primitive().getEncoded(ASN1Encoding.DER);
             }
             else
             {
@@ -172,7 +173,7 @@ public class X509CRLObject
     {
         try
         {
-            return c.getEncoded(ASN1Encodable.DER);
+            return c.getEncoded(ASN1Encoding.DER);
         }
         catch (IOException e)
         {
@@ -213,7 +214,7 @@ public class X509CRLObject
 
     public Principal getIssuerDN()
     {
-        return new X509Principal(X509Name.getInstance(c.getIssuer().getDERObject()));
+        return new X509Principal(X509Name.getInstance(c.getIssuer().toASN1Primitive()));
     }
 
     public X500Principal getIssuerX500Principal()

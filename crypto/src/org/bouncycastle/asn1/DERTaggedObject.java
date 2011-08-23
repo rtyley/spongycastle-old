@@ -13,50 +13,29 @@ public class DERTaggedObject
     private static final byte[] ZERO_BYTES = new byte[0];
 
     /**
-     * @param tagNo the tag number for this object.
-     * @param obj the tagged object.
-     */
-    public DERTaggedObject(
-        int             tagNo,
-        ASN1Encodable    obj)
-    {
-        super(tagNo, obj);
-    }
-
-    /**
      * @param explicit true if an explicitly tagged object.
      * @param tagNo the tag number for this object.
      * @param obj the tagged object.
      */
     public DERTaggedObject(
-        boolean         explicit,
-        int             tagNo,
-        ASN1Encodable    obj)
+        boolean       explicit,
+        int           tagNo,
+        ASN1Encodable obj)
     {
         super(explicit, tagNo, obj);
     }
 
-    /**
-     * create an implicitly tagged object that contains a zero
-     * length sequence.
-     */
-    public DERTaggedObject(
-        int             tagNo)
-    {
-        super(false, tagNo, new DERSequence());
-    }
-
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream out)
         throws IOException
     {
         if (!empty)
         {
-            byte[] bytes = obj.getDERObject().getEncoded(DER);
+            byte[] bytes = obj.toASN1Primitive().getEncoded(ASN1Encoding.DER);
 
             if (explicit)
             {
-                out.writeEncoded(CONSTRUCTED | TAGGED, tagNo, bytes);
+                out.writeEncoded(BERTags.CONSTRUCTED | BERTags.TAGGED, tagNo, bytes);
             }
             else
             {
@@ -64,13 +43,13 @@ public class DERTaggedObject
                 // need to mark constructed types...
                 //
                 int flags;
-                if ((bytes[0] & CONSTRUCTED) != 0)
+                if ((bytes[0] & BERTags.CONSTRUCTED) != 0)
                 {
-                    flags = CONSTRUCTED | TAGGED;
+                    flags = BERTags.CONSTRUCTED | BERTags.TAGGED;
                 }
                 else
                 {
-                    flags = TAGGED;
+                    flags = BERTags.TAGGED;
                 }
 
                 out.writeTag(flags, tagNo);
@@ -79,7 +58,7 @@ public class DERTaggedObject
         }
         else
         {
-            out.writeEncoded(CONSTRUCTED | TAGGED, tagNo, ZERO_BYTES);
+            out.writeEncoded(BERTags.CONSTRUCTED | BERTags.TAGGED, tagNo, ZERO_BYTES);
         }
     }
 }

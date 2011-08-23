@@ -28,7 +28,7 @@ import org.bouncycastle.asn1.x500.X500Name;
  */
 public class V3TBSCertificateGenerator
 {
-    DERTaggedObject         version = new DERTaggedObject(0, new DERInteger(2));
+    DERTaggedObject         version = new DERTaggedObject(true, 0, new DERInteger(2));
 
     DERInteger              serialNumber;
     AlgorithmIdentifier     signature;
@@ -103,7 +103,7 @@ public class V3TBSCertificateGenerator
     public void setSubject(
         X509Name    subject)
     {
-        this.subject = X500Name.getInstance(subject.getASN1Primitive());
+        this.subject = X500Name.getInstance(subject.toASN1Primitive());
     }
 
     public void setSubject(
@@ -194,7 +194,7 @@ public class V3TBSCertificateGenerator
 
         if (extensions != null)
         {
-            v.add(new DERTaggedObject(3, extensions));
+            v.add(new DERTaggedObject(true, 3, extensions));
         }
 
         return new TBSCertificateStructure(new DERSequence(v));
