@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfoParser;
@@ -47,7 +47,7 @@ public class CMSTimeStampedDataParser
         {
             if (CMSObjectIdentifiers.timestampedData.equals(contentInfo.getContentType()))
             {
-                this.timeStampedData = TimeStampedDataParser.getInstance(contentInfo.getContent(DERTags.SEQUENCE));
+                this.timeStampedData = TimeStampedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
             }
             else
             {

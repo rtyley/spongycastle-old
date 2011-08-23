@@ -2,9 +2,10 @@ package org.bouncycastle.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.x509.Attribute;
 
@@ -12,7 +13,7 @@ import org.bouncycastle.asn1.x509.Attribute;
  * Class for carrying the values in an X.509 Attribute.
  */
 public class X509Attribute
-    extends ASN1Encodable
+    extends ASN1Object
 {
     Attribute    attr;
     
@@ -36,7 +37,7 @@ public class X509Attribute
         String          oid,
         ASN1Encodable   value)
     {
-        this.attr = new Attribute(new DERObjectIdentifier(oid), new DERSet(value));
+        this.attr = new Attribute(new ASN1ObjectIdentifier(oid), new DERSet(value));
     }
     
     /**
@@ -50,7 +51,7 @@ public class X509Attribute
         String              oid,
         ASN1EncodableVector value)
     {
-        this.attr = new Attribute(new DERObjectIdentifier(oid), new DERSet(value));
+        this.attr = new Attribute(new ASN1ObjectIdentifier(oid), new DERSet(value));
     }
     
     public String getOID()
@@ -71,8 +72,8 @@ public class X509Attribute
         return values;
     }
     
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
-        return attr.toASN1Object();
+        return attr.toASN1Primitive();
     }
 }

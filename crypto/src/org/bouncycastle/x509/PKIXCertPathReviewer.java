@@ -37,15 +37,13 @@ import java.util.Vector;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.AccessDescription;
@@ -2505,8 +2503,8 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
 
             if (ext != null)
             {
-                ASN1OctetString oct = (ASN1OctetString)ASN1Object.fromByteArray(ext);
-                AuthorityKeyIdentifier authID = AuthorityKeyIdentifier.getInstance(ASN1Object.fromByteArray(oct.getOctets()));
+                ASN1OctetString oct = (ASN1OctetString)ASN1Primitive.fromByteArray(ext);
+                AuthorityKeyIdentifier authID = AuthorityKeyIdentifier.getInstance(ASN1Primitive.fromByteArray(oct.getOctets()));
 
                 certSelectX509.setSerialNumber(authID.getAuthorityCertSerialNumber());
                 byte[] keyID = authID.getKeyIdentifier();

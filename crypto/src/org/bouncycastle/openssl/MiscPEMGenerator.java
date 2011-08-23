@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
@@ -139,7 +139,7 @@ public class MiscPEMGenerator
         else if (o instanceof PrivateKey)
         {
             PrivateKeyInfo info = new PrivateKeyInfo(
-                (ASN1Sequence) ASN1Object.fromByteArray(((Key)o).getEncoded()));
+                (ASN1Sequence) ASN1Primitive.fromByteArray(((Key)o).getEncoded()));
 
             if (o instanceof RSAPrivateKey)
             {
@@ -281,7 +281,7 @@ public class MiscPEMGenerator
         {
             type = "EC PRIVATE KEY";
 
-            PrivateKeyInfo      privInfo = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(((PrivateKey)obj).getEncoded()));
+            PrivateKeyInfo      privInfo = PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(((PrivateKey)obj).getEncoded()));
 
             keyData = privInfo.parsePrivateKey().getEncoded();
         }

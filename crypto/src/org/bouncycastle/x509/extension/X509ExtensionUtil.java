@@ -9,8 +9,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -22,13 +22,13 @@ import org.bouncycastle.asn1.x509.X509Name;
 
 public class X509ExtensionUtil
 {
-    public static ASN1Object fromExtensionValue(
+    public static ASN1Primitive fromExtensionValue(
         byte[]  encodedValue) 
         throws IOException
     {
-        ASN1OctetString octs = (ASN1OctetString)ASN1Object.fromByteArray(encodedValue);
+        ASN1OctetString octs = (ASN1OctetString)ASN1Primitive.fromByteArray(encodedValue);
         
-        return ASN1Object.fromByteArray(octs.getOctets());
+        return ASN1Primitive.fromByteArray(octs.getOctets());
     }
 
     public static Collection getIssuerAlternativeNames(X509Certificate cert)

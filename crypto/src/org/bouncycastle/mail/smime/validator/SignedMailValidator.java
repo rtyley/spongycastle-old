@@ -34,11 +34,12 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -441,7 +442,7 @@ public class SignedMailValidator
         return addresses;
     }
 
-    private static DERObject getObject(byte[] ext) throws IOException
+    private static ASN1Primitive getObject(byte[] ext) throws IOException
     {
         ASN1InputStream aIn = new ASN1InputStream(ext);
         ASN1OctetString octs = (ASN1OctetString) aIn.readObject();
@@ -595,7 +596,7 @@ public class SignedMailValidator
             if (attr != null)
             {
                 Time t = Time.getInstance(attr.getAttrValues().getObjectAt(0)
-                        .getDERObject());
+                        .toASN1Primitive());
                 result = t.getDate();
             }
         }
@@ -743,7 +744,7 @@ public class SignedMailValidator
                         AuthorityKeyIdentifier kid = AuthorityKeyIdentifier.getInstance(getObject(authKeyIdentBytes));
                         if (kid.getKeyIdentifier() != null)
                         {
-                            select.setSubjectKeyIdentifier(new DEROctetString(kid.getKeyIdentifier()).getDEREncoded());
+                            select.setSubjectKeyIdentifier(new DEROctetString(kid.getKeyIdentifier()).getEncoded(ASN1Encoding.DER));
                         }
                     }
                     catch (IOException ioe)

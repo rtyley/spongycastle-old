@@ -1,25 +1,24 @@
 package org.bouncycastle.mozilla;
 
 import java.io.ByteArrayInputStream;
-
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.NoSuchAlgorithmException;
-import java.security.KeyFactory;
-import java.security.InvalidKeyException;
-import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.mozilla.PublicKeyAndChallenge;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 
 /**
  * This is designed to parse the SignedPublicKeyAndChallenge created by the
@@ -38,7 +37,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
  *  </pre>
  */
 public class SignedPublicKeyAndChallenge
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private static ASN1Sequence toDERSequence(byte[]  bytes)
     {
@@ -69,7 +68,7 @@ public class SignedPublicKeyAndChallenge
         signature = (DERBitString)spkacSeq.getObjectAt(2);
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return spkacSeq;
     }
