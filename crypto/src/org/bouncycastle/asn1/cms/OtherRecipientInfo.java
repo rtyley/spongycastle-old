@@ -2,22 +2,22 @@ package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 public class OtherRecipientInfo
-    extends ASN1Encodable
+    extends ASN1Object
 {
-    private DERObjectIdentifier    oriType;
-    private DEREncodable           oriValue;
+    private ASN1ObjectIdentifier    oriType;
+    private ASN1Encodable           oriValue;
 
     public OtherRecipientInfo(
-        DERObjectIdentifier     oriType,
-        DEREncodable            oriValue)
+        ASN1ObjectIdentifier     oriType,
+        ASN1Encodable            oriValue)
     {
         this.oriType = oriType;
         this.oriValue = oriValue;
@@ -26,7 +26,7 @@ public class OtherRecipientInfo
     public OtherRecipientInfo(
         ASN1Sequence seq)
     {
-        oriType = DERObjectIdentifier.getInstance(seq.getObjectAt(0));
+        oriType = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
         oriValue = seq.getObjectAt(1);
     }
 
@@ -68,12 +68,12 @@ public class OtherRecipientInfo
         throw new IllegalArgumentException("Invalid OtherRecipientInfo: " + obj.getClass().getName());
     }
 
-    public DERObjectIdentifier getType()
+    public ASN1ObjectIdentifier getType()
     {
         return oriType;
     }
 
-    public DEREncodable getValue()
+    public ASN1Encodable getValue()
     {
         return oriValue;
     }
@@ -86,7 +86,7 @@ public class OtherRecipientInfo
      *    oriValue ANY DEFINED BY oriType }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 

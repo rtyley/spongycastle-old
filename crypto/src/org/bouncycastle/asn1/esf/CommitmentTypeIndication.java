@@ -1,22 +1,22 @@
 package org.bouncycastle.asn1.esf;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 public class CommitmentTypeIndication
-    extends ASN1Encodable 
+    extends ASN1Object
 {
-    private DERObjectIdentifier   commitmentTypeId;
+    private ASN1ObjectIdentifier   commitmentTypeId;
     private ASN1Sequence          commitmentTypeQualifier;
     
     public CommitmentTypeIndication(
         ASN1Sequence seq)
     {
-        commitmentTypeId = (DERObjectIdentifier)seq.getObjectAt(0);
+        commitmentTypeId = (ASN1ObjectIdentifier)seq.getObjectAt(0);
 
         if (seq.size() > 1)
         {
@@ -25,13 +25,13 @@ public class CommitmentTypeIndication
     }
 
     public CommitmentTypeIndication(
-        DERObjectIdentifier commitmentTypeId)
+        ASN1ObjectIdentifier commitmentTypeId)
     {
         this.commitmentTypeId = commitmentTypeId;
     }
 
     public CommitmentTypeIndication(
-        DERObjectIdentifier commitmentTypeId,
+        ASN1ObjectIdentifier commitmentTypeId,
         ASN1Sequence        commitmentTypeQualifier)
     {
         this.commitmentTypeId = commitmentTypeId;
@@ -49,7 +49,7 @@ public class CommitmentTypeIndication
         return new CommitmentTypeIndication(ASN1Sequence.getInstance(obj));
     }
 
-    public DERObjectIdentifier getCommitmentTypeId()
+    public ASN1ObjectIdentifier getCommitmentTypeId()
     {
         return commitmentTypeId;
     }
@@ -67,7 +67,7 @@ public class CommitmentTypeIndication
      *              CommitmentTypeQualifier OPTIONAL }
      * </pre>
      */ 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
         

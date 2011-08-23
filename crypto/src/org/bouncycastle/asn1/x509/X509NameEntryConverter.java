@@ -1,12 +1,12 @@
 package org.bouncycastle.asn1.x509;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.util.Strings;
-
-import java.io.IOException;
 
 /**
  * It turns out that the number of standard ways the fields in a DN should be 
@@ -19,8 +19,8 @@ import java.io.IOException;
  * public class X509DirEntryConverter
  *     extends X509NameEntryConverter
  * {
- *     public DERObject getConvertedValue(
- *         DERObjectIdentifier  oid,
+ *     public ASN1Primitive getConvertedValue(
+ *         ASN1ObjectIdentifier  oid,
  *         String               value)
  *     {
  *         if (str.length() != 0 && str.charAt(0) == '#')
@@ -56,7 +56,7 @@ public abstract class X509NameEntryConverter
      * @param off the index at which the encoding starts
      * @return the decoded object
      */
-    protected DERObject convertHexEncoded(
+    protected ASN1Primitive convertHexEncoded(
         String  str,
         int     off)
         throws IOException
@@ -109,5 +109,5 @@ public abstract class X509NameEntryConverter
      * @param value the value of the particular DN component.
      * @return the ASN.1 equivalent for the value.
      */
-    public abstract DERObject getConvertedValue(DERObjectIdentifier oid, String value);
+    public abstract ASN1Primitive getConvertedValue(ASN1ObjectIdentifier oid, String value);
 }

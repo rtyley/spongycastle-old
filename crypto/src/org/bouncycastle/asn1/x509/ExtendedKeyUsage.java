@@ -1,16 +1,16 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERSequence;
-
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERSequence;
 
 /**
  * The extendedKeyUsage object.
@@ -19,7 +19,7 @@ import java.util.Vector;
  * </pre>
  */
 public class ExtendedKeyUsage
-    extends ASN1Encodable
+    extends ASN1Object
 {
     Hashtable     usageTable = new Hashtable();
     ASN1Sequence  seq;
@@ -70,9 +70,9 @@ public class ExtendedKeyUsage
         while (e.hasMoreElements())
         {
             Object  o = e.nextElement();
-            if (!(o instanceof DERObjectIdentifier))
+            if (!(o instanceof ASN1ObjectIdentifier))
             {
-                throw new IllegalArgumentException("Only DERObjectIdentifiers allowed in ExtendedKeyUsage.");
+                throw new IllegalArgumentException("Only ASN1ObjectIdentifiers allowed in ExtendedKeyUsage.");
             }
             this.usageTable.put(o, o);
         }
@@ -86,7 +86,7 @@ public class ExtendedKeyUsage
 
         while (e.hasMoreElements())
         {
-            DERObject  o = (DERObject)e.nextElement();
+            ASN1Primitive  o = (ASN1Primitive)e.nextElement();
 
             v.add(o);
             this.usageTable.put(o, o);
@@ -103,7 +103,7 @@ public class ExtendedKeyUsage
     
     /**
      * Returns all extended key usages.
-     * The returned vector contains DERObjectIdentifiers.
+     * The returned vector contains ASN1ObjectIdentifiers.
      * @return A vector with all key purposes.
      */
     public Vector getUsages()
@@ -121,7 +121,7 @@ public class ExtendedKeyUsage
         return usageTable.size();
     }
     
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return seq;
     }

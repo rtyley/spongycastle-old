@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
@@ -125,7 +125,7 @@ public class ECGOST3410NamedCurves
      * @param oid an object identifier representing a named parameters, if present.
      */
     public static ECDomainParameters getByOID(
-        DERObjectIdentifier  oid)
+        ASN1ObjectIdentifier  oid)
     {
         return (ECDomainParameters)params.get(oid);
     }
@@ -142,7 +142,7 @@ public class ECGOST3410NamedCurves
     public static ECDomainParameters getByName(
         String  name)
     {
-        DERObjectIdentifier oid = (DERObjectIdentifier)objIds.get(name);
+        ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)objIds.get(name);
 
         if (oid != null)
         {
@@ -156,13 +156,13 @@ public class ECGOST3410NamedCurves
      * return the named curve name represented by the given object identifier.
      */
     public static String getName(
-        DERObjectIdentifier  oid)
+        ASN1ObjectIdentifier  oid)
     {
         return (String)names.get(oid);
     }
     
-    public static DERObjectIdentifier getOID(String name)
+    public static ASN1ObjectIdentifier getOID(String name)
     {
-        return (DERObjectIdentifier)objIds.get(name);
+        return (ASN1ObjectIdentifier)objIds.get(name);
     }
 }

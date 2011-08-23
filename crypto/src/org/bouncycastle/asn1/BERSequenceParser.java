@@ -12,19 +12,19 @@ public class BERSequenceParser
         this._parser = parser;
     }
 
-    public DEREncodable readObject()
+    public ASN1Encodable readObject()
         throws IOException
     {
         return _parser.readObject();
     }
 
-    public DERObject getLoadedObject()
+    public ASN1Primitive getLoadedObject()
         throws IOException
     {
         return new BERSequence(_parser.readVector());
     }
     
-    public DERObject getDERObject()
+    public ASN1Primitive toASN1Primitive()
     {
         try
         {

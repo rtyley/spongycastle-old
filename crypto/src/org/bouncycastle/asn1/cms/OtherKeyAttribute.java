@@ -2,17 +2,17 @@ package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 public class OtherKeyAttribute
-    extends ASN1Encodable
+    extends ASN1Object
 {
-    private DERObjectIdentifier keyAttrId;
-    private DEREncodable        keyAttr;
+    private ASN1ObjectIdentifier keyAttrId;
+    private ASN1Encodable        keyAttr;
 
     /**
      * return an OtherKeyAttribute object from the given object.
@@ -39,24 +39,24 @@ public class OtherKeyAttribute
     public OtherKeyAttribute(
         ASN1Sequence seq)
     {
-        keyAttrId = (DERObjectIdentifier)seq.getObjectAt(0);
+        keyAttrId = (ASN1ObjectIdentifier)seq.getObjectAt(0);
         keyAttr = seq.getObjectAt(1);
     }
 
     public OtherKeyAttribute(
-        DERObjectIdentifier keyAttrId,
-        DEREncodable        keyAttr)
+        ASN1ObjectIdentifier keyAttrId,
+        ASN1Encodable        keyAttr)
     {
         this.keyAttrId = keyAttrId;
         this.keyAttr = keyAttr;
     }
 
-    public DERObjectIdentifier getKeyAttrId()
+    public ASN1ObjectIdentifier getKeyAttrId()
     {
         return keyAttrId;
     }
     
-    public DEREncodable getKeyAttr()
+    public ASN1Encodable getKeyAttr()
     {
         return keyAttr;
     }
@@ -70,7 +70,7 @@ public class OtherKeyAttribute
      * }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

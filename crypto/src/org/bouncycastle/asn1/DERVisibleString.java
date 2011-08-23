@@ -6,8 +6,8 @@ import java.io.IOException;
  * DER VisibleString object.
  */
 public class DERVisibleString
-    extends ASN1Object
-    implements DERString
+    extends ASN1Primitive
+    implements ASN1String
 {
     String  string;
 
@@ -102,14 +102,14 @@ public class DERVisibleString
     }
 
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(VISIBLE_STRING, this.getOctets());
+        out.writeEncoded(BERTags.VISIBLE_STRING, this.getOctets());
     }
     
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive o)
     {
         if (!(o instanceof DERVisibleString))
         {

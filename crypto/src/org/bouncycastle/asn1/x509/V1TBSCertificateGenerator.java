@@ -55,7 +55,7 @@ public class V1TBSCertificateGenerator
     public void setIssuer(
         X509Name    issuer)
     {
-        this.issuer = X500Name.getInstance(issuer.getDERObject());
+        this.issuer = X500Name.getInstance(issuer.getASN1Primitive());
     }
 
     public void setIssuer(
@@ -94,7 +94,7 @@ public class V1TBSCertificateGenerator
     public void setSubject(
         X509Name    subject)
     {
-        this.subject = X500Name.getInstance(subject.getDERObject());
+        this.subject = X500Name.getInstance(subject.getASN1Primitive());
     }
 
     public void setSubject(

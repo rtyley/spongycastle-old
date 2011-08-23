@@ -4,13 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 
-import org.bouncycastle.math.ec.ECFieldElement;
-import org.bouncycastle.math.ec.ECPoint;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
@@ -22,6 +17,10 @@ import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ECPoint;
 import org.bouncycastle.asn1.x9.X9IntegerConverter;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.math.ec.ECFieldElement;
+import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class X9Test
     extends SimpleTest

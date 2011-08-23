@@ -26,7 +26,6 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1StreamParser;
 import org.bouncycastle.asn1.DERBMPString;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSequenceParser;
 import org.bouncycastle.asn1.pkcs.ContentInfo;
 import org.bouncycastle.asn1.pkcs.EncryptedData;

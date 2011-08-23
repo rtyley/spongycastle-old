@@ -6,7 +6,7 @@ import java.math.BigInteger;
 import org.bouncycastle.util.Arrays;
 
 public class DEREnumerated
-    extends ASN1Object
+    extends ASN1Primitive
 {
     byte[]      bytes;
 
@@ -15,14 +15,18 @@ public class DEREnumerated
      *
      * @exception IllegalArgumentException if the object cannot be converted.
      */
-    public static DEREnumerated getInstance(
+    public static ASN1Enumerated getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof DEREnumerated)
+        if (obj == null || obj instanceof ASN1Enumerated)
         {
-            return (DEREnumerated)obj;
+            return (ASN1Enumerated)obj;
         }
 
+        if (obj instanceof DEREnumerated)
+        {
+            return new ASN1Enumerated(((DEREnumerated)obj).getValue());
+        }
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -39,7 +43,7 @@ public class DEREnumerated
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DEREnumerated)
         {
@@ -47,7 +51,7 @@ public class DEREnumerated
         }
         else
         {
-            return new DEREnumerated(((ASN1OctetString)o).getOctets());
+            return new ASN1Enumerated(((ASN1OctetString)o).getOctets());
         }
     }
 
@@ -75,14 +79,14 @@ public class DEREnumerated
     }
 
     void encode(
-        DEROutputStream out)
+        ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(ENUMERATED, bytes);
+        out.writeEncoded(BERTags.ENUMERATED, bytes);
     }
     
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive  o)
     {
         if (!(o instanceof DEREnumerated))
         {

@@ -4,11 +4,11 @@ package org.bouncycastle.asn1.x509;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -27,7 +27,7 @@ import org.bouncycastle.asn1.DERSequence;
  * @see PolicyInformation
  */
 public class NoticeReference 
-    extends ASN1Encodable
+    extends ASN1Object
 {
    private DisplayText organization;
    private ASN1Sequence noticeNumbers;
@@ -99,7 +99,7 @@ public class NoticeReference
     * instance from its encodable/encoded form. 
     *
     * @param as an <code>ASN1Sequence</code> value obtained from either
-    * calling @{link toASN1Object()} for a <code>NoticeReference</code>
+    * calling @{link toASN1Primitive()} for a <code>NoticeReference</code>
     * instance or from parsing it from a DER-encoded stream. 
     */
    public NoticeReference(
@@ -143,9 +143,9 @@ public class NoticeReference
    /**
     * Describe <code>toASN1Object</code> method here.
     *
-    * @return a <code>DERObject</code> value
+    * @return a <code>ASN1Primitive</code> value
     */
-   public DERObject toASN1Object() 
+   public ASN1Primitive toASN1Primitive()
    {
       ASN1EncodableVector av = new ASN1EncodableVector();
       av.add (organization);

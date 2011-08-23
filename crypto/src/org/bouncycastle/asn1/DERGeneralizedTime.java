@@ -11,7 +11,7 @@ import java.util.TimeZone;
  * Generalized time object.
  */
 public class DERGeneralizedTime
-    extends ASN1Object
+    extends ASN1Primitive
 {
     String      time;
 
@@ -20,12 +20,17 @@ public class DERGeneralizedTime
      *
      * @exception IllegalArgumentException if the object cannot be converted.
      */
-    public static DERGeneralizedTime getInstance(
+    public static ASN1GeneralizedTime getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof DERGeneralizedTime)
+        if (obj == null || obj instanceof ASN1GeneralizedTime)
         {
-            return (DERGeneralizedTime)obj;
+            return (ASN1GeneralizedTime)obj;
+        }
+
+        if (obj instanceof DERGeneralizedTime)
+        {
+            return new ASN1GeneralizedTime(((DERGeneralizedTime)obj).time);
         }
 
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
@@ -40,11 +45,11 @@ public class DERGeneralizedTime
      * @exception IllegalArgumentException if the tagged object cannot
      *               be converted.
      */
-    public static DERGeneralizedTime getInstance(
+    public static ASN1GeneralizedTime getInstance(
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERGeneralizedTime)
         {
@@ -52,7 +57,7 @@ public class DERGeneralizedTime
         }
         else
         {
-            return new DERGeneralizedTime(((ASN1OctetString)o).getOctets());
+            return new ASN1GeneralizedTime(((ASN1OctetString)o).getOctets());
         }
     }
     
@@ -305,14 +310,14 @@ public class DERGeneralizedTime
 
 
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream  out)
         throws IOException
     {
-        out.writeEncoded(GENERALIZED_TIME, this.getOctets());
+        out.writeEncoded(BERTags.GENERALIZED_TIME, this.getOctets());
     }
     
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive  o)
     {
         if (!(o instanceof DERGeneralizedTime))
         {

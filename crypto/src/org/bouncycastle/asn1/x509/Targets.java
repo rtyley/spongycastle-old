@@ -1,11 +1,11 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERSequence;
-
 import java.util.Enumeration;
+
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERSequence;
 
 /**
  * Targets structure used in target information extension for attribute
@@ -31,7 +31,7 @@ import java.util.Enumeration;
  * @see org.bouncycastle.asn1.x509.TargetInformation
  */
 public class Targets
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private ASN1Sequence targets;
 
@@ -113,9 +113,9 @@ public class Targets
      *            Targets ::= SEQUENCE OF Target
      * </pre>
      * 
-     * @return a DERObject
+     * @return a ASN1Primitive
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return targets;
     }

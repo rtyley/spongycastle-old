@@ -4,6 +4,6 @@ import java.io.IOException;
 
 public interface InMemoryRepresentable
 {
-    DERObject getLoadedObject()
+    ASN1Primitive getLoadedObject()
         throws IOException;
 }

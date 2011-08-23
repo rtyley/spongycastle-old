@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 /**
  * table of the available named parameters for GOST 3410-94.
@@ -82,7 +82,7 @@ public class GOST3410NamedParameters
      * @param oid an object identifier representing a named parameters, if present.
      */
     public static GOST3410ParamSetParameters getByOID(
-        DERObjectIdentifier  oid)
+        ASN1ObjectIdentifier  oid)
     {
         return (GOST3410ParamSetParameters)params.get(oid);
     }
@@ -99,7 +99,7 @@ public class GOST3410NamedParameters
     public static GOST3410ParamSetParameters getByName(
         String  name)
     {
-        DERObjectIdentifier oid = (DERObjectIdentifier)objIds.get(name);
+        ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)objIds.get(name);
 
         if (oid != null)
         {
@@ -109,8 +109,8 @@ public class GOST3410NamedParameters
         return null;
     }
 
-    public static DERObjectIdentifier getOID(String name)
+    public static ASN1ObjectIdentifier getOID(String name)
     {
-        return (DERObjectIdentifier)objIds.get(name);
+        return (ASN1ObjectIdentifier)objIds.get(name);
     }
 }

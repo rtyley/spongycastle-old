@@ -1,16 +1,16 @@
 package org.bouncycastle.asn1.isismtt.ocsp;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1Choice;
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-
-import java.io.IOException;
 
 /**
  * ISIS-MTT-Optional: The certificate requested by the client by inserting the
@@ -46,7 +46,7 @@ import java.io.IOException;
  * </pre>
  */
 public class RequestedCertificate
-    extends ASN1Encodable
+    extends ASN1Object
     implements ASN1Choice
 {
     public static final int certificate = -1;
@@ -168,7 +168,7 @@ public class RequestedCertificate
      *
      * @return a DERObject
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         if (publicKeyCert != null)
         {
@@ -178,6 +178,6 @@ public class RequestedCertificate
         {
             return new DERTaggedObject(1, new DEROctetString(attributeCert));
         }
-        return cert.getDERObject();
+        return cert.toASN1Primitive();
     }
 }

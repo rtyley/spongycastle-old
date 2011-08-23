@@ -2,16 +2,17 @@ package org.bouncycastle.asn1.ess;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.x509.IssuerSerial;
-import org.bouncycastle.asn1.x509.DigestInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.DigestInfo;
+import org.bouncycastle.asn1.x509.IssuerSerial;
 
 public class OtherCertID
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private ASN1Encodable otherCertHash;
     private IssuerSerial issuerSerial;
@@ -43,7 +44,7 @@ public class OtherCertID
                     + seq.size());
         }
 
-        if (seq.getObjectAt(0).getDERObject() instanceof ASN1OctetString)
+        if (seq.getObjectAt(0).getASN1Primitive() instanceof ASN1OctetString)
         {
             otherCertHash = ASN1OctetString.getInstance(seq.getObjectAt(0));
         }
@@ -77,7 +78,7 @@ public class OtherCertID
 
     public AlgorithmIdentifier getAlgorithmHash()
     {
-        if (otherCertHash.getDERObject() instanceof ASN1OctetString)
+        if (otherCertHash.getASN1Primitive() instanceof ASN1OctetString)
         {
             // SHA-1
             return new AlgorithmIdentifier("1.3.14.3.2.26");
@@ -90,10 +91,10 @@ public class OtherCertID
 
     public byte[] getCertHash()
     {
-        if (otherCertHash.getDERObject() instanceof ASN1OctetString)
+        if (otherCertHash.getASN1Primitive() instanceof ASN1OctetString)
         {
             // SHA-1
-            return ((ASN1OctetString)otherCertHash.getDERObject()).getOctets();
+            return ((ASN1OctetString)otherCertHash.getASN1Primitive()).getOctets();
         }
         else
         {
@@ -122,7 +123,7 @@ public class OtherCertID
      *
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

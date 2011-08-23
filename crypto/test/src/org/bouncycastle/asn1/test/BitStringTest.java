@@ -2,7 +2,7 @@ package org.bouncycastle.asn1.test;
 
 import java.io.IOException;
 
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.util.test.SimpleTestResult;
@@ -47,7 +47,7 @@ public class BitStringTest
         // test for zero length bit string
         try
         {
-            ASN1Object.fromByteArray(new DERBitString(new byte[0], 0).getEncoded());
+            ASN1Primitive.fromByteArray(new DERBitString(new byte[0], 0).getEncoded());
         }
         catch (IOException e)
         {

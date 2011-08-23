@@ -2,14 +2,15 @@ package org.bouncycastle.asn1.x500;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 
 public class RDN
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private ASN1Set values;
 
@@ -99,7 +100,7 @@ public class RDN
      * </pre>
      * @return
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return values;
     }

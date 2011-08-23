@@ -3,17 +3,17 @@ package org.bouncycastle.asn1.pkcs;
 import java.math.BigInteger;
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 
 public class PBKDF2Params
-    extends ASN1Encodable
+    extends ASN1Object
 {
     ASN1OctetString     octStr;
     DERInteger          iterationCount;
@@ -81,7 +81,7 @@ public class PBKDF2Params
         return null;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 

@@ -2,17 +2,17 @@ package org.bouncycastle.asn1.cmp;
 
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
 public class PKIStatusInfo
-    extends ASN1Encodable
+    extends ASN1Object
 {
     DERInteger      status;
     PKIFreeText     statusString;
@@ -77,7 +77,7 @@ public class PKIStatusInfo
 
     public PKIStatusInfo(PKIStatus status)
     {
-        this.status = DERInteger.getInstance(status.toASN1Object());
+        this.status = DERInteger.getInstance(status.toASN1Primitive());
     }
 
     /**
@@ -96,7 +96,7 @@ public class PKIStatusInfo
         PKIStatus   status,
         PKIFreeText statusString)
     {
-        this.status = DERInteger.getInstance(status.toASN1Object());
+        this.status = DERInteger.getInstance(status.toASN1Primitive());
         this.statusString = statusString;
     }
 
@@ -156,7 +156,7 @@ public class PKIStatusInfo
      *
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 

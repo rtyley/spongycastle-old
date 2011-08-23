@@ -1,13 +1,13 @@
 package org.bouncycastle.asn1.isismtt.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.GeneralName;
-
-import java.util.Enumeration;
 
 /**
  * Attribute to indicate admissions to certain professions.
@@ -118,7 +118,7 @@ import java.util.Enumeration;
  * @see org.bouncycastle.asn1.isismtt.x509.NamingAuthority
  */
 public class AdmissionSyntax
-    extends ASN1Encodable
+    extends ASN1Object
 {
 
     private GeneralName admissionAuthority;
@@ -245,7 +245,7 @@ public class AdmissionSyntax
      *
      * @return a DERObject
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector vec = new ASN1EncodableVector();
         if (admissionAuthority != null)

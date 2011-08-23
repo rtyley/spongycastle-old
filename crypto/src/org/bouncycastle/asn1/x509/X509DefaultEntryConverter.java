@@ -1,13 +1,13 @@
 package org.bouncycastle.asn1.x509;
 
+import java.io.IOException;
+
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERUTF8String;
-
-import java.io.IOException;
 
 /**
  * The default converter for X509 DN entries when going from their
@@ -24,8 +24,8 @@ public class X509DefaultEntryConverter
      * @param value the value associated with it
      * @return the ASN.1 equivalent for the string value.
      */
-    public DERObject getConvertedValue(
-        DERObjectIdentifier  oid,
+    public ASN1Primitive getConvertedValue(
+        ASN1ObjectIdentifier  oid,
         String               value)
     {
         if (value.length() != 0 && value.charAt(0) == '#')

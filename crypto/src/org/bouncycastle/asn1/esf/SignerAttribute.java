@@ -1,11 +1,16 @@
 package org.bouncycastle.asn1.esf;
 
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 
 
 public class SignerAttribute
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private ASN1Sequence          claimedAttributes;
     private AttributeCertificate  certifiedAttributes;
@@ -79,7 +84,7 @@ public class SignerAttribute
      *  CertifiedAttributes ::= AttributeCertificate -- as defined in RFC 3281: see clause 4.1.
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

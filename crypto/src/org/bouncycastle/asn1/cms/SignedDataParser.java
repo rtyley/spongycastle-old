@@ -1,14 +1,14 @@
 package org.bouncycastle.asn1.cms;
 
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.ASN1SequenceParser;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1SetParser;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.ASN1TaggedObjectParser;
-import org.bouncycastle.asn1.DERTags;
-
 import java.io.IOException;
+
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1SequenceParser;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1SetParser;
+import org.bouncycastle.asn1.ASN1TaggedObjectParser;
+import org.bouncycastle.asn1.BERTags;
+import org.bouncycastle.asn1.DERInteger;
 
 /**
  * <pre>
@@ -86,7 +86,7 @@ public class SignedDataParser
 
         if (_nextObject instanceof ASN1TaggedObjectParser && ((ASN1TaggedObjectParser)_nextObject).getTagNo() == 0)
         {
-            ASN1SetParser certs = (ASN1SetParser)((ASN1TaggedObjectParser)_nextObject).getObjectParser(DERTags.SET, false);
+            ASN1SetParser certs = (ASN1SetParser)((ASN1TaggedObjectParser)_nextObject).getObjectParser(BERTags.SET, false);
             _nextObject = null;
 
             return certs;
@@ -112,7 +112,7 @@ public class SignedDataParser
 
         if (_nextObject instanceof ASN1TaggedObjectParser && ((ASN1TaggedObjectParser)_nextObject).getTagNo() == 1)
         {
-            ASN1SetParser crls = (ASN1SetParser)((ASN1TaggedObjectParser)_nextObject).getObjectParser(DERTags.SET, false);
+            ASN1SetParser crls = (ASN1SetParser)((ASN1TaggedObjectParser)_nextObject).getObjectParser(BERTags.SET, false);
             _nextObject = null;
 
             return crls;

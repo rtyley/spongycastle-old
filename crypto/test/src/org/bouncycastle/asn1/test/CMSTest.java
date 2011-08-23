@@ -11,8 +11,8 @@ import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.ASN1StreamParser;
+import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.CompressedData;
 import org.bouncycastle.asn1.cms.ContentInfo;
@@ -266,7 +266,7 @@ public class CMSTest
             ASN1StreamParser asn1In = new ASN1StreamParser(new ByteArrayInputStream(envDataNestedNDEF));
             ContentInfoParser ci = new ContentInfoParser((ASN1SequenceParser)asn1In.readObject());
             EnvelopedDataParser ed = new EnvelopedDataParser((ASN1SequenceParser)ci
-                .getContent(DERTags.SEQUENCE));
+                .getContent(BERTags.SEQUENCE));
             ed.getVersion();
             ed.getOriginatorInfo();
             ed.getRecipientInfos().getDERObject();
@@ -274,7 +274,7 @@ public class CMSTest
             eci.getContentType();
             eci.getContentEncryptionAlgorithm();
 
-            InputStream dataIn = ((ASN1OctetStringParser)eci.getEncryptedContent(DERTags.OCTET_STRING))
+            InputStream dataIn = ((ASN1OctetStringParser)eci.getEncryptedContent(BERTags.OCTET_STRING))
                 .getOctetStream();
             Streams.drain(dataIn);
             dataIn.close();

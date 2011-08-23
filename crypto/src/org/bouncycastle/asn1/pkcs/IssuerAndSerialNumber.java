@@ -2,18 +2,18 @@ package org.bouncycastle.asn1.pkcs;
 
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.X509Name;
 
 public class IssuerAndSerialNumber
-    extends ASN1Encodable
+    extends ASN1Object
 {
     X500Name name;
     DERInteger  certSerialNumber;
@@ -44,7 +44,7 @@ public class IssuerAndSerialNumber
         X509Name    name,
         BigInteger  certSerialNumber)
     {
-        this.name = X500Name.getInstance(name.getDERObject());
+        this.name = X500Name.getInstance(name.toASN1Primitive());
         this.certSerialNumber = new DERInteger(certSerialNumber);
     }
 
@@ -52,7 +52,7 @@ public class IssuerAndSerialNumber
         X509Name    name,
         DERInteger  certSerialNumber)
     {
-        this.name = X500Name.getInstance(name.getDERObject());
+        this.name = X500Name.getInstance(name.toASN1Primitive());
         this.certSerialNumber = certSerialNumber;
     }
 
@@ -74,7 +74,7 @@ public class IssuerAndSerialNumber
         return certSerialNumber;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector    v = new ASN1EncodableVector();
 

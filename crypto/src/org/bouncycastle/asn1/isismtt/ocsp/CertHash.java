@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1.isismtt.ocsp;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -29,7 +29,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
  * </pre>
  */
 public class CertHash
-    extends ASN1Encodable
+    extends ASN1Object
 {
 
     private AlgorithmIdentifier hashAlgorithm;
@@ -114,7 +114,7 @@ public class CertHash
      *
      * @return a DERObject
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector vec = new ASN1EncodableVector();
         vec.add(hashAlgorithm);

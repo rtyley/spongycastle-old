@@ -25,7 +25,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -185,7 +185,7 @@ public class DSATest
         DSAParameters params = new DSAParameters(key.getParams().getP(), key.getParams().getQ(), key.getParams().getG());
         DSAPublicKeyParameters keyParams = new DSAPublicKeyParameters(key.getY(), params);
         DSASigner signer = new DSASigner();
-        ASN1Sequence derSig = ASN1Sequence.getInstance(ASN1Object.fromByteArray(sigBytes));
+        ASN1Sequence derSig = ASN1Sequence.getInstance(ASN1Primitive.fromByteArray(sigBytes));
 
         signer.init(false, keyParams);
 

@@ -7,34 +7,34 @@ import java.io.IOException;
  * Class representing the DER-type External
  */
 public class DERExternal
-    extends ASN1Object
+    extends ASN1Primitive
 {
-    private DERObjectIdentifier directReference;
-    private DERInteger indirectReference;
-    private ASN1Object dataValueDescriptor;
+    private ASN1ObjectIdentifier directReference;
+    private ASN1Integer indirectReference;
+    private ASN1Primitive dataValueDescriptor;
     private int encoding;
-    private DERObject externalContent;
+    private ASN1Primitive externalContent;
     
     public DERExternal(ASN1EncodableVector vector)
     {
         int offset = 0;
 
-        DERObject enc = getObjFromVector(vector, offset);
-        if (enc instanceof DERObjectIdentifier)
+        ASN1Primitive enc = getObjFromVector(vector, offset);
+        if (enc instanceof ASN1ObjectIdentifier)
         {
-            directReference = (DERObjectIdentifier)enc;
+            directReference = (ASN1ObjectIdentifier)enc;
             offset++;
             enc = getObjFromVector(vector, offset);
         }
-        if (enc instanceof DERInteger)
+        if (enc instanceof ASN1Integer)
         {
-            indirectReference = (DERInteger) enc;
+            indirectReference = (ASN1Integer) enc;
             offset++;
             enc = getObjFromVector(vector, offset);
         }
         if (!(enc instanceof DERTaggedObject))
         {
-            dataValueDescriptor = (ASN1Object) enc;
+            dataValueDescriptor = (ASN1Primitive) enc;
             offset++;
             enc = getObjFromVector(vector, offset);
         }
@@ -53,14 +53,14 @@ public class DERExternal
         externalContent = obj.getObject();
     }
 
-    private DERObject getObjFromVector(ASN1EncodableVector v, int index)
+    private ASN1Primitive getObjFromVector(ASN1EncodableVector v, int index)
     {
         if (v.size() <= index)
         {
             throw new IllegalArgumentException("too few objects in input vector");
         }
 
-        return v.get(index).getDERObject();
+        return v.get(index).toASN1Primitive();
     }
     /**
      * Creates a new instance of DERExternal
@@ -70,9 +70,9 @@ public class DERExternal
      * @param dataValueDescriptor The data value descriptor or <code>null</code> if not set.
      * @param externalData The external data in its encoded form.
      */
-    public DERExternal(DERObjectIdentifier directReference, DERInteger indirectReference, ASN1Object dataValueDescriptor, DERTaggedObject externalData)
+    public DERExternal(ASN1ObjectIdentifier directReference, ASN1Integer indirectReference, ASN1Primitive dataValueDescriptor, DERTaggedObject externalData)
     {
-        this(directReference, indirectReference, dataValueDescriptor, externalData.getTagNo(), externalData.getDERObject());
+        this(directReference, indirectReference, dataValueDescriptor, externalData.getTagNo(), externalData.toASN1Primitive());
     }
 
     /**
@@ -84,13 +84,13 @@ public class DERExternal
      * @param encoding The encoding to be used for the external data
      * @param externalData The external data
      */
-    public DERExternal(DERObjectIdentifier directReference, DERInteger indirectReference, ASN1Object dataValueDescriptor, int encoding, DERObject externalData)
+    public DERExternal(ASN1ObjectIdentifier directReference, ASN1Integer indirectReference, ASN1Primitive dataValueDescriptor, int encoding, ASN1Primitive externalData)
     {
         setDirectReference(directReference);
         setIndirectReference(indirectReference);
         setDataValueDescriptor(dataValueDescriptor);
         setEncoding(encoding);
-        setExternalContent(externalData.getDERObject());
+        setExternalContent(externalData.toASN1Primitive());
     }
 
     /* (non-Javadoc)
@@ -116,33 +116,33 @@ public class DERExternal
     }
 
     /* (non-Javadoc)
-     * @see org.bouncycastle.asn1.DERObject#encode(org.bouncycastle.asn1.DEROutputStream)
+     * @see org.bouncycastle.asn1.ASN1Primitive#encode(org.bouncycastle.asn1.DEROutputStream)
      */
-    void encode(DEROutputStream out)
+    void encode(ASN1OutputStream out)
         throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         if (directReference != null)
         {
-            baos.write(directReference.getDEREncoded());
+            baos.write(directReference.getEncoded(ASN1Encoding.DER));
         }
         if (indirectReference != null)
         {
-            baos.write(indirectReference.getDEREncoded());
+            baos.write(indirectReference.getEncoded(ASN1Encoding.DER));
         }
         if (dataValueDescriptor != null)
         {
-            baos.write(dataValueDescriptor.getDEREncoded());
+            baos.write(dataValueDescriptor.getEncoded(ASN1Encoding.DER));
         }
-        DERTaggedObject obj = new DERTaggedObject(encoding, externalContent);
-        baos.write(obj.getDEREncoded());
-        out.writeEncoded(DERTags.CONSTRUCTED, DERTags.EXTERNAL, baos.toByteArray());
+        DERTaggedObject obj = new DERTaggedObject(true, encoding, externalContent);
+        baos.write(obj.getEncoded(ASN1Encoding.DER));
+        out.writeEncoded(BERTags.CONSTRUCTED, BERTags.EXTERNAL, baos.toByteArray());
     }
 
     /* (non-Javadoc)
-     * @see org.bouncycastle.asn1.ASN1Object#asn1Equals(org.bouncycastle.asn1.DERObject)
+     * @see org.bouncycastle.asn1.ASN1Primitive#asn1Equals(org.bouncycastle.asn1.ASN1Primitive)
      */
-    boolean asn1Equals(DERObject o)
+    boolean asn1Equals(ASN1Primitive o)
     {
         if (!(o instanceof DERExternal))
         {
@@ -181,7 +181,7 @@ public class DERExternal
      * Returns the data value descriptor
      * @return The descriptor
      */
-    public ASN1Object getDataValueDescriptor()
+    public ASN1Primitive getDataValueDescriptor()
     {
         return dataValueDescriptor;
     }
@@ -190,7 +190,7 @@ public class DERExternal
      * Returns the direct reference of the external element
      * @return The reference
      */
-    public DERObjectIdentifier getDirectReference()
+    public ASN1ObjectIdentifier getDirectReference()
     {
         return directReference;
     }
@@ -213,7 +213,7 @@ public class DERExternal
      * Returns the content of this element
      * @return The content
      */
-    public DERObject getExternalContent()
+    public ASN1Primitive getExternalContent()
     {
         return externalContent;
     }
@@ -222,7 +222,7 @@ public class DERExternal
      * Returns the indirect reference of this element
      * @return The reference
      */
-    public DERInteger getIndirectReference()
+    public ASN1Integer getIndirectReference()
     {
         return indirectReference;
     }
@@ -231,7 +231,7 @@ public class DERExternal
      * Sets the data value descriptor
      * @param dataValueDescriptor The descriptor
      */
-    private void setDataValueDescriptor(ASN1Object dataValueDescriptor)
+    private void setDataValueDescriptor(ASN1Primitive dataValueDescriptor)
     {
         this.dataValueDescriptor = dataValueDescriptor;
     }
@@ -240,7 +240,7 @@ public class DERExternal
      * Sets the direct reference of the external element
      * @param directReferemce The reference
      */
-    private void setDirectReference(DERObjectIdentifier directReferemce)
+    private void setDirectReference(ASN1ObjectIdentifier directReferemce)
     {
         this.directReference = directReferemce;
     }
@@ -267,7 +267,7 @@ public class DERExternal
      * Sets the content of this element
      * @param externalContent The content
      */
-    private void setExternalContent(DERObject externalContent)
+    private void setExternalContent(ASN1Primitive externalContent)
     {
         this.externalContent = externalContent;
     }
@@ -276,7 +276,7 @@ public class DERExternal
      * Sets the indirect reference of this element
      * @param indirectReference The reference
      */
-    private void setIndirectReference(DERInteger indirectReference)
+    private void setIndirectReference(ASN1Integer indirectReference)
     {
         this.indirectReference = indirectReference;
     }

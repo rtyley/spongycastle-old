@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 
 public class DERObjectIdentifier
-    extends ASN1Object
+    extends ASN1Primitive
 {
     String      identifier;
 
@@ -15,12 +15,16 @@ public class DERObjectIdentifier
      *
      * @exception IllegalArgumentException if the object cannot be converted.
      */
-    public static DERObjectIdentifier getInstance(
+    public static ASN1ObjectIdentifier getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof DERObjectIdentifier)
+        if (obj == null || obj instanceof ASN1ObjectIdentifier)
         {
-            return (DERObjectIdentifier)obj;
+            return (ASN1ObjectIdentifier)obj;
+        }
+        if (obj instanceof DERObjectIdentifier)
+        {
+            return new ASN1ObjectIdentifier(((DERObjectIdentifier)obj).getId());
         }
 
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
@@ -35,11 +39,11 @@ public class DERObjectIdentifier
      * @exception IllegalArgumentException if the tagged object cannot
      *               be converted.
      */
-    public static DERObjectIdentifier getInstance(
+    public static ASN1ObjectIdentifier getInstance(
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERObjectIdentifier)
         {
@@ -171,7 +175,7 @@ public class DERObjectIdentifier
     }
 
     void encode(
-        DEROutputStream out)
+        ASN1OutputStream out)
         throws IOException
     {
         OIDTokenizer            tok = new OIDTokenizer(identifier);
@@ -199,7 +203,7 @@ public class DERObjectIdentifier
 
         byte[]  bytes = bOut.toByteArray();
 
-        out.writeEncoded(OBJECT_IDENTIFIER, bytes);
+        out.writeEncoded(BERTags.OBJECT_IDENTIFIER, bytes);
     }
 
     public int hashCode()
@@ -208,7 +212,7 @@ public class DERObjectIdentifier
     }
 
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive  o)
     {
         if (!(o instanceof DERObjectIdentifier))
         {

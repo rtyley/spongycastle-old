@@ -3,18 +3,18 @@ package org.bouncycastle.asn1.x509;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 public class CertificatePolicies
-    extends ASN1Encodable
+    extends ASN1Object
 {
-    static final DERObjectIdentifier anyPolicy = new DERObjectIdentifier("2.5.29.32.0");
+    static final ASN1ObjectIdentifier anyPolicy = new ASN1ObjectIdentifier("2.5.29.32.0");
 
     Vector policies = new Vector();
 
@@ -66,7 +66,7 @@ public class CertificatePolicies
      * @deprecated use an ASN1Sequence of PolicyInformation
      */
     public CertificatePolicies(
-        DERObjectIdentifier p)
+        ASN1ObjectIdentifier p)
     {
         policies.addElement(p);
     }
@@ -79,20 +79,20 @@ public class CertificatePolicies
     public CertificatePolicies(
         String p)
     {
-        this(new DERObjectIdentifier(p));
+        this(new ASN1ObjectIdentifier(p));
     }
 
     public void addPolicy(
         String p)
     {
-        policies.addElement(new DERObjectIdentifier(p));
+        policies.addElement(new ASN1ObjectIdentifier(p));
     }
 
     public String getPolicy(int nr)
     {
         if (policies.size() > nr)
         {
-            return ((DERObjectIdentifier)policies.elementAt(nr)).getId();
+            return ((ASN1ObjectIdentifier)policies.elementAt(nr)).getId();
         }
         
         return null;
@@ -118,14 +118,14 @@ public class CertificatePolicies
      * </pre>
      * @deprecated use an ASN1Sequence of PolicyInformation
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 
         // We only do policyIdentifier yet...
         for (int i=0;i<policies.size();i++)
         {
-            v.add(new DERSequence((DERObjectIdentifier)policies.elementAt(i)));
+            v.add(new DERSequence((ASN1ObjectIdentifier)policies.elementAt(i)));
         }
 
         return new DERSequence(v);
@@ -140,7 +140,7 @@ public class CertificatePolicies
             {
                 p += ", ";
             }
-            p += ((DERObjectIdentifier)policies.elementAt(i)).getId();
+            p += ((ASN1ObjectIdentifier)policies.elementAt(i)).getId();
         }
         return "CertificatePolicies: "+p;
     }

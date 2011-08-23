@@ -2,18 +2,18 @@ package org.bouncycastle.asn1.pkcs;
 
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 
 /**
  * the infamous Pfx from PKCS12
  */
 public class Pfx
-    extends ASN1Encodable
+    extends ASN1Object
     implements PKCSObjectIdentifiers
 {
     private ContentInfo             contentInfo;
@@ -54,7 +54,7 @@ public class Pfx
         return macData;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

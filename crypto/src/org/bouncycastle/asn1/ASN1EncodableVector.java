@@ -2,27 +2,22 @@ package org.bouncycastle.asn1;
 
 import java.util.Vector;
 
-/**
- * the parent class for this will eventually disappear. Use this one!
- */
 public class ASN1EncodableVector
-    extends DEREncodableVector
 {
     Vector v = new Vector();
 
     public ASN1EncodableVector()
     {
-
     }
 
-    public void add(DEREncodable obj)
+    public void add(ASN1Encodable obj)
     {
         v.addElement(obj);
     }
 
-    public DEREncodable get(int i)
+    public ASN1Encodable get(int i)
     {
-        return (DEREncodable)v.elementAt(i);
+        return (ASN1Encodable)v.elementAt(i);
     }
 
     public int size()

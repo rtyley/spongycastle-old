@@ -1,8 +1,8 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 public class X509Attributes
 {
-    public static final DERObjectIdentifier RoleSyntax = new DERObjectIdentifier("2.5.4.72");
+    public static final ASN1ObjectIdentifier RoleSyntax = new ASN1ObjectIdentifier("2.5.4.72");
 }

@@ -2,9 +2,9 @@ package org.bouncycastle.asn1.esf;
 
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -14,7 +14,7 @@ import org.bouncycastle.asn1.DERSequence;
  * </pre>
  */
 public class CrlListID
-    extends ASN1Encodable
+    extends ASN1Object
 {
 
     private ASN1Sequence crls;
@@ -59,7 +59,7 @@ public class CrlListID
         return result;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return new DERSequence(this.crls);
     }

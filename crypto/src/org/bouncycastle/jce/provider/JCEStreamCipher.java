@@ -31,6 +31,8 @@ import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
+import org.bouncycastle.jcajce.provider.symmetric.util.PBE;
 
 public class JCEStreamCipher
     extends WrapCipherSpi implements PBE
@@ -163,9 +165,9 @@ public class JCEStreamCipher
             throw new InvalidKeyException("Key for algorithm " + key.getAlgorithm() + " not suitable for symmetric enryption.");
         }
         
-        if (key instanceof JCEPBEKey)
+        if (key instanceof BCPBEKey)
         {
-            JCEPBEKey   k = (JCEPBEKey)key;
+            BCPBEKey k = (BCPBEKey)key;
             
             if (k.getOID() != null)
             {

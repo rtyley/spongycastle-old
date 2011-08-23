@@ -18,9 +18,8 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -109,12 +108,12 @@ public class SignerInformation
     }
 
     private byte[] encodeObj(
-        DEREncodable    obj)
+        ASN1Encodable    obj)
         throws IOException
     {
         if (obj != null)
         {
-            return obj.getDERObject().getEncoded();
+            return obj.toASN1Primitive().getEncoded();
         }
 
         return null;
@@ -424,7 +423,7 @@ public class SignerInformation
 
         // RFC 3852 11.2 Check the message-digest attribute is correct
         {
-            DERObject validMessageDigest = getSingleValuedSignedAttribute(
+            ASN1Primitive validMessageDigest = getSingleValuedSignedAttribute(
                 CMSAttributes.messageDigest, "message-digest");
             if (validMessageDigest == null)
             {
@@ -645,8 +644,8 @@ public class SignerInformation
         return info;
     }
 
-    private DERObject getSingleValuedSignedAttribute(
-        DERObjectIdentifier attrOID, String printableName)
+    private ASN1Primitive getSingleValuedSignedAttribute(
+        ASN1ObjectIdentifier attrOID, String printableName)
         throws CMSException
     {
         AttributeTable unsignedAttrTable = this.getUnsignedAttributes();

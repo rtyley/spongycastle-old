@@ -24,9 +24,9 @@ public class BEROutputStream
         {
             ((DERObject)obj).encode(this);
         }
-        else if (obj instanceof DEREncodable)
+        else if (obj instanceof ASN1Encodable)
         {
-            ((DEREncodable)obj).getDERObject().encode(this);
+            ((ASN1Encodable)obj).getDERObject().encode(this);
         }
         else
         {

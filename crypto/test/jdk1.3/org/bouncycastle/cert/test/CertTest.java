@@ -27,15 +27,14 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Enumerated;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -2484,7 +2483,7 @@ public class CertTest
         JcaX509v3CertificateBuilder  certGen = new JcaX509v3CertificateBuilder(new X500Name("CN=Test"),BigInteger.valueOf(1),new Date(System.currentTimeMillis() - 50000),new Date(System.currentTimeMillis() + 50000),new X500Name("CN=Test"),pubKey);
         X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(certGen.build(sigGen));
 
-        X509CertificateStructure struct = X509CertificateStructure.getInstance(ASN1Object.fromByteArray(cert.getEncoded()));
+        X509CertificateStructure struct = X509CertificateStructure.getInstance(ASN1Primitive.fromByteArray(cert.getEncoded()));
 
         ASN1Encodable tbsCertificate = struct.getTBSCertificate();
         AlgorithmIdentifier sig = struct.getSignatureAlgorithm();

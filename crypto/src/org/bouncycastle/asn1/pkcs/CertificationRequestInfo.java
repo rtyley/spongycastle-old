@@ -1,11 +1,11 @@
 package org.bouncycastle.asn1.pkcs;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -31,7 +31,7 @@ import org.bouncycastle.asn1.x509.X509Name;
  * </pre>
  */
 public class CertificationRequestInfo
-    extends ASN1Encodable
+    extends ASN1Object
 {
     DERInteger              version = new DERInteger(0);
     X500Name                subject;
@@ -76,7 +76,7 @@ public class CertificationRequestInfo
         SubjectPublicKeyInfo    pkInfo,
         ASN1Set                 attributes)
     {
-        this.subject = X500Name.getInstance(subject.getDERObject());
+        this.subject = X500Name.getInstance(subject.toASN1Primitive());
         this.subjectPKInfo = pkInfo;
         this.attributes = attributes;
 
@@ -130,7 +130,7 @@ public class CertificationRequestInfo
         return attributes;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 

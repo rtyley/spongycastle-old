@@ -8,7 +8,7 @@ import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 
 public abstract class ASN1OctetString
-    extends ASN1Object
+    extends ASN1Primitive
     implements ASN1OctetStringParser
 {
     byte[]  string;
@@ -26,7 +26,7 @@ public abstract class ASN1OctetString
         ASN1TaggedObject    obj,
         boolean             explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof ASN1OctetString)
         {
@@ -34,7 +34,7 @@ public abstract class ASN1OctetString
         }
         else
         {
-            return BERConstructedOctetString.fromSequence(ASN1Sequence.getInstance(o)); 
+            return BEROctetString.fromSequence(ASN1Sequence.getInstance(o));
         }
     }
     
@@ -55,17 +55,12 @@ public abstract class ASN1OctetString
         {
             try
             {
-                return ASN1OctetString.getInstance(ASN1Object.fromByteArray((byte[])obj));
+                return ASN1OctetString.getInstance(ASN1Primitive.fromByteArray((byte[])obj));
             }
             catch (IOException e)
             {
                 throw new IllegalArgumentException("failed to construct OCTET STRING from byte[]: " + e.getMessage());
             }
-        }
-        // TODO: this needs to be deleted in V2
-        if (obj instanceof ASN1TaggedObject)
-        {
-            return getInstance(((ASN1TaggedObject)obj).getObject());
         }
 
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
@@ -82,19 +77,6 @@ public abstract class ASN1OctetString
             throw new NullPointerException("string cannot be null");
         }
         this.string = string;
-    }
-
-    public ASN1OctetString(
-        DEREncodable obj)
-    {
-        try
-        {
-            this.string = obj.getDERObject().getEncoded(ASN1Encodable.DER);
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("Error processing object : " + e.toString());
-        }
     }
 
     public InputStream getOctetStream()
@@ -118,7 +100,7 @@ public abstract class ASN1OctetString
     }
 
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive o)
     {
         if (!(o instanceof ASN1OctetString))
         {
@@ -130,12 +112,22 @@ public abstract class ASN1OctetString
         return Arrays.areEqual(string, other.string);
     }
 
-    public DERObject getLoadedObject()
+    public ASN1Primitive getLoadedObject()
     {
-        return this.getDERObject();
+        return this.toASN1Primitive();
     }
 
-    abstract void encode(DEROutputStream out)
+    ASN1Primitive toDERObject()
+    {
+        return new DEROctetString(string);
+    }
+
+    ASN1Primitive toDLObject()
+    {
+        return new DEROctetString(string);
+    }
+
+    abstract void encode(ASN1OutputStream out)
         throws IOException;
 
     public String toString()

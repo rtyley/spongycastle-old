@@ -18,33 +18,27 @@ public class DERSequence
      * create a sequence containing one object
      */
     public DERSequence(
-        DEREncodable    obj)
+        ASN1Encodable obj)
     {
-        this.addObject(obj);
+        super(obj);
     }
 
     /**
      * create a sequence containing a vector of objects.
      */
     public DERSequence(
-        ASN1EncodableVector   v)
+        ASN1EncodableVector v)
     {
-        for (int i = 0; i != v.size(); i++)
-        {
-            this.addObject(v.get(i));
-        }
+        super(v);
     }
 
     /**
      * create a sequence containing an array of objects.
      */
     public DERSequence(
-        ASN1Encodable[]   a)
+        ASN1Encodable[]   array)
     {
-        for (int i = 0; i != a.length; i++)
-        {
-            this.addObject(a[i]);
-        }
+        super(array);
     }
     
     /*
@@ -52,11 +46,11 @@ public class DERSequence
      * <p>
      * As DER requires the constructed, definite-length model to
      * be used for structured types, this varies slightly from the
-     * ASN.1 descriptions given. Rather than just outputing SEQUENCE,
+     * ASN.1 descriptions given. Rather than just outputting SEQUENCE,
      * we also have to specify CONSTRUCTED, and the objects length.
      */
     void encode(
-        DEROutputStream out)
+        ASN1OutputStream out)
         throws IOException
     {
         // TODO Intermediate buffer could be avoided if we could calculate expected length
@@ -68,13 +62,13 @@ public class DERSequence
         {
             Object    obj = e.nextElement();
 
-            dOut.writeObject(obj);
+            dOut.writeObject((ASN1Encodable)obj);
         }
 
         dOut.close();
 
         byte[]  bytes = bOut.toByteArray();
 
-        out.writeEncoded(SEQUENCE | CONSTRUCTED, bytes);
+        out.writeEncoded(BERTags.SEQUENCE | BERTags.CONSTRUCTED, bytes);
     }
 }

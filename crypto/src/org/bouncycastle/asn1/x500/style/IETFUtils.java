@@ -5,10 +5,9 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1String;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERUniversalString;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
@@ -148,7 +147,7 @@ public class IETFUtils
             }
         }
 
-        return ASN1Object.fromByteArray(data);
+        return ASN1Primitive.fromByteArray(data);
     }
 
     public static void appendTypeAndValue(
@@ -255,11 +254,11 @@ public class IETFUtils
         return value;
     }
 
-    private static ASN1Object decodeObject(String oValue)
+    private static ASN1Primitive decodeObject(String oValue)
     {
         try
         {
-            return ASN1Object.fromByteArray(Hex.decode(oValue.substring(1)));
+            return ASN1Primitive.fromByteArray(Hex.decode(oValue.substring(1)));
         }
         catch (IOException e)
         {

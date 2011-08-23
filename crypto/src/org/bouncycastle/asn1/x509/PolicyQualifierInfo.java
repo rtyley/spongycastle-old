@@ -2,11 +2,11 @@ package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -20,10 +20,10 @@ import org.bouncycastle.asn1.DERSequence;
  * </pre>
  */
 public class PolicyQualifierInfo
-    extends ASN1Encodable
+    extends ASN1Object
 {
-   private DERObjectIdentifier policyQualifierId;
-   private DEREncodable        qualifier;
+   private ASN1ObjectIdentifier policyQualifierId;
+   private ASN1Encodable        qualifier;
 
    /**
     * Creates a new <code>PolicyQualifierInfo</code> instance.
@@ -32,8 +32,8 @@ public class PolicyQualifierInfo
     * @param qualifier the qualifier, defined by the above field.
     */
    public PolicyQualifierInfo(
-       DERObjectIdentifier policyQualifierId,
-       DEREncodable qualifier) 
+       ASN1ObjectIdentifier policyQualifierId,
+       ASN1Encodable qualifier) 
    {
       this.policyQualifierId = policyQualifierId;
       this.qualifier = qualifier;
@@ -68,7 +68,7 @@ public class PolicyQualifierInfo
                     + as.size());
         }
 
-        policyQualifierId = DERObjectIdentifier.getInstance(as.getObjectAt(0));
+        policyQualifierId = ASN1ObjectIdentifier.getInstance(as.getObjectAt(0));
         qualifier = as.getObjectAt(1);
    }
 
@@ -88,12 +88,12 @@ public class PolicyQualifierInfo
    }
 
 
-   public DERObjectIdentifier getPolicyQualifierId()
+   public ASN1ObjectIdentifier getPolicyQualifierId()
    {
        return policyQualifierId;
    }
 
-   public DEREncodable getQualifier()
+   public ASN1Encodable getQualifier()
    {
        return qualifier;
    }
@@ -101,9 +101,9 @@ public class PolicyQualifierInfo
    /**
     * Returns a DER-encodable representation of this instance. 
     *
-    * @return a <code>DERObject</code> value
+    * @return a <code>ASN1Primitive</code> value
     */
-   public DERObject toASN1Object() 
+   public ASN1Primitive toASN1Primitive()
    {
       ASN1EncodableVector dev = new ASN1EncodableVector();
       dev.add(policyQualifierId);

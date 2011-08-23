@@ -1,15 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.SignedData;
-import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
@@ -25,6 +15,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.SignedData;
+import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
 
 /**
  * class for dealing with X509 certificates.

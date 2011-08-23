@@ -27,7 +27,7 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -337,7 +337,7 @@ public class ECDSA5Test
 
         PublicKey pubKey = ECKeyUtil.publicToExplicitParameters(pair.getPublic(), "BC");
 
-        SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(ASN1Object.fromByteArray(pubKey.getEncoded()));
+        SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(pubKey.getEncoded()));
         X962Parameters params = X962Parameters.getInstance(info.getAlgorithmId().getParameters());
 
         if (params.isNamedCurve() || params.isImplicitlyCA())
@@ -351,7 +351,7 @@ public class ECDSA5Test
         }
 
         PrivateKey privKey = ECKeyUtil.privateToExplicitParameters(pair.getPrivate(), "BC");
-        PrivateKeyInfo privInfo = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(privKey.getEncoded()));
+        PrivateKeyInfo privInfo = PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(privKey.getEncoded()));
         params = X962Parameters.getInstance(privInfo.getAlgorithmId().getParameters());
 
         if (params.isNamedCurve() || params.isImplicitlyCA())

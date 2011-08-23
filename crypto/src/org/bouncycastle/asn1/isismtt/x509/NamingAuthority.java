@@ -4,12 +4,12 @@ import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.isismtt.ISISMTTObjectIdentifiers;
@@ -31,7 +31,7 @@ import org.bouncycastle.asn1.x500.DirectoryString;
  * 
  */
 public class NamingAuthority
-    extends ASN1Encodable
+    extends ASN1Object
 {
 
     /**
@@ -96,7 +96,7 @@ public class NamingAuthority
 
         if (e.hasMoreElements())
         {
-            DEREncodable o = (DEREncodable)e.nextElement();
+            ASN1Encodable o = (ASN1Encodable)e.nextElement();
             if (o instanceof DERObjectIdentifier)
             {
                 namingAuthorityId = (DERObjectIdentifier)o;
@@ -117,7 +117,7 @@ public class NamingAuthority
         }
         if (e.hasMoreElements())
         {
-            DEREncodable o = (DEREncodable)e.nextElement();
+            ASN1Encodable o = (ASN1Encodable)e.nextElement();
             if (o instanceof DERIA5String)
             {
                 namingAuthorityUrl = DERIA5String.getInstance(o).getString();
@@ -134,7 +134,7 @@ public class NamingAuthority
         }
         if (e.hasMoreElements())
         {
-            DEREncodable o = (DEREncodable)e.nextElement();
+            ASN1Encodable o = (ASN1Encodable)e.nextElement();
             if (o instanceof ASN1String)
             {
                 namingAuthorityText = DirectoryString.getInstance(o);
@@ -205,7 +205,7 @@ public class NamingAuthority
      *
      * @return a DERObject
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector vec = new ASN1EncodableVector();
         if (namingAuthorityId != null)

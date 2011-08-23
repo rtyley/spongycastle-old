@@ -2,12 +2,12 @@ package org.bouncycastle.asn1.x509;
 
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -34,10 +34,10 @@ import org.bouncycastle.asn1.x500.X500Name;
  * </pre>
  */
 public class TBSCertList
-    extends ASN1Encodable
+    extends ASN1Object
 {
     public static class CRLEntry
-        extends ASN1Encodable
+        extends ASN1Object
     {
         ASN1Sequence  seq;
 
@@ -79,7 +79,7 @@ public class TBSCertList
             return crlEntryExtensions;
         }
 
-        public DERObject toASN1Object()
+        public ASN1Primitive toASN1Primitive()
         {
             return seq;
         }
@@ -260,7 +260,7 @@ public class TBSCertList
         return crlExtensions;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return seq;
     }

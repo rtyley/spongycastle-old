@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 
 public class BERSet
-    extends DERSet
+    extends ASN1Set
 {
     /**
      * create an empty sequence
@@ -14,10 +14,10 @@ public class BERSet
     }
 
     /**
-     * create a set containing one object
+     * @param obj - a single object that makes up the set.
      */
     public BERSet(
-        DEREncodable    obj)
+        ASN1Encodable obj)
     {
         super(obj);
     }
@@ -26,44 +26,36 @@ public class BERSet
      * @param v - a vector of objects making up the set.
      */
     public BERSet(
-        ASN1EncodableVector   v)
+        ASN1EncodableVector v)
     {
         super(v, false);
     }
 
     /**
-     * @param v - a vector of objects making up the set.
+     * create a set from an array of objects.
      */
-    BERSet(
-        ASN1EncodableVector  v,
-        boolean              needsSorting)
+    public BERSet(
+        ASN1Encodable[]   a)
     {
-        super(v, needsSorting);
+        super(a, false);
     }
 
     /*
      */
     void encode(
-        DEROutputStream out)
+        ASN1OutputStream out)
         throws IOException
     {
-        if (out instanceof ASN1OutputStream || out instanceof BEROutputStream)
+        out.write(BERTags.SET | BERTags.CONSTRUCTED);
+        out.write(0x80);
+
+        Enumeration e = getObjects();
+        while (e.hasMoreElements())
         {
-            out.write(SET | CONSTRUCTED);
-            out.write(0x80);
-            
-            Enumeration e = getObjects();
-            while (e.hasMoreElements())
-            {
-                out.writeObject(e.nextElement());
-            }
-        
-            out.write(0x00);
-            out.write(0x00);
+            out.writeObject((ASN1Encodable)e.nextElement());
         }
-        else
-        {
-            super.encode(out);
-        }
+
+        out.write(0x00);
+        out.write(0x00);
     }
 }

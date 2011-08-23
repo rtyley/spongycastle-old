@@ -1,45 +1,92 @@
 package org.bouncycastle.asn1;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public abstract  class ASN1Object
-    extends DERObject
+public abstract class ASN1Object
+    implements ASN1Encodable
 {
     /**
-     * Create a base ASN.1 object from a byte stream.
+     * Return the default BER or DER encoding for this object.
      *
-     * @param data the byte stream to parse.
-     * @return the base ASN.1 object represented by the byte stream.
-     * @exception IOException if there is a problem parsing the data.
+     * @return BER/DER byte encoded object.
+     * @throws java.io.IOException on encoding error.
      */
-    public static ASN1Object fromByteArray(byte[] data)
+    public byte[] getEncoded()
         throws IOException
     {
-        ASN1InputStream aIn = new ASN1InputStream(data);
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
 
-        try
-        {
-            return (ASN1Object)aIn.readObject();
-        }
-        catch (ClassCastException e)
-        {
-            throw new IOException("cannot recognise object in stream");    
-        }
+        aOut.writeObject(this);
+
+        return bOut.toByteArray();
     }
 
-    public final boolean equals(Object o)
+    /**
+     * Return either the default for "BER" or a DER encoding if "DER" is specified.
+     *
+     * @param encoding name of encoding to use.
+     * @return byte encoded object.
+     * @throws IOException on encoding error.
+     */
+    public byte[] getEncoded(
+        String encoding)
+        throws IOException
+    {
+        if (encoding.equals(ASN1Encoding.DER))
+        {
+            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+            DEROutputStream         dOut = new DEROutputStream(bOut);
+
+            dOut.writeObject(this);
+
+            return bOut.toByteArray();
+        }
+        else if (encoding.equals(ASN1Encoding.DL))
+        {
+            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+            DLOutputStream          dOut = new DLOutputStream(bOut);
+
+            dOut.writeObject(this);
+
+            return bOut.toByteArray();
+        }
+
+        return this.getEncoded();
+    }
+
+    public int hashCode()
+    {
+        return this.toASN1Primitive().hashCode();
+    }
+
+    public boolean equals(
+        Object  o)
     {
         if (this == o)
         {
             return true;
         }
-        
-        return (o instanceof DEREncodable) && asn1Equals(((DEREncodable)o).getDERObject());
+
+        if (!(o instanceof ASN1Encodable))
+        {
+            return false;
+        }
+
+        ASN1Encodable other = (ASN1Encodable)o;
+
+        return this.toASN1Primitive().equals(other.toASN1Primitive());
     }
 
-    public abstract int hashCode();
+    /**
+     * @deprecated use toASN1Primitive()
+     * @return
+     */
+    public ASN1Primitive toASN1Object()
+    {
+        return this.toASN1Primitive();
+    }
 
-    abstract void encode(DEROutputStream out) throws IOException;
-
-    abstract boolean asn1Equals(DERObject o);
+    public abstract ASN1Primitive toASN1Primitive();
 }

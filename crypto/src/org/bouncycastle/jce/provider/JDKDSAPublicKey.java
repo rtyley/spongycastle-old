@@ -9,8 +9,9 @@ import java.security.interfaces.DSAPublicKey;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.DSAPublicKeySpec;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -81,7 +82,7 @@ public class JDKDSAPublicKey
         }
     }
 
-    private boolean isNotNull(DEREncodable parameters)
+    private boolean isNotNull(ASN1Encodable parameters)
     {
         return parameters != null && !DERNull.INSTANCE.equals(parameters);
     }
@@ -98,12 +99,19 @@ public class JDKDSAPublicKey
 
     public byte[] getEncoded()
     {
-        if (dsaSpec == null)
+        try
         {
-            return new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa), new DERInteger(y)).getDEREncoded();
-        }
+            if (dsaSpec == null)
+            {
+                return new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa), new DERInteger(y)).getEncoded(ASN1Encoding.DER);
+            }
 
-        return new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa, new DSAParameter(dsaSpec.getP(), dsaSpec.getQ(), dsaSpec.getG()).getDERObject()), new DERInteger(y)).getDEREncoded();
+            return new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa, new DSAParameter(dsaSpec.getP(), dsaSpec.getQ(), dsaSpec.getG())), new DERInteger(y)).getEncoded(ASN1Encoding.DER);
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
     }
 
     public DSAParams getParams()

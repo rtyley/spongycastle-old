@@ -39,6 +39,8 @@ import org.bouncycastle.crypto.Wrapper;
 import org.bouncycastle.crypto.engines.RC2WrapEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
+import org.bouncycastle.jcajce.provider.symmetric.util.PBE;
 
 public abstract class WrapCipherSpi extends CipherSpi
     implements PBE
@@ -134,9 +136,9 @@ public abstract class WrapCipherSpi extends CipherSpi
     {
         CipherParameters        param;
 
-        if (key instanceof JCEPBEKey)
+        if (key instanceof BCPBEKey)
         {
-            JCEPBEKey   k = (JCEPBEKey)key;
+            BCPBEKey k = (BCPBEKey)key;
             
             if (params instanceof PBEParameterSpec)
             {

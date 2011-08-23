@@ -6,8 +6,8 @@ import java.security.AlgorithmParameters;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.EncryptedContentInfo;
@@ -40,19 +40,19 @@ public class CMSEnvelopedData
 {
     RecipientInformationStore   recipientInfoStore;
     ContentInfo                 contentInfo;
-    
+
     private AlgorithmIdentifier    encAlg;
     private ASN1Set                unprotectedAttributes;
 
     public CMSEnvelopedData(
-        byte[]    envelopedData) 
+        byte[]    envelopedData)
         throws CMSException
     {
         this(CMSUtils.readContentInfo(envelopedData));
     }
 
     public CMSEnvelopedData(
-        InputStream    envelopedData) 
+        InputStream    envelopedData)
         throws CMSException
     {
         this(CMSUtils.readContentInfo(envelopedData));
@@ -89,17 +89,17 @@ public class CMSEnvelopedData
     }
 
     private byte[] encodeObj(
-        DEREncodable    obj)
+        ASN1Encodable obj)
         throws IOException
     {
         if (obj != null)
         {
-            return obj.getDERObject().getEncoded();
+            return obj.toASN1Primitive().getEncoded();
         }
 
         return null;
     }
-    
+
     /**
      * return the object identifier for the content encryption algorithm.
      */
@@ -123,19 +123,19 @@ public class CMSEnvelopedData
             throw new RuntimeException("exception getting encryption parameters " + e);
         }
     }
-    
+
     /**
      * Return an AlgorithmParameters object giving the encryption parameters
      * used to encrypt the message content.
-     * 
+     *
      * @param provider the provider to generate the parameters for.
      * @return the parameters object, null if there is not one.
      * @throws CMSException if the algorithm cannot be found, or the parameters can't be parsed.
      * @throws NoSuchProviderException if the provider cannot be found.
      */
     public AlgorithmParameters getEncryptionAlgorithmParameters(
-        String  provider) 
-    throws CMSException, NoSuchProviderException    
+        String  provider)
+    throws CMSException, NoSuchProviderException
     {
         return getEncryptionAlgorithmParameters(CMSUtils.getProvider(provider));
     }
@@ -164,7 +164,7 @@ public class CMSEnvelopedData
     }
 
     /**
-     * return the ContentInfo 
+     * return the ContentInfo
      */
     public ContentInfo getContentInfo()
     {
@@ -184,7 +184,7 @@ public class CMSEnvelopedData
 
         return new AttributeTable(unprotectedAttributes);
     }
-    
+
     /**
      * return the ASN.1 encoded representation of this object.
      */

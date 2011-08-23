@@ -2,9 +2,9 @@ package org.bouncycastle.asn1.x509.qualified;
 
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 
 /**
@@ -20,13 +20,13 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
  * </pre>
  */
 public class TypeOfBiometricData  
-    extends ASN1Encodable
+    extends ASN1Object
     implements ASN1Choice
 {
     public static final int PICTURE                     = 0;
     public static final int HANDWRITTEN_SIGNATURE       = 1;
 
-    DEREncodable      obj;
+    ASN1Encodable      obj;
 
     public static TypeOfBiometricData getInstance(Object obj)
     {
@@ -83,8 +83,8 @@ public class TypeOfBiometricData
         return (DERObjectIdentifier)obj;
     }
     
-    public DERObject toASN1Object() 
+    public ASN1Primitive toASN1Primitive()
     {        
-        return obj.getDERObject();
+        return obj.toASN1Primitive();
     }
 }

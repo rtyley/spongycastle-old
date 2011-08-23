@@ -2,8 +2,8 @@ package org.bouncycastle.cert.crmf;
 
 import java.io.IOException;
 
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.crmf.AttributeTypeAndValue;
 import org.bouncycastle.asn1.crmf.CRMFObjectIdentifiers;
@@ -37,7 +37,7 @@ public class CertificateRequestMessage
     {
         try
         {
-            return CertReqMsg.getInstance(ASN1Object.fromByteArray(encoding));
+            return CertReqMsg.getInstance(ASN1Primitive.fromByteArray(encoding));
         }
         catch (ClassCastException e)
         {

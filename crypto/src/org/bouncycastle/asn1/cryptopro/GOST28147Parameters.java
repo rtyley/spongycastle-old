@@ -2,20 +2,20 @@ package org.bouncycastle.asn1.cryptopro;
 
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 public class GOST28147Parameters
-    extends ASN1Encodable
+    extends ASN1Object
 {
     ASN1OctetString iv;
-    DERObjectIdentifier paramSet;
+    ASN1ObjectIdentifier paramSet;
 
     public static GOST28147Parameters getInstance(
         ASN1TaggedObject obj,
@@ -46,7 +46,7 @@ public class GOST28147Parameters
         Enumeration     e = seq.getObjects();
 
         iv = (ASN1OctetString)e.nextElement();
-        paramSet = (DERObjectIdentifier)e.nextElement();
+        paramSet = (ASN1ObjectIdentifier)e.nextElement();
     }
 
     /**
@@ -60,7 +60,7 @@ public class GOST28147Parameters
      *   Gost28147-89-IV ::= OCTET STRING (SIZE (8))
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 

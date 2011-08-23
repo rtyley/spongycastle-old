@@ -1,11 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.jce.exception.ExtCertPathValidatorException;
-import org.bouncycastle.util.Selector;
-import org.bouncycastle.x509.ExtendedPKIXParameters;
-import org.bouncycastle.x509.X509AttributeCertStoreSelector;
-import org.bouncycastle.x509.X509AttributeCertificate;
-
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathParameters;
@@ -15,6 +9,12 @@ import java.security.cert.CertPathValidatorSpi;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Set;
+
+import org.bouncycastle.jce.exception.ExtCertPathValidatorException;
+import org.bouncycastle.util.Selector;
+import org.bouncycastle.x509.ExtendedPKIXParameters;
+import org.bouncycastle.x509.X509AttributeCertStoreSelector;
+import org.bouncycastle.x509.X509AttributeCertificate;
 
 /**
  * CertPathValidatorSpi implementation for X.509 Attribute Certificates la RFC 3281.

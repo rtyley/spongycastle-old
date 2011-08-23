@@ -1,5 +1,12 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
@@ -11,13 +18,6 @@ import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509StreamParserSpi;
 import org.bouncycastle.x509.X509V2AttributeCertificate;
 import org.bouncycastle.x509.util.StreamParsingException;
-
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 public class X509AttrCertParser
     extends X509StreamParserSpi

@@ -1,13 +1,13 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;
+
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DEROctetString;
 
 /**
  * Generator for X.509 extensions
@@ -35,13 +35,13 @@ public class X509ExtensionsGenerator
      * @param value the ASN.1 object to be included in the extension.
      */
     public void addExtension(
-        DERObjectIdentifier oid,
+        ASN1ObjectIdentifier oid,
         boolean             critical,
-        DEREncodable        value)
+        ASN1Encodable       value)
     {
         try
         {
-            this.addExtension(oid, critical, value.getDERObject().getEncoded(ASN1Encodable.DER));
+            this.addExtension(oid, critical, value.toASN1Primitive().getEncoded(ASN1Encoding.DER));
         }
         catch (IOException e)
         {
@@ -58,7 +58,7 @@ public class X509ExtensionsGenerator
      * @param value the byte array to be wrapped.
      */
     public void addExtension(
-        DERObjectIdentifier oid,
+        ASN1ObjectIdentifier oid,
         boolean             critical,
         byte[]              value)
     {

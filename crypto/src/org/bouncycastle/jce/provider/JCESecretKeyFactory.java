@@ -17,6 +17,8 @@ import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.params.DESParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
+import org.bouncycastle.jcajce.provider.symmetric.util.PBE;
 
 public class JCESecretKeyFactory
     extends SecretKeyFactorySpi
@@ -140,7 +142,7 @@ public class JCESecretKeyFactory
                 
                 if (pbeSpec.getSalt() == null)
                 {
-                    return new JCEPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, null);
+                    return new BCPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, null);
                 }
                 
                 if (forCipher)
@@ -152,7 +154,7 @@ public class JCESecretKeyFactory
                     param = Util.makePBEMacParameters(pbeSpec, scheme, digest, keySize);
                 }
                 
-                return new JCEPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, param);
+                return new BCPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, param);
             }
             
             throw new InvalidKeySpecException("Invalid KeySpec");
@@ -197,7 +199,7 @@ public class JCESecretKeyFactory
                 
                 if (pbeSpec.getSalt() == null)
                 {
-                    return new JCEPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, null);
+                    return new BCPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, null);
                 }
                 
                 if (forCipher)
@@ -221,7 +223,7 @@ public class JCESecretKeyFactory
 
                 DESParameters.setOddParity(kParam.getKey());
 
-                return new JCEPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, param);
+                return new BCPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, param);
             }
             
             throw new InvalidKeySpecException("Invalid KeySpec");

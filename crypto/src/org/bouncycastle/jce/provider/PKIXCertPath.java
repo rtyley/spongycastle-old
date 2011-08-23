@@ -24,10 +24,11 @@ import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.pkcs.ContentInfo;
@@ -170,7 +171,7 @@ public  class PKIXCertPath
             if (encoding.equalsIgnoreCase("PkiPath"))
             {
                 ASN1InputStream derInStream = new ASN1InputStream(inStream);
-                DERObject derObject = derInStream.readObject();
+                ASN1Primitive derObject = derInStream.readObject();
                 if (!(derObject instanceof ASN1Sequence))
                 {
                     throw new CertificateException("input stream does not contain a ASN1 SEQUENCE while reading PkiPath encoded data to load CertPath");
@@ -181,7 +182,7 @@ public  class PKIXCertPath
                 while (e.hasMoreElements())
                 {
                     ASN1Encodable element = (ASN1Encodable)e.nextElement();
-                    byte[] encoded = element.getEncoded(ASN1Encodable.DER);
+                    byte[] encoded = element.toASN1Primitive().getEncoded(ASN1Encoding.DER);
                     certificates.add(0, certFactory.generateCertificate(
                         new ByteArrayInputStream(encoded)));
                 }
@@ -340,7 +341,7 @@ public  class PKIXCertPath
      *
      * @return the DERObject
      **/
-    private DERObject toASN1Object(
+    private ASN1Primitive toASN1Object(
         X509Certificate cert)
         throws CertificateEncodingException
     {
@@ -359,7 +360,7 @@ public  class PKIXCertPath
     {
         try
         {
-            return obj.getEncoded(ASN1Encodable.DER);
+            return obj.toASN1Primitive().getEncoded(ASN1Encoding.DER);
         }
         catch (IOException e)
         {

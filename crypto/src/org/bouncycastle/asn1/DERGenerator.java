@@ -1,11 +1,11 @@
 package org.bouncycastle.asn1;
 
-import org.bouncycastle.util.io.Streams;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import org.bouncycastle.util.io.Streams;
 
 public abstract class DERGenerator
     extends ASN1Generator
@@ -78,11 +78,11 @@ public abstract class DERGenerator
     {
         if (_tagged)
         {
-            int tagNum = _tagNo | DERTags.TAGGED;
+            int tagNum = _tagNo | BERTags.TAGGED;
             
             if (_isExplicit)
             {
-                int newTag = _tagNo | DERTags.CONSTRUCTED | DERTags.TAGGED;
+                int newTag = _tagNo | BERTags.CONSTRUCTED | BERTags.TAGGED;
 
                 ByteArrayOutputStream bOut = new ByteArrayOutputStream();
                 
@@ -92,9 +92,9 @@ public abstract class DERGenerator
             }
             else
             {   
-                if ((tag & DERTags.CONSTRUCTED) != 0)
+                if ((tag & BERTags.CONSTRUCTED) != 0)
                 {
-                    writeDEREncoded(_out, tagNum | DERTags.CONSTRUCTED, bytes);
+                    writeDEREncoded(_out, tagNum | BERTags.CONSTRUCTED, bytes);
                 }
                 else
                 {

@@ -6,8 +6,8 @@ import java.io.IOException;
  * DER T61String (also the teletex string)
  */
 public class DERT61String
-    extends ASN1Object
-    implements DERString
+    extends ASN1Primitive
+    implements ASN1String
 {
     String  string;
 
@@ -40,7 +40,7 @@ public class DERT61String
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit)
         {
@@ -88,10 +88,10 @@ public class DERT61String
     }
 
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(T61_STRING, this.getOctets());
+        out.writeEncoded(BERTags.T61_STRING, this.getOctets());
     }
     
     public byte[] getOctets()
@@ -108,7 +108,7 @@ public class DERT61String
     }
 
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive o)
     {
         if (!(o instanceof DERT61String))
         {

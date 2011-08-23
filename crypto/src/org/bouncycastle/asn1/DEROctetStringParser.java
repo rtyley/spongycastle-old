@@ -19,13 +19,13 @@ public class DEROctetStringParser
         return stream;
     }
 
-    public DERObject getLoadedObject()
+    public ASN1Primitive getLoadedObject()
         throws IOException
     {
         return new DEROctetString(stream.toByteArray());
     }
     
-    public DERObject getDERObject()
+    public ASN1Primitive toASN1Primitive()
     {
         try
         {

@@ -1,8 +1,9 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.ByteArrayInputStream;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cms.RecipientKeyIdentifier;
 import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
@@ -13,8 +14,6 @@ import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
-
-import java.io.ByteArrayInputStream;
 
 public class SMIMETest
     implements Test

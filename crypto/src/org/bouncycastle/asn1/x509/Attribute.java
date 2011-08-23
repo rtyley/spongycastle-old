@@ -2,17 +2,17 @@ package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 public class Attribute
-    extends ASN1Encodable
+    extends ASN1Object
 {
-    private DERObjectIdentifier attrType;
+    private ASN1ObjectIdentifier attrType;
     private ASN1Set             attrValues;
 
     /**
@@ -45,12 +45,12 @@ public class Attribute
             throw new IllegalArgumentException("Bad sequence size: " + seq.size());
         }
 
-        attrType = DERObjectIdentifier.getInstance(seq.getObjectAt(0));
+        attrType = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
         attrValues = ASN1Set.getInstance(seq.getObjectAt(1));
     }
 
     public Attribute(
-        DERObjectIdentifier attrType,
+        ASN1ObjectIdentifier attrType,
         ASN1Set             attrValues)
     {
         this.attrType = attrType;
@@ -81,7 +81,7 @@ public class Attribute
      * }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

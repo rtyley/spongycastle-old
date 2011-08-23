@@ -56,6 +56,8 @@ import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.params.ParametersWithSBox;
 import org.bouncycastle.crypto.params.RC2Parameters;
 import org.bouncycastle.crypto.params.RC5Parameters;
+import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
+import org.bouncycastle.jcajce.provider.symmetric.util.PBE;
 import org.bouncycastle.jce.spec.GOST28147ParameterSpec;
 import org.bouncycastle.jce.spec.RepeatedSecretKeySpec;
 import org.bouncycastle.util.Strings;
@@ -377,9 +379,9 @@ public class JCEBlockCipher extends WrapCipherSpi
         //
         // a note on iv's - if ivLength is zero the IV gets ignored (we don't use it).
         //
-        if (key instanceof JCEPBEKey)
+        if (key instanceof BCPBEKey)
         {
-            JCEPBEKey   k = (JCEPBEKey)key;
+            BCPBEKey k = (BCPBEKey)key;
             
             if (k.getOID() != null)
             {

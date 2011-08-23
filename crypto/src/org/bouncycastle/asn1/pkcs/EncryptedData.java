@@ -2,14 +2,14 @@ package org.bouncycastle.asn1.pkcs;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.BERTaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
@@ -32,11 +32,11 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
  * </pre>
  */
 public class EncryptedData
-    extends ASN1Encodable
+    extends ASN1Object
 {
     ASN1Sequence                data;
-    DERObjectIdentifier         bagId;
-    DERObject                   bagValue;
+    ASN1ObjectIdentifier         bagId;
+    ASN1Primitive bagValue;
 
     public static EncryptedData getInstance(
          Object  obj)
@@ -67,22 +67,22 @@ public class EncryptedData
     }
 
     public EncryptedData(
-        DERObjectIdentifier     contentType,
+        ASN1ObjectIdentifier     contentType,
         AlgorithmIdentifier     encryptionAlgorithm,
-        DEREncodable            content)
+        ASN1Encodable            content)
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
         v.add(contentType);
-        v.add(encryptionAlgorithm.getDERObject());
+        v.add(encryptionAlgorithm.toASN1Primitive());
         v.add(new BERTaggedObject(false, 0, content));
 
         data = new BERSequence(v);
     }
         
-    public DERObjectIdentifier getContentType()
+    public ASN1ObjectIdentifier getContentType()
     {
-        return (DERObjectIdentifier)data.getObjectAt(0);
+        return (ASN1ObjectIdentifier)data.getObjectAt(0);
     }
 
     public AlgorithmIdentifier getEncryptionAlgorithm()
@@ -102,7 +102,7 @@ public class EncryptedData
         return null;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 

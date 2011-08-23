@@ -3,9 +3,9 @@ package org.bouncycastle.asn1.x509;
 import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERBoolean;
 
 /**
@@ -233,13 +233,13 @@ public class X509Extension
      * @return the object the value string contains
      * @exception IllegalArgumentException if conversion is not possible
      */
-    public static ASN1Object convertValueToObject(
+    public static ASN1Primitive convertValueToObject(
         X509Extension ext)
         throws IllegalArgumentException
     {
         try
         {
-            return ASN1Object.fromByteArray(ext.getValue().getOctets());
+            return ASN1Primitive.fromByteArray(ext.getValue().getOctets());
         }
         catch (IOException e)
         {

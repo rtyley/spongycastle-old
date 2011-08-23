@@ -15,7 +15,7 @@ public class DEROctetString
     }
 
     public DEROctetString(
-        DEREncodable  obj)
+        ASN1Encodable  obj)
     {
         super(obj);
     }
@@ -32,6 +32,6 @@ public class DEROctetString
         byte[]          bytes)
         throws IOException
     {
-        derOut.writeEncoded(DERTags.OCTET_STRING, bytes);
+        derOut.writeEncoded(BERTags.OCTET_STRING, bytes);
     }
 }

@@ -1,8 +1,8 @@
 package org.bouncycastle.asn1.x9;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
@@ -11,7 +11,7 @@ import org.bouncycastle.math.ec.ECPoint;
  * class for describing an ECPoint as a DER object.
  */
 public class X9ECPoint
-    extends ASN1Encodable
+    extends ASN1Object
 {
     ECPoint p;
 
@@ -41,7 +41,7 @@ public class X9ECPoint
      * <p>
      * Octet string produced using ECPoint.getEncoded().
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return new DEROctetString(p.getEncoded());
     }

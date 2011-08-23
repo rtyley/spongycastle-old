@@ -50,20 +50,37 @@ public final class BouncyCastleProvider extends Provider
     /*
      * Configurable symmetric ciphers
      */
-    private static final String SYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jce.provider.symmetric.";
+    private static final String SYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jcajce.provider.symmetric.";
     private static final String[] SYMMETRIC_CIPHERS =
     {
         "AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "DESede", "Grainv1", "Grain128", "HC128", "HC256", "IDEA",
         "Noekeon", "RC5", "RC6", "Rijndael", "Salsa20", "SEED", "Serpent", "Skipjack", "TEA", "Twofish", "VMPC", "VMPCKSA3", "XTEA"
     };
 
-    /*
+     /*
      * Configurable asymmetric ciphers
      */
-    private static final String ASYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jce.provider.asymmetric.";
+    private static final String ASYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jcajce.provider.asymmetric.";
+
+    // this one is required for GNU class path - it needs to be loaded first as the
+    // later ones configure it.
+    private static final String[] ASYMMETRIC_GENERIC =
+    {
+        "X509"
+    };
+
     private static final String[] ASYMMETRIC_CIPHERS =
     {
-        "EC"
+        "DSA", "EC", "RSA", "GOST"
+    };
+
+    /*
+     * Configurable digests
+     */
+    private static final String DIGEST_PACKAGE = "org.bouncycastle.jcajce.provider.digest.";
+    private static final String[] DIGESTS =
+    {
+        "SHA1", "SHA224", "SHA256", "SHA384", "SHA512"
     };
 
     /**
@@ -87,7 +104,12 @@ public final class BouncyCastleProvider extends Provider
 
     private void setup()
     {
+        loadAlgorithms(DIGEST_PACKAGE, DIGESTS);
+
         loadAlgorithms(SYMMETRIC_CIPHER_PACKAGE, SYMMETRIC_CIPHERS);
+
+        loadAlgorithms(ASYMMETRIC_CIPHER_PACKAGE, ASYMMETRIC_GENERIC);
+
         loadAlgorithms(ASYMMETRIC_CIPHER_PACKAGE, ASYMMETRIC_CIPHERS);
 
         //

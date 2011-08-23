@@ -2,20 +2,20 @@ package org.bouncycastle.asn1.pkcs;
 
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
 
 /**
  * a PKCS#7 signed data object.
  */
 public class SignedData
-    extends ASN1Encodable
+    extends ASN1Object
     implements PKCSObjectIdentifiers
 {
     private DERInteger              version;
@@ -67,7 +67,7 @@ public class SignedData
 
         while (e.hasMoreElements())
         {
-            DERObject o = (DERObject)e.nextElement();
+            ASN1Primitive o = (ASN1Primitive)e.nextElement();
 
             //
             // an interesting feature of SignedData is that there appear to be varying implementations...
@@ -141,7 +141,7 @@ public class SignedData
      *      signerInfos SignerInfos }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

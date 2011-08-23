@@ -1,11 +1,11 @@
 package org.bouncycastle.asn1.icao;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
@@ -24,7 +24,7 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
  */
 
 public class CscaMasterList 
-    extends ASN1Encodable 
+    extends ASN1Object
 {
     private DERInteger version = new DERInteger(0);
     private X509CertificateStructure[] certList;
@@ -93,7 +93,7 @@ public class CscaMasterList
         return certs;
     }
 
-    public DERObject toASN1Object() 
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector seq = new ASN1EncodableVector();
 

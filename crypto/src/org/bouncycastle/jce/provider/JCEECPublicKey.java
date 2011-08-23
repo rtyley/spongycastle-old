@@ -11,12 +11,11 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -31,10 +30,10 @@ import org.bouncycastle.asn1.x9.X9IntegerConverter;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.EC5Util;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
-import org.bouncycastle.jce.provider.asymmetric.ec.EC5Util;
-import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
@@ -187,7 +186,7 @@ public class JCEECPublicKey
 
             try
             {
-                key = (ASN1OctetString) ASN1Object.fromByteArray(bits.getBytes());
+                key = (ASN1OctetString) ASN1Primitive.fromByteArray(bits.getBytes());
             }
             catch (IOException ex)
             {
@@ -286,7 +285,7 @@ public class JCEECPublicKey
                 {
                     try
                     {
-                        key = (ASN1OctetString) ASN1Object.fromByteArray(data);
+                        key = (ASN1OctetString) ASN1Primitive.fromByteArray(data);
                     }
                     catch (IOException ex)
                     {
@@ -501,7 +500,7 @@ public class JCEECPublicKey
     {
         byte[] enc = (byte[])in.readObject();
 
-        populateFromPubKeyInfo(SubjectPublicKeyInfo.getInstance(ASN1Object.fromByteArray(enc)));
+        populateFromPubKeyInfo(SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(enc)));
 
         this.algorithm = (String)in.readObject();
         this.withCompression = in.readBoolean();

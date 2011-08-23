@@ -1,0 +1,45 @@
+package org.bouncycastle.jcajce.provider.symmetric;
+
+import java.util.HashMap;
+
+import org.bouncycastle.crypto.CipherKeyGenerator;
+import org.bouncycastle.crypto.engines.VMPCKSA3Engine;
+import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
+import org.bouncycastle.jcajce.provider.symmetric.util.BaseStreamCipher;
+
+public final class VMPCKSA3
+{
+    private VMPCKSA3()
+    {
+    }
+    
+    public static class Base
+        extends BaseStreamCipher
+    {
+        public Base()
+        {
+            super(new VMPCKSA3Engine(), 16);
+        }
+    }
+
+    public static class KeyGen
+        extends BaseKeyGenerator
+    {
+        public KeyGen()
+        {
+            super("VMPC-KSA3", 128, new CipherKeyGenerator());
+        }
+    }
+
+    public static class Mappings
+        extends HashMap
+    {
+        private static final String PREFIX = VMPCKSA3.class.getName();
+                 
+        public Mappings()
+        {
+            put("Cipher.VMPC-KSA3", PREFIX + "$Base");
+            put("KeyGenerator.VMPC-KSA3", PREFIX + "$KeyGen");
+        }
+    }
+}

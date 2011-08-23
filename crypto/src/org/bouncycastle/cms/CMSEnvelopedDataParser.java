@@ -7,14 +7,14 @@ import java.security.AlgorithmParameters;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1SetParser;
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.EncryptedContentInfoParser;
 import org.bouncycastle.asn1.cms.EnvelopedDataParser;
@@ -76,7 +76,7 @@ public class CMSEnvelopedDataParser
         super(envelopedData);
 
         this._attrNotRead = true;
-        this._envelopedData = new EnvelopedDataParser((ASN1SequenceParser)_contentInfo.getContent(DERTags.SEQUENCE));
+        this._envelopedData = new EnvelopedDataParser((ASN1SequenceParser)_contentInfo.getContent(BERTags.SEQUENCE));
 
         // TODO Validate version?
         //DERInteger version = this._envelopedData.getVersion();
@@ -84,7 +84,7 @@ public class CMSEnvelopedDataParser
         //
         // read the recipients
         //
-        ASN1Set recipientInfos = ASN1Set.getInstance(_envelopedData.getRecipientInfos().getDERObject());
+        ASN1Set recipientInfos = ASN1Set.getInstance(_envelopedData.getRecipientInfos().toASN1Primitive());
 
         //
         // read the encrypted content info
@@ -92,7 +92,7 @@ public class CMSEnvelopedDataParser
         EncryptedContentInfoParser encInfo = _envelopedData.getEncryptedContentInfo();
         this._encAlg = encInfo.getContentEncryptionAlgorithm();
         CMSReadable readable = new CMSProcessableInputStream(
-            ((ASN1OctetStringParser)encInfo.getEncryptedContent(DERTags.OCTET_STRING)).getOctetStream());
+            ((ASN1OctetStringParser)encInfo.getEncryptedContent(BERTags.OCTET_STRING)).getOctetStream());
         CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSEnvelopedSecureReadable(
             this._encAlg, readable);
 
@@ -183,13 +183,13 @@ public class CMSEnvelopedDataParser
             if (set != null)
             {
                 ASN1EncodableVector v = new ASN1EncodableVector();
-                DEREncodable        o;
+                ASN1Encodable        o;
                 
                 while ((o = set.readObject()) != null)
                 {
                     ASN1SequenceParser    seq = (ASN1SequenceParser)o;
                     
-                    v.add(seq.getDERObject());
+                    v.add(seq.toASN1Primitive());
                 }
                 
                 _unprotectedAttributes = new AttributeTable(new DERSet(v));
@@ -200,12 +200,12 @@ public class CMSEnvelopedDataParser
     }
 
     private byte[] encodeObj(
-        DEREncodable    obj)
+        ASN1Encodable obj)
         throws IOException
     {
         if (obj != null)
         {
-            return obj.getDERObject().getEncoded();
+            return obj.toASN1Primitive().getEncoded();
         }
 
         return null;

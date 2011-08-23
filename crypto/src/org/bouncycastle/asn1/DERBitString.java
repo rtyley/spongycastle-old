@@ -6,8 +6,8 @@ import java.io.IOException;
 import org.bouncycastle.util.Arrays;
 
 public class DERBitString
-    extends ASN1Object
-    implements DERString
+    extends ASN1Primitive
+    implements ASN1String
 {
     private static final char[]  table = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
     
@@ -116,7 +116,7 @@ public class DERBitString
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERBitString)
         {
@@ -156,11 +156,11 @@ public class DERBitString
     }
 
     public DERBitString(
-        DEREncodable  obj)
+        ASN1Encodable  obj)
     {
         try
         {
-            this.data = obj.getDERObject().getEncoded(ASN1Encodable.DER);
+            this.data = obj.toASN1Primitive().getEncoded(ASN1Encoding.DER);
             this.padBits = 0;
         }
         catch (IOException e)
@@ -196,7 +196,7 @@ public class DERBitString
     }
     
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream  out)
         throws IOException
     {
         byte[]  bytes = new byte[getBytes().length + 1];
@@ -204,7 +204,7 @@ public class DERBitString
         bytes[0] = (byte)getPadBits();
         System.arraycopy(getBytes(), 0, bytes, 1, bytes.length - 1);
 
-        out.writeEncoded(BIT_STRING, bytes);
+        out.writeEncoded(BERTags.BIT_STRING, bytes);
     }
 
     public int hashCode()
@@ -213,7 +213,7 @@ public class DERBitString
     }
 
     protected boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive  o)
     {
         if (!(o instanceof DERBitString))
         {

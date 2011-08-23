@@ -2,9 +2,10 @@ package org.bouncycastle.asn1.cmp;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -51,14 +52,14 @@ import org.bouncycastle.asn1.DERSequence;
  * </pre>
  */
 public class InfoTypeAndValue
-    extends ASN1Encodable
+    extends ASN1Object
 {
-    private DERObjectIdentifier infoType;
+    private ASN1ObjectIdentifier infoType;
     private ASN1Encodable       infoValue;
 
     private InfoTypeAndValue(ASN1Sequence seq)
     {
-        infoType = DERObjectIdentifier.getInstance(seq.getObjectAt(0));
+        infoType = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
 
         if (seq.size() > 1)
         {
@@ -82,21 +83,21 @@ public class InfoTypeAndValue
     }
 
     public InfoTypeAndValue(
-        DERObjectIdentifier infoType)
+        ASN1ObjectIdentifier infoType)
     {
         this.infoType = infoType;
         this.infoValue = null;
     }
 
     public InfoTypeAndValue(
-        DERObjectIdentifier infoType,
+        ASN1ObjectIdentifier infoType,
         ASN1Encodable optionalValue)
     {
         this.infoType = infoType;
         this.infoValue = optionalValue;
     }
 
-    public DERObjectIdentifier getInfoType()
+    public ASN1ObjectIdentifier getInfoType()
     {
         return infoType;
     }
@@ -115,7 +116,7 @@ public class InfoTypeAndValue
      * </pre>
      * @return a basic ASN.1 object representation.
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

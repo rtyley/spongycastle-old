@@ -7,7 +7,9 @@ import java.io.InputStream;
 class IndefiniteLengthInputStream
     extends LimitedInputStream
 {
-    private int _lookAhead;
+    private int _b1;
+    private int _b2;
+    private boolean _eofReached = false;
     private boolean _eofOn00 = true;
 
     IndefiniteLengthInputStream(
@@ -17,50 +19,50 @@ class IndefiniteLengthInputStream
     {
         super(in, limit);
 
-        _lookAhead = requireByte();
+        _b1 = in.read();
+        _b2 = in.read();
+
+        if (_b2 < 0)
+        {
+            // Corrupted stream
+            throw new EOFException();
+        }
+
         checkForEof();
     }
 
     void setEofOn00(
         boolean eofOn00)
-        throws IOException
     {
         _eofOn00 = eofOn00;
         checkForEof();
     }
 
     private boolean checkForEof()
-        throws IOException
     {
-        if (_lookAhead == 0x00 && _eofOn00)
+        if (!_eofReached && _eofOn00 && (_b1 == 0x00 && _b2 == 0x00))
         {
-            int extra = requireByte();
-            if (extra != 0)
-            {
-                throw new IOException("malformed end-of-contents marker");
-            }
-
-            _lookAhead = -1;            
+            _eofReached = true;
             setParentEofDetect(true);
         }
-        return _lookAhead < 0;
+        return _eofReached;
     }
 
     public int read(byte[] b, int off, int len)
         throws IOException
     {
-        // Can't use optimisation if we are checking for 00
-        if (_eofOn00 || len <= 1)
+        // Only use this optimisation if we aren't checking for 00
+        if (_eofOn00 || len < 3)
         {
             return super.read(b, off, len);
         }
 
-        if (_lookAhead < 0)
+        if (_eofReached)
         {
             return -1;
         }
 
-        int numRead = _in.read(b, off + 1, len - 1);
+        int numRead = _in.read(b, off + 2, len - 2);
 
         if (numRead < 0)
         {
@@ -68,10 +70,19 @@ class IndefiniteLengthInputStream
             throw new EOFException();
         }
 
-        b[off] = (byte)_lookAhead;
-        _lookAhead = requireByte();
+        b[off] = (byte)_b1;
+        b[off + 1] = (byte)_b2;
 
-        return numRead + 1;
+        _b1 = _in.read();
+        _b2 = _in.read();
+
+        if (_b2 < 0)
+        {
+            // Corrupted stream
+            throw new EOFException();
+        }
+
+        return numRead + 2;
     }
 
     public int read()
@@ -82,19 +93,19 @@ class IndefiniteLengthInputStream
             return -1;
         }
 
-        int result = _lookAhead;
-        _lookAhead = requireByte();
-        return result;
-    }
-
-    private int requireByte() throws IOException
-    {
         int b = _in.read();
+
         if (b < 0)
         {
             // Corrupted stream
             throw new EOFException();
         }
-        return b;
+
+        int v = _b1;
+
+        _b1 = _b2;
+        _b2 = b;
+
+        return v;
     }
 }

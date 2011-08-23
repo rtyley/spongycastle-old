@@ -1,13 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.GeneralSubtree;
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.Strings;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -16,6 +8,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralSubtree;
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
 
 public class PKIXNameConstraintValidator
 {

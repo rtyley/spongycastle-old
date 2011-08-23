@@ -54,7 +54,7 @@ public class JDKKeyStore
     extends KeyStoreSpi
     implements BCKeyStore
 {
-    private static final int    STORE_VERSION = 1;
+    private static final int    STORE_VERSION = 2;
 
     private static final int    STORE_SALT_SIZE = 20;
     private static final String STORE_CIPHER = "PBEWithSHAAndTwofish-CBC";
@@ -795,7 +795,7 @@ public class JDKKeyStore
 
         if (version != STORE_VERSION)
         {
-            if (version != 0)
+            if (version != 0 && version != 1)
             {
                 throw new IOException("Wrong version of key store.");
             }
@@ -817,7 +817,18 @@ public class JDKKeyStore
 
             PBEParametersGenerator pbeGen = new PKCS12ParametersGenerator(new SHA1Digest());
             pbeGen.init(passKey, salt, iterationCount);
-            CipherParameters macParams = pbeGen.generateDerivedMacParameters(hMac.getMacSize());
+
+            CipherParameters macParams;
+
+            if (version != 2)
+            {
+                macParams = pbeGen.generateDerivedMacParameters(hMac.getMacSize());
+            }
+            else
+            {
+                macParams = pbeGen.generateDerivedMacParameters(hMac.getMacSize() * 8);
+            }
+
             Arrays.fill(passKey, (byte)0);
 
             hMac.init(macParams);
@@ -873,7 +884,7 @@ public class JDKKeyStore
 
         pbeGen.init(passKey, salt, iterationCount);
 
-        hMac.init(pbeGen.generateDerivedMacParameters(hMac.getMacSize()));
+        hMac.init(pbeGen.generateDerivedMacParameters(hMac.getMacSize() * 8));
 
         for (int i = 0; i != passKey.length; i++)
         {
@@ -921,7 +932,7 @@ public class JDKKeyStore
     
             if (version != STORE_VERSION)
             {
-                if (version != 0)
+                if (version != 0 && version != 1)
                 {
                     throw new IOException("Wrong version of key store.");
                 }

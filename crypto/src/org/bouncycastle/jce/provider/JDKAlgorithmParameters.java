@@ -18,8 +18,8 @@ import javax.crypto.spec.RC2ParameterSpec;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Null;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
@@ -140,7 +140,7 @@ public abstract class JDKAlgorithmParameters
             if ((params.length % 8) != 0
                     && params[0] == 0x04 && params[1] == params.length - 2)
             {
-                ASN1OctetString oct = (ASN1OctetString)ASN1Object.fromByteArray(params);
+                ASN1OctetString oct = (ASN1OctetString)ASN1Primitive.fromByteArray(params);
 
                 params = oct.getOctets();
             }
@@ -157,7 +157,7 @@ public abstract class JDKAlgorithmParameters
             {
                 try
                 {
-                    ASN1Object object = ASN1Object.fromByteArray(params);
+                    ASN1Primitive object = ASN1Primitive.fromByteArray(params);
 
                     if (object instanceof ASN1OctetString)
                     {
@@ -347,7 +347,7 @@ public abstract class JDKAlgorithmParameters
         {
             if (isASN1FormatString(format))
             {
-                RC2CBCParameter p = RC2CBCParameter.getInstance(ASN1Object.fromByteArray(params));
+                RC2CBCParameter p = RC2CBCParameter.getInstance(ASN1Primitive.fromByteArray(params));
 
                 if (p.getRC2ParameterVersion() != null)
                 {
@@ -434,7 +434,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params)
             throws IOException
         {
-            this.params = PBKDF2Params.getInstance(ASN1Object.fromByteArray(params));
+            this.params = PBKDF2Params.getInstance(ASN1Primitive.fromByteArray(params));
         }
 
         protected void engineInit(
@@ -517,7 +517,7 @@ public abstract class JDKAlgorithmParameters
             byte[] params) 
             throws IOException
         {
-            this.params = PKCS12PBEParams.getInstance(ASN1Object.fromByteArray(params));
+            this.params = PKCS12PBEParams.getInstance(ASN1Primitive.fromByteArray(params));
         }
 
         protected void engineInit(
@@ -610,7 +610,7 @@ public abstract class JDKAlgorithmParameters
         {
             try
             {
-                DHParameter dhP = new DHParameter((ASN1Sequence)ASN1Object.fromByteArray(params));
+                DHParameter dhP = DHParameter.getInstance(params);
 
                 if (dhP.getL() != null)
                 {
@@ -722,7 +722,7 @@ public abstract class JDKAlgorithmParameters
         {
             try
             {
-                DSAParameter dsaP = new DSAParameter((ASN1Sequence)ASN1Object.fromByteArray(params));
+                DSAParameter dsaP = new DSAParameter((ASN1Sequence)ASN1Primitive.fromByteArray(params));
 
                 currentSpec = new DSAParameterSpec(dsaP.getP(), dsaP.getQ(), dsaP.getG());
             }
@@ -827,7 +827,7 @@ public abstract class JDKAlgorithmParameters
         {
             try
             {
-                ASN1Sequence seq = (ASN1Sequence) ASN1Object.fromByteArray(params);
+                ASN1Sequence seq = (ASN1Sequence) ASN1Primitive.fromByteArray(params);
 
                 this.currentSpec = GOST3410ParameterSpec.fromPublicKeyAlg(
                     new GOST3410PublicKeyAlgParameters(seq));
@@ -945,7 +945,7 @@ public abstract class JDKAlgorithmParameters
         {
             try
             {
-                ElGamalParameter elP = new ElGamalParameter((ASN1Sequence)ASN1Object.fromByteArray(params));
+                ElGamalParameter elP = new ElGamalParameter((ASN1Sequence)ASN1Primitive.fromByteArray(params));
 
                 currentSpec = new ElGamalParameterSpec(elP.getP(), elP.getG());
             }
@@ -1048,7 +1048,7 @@ public abstract class JDKAlgorithmParameters
         {
             try
             {
-                ASN1Sequence s = (ASN1Sequence)ASN1Object.fromByteArray(params);
+                ASN1Sequence s = (ASN1Sequence)ASN1Primitive.fromByteArray(params);
 
                 this.currentSpec = new IESParameterSpec(
                                         ((ASN1OctetString)s.getObjectAt(0)).getOctets(),
@@ -1159,7 +1159,7 @@ public abstract class JDKAlgorithmParameters
         {
             try
             {
-                RSAESOAEPparams oaepP = new RSAESOAEPparams((ASN1Sequence)ASN1Object.fromByteArray(params));
+                RSAESOAEPparams oaepP = new RSAESOAEPparams((ASN1Sequence)ASN1Primitive.fromByteArray(params));
 
                 currentSpec = new OAEPParameterSpec(
                                        oaepP.getHashAlgorithm().getObjectId().getId(), 
@@ -1266,14 +1266,14 @@ public abstract class JDKAlgorithmParameters
         {
             try
             {
-                RSASSAPSSparams pssP = new RSASSAPSSparams((ASN1Sequence)ASN1Object.fromByteArray(params));
+                RSASSAPSSparams pssP = new RSASSAPSSparams((ASN1Sequence)ASN1Primitive.fromByteArray(params));
 
                 currentSpec = new PSSParameterSpec(
-                                       pssP.getHashAlgorithm().getObjectId().getId(), 
-                                       pssP.getMaskGenAlgorithm().getObjectId().getId(), 
+                                       pssP.getHashAlgorithm().getAlgorithm().getId(),
+                                       pssP.getMaskGenAlgorithm().getAlgorithm().getId(),
                                        new MGF1ParameterSpec(AlgorithmIdentifier.getInstance(pssP.getMaskGenAlgorithm().getParameters()).getObjectId().getId()),
-                                       pssP.getSaltLength().getValue().intValue(),
-                                       pssP.getTrailerField().getValue().intValue());
+                                       pssP.getSaltLength().intValue(),
+                                       pssP.getTrailerField().intValue());
             }
             catch (ClassCastException e)
             {

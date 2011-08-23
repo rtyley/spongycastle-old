@@ -5,9 +5,9 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 public abstract class ASN1Sequence
-    extends ASN1Object
+    extends ASN1Primitive
 {
-    private Vector seq = new Vector();
+    protected Vector seq = new Vector();
 
     /**
      * return an ASN1Sequence from the given object.
@@ -24,13 +24,13 @@ public abstract class ASN1Sequence
         }
         else if (obj instanceof ASN1SequenceParser)
         {
-            return ASN1Sequence.getInstance(((ASN1SequenceParser)obj).getDERObject());
+            return ASN1Sequence.getInstance(((ASN1SequenceParser)obj).toASN1Primitive());
         }
         else if (obj instanceof byte[])
         {
             try
             {
-                return ASN1Sequence.getInstance(ASN1Object.fromByteArray((byte[])obj));
+                return ASN1Sequence.getInstance(ASN1Primitive.fromByteArray((byte[])obj));
             }
             catch (IOException e)
             {
@@ -68,7 +68,7 @@ public abstract class ASN1Sequence
                 throw new IllegalArgumentException("object implicit - explicit expected.");
             }
 
-            return (ASN1Sequence)obj.getObject();
+            return ASN1Sequence.getInstance(obj.getObject().toASN1Primitive());
         }
         else
         {
@@ -85,7 +85,7 @@ public abstract class ASN1Sequence
                 }
                 else
                 {
-                    return new DERSequence(obj.getObject());
+                    return new DLSequence(obj.getObject());
                 }
             }
             else
@@ -98,6 +98,58 @@ public abstract class ASN1Sequence
         }
 
         throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
+    }
+
+    /**
+     * create an empty sequence
+     */
+    protected ASN1Sequence()
+    {
+    }
+
+    /**
+     * create a sequence containing one object
+     */
+    protected ASN1Sequence(
+        ASN1Encodable obj)
+    {
+        seq.addElement(obj);
+    }
+
+    /**
+     * create a sequence containing a vector of objects.
+     */
+    protected ASN1Sequence(
+        ASN1EncodableVector v)
+    {
+        for (int i = 0; i != v.size(); i++)
+        {
+            seq.addElement(v.get(i));
+        }
+    }
+
+    /**
+     * create a sequence containing a vector of objects.
+     */
+    protected ASN1Sequence(
+        ASN1Encodable[]   array)
+    {
+        for (int i = 0; i != array.length; i++)
+        {
+            seq.addElement(array[i]);
+        }
+    }
+
+    public ASN1Encodable[] toArray()
+    {
+        ASN1Encodable[] values = new ASN1Encodable[this.size()];
+
+        for (int i = 0; i != this.size(); i++)
+        {
+            values[i] = this.getObjectAt(i);
+        }
+
+        return values;
     }
 
     public Enumeration getObjects()
@@ -115,14 +167,14 @@ public abstract class ASN1Sequence
 
             private int index;
 
-            public DEREncodable readObject() throws IOException
+            public ASN1Encodable readObject() throws IOException
             {
                 if (index == max)
                 {
                     return null;
                 }
                 
-                DEREncodable obj = getObjectAt(index++);
+                ASN1Encodable obj = getObjectAt(index++);
                 if (obj instanceof ASN1Sequence)
                 {
                     return ((ASN1Sequence)obj).parser();
@@ -135,12 +187,12 @@ public abstract class ASN1Sequence
                 return obj;
             }
 
-            public DERObject getLoadedObject()
+            public ASN1Primitive getLoadedObject()
             {
                 return outer;
             }
             
-            public DERObject getDERObject()
+            public ASN1Primitive toASN1Primitive()
             {
                 return outer;
             }
@@ -153,10 +205,10 @@ public abstract class ASN1Sequence
      * @param index the sequence number (starting at zero) of the object
      * @return the object at the sequence position indicated by index.
      */
-    public DEREncodable getObjectAt(
+    public ASN1Encodable getObjectAt(
         int index)
     {
-        return (DEREncodable)seq.elementAt(index);
+        return (ASN1Encodable)seq.elementAt(index);
     }
 
     /**
@@ -186,7 +238,7 @@ public abstract class ASN1Sequence
     }
 
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive o)
     {
         if (!(o instanceof ASN1Sequence))
         {
@@ -205,11 +257,11 @@ public abstract class ASN1Sequence
 
         while (s1.hasMoreElements())
         {
-            DEREncodable  obj1 = getNext(s1);
-            DEREncodable  obj2 = getNext(s2);
+            ASN1Encodable obj1 = getNext(s1);
+            ASN1Encodable obj2 = getNext(s2);
 
-            DERObject  o1 = obj1.getDERObject();
-            DERObject  o2 = obj2.getDERObject();
+            ASN1Primitive o1 = obj1.toASN1Primitive();
+            ASN1Primitive o2 = obj2.toASN1Primitive();
 
             if (o1 == o2 || o1.equals(o2))
             {
@@ -222,30 +274,36 @@ public abstract class ASN1Sequence
         return true;
     }
 
-    private DEREncodable getNext(Enumeration e)
+    private ASN1Encodable getNext(Enumeration e)
     {
-        DEREncodable encObj = (DEREncodable)e.nextElement();
-
-        // unfortunately null was allowed as a substitute for DER null
-        if (encObj == null)
-        {
-            return DERNull.INSTANCE;
-        }
+        ASN1Encodable encObj = (ASN1Encodable)e.nextElement();
 
         return encObj;
     }
 
-    protected void addObject(
-        DEREncodable obj)
+    ASN1Primitive toDERObject()
     {
-        seq.addElement(obj);
+        ASN1Sequence derSeq = new DERSequence();
+
+        derSeq.seq = this.seq;
+
+        return derSeq;
     }
 
-    abstract void encode(DEROutputStream out)
+    ASN1Primitive toDLObject()
+    {
+        ASN1Sequence dlSeq = new DLSequence();
+
+        dlSeq.seq = this.seq;
+
+        return dlSeq;
+    }
+
+    abstract void encode(ASN1OutputStream out)
         throws IOException;
 
     public String toString() 
     {
-      return seq.toString();
+        return seq.toString();
     }
 }

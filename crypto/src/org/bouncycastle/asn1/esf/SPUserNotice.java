@@ -1,10 +1,13 @@
 package org.bouncycastle.asn1.esf;
 
-import org.bouncycastle.asn1.x509.NoticeReference;
-import org.bouncycastle.asn1.x509.DisplayText;
-import org.bouncycastle.asn1.*;
-
 import java.util.Enumeration;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.DisplayText;
+import org.bouncycastle.asn1.x509.NoticeReference;
 
 public class SPUserNotice
 {
@@ -75,7 +78,7 @@ public class SPUserNotice
      *     explicitText DisplayText OPTIONAL }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 

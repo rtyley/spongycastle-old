@@ -29,10 +29,9 @@ import javax.crypto.spec.RC2ParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.ASN1Null;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -305,7 +304,7 @@ class EnvelopedDataHelper
                 NoSuchPaddingException, NoSuchProviderException
             {
                 Cipher cipher = createCipher(encryptionAlgID.getAlgorithm());
-                ASN1Object sParams = (ASN1Object)encryptionAlgID.getParameters().getDERObject();
+                ASN1Primitive sParams = (ASN1Primitive)encryptionAlgID.getParameters().getDERObject();
                 String encAlg = encryptionAlgID.getAlgorithm().getId();
 
                 if (sParams != null && !(sParams instanceof ASN1Null))
@@ -372,7 +371,7 @@ class EnvelopedDataHelper
                 NoSuchPaddingException, NoSuchProviderException
             {
                 Mac mac = createMac(macAlgId.getAlgorithm());
-                ASN1Object sParams = (ASN1Object)macAlgId.getParameters().getDERObject();
+                ASN1Primitive sParams = (ASN1Primitive)macAlgId.getParameters().getDERObject();
                 String macAlg = macAlgId.getAlgorithm().getId();
 
                 if (sParams != null && !(sParams instanceof ASN1Null))
@@ -525,7 +524,7 @@ class EnvelopedDataHelper
         {
             try
             {
-                asn1Params = ASN1Object.fromByteArray(params.getEncoded("ASN.1"));
+                asn1Params = ASN1Primitive.fromByteArray(params.getEncoded("ASN.1"));
             }
             catch (IOException e)
             {

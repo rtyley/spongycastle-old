@@ -29,11 +29,9 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.BERSetParser;
 import org.bouncycastle.asn1.BERTaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfoParser;
 import org.bouncycastle.asn1.cms.SignedDataParser;
@@ -221,7 +219,7 @@ public class CMSSignedDataParser
         try
         {
             _signedContent = signedContent;
-            _signedData = SignedDataParser.getInstance(_contentInfo.getContent(DERTags.SEQUENCE));
+            _signedData = SignedDataParser.getInstance(_contentInfo.getContent(BERTags.SEQUENCE));
             digests = new HashMap();
             
             ASN1SetParser digAlgs = _signedData.getDigestAlgorithms();
@@ -250,7 +248,7 @@ public class CMSSignedDataParser
             //
             ContentInfoParser     cont = _signedData.getEncapContentInfo();
             ASN1OctetStringParser octs = (ASN1OctetStringParser)
-                cont.getContent(DERTags.OCTET_STRING);
+                cont.getContent(BERTags.OCTET_STRING);
 
             if (octs != null)
             {
@@ -673,7 +671,7 @@ public class CMSSignedDataParser
     {
         ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
         ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
-        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(DERTags.SEQUENCE));
+        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
 
         BERSequenceGenerator sGen = new BERSequenceGenerator(out);
 
@@ -751,7 +749,7 @@ public class CMSSignedDataParser
     {
         ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
         ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
-        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(DERTags.SEQUENCE));
+        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
 
         BERSequenceGenerator sGen = new BERSequenceGenerator(out);
 
@@ -850,7 +848,7 @@ public class CMSSignedDataParser
     {
         ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
         ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
-        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(DERTags.SEQUENCE));
+        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
 
         BERSequenceGenerator sGen = new BERSequenceGenerator(out);
 
@@ -954,7 +952,7 @@ public class CMSSignedDataParser
         OutputStream rawOutputStream) throws IOException
     {
         ASN1OctetStringParser octs = (ASN1OctetStringParser)
-            encapContentInfo.getContent(DERTags.OCTET_STRING);
+            encapContentInfo.getContent(BERTags.OCTET_STRING);
 
         if (octs != null)
         {

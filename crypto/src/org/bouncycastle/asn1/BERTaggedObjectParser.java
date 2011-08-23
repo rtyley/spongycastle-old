@@ -1,7 +1,6 @@
 package org.bouncycastle.asn1;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 public class BERTaggedObjectParser
     implements ASN1TaggedObjectParser
@@ -9,17 +8,6 @@ public class BERTaggedObjectParser
     private boolean _constructed;
     private int _tagNumber;
     private ASN1StreamParser _parser;
-
-    /**
-     * @deprecated
-     */
-    protected BERTaggedObjectParser(
-        int         baseTag,
-        int         tagNumber,
-        InputStream contentStream)
-    {
-        this((baseTag & DERTags.CONSTRUCTED) != 0, tagNumber, new ASN1StreamParser(contentStream));
-    }
 
     BERTaggedObjectParser(
         boolean             constructed,
@@ -41,7 +29,7 @@ public class BERTaggedObjectParser
         return _tagNumber;
     }
 
-    public DEREncodable getObjectParser(
+    public ASN1Encodable getObjectParser(
         int     tag,
         boolean isExplicit)
         throws IOException
@@ -58,13 +46,13 @@ public class BERTaggedObjectParser
         return _parser.readImplicit(_constructed, tag);
     }
 
-    public DERObject getLoadedObject()
+    public ASN1Primitive getLoadedObject()
         throws IOException
     {
         return _parser.readTaggedObject(_constructed, _tagNumber);
     }
 
-    public DERObject getDERObject()
+    public ASN1Primitive toASN1Primitive()
     {
         try
         {

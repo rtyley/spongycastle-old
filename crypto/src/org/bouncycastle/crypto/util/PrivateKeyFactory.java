@@ -5,11 +5,9 @@ import java.io.InputStream;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
@@ -52,7 +50,7 @@ public class PrivateKeyFactory
      */
     public static AsymmetricKeyParameter createKey(byte[] privateKeyInfoData) throws IOException
     {
-        return createKey(PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(privateKeyInfoData)));
+        return createKey(PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(privateKeyInfoData)));
     }
 
     /**

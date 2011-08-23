@@ -1,22 +1,22 @@
 package org.bouncycastle.asn1.tsp;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERTaggedObject;
 
 
 public class Accuracy
-    extends ASN1Encodable
+    extends ASN1Object
 {
-    DERInteger seconds;
+    ASN1Integer seconds;
 
-    DERInteger millis;
+    ASN1Integer millis;
 
-    DERInteger micros;
+    ASN1Integer micros;
 
     // constantes
     protected static final int MIN_MILLIS = 1;
@@ -32,9 +32,9 @@ public class Accuracy
     }
 
     public Accuracy(
-        DERInteger seconds,
-        DERInteger millis,
-        DERInteger micros)
+        ASN1Integer seconds,
+        ASN1Integer millis,
+        ASN1Integer micros)
     {
         this.seconds = seconds;
 
@@ -65,7 +65,7 @@ public class Accuracy
 
     }
 
-    public Accuracy(ASN1Sequence seq)
+    private Accuracy(ASN1Sequence seq)
     {
         seconds = null;
         millis = null;
@@ -74,9 +74,9 @@ public class Accuracy
         for (int i = 0; i < seq.size(); i++)
         {
             // seconds
-            if (seq.getObjectAt(i) instanceof DERInteger)
+            if (seq.getObjectAt(i) instanceof ASN1Integer)
             {
-                seconds = (DERInteger) seq.getObjectAt(i);
+                seconds = (ASN1Integer) seq.getObjectAt(i);
             }
             else if (seq.getObjectAt(i) instanceof DERTaggedObject)
             {
@@ -85,7 +85,7 @@ public class Accuracy
                 switch (extra.getTagNo())
                 {
                 case 0:
-                    millis = DERInteger.getInstance(extra, false);
+                    millis = ASN1Integer.getInstance(extra, false);
                     if (millis.getValue().intValue() < MIN_MILLIS
                             || millis.getValue().intValue() > MAX_MILLIS)
                     {
@@ -94,7 +94,7 @@ public class Accuracy
                     }
                     break;
                 case 1:
-                    micros = DERInteger.getInstance(extra, false);
+                    micros = ASN1Integer.getInstance(extra, false);
                     if (micros.getValue().intValue() < MIN_MICROS
                             || micros.getValue().intValue() > MAX_MICROS)
                     {
@@ -111,31 +111,30 @@ public class Accuracy
 
     public static Accuracy getInstance(Object o)
     {
-        if (o == null || o instanceof Accuracy)
+        if (o instanceof Accuracy)
         {
             return (Accuracy) o;
         }
-        else if (o instanceof ASN1Sequence)
+
+        if (o != null)
         {
-            return new Accuracy((ASN1Sequence) o);
+            return new Accuracy(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException(
-                "Unknown object in 'Accuracy' factory : "
-                        + o.getClass().getName() + ".");
+        return null;
     }
 
-    public DERInteger getSeconds()
+    public ASN1Integer getSeconds()
     {
         return seconds;
     }
 
-    public DERInteger getMillis()
+    public ASN1Integer getMillis()
     {
         return millis;
     }
 
-    public DERInteger getMicros()
+    public ASN1Integer getMicros()
     {
         return micros;
     }
@@ -149,7 +148,7 @@ public class Accuracy
      *             }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
 
         ASN1EncodableVector v = new ASN1EncodableVector();

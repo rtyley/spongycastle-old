@@ -1,14 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.engines.RSABlindedEngine;
-import org.bouncycastle.crypto.signers.ISO9796d2Signer;
-
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -17,6 +8,15 @@ import java.security.SignatureSpi;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
+
+import org.bouncycastle.crypto.AsymmetricBlockCipher;
+import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.MD5Digest;
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.engines.RSABlindedEngine;
+import org.bouncycastle.crypto.signers.ISO9796d2Signer;
 
 public class JDKISOSignature
     extends SignatureSpi

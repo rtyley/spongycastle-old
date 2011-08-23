@@ -10,8 +10,10 @@ import javax.crypto.interfaces.DHPrivateKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.DHPrivateKeySpec;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.DHParameter;
@@ -66,7 +68,7 @@ public class JCEDHPrivateKey
 
         if (id.equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {
-            DHParameter params = new DHParameter(seq);
+            DHParameter params = DHParameter.getInstance(seq);
 
             if (params.getL() != null)
             {
@@ -119,14 +121,21 @@ public class JCEDHPrivateKey
      */
     public byte[] getEncoded()
     {
-        if (info != null)
+        try
         {
-            return info.getDEREncoded();
-        }
-        
-        PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.dhKeyAgreement, new DHParameter(dhSpec.getP(), dhSpec.getG(), dhSpec.getL()).getDERObject()), new DERInteger(getX()));
+            if (info != null)
+            {
+                return info.getEncoded(ASN1Encoding.DER);
+            }
 
-        return info.getDEREncoded();
+            PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.dhKeyAgreement, new DHParameter(dhSpec.getP(), dhSpec.getG(), dhSpec.getL())), new DERInteger(getX()));
+
+            return info.getEncoded(ASN1Encoding.DER);
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
     }
 
     public DHParameterSpec getParams()
@@ -159,13 +168,13 @@ public class JCEDHPrivateKey
     }
 
     public void setBagAttribute(
-        DERObjectIdentifier oid,
-        DEREncodable        attribute)
+        ASN1ObjectIdentifier oid,
+        ASN1Encodable attribute)
     {
         attrCarrier.setBagAttribute(oid, attribute);
     }
 
-    public DEREncodable getBagAttribute(
+    public ASN1Encodable getBagAttribute(
         DERObjectIdentifier oid)
     {
         return attrCarrier.getBagAttribute(oid);

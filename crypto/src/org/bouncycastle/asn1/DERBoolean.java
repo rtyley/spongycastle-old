@@ -3,24 +3,29 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 
 public class DERBoolean
-    extends ASN1Object
+    extends ASN1Primitive
 {
     byte         value;
 
-    public static final DERBoolean FALSE = new DERBoolean(false);
-    public static final DERBoolean TRUE  = new DERBoolean(true);
+    public static final ASN1Boolean FALSE = new ASN1Boolean(false);
+    public static final ASN1Boolean TRUE  = new ASN1Boolean(true);
 
     /**
      * return a boolean from the passed in object.
      *
      * @exception IllegalArgumentException if the object cannot be converted.
      */
-    public static DERBoolean getInstance(
+    public static ASN1Boolean getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof DERBoolean)
+        if (obj == null || obj instanceof ASN1Boolean)
         {
-            return (DERBoolean)obj;
+            return (ASN1Boolean)obj;
+        }
+
+        if (obj instanceof DERBoolean)
+        {
+            return ((DERBoolean)obj).isTrue() ? DERBoolean.TRUE : DERBoolean.FALSE;
         }
 
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
@@ -29,7 +34,7 @@ public class DERBoolean
     /**
      * return a DERBoolean from the passed in boolean.
      */
-    public static DERBoolean getInstance(
+    public static ASN1Boolean getInstance(
         boolean  value)
     {
         return (value ? TRUE : FALSE);
@@ -48,7 +53,7 @@ public class DERBoolean
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERBoolean)
         {
@@ -56,7 +61,7 @@ public class DERBoolean
         }
         else
         {
-            return new DERBoolean(((ASN1OctetString)o).getOctets());
+            return new ASN1Boolean(((ASN1OctetString)o).getOctets());
         }
     }
     
@@ -83,18 +88,18 @@ public class DERBoolean
     }
 
     void encode(
-        DEROutputStream out)
+        ASN1OutputStream out)
         throws IOException
     {
         byte[]  bytes = new byte[1];
 
         bytes[0] = value;
 
-        out.writeEncoded(BOOLEAN, bytes);
+        out.writeEncoded(BERTags.BOOLEAN, bytes);
     }
     
     protected boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive  o)
     {
         if ((o == null) || !(o instanceof DERBoolean))
         {

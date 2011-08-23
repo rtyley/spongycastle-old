@@ -10,7 +10,7 @@ import java.util.SimpleTimeZone;
  * UTC time object.
  */
 public class DERUTCTime
-    extends ASN1Object
+    extends ASN1Primitive
 {
     String      time;
 
@@ -19,12 +19,17 @@ public class DERUTCTime
      *
      * @exception IllegalArgumentException if the object cannot be converted.
      */
-    public static DERUTCTime getInstance(
+    public static ASN1UTCTime getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof DERUTCTime)
+        if (obj == null || obj instanceof ASN1UTCTime)
         {
-            return (DERUTCTime)obj;
+            return (ASN1UTCTime)obj;
+        }
+
+        if (obj instanceof DERUTCTime)
+        {
+            return new ASN1UTCTime(((DERUTCTime)obj).time);
         }
 
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
@@ -39,19 +44,19 @@ public class DERUTCTime
      * @exception IllegalArgumentException if the tagged object cannot
      *               be converted.
      */
-    public static DERUTCTime getInstance(
+    public static ASN1UTCTime getInstance(
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Object o = obj.getObject();
 
-        if (explicit || o instanceof DERUTCTime)
+        if (explicit || o instanceof ASN1UTCTime)
         {
             return getInstance(o);
         }
         else
         {
-            return new DERUTCTime(((ASN1OctetString)o).getOctets());
+            return new ASN1UTCTime(((ASN1OctetString)o).getOctets());
         }
     }
     
@@ -229,14 +234,14 @@ public class DERUTCTime
     }
 
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream  out)
         throws IOException
     {
-        out.writeEncoded(UTC_TIME, this.getOctets());
+        out.writeEncoded(BERTags.UTC_TIME, this.getOctets());
     }
     
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive o)
     {
         if (!(o instanceof DERUTCTime))
         {

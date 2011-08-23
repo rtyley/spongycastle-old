@@ -6,11 +6,11 @@ import java.util.Enumeration;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -20,7 +20,7 @@ import org.bouncycastle.asn1.DERSequence;
  * encoded one of these.
  */
 public class SubjectPublicKeyInfo
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private AlgorithmIdentifier     algId;
     private DERBitString            keyData;
@@ -49,7 +49,7 @@ public class SubjectPublicKeyInfo
 
     public SubjectPublicKeyInfo(
         AlgorithmIdentifier algId,
-        DEREncodable        publicKey)
+        ASN1Encodable       publicKey)
     {
         this.keyData = new DERBitString(publicKey);
         this.algId = algId;
@@ -78,6 +78,15 @@ public class SubjectPublicKeyInfo
         this.keyData = DERBitString.getInstance(e.nextElement());
     }
 
+    public AlgorithmIdentifier getAlgorithm()
+    {
+        return algId;
+    }
+
+    /**
+     * @deprecated use getAlgorithm()
+     * @return
+     */
     public AlgorithmIdentifier getAlgorithmId()
     {
         return algId;
@@ -90,7 +99,7 @@ public class SubjectPublicKeyInfo
      * @exception IOException - if the bit string doesn't represent a DER
      * encoded object.
      */
-    public DERObject parsePublicKey()
+    public ASN1Primitive parsePublicKey()
         throws IOException
     {
         ASN1InputStream         aIn = new ASN1InputStream(keyData.getBytes());
@@ -106,7 +115,7 @@ public class SubjectPublicKeyInfo
      * encoded object.
      * @deprecated use parsePublicKey
      */
-    public DERObject getPublicKey()
+    public ASN1Primitive getPublicKey()
         throws IOException
     {
         ASN1InputStream         aIn = new ASN1InputStream(keyData.getBytes());
@@ -130,7 +139,7 @@ public class SubjectPublicKeyInfo
      *                          publicKey BIT STRING }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 

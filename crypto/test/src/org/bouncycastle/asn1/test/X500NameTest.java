@@ -4,16 +4,16 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERPrintableString;
@@ -55,7 +55,7 @@ public class X500NameTest
         return X500Name.getInstance(new ASN1InputStream(new ByteArrayInputStream(bytes)).readObject());
     }
 
-    private DEREncodable createEntryValue(ASN1ObjectIdentifier oid, String value)
+    private ASN1Encodable createEntryValue(ASN1ObjectIdentifier oid, String value)
     {
         X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
 
@@ -63,14 +63,14 @@ public class X500NameTest
         
         X500Name name = builder.build();
 
-        ASN1Sequence seq = (ASN1Sequence)name.getDERObject();
-        ASN1Set set = ASN1Set.getInstance(seq.getObjectAt(0).getDERObject());
+        ASN1Sequence seq = (ASN1Sequence)name.toASN1Primitive();
+        ASN1Set set = ASN1Set.getInstance(seq.getObjectAt(0).toASN1Primitive());
         seq = (ASN1Sequence)set.getObjectAt(0);
 
         return seq.getObjectAt(1);
     }
 
-    private DEREncodable createEntryValueFromString(ASN1ObjectIdentifier oid, String value)
+    private ASN1Encodable createEntryValueFromString(ASN1ObjectIdentifier oid, String value)
     {
         X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
 
@@ -78,8 +78,8 @@ public class X500NameTest
 
         X500Name name = new X500Name(builder.build().toString());
 
-        ASN1Sequence seq = (ASN1Sequence)name.getDERObject();
-        ASN1Set set = ASN1Set.getInstance(seq.getObjectAt(0).getDERObject());
+        ASN1Sequence seq = (ASN1Sequence)name.toASN1Primitive();
+        ASN1Set set = ASN1Set.getInstance(seq.getObjectAt(0).toASN1Primitive());
         seq = (ASN1Sequence)set.getObjectAt(0);
 
         return seq.getObjectAt(1);
@@ -87,7 +87,7 @@ public class X500NameTest
 
     private void testEncodingPrintableString(ASN1ObjectIdentifier oid, String value)
     {
-        DEREncodable converted = createEntryValue(oid, value);
+        ASN1Encodable converted = createEntryValue(oid, value);
         if (!(converted instanceof DERPrintableString))
         {
             fail("encoding for " + oid + " not printable string");
@@ -96,7 +96,7 @@ public class X500NameTest
 
     private void testEncodingIA5String(ASN1ObjectIdentifier oid, String value)
     {
-        DEREncodable converted = createEntryValue(oid, value);
+        ASN1Encodable converted = createEntryValue(oid, value);
         if (!(converted instanceof DERIA5String))
         {
             fail("encoding for " + oid + " not IA5String");
@@ -106,7 +106,7 @@ public class X500NameTest
 
     private void testEncodingGeneralizedTime(ASN1ObjectIdentifier oid, String value)
     {
-        DEREncodable converted = createEntryValue(oid, value);
+        ASN1Encodable converted = createEntryValue(oid, value);
         if (!(converted instanceof DERGeneralizedTime))
         {
             fail("encoding for " + oid + " not GeneralizedTime");
@@ -369,8 +369,8 @@ public class X500NameTest
 
         n1 = new X500Name("2.5.4.5=#130138,CN=SSC Class 3 CA,O=UAB Skaitmeninio sertifikavimo centras,C=LT");
         n2 = new X500Name("SERIALNUMBER=#130138,CN=SSC Class 3 CA,O=UAB Skaitmeninio sertifikavimo centras,C=LT");
-        n3 = X500Name.getInstance(ASN1Object.fromByteArray(Hex.decode("3063310b3009060355040613024c54312f302d060355040a1326"
-        + "55414220536b6169746d656e696e696f20736572746966696b6176696d6f2063656e74726173311730150603550403130e53534320436c6173732033204341310a30080603550405130138")));
+        n3 = X500Name.getInstance(ASN1Primitive.fromByteArray(Hex.decode("3063310b3009060355040613024c54312f302d060355040a1326"
+            + "55414220536b6169746d656e696e696f20736572746966696b6176696d6f2063656e74726173311730150603550403130e53534320436c6173732033204341310a30080603550405130138")));
 
         equalityTest(n1, n2);
         equalityTest(n2, n3);

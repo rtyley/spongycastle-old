@@ -3,7 +3,8 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 
 public class DERGeneralString 
-    extends ASN1Object implements DERString
+    extends ASN1Primitive
+    implements ASN1String
 {
     private String string;
 
@@ -23,7 +24,7 @@ public class DERGeneralString
         ASN1TaggedObject obj, 
         boolean explicit) 
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERGeneralString)
         {
@@ -71,10 +72,10 @@ public class DERGeneralString
         return bs;
     }
     
-    void encode(DEROutputStream out) 
+    void encode(ASN1OutputStream out)
         throws IOException 
     {
-        out.writeEncoded(GENERAL_STRING, this.getOctets());
+        out.writeEncoded(BERTags.GENERAL_STRING, this.getOctets());
     }
     
     public int hashCode() 
@@ -82,7 +83,7 @@ public class DERGeneralString
         return this.getString().hashCode();
     }
     
-    boolean asn1Equals(DERObject o)
+    boolean asn1Equals(ASN1Primitive o)
     {
         if (!(o instanceof DERGeneralString)) 
         {

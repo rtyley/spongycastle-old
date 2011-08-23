@@ -1,22 +1,22 @@
 package org.bouncycastle.asn1.cms;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
-import java.util.Enumeration;
-
 public class SignerInfo
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private DERInteger              version;
     private SignerIdentifier        sid;
@@ -157,7 +157,7 @@ public class SignerInfo
      *  DigestEncryptionAlgorithmIdentifier ::= AlgorithmIdentifier
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

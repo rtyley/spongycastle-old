@@ -3,9 +3,9 @@ package org.bouncycastle.asn1.pkcs;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
@@ -15,7 +15,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class PBES2Algorithms
     extends AlgorithmIdentifier implements PKCSObjectIdentifiers
 {
-    private DERObjectIdentifier objectId;
+    private ASN1ObjectIdentifier objectId;
     private KeyDerivationFunc   func;
     private EncryptionScheme    scheme;
 
@@ -26,7 +26,7 @@ public class PBES2Algorithms
 
         Enumeration     e = obj.getObjects();
 
-        objectId = (DERObjectIdentifier)e.nextElement();
+        objectId = (ASN1ObjectIdentifier)e.nextElement();
 
         ASN1Sequence seq = (ASN1Sequence)e.nextElement();
 
@@ -46,7 +46,7 @@ public class PBES2Algorithms
         scheme = new EncryptionScheme((ASN1Sequence)e.nextElement());
     }
 
-    public DERObjectIdentifier getObjectId()
+    public ASN1ObjectIdentifier getObjectId()
     {
         return objectId;
     }
@@ -61,7 +61,7 @@ public class PBES2Algorithms
         return scheme;
     }
 
-    public DERObject getDERObject()
+    public ASN1Primitive getASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
         ASN1EncodableVector  subV = new ASN1EncodableVector();

@@ -1,7 +1,7 @@
 package org.bouncycastle.asn1.esf;
 
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
 
 public class SPuri
 {
@@ -40,8 +40,8 @@ public class SPuri
      * SPuri ::= IA5String
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
-        return uri.getDERObject();
+        return uri.toASN1Primitive();
     }
 }

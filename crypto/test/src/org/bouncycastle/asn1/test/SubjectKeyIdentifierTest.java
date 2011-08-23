@@ -2,7 +2,7 @@ package org.bouncycastle.asn1.test;
 
 import java.io.IOException;
 
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.util.Arrays;
@@ -28,7 +28,7 @@ public class SubjectKeyIdentifierTest
     public void performTest()
         throws IOException
     {
-        SubjectPublicKeyInfo pubInfo = SubjectPublicKeyInfo.getInstance(ASN1Object.fromByteArray(pubKeyInfo));
+        SubjectPublicKeyInfo pubInfo = SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(pubKeyInfo));
         SubjectKeyIdentifier ski = SubjectKeyIdentifier.createSHA1KeyIdentifier(pubInfo);
 
         if (!Arrays.areEqual(shaID, ski.getKeyIdentifier()))

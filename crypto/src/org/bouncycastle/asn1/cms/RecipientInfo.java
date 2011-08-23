@@ -2,18 +2,18 @@ package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
 
 public class RecipientInfo
-    extends ASN1Encodable
+    extends ASN1Object
     implements ASN1Choice
 {
-    DEREncodable    info;
+    ASN1Encodable    info;
 
     public RecipientInfo(
         KeyTransRecipientInfo info)
@@ -46,7 +46,7 @@ public class RecipientInfo
     }
 
     public RecipientInfo(
-        DERObject   info)
+        ASN1Primitive   info)
     {
         this.info = info;
     }
@@ -100,7 +100,7 @@ public class RecipientInfo
         return (info instanceof ASN1TaggedObject);
     }
 
-    public DEREncodable getInfo()
+    public ASN1Encodable getInfo()
     {
         if (info instanceof ASN1TaggedObject)
         {
@@ -147,8 +147,8 @@ public class RecipientInfo
      *     ori [4] OtherRecipientInfo }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
-        return info.getDERObject();
+        return info.toASN1Primitive();
     }
 }

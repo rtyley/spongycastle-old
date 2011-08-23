@@ -1,6 +1,6 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 /**
  * The KeyPurposeId object.
@@ -13,7 +13,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
  * </pre>
  */
 public class KeyPurposeId
-    extends DERObjectIdentifier
+    extends ASN1ObjectIdentifier
 {
     private static final String id_kp = "1.3.6.1.5.5.7.3";
 

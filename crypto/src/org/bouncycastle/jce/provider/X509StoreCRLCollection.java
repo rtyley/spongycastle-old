@@ -1,12 +1,12 @@
 package org.bouncycastle.jce.provider;
 
+import java.util.Collection;
+
 import org.bouncycastle.util.CollectionStore;
 import org.bouncycastle.util.Selector;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
 import org.bouncycastle.x509.X509StoreParameters;
 import org.bouncycastle.x509.X509StoreSpi;
-
-import java.util.Collection;
 
 public class X509StoreCRLCollection
     extends X509StoreSpi

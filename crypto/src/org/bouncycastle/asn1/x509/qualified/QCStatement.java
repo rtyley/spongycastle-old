@@ -3,9 +3,10 @@ package org.bouncycastle.asn1.x509.qualified;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
@@ -19,7 +20,7 @@ import org.bouncycastle.asn1.DERSequence;
  */
 
 public class QCStatement 
-    extends ASN1Encodable 
+    extends ASN1Object
     implements ETSIQCObjectIdentifiers, RFC3739QCObjectIdentifiers
 {
     DERObjectIdentifier qcStatementId;
@@ -80,7 +81,7 @@ public class QCStatement
         return qcStatementInfo;
     }
 
-    public DERObject toASN1Object() 
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector seq = new ASN1EncodableVector();
         seq.add(qcStatementId);       

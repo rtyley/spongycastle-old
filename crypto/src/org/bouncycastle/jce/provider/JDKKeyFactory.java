@@ -26,7 +26,7 @@ import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHPrivateKeySpec;
 import javax.crypto.spec.DHPublicKeySpec;
 
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -210,7 +210,7 @@ public abstract class JDKKeyFactory
         throws IOException
     {
         return createPublicKeyFromPublicKeyInfo(
-            new SubjectPublicKeyInfo((ASN1Sequence) ASN1Object.fromByteArray(in)));
+            new SubjectPublicKeyInfo((ASN1Sequence) ASN1Primitive.fromByteArray(in)));
     }
 
     /**
@@ -271,7 +271,7 @@ public abstract class JDKKeyFactory
         throws IOException
     {
         return createPrivateKeyFromPrivateKeyInfo(
-            new PrivateKeyInfo((ASN1Sequence) ASN1Object.fromByteArray(in)));
+            new PrivateKeyInfo((ASN1Sequence) ASN1Primitive.fromByteArray(in)));
     }
 
     /**
@@ -348,7 +348,7 @@ public abstract class JDKKeyFactory
                     {
                         return new JCERSAPrivateCrtKey(
                             new RSAPrivateKeyStructure(
-                                (ASN1Sequence) ASN1Object.fromByteArray(((PKCS8EncodedKeySpec)keySpec).getEncoded())));
+                                (ASN1Sequence) ASN1Primitive.fromByteArray(((PKCS8EncodedKeySpec)keySpec).getEncoded())));
                     }
                     catch (Exception ex)
                     {

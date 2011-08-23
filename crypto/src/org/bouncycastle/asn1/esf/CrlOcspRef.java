@@ -2,10 +2,10 @@ package org.bouncycastle.asn1.esf;
 
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 
@@ -19,7 +19,7 @@ import org.bouncycastle.asn1.DERTaggedObject;
  * </pre>
  */
 public class CrlOcspRef
-    extends ASN1Encodable
+    extends ASN1Object
 {
 
     private CrlListID crlids;
@@ -86,20 +86,20 @@ public class CrlOcspRef
         return this.otherRev;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
         if (null != this.crlids)
         {
-            v.add(new DERTaggedObject(true, 0, this.crlids.toASN1Object()));
+            v.add(new DERTaggedObject(true, 0, this.crlids.toASN1Primitive()));
         }
         if (null != this.ocspids)
         {
-            v.add(new DERTaggedObject(true, 1, this.ocspids.toASN1Object()));
+            v.add(new DERTaggedObject(true, 1, this.ocspids.toASN1Primitive()));
         }
         if (null != this.otherRev)
         {
-            v.add(new DERTaggedObject(true, 2, this.otherRev.toASN1Object()));
+            v.add(new DERTaggedObject(true, 2, this.otherRev.toASN1Primitive()));
         }
         return new DERSequence(v);
     }

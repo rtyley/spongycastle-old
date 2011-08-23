@@ -17,8 +17,8 @@ import java.util.Map;
 
 import javax.crypto.Cipher;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -225,7 +225,7 @@ class OperatorHelper
             {
                 AlgorithmParameters params = helper.createAlgorithmParameters(algName);
 
-                params.init(algorithm.getParameters().getDERObject().getEncoded(), "ASN.1");
+                params.init(algorithm.getParameters().toASN1Primitive().getEncoded(), "ASN.1");
 
                 PSSParameterSpec spec = (PSSParameterSpec)params.getParameterSpec(PSSParameterSpec.class);
                 sig.setParameter(spec);
@@ -242,7 +242,7 @@ class OperatorHelper
     private static String getSignatureName(
         AlgorithmIdentifier sigAlgId)
     {
-        DEREncodable params = sigAlgId.getParameters();
+        ASN1Encodable params = sigAlgId.getParameters();
 
         if (params != null && !DERNull.INSTANCE.equals(params))
         {

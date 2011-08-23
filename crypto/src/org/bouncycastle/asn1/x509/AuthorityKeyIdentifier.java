@@ -1,20 +1,20 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import java.math.BigInteger;
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
-
-import java.math.BigInteger;
-import java.util.Enumeration;
 
 /**
  * The AuthorityKeyIdentifier object.
@@ -31,7 +31,7 @@ import java.util.Enumeration;
  *
  */
 public class AuthorityKeyIdentifier
-    extends ASN1Encodable
+    extends ASN1Object
 {
     ASN1OctetString keyidentifier=null;
     GeneralNames certissuer=null;
@@ -131,7 +131,7 @@ public class AuthorityKeyIdentifier
         digest.doFinal(resBuf, 0);
 
         this.keyidentifier = new DEROctetString(resBuf);
-        this.certissuer = GeneralNames.getInstance(name.toASN1Object());
+        this.certissuer = GeneralNames.getInstance(name.toASN1Primitive());
         this.certserno = new DERInteger(serialNumber);
     }
 
@@ -144,7 +144,7 @@ public class AuthorityKeyIdentifier
         BigInteger              serialNumber)
     {
         this.keyidentifier = null;
-        this.certissuer = GeneralNames.getInstance(name.toASN1Object());
+        this.certissuer = GeneralNames.getInstance(name.toASN1Primitive());
         this.certserno = new DERInteger(serialNumber);
     }
 
@@ -169,7 +169,7 @@ public class AuthorityKeyIdentifier
         BigInteger              serialNumber)
     {
         this.keyidentifier = new DEROctetString(keyIdentifier);
-        this.certissuer = GeneralNames.getInstance(name.toASN1Object());
+        this.certissuer = GeneralNames.getInstance(name.toASN1Primitive());
         this.certserno = new DERInteger(serialNumber);
     }
     
@@ -201,7 +201,7 @@ public class AuthorityKeyIdentifier
     /**
      * Produce an object suitable for an ASN1OutputStream.
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 

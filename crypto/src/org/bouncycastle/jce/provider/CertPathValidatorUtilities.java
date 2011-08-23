@@ -35,15 +35,15 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.isismtt.ISISMTTObjectIdentifiers;
@@ -310,7 +310,7 @@ public class CertPathValidatorUtilities
      * @throws AnnotatedException
      *             if the extension cannot be read.
      */
-    protected static DERObject getExtensionValue(
+    protected static ASN1Primitive getExtensionValue(
         java.security.cert.X509Extension    ext,
         String                              oid)
         throws AnnotatedException
@@ -324,7 +324,7 @@ public class CertPathValidatorUtilities
         return getObject(oid, bytes);
     }
     
-    private static DERObject getObject(
+    private static ASN1Primitive getObject(
             String oid,
             byte[] ext)
             throws AnnotatedException
@@ -392,7 +392,7 @@ public class CertPathValidatorUtilities
         {
             try
             {
-                aOut.writeObject(e.nextElement());
+                aOut.writeObject((ASN1Encodable)e.nextElement());
     
                 pq.add(new PolicyQualifierInfo(bOut.toByteArray()));
             }
@@ -871,7 +871,7 @@ public class CertPathValidatorUtilities
                     try
                     {
                         issuers.add(new X500Principal(genNames[j].getName()
-                            .getDERObject().getEncoded()));
+                            .toASN1Primitive().getEncoded()));
                     }
                     catch (IOException e)
                     {
@@ -913,7 +913,7 @@ public class CertPathValidatorUtilities
 //                    throw new AnnotatedException(
 //                        "nameRelativeToCRLIssuer field is given but more than one CRL issuer is given.");
 //                }
-//                DEREncodable relName = dp.getDistributionPoint().getName();
+//                ASN1Encodable relName = dp.getDistributionPoint().getName();
 //                Iterator it = issuers.iterator();
 //                List issuersTemp = new ArrayList(issuers.size());
 //                while (it.hasNext())
@@ -933,7 +933,7 @@ public class CertPathValidatorUtilities
 //                    ASN1EncodableVector v = new ASN1EncodableVector();
 //                    while (e.hasMoreElements())
 //                    {
-//                        v.add((DEREncodable) e.nextElement());
+//                        v.add((ASN1Encodable) e.nextElement());
 //                    }
 //                    v.add(relName);
 //                    issuersTemp.add(new X500Principal(new DERSequence(v)
@@ -1069,7 +1069,7 @@ public class CertPathValidatorUtilities
         BigInteger completeCRLNumber = null;
         try
         {
-            DERObject derObject = CertPathValidatorUtilities.getExtensionValue(completeCRL,
+            ASN1Primitive derObject = CertPathValidatorUtilities.getExtensionValue(completeCRL,
                     CRL_NUMBER);
             if (derObject != null)
             {
@@ -1224,7 +1224,7 @@ public class CertPathValidatorUtilities
                         byte[] extBytes = ((X509Certificate)certPath.getCertificates().get(index - 1)).getExtensionValue(ISISMTTObjectIdentifiers.id_isismtt_at_dateOfCertGen.getId());
                         if (extBytes != null)
                         {
-                            dateOfCertgen = DERGeneralizedTime.getInstance(ASN1Object.fromByteArray(extBytes));
+                            dateOfCertgen = DERGeneralizedTime.getInstance(ASN1Primitive.fromByteArray(extBytes));
                         }
                     }
                     catch (IOException e)

@@ -2,17 +2,17 @@ package org.bouncycastle.asn1.pkcs;
 
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 public class EncryptedPrivateKeyInfo
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private AlgorithmIdentifier algId;
     private ASN1OctetString     data;
@@ -74,7 +74,7 @@ public class EncryptedPrivateKeyInfo
      * }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

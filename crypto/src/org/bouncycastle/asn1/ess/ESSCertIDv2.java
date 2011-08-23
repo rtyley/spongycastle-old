@@ -1,10 +1,10 @@
 package org.bouncycastle.asn1.ess;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -12,7 +12,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.IssuerSerial;
 
 public class ESSCertIDv2
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private AlgorithmIdentifier hashAlgorithm;
     private byte[]              certHash;
@@ -53,14 +53,14 @@ public class ESSCertIDv2
         }
         else
         {
-            this.hashAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(count++).getDERObject());
+            this.hashAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(count++).toASN1Primitive());
         }
 
-        this.certHash = ASN1OctetString.getInstance(seq.getObjectAt(count++).getDERObject()).getOctets();
+        this.certHash = ASN1OctetString.getInstance(seq.getObjectAt(count++).toASN1Primitive()).getOctets();
 
         if (seq.size() > count)
         {
-            this.issuerSerial = new IssuerSerial(ASN1Sequence.getInstance(seq.getObjectAt(count).getDERObject()));
+            this.issuerSerial = new IssuerSerial(ASN1Sequence.getInstance(seq.getObjectAt(count).toASN1Primitive()));
         }
     }
 
@@ -122,7 +122,7 @@ public class ESSCertIDv2
      * }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
@@ -131,7 +131,7 @@ public class ESSCertIDv2
             v.add(hashAlgorithm);
         }
 
-        v.add(new DEROctetString(certHash).toASN1Object());
+        v.add(new DEROctetString(certHash).toASN1Primitive());
 
         if (issuerSerial != null)
         {

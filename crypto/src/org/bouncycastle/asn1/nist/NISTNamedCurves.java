@@ -1,13 +1,13 @@
 package org.bouncycastle.asn1.nist;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import java.util.Enumeration;
+import java.util.Hashtable;
+
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.util.Strings;
-
-import java.util.Enumeration;
-import java.util.Hashtable;
 
 /**
  * Utility class for fetching curves using their NIST names as published in FIPS-PUB 186-2
@@ -17,7 +17,7 @@ public class NISTNamedCurves
     static final Hashtable objIds = new Hashtable();
     static final Hashtable names = new Hashtable();
 
-    static void defineCurve(String name, DERObjectIdentifier oid)
+    static void defineCurve(String name, ASN1ObjectIdentifier oid)
     {
         objIds.put(name, oid);
         names.put(oid, name);
@@ -42,7 +42,7 @@ public class NISTNamedCurves
     public static X9ECParameters getByName(
         String  name)
     {
-        DERObjectIdentifier oid = (DERObjectIdentifier)objIds.get(Strings.toUpperCase(name));
+        ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)objIds.get(Strings.toUpperCase(name));
 
         if (oid != null)
         {
@@ -59,7 +59,7 @@ public class NISTNamedCurves
      * @param oid an object identifier representing a named curve, if present.
      */
     public static X9ECParameters getByOID(
-        DERObjectIdentifier  oid)
+        ASN1ObjectIdentifier  oid)
     {
         return SECNamedCurves.getByOID(oid);
     }
@@ -70,17 +70,17 @@ public class NISTNamedCurves
      *
      * @return the object identifier associated with name, if present.
      */
-    public static DERObjectIdentifier getOID(
+    public static ASN1ObjectIdentifier getOID(
         String  name)
     {
-        return (DERObjectIdentifier)objIds.get(Strings.toUpperCase(name));
+        return (ASN1ObjectIdentifier)objIds.get(Strings.toUpperCase(name));
     }
 
     /**
      * return the named curve name represented by the given object identifier.
      */
     public static String getName(
-        DERObjectIdentifier  oid)
+        ASN1ObjectIdentifier  oid)
     {
         return (String)names.get(oid);
     }

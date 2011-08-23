@@ -18,7 +18,7 @@ public class DLSequence
      * create a sequence containing one object
      */
     public DLSequence(
-        DEREncodable obj)
+        ASN1Encodable obj)
     {
         addObject(obj);
     }
@@ -64,7 +64,7 @@ public class DLSequence
 
             byte[]  bytes = bOut.toByteArray();
 
-            out.writeEncoded(DERTags.SEQUENCE | DERTags.CONSTRUCTED, bytes);
+            out.writeEncoded(BERTags.SEQUENCE | BERTags.CONSTRUCTED, bytes);
         }
         else
         {
@@ -83,7 +83,7 @@ public class DLSequence
 
             byte[]  bytes = bOut.toByteArray();
 
-            out.writeEncoded(DERTags.SEQUENCE | DERTags.CONSTRUCTED, bytes);
+            out.writeEncoded(BERTags.SEQUENCE | BERTags.CONSTRUCTED, bytes);
         }
     }
 }

@@ -1,19 +1,19 @@
 package org.bouncycastle.asn1.isismtt.x509;
 
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x500.DirectoryString;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.IssuerSerial;
-
-import java.util.Enumeration;
 
 /**
  * Attribute to indicate that the certificate holder may sign in the name of a
@@ -49,7 +49,7 @@ import java.util.Enumeration;
  * 
  */
 public class ProcurationSyntax
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private String country;
     private DirectoryString typeOfSubstitution;
@@ -114,7 +114,7 @@ public class ProcurationSyntax
                     typeOfSubstitution = DirectoryString.getInstance(o, true);
                     break;
                 case 3:
-                    DEREncodable signingFor = o.getObject();
+                    ASN1Encodable signingFor = o.getObject();
                     if (signingFor instanceof ASN1TaggedObject)
                     {
                         thirdPerson = GeneralName.getInstance(signingFor);
@@ -215,7 +215,7 @@ public class ProcurationSyntax
      *
      * @return a DERObject
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector vec = new ASN1EncodableVector();
         if (country != null)

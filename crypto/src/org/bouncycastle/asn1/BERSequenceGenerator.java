@@ -12,7 +12,7 @@ public class BERSequenceGenerator
     {
         super(out);
 
-        writeBERHeader(DERTags.CONSTRUCTED | DERTags.SEQUENCE);
+        writeBERHeader(BERTags.CONSTRUCTED | BERTags.SEQUENCE);
     }
 
     public BERSequenceGenerator(
@@ -23,14 +23,14 @@ public class BERSequenceGenerator
     {
         super(out, tagNo, isExplicit);
         
-        writeBERHeader(DERTags.CONSTRUCTED | DERTags.SEQUENCE);
+        writeBERHeader(BERTags.CONSTRUCTED | BERTags.SEQUENCE);
     }
 
     public void addObject(
-        DEREncodable object)
+        ASN1Encodable object)
         throws IOException
     {
-        object.getDERObject().encode(new BEROutputStream(_out));
+        object.toASN1Primitive().encode(new BEROutputStream(_out));
     }
     
     public void close() 

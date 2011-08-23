@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -168,7 +168,7 @@ public class DefaultSignatureAlgorithmIdentifierFinder
         }
         else if (params.containsKey(algorithmName))
         {
-            sigAlgId = new AlgorithmIdentifier(sigOID, (DEREncodable)params.get(algorithmName));
+            sigAlgId = new AlgorithmIdentifier(sigOID, (ASN1Encodable)params.get(algorithmName));
         }
         else
         {

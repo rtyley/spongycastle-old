@@ -3,7 +3,6 @@ package org.bouncycastle.asn1.test;
 import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.qualified.TypeOfBiometricData;
 import org.bouncycastle.util.test.SimpleTest;

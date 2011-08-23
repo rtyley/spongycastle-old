@@ -33,6 +33,8 @@ import org.bouncycastle.crypto.macs.OldHMac;
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
+import org.bouncycastle.jcajce.provider.symmetric.util.PBE;
 
 public class JCEMac
     extends MacSpi implements PBE
@@ -73,9 +75,9 @@ public class JCEMac
             throw new InvalidKeyException("key is null");
         }
         
-        if (key instanceof JCEPBEKey)
+        if (key instanceof BCPBEKey)
         {
-            JCEPBEKey   k = (JCEPBEKey)key;
+            BCPBEKey k = (BCPBEKey)key;
             
             if (k.getParam() != null)
             {

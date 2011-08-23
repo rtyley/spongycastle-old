@@ -2,14 +2,14 @@ package org.bouncycastle.asn1.x9;
 
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.math.ec.ECCurve;
 
@@ -18,12 +18,12 @@ import org.bouncycastle.math.ec.ECCurve;
  * X9.62, for further details.
  */
 public class X9Curve
-    extends ASN1Encodable
+    extends ASN1Object
     implements X9ObjectIdentifiers
 {
     private ECCurve     curve;
     private byte[]      seed;
-    private DERObjectIdentifier fieldIdentifier = null;
+    private ASN1ObjectIdentifier fieldIdentifier = null;
 
     public X9Curve(
         ECCurve     curve)
@@ -62,8 +62,8 @@ public class X9Curve
                 DERSequence parameters = (DERSequence)fieldID.getParameters();
                 int m = ((DERInteger)parameters.getObjectAt(0)).getValue().
                     intValue();
-                DERObjectIdentifier representation
-                    = (DERObjectIdentifier)parameters.getObjectAt(1);
+                ASN1ObjectIdentifier representation
+                    = (ASN1ObjectIdentifier)parameters.getObjectAt(1);
 
                 int k1 = 0;
                 int k2 = 0;
@@ -136,19 +136,19 @@ public class X9Curve
      *  }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
         if (fieldIdentifier.equals(prime_field)) 
         { 
-            v.add(new X9FieldElement(curve.getA()).getDERObject());
-            v.add(new X9FieldElement(curve.getB()).getDERObject());
+            v.add(new X9FieldElement(curve.getA()).toASN1Primitive());
+            v.add(new X9FieldElement(curve.getB()).toASN1Primitive());
         } 
         else if (fieldIdentifier.equals(characteristic_two_field)) 
         {
-            v.add(new X9FieldElement(curve.getA()).getDERObject());
-            v.add(new X9FieldElement(curve.getB()).getDERObject());
+            v.add(new X9FieldElement(curve.getA()).toASN1Primitive());
+            v.add(new X9FieldElement(curve.getB()).toASN1Primitive());
         }
 
         if (seed != null)

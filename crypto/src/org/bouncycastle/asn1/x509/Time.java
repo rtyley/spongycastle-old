@@ -1,22 +1,22 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.ASN1Choice;
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERUTCTime;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.SimpleTimeZone;
 
+import org.bouncycastle.asn1.ASN1Choice;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERGeneralizedTime;
+import org.bouncycastle.asn1.DERUTCTime;
+
 public class Time
-    extends ASN1Encodable
+    extends ASN1Object
     implements ASN1Choice
 {
-    DERObject   time;
+    ASN1Primitive time;
 
     public static Time getInstance(
         ASN1TaggedObject obj,
@@ -26,7 +26,7 @@ public class Time
     }
 
     public Time(
-        DERObject   time)
+        ASN1Primitive   time)
     {
         if (!(time instanceof DERUTCTime)
             && !(time instanceof DERGeneralizedTime))
@@ -121,7 +121,7 @@ public class Time
      *             generalTime    GeneralizedTime }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return time;
     }

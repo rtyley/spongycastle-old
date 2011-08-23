@@ -1,7 +1,7 @@
 package org.bouncycastle.jce.provider;
 
-import java.math.BigInteger;
 import java.io.IOException;
+import java.math.BigInteger;
 
 public interface DSAEncoder
 {

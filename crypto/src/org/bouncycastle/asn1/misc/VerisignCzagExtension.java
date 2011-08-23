@@ -1,6 +1,6 @@
 package org.bouncycastle.asn1.misc;
 
-import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.DERIA5String;
 
 public class VerisignCzagExtension
     extends DERIA5String

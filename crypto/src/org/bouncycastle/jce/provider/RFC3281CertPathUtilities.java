@@ -27,7 +27,6 @@ import java.util.Set;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.DistributionPoint;

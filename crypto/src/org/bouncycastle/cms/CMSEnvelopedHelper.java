@@ -15,7 +15,6 @@ import java.util.Map;
 import javax.crypto.KeyGenerator;
 
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
 import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;

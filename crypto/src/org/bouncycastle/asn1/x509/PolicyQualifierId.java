@@ -1,7 +1,7 @@
 
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 /**
  * PolicyQualifierId, used in the CertificatePolicies
@@ -15,7 +15,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
  *       OBJECT IDENTIFIER (id-qt-cps | id-qt-unotice)
  * </pre>
  */
-public class PolicyQualifierId extends DERObjectIdentifier 
+public class PolicyQualifierId extends ASN1ObjectIdentifier 
 {
    private static final String id_qt = "1.3.6.1.5.5.7.2";
 

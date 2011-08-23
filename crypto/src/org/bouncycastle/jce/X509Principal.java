@@ -5,9 +5,10 @@ import java.security.Principal;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.X509Name;
 
 /**
@@ -53,7 +54,16 @@ public class X509Principal
     public X509Principal(
         X509Name  name)
     {
-        super((ASN1Sequence)name.getDERObject());
+        super((ASN1Sequence)name.toASN1Primitive());
+    }
+
+     /**
+     * Constructor from an X509Name object.
+     */
+    public X509Principal(
+        X500Name name)
+    {
+        super((ASN1Sequence)name.toASN1Primitive());
     }
 
     /**
@@ -144,7 +154,7 @@ public class X509Principal
     {
         try
         {
-            return this.getEncoded(ASN1Encodable.DER);
+            return this.getEncoded(ASN1Encoding.DER);
         }
         catch (IOException e)
         {

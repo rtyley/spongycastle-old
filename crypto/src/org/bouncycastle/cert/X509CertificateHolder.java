@@ -7,8 +7,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -32,7 +32,7 @@ public class X509CertificateHolder
     {
         try
         {
-            return X509CertificateStructure.getInstance(ASN1Object.fromByteArray(certEncoding));
+            return X509CertificateStructure.getInstance(ASN1Primitive.fromByteArray(certEncoding));
         }
         catch (ClassCastException e)
         {

@@ -40,6 +40,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.params.RC2Parameters;
 import org.bouncycastle.crypto.params.RC5Parameters;
+import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
 import org.bouncycastle.util.Strings;
 
 public class BrokenJCEBlockCipher
@@ -229,9 +230,9 @@ public class BrokenJCEBlockCipher
         //
         // a note on iv's - if ivLength is zero the IV gets ignored (we don't use it).
         //
-        if (key instanceof JCEPBEKey)
+        if (key instanceof BCPBEKey)
         {
-            param = BrokenPBE.Util.makePBEParameters((JCEPBEKey)key, params, pbeType, pbeHash,
+            param = BrokenPBE.Util.makePBEParameters((BCPBEKey)key, params, pbeType, pbeHash,
                         cipher.getUnderlyingCipher().getAlgorithmName(), pbeKeySize, pbeIvSize);
 
             if (pbeIvSize != 0)

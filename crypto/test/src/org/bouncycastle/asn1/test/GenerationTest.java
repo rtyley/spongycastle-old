@@ -1,11 +1,18 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Vector;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
@@ -33,14 +40,6 @@ import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Vector;
 
 public class GenerationTest
     extends SimpleTest

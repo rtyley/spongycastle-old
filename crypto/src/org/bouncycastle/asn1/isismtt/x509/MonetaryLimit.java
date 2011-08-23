@@ -1,15 +1,15 @@
 package org.bouncycastle.asn1.isismtt.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERPrintableString;
-import org.bouncycastle.asn1.DERSequence;
-
 import java.math.BigInteger;
 import java.util.Enumeration;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERPrintableString;
+import org.bouncycastle.asn1.DERSequence;
 
 /**
  * Monetary limit for transactions. The QcEuMonetaryLimit QC statement MUST be
@@ -36,7 +36,7 @@ import java.util.Enumeration;
  * value = amount�10*exponent
  */
 public class MonetaryLimit
-    extends ASN1Encodable
+    extends ASN1Object
 {
     DERPrintableString currency;
     DERInteger amount;
@@ -118,7 +118,7 @@ public class MonetaryLimit
      *
      * @return a DERObject
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector seq = new ASN1EncodableVector();
         seq.add(currency);

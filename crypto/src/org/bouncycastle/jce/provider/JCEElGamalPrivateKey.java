@@ -10,9 +10,11 @@ import javax.crypto.interfaces.DHPrivateKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.DHPrivateKeySpec;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
@@ -109,9 +111,16 @@ public class JCEElGamalPrivateKey
      */
     public byte[] getEncoded()
     {
-        PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(elSpec.getP(), elSpec.getG()).getDERObject()), new DERInteger(getX()));
+        try
+        {
+            PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(elSpec.getP(), elSpec.getG())), new DERInteger(getX()));
 
-        return info.getDEREncoded();
+            return info.getEncoded(ASN1Encoding.DER);
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
     }
 
     public ElGamalParameterSpec getParameters()
@@ -148,13 +157,13 @@ public class JCEElGamalPrivateKey
     }
 
     public void setBagAttribute(
-        DERObjectIdentifier oid,
-        DEREncodable        attribute)
+        ASN1ObjectIdentifier oid,
+        ASN1Encodable attribute)
     {
         attrCarrier.setBagAttribute(oid, attribute);
     }
 
-    public DEREncodable getBagAttribute(
+    public ASN1Encodable getBagAttribute(
         DERObjectIdentifier oid)
     {
         return attrCarrier.getBagAttribute(oid);

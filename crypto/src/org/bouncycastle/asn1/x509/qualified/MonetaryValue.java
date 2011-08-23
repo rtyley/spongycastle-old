@@ -3,11 +3,11 @@ package org.bouncycastle.asn1.x509.qualified;
 import java.math.BigInteger;
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -21,7 +21,7 @@ import org.bouncycastle.asn1.DERSequence;
  * </pre>
  */
 public class MonetaryValue 
-    extends ASN1Encodable
+    extends ASN1Object
 {
     Iso4217CurrencyCode currency;
     DERInteger          amount;
@@ -80,7 +80,7 @@ public class MonetaryValue
         return exponent.getValue();
     }   
     
-    public DERObject toASN1Object() 
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector seq = new ASN1EncodableVector();
         seq.add(currency);

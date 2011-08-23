@@ -3,7 +3,7 @@ package org.bouncycastle.cert.ocsp;
 import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.ocsp.OCSPResponse;
@@ -64,7 +64,7 @@ public class OCSPResp
         {
             try
             {
-                ASN1Object obj = ASN1Object.fromByteArray(rb.getResponse().getOctets());
+                ASN1Primitive obj = ASN1Primitive.fromByteArray(rb.getResponse().getOctets());
                 return new BasicOCSPResp(BasicOCSPResponse.getInstance(obj));
             }
             catch (Exception e)

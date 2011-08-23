@@ -1,14 +1,14 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
-
-import java.util.Enumeration;
 
 /**
  * This class helps to support crossCerfificatePairs in a LDAP directory
@@ -44,7 +44,7 @@ import java.util.Enumeration;
  * </pre>
  */
 public class CertificatePair
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private X509CertificateStructure forward;
 
@@ -133,9 +133,9 @@ public class CertificatePair
      *         -- at least one of the pair shall be present -- }
      * </pre>
      *
-     * @return a DERObject
+     * @return a ASN1Primitive
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector vec = new ASN1EncodableVector();
 

@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Key;
 import java.security.KeyStore;
+import java.security.KeyStore.LoadStoreParameter;
+import java.security.KeyStore.ProtectionParameter;
 import java.security.KeyStoreException;
 import java.security.KeyStoreSpi;
 import java.security.NoSuchAlgorithmException;
@@ -17,8 +19,6 @@ import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
-import java.security.KeyStore.LoadStoreParameter;
-import java.security.KeyStore.ProtectionParameter;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -38,16 +38,14 @@ import javax.crypto.spec.PBEParameterSpec;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.BEROutputStream;
 import org.bouncycastle.asn1.DERBMPString;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -70,6 +68,7 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
+import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
 import org.bouncycastle.jce.interfaces.BCKeyStore;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.util.Arrays;
@@ -185,7 +184,7 @@ public class JDKPKCS12KeyStore
         try
         {
             SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-                (ASN1Sequence) ASN1Object.fromByteArray(pubKey.getEncoded()));
+                (ASN1Sequence) ASN1Primitive.fromByteArray(pubKey.getEncoded()));
 
             return new SubjectKeyIdentifier(info);
         }
@@ -561,7 +560,7 @@ public class JDKPKCS12KeyStore
 
             SecretKey           k = keyFact.generateSecret(pbeSpec);
             
-            ((JCEPBEKey)k).setTryWrongPKCS12Zero(wrongPKCS12Zero);
+            ((BCPBEKey)k).setTryWrongPKCS12Zero(wrongPKCS12Zero);
 
             Cipher cipher = Cipher.getInstance(algorithm, bcProvider);
 
@@ -628,7 +627,7 @@ public class JDKPKCS12KeyStore
             PBEParameterSpec defParams = new PBEParameterSpec(
                 pbeParams.getIV(),
                 pbeParams.getIterations().intValue());
-            JCEPBEKey        key = (JCEPBEKey) keyFact.generateSecret(pbeSpec);
+            BCPBEKey key = (BCPBEKey) keyFact.generateSecret(pbeSpec);
 
             key.setTryWrongPKCS12Zero(wrongPKCS12Zero);
 
@@ -768,7 +767,7 @@ public class JDKPKCS12KeyStore
                                     {
                                         attr = (DERObject)attrSet.getObjectAt(0);
 
-                                        DEREncodable existing = bagAttr.getBagAttribute(aOid);
+                                        ASN1Encodable existing = bagAttr.getBagAttribute(aOid);
                                         if (existing != null)
                                         {
                                             // OK, but the value has to be the same
@@ -831,7 +830,7 @@ public class JDKPKCS12KeyStore
                     EncryptedData d = new EncryptedData((ASN1Sequence)c[i].getContent());
                     byte[] octets = cryptData(false, d.getEncryptionAlgorithm(),
                         password, wrongPKCS12Zero, d.getContent().getOctets());
-                    ASN1Sequence seq = (ASN1Sequence) ASN1Object.fromByteArray(octets);
+                    ASN1Sequence seq = (ASN1Sequence) ASN1Primitive.fromByteArray(octets);
 
                     for (int j = 0; j != seq.size(); j++)
                     {
@@ -865,7 +864,7 @@ public class JDKPKCS12KeyStore
                                 {
                                     attr = (DERObject)attrSet.getObjectAt(0);
 
-                                    DEREncodable existing = bagAttr.getBagAttribute(aOid);
+                                    ASN1Encodable existing = bagAttr.getBagAttribute(aOid);
                                     if (existing != null)
                                     {
                                         // OK, but the value has to be the same
@@ -927,7 +926,7 @@ public class JDKPKCS12KeyStore
                                 {
                                     attr = (DERObject)attrSet.getObjectAt(0);
 
-                                    DEREncodable existing = bagAttr.getBagAttribute(aOid);
+                                    ASN1Encodable existing = bagAttr.getBagAttribute(aOid);
                                     if (existing != null)
                                     {
                                         // OK, but the value has to be the same
@@ -1027,7 +1026,7 @@ public class JDKPKCS12KeyStore
                     {
                         bagAttr = (PKCS12BagAttributeCarrier)cert;
 
-                        DEREncodable existing = bagAttr.getBagAttribute(oid);
+                        ASN1Encodable existing = bagAttr.getBagAttribute(oid);
                         if (existing != null)
                         {
                             // OK, but the value has to be the same
@@ -1527,7 +1526,7 @@ public class JDKPKCS12KeyStore
         SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(oid.getId(), bcProvider);
         PBEParameterSpec    defParams = new PBEParameterSpec(salt, itCount);
         PBEKeySpec          pbeSpec = new PBEKeySpec(password);
-        JCEPBEKey           key = (JCEPBEKey) keyFact.generateSecret(pbeSpec);
+        BCPBEKey key = (BCPBEKey) keyFact.generateSecret(pbeSpec);
         key.setTryWrongPKCS12Zero(wrongPkcs12Zero);
 
         Mac mac = Mac.getInstance(oid.getId(), bcProvider);

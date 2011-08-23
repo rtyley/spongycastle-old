@@ -8,13 +8,13 @@ import java.io.IOException;
  * rules (as with sequences).
  */
 public abstract class ASN1TaggedObject
-    extends ASN1Object
+    extends ASN1Primitive
     implements ASN1TaggedObjectParser
 {
     int             tagNo;
     boolean         empty = false;
     boolean         explicit = true;
-    DEREncodable    obj = null;
+    ASN1Encodable obj = null;
 
     static public ASN1TaggedObject getInstance(
         ASN1TaggedObject    obj,
@@ -40,21 +40,6 @@ public abstract class ASN1TaggedObject
     }
 
     /**
-     * Create a tagged object in the explicit style.
-     * 
-     * @param tagNo the tag number for this object.
-     * @param obj the tagged object.
-     */
-    public ASN1TaggedObject(
-        int             tagNo,
-        DEREncodable    obj)
-    {
-        this.explicit = true;
-        this.tagNo = tagNo;
-        this.obj = obj;
-    }
-
-    /**
      * Create a tagged object with the style given by the value of explicit.
      * <p>
      * If the object implements ASN1Choice the tag style will always be changed
@@ -67,7 +52,7 @@ public abstract class ASN1TaggedObject
     public ASN1TaggedObject(
         boolean         explicit,
         int             tagNo,
-        DEREncodable    obj)
+        ASN1Encodable   obj)
     {
         if (obj instanceof ASN1Choice)
         {
@@ -79,11 +64,26 @@ public abstract class ASN1TaggedObject
         }
         
         this.tagNo = tagNo;
-        this.obj = obj;
+
+        if (this.explicit)
+        {
+            this.obj = obj;
+        }
+        else
+        {
+            ASN1Primitive prim = obj.toASN1Primitive();
+
+            if (prim instanceof ASN1Set)
+            {
+                ASN1Set s = null;
+            }
+
+            this.obj = obj;
+        }
     }
     
     boolean asn1Equals(
-        DERObject o)
+        ASN1Primitive o)
     {
         if (!(o instanceof ASN1TaggedObject))
         {
@@ -106,7 +106,7 @@ public abstract class ASN1TaggedObject
         }
         else
         {
-            if (!(obj.getDERObject().equals(other.obj.getDERObject())))
+            if (!(obj.toASN1Primitive().equals(other.obj.toASN1Primitive())))
             {
                 return false;
             }
@@ -163,11 +163,11 @@ public abstract class ASN1TaggedObject
      * trying to extract a tagged object you should be going via the
      * appropriate getInstance method.
      */
-    public DERObject getObject()
+    public ASN1Primitive getObject()
     {
         if (obj != null)
         {
-            return obj.getDERObject();
+            return obj.toASN1Primitive();
         }
 
         return null;
@@ -178,17 +178,17 @@ public abstract class ASN1TaggedObject
      * the type of the passed in tag. If the object doesn't have a parser
      * associated with it, the base object is returned.
      */
-    public DEREncodable getObjectParser(
+    public ASN1Encodable getObjectParser(
         int     tag,
         boolean isExplicit)
     {
         switch (tag)
         {
-        case DERTags.SET:
+        case BERTags.SET:
             return ASN1Set.getInstance(this, isExplicit).parser();
-        case DERTags.SEQUENCE:
+        case BERTags.SEQUENCE:
             return ASN1Sequence.getInstance(this, isExplicit).parser();
-        case DERTags.OCTET_STRING:
+        case BERTags.OCTET_STRING:
             return ASN1OctetString.getInstance(this, isExplicit).parser();
         }
 
@@ -200,12 +200,22 @@ public abstract class ASN1TaggedObject
         throw new RuntimeException("implicit tagging not implemented for tag: " + tag);
     }
 
-    public DERObject getLoadedObject()
+    public ASN1Primitive getLoadedObject()
     {
-        return this.getDERObject();
+        return this.toASN1Primitive();
     }
-    
-    abstract void encode(DEROutputStream  out)
+
+    ASN1Primitive toDERObject()
+    {
+        return new DERTaggedObject(explicit, tagNo, obj);
+    }
+
+    ASN1Primitive toDLObject()
+    {
+        return new DLTaggedObject(explicit, tagNo, obj);
+    }
+
+    abstract void encode(ASN1OutputStream out)
         throws IOException;
 
     public String toString()

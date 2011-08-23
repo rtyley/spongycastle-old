@@ -6,17 +6,16 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
@@ -57,7 +56,7 @@ public class X509NameTest
         return X509Name.getInstance(new ASN1InputStream(new ByteArrayInputStream(bytes)).readObject());
     }
 
-    private DEREncodable createEntryValue(DERObjectIdentifier oid, String value)
+    private ASN1Encodable createEntryValue(DERObjectIdentifier oid, String value)
     {
         Hashtable attrs = new Hashtable();
 
@@ -69,14 +68,14 @@ public class X509NameTest
         
         X509Name name = new X509Name(order, attrs);
 
-        ASN1Sequence seq = (ASN1Sequence)name.getDERObject();
+        ASN1Sequence seq = (ASN1Sequence)name.toASN1Primitive();
         ASN1Set set = (ASN1Set)seq.getObjectAt(0);
         seq = (ASN1Sequence)set.getObjectAt(0);
 
         return seq.getObjectAt(1);
     }
 
-    private DEREncodable createEntryValueFromString(DERObjectIdentifier oid, String value)
+    private ASN1Encodable createEntryValueFromString(DERObjectIdentifier oid, String value)
     {
         Hashtable attrs = new Hashtable();
 
@@ -88,7 +87,7 @@ public class X509NameTest
         
         X509Name name = new X509Name(new X509Name(order, attrs).toString());
 
-        ASN1Sequence seq = (ASN1Sequence)name.getDERObject();
+        ASN1Sequence seq = (ASN1Sequence)name.toASN1Primitive();
         ASN1Set set = (ASN1Set)seq.getObjectAt(0);
         seq = (ASN1Sequence)set.getObjectAt(0);
 
@@ -116,7 +115,7 @@ public class X509NameTest
 
     private void testEncodingGeneralizedTime(DERObjectIdentifier oid, String value)
     {
-        DEREncodable converted = createEntryValue(oid, value);
+        ASN1Encodable converted = createEntryValue(oid, value);
         if (!(converted instanceof DERGeneralizedTime))
         {
             fail("encoding for " + oid + " not GeneralizedTime");
@@ -378,8 +377,8 @@ public class X509NameTest
 
         n1 = new X509Name(true, "2.5.4.5=#130138,CN=SSC Class 3 CA,O=UAB Skaitmeninio sertifikavimo centras,C=LT");
         n2 = new X509Name(true, "SERIALNUMBER=#130138,CN=SSC Class 3 CA,O=UAB Skaitmeninio sertifikavimo centras,C=LT");
-        n3 = X509Name.getInstance(ASN1Object.fromByteArray(Hex.decode("3063310b3009060355040613024c54312f302d060355040a1326"
-        + "55414220536b6169746d656e696e696f20736572746966696b6176696d6f2063656e74726173311730150603550403130e53534320436c6173732033204341310a30080603550405130138")));
+        n3 = X509Name.getInstance(ASN1Primitive.fromByteArray(Hex.decode("3063310b3009060355040613024c54312f302d060355040a1326"
+            + "55414220536b6169746d656e696e696f20736572746966696b6176696d6f2063656e74726173311730150603550403130e53534320436c6173732033204341310a30080603550405130138")));
 
         equalityTest(n1, n2);
         equalityTest(n2, n3);
@@ -648,7 +647,7 @@ public class X509NameTest
         //
         n = new X509Name("C=CH,O=,OU=dummy,CN=mail@dummy.com");
 
-        n = X509Name.getInstance(ASN1Object.fromByteArray(n.getEncoded()));
+        n = X509Name.getInstance(ASN1Primitive.fromByteArray(n.getEncoded()));
     }
 
     private void equalityTest(X509Name x509Name, X509Name x509Name1)

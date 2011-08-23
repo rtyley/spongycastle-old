@@ -1,15 +1,15 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+import java.security.SecureRandom;
+
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERApplicationSpecific;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
-
-import java.io.IOException;
-import java.security.SecureRandom;
 
 
 /**
@@ -54,7 +54,7 @@ public class TagTest
             fail("unexpected tag value found - not 32");
         }
 
-        tagged = (ASN1TaggedObject)ASN1Object.fromByteArray(tagged.getEncoded());
+        tagged = (ASN1TaggedObject)ASN1Primitive.fromByteArray(tagged.getEncoded());
 
         if (tagged.getTagNo() != 32)
         {
@@ -68,7 +68,7 @@ public class TagTest
             fail("unexpected tag value found - not 33");
         }
 
-        tagged = (ASN1TaggedObject)ASN1Object.fromByteArray(tagged.getEncoded());
+        tagged = (ASN1TaggedObject)ASN1Primitive.fromByteArray(tagged.getEncoded());
 
         if (tagged.getTagNo() != 33)
         {
@@ -84,7 +84,7 @@ public class TagTest
             fail("incorrect tag number read");
         }
 
-        app = (DERApplicationSpecific)ASN1Object.fromByteArray(app.getEncoded());
+        app = (DERApplicationSpecific)ASN1Primitive.fromByteArray(app.getEncoded());
 
         if (app.getApplicationTag() != 97)
         {
@@ -96,7 +96,7 @@ public class TagTest
         {
             int testTag = sr.nextInt() >>> (1 + (sr.nextInt() >>> 1) % 26);
             app = new DERApplicationSpecific(testTag, new byte[]{ 1 });
-            app = (DERApplicationSpecific)ASN1Object.fromByteArray(app.getEncoded());
+            app = (DERApplicationSpecific)ASN1Primitive.fromByteArray(app.getEncoded());
 
             if (app.getApplicationTag() != testTag)
             {

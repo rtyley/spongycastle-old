@@ -6,8 +6,8 @@ import java.io.IOException;
  * DER NumericString object - this is an ascii string of characters {0,1,2,3,4,5,6,7,8,9, }.
  */
 public class DERNumericString
-    extends ASN1Object
-    implements DERString
+    extends ASN1Primitive
+    implements ASN1String
 {
     String  string;
 
@@ -40,7 +40,7 @@ public class DERNumericString
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERNumericString)
         {
@@ -121,10 +121,10 @@ public class DERNumericString
     }
 
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(NUMERIC_STRING, this.getOctets());
+        out.writeEncoded(BERTags.NUMERIC_STRING, this.getOctets());
     }
 
     public int hashCode()
@@ -133,7 +133,7 @@ public class DERNumericString
     }
 
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive o)
     {
         if (!(o instanceof DERNumericString))
         {

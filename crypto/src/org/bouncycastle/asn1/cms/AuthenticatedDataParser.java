@@ -2,14 +2,15 @@ package org.bouncycastle.asn1.cms;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.ASN1TaggedObjectParser;
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
@@ -36,8 +37,8 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class AuthenticatedDataParser
 {
     private ASN1SequenceParser seq;
-    private DERInteger version;
-    private DEREncodable nextObject;
+    private ASN1Integer version;
+    private ASN1Encodable nextObject;
     private boolean originatorInfoCalled;
 
     public AuthenticatedDataParser(
@@ -45,7 +46,7 @@ public class AuthenticatedDataParser
         throws IOException
     {
         this.seq = seq;
-        this.version = (DERInteger)seq.readObject();
+        this.version = ASN1Integer.getInstance(seq.readObject());
     }
 
     public DERInteger getVersion()
@@ -65,9 +66,9 @@ public class AuthenticatedDataParser
 
         if (nextObject instanceof ASN1TaggedObjectParser && ((ASN1TaggedObjectParser)nextObject).getTagNo() == 0)
         {
-            ASN1SequenceParser originatorInfo = (ASN1SequenceParser) ((ASN1TaggedObjectParser)nextObject).getObjectParser(DERTags.SEQUENCE, false);
+            ASN1SequenceParser originatorInfo = (ASN1SequenceParser) ((ASN1TaggedObjectParser)nextObject).getObjectParser(BERTags.SEQUENCE, false);
             nextObject = null;
-            return OriginatorInfo.getInstance(originatorInfo.getDERObject());
+            return OriginatorInfo.getInstance(originatorInfo.toASN1Primitive());
         }
 
         return null;
@@ -103,7 +104,7 @@ public class AuthenticatedDataParser
         {
             ASN1SequenceParser o = (ASN1SequenceParser)nextObject;
             nextObject = null;
-            return AlgorithmIdentifier.getInstance(o.getDERObject());
+            return AlgorithmIdentifier.getInstance(o.toASN1Primitive());
         }
 
         return null;
@@ -119,7 +120,7 @@ public class AuthenticatedDataParser
 
         if (nextObject instanceof ASN1TaggedObjectParser)
         {
-            AlgorithmIdentifier obj = AlgorithmIdentifier.getInstance((ASN1TaggedObject)nextObject.getDERObject(), false);
+            AlgorithmIdentifier obj = AlgorithmIdentifier.getInstance((ASN1TaggedObject)nextObject.toASN1Primitive(), false);
             nextObject = null;
             return obj;
         }
@@ -155,9 +156,9 @@ public class AuthenticatedDataParser
 
         if (nextObject instanceof ASN1TaggedObjectParser)
         {
-            DEREncodable o = nextObject;
+            ASN1Encodable o = nextObject;
             nextObject = null;
-            return (ASN1SetParser)((ASN1TaggedObjectParser)o).getObjectParser(DERTags.SET, false);
+            return (ASN1SetParser)((ASN1TaggedObjectParser)o).getObjectParser(BERTags.SET, false);
         }
 
         return null;
@@ -171,10 +172,10 @@ public class AuthenticatedDataParser
             nextObject = seq.readObject();
         }
 
-        DEREncodable o = nextObject;
+        ASN1Encodable o = nextObject;
         nextObject = null;
 
-        return ASN1OctetString.getInstance(o.getDERObject());
+        return ASN1OctetString.getInstance(o.toASN1Primitive());
     }
 
     public ASN1SetParser getUnauthAttrs()
@@ -187,9 +188,9 @@ public class AuthenticatedDataParser
 
         if (nextObject != null)
         {
-            DEREncodable o = nextObject;
+            ASN1Encodable o = nextObject;
             nextObject = null;
-            return (ASN1SetParser)((ASN1TaggedObjectParser)o).getObjectParser(DERTags.SET, false);
+            return (ASN1SetParser)((ASN1TaggedObjectParser)o).getObjectParser(BERTags.SET, false);
         }
 
         return null;

@@ -1,10 +1,10 @@
 package org.bouncycastle.jce.provider;
 
 import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.SignatureSpi;
-import java.security.PrivateKey;
-import java.security.InvalidKeyException;
 import java.security.spec.AlgorithmParameterSpec;
 
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;

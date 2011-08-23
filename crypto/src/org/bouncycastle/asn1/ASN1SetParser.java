@@ -3,8 +3,8 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 
 public interface ASN1SetParser
-    extends DEREncodable, InMemoryRepresentable
+    extends ASN1Encodable, InMemoryRepresentable
 {
-    public DEREncodable readObject()
+    public ASN1Encodable readObject()
         throws IOException;
 }

@@ -7,13 +7,13 @@ import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERString;
@@ -36,177 +36,177 @@ import org.bouncycastle.util.encoders.Hex;
  * @deprecated use org.bouncycastle.asn1.x500.X500Name.
  */
 public class X509Name
-    extends ASN1Encodable
+    extends ASN1Object
 {
     /**
      * country code - StringType(SIZE(2))
      */
-    public static final DERObjectIdentifier C = new DERObjectIdentifier("2.5.4.6");
+    public static final ASN1ObjectIdentifier C = new ASN1ObjectIdentifier("2.5.4.6");
 
     /**
      * organization - StringType(SIZE(1..64))
      */
-    public static final DERObjectIdentifier O = new DERObjectIdentifier("2.5.4.10");
+    public static final ASN1ObjectIdentifier O = new ASN1ObjectIdentifier("2.5.4.10");
 
     /**
      * organizational unit name - StringType(SIZE(1..64))
      */
-    public static final DERObjectIdentifier OU = new DERObjectIdentifier("2.5.4.11");
+    public static final ASN1ObjectIdentifier OU = new ASN1ObjectIdentifier("2.5.4.11");
 
     /**
      * Title
      */
-    public static final DERObjectIdentifier T = new DERObjectIdentifier("2.5.4.12");
+    public static final ASN1ObjectIdentifier T = new ASN1ObjectIdentifier("2.5.4.12");
 
     /**
      * common name - StringType(SIZE(1..64))
      */
-    public static final DERObjectIdentifier CN = new DERObjectIdentifier("2.5.4.3");
+    public static final ASN1ObjectIdentifier CN = new ASN1ObjectIdentifier("2.5.4.3");
 
     /**
      * device serial number name - StringType(SIZE(1..64))
      */
-    public static final DERObjectIdentifier SN = new DERObjectIdentifier("2.5.4.5");
+    public static final ASN1ObjectIdentifier SN = new ASN1ObjectIdentifier("2.5.4.5");
 
     /**
      * street - StringType(SIZE(1..64))
      */
-    public static final DERObjectIdentifier STREET = new DERObjectIdentifier("2.5.4.9");
+    public static final ASN1ObjectIdentifier STREET = new ASN1ObjectIdentifier("2.5.4.9");
     
     /**
      * device serial number name - StringType(SIZE(1..64))
      */
-    public static final DERObjectIdentifier SERIALNUMBER = SN;
+    public static final ASN1ObjectIdentifier SERIALNUMBER = SN;
 
     /**
      * locality name - StringType(SIZE(1..64))
      */
-    public static final DERObjectIdentifier L = new DERObjectIdentifier("2.5.4.7");
+    public static final ASN1ObjectIdentifier L = new ASN1ObjectIdentifier("2.5.4.7");
 
     /**
      * state, or province name - StringType(SIZE(1..64))
      */
-    public static final DERObjectIdentifier ST = new DERObjectIdentifier("2.5.4.8");
+    public static final ASN1ObjectIdentifier ST = new ASN1ObjectIdentifier("2.5.4.8");
 
     /**
      * Naming attributes of type X520name
      */
-    public static final DERObjectIdentifier SURNAME = new DERObjectIdentifier("2.5.4.4");
-    public static final DERObjectIdentifier GIVENNAME = new DERObjectIdentifier("2.5.4.42");
-    public static final DERObjectIdentifier INITIALS = new DERObjectIdentifier("2.5.4.43");
-    public static final DERObjectIdentifier GENERATION = new DERObjectIdentifier("2.5.4.44");
-    public static final DERObjectIdentifier UNIQUE_IDENTIFIER = new DERObjectIdentifier("2.5.4.45");
+    public static final ASN1ObjectIdentifier SURNAME = new ASN1ObjectIdentifier("2.5.4.4");
+    public static final ASN1ObjectIdentifier GIVENNAME = new ASN1ObjectIdentifier("2.5.4.42");
+    public static final ASN1ObjectIdentifier INITIALS = new ASN1ObjectIdentifier("2.5.4.43");
+    public static final ASN1ObjectIdentifier GENERATION = new ASN1ObjectIdentifier("2.5.4.44");
+    public static final ASN1ObjectIdentifier UNIQUE_IDENTIFIER = new ASN1ObjectIdentifier("2.5.4.45");
 
     /**
      * businessCategory - DirectoryString(SIZE(1..128)
      */
-    public static final DERObjectIdentifier BUSINESS_CATEGORY = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier BUSINESS_CATEGORY = new ASN1ObjectIdentifier(
                     "2.5.4.15");
 
     /**
      * postalCode - DirectoryString(SIZE(1..40)
      */
-    public static final DERObjectIdentifier POSTAL_CODE = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier POSTAL_CODE = new ASN1ObjectIdentifier(
                     "2.5.4.17");
     
     /**
      * dnQualifier - DirectoryString(SIZE(1..64)
      */
-    public static final DERObjectIdentifier DN_QUALIFIER = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier DN_QUALIFIER = new ASN1ObjectIdentifier(
                     "2.5.4.46");
 
     /**
      * RFC 3039 Pseudonym - DirectoryString(SIZE(1..64)
      */
-    public static final DERObjectIdentifier PSEUDONYM = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier PSEUDONYM = new ASN1ObjectIdentifier(
                     "2.5.4.65");
 
 
     /**
      * RFC 3039 DateOfBirth - GeneralizedTime - YYYYMMDD000000Z
      */
-    public static final DERObjectIdentifier DATE_OF_BIRTH = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier DATE_OF_BIRTH = new ASN1ObjectIdentifier(
                     "1.3.6.1.5.5.7.9.1");
 
     /**
      * RFC 3039 PlaceOfBirth - DirectoryString(SIZE(1..128)
      */
-    public static final DERObjectIdentifier PLACE_OF_BIRTH = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier PLACE_OF_BIRTH = new ASN1ObjectIdentifier(
                     "1.3.6.1.5.5.7.9.2");
 
     /**
      * RFC 3039 Gender - PrintableString (SIZE(1)) -- "M", "F", "m" or "f"
      */
-    public static final DERObjectIdentifier GENDER = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier GENDER = new ASN1ObjectIdentifier(
                     "1.3.6.1.5.5.7.9.3");
 
     /**
      * RFC 3039 CountryOfCitizenship - PrintableString (SIZE (2)) -- ISO 3166
      * codes only
      */
-    public static final DERObjectIdentifier COUNTRY_OF_CITIZENSHIP = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier COUNTRY_OF_CITIZENSHIP = new ASN1ObjectIdentifier(
                     "1.3.6.1.5.5.7.9.4");
 
     /**
      * RFC 3039 CountryOfResidence - PrintableString (SIZE (2)) -- ISO 3166
      * codes only
      */
-    public static final DERObjectIdentifier COUNTRY_OF_RESIDENCE = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier COUNTRY_OF_RESIDENCE = new ASN1ObjectIdentifier(
                     "1.3.6.1.5.5.7.9.5");
 
 
     /**
      * ISIS-MTT NameAtBirth - DirectoryString(SIZE(1..64)
      */
-    public static final DERObjectIdentifier NAME_AT_BIRTH =  new DERObjectIdentifier("1.3.36.8.3.14");
+    public static final ASN1ObjectIdentifier NAME_AT_BIRTH =  new ASN1ObjectIdentifier("1.3.36.8.3.14");
 
     /**
      * RFC 3039 PostalAddress - SEQUENCE SIZE (1..6) OF
      * DirectoryString(SIZE(1..30))
      */
-    public static final DERObjectIdentifier POSTAL_ADDRESS = new DERObjectIdentifier("2.5.4.16");
+    public static final ASN1ObjectIdentifier POSTAL_ADDRESS = new ASN1ObjectIdentifier("2.5.4.16");
 
     /**
      * RFC 2256 dmdName
      */
-    public static final DERObjectIdentifier DMD_NAME = new DERObjectIdentifier("2.5.4.54");
+    public static final ASN1ObjectIdentifier DMD_NAME = new ASN1ObjectIdentifier("2.5.4.54");
 
     /**
      * id-at-telephoneNumber
      */
-    public static final DERObjectIdentifier TELEPHONE_NUMBER = X509ObjectIdentifiers.id_at_telephoneNumber;
+    public static final ASN1ObjectIdentifier TELEPHONE_NUMBER = X509ObjectIdentifiers.id_at_telephoneNumber;
 
     /**
      * id-at-name
      */
-    public static final DERObjectIdentifier NAME = X509ObjectIdentifiers.id_at_name;
+    public static final ASN1ObjectIdentifier NAME = X509ObjectIdentifiers.id_at_name;
 
     /**
      * Email address (RSA PKCS#9 extension) - IA5String.
      * <p>Note: if you're trying to be ultra orthodox, don't use this! It shouldn't be in here.
      */
-    public static final DERObjectIdentifier EmailAddress = PKCSObjectIdentifiers.pkcs_9_at_emailAddress;
+    public static final ASN1ObjectIdentifier EmailAddress = PKCSObjectIdentifiers.pkcs_9_at_emailAddress;
     
     /**
      * more from PKCS#9
      */
-    public static final DERObjectIdentifier UnstructuredName = PKCSObjectIdentifiers.pkcs_9_at_unstructuredName;
-    public static final DERObjectIdentifier UnstructuredAddress = PKCSObjectIdentifiers.pkcs_9_at_unstructuredAddress;
+    public static final ASN1ObjectIdentifier UnstructuredName = PKCSObjectIdentifiers.pkcs_9_at_unstructuredName;
+    public static final ASN1ObjectIdentifier UnstructuredAddress = PKCSObjectIdentifiers.pkcs_9_at_unstructuredAddress;
     
     /**
      * email address in Verisign certificates
      */
-    public static final DERObjectIdentifier E = EmailAddress;
+    public static final ASN1ObjectIdentifier E = EmailAddress;
     
     /*
      * others...
      */
-    public static final DERObjectIdentifier DC = new DERObjectIdentifier("0.9.2342.19200300.100.1.25");
+    public static final ASN1ObjectIdentifier DC = new ASN1ObjectIdentifier("0.9.2342.19200300.100.1.25");
 
     /**
      * LDAP User id.
      */
-    public static final DERObjectIdentifier UID = new DERObjectIdentifier("0.9.2342.19200300.100.1.1");
+    public static final ASN1ObjectIdentifier UID = new ASN1ObjectIdentifier("0.9.2342.19200300.100.1.1");
 
     /**
      * determines whether or not strings should be processed and printed
@@ -374,7 +374,7 @@ public class X509Name
         }
         else if (obj instanceof X500Name)
         {
-            return new X509Name(ASN1Sequence.getInstance(((X500Name)obj).getDERObject()));
+            return new X509Name(ASN1Sequence.getInstance(((X500Name)obj).toASN1Primitive()));
         }
         else if (obj != null)
         {
@@ -402,20 +402,20 @@ public class X509Name
 
         while (e.hasMoreElements())
         {
-            ASN1Set         set = ASN1Set.getInstance(((DEREncodable)e.nextElement()).getDERObject());
+            ASN1Set         set = ASN1Set.getInstance(((ASN1Encodable)e.nextElement()).toASN1Primitive());
 
             for (int i = 0; i < set.size(); i++) 
             {
-                   ASN1Sequence s = ASN1Sequence.getInstance(set.getObjectAt(i).getDERObject());
+                   ASN1Sequence s = ASN1Sequence.getInstance(set.getObjectAt(i).toASN1Primitive());
 
                    if (s.size() != 2)
                    {
                        throw new IllegalArgumentException("badly sized pair");
                    }
 
-                   ordering.addElement(DERObjectIdentifier.getInstance(s.getObjectAt(0)));
+                   ordering.addElement(ASN1ObjectIdentifier.getInstance(s.getObjectAt(0)));
                    
-                   DEREncodable value = s.getObjectAt(1);
+                   ASN1Encodable value = s.getObjectAt(1);
                    if (value instanceof DERString && !(value instanceof DERUniversalString))
                    {
                        String v = ((DERString)value).getString();
@@ -430,7 +430,14 @@ public class X509Name
                    }
                    else
                    {
-                       values.addElement("#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded())));
+                       try
+                       {
+                           values.addElement("#" + bytesToString(Hex.encode(value.toASN1Primitive().getEncoded(ASN1Encoding.DER))));
+                       }
+                       catch (IOException e1)
+                       {
+                           throw new IllegalArgumentException("cannot encode value");
+                       }
                    }
                    added.addElement((i != 0) ? TRUE : FALSE);  // to allow earlier JDK compatibility
             }
@@ -509,7 +516,7 @@ public class X509Name
 
         for (int i = 0; i != this.ordering.size(); i++)
         {
-            DERObjectIdentifier     oid = (DERObjectIdentifier)this.ordering.elementAt(i);
+            ASN1ObjectIdentifier     oid = (ASN1ObjectIdentifier)this.ordering.elementAt(i);
 
             if (attributes.get(oid) == null)
             {
@@ -621,7 +628,7 @@ public class X509Name
      * Takes an X509 dir name as a string of the format "C=AU, ST=Victoria", or
      * some such, converting it into an ordered set of name attributes. lookUp
      * should provide a table of lookups, indexed by lowercase only strings and
-     * yielding a DERObjectIdentifier, other than that OID. and numeric oids
+     * yielding a ASN1ObjectIdentifier, other than that OID. and numeric oids
      * will be processed automatically.
      * <br>
      * If reverse is true, create the encoded version of the sequence
@@ -638,20 +645,20 @@ public class X509Name
         this(reverse, lookUp, dirName, new X509DefaultEntryConverter());
     }
 
-    private DERObjectIdentifier decodeOID(
+    private ASN1ObjectIdentifier decodeOID(
         String      name,
         Hashtable   lookUp)
     {
         if (Strings.toUpperCase(name).startsWith("OID."))
         {
-            return new DERObjectIdentifier(name.substring(4));
+            return new ASN1ObjectIdentifier(name.substring(4));
         }
         else if (name.charAt(0) >= '0' && name.charAt(0) <= '9')
         {
-            return new DERObjectIdentifier(name);
+            return new ASN1ObjectIdentifier(name);
         }
 
-        DERObjectIdentifier oid = (DERObjectIdentifier)lookUp.get(Strings.toLowerCase(name));
+        ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)lookUp.get(Strings.toLowerCase(name));
         if (oid == null)
         {
             throw new IllegalArgumentException("Unknown object id - " + name + " - passed to distinguished name");
@@ -664,7 +671,7 @@ public class X509Name
      * Takes an X509 dir name as a string of the format "C=AU, ST=Victoria", or
      * some such, converting it into an ordered set of name attributes. lookUp
      * should provide a table of lookups, indexed by lowercase only strings and
-     * yielding a DERObjectIdentifier, other than that OID. and numeric oids
+     * yielding a ASN1ObjectIdentifier, other than that OID. and numeric oids
      * will be processed automatically. The passed in converter is used to convert the
      * string values to the right of each equals sign to their ASN.1 counterparts.
      * <br>
@@ -694,7 +701,7 @@ public class X509Name
 
             String              name = token.substring(0, index);
             String              value = token.substring(index + 1);
-            DERObjectIdentifier oid = decodeOID(name, lookUp);
+            ASN1ObjectIdentifier oid = decodeOID(name, lookUp);
 
             if (value.indexOf('+') > 0)
             {
@@ -793,7 +800,7 @@ public class X509Name
      * were found, with the DN label corresponding to passed in oid.
      */
     public Vector getValues(
-        DERObjectIdentifier oid)
+        ASN1ObjectIdentifier oid)
     {
         Vector  v = new Vector();
 
@@ -817,18 +824,18 @@ public class X509Name
         return v;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         if (seq == null)
         {
             ASN1EncodableVector  vec = new ASN1EncodableVector();
             ASN1EncodableVector  sVec = new ASN1EncodableVector();
-            DERObjectIdentifier  lstOid = null;
+            ASN1ObjectIdentifier  lstOid = null;
             
             for (int i = 0; i != ordering.size(); i++)
             {
                 ASN1EncodableVector     v = new ASN1EncodableVector();
-                DERObjectIdentifier     oid = (DERObjectIdentifier)ordering.elementAt(i);
+                ASN1ObjectIdentifier     oid = (ASN1ObjectIdentifier)ordering.elementAt(i);
 
                 v.add(oid);
 
@@ -881,9 +888,9 @@ public class X509Name
             return false;
         }
 
-        DERObject derO = ((DEREncodable)obj).getDERObject();
+        ASN1Primitive derO = ((ASN1Encodable)obj).toASN1Primitive();
 
-        if (this.getDERObject().equals(derO))
+        if (this.toASN1Primitive().equals(derO))
         {
             return true;
         }
@@ -908,8 +915,8 @@ public class X509Name
 
         for (int i = 0; i < orderingSize; i++)
         {
-            DERObjectIdentifier  oid = (DERObjectIdentifier)ordering.elementAt(i);
-            DERObjectIdentifier  oOid = (DERObjectIdentifier)other.ordering.elementAt(i);
+            ASN1ObjectIdentifier  oid = (ASN1ObjectIdentifier)ordering.elementAt(i);
+            ASN1ObjectIdentifier  oOid = (ASN1ObjectIdentifier)other.ordering.elementAt(i);
 
             if (oid.equals(oOid))
             {
@@ -969,9 +976,9 @@ public class X509Name
             return false;
         }
         
-        DERObject derO = ((DEREncodable)obj).getDERObject();
+        ASN1Primitive derO = ((ASN1Encodable)obj).toASN1Primitive();
         
-        if (this.getDERObject().equals(derO))
+        if (this.toASN1Primitive().equals(derO))
         {
             return true;
         }
@@ -1013,7 +1020,7 @@ public class X509Name
         for (int i = start; i != end; i += delta)
         {
             boolean              found = false;
-            DERObjectIdentifier  oid = (DERObjectIdentifier)ordering.elementAt(i);
+            ASN1ObjectIdentifier  oid = (ASN1ObjectIdentifier)ordering.elementAt(i);
             String               value = (String)values.elementAt(i);
 
             for (int j = 0; j < orderingSize; j++)
@@ -1023,7 +1030,7 @@ public class X509Name
                     continue;
                 }
 
-                DERObjectIdentifier oOid = (DERObjectIdentifier)other.ordering.elementAt(j);
+                ASN1ObjectIdentifier oOid = (ASN1ObjectIdentifier)other.ordering.elementAt(j);
 
                 if (oid.equals(oOid))
                 {
@@ -1072,7 +1079,7 @@ public class X509Name
         
         if (value.length() > 0 && value.charAt(0) == '#')
         {
-            DERObject obj = decodeObject(value);
+            ASN1Primitive obj = decodeObject(value);
 
             if (obj instanceof DERString)
             {
@@ -1083,11 +1090,11 @@ public class X509Name
         return value;
     }
 
-    private ASN1Object decodeObject(String oValue)
+    private ASN1Primitive decodeObject(String oValue)
     {
         try
         {
-            return ASN1Object.fromByteArray(Hex.decode(oValue.substring(1)));
+            return ASN1Primitive.fromByteArray(Hex.decode(oValue.substring(1)));
         }
         catch (IOException e)
         {
@@ -1123,7 +1130,7 @@ public class X509Name
     private void appendValue(
         StringBuffer        buf,
         Hashtable           oidSymbols,
-        DERObjectIdentifier oid,
+        ASN1ObjectIdentifier oid,
         String              value)
     {
         String  sym = (String)oidSymbols.get(oid);
@@ -1198,14 +1205,14 @@ public class X509Name
             {
                 ava.append('+');
                 appendValue(ava, oidSymbols,
-                    (DERObjectIdentifier)ordering.elementAt(i),
+                    (ASN1ObjectIdentifier)ordering.elementAt(i),
                     (String)values.elementAt(i));
             }
             else
             {
                 ava = new StringBuffer();
                 appendValue(ava, oidSymbols,
-                    (DERObjectIdentifier)ordering.elementAt(i),
+                    (ASN1ObjectIdentifier)ordering.elementAt(i),
                     (String)values.elementAt(i));
                 components.addElement(ava);
             }

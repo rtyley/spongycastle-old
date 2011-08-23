@@ -12,7 +12,7 @@ import java.security.interfaces.DSAKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
@@ -216,7 +216,7 @@ public class JDKDSASigner
         byte[]  encoding)
         throws IOException
     {
-        ASN1Sequence s = (ASN1Sequence)ASN1Object.fromByteArray(encoding);
+        ASN1Sequence s = (ASN1Sequence)ASN1Primitive.fromByteArray(encoding);
         return new BigInteger[]{
             ((DERInteger)s.getObjectAt(0)).getValue(),
             ((DERInteger)s.getObjectAt(1)).getValue()

@@ -1,11 +1,11 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.DEROctetString;
-
 import java.io.IOException;
 import java.security.AlgorithmParametersSpi;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
+
+import org.bouncycastle.asn1.DEROctetString;
 
 public abstract class JDKECDSAAlgParameters
     extends AlgorithmParametersSpi

@@ -8,7 +8,6 @@ import java.security.Security;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.mozilla.PublicKeyAndChallenge;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;

@@ -4,14 +4,13 @@ import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.style.BCStyle;
-import org.bouncycastle.asn1.x509.X509Name;
 
 /**
  * <pre>
@@ -28,7 +27,7 @@ import org.bouncycastle.asn1.x509.X509Name;
  * </pre>
  */
 public class X500Name
-    extends ASN1Encodable
+    extends ASN1Object
     implements ASN1Choice
 {
     private static X500NameStyle    defaultStyle = BCStyle.INSTANCE;
@@ -46,11 +45,11 @@ public class X500Name
     }
 
     /**
-     * Return a X509Name based on the passed in tagged object.
+     * Return a X500Name based on the passed in tagged object.
      * 
      * @param obj tag object holding name.
      * @param explicit true if explicitly tagged false otherwise.
-     * @return the X509Name
+     * @return the X500Name
      */
     public static X500Name getInstance(
         ASN1TaggedObject obj,
@@ -66,10 +65,6 @@ public class X500Name
         if (obj instanceof X500Name)
         {
             return (X500Name)obj;
-        }
-        else if (obj instanceof X509Name)
-        {
-            return new X500Name(ASN1Sequence.getInstance(((X509Name)obj).getDERObject()));
         }
         else if (obj != null)
         {
@@ -191,7 +186,7 @@ public class X500Name
         return tmp;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return new DERSequence(rdns);
     }
@@ -225,16 +220,16 @@ public class X500Name
             return false;
         }
         
-        DERObject derO = ((DEREncodable)obj).getDERObject();
+        ASN1Primitive derO = ((ASN1Encodable)obj).toASN1Primitive();
 
-        if (this.getDERObject().equals(derO))
+        if (this.toASN1Primitive().equals(derO))
         {
             return true;
         }
 
         try
         {
-            return style.areEqual(this, new X500Name(ASN1Sequence.getInstance(((DEREncodable)obj).getDERObject())));
+            return style.areEqual(this, new X500Name(ASN1Sequence.getInstance(((ASN1Encodable)obj).toASN1Primitive())));
         }
         catch (Exception e)
         {

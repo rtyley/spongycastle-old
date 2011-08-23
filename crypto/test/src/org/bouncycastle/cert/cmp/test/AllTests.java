@@ -15,7 +15,7 @@ import java.util.Date;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cmp.CertConfirmContent;
 import org.bouncycastle.asn1.cmp.CertRepMessage;
@@ -223,7 +223,7 @@ public class AllTests
 
         try
         {
-            return PKIMessage.getInstance(ASN1Object.fromByteArray(Streams.readAll(new FileInputStream(dataHome + "/cmp/" + name))));
+            return PKIMessage.getInstance(ASN1Primitive.fromByteArray(Streams.readAll(new FileInputStream(dataHome + "/cmp/" + name))));
         }
         catch (IOException e)
         {

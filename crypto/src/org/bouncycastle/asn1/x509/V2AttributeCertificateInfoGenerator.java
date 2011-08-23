@@ -2,11 +2,11 @@ package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERGeneralizedTime;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERGeneralizedTime;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 
 /**
@@ -54,7 +54,7 @@ public class V2AttributeCertificateInfoGenerator
     
     public void addAttribute(String oid, ASN1Encodable value) 
     {
-        attributes.add(new Attribute(new DERObjectIdentifier(oid), new DERSet(value)));
+        attributes.add(new Attribute(new ASN1ObjectIdentifier(oid), new DERSet(value)));
     }
 
     /**

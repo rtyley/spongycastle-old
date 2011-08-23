@@ -1,7 +1,7 @@
 package org.bouncycastle.jce;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x509.KeyUsage;
 
 /**
@@ -23,7 +23,7 @@ import org.bouncycastle.asn1.x509.KeyUsage;
  * </pre>
  */
 public class X509KeyUsage
-    extends ASN1Encodable
+    extends ASN1Object
 {
     public static final int        digitalSignature = 1 << 7; 
     public static final int        nonRepudiation   = 1 << 6;
@@ -50,7 +50,7 @@ public class X509KeyUsage
         this.usage = usage;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         return new KeyUsage(usage);
     }

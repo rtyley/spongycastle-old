@@ -2,18 +2,18 @@ package org.bouncycastle.asn1.ess;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERUTF8String;
 
 public class ContentHints
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private DERUTF8String contentDescription;
-    private DERObjectIdentifier contentType;
+    private ASN1ObjectIdentifier contentType;
 
     public static ContentHints getInstance(Object o)
     {
@@ -36,34 +36,34 @@ public class ContentHints
      */
     private ContentHints(ASN1Sequence seq)
     {
-        DEREncodable field = seq.getObjectAt(0);
-        if (field.getDERObject() instanceof DERUTF8String)
+        ASN1Encodable field = seq.getObjectAt(0);
+        if (field.toASN1Primitive() instanceof DERUTF8String)
         {
             contentDescription = DERUTF8String.getInstance(field);
-            contentType = DERObjectIdentifier.getInstance(seq.getObjectAt(1));
+            contentType = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(1));
         }
         else
         {
-            contentType = DERObjectIdentifier.getInstance(seq.getObjectAt(0));
+            contentType = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
         }
     }
 
     public ContentHints(
-        DERObjectIdentifier contentType)
+        ASN1ObjectIdentifier contentType)
     {
         this.contentType = contentType;
         this.contentDescription = null;
     }
 
     public ContentHints(
-        DERObjectIdentifier contentType,
+        ASN1ObjectIdentifier contentType,
         DERUTF8String contentDescription)
     {
         this.contentType = contentType;
         this.contentDescription = contentDescription;
     }
 
-    public DERObjectIdentifier getContentType()
+    public ASN1ObjectIdentifier getContentType()
     {
         return contentType;
     }
@@ -80,7 +80,7 @@ public class ContentHints
      *   contentType ContentType }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

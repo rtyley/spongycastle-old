@@ -2,9 +2,9 @@ package org.bouncycastle.asn1.x9;
 
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.math.ec.ECFieldElement;
 
@@ -12,7 +12,7 @@ import org.bouncycastle.math.ec.ECFieldElement;
  * class for processing an FieldElement as a DER object.
  */
 public class X9FieldElement
-    extends ASN1Encodable
+    extends ASN1Object
 {
     protected ECFieldElement  f;
     
@@ -54,7 +54,7 @@ public class X9FieldElement
      * </li>
      * </ol>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         int byteCount = converter.getByteLength(f);
         byte[] paddedBigInteger = converter.integerToBytes(f.toBigInteger(), byteCount);

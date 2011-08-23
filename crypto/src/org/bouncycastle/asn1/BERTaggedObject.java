@@ -17,7 +17,7 @@ public class BERTaggedObject
      */
     public BERTaggedObject(
         int             tagNo,
-        DEREncodable    obj)
+        ASN1Encodable    obj)
     {
         super(tagNo, obj);
     }
@@ -30,7 +30,7 @@ public class BERTaggedObject
     public BERTaggedObject(
         boolean         explicit,
         int             tagNo,
-        DEREncodable    obj)
+        ASN1Encodable    obj)
     {
         super(explicit, tagNo, obj);
     }
@@ -46,62 +46,55 @@ public class BERTaggedObject
     }
 
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream out)
         throws IOException
     {
-        if (out instanceof ASN1OutputStream || out instanceof BEROutputStream)
-        {
-            out.writeTag(CONSTRUCTED | TAGGED, tagNo);
-            out.write(0x80);
+        out.writeTag(BERTags.CONSTRUCTED | BERTags.TAGGED, tagNo);
+        out.write(0x80);
 
-            if (!empty)
+        if (!empty)
+        {
+            if (!explicit)
             {
-                if (!explicit)
+                Enumeration e;
+                if (obj instanceof ASN1OctetString)
                 {
-                    Enumeration e;
-                    if (obj instanceof ASN1OctetString)
+                    if (obj instanceof BEROctetString)
                     {
-                        if (obj instanceof BERConstructedOctetString)
-                        {
-                            e = ((BERConstructedOctetString)obj).getObjects();
-                        }
-                        else
-                        {
-                            ASN1OctetString             octs = (ASN1OctetString)obj;
-                            BERConstructedOctetString   berO = new BERConstructedOctetString(octs.getOctets());
-                            e = berO.getObjects();
-                        }
-                    }
-                    else if (obj instanceof ASN1Sequence)
-                    {
-                        e = ((ASN1Sequence)obj).getObjects();
-                    }
-                    else if (obj instanceof ASN1Set)
-                    {
-                        e = ((ASN1Set)obj).getObjects();
+                        e = ((BEROctetString)obj).getObjects();
                     }
                     else
                     {
-                        throw new RuntimeException("not implemented: " + obj.getClass().getName());
+                        ASN1OctetString             octs = (ASN1OctetString)obj;
+                        BEROctetString berO = new BEROctetString(octs.getOctets());
+                        e = berO.getObjects();
                     }
-
-                    while (e.hasMoreElements())
-                    {
-                        out.writeObject(e.nextElement());
-                    }
+                }
+                else if (obj instanceof ASN1Sequence)
+                {
+                    e = ((ASN1Sequence)obj).getObjects();
+                }
+                else if (obj instanceof ASN1Set)
+                {
+                    e = ((ASN1Set)obj).getObjects();
                 }
                 else
                 {
-                    out.writeObject(obj);
+                    throw new RuntimeException("not implemented: " + obj.getClass().getName());
+                }
+
+                while (e.hasMoreElements())
+                {
+                    out.writeObject((ASN1Encodable)e.nextElement());
                 }
             }
+            else
+            {
+                out.writeObject(obj);
+            }
+        }
 
-            out.write(0x00);
-            out.write(0x00);
-        }
-        else
-        {
-            super.encode(out);
-        }
+        out.write(0x00);
+        out.write(0x00);
     }
 }

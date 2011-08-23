@@ -8,8 +8,8 @@ import org.bouncycastle.util.Strings;
  * DER UTF8String object.
  */
 public class DERUTF8String
-    extends ASN1Object
-    implements DERString
+    extends ASN1Primitive
+    implements ASN1String
 {
     String string;
 
@@ -45,7 +45,7 @@ public class DERUTF8String
         ASN1TaggedObject obj,
         boolean explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERUTF8String)
         {
@@ -95,7 +95,7 @@ public class DERUTF8String
         return this.getString().hashCode();
     }
 
-    boolean asn1Equals(DERObject o)
+    boolean asn1Equals(ASN1Primitive o)
     {
         if (!(o instanceof DERUTF8String))
         {
@@ -107,9 +107,9 @@ public class DERUTF8String
         return this.getString().equals(s.getString());
     }
 
-    void encode(DEROutputStream out)
+    void encode(ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(UTF8_STRING, Strings.toUTF8ByteArray(string));
+        out.writeEncoded(BERTags.UTF8_STRING, Strings.toUTF8ByteArray(string));
     }
 }

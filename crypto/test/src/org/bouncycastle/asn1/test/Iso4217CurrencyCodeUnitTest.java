@@ -1,6 +1,5 @@
 package org.bouncycastle.asn1.test;
 
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
 import org.bouncycastle.util.test.SimpleTest;
 

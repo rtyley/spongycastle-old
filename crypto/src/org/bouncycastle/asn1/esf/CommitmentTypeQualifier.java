@@ -2,10 +2,10 @@ package org.bouncycastle.asn1.esf;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -18,10 +18,10 @@ import org.bouncycastle.asn1.DERSequence;
  * </pre>
  */
 public class CommitmentTypeQualifier
-    extends ASN1Encodable
+    extends ASN1Object
 {
-   private DERObjectIdentifier commitmentTypeIdentifier;
-   private DEREncodable qualifier;
+   private ASN1ObjectIdentifier commitmentTypeIdentifier;
+   private ASN1Encodable qualifier;
 
    /**
     * Creates a new <code>CommitmentTypeQualifier</code> instance.
@@ -29,7 +29,7 @@ public class CommitmentTypeQualifier
     * @param commitmentTypeIdentifier a <code>CommitmentTypeIdentifier</code> value
     */
     public CommitmentTypeQualifier(
-        DERObjectIdentifier commitmentTypeIdentifier)
+        ASN1ObjectIdentifier commitmentTypeIdentifier)
     {
         this(commitmentTypeIdentifier, null);
     }
@@ -41,8 +41,8 @@ public class CommitmentTypeQualifier
     * @param qualifier the qualifier, defined by the above field.
     */
     public CommitmentTypeQualifier(
-        DERObjectIdentifier commitmentTypeIdentifier,
-        DEREncodable qualifier) 
+        ASN1ObjectIdentifier commitmentTypeIdentifier,
+        ASN1Encodable qualifier)
     {
         this.commitmentTypeIdentifier = commitmentTypeIdentifier;
         this.qualifier = qualifier;
@@ -57,7 +57,7 @@ public class CommitmentTypeQualifier
     public CommitmentTypeQualifier(
         ASN1Sequence as)
     {
-        commitmentTypeIdentifier = (DERObjectIdentifier)as.getObjectAt(0);
+        commitmentTypeIdentifier = (ASN1ObjectIdentifier)as.getObjectAt(0);
         
         if (as.size() > 1)
         {
@@ -79,12 +79,12 @@ public class CommitmentTypeQualifier
         throw new IllegalArgumentException("unknown object in getInstance.");
     }
 
-    public DERObjectIdentifier getCommitmentTypeIdentifier()
+    public ASN1ObjectIdentifier getCommitmentTypeIdentifier()
     {
         return commitmentTypeIdentifier;
     }
     
-    public DEREncodable getQualifier()
+    public ASN1Encodable getQualifier()
     {
         return qualifier;
     }
@@ -92,9 +92,9 @@ public class CommitmentTypeQualifier
    /**
     * Returns a DER-encodable representation of this instance. 
     *
-    * @return a <code>DERObject</code> value
+    * @return a <code>ASN1Primitive</code> value
     */
-   public DERObject toASN1Object() 
+   public ASN1Primitive toASN1Primitive()
    {
       ASN1EncodableVector dev = new ASN1EncodableVector();
       dev.add(commitmentTypeIdentifier);

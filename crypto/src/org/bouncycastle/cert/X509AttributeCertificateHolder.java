@@ -8,8 +8,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttCertValidityPeriod;
@@ -36,7 +36,7 @@ public class X509AttributeCertificateHolder
     {
         try
         {
-            return AttributeCertificate.getInstance(ASN1Object.fromByteArray(certEncoding));
+            return AttributeCertificate.getInstance(ASN1Primitive.fromByteArray(certEncoding));
         }
         catch (ClassCastException e)
         {

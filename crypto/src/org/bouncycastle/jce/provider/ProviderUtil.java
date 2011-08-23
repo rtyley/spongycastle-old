@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.Permission;
 
+import org.bouncycastle.jcajce.provider.asymmetric.ec.EC5Util;
 import org.bouncycastle.jce.ProviderConfigurationPermission;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
-import org.bouncycastle.jce.provider.asymmetric.ec.EC5Util;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 
 public class ProviderUtil

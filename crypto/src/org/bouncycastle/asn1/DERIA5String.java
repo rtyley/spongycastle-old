@@ -6,8 +6,8 @@ import java.io.IOException;
  * DER IA5String object - this is an ascii string.
  */
 public class DERIA5String
-    extends ASN1Object
-    implements DERString
+    extends ASN1Primitive
+    implements ASN1String
 {
     String  string;
 
@@ -40,7 +40,7 @@ public class DERIA5String
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERIA5String)
         {
@@ -125,10 +125,10 @@ public class DERIA5String
     }
 
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(IA5_STRING, this.getOctets());
+        out.writeEncoded(BERTags.IA5_STRING, this.getOctets());
     }
 
     public int hashCode()
@@ -137,7 +137,7 @@ public class DERIA5String
     }
 
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive o)
     {
         if (!(o instanceof DERIA5String))
         {

@@ -6,8 +6,8 @@ import java.io.IOException;
  * DER BMPString object.
  */
 public class DERBMPString
-    extends ASN1Object
-    implements DERString
+    extends ASN1Primitive
+    implements ASN1String
 {
     String  string;
 
@@ -41,7 +41,7 @@ public class DERBMPString
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Primitive o = obj.getObject();
 
         if (explicit || o instanceof DERBMPString)
         {
@@ -95,7 +95,7 @@ public class DERBMPString
     }
 
     protected boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive o)
     {
         if (!(o instanceof DERBMPString))
         {
@@ -108,7 +108,7 @@ public class DERBMPString
     }
 
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream out)
         throws IOException
     {
         char[]  c = string.toCharArray();
@@ -120,6 +120,6 @@ public class DERBMPString
             b[2 * i + 1] = (byte)c[i];
         }
 
-        out.writeEncoded(BMP_STRING, b);
+        out.writeEncoded(BERTags.BMP_STRING, b);
     }
 }

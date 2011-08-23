@@ -9,7 +9,7 @@ import org.bouncycastle.util.Arrays;
  * Base class for an application specific object
  */
 public class DERApplicationSpecific 
-    extends ASN1Object
+    extends ASN1Primitive
 {
     private final boolean   isConstructed;
     private final int       tag;
@@ -34,7 +34,7 @@ public class DERApplicationSpecific
 
     public DERApplicationSpecific(
         int                  tag, 
-        DEREncodable         object) 
+        ASN1Encodable object)
         throws IOException 
     {
         this(true, tag, object);
@@ -43,10 +43,10 @@ public class DERApplicationSpecific
     public DERApplicationSpecific(
         boolean      explicit,
         int          tag,
-        DEREncodable object)
+        ASN1Encodable object)
         throws IOException
     {
-        byte[] data = object.getDERObject().getDEREncoded();
+        byte[] data = object.toASN1Primitive().getEncoded(ASN1Encoding.DER);
 
         this.isConstructed = explicit;
         this.tag = tag;
@@ -74,7 +74,7 @@ public class DERApplicationSpecific
         {
             try
             {
-                bOut.write(((ASN1Encodable)vec.get(i)).getEncoded());
+                bOut.write(((ASN1Object)vec.get(i)).getEncoded(ASN1Encoding.DER));
             }
             catch (IOException e)
             {
@@ -117,7 +117,7 @@ public class DERApplicationSpecific
      * @return  the resulting object
      * @throws IOException if reconstruction fails.
      */
-    public DERObject getObject() 
+    public ASN1Primitive getObject()
         throws IOException 
     {
         return new ASN1InputStream(getContents()).readObject();
@@ -130,7 +130,7 @@ public class DERApplicationSpecific
      * @return  the resulting object
      * @throws IOException if reconstruction fails.
      */
-    public DERObject getObject(int derTagNo)
+    public ASN1Primitive getObject(int derTagNo)
         throws IOException
     {
         if (derTagNo >= 0x1f)
@@ -141,30 +141,30 @@ public class DERApplicationSpecific
         byte[] orig = this.getEncoded();
         byte[] tmp = replaceTagNumber(derTagNo, orig);
 
-        if ((orig[0] & DERTags.CONSTRUCTED) != 0)
+        if ((orig[0] & BERTags.CONSTRUCTED) != 0)
         {
-            tmp[0] |= DERTags.CONSTRUCTED;
+            tmp[0] |= BERTags.CONSTRUCTED;
         }
 
         return new ASN1InputStream(tmp).readObject();
     }
     
     /* (non-Javadoc)
-     * @see org.bouncycastle.asn1.DERObject#encode(org.bouncycastle.asn1.DEROutputStream)
+     * @see org.bouncycastle.asn1.ASN1Primitive#encode(org.bouncycastle.asn1.DEROutputStream)
      */
-    void encode(DEROutputStream out) throws IOException
+    void encode(ASN1OutputStream out) throws IOException
     {
-        int classBits = DERTags.APPLICATION;
+        int classBits = BERTags.APPLICATION;
         if (isConstructed)
         {
-            classBits |= DERTags.CONSTRUCTED; 
+            classBits |= BERTags.CONSTRUCTED;
         }
 
         out.writeEncoded(classBits, tag, octets);
     }
     
     boolean asn1Equals(
-        DERObject o)
+        ASN1Primitive o)
     {
         if (!(o instanceof DERApplicationSpecific))
         {

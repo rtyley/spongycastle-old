@@ -2,10 +2,10 @@ package org.bouncycastle.asn1.cms;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1TaggedObjectParser;
-import org.bouncycastle.asn1.DEREncodable;
 
 /**
  * Produce an object suitable for an ASN1OutputStream.
@@ -34,7 +34,7 @@ public class ContentInfoParser
         return contentType;
     }
 
-    public DEREncodable getContent(
+    public ASN1Encodable getContent(
         int  tag)
         throws IOException
     {

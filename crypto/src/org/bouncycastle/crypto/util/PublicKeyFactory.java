@@ -5,13 +5,11 @@ import java.io.InputStream;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
@@ -61,7 +59,7 @@ public class PublicKeyFactory
      */
     public static AsymmetricKeyParameter createKey(byte[] keyInfoData) throws IOException
     {
-        return createKey(SubjectPublicKeyInfo.getInstance(ASN1Object.fromByteArray(keyInfoData)));
+        return createKey(SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(keyInfoData)));
     }
 
     /**

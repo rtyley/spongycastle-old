@@ -1,15 +1,15 @@
 package org.bouncycastle.asn1.teletrust;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import java.math.BigInteger;
+import java.util.Enumeration;
+import java.util.Hashtable;
+
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ECParametersHolder;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.encoders.Hex;
-
-import java.math.BigInteger;
-import java.util.Enumeration;
-import java.util.Hashtable;
 
 /**
  * elliptic curves defined in "ECC Brainpool Standard Curves and Curve Generation"
@@ -257,7 +257,7 @@ public class TeleTrusTNamedCurves
     static final Hashtable curves = new Hashtable();
     static final Hashtable names = new Hashtable();
 
-    static void defineCurve(String name, DERObjectIdentifier oid, X9ECParametersHolder holder)
+    static void defineCurve(String name, ASN1ObjectIdentifier oid, X9ECParametersHolder holder)
     {
         objIds.put(name, oid);
         names.put(oid, name);
@@ -285,7 +285,7 @@ public class TeleTrusTNamedCurves
     public static X9ECParameters getByName(
         String name)
     {
-        DERObjectIdentifier oid = (DERObjectIdentifier)objIds.get(Strings.toLowerCase(name));
+        ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)objIds.get(Strings.toLowerCase(name));
 
         if (oid != null)
         {
@@ -302,7 +302,7 @@ public class TeleTrusTNamedCurves
      * @param oid an object identifier representing a named curve, if present.
      */
     public static X9ECParameters getByOID(
-        DERObjectIdentifier oid)
+        ASN1ObjectIdentifier oid)
     {
         X9ECParametersHolder holder = (X9ECParametersHolder)curves.get(oid);
 
@@ -320,17 +320,17 @@ public class TeleTrusTNamedCurves
      *
      * @return the object identifier associated with name, if present.
      */
-    public static DERObjectIdentifier getOID(
+    public static ASN1ObjectIdentifier getOID(
         String name)
     {
-        return (DERObjectIdentifier)objIds.get(Strings.toLowerCase(name));
+        return (ASN1ObjectIdentifier)objIds.get(Strings.toLowerCase(name));
     }
 
     /**
      * return the named curve name represented by the given object identifier.
      */
     public static String getName(
-        DERObjectIdentifier oid)
+        ASN1ObjectIdentifier oid)
     {
         return (String)names.get(oid);
     }
@@ -344,7 +344,7 @@ public class TeleTrusTNamedCurves
         return objIds.keys();
     }
 
-    public static DERObjectIdentifier getOID(short curvesize, boolean twisted)
+    public static ASN1ObjectIdentifier getOID(short curvesize, boolean twisted)
     {
         return getOID("brainpoolP" + curvesize + (twisted ? "t" : "r") + "1");
     }

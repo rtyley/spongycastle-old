@@ -1,25 +1,25 @@
 package org.bouncycastle.asn1.tsp;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.X509Extensions;
 
 public class TimeStampReq
-    extends ASN1Encodable
+    extends ASN1Object
 {
     DERInteger version;
 
     MessageImprint messageImprint;
 
-    DERObjectIdentifier tsaPolicy;
+    ASN1ObjectIdentifier tsaPolicy;
 
     DERInteger nonce;
 
@@ -62,9 +62,9 @@ public class TimeStampReq
         for (int opt = seqStart; opt < nbObjects; opt++)
         {
             // tsaPolicy
-            if (seq.getObjectAt(opt) instanceof DERObjectIdentifier)
+            if (seq.getObjectAt(opt) instanceof ASN1ObjectIdentifier)
             {
-                tsaPolicy = DERObjectIdentifier.getInstance(seq.getObjectAt(opt));
+                tsaPolicy = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(opt));
             }
             // nonce
             else if (seq.getObjectAt(opt) instanceof DERInteger)
@@ -90,7 +90,7 @@ public class TimeStampReq
 
     public TimeStampReq(
         MessageImprint      messageImprint,
-        DERObjectIdentifier tsaPolicy,
+        ASN1ObjectIdentifier tsaPolicy,
         DERInteger          nonce,
         DERBoolean          certReq,
         X509Extensions      extensions)
@@ -115,7 +115,7 @@ public class TimeStampReq
         return messageImprint;
     }
 
-    public DERObjectIdentifier getReqPolicy()
+    public ASN1ObjectIdentifier getReqPolicy()
     {
         return tsaPolicy;
     }
@@ -149,7 +149,7 @@ public class TimeStampReq
      * }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
         

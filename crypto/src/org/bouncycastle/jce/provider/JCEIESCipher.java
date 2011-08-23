@@ -23,10 +23,10 @@ import org.bouncycastle.crypto.engines.IESEngine;
 import org.bouncycastle.crypto.generators.KDF2BytesGenerator;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.IESParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.IESKey;
-import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.jce.spec.IESParameterSpec;
 
 public class JCEIESCipher extends WrapCipherSpi

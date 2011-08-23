@@ -1,6 +1,6 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 
 /**
@@ -11,7 +11,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
  *     CertPolicyId ::= OBJECT IDENTIFIER
  * </pre>
  */
-public class CertPolicyId extends DERObjectIdentifier 
+public class CertPolicyId extends ASN1ObjectIdentifier 
 {
    public CertPolicyId (String id) 
    {

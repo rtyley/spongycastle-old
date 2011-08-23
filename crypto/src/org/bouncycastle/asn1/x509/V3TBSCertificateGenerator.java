@@ -103,7 +103,7 @@ public class V3TBSCertificateGenerator
     public void setSubject(
         X509Name    subject)
     {
-        this.subject = X500Name.getInstance(subject.getDERObject());
+        this.subject = X500Name.getInstance(subject.getASN1Primitive());
     }
 
     public void setSubject(

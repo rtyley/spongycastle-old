@@ -2,13 +2,14 @@ package org.bouncycastle.asn1.cms;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.ASN1TaggedObjectParser;
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERTags;
 
 /**
  * Produce an object suitable for an ASN1OutputStream.
@@ -27,8 +28,8 @@ import org.bouncycastle.asn1.DERTags;
 public class AuthEnvelopedDataParser
 {
     private ASN1SequenceParser seq;
-    private DERInteger version;
-    private DEREncodable nextObject;
+    private ASN1Integer version;
+    private ASN1Encodable nextObject;
     private boolean originatorInfoCalled;
 
     public AuthEnvelopedDataParser(ASN1SequenceParser seq) throws IOException
@@ -37,7 +38,7 @@ public class AuthEnvelopedDataParser
 
         // TODO
         // "It MUST be set to 0."
-        this.version = (DERInteger)seq.readObject();
+        this.version = ASN1Integer.getInstance(seq.readObject());
     }
 
     public DERInteger getVersion()
@@ -57,9 +58,9 @@ public class AuthEnvelopedDataParser
 
         if (nextObject instanceof ASN1TaggedObjectParser && ((ASN1TaggedObjectParser)nextObject).getTagNo() == 0)
         {
-            ASN1SequenceParser originatorInfo = (ASN1SequenceParser) ((ASN1TaggedObjectParser)nextObject).getObjectParser(DERTags.SEQUENCE, false);
+            ASN1SequenceParser originatorInfo = (ASN1SequenceParser) ((ASN1TaggedObjectParser)nextObject).getObjectParser(BERTags.SEQUENCE, false);
             nextObject = null;
-            return OriginatorInfo.getInstance(originatorInfo.getDERObject());
+            return OriginatorInfo.getInstance(originatorInfo.toASN1Primitive());
         }
 
         return null;
@@ -111,9 +112,9 @@ public class AuthEnvelopedDataParser
 
         if (nextObject instanceof ASN1TaggedObjectParser)
         {
-            DEREncodable o = nextObject;
+            ASN1Encodable o = nextObject;
             nextObject = null;
-            return (ASN1SetParser)((ASN1TaggedObjectParser)o).getObjectParser(DERTags.SET, false);
+            return (ASN1SetParser)((ASN1TaggedObjectParser)o).getObjectParser(BERTags.SET, false);
         }
 
         // TODO
@@ -131,10 +132,10 @@ public class AuthEnvelopedDataParser
             nextObject = seq.readObject();
         }
 
-        DEREncodable o = nextObject;
+        ASN1Encodable o = nextObject;
         nextObject = null;
 
-        return ASN1OctetString.getInstance(o.getDERObject());
+        return ASN1OctetString.getInstance(o.toASN1Primitive());
     }
 
     public ASN1SetParser getUnauthAttrs()
@@ -147,9 +148,9 @@ public class AuthEnvelopedDataParser
 
         if (nextObject != null)
         {
-            DEREncodable o = nextObject;
+            ASN1Encodable o = nextObject;
             nextObject = null;
-            return (ASN1SetParser)((ASN1TaggedObjectParser)o).getObjectParser(DERTags.SET, false);
+            return (ASN1SetParser)((ASN1TaggedObjectParser)o).getObjectParser(BERTags.SET, false);
         }
 
         return null;

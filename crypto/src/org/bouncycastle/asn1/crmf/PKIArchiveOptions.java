@@ -2,14 +2,15 @@ package org.bouncycastle.asn1.crmf;
 
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
 
 public class PKIArchiveOptions
-    extends ASN1Encodable
+    extends ASN1Object
     implements ASN1Choice
 {
     public static final int encryptedPrivKey = 0;
@@ -98,7 +99,7 @@ public class PKIArchiveOptions
      *      -- this request; set to FALSE if no archival is desired.
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         if (value instanceof EncryptedKey)
         {

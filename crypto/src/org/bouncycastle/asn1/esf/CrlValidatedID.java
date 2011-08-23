@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1.esf;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -14,7 +14,7 @@ import org.bouncycastle.asn1.DERSequence;
  * </pre>
  */
 public class CrlValidatedID
-    extends ASN1Encodable
+    extends ASN1Object
 {
 
     private OtherHash crlHash;
@@ -69,13 +69,13 @@ public class CrlValidatedID
         return this.crlIdentifier;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
-        v.add(this.crlHash.toASN1Object());
+        v.add(this.crlHash.toASN1Primitive());
         if (null != this.crlIdentifier)
         {
-            v.add(this.crlIdentifier.toASN1Object());
+            v.add(this.crlIdentifier.toASN1Primitive());
         }
         return new DERSequence(v);
     }

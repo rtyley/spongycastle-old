@@ -1,19 +1,19 @@
 package org.bouncycastle.asn1.x509.sigi;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import java.math.BigInteger;
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x500.DirectoryString;
-
-import java.math.BigInteger;
-import java.util.Enumeration;
 
 /**
  * Contains personal data for the otherName field in the subjectAltNames
@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * @see org.bouncycastle.asn1.x509.sigi.SigIObjectIdentifiers
  */
 public class PersonalData
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private NameOrPseudonym nameOrPseudonym;
     private BigInteger nameDistinguisher;
@@ -185,7 +185,7 @@ public class PersonalData
      *
      * @return a DERObject
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector vec = new ASN1EncodableVector();
         vec.add(nameOrPseudonym);

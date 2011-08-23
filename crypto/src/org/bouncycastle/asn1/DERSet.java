@@ -21,7 +21,7 @@ public class DERSet
      * @param obj - a single object that makes up the set.
      */
     public DERSet(
-        DEREncodable   obj)
+        ASN1Encodable   obj)
     {
         this.addObject(obj);
     }

@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1.test;
 
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERApplicationSpecific;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
@@ -45,7 +45,7 @@ public class DERApplicationSpecificTest
             fail("implicit encoding failed");
         }
 
-        DERInteger recVal = (DERInteger)tagged.getObject(DERTags.INTEGER);
+        DERInteger recVal = (DERInteger)tagged.getObject(BERTags.INTEGER);
 
         if (!value.equals(recVal))
         {
@@ -53,7 +53,7 @@ public class DERApplicationSpecificTest
         }
 
         DERApplicationSpecific certObj = (DERApplicationSpecific)
-        ASN1Object.fromByteArray(certData);
+        ASN1Primitive.fromByteArray(certData);
 
         if (!certObj.isConstructed() || certObj.getApplicationTag() != 33)
         {

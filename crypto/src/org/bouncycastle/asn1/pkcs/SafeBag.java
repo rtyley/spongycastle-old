@@ -1,24 +1,24 @@
 package org.bouncycastle.asn1.pkcs;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 
 public class SafeBag
-    extends ASN1Encodable
+    extends ASN1Object
 {
-    DERObjectIdentifier         bagId;
-    DERObject                   bagValue;
+    ASN1ObjectIdentifier         bagId;
+    ASN1Primitive bagValue;
     ASN1Set                     bagAttributes;
 
     public SafeBag(
-        DERObjectIdentifier     oid,
-        DERObject               obj)
+        ASN1ObjectIdentifier     oid,
+        ASN1Primitive               obj)
     {
         this.bagId = oid;
         this.bagValue = obj;
@@ -26,8 +26,8 @@ public class SafeBag
     }
 
     public SafeBag(
-        DERObjectIdentifier     oid,
-        DERObject               obj,
+        ASN1ObjectIdentifier     oid,
+        ASN1Primitive               obj,
         ASN1Set                 bagAttributes)
     {
         this.bagId = oid;
@@ -38,7 +38,7 @@ public class SafeBag
     public SafeBag(
         ASN1Sequence    seq)
     {
-        this.bagId = (DERObjectIdentifier)seq.getObjectAt(0);
+        this.bagId = (ASN1ObjectIdentifier)seq.getObjectAt(0);
         this.bagValue = ((DERTaggedObject)seq.getObjectAt(1)).getObject();
         if (seq.size() == 3)
         {
@@ -46,12 +46,12 @@ public class SafeBag
         }
     }
 
-    public DERObjectIdentifier getBagId()
+    public ASN1ObjectIdentifier getBagId()
     {
         return bagId;
     }
 
-    public DERObject getBagValue()
+    public ASN1Primitive getBagValue()
     {
         return bagValue;
     }
@@ -61,7 +61,7 @@ public class SafeBag
         return bagAttributes;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

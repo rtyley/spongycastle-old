@@ -7,19 +7,18 @@ import java.io.OutputStream;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.ContentInfoParser;
-import org.bouncycastle.asn1.cms.CompressedDataParser;
-import org.bouncycastle.asn1.BEROctetStringGenerator;
-import org.bouncycastle.asn1.ASN1StreamParser;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
-import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.ASN1SequenceParser;
+import org.bouncycastle.asn1.ASN1StreamParser;
+import org.bouncycastle.asn1.BEROctetStringGenerator;
+import org.bouncycastle.asn1.BERSequenceGenerator;
+import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequenceGenerator;
-import org.bouncycastle.asn1.DERTags;
+import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle.asn1.cms.CompressedDataParser;
+import org.bouncycastle.asn1.cms.ContentInfoParser;
 
 public class OctetStringTest 
     extends TestCase 
@@ -181,10 +180,10 @@ public class OctetStringTest
 
         ContentInfoParser cp = new ContentInfoParser((ASN1SequenceParser)aIn.readObject());
         
-        CompressedDataParser comData = new CompressedDataParser((ASN1SequenceParser)cp.getContent(DERTags.SEQUENCE));
+        CompressedDataParser comData = new CompressedDataParser((ASN1SequenceParser)cp.getContent(BERTags.SEQUENCE));
         ContentInfoParser     content = comData.getEncapContentInfo();
 
-        ASN1OctetStringParser bytes = (ASN1OctetStringParser)content.getContent(DERTags.OCTET_STRING);
+        ASN1OctetStringParser bytes = (ASN1OctetStringParser)content.getContent(BERTags.OCTET_STRING);
 
         InputStream in = bytes.getOctetStream();
         int         count = 0;

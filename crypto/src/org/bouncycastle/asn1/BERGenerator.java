@@ -48,18 +48,18 @@ public class BERGenerator
     {
         if (_tagged)
         {
-            int tagNum = _tagNo | DERTags.TAGGED;
+            int tagNum = _tagNo | BERTags.TAGGED;
 
             if (_isExplicit)
             {
-                writeHdr(tagNum | DERTags.CONSTRUCTED);
+                writeHdr(tagNum | BERTags.CONSTRUCTED);
                 writeHdr(tag);
             }
             else
             {   
-                if ((tag & DERTags.CONSTRUCTED) != 0)
+                if ((tag & BERTags.CONSTRUCTED) != 0)
                 {
-                    writeHdr(tagNum | DERTags.CONSTRUCTED);
+                    writeHdr(tagNum | BERTags.CONSTRUCTED);
                 }
                 else
                 {

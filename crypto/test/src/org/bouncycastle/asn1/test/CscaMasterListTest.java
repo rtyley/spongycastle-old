@@ -2,7 +2,7 @@ package org.bouncycastle.asn1.test;
 
 import java.io.IOException;
 
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.icao.CscaMasterList;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.io.Streams;
@@ -21,7 +21,7 @@ public class CscaMasterListTest
     {
         byte[] input = getInput("masterlist-content.data");
         CscaMasterList parsedList
-            = CscaMasterList.getInstance(ASN1Object.fromByteArray(input));
+            = CscaMasterList.getInstance(ASN1Primitive.fromByteArray(input));
 
         if (parsedList.getCertStructs().length != 3)
         {

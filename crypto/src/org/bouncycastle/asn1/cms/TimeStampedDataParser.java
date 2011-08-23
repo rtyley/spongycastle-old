@@ -2,15 +2,15 @@ package org.bouncycastle.asn1.cms;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.BERSequence;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
 
 public class TimeStampedDataParser
 {
@@ -27,7 +27,7 @@ public class TimeStampedDataParser
         this.parser = parser;
         this.version = DERInteger.getInstance(parser.readObject());
 
-        DEREncodable obj = parser.readObject();
+        ASN1Encodable obj = parser.readObject();
 
         if (obj instanceof DERIA5String)
         {
@@ -36,7 +36,7 @@ public class TimeStampedDataParser
         }
         if (obj instanceof MetaData || obj instanceof ASN1SequenceParser)
         {
-            this.metaData = MetaData.getInstance(obj.getDERObject());
+            this.metaData = MetaData.getInstance(obj.toASN1Primitive());
             obj = parser.readObject();
         }
         if (obj instanceof ASN1OctetStringParser)
@@ -80,7 +80,7 @@ public class TimeStampedDataParser
     {
         if (temporalEvidence == null)
         {
-            temporalEvidence = Evidence.getInstance(parser.readObject().getDERObject());
+            temporalEvidence = Evidence.getInstance(parser.readObject().toASN1Primitive());
         }
 
         return temporalEvidence;
@@ -99,7 +99,7 @@ public class TimeStampedDataParser
      * @return
      * @deprecated will be removed
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

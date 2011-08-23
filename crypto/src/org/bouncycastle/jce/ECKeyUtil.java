@@ -11,8 +11,7 @@ import java.security.Security;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -21,8 +20,8 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.jce.provider.ProviderUtil;
-import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
 
 /**
  * Utility class to allow conversion of EC key parameters to explicit from named
@@ -69,7 +68,7 @@ public class ECKeyUtil
     {
         try
         {
-            SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(ASN1Object.fromByteArray(key.getEncoded()));
+            SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(key.getEncoded()));
 
             if (info.getAlgorithmId().getObjectId().equals(CryptoProObjectIdentifiers.gostR3410_2001))
             {
@@ -159,7 +158,7 @@ public class ECKeyUtil
     {
         try
         {
-            PrivateKeyInfo info = PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(key.getEncoded()));
+            PrivateKeyInfo info = PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(key.getEncoded()));
 
             if (info.getAlgorithmId().getObjectId().equals(CryptoProObjectIdentifiers.gostR3410_2001))
             {

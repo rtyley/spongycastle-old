@@ -21,13 +21,13 @@ public class BEROctetStringParser
         return new ConstructedOctetStream(_parser);
     }
 
-    public DERObject getLoadedObject()
+    public ASN1Primitive getLoadedObject()
         throws IOException
     {
-        return new BERConstructedOctetString(Streams.readAll(getOctetStream()));
+        return new BEROctetString(Streams.readAll(getOctetStream()));
     }
 
-    public DERObject getDERObject()
+    public ASN1Primitive toASN1Primitive()
     {
         try
         {

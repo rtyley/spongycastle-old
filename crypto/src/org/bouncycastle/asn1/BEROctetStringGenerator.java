@@ -11,7 +11,7 @@ public class BEROctetStringGenerator
     {
         super(out);
         
-        writeBERHeader(DERTags.CONSTRUCTED | DERTags.OCTET_STRING);
+        writeBERHeader(BERTags.CONSTRUCTED | BERTags.OCTET_STRING);
     }
 
     public BEROctetStringGenerator(
@@ -22,7 +22,7 @@ public class BEROctetStringGenerator
     {
         super(out, tagNo, isExplicit);
         
-        writeBERHeader(DERTags.CONSTRUCTED | DERTags.OCTET_STRING);
+        writeBERHeader(BERTags.CONSTRUCTED | BERTags.OCTET_STRING);
     }
     
     public OutputStream getOctetOutputStream()

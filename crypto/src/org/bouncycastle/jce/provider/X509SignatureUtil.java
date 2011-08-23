@@ -1,8 +1,17 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.IOException;
+import java.security.AlgorithmParameters;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.PSSParameterSpec;
+
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -14,22 +23,13 @@ import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 
-import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.spec.PSSParameterSpec;
-
 class X509SignatureUtil
 {
     private static final ASN1Null       derNull = new DERNull();
     
     static void setSignatureParameters(
         Signature signature,
-        DEREncodable params) 
+        ASN1Encodable params)
         throws NoSuchAlgorithmException, SignatureException, InvalidKeyException
     {
         if (params != null && !derNull.equals(params))
@@ -38,7 +38,7 @@ class X509SignatureUtil
             
             try
             {
-                sigParams.init(params.getDERObject().getDEREncoded());
+                sigParams.init(params.toASN1Primitive().getEncoded());
             }
             catch (IOException e)
             {
@@ -62,7 +62,7 @@ class X509SignatureUtil
     static String getSignatureName(
         AlgorithmIdentifier sigAlgId) 
     {
-        DEREncodable params = sigAlgId.getParameters();
+        ASN1Encodable params = sigAlgId.getParameters();
         
         if (params != null && !derNull.equals(params))
         {

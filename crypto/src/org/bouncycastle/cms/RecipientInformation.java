@@ -8,7 +8,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.util.io.Streams;
 
@@ -42,12 +43,12 @@ public abstract class RecipientInformation
     }
 
     private byte[] encodeObj(
-        DEREncodable obj)
+        ASN1Encodable obj)
         throws IOException
     {
         if (obj != null)
         {
-            return obj.getDERObject().getEncoded();
+            return obj.toASN1Primitive().getEncoded();
         }
 
         return null;
@@ -194,7 +195,7 @@ public abstract class RecipientInformation
                 {
                     try
                     {
-                        Streams.drain(operator.getInputStream(new ByteArrayInputStream(additionalData.getAuthAttributes().getDEREncoded())));
+                        Streams.drain(operator.getInputStream(new ByteArrayInputStream(additionalData.getAuthAttributes().getEncoded(ASN1Encoding.DER))));
                     }
                     catch (IOException e)
                     {

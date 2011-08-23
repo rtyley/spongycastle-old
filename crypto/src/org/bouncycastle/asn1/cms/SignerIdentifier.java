@@ -2,17 +2,17 @@ package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERTaggedObject;
 
 public class SignerIdentifier
-    extends ASN1Encodable
+    extends ASN1Object
     implements ASN1Choice
 {
-    private DEREncodable id;
+    private ASN1Encodable id;
     
     public SignerIdentifier(
         IssuerAndSerialNumber id)
@@ -27,7 +27,7 @@ public class SignerIdentifier
     }
     
     public SignerIdentifier(
-        DERObject id)
+        ASN1Primitive id)
     {
         this.id = id;
     }
@@ -56,9 +56,9 @@ public class SignerIdentifier
             return new SignerIdentifier((ASN1OctetString)o);
         }
         
-        if (o instanceof DERObject)
+        if (o instanceof ASN1Primitive)
         {
-            return new SignerIdentifier((DERObject)o);
+            return new SignerIdentifier((ASN1Primitive)o);
         }
         
         throw new IllegalArgumentException(
@@ -70,7 +70,7 @@ public class SignerIdentifier
         return (id instanceof ASN1TaggedObject);
     }
 
-    public DEREncodable getId()
+    public ASN1Encodable getId()
     {
         if (id instanceof ASN1TaggedObject)
         {
@@ -91,8 +91,8 @@ public class SignerIdentifier
      * SubjectKeyIdentifier ::= OCTET STRING
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
-        return id.getDERObject();
+        return id.toASN1Primitive();
     }
 }

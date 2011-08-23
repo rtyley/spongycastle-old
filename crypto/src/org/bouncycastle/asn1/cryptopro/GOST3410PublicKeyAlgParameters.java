@@ -1,19 +1,19 @@
 package org.bouncycastle.asn1.cryptopro;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 public class GOST3410PublicKeyAlgParameters
-    extends ASN1Encodable
+    extends ASN1Object
 {
-    private DERObjectIdentifier  publicKeyParamSet;
-    private DERObjectIdentifier  digestParamSet;
-    private DERObjectIdentifier  encryptionParamSet;
+    private ASN1ObjectIdentifier  publicKeyParamSet;
+    private ASN1ObjectIdentifier  digestParamSet;
+    private ASN1ObjectIdentifier  encryptionParamSet;
     
     public static GOST3410PublicKeyAlgParameters getInstance(
         ASN1TaggedObject obj,
@@ -39,8 +39,8 @@ public class GOST3410PublicKeyAlgParameters
     }
     
     public GOST3410PublicKeyAlgParameters(
-        DERObjectIdentifier  publicKeyParamSet,
-        DERObjectIdentifier  digestParamSet)
+        ASN1ObjectIdentifier  publicKeyParamSet,
+        ASN1ObjectIdentifier  digestParamSet)
     {
         this.publicKeyParamSet = publicKeyParamSet;
         this.digestParamSet = digestParamSet;
@@ -48,9 +48,9 @@ public class GOST3410PublicKeyAlgParameters
     }
 
     public GOST3410PublicKeyAlgParameters(
-        DERObjectIdentifier  publicKeyParamSet,
-        DERObjectIdentifier  digestParamSet,
-        DERObjectIdentifier  encryptionParamSet)
+        ASN1ObjectIdentifier  publicKeyParamSet,
+        ASN1ObjectIdentifier  digestParamSet,
+        ASN1ObjectIdentifier  encryptionParamSet)
     {
         this.publicKeyParamSet = publicKeyParamSet;
         this.digestParamSet = digestParamSet;
@@ -60,31 +60,31 @@ public class GOST3410PublicKeyAlgParameters
     public GOST3410PublicKeyAlgParameters(
         ASN1Sequence  seq)
     {
-        this.publicKeyParamSet = (DERObjectIdentifier)seq.getObjectAt(0);
-        this.digestParamSet = (DERObjectIdentifier)seq.getObjectAt(1);
+        this.publicKeyParamSet = (ASN1ObjectIdentifier)seq.getObjectAt(0);
+        this.digestParamSet = (ASN1ObjectIdentifier)seq.getObjectAt(1);
         
         if (seq.size() > 2)
         {
-            this.encryptionParamSet = (DERObjectIdentifier)seq.getObjectAt(2);
+            this.encryptionParamSet = (ASN1ObjectIdentifier)seq.getObjectAt(2);
         }
     }
 
-    public DERObjectIdentifier getPublicKeyParamSet()
+    public ASN1ObjectIdentifier getPublicKeyParamSet()
     {
         return publicKeyParamSet;
     }
 
-    public DERObjectIdentifier getDigestParamSet()
+    public ASN1ObjectIdentifier getDigestParamSet()
     {
         return digestParamSet;
     }
 
-    public DERObjectIdentifier getEncryptionParamSet()
+    public ASN1ObjectIdentifier getEncryptionParamSet()
     {
         return encryptionParamSet;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 

@@ -2,7 +2,7 @@ package org.bouncycastle.asn1.test;
 
 import java.io.IOException;
 
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -59,7 +59,7 @@ public class IssuingDistributionPointUnitTest
 
         checkValues(point, distributionPoint, onlyContainsUserCerts, onlyContainsCACerts, onlySomeReasons, indirectCRL, onlyContainsAttributeCerts);
 
-        ASN1Sequence seq = ASN1Sequence.getInstance(ASN1Object.fromByteArray(point.getEncoded()));
+        ASN1Sequence seq = ASN1Sequence.getInstance(ASN1Primitive.fromByteArray(point.getEncoded()));
 
         if (seq.size() != size)
         {

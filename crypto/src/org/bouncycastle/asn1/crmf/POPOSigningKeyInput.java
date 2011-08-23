@@ -2,16 +2,17 @@ package org.bouncycastle.asn1.crmf;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 
 public class POPOSigningKeyInput
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private GeneralName sender;
     private PKMACValue publicKeyMAC;
@@ -113,7 +114,7 @@ public class POPOSigningKeyInput
      * </pre>
      * @return a basic ASN.1 object representation.
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

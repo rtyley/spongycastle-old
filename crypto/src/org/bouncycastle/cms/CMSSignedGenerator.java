@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -168,7 +168,7 @@ public class CMSSignedGenerator
                 AlgorithmParameters sigParams = sig.getParameters();
 
                 return new AlgorithmIdentifier(
-                    new DERObjectIdentifier(encOid), ASN1Object.fromByteArray(sigParams.getEncoded()));
+                    new DERObjectIdentifier(encOid), ASN1Primitive.fromByteArray(sigParams.getEncoded()));
             }
             else
             {
@@ -257,7 +257,7 @@ public class CMSSignedGenerator
                 X509AttributeCertificate attrCert = (X509AttributeCertificate)it.next();
 
                 certs.add(new DERTaggedObject(false, 2,
-                             AttributeCertificate.getInstance(ASN1Object.fromByteArray(attrCert.getEncoded()))));
+                             AttributeCertificate.getInstance(ASN1Primitive.fromByteArray(attrCert.getEncoded()))));
             }
         }
         catch (IllegalArgumentException e)

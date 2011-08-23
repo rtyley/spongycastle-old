@@ -18,7 +18,7 @@ public class DERTaggedObject
      */
     public DERTaggedObject(
         int             tagNo,
-        DEREncodable    obj)
+        ASN1Encodable    obj)
     {
         super(tagNo, obj);
     }
@@ -31,7 +31,7 @@ public class DERTaggedObject
     public DERTaggedObject(
         boolean         explicit,
         int             tagNo,
-        DEREncodable    obj)
+        ASN1Encodable    obj)
     {
         super(explicit, tagNo, obj);
     }

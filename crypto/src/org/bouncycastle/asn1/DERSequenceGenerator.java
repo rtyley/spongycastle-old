@@ -26,10 +26,10 @@ public class DERSequenceGenerator
     }
 
     public void addObject(
-        DEREncodable object) 
+        ASN1Encodable object)
         throws IOException
     {
-        object.getDERObject().encode(new DEROutputStream(_bOut));
+        object.toASN1Primitive().encode(new DEROutputStream(_bOut));
     }
     
     public OutputStream getRawOutputStream()
@@ -40,6 +40,6 @@ public class DERSequenceGenerator
     public void close() 
         throws IOException
     {
-        writeDEREncoded(DERTags.CONSTRUCTED | DERTags.SEQUENCE, _bOut.toByteArray());
+        writeDEREncoded(BERTags.CONSTRUCTED | BERTags.SEQUENCE, _bOut.toByteArray());
     }
 }

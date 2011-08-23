@@ -23,13 +23,13 @@ public class LazyDERSequence
 
         while (en.hasMoreElements())
         {
-            addObject((DEREncodable)en.nextElement());
+            addObject((ASN1Encodable)en.nextElement());
         }
 
         parsed = true;
     }
 
-    public synchronized DEREncodable getObjectAt(int index)
+    public synchronized ASN1Encodable getObjectAt(int index)
     {
         if (!parsed)
         {

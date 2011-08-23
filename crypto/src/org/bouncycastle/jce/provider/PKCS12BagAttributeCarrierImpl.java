@@ -1,18 +1,19 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.ASN1InputStream;
-
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-import java.io.ObjectOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 
 class PKCS12BagAttributeCarrierImpl
     implements PKCS12BagAttributeCarrier
@@ -32,8 +33,8 @@ class PKCS12BagAttributeCarrierImpl
     }
 
     public void setBagAttribute(
-        DERObjectIdentifier oid,
-        DEREncodable        attribute)
+        ASN1ObjectIdentifier oid,
+        ASN1Encodable        attribute)
     {
         if (pkcs12Attributes.containsKey(oid))
         {                           // preserve original ordering
@@ -46,10 +47,10 @@ class PKCS12BagAttributeCarrierImpl
         }
     }
 
-    public DEREncodable getBagAttribute(
+    public ASN1Encodable getBagAttribute(
         DERObjectIdentifier oid)
     {
-        return (DEREncodable)pkcs12Attributes.get(oid);
+        return (ASN1Encodable)pkcs12Attributes.get(oid);
     }
 
     public Enumeration getBagAttributeKeys()
@@ -92,7 +93,7 @@ class PKCS12BagAttributeCarrierImpl
                 DERObjectIdentifier    oid = (DERObjectIdentifier)e.nextElement();
 
                 aOut.writeObject(oid);
-                aOut.writeObject(pkcs12Attributes.get(oid));
+                aOut.writeObject((ASN1Encodable)pkcs12Attributes.get(oid));
             }
 
             out.writeObject(bOut.toByteArray());
@@ -113,9 +114,9 @@ class PKCS12BagAttributeCarrierImpl
         {
             ASN1InputStream aIn = new ASN1InputStream((byte[])obj);
 
-            DERObjectIdentifier    oid;
+            ASN1ObjectIdentifier    oid;
 
-            while ((oid = (DERObjectIdentifier)aIn.readObject()) != null)
+            while ((oid = (ASN1ObjectIdentifier)aIn.readObject()) != null)
             {
                 this.setBagAttribute(oid, aIn.readObject());
             }

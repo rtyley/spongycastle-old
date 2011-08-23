@@ -1,10 +1,10 @@
 package org.bouncycastle.asn1.cms;
 
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.ASN1SequenceParser;
-
 import java.io.IOException;
+
+import org.bouncycastle.asn1.ASN1SequenceParser;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
  * RFC 3274 - CMS Compressed Data.
@@ -27,7 +27,7 @@ public class CompressedDataParser
         throws IOException
     {
         this._version = (DERInteger)seq.readObject();
-        this._compressionAlgorithm = AlgorithmIdentifier.getInstance(seq.readObject().getDERObject());
+        this._compressionAlgorithm = AlgorithmIdentifier.getInstance(seq.readObject().getASN1Primitive());
         this._encapContentInfo = new ContentInfoParser((ASN1SequenceParser)seq.readObject());
     }
 

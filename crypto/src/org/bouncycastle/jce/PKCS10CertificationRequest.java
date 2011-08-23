@@ -21,12 +21,12 @@ import java.util.Set;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -335,7 +335,7 @@ public class PKCS10CertificationRequest
         }
         else if (params.containsKey(algorithmName))
         {
-            this.sigAlgId = new AlgorithmIdentifier(sigOID, (DEREncodable)params.get(algorithmName));
+            this.sigAlgId = new AlgorithmIdentifier(sigOID, (ASN1Encodable)params.get(algorithmName));
         }
         else
         {
@@ -344,7 +344,7 @@ public class PKCS10CertificationRequest
 
         try
         {
-            ASN1Sequence seq = (ASN1Sequence)ASN1Object.fromByteArray(key.getEncoded());
+            ASN1Sequence seq = (ASN1Sequence)ASN1Primitive.fromByteArray(key.getEncoded());
             this.reqInfo = new CertificationRequestInfo(subject, new SubjectPublicKeyInfo(seq), attributes);
         }
         catch (IOException e)
@@ -366,7 +366,7 @@ public class PKCS10CertificationRequest
 
         try
         {
-            sig.update(reqInfo.getEncoded(ASN1Encodable.DER));
+            sig.update(reqInfo.getEncoded(ASN1Encoding.DER));
         }
         catch (Exception e)
         {
@@ -509,7 +509,7 @@ public class PKCS10CertificationRequest
 
         try
         {
-            sig.update(reqInfo.getEncoded(ASN1Encodable.DER));
+            sig.update(reqInfo.getEncoded(ASN1Encoding.DER));
         }
         catch (Exception e)
         {
@@ -526,7 +526,7 @@ public class PKCS10CertificationRequest
     {
         try
         {
-            return this.getEncoded(ASN1Encodable.DER);
+            return this.getEncoded(ASN1Encoding.DER);
         }
         catch (IOException e)
         {
@@ -536,7 +536,7 @@ public class PKCS10CertificationRequest
 
     private void setSignatureParameters(
         Signature signature,
-        DEREncodable params)
+        ASN1Encodable params)
         throws NoSuchAlgorithmException, SignatureException, InvalidKeyException
     {
         if (params != null && !DERNull.INSTANCE.equals(params))
@@ -545,7 +545,7 @@ public class PKCS10CertificationRequest
 
             try
             {
-                sigParams.init(params.getDERObject().getDEREncoded());
+                sigParams.init(params.toASN1Primitive().getEncoded(ASN1Encoding.DER));
             }
             catch (IOException e)
             {
@@ -569,7 +569,7 @@ public class PKCS10CertificationRequest
     static String getSignatureName(
         AlgorithmIdentifier sigAlgId)
     {
-        DEREncodable params = sigAlgId.getParameters();
+        ASN1Encodable params = sigAlgId.getParameters();
 
         if (params != null && !DERNull.INSTANCE.equals(params))
         {

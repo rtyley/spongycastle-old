@@ -3,7 +3,21 @@ package org.bouncycastle.jce.provider;
 import java.security.MessageDigest;
 
 import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.*;
+import org.bouncycastle.crypto.digests.GOST3411Digest;
+import org.bouncycastle.crypto.digests.MD2Digest;
+import org.bouncycastle.crypto.digests.MD4Digest;
+import org.bouncycastle.crypto.digests.MD5Digest;
+import org.bouncycastle.crypto.digests.RIPEMD128Digest;
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+import org.bouncycastle.crypto.digests.RIPEMD256Digest;
+import org.bouncycastle.crypto.digests.RIPEMD320Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.digests.SHA224Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.digests.SHA384Digest;
+import org.bouncycastle.crypto.digests.SHA512Digest;
+import org.bouncycastle.crypto.digests.TigerDigest;
+import org.bouncycastle.crypto.digests.WhirlpoolDigest;
 
 public class JDKMessageDigest
     extends MessageDigest

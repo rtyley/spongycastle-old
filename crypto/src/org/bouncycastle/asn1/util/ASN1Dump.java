@@ -3,7 +3,10 @@ package org.bouncycastle.asn1.util;
 import java.io.IOException;
 import java.util.Enumeration;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERApplicationSpecific;
@@ -11,29 +14,25 @@ import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.BERTaggedObject;
+import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERApplicationSpecific;
 import org.bouncycastle.asn1.DERBMPString;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERExternal;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERT61String;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.DERUTF8String;
-import org.bouncycastle.asn1.DERUnknownTag;
 import org.bouncycastle.asn1.DERVisibleString;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -45,12 +44,12 @@ public class ASN1Dump
     /**
      * dump a DER object as a formatted string with indentation
      *
-     * @param obj the DERObject to be dumped out.
+     * @param obj the ASN1Primitive to be dumped out.
      */
     static void _dumpAsString(
         String      indent,
         boolean     verbose,
-        DERObject   obj,
+        ASN1Primitive obj,
         StringBuffer    buf)
     {
         String nl = System.getProperty("line.separator");
@@ -85,13 +84,13 @@ public class ASN1Dump
                     buf.append("NULL");
                     buf.append(nl);
                 }
-                else if (o instanceof DERObject)
+                else if (o instanceof ASN1Primitive)
                 {
-                    _dumpAsString(tab, verbose, (DERObject)o, buf);
+                    _dumpAsString(tab, verbose, (ASN1Primitive)o, buf);
                 }
                 else
                 {
-                    _dumpAsString(tab, verbose, ((DEREncodable)o).getDERObject(), buf);
+                    _dumpAsString(tab, verbose, ((ASN1Encodable)o).toASN1Primitive(), buf);
                 }
             }
         }
@@ -151,13 +150,13 @@ public class ASN1Dump
                     buf.append("NULL");
                     buf.append(nl);
                 }
-                else if (o instanceof DERObject)
+                else if (o instanceof ASN1Primitive)
                 {
-                    _dumpAsString(tab, verbose, (DERObject)o, buf);
+                    _dumpAsString(tab, verbose, (ASN1Primitive)o, buf);
                 }
                 else
                 {
-                    _dumpAsString(tab, verbose, ((DEREncodable)o).getDERObject(), buf);
+                    _dumpAsString(tab, verbose, ((ASN1Encodable)o).toASN1Primitive(), buf);
                 }
             }
         }
@@ -180,19 +179,19 @@ public class ASN1Dump
                     buf.append("NULL");
                     buf.append(nl);
                 }
-                else if (o instanceof DERObject)
+                else if (o instanceof ASN1Primitive)
                 {
-                    _dumpAsString(tab, verbose, (DERObject)o, buf);
+                    _dumpAsString(tab, verbose, (ASN1Primitive)o, buf);
                 }
                 else
                 {
-                    _dumpAsString(tab, verbose, ((DEREncodable)o).getDERObject(), buf);
+                    _dumpAsString(tab, verbose, ((ASN1Encodable)o).toASN1Primitive(), buf);
                 }
             }
         }
-        else if (obj instanceof DERObjectIdentifier)
+        else if (obj instanceof ASN1ObjectIdentifier)
         {
-            buf.append(indent + "ObjectIdentifier(" + ((DERObjectIdentifier)obj).getId() + ")" + nl);
+            buf.append(indent + "ObjectIdentifier(" + ((ASN1ObjectIdentifier)obj).getId() + ")" + nl);
         }
         else if (obj instanceof DERBoolean)
         {
@@ -270,10 +269,6 @@ public class ASN1Dump
         {
             buf.append(indent + "GeneralizedTime(" + ((DERGeneralizedTime)obj).getTime() + ") " + nl);
         }
-        else if (obj instanceof DERUnknownTag)
-        {
-            buf.append(indent + "Unknown " + Integer.toString(((DERUnknownTag)obj).getTag(), 16) + " " + new String(Hex.encode(((DERUnknownTag)obj).getData())) + nl);
-        }
         else if (obj instanceof BERApplicationSpecific)
         {
             buf.append(outputApplicationSpecific("BER", indent, verbose, obj, nl));
@@ -313,7 +308,7 @@ public class ASN1Dump
         }
     }
     
-    private static String outputApplicationSpecific(String type, String indent, boolean verbose, DERObject obj, String nl)
+    private static String outputApplicationSpecific(String type, String indent, boolean verbose, ASN1Primitive obj, String nl)
     {
         DERApplicationSpecific app = (DERApplicationSpecific)obj;
         StringBuffer buf = new StringBuffer();
@@ -322,11 +317,11 @@ public class ASN1Dump
         {
             try
             {
-                ASN1Sequence s = ASN1Sequence.getInstance(app.getObject(DERTags.SEQUENCE));
+                ASN1Sequence s = ASN1Sequence.getInstance(app.getObject(BERTags.SEQUENCE));
                 buf.append(indent + type + " ApplicationSpecific[" + app.getApplicationTag() + "]" + nl);
                 for (Enumeration e = s.getObjects(); e.hasMoreElements();)
                 {
-                    _dumpAsString(indent + TAB, verbose, (DERObject)e.nextElement(), buf);
+                    _dumpAsString(indent + TAB, verbose, (ASN1Primitive)e.nextElement(), buf);
                 }
             }
             catch (IOException e)
@@ -342,7 +337,7 @@ public class ASN1Dump
     /**
      * dump out a DER object as a formatted string, in non-verbose mode.
      *
-     * @param obj the DERObject to be dumped out.
+     * @param obj the ASN1Primitive to be dumped out.
      * @return  the resulting string.
      */
     public static String dumpAsString(
@@ -364,13 +359,13 @@ public class ASN1Dump
     {
         StringBuffer buf = new StringBuffer();
 
-        if (obj instanceof DERObject)
+        if (obj instanceof ASN1Primitive)
         {
-            _dumpAsString("", verbose, (DERObject)obj, buf);
+            _dumpAsString("", verbose, (ASN1Primitive)obj, buf);
         }
-        else if (obj instanceof DEREncodable)
+        else if (obj instanceof ASN1Encodable)
         {
-            _dumpAsString("", verbose, ((DEREncodable)obj).getDERObject(), buf);
+            _dumpAsString("", verbose, ((ASN1Encodable)obj).toASN1Primitive(), buf);
         }
         else
         {

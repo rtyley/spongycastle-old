@@ -1,16 +1,16 @@
 package org.bouncycastle.asn1.cmp;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.crmf.CertId;
 import org.bouncycastle.asn1.x509.X509Extensions;
 
 public class RevAnnContent
-    extends ASN1Encodable
+    extends ASN1Object
 {
     private PKIStatus status;
     private CertId certId;
@@ -84,7 +84,7 @@ public class RevAnnContent
      * </pre>
      * @return a basic ASN.1 object representation.
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

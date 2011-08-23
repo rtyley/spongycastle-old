@@ -16,7 +16,7 @@ import org.bouncycastle.util.io.Streams;
  */
 public class ASN1InputStream
     extends FilterInputStream
-    implements DERTags
+    implements BERTags
 {
     private final int limit;
     private final boolean lazyEvaluate;
@@ -117,7 +117,7 @@ public class ASN1InputStream
     /**
      * build an object given its tag and the number of bytes to construct it from.
      */
-    protected DERObject buildObject(
+    protected ASN1Primitive buildObject(
         int       tag,
         int       tagNo,
         int       length)
@@ -146,7 +146,7 @@ public class ASN1InputStream
                     //
                     // yes, people actually do this...
                     //
-                    return new BERConstructedOctetString(buildDEREncodableVector(defIn).v);
+                    return new BERConstructedOctetString(buildASN1EncodableVector(defIn).v);
                 case SEQUENCE:
                     if (lazyEvaluate)
                     {
@@ -154,14 +154,14 @@ public class ASN1InputStream
                     }
                     else
                     {
-                        return DERFactory.createSequence(buildDEREncodableVector(defIn));   
+                        return DERFactory.createSequence(buildASN1EncodableVector(defIn));   
                     }
                 case SET:
-                    return DERFactory.createSet(buildDEREncodableVector(defIn), false);
+                    return DERFactory.createSet(buildASN1EncodableVector(defIn), false);
                 case EXTERNAL:
-                    return new DERExternal(buildDEREncodableVector(defIn));                
+                    return new DERExternal(buildASN1EncodableVector(defIn));                
                 default:
-                    return new DERUnknownTag(true, tagNo, defIn.toByteArray());
+                    throw new IOException("unknown BER object encountered");
             }
         }
 
@@ -182,13 +182,13 @@ public class ASN1InputStream
         return v;
     }
 
-    ASN1EncodableVector buildDEREncodableVector(
+    ASN1EncodableVector buildASN1EncodableVector(
         DefiniteLengthInputStream dIn) throws IOException
     {
         return new ASN1InputStream(dIn).buildEncodableVector();
     }
 
-    public DERObject readObject()
+    public ASN1Primitive readObject()
         throws IOException
     {
         int tag = read();
@@ -352,9 +352,10 @@ public class ASN1InputStream
         return length;
     }
 
-    static DERObject createPrimitiveDERObject(
+    static ASN1Primitive createPrimitiveDERObject(
         int     tagNo,
         byte[]  bytes)
+        throws IOException
     {
         switch (tagNo)
         {
@@ -395,7 +396,7 @@ public class ASN1InputStream
             case VISIBLE_STRING:
                 return new DERVisibleString(bytes);
             default:
-                return new DERUnknownTag(false, tagNo, bytes);
+                throw new IOException("unknown tag " + tagNo + " encountered");
         }
     }
 }

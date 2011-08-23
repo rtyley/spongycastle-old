@@ -1,5 +1,18 @@
 package org.bouncycastle.jce.provider;
 
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidParameterException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.DSAParameterSpec;
+import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Hashtable;
+
+import javax.crypto.spec.DHParameterSpec;
+
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
@@ -32,19 +45,6 @@ import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
-
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidParameterException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.DSAParameterSpec;
-import java.security.spec.RSAKeyGenParameterSpec;
-import java.util.Hashtable;
-
-import javax.crypto.spec.DHParameterSpec;
 
 public abstract class JDKKeyPairGenerator
     extends KeyPairGenerator

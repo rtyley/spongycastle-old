@@ -2,17 +2,17 @@ package org.bouncycastle.asn1.tsp;
 
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cmp.PKIStatusInfo;
+import org.bouncycastle.asn1.cms.ContentInfo;
 
 
 public class TimeStampResp
-    extends ASN1Encodable
+    extends ASN1Object
 {
     PKIStatusInfo pkiStatusInfo;
 
@@ -71,7 +71,7 @@ public class TimeStampResp
      *   timeStampToken          TimeStampToken     OPTIONAL  }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
         

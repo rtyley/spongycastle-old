@@ -2,13 +2,12 @@ package org.bouncycastle.asn1.esf;
 
 import java.io.IOException;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -22,11 +21,11 @@ import org.bouncycastle.asn1.DERSequence;
  * </pre>
  */
 public class OtherRevRefs
-    extends ASN1Encodable
+    extends ASN1Object
 {
 
     private ASN1ObjectIdentifier otherRevRefType;
-    private ASN1Object otherRevRefs;
+    private ASN1Primitive otherRevRefs;
 
     public static OtherRevRefs getInstance(Object obj)
     {
@@ -49,11 +48,11 @@ public class OtherRevRefs
             throw new IllegalArgumentException("Bad sequence size: "
                 + seq.size());
         }
-        this.otherRevRefType = new ASN1ObjectIdentifier(((DERObjectIdentifier)seq.getObjectAt(0)).getId());
+        this.otherRevRefType = new ASN1ObjectIdentifier(((ASN1ObjectIdentifier)seq.getObjectAt(0)).getId());
         try
         {
-            this.otherRevRefs = ASN1Object.fromByteArray(seq.getObjectAt(1)
-                .getDERObject().getDEREncoded());
+            this.otherRevRefs = ASN1Primitive.fromByteArray(seq.getObjectAt(1)
+                .toASN1Primitive().getEncoded(ASN1Encoding.DER));
         }
         catch (IOException e)
         {
@@ -66,12 +65,12 @@ public class OtherRevRefs
         return this.otherRevRefType;
     }
 
-    public ASN1Object getOtherRevRefs()
+    public ASN1Primitive getOtherRevRefs()
     {
         return this.otherRevRefs;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
         v.add(this.otherRevRefType);

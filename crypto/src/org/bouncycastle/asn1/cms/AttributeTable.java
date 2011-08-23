@@ -8,7 +8,6 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 
 public class AttributeTable
@@ -46,11 +45,11 @@ public class AttributeTable
     public AttributeTable(
         Attributes    attrs)
     {
-        this(ASN1Set.getInstance(attrs.getDERObject()));
+        this(ASN1Set.getInstance(attrs.getASN1Primitive()));
     }
 
     private void addAttribute(
-        DERObjectIdentifier oid,
+        ASN1ObjectIdentifier oid,
         Attribute           a)
     {
         Object value = attributes.get(oid);
@@ -88,7 +87,7 @@ public class AttributeTable
      * @return first attribute found of type oid.
      */
     public Attribute get(
-        DERObjectIdentifier oid)
+        ASN1ObjectIdentifier oid)
     {
         Object value = attributes.get(oid);
         
@@ -108,7 +107,7 @@ public class AttributeTable
      * @return a vector of all the attributes found of type oid.
      */
     public ASN1EncodableVector getAll(
-        DERObjectIdentifier oid)
+        ASN1ObjectIdentifier oid)
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
         

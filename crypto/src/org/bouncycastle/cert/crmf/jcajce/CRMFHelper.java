@@ -28,11 +28,10 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
 
 import org.bouncycastle.asn1.ASN1Null;
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -172,7 +171,7 @@ class CRMFHelper
                 NoSuchPaddingException, NoSuchProviderException
             {
                 Cipher cipher = createCipher(encryptionAlgID.getAlgorithm());
-                ASN1Object sParams = (ASN1Object)encryptionAlgID.getParameters();
+                ASN1Primitive sParams = (ASN1Primitive)encryptionAlgID.getParameters();
                 String encAlg = encryptionAlgID.getAlgorithm().getId();
 
                 if (sParams != null && !(sParams instanceof ASN1Null))
@@ -392,7 +391,7 @@ class CRMFHelper
         {
             try
             {
-                asn1Params = ASN1Object.fromByteArray(params.getEncoded("ASN.1"));
+                asn1Params = ASN1Primitive.fromByteArray(params.getEncoded("ASN.1"));
             }
             catch (IOException e)
             {

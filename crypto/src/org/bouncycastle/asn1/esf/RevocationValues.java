@@ -2,10 +2,10 @@ package org.bouncycastle.asn1.esf;
 
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
@@ -20,7 +20,7 @@ import org.bouncycastle.asn1.x509.CertificateList;
  * </pre>
  */
 public class RevocationValues
-    extends ASN1Encodable
+    extends ASN1Object
 {
 
     private ASN1Sequence crlVals;
@@ -131,7 +131,7 @@ public class RevocationValues
         return this.otherRevVals;
     }
 
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
         if (null != this.crlVals)
@@ -144,7 +144,7 @@ public class RevocationValues
         }
         if (null != this.otherRevVals)
         {
-            v.add(new DERTaggedObject(true, 2, this.otherRevVals.toASN1Object()));
+            v.add(new DERTaggedObject(true, 2, this.otherRevVals.toASN1Primitive()));
         }
         return new DERSequence(v);
     }

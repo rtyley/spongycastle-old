@@ -1,12 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.x509.CertificatePair;
-import org.bouncycastle.x509.X509CertificatePair;
-import org.bouncycastle.x509.X509StreamParserSpi;
-import org.bouncycastle.x509.util.StreamParsingException;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +7,13 @@ import java.security.cert.CertificateParsingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.x509.CertificatePair;
+import org.bouncycastle.x509.X509CertificatePair;
+import org.bouncycastle.x509.X509StreamParserSpi;
+import org.bouncycastle.x509.util.StreamParsingException;
 
 public class X509CertPairParser
     extends X509StreamParserSpi

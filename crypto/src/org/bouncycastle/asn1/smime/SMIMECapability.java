@@ -2,51 +2,51 @@ package org.bouncycastle.asn1.smime;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 
 public class SMIMECapability
-    extends ASN1Encodable
+    extends ASN1Object
 {
     /**
      * general preferences
      */
-    public static final DERObjectIdentifier preferSignedData = PKCSObjectIdentifiers.preferSignedData;
-    public static final DERObjectIdentifier canNotDecryptAny = PKCSObjectIdentifiers.canNotDecryptAny;
-    public static final DERObjectIdentifier sMIMECapabilitiesVersions = PKCSObjectIdentifiers.sMIMECapabilitiesVersions;
+    public static final ASN1ObjectIdentifier preferSignedData = PKCSObjectIdentifiers.preferSignedData;
+    public static final ASN1ObjectIdentifier canNotDecryptAny = PKCSObjectIdentifiers.canNotDecryptAny;
+    public static final ASN1ObjectIdentifier sMIMECapabilitiesVersions = PKCSObjectIdentifiers.sMIMECapabilitiesVersions;
 
     /**
      * encryption algorithms preferences
      */
-    public static final DERObjectIdentifier dES_CBC = new DERObjectIdentifier("1.3.14.3.2.7");
-    public static final DERObjectIdentifier dES_EDE3_CBC = PKCSObjectIdentifiers.des_EDE3_CBC;
-    public static final DERObjectIdentifier rC2_CBC = PKCSObjectIdentifiers.RC2_CBC;
-    public static final DERObjectIdentifier aES128_CBC = NISTObjectIdentifiers.id_aes128_CBC;
-    public static final DERObjectIdentifier aES192_CBC = NISTObjectIdentifiers.id_aes192_CBC;
-    public static final DERObjectIdentifier aES256_CBC = NISTObjectIdentifiers.id_aes256_CBC;
+    public static final ASN1ObjectIdentifier dES_CBC = new ASN1ObjectIdentifier("1.3.14.3.2.7");
+    public static final ASN1ObjectIdentifier dES_EDE3_CBC = PKCSObjectIdentifiers.des_EDE3_CBC;
+    public static final ASN1ObjectIdentifier rC2_CBC = PKCSObjectIdentifiers.RC2_CBC;
+    public static final ASN1ObjectIdentifier aES128_CBC = NISTObjectIdentifiers.id_aes128_CBC;
+    public static final ASN1ObjectIdentifier aES192_CBC = NISTObjectIdentifiers.id_aes192_CBC;
+    public static final ASN1ObjectIdentifier aES256_CBC = NISTObjectIdentifiers.id_aes256_CBC;
     
-    private DERObjectIdentifier capabilityID;
-    private DEREncodable        parameters;
+    private ASN1ObjectIdentifier capabilityID;
+    private ASN1Encodable        parameters;
 
     public SMIMECapability(
         ASN1Sequence seq)
     {
-        capabilityID = (DERObjectIdentifier)seq.getObjectAt(0);
+        capabilityID = (ASN1ObjectIdentifier)seq.getObjectAt(0);
 
         if (seq.size() > 1)
         {
-            parameters = (DERObject)seq.getObjectAt(1);
+            parameters = (ASN1Primitive)seq.getObjectAt(1);
         }
     }
 
     public SMIMECapability(
-        DERObjectIdentifier capabilityID,
-        DEREncodable        parameters)
+        ASN1ObjectIdentifier capabilityID,
+        ASN1Encodable        parameters)
     {
         this.capabilityID = capabilityID;
         this.parameters = parameters;
@@ -68,12 +68,12 @@ public class SMIMECapability
         throw new IllegalArgumentException("Invalid SMIMECapability");
     } 
 
-    public DERObjectIdentifier getCapabilityID()
+    public ASN1ObjectIdentifier getCapabilityID()
     {
         return capabilityID;
     }
 
-    public DEREncodable getParameters()
+    public ASN1Encodable getParameters()
     {
         return parameters;
     }
@@ -87,7 +87,7 @@ public class SMIMECapability
      * }
      * </pre>
      */
-    public DERObject toASN1Object()
+    public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 
