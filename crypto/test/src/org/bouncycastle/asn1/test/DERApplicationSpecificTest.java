@@ -1,5 +1,6 @@
 package org.bouncycastle.asn1.test;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERApplicationSpecific;
@@ -60,7 +61,7 @@ public class DERApplicationSpecificTest
             fail("parsing of certificate data failed");
         }
 
-        byte[] encoded = certObj.getDEREncoded();
+        byte[] encoded = certObj.getEncoded(ASN1Encoding.DER);
     
         if (!Arrays.areEqual(certData, encoded))
         {

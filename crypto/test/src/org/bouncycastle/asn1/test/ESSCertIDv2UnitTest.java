@@ -1,5 +1,6 @@
 package org.bouncycastle.asn1.test;
 
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ess.ESSCertIDv2;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -19,7 +20,7 @@ public class ESSCertIDv2UnitTest
         byte[] digest = new byte [256];
         ESSCertIDv2 essCertIdv2 = new ESSCertIDv2(new AlgorithmIdentifier(
             NISTObjectIdentifiers.id_sha256), digest);
-        DERObject asn1Object = essCertIdv2.toASN1Object();
+        ASN1Primitive asn1Object = essCertIdv2.toASN1Primitive();
 
         ESSCertIDv2.getInstance(asn1Object);
     }

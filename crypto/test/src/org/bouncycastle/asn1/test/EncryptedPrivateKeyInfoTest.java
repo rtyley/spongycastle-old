@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo;
@@ -100,7 +101,7 @@ public class EncryptedPrivateKeyInfoTest
                 bIn = new ByteArrayInputStream(bytes);
                 aIn = new ASN1InputStream(bIn);
 
-                DERObject   obj = aIn.readObject();
+                ASN1Primitive obj = aIn.readObject();
     
                 fail("test " + id + " length mismatch - expected " + sample.length + System.getProperty("line.separator") + ASN1Dump.dumpAsString(info) + " got " + bytes.length + System.getProperty("line.separator") + ASN1Dump.dumpAsString(obj));
             }

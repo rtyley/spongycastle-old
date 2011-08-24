@@ -297,7 +297,7 @@ public class ParseTest
         
         EnvelopedDataParser eP = new EnvelopedDataParser((ASN1SequenceParser)cP.getContent(BERTags.SEQUENCE));
         
-        eP.getRecipientInfos().getDERObject(); // Must drain the parser!
+        eP.getRecipientInfos().toASN1Primitive(); // Must drain the parser!
         
         EncryptedContentInfoParser ecP = eP.getEncryptedContentInfo();
         

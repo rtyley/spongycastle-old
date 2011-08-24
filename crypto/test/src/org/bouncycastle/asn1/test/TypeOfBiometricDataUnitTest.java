@@ -3,6 +3,7 @@ package org.bouncycastle.asn1.test;
 import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.qualified.TypeOfBiometricData;
 import org.bouncycastle.util.test.SimpleTest;
@@ -38,7 +39,7 @@ public class TypeOfBiometricDataUnitTest
         
         checkNonPredefined(type, localType);
         
-        DERObject obj = type.toASN1Object();
+        ASN1Primitive obj = type.toASN1Primitive();
         
         type = TypeOfBiometricData.getInstance(obj);
         
@@ -98,7 +99,7 @@ public class TypeOfBiometricDataUnitTest
         
         ASN1InputStream aIn = new ASN1InputStream(type.toASN1Object().getEncoded());
 
-        DERObject obj = aIn.readObject();
+        ASN1Primitive obj = aIn.readObject();
 
         type = TypeOfBiometricData.getInstance(obj);
         

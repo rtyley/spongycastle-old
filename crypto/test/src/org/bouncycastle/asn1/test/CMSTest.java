@@ -269,7 +269,7 @@ public class CMSTest
                 .getContent(BERTags.SEQUENCE));
             ed.getVersion();
             ed.getOriginatorInfo();
-            ed.getRecipientInfos().getDERObject();
+            ed.getRecipientInfos().toASN1Primitive();
             EncryptedContentInfoParser eci = ed.getEncryptedContentInfo();
             eci.getContentType();
             eci.getContentEncryptionAlgorithm();
@@ -283,7 +283,7 @@ public class CMSTest
             ASN1SetParser upa = ed.getUnprotectedAttrs();
             if (upa != null)
             {
-                upa.getDERObject();
+                upa.toASN1Primitive();
             }
 
             return new SimpleTestResult(true, getName() + ": Okay");

@@ -6,6 +6,7 @@ import java.util.Date;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.BERSet;
@@ -43,7 +44,7 @@ public class EqualsAndHashCodeTest
     {
         byte[]    data = { 0, 1, 0, 1, 0, 0, 1 };
         
-        DERObject    values[] = {
+        ASN1Primitive    values[] = {
                 new BERConstructedOctetString(data),
                 new BERSequence(new DERPrintableString("hello world")),
                 new BERSet(new DERPrintableString("hello world")),
@@ -68,7 +69,6 @@ public class EqualsAndHashCodeTest
                 new DERT61String("hello world"),
                 new DERTaggedObject(0, new DERPrintableString("hello world")),
                 new DERUniversalString(data),
-                new DERUnknownTag(true, 500, data),
                 new DERUTCTime(new Date()),
                 new DERUTF8String("hello world"),
                 new DERVisibleString("hello world")
@@ -84,14 +84,14 @@ public class EqualsAndHashCodeTest
                 aOut.writeObject(values[i]);
             }
             
-            DERObject[] readValues = new DERObject[values.length];
+            ASN1Primitive[] readValues = new ASN1Primitive[values.length];
             
             ByteArrayInputStream    bIn = new ByteArrayInputStream(bOut.toByteArray());
             ASN1InputStream         aIn = new ASN1InputStream(bIn);
             
             for (int i = 0; i != values.length; i++)
             {
-                DERObject   o = aIn.readObject();
+                ASN1Primitive o = aIn.readObject();
                 if (!o.equals(values[i]))
                 {
                     return new SimpleTestResult(false, getName() + ": Failed equality test for " + o.getClass());

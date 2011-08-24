@@ -26,8 +26,9 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -670,7 +671,7 @@ public class RSATest
         }
     }
 
-    private void rawModeTest(String sigName, DERObjectIdentifier digestOID,
+    private void rawModeTest(String sigName, ASN1ObjectIdentifier digestOID,
         PrivateKey privKey, PublicKey pubKey, SecureRandom random) throws Exception
     {
         byte[] sampleMessage = new byte[1000 + random.nextInt(100)];
@@ -704,7 +705,7 @@ public class RSATest
         }
     }
 
-    private byte[] derEncode(DERObjectIdentifier oid, byte[] hash) throws IOException
+    private byte[] derEncode(ASN1ObjectIdentifier oid, byte[] hash) throws IOException
     {
         AlgorithmIdentifier algId = new AlgorithmIdentifier(oid, DERNull.INSTANCE);
         DigestInfo dInfo = new DigestInfo(algId, hash);

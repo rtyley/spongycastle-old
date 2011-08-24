@@ -11,6 +11,7 @@ import java.util.Vector;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DEROctetString;
@@ -112,7 +113,7 @@ public class GenerationTest
         // read back test
         //
         ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(v1Cert));
-        DERObject       o = aIn.readObject();
+        ASN1Primitive       o = aIn.readObject();
 
         bOut = new ByteArrayOutputStream();
         aOut = new ASN1OutputStream(bOut);
@@ -193,7 +194,7 @@ public class GenerationTest
         // read back test
         //
         ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(v3Cert));
-        DERObject       o = aIn.readObject();
+        ASN1Primitive       o = aIn.readObject();
 
         bOut = new ByteArrayOutputStream();
         aOut = new ASN1OutputStream(bOut);
@@ -268,7 +269,7 @@ public class GenerationTest
         // read back test
         //
         ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(v3CertNullSubject));
-        DERObject       o = aIn.readObject();
+        ASN1Primitive       o = aIn.readObject();
 
         bOut = new ByteArrayOutputStream();
         aOut = new ASN1OutputStream(bOut);
@@ -332,7 +333,7 @@ public class GenerationTest
         // read back test
         //
         ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(v2CertList));
-        DERObject       o = aIn.readObject();
+        ASN1Primitive o = aIn.readObject();
 
         bOut = new ByteArrayOutputStream();
         aOut = new ASN1OutputStream(bOut);
