@@ -1,5 +1,6 @@
 package org.bouncycastle.asn1.test;
 
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
 import org.bouncycastle.util.test.SimpleTest;
 
@@ -28,7 +29,7 @@ public class Iso4217CurrencyCodeUnitTest
         
         checkNumeric(cc, ALPHABETIC_CURRENCY_CODE);
         
-        DERObject obj = cc.toASN1Object();
+        ASN1Primitive obj = cc.toASN1Object();
         
         cc = Iso4217CurrencyCode.getInstance(obj);
         
