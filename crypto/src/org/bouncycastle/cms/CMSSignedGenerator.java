@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERNull;
@@ -159,7 +160,7 @@ public class CMSSignedGenerator
         if (NO_PARAMS.contains(encOid))
         {
             return new AlgorithmIdentifier(
-                  new DERObjectIdentifier(encOid));
+                  new ASN1ObjectIdentifier(encOid));
         }
         else
         {
@@ -168,12 +169,12 @@ public class CMSSignedGenerator
                 AlgorithmParameters sigParams = sig.getParameters();
 
                 return new AlgorithmIdentifier(
-                    new DERObjectIdentifier(encOid), ASN1Primitive.fromByteArray(sigParams.getEncoded()));
+                    new ASN1ObjectIdentifier(encOid), ASN1Primitive.fromByteArray(sigParams.getEncoded()));
             }
             else
             {
                 return new AlgorithmIdentifier(
-                    new DERObjectIdentifier(encOid), new DERNull());
+                    new ASN1ObjectIdentifier(encOid), new DERNull());
             }
         }
     }

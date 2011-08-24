@@ -101,14 +101,14 @@ public class ASN1InputStream
     protected int readLength()
         throws IOException
     {
-        return readLength(this.in, limit);
+        return readLength(this, limit);
     }
 
     protected void readFully(
         byte[]  bytes)
         throws IOException
     {
-        if (Streams.readFully(this.in, bytes) != bytes.length)
+        if (Streams.readFully(this, bytes) != bytes.length)
         {
             throw new EOFException("EOF encountered in middle of object");
         }
@@ -125,7 +125,7 @@ public class ASN1InputStream
     {
         boolean isConstructed = (tag & CONSTRUCTED) != 0;
 
-        DefiniteLengthInputStream defIn = new DefiniteLengthInputStream(this.in, length);
+        DefiniteLengthInputStream defIn = new DefiniteLengthInputStream(this, length);
 
         if ((tag & APPLICATION) != 0)
         {
@@ -146,22 +146,30 @@ public class ASN1InputStream
                     //
                     // yes, people actually do this...
                     //
-                    return new BERConstructedOctetString(buildASN1EncodableVector(defIn).v);
+                    ASN1EncodableVector v = buildDEREncodableVector(defIn);
+                    ASN1OctetString[] strings = new ASN1OctetString[v.size()];
+
+                    for (int i = 0; i != strings.length; i++)
+                    {
+                        strings[i] = (ASN1OctetString)v.get(i);
+                    }
+
+                    return new BEROctetString(strings);
                 case SEQUENCE:
                     if (lazyEvaluate)
                     {
-                        return new LazyDERSequence(defIn.toByteArray());
+                        return new LazyEncodedSequence(defIn.toByteArray());
                     }
                     else
                     {
-                        return DERFactory.createSequence(buildASN1EncodableVector(defIn));   
+                        return DERFactory.createSequence(buildDEREncodableVector(defIn));   
                     }
                 case SET:
-                    return DERFactory.createSet(buildASN1EncodableVector(defIn), false);
+                    return DERFactory.createSet(buildDEREncodableVector(defIn));
                 case EXTERNAL:
-                    return new DERExternal(buildASN1EncodableVector(defIn));                
+                    return new DERExternal(buildDEREncodableVector(defIn));                
                 default:
-                    throw new IOException("unknown BER object encountered");
+                    throw new IOException("unknown tag " + tagNo + " encountered");
             }
         }
 
@@ -172,7 +180,7 @@ public class ASN1InputStream
         throws IOException
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
-        DERObject o;
+        ASN1Primitive o;
 
         while ((o = readObject()) != null)
         {
@@ -182,7 +190,7 @@ public class ASN1InputStream
         return v;
     }
 
-    ASN1EncodableVector buildASN1EncodableVector(
+    ASN1EncodableVector buildDEREncodableVector(
         DefiniteLengthInputStream dIn) throws IOException
     {
         return new ASN1InputStream(dIn).buildEncodableVector();
@@ -205,7 +213,7 @@ public class ASN1InputStream
         //
         // calculate tag number
         //
-        int tagNo = readTagNumber(this.in, tag);
+        int tagNo = readTagNumber(this, tag);
 
         boolean isConstructed = (tag & CONSTRUCTED) != 0;
 
@@ -221,7 +229,7 @@ public class ASN1InputStream
                 throw new IOException("indefinite length primitive encoding encountered");
             }
 
-            IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this.in, limit);
+            IndefiniteLengthInputStream indIn = new IndefiniteLengthInputStream(this, limit);
             ASN1StreamParser sp = new ASN1StreamParser(indIn, limit);
 
             if ((tag & APPLICATION) != 0)

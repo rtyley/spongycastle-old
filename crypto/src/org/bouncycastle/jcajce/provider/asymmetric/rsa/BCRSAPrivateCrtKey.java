@@ -5,13 +5,14 @@ import java.math.BigInteger;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.RSAPrivateCrtKeySpec;
 
-import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 
 /**
  * A provider representation for a RSA private key, with CRT factors included.
@@ -22,12 +23,12 @@ public class BCRSAPrivateCrtKey
 {
     static final long serialVersionUID = 7834723820638524718L;
     
-    private BigInteger publicExponent;
-    private BigInteger primeP;
-    private BigInteger primeQ;
-    private BigInteger primeExponentP;
-    private BigInteger primeExponentQ;
-    private BigInteger crtCoefficient;
+    private BigInteger  publicExponent;
+    private BigInteger  primeP;
+    private BigInteger  primeQ;
+    private BigInteger  primeExponentP;
+    private BigInteger  primeExponentQ;
+    private BigInteger  crtCoefficient;
 
     /**
      * construct a private key from it's org.bouncycastle.crypto equivalent.
@@ -86,7 +87,7 @@ public class BCRSAPrivateCrtKey
     /**
      * construct an RSA key from a private key info object.
      */
-    public BCRSAPrivateCrtKey(
+    BCRSAPrivateCrtKey(
         PrivateKeyInfo info)
         throws IOException
     {
@@ -127,16 +128,7 @@ public class BCRSAPrivateCrtKey
      */
     public byte[] getEncoded()
     {
-        try
-        {
-            PrivateKeyInfo info = new PrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, new DERNull()), new RSAPrivateKey(getModulus(), getPublicExponent(), getPrivateExponent(), getPrimeP(), getPrimeQ(), getPrimeExponentP(), getPrimeExponentQ(), getCrtCoefficient()).toASN1Object());
-
-            return info.getEncoded(ASN1Encoding.DER);
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
+        return KeyUtil.getEncodedPrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, new DERNull()), new RSAPrivateKeyStructure(getModulus(), getPublicExponent(), getPrivateExponent(), getPrimeP(), getPrimeQ(), getPrimeExponentP(), getPrimeExponentQ(), getCrtCoefficient()));
     }
 
     /**
@@ -232,8 +224,8 @@ public class BCRSAPrivateCrtKey
 
     public String toString()
     {
-        StringBuffer buf = new StringBuffer();
-        String nl = System.getProperty("line.separator");
+        StringBuffer    buf = new StringBuffer();
+        String          nl = System.getProperty("line.separator");
 
         buf.append("RSA Private CRT Key").append(nl);
         buf.append("            modulus: ").append(this.getModulus().toString(16)).append(nl);

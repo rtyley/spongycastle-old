@@ -3,7 +3,6 @@ package org.bouncycastle.jcajce.provider.asymmetric.rsa;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.KeyFactorySpi;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPrivateCrtKey;
@@ -14,18 +13,16 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.jcajce.provider.asymmetric.util.BCKeyFactory;
+import org.bouncycastle.jcajce.provider.asymmetric.util.BaseKeyFactorySpi;
 import org.bouncycastle.jcajce.provider.asymmetric.util.ExtendedInvalidKeySpecException;
 
 public class KeyFactory
-    extends KeyFactorySpi
-    implements BCKeyFactory
+    extends BaseKeyFactorySpi
 {
     public KeyFactory()
     {
@@ -36,15 +33,7 @@ public class KeyFactory
         Class spec)
         throws InvalidKeySpecException
     {
-        if (spec.isAssignableFrom(PKCS8EncodedKeySpec.class) && key.getFormat().equals("PKCS#8"))
-        {
-            return new PKCS8EncodedKeySpec(key.getEncoded());
-        }
-        else if (spec.isAssignableFrom(X509EncodedKeySpec.class) && key.getFormat().equals("X.509"))
-        {
-            return new X509EncodedKeySpec(key.getEncoded());
-        }
-        else if (spec.isAssignableFrom(RSAPublicKeySpec.class) && key instanceof RSAPublicKey)
+        if (spec.isAssignableFrom(RSAPublicKeySpec.class) && key instanceof RSAPublicKey)
         {
             RSAPublicKey k = (RSAPublicKey)key;
 
@@ -68,7 +57,7 @@ public class KeyFactory
                 k.getCrtCoefficient());
         }
 
-        throw new InvalidKeySpecException("not implemented yet " + key + " " + spec);
+        return super.engineGetKeySpec(key, spec);
     }
 
     protected Key engineTranslateKey(
@@ -85,31 +74,10 @@ public class KeyFactory
         }
         else if (key instanceof java.security.interfaces.RSAPrivateKey)
         {
-            return new JCERSAPrivateKey((java.security.interfaces.RSAPrivateKey)key);
+            return new BCRSAPrivateKey((java.security.interfaces.RSAPrivateKey)key);
         }
 
         throw new InvalidKeyException("key type unknown");
-    }
-
-    /**
-     * create a public key from the given DER encoded input stream. 
-     */
-    private PublicKey createPublicKeyFromDERStream(
-        byte[] in)
-        throws IOException
-    {
-        return generatePublic(
-            SubjectPublicKeyInfo.getInstance(in));
-    }
-
-    /**
-     * create a private key from the given DER encoded input stream. 
-     */
-    private PrivateKey createPrivateKeyFromDERStream(
-        byte[] in)
-        throws IOException
-    {
-        return generatePrivate(PrivateKeyInfo.getInstance(in));
     }
 
     protected PrivateKey engineGeneratePrivate(
@@ -120,12 +88,12 @@ public class KeyFactory
         {
             try
             {
-                return createPrivateKeyFromDERStream(((PKCS8EncodedKeySpec)keySpec).getEncoded());
+                return generatePrivate(PrivateKeyInfo.getInstance(((PKCS8EncodedKeySpec)keySpec).getEncoded()));
             }
             catch (Exception e)
             {
                 //
-                // in case it's just a RSAPrivateKey object...
+                // in case it's just a RSAPrivateKey object... -- openSSL produces these
                 //
                 try
                 {
@@ -144,7 +112,7 @@ public class KeyFactory
         }
         else if (keySpec instanceof RSAPrivateKeySpec)
         {
-            return new JCERSAPrivateKey((RSAPrivateKeySpec)keySpec);
+            return new BCRSAPrivateKey((RSAPrivateKeySpec)keySpec);
         }
 
         throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
@@ -158,20 +126,8 @@ public class KeyFactory
         {
             return new BCRSAPublicKey((RSAPublicKeySpec)keySpec);
         }
-        else if (keySpec instanceof X509EncodedKeySpec)
-        {
-            try
-            {
-                return createPublicKeyFromDERStream(
-                    ((X509EncodedKeySpec)keySpec).getEncoded());
-            }
-            catch (Exception e)
-            {
-                throw new ExtendedInvalidKeySpecException("unable to process key spec: " + e.toString(), e);
-            }
-        }
 
-        throw new InvalidKeySpecException("unknown keySpec: " + keySpec);
+        return super.engineGeneratePublic(keySpec);
     }
 
     public PrivateKey generatePrivate(PrivateKeyInfo keyInfo)

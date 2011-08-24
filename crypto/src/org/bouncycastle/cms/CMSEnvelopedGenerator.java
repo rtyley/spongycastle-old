@@ -19,10 +19,10 @@ import java.util.List;
 
 import javax.crypto.SecretKey;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.KEKIdentifier;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -301,7 +301,7 @@ public class CMSEnvelopedGenerator
 
     protected AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameters params) throws IOException
     {
-        DEREncodable asn1Params;
+        ASN1Encodable asn1Params;
         if (params != null)
         {
             asn1Params = ASN1Primitive.fromByteArray(params.getEncoded("ASN.1"));
@@ -312,7 +312,7 @@ public class CMSEnvelopedGenerator
         }
 
         return new AlgorithmIdentifier(
-            new DERObjectIdentifier(encryptionOID),
+            new ASN1ObjectIdentifier(encryptionOID),
             asn1Params);
     }
 

@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.DistributionPoint;
@@ -206,7 +207,7 @@ class RFC3281CertPathUtilities
                          * fields omitted and a distribution point name of the
                          * certificate issuer.
                          */
-                        DERObject issuer = null;
+                        ASN1Primitive issuer = null;
                         try
                         {
 

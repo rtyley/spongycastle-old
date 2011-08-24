@@ -68,7 +68,7 @@ public class X509ExtensionUtil
                 case GeneralName.ediPartyName:
                 case GeneralName.x400Address:
                 case GeneralName.otherName:
-                    list.add(genName.getName().getDERObject());
+                    list.add(genName.getName().toASN1Primitive());
                     break;
                 case GeneralName.directoryName:
                     list.add(X509Name.getInstance(genName.getName()).toString());

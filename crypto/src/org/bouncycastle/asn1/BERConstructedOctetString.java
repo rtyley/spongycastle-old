@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
 
+/**
+ * @deprecated use BEROctetString
+ */
 public class BERConstructedOctetString
     extends BEROctetString
 {

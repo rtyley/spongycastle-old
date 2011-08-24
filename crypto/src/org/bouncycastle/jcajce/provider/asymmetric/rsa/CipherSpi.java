@@ -30,12 +30,12 @@ import org.bouncycastle.crypto.encodings.OAEPEncoding;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.jcajce.provider.asymmetric.util.BaseCipherSpi;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.provider.WrapCipherSpi;
 import org.bouncycastle.util.Strings;
 
-public class Cipher
-    extends WrapCipherSpi
+public class CipherSpi
+    extends BaseCipherSpi
 {
     private AsymmetricBlockCipher cipher;
     private AlgorithmParameterSpec paramSpec;
@@ -44,13 +44,13 @@ public class Cipher
     private boolean                 privateKeyOnly = false;
     private ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 
-    public Cipher(
+    public CipherSpi(
         AsymmetricBlockCipher engine)
     {
         cipher = engine;
     }
 
-    public Cipher(
+    public CipherSpi(
         OAEPParameterSpec pSpec)
     {
         try
@@ -63,7 +63,7 @@ public class Cipher
         }
     }
 
-    public Cipher(
+    public CipherSpi(
         boolean publicKeyOnly,
         boolean privateKeyOnly,
         AsymmetricBlockCipher engine)
@@ -99,11 +99,6 @@ public class Cipher
         {
             throw new IllegalStateException("RSA Cipher not initialised");
         }
-    }
-
-    protected byte[] engineGetIV() 
-    {
-        return null;
     }
 
     protected int engineGetKeySize(
@@ -529,7 +524,7 @@ public class Cipher
      */
 
     static public class NoPadding
-        extends Cipher
+        extends CipherSpi
     {
         public NoPadding()
         {
@@ -538,7 +533,7 @@ public class Cipher
     }
 
     static public class PKCS1v1_5Padding
-        extends Cipher
+        extends CipherSpi
     {
         public PKCS1v1_5Padding()
         {
@@ -547,7 +542,7 @@ public class Cipher
     }
 
     static public class PKCS1v1_5Padding_PrivateOnly
-        extends Cipher
+        extends CipherSpi
     {
         public PKCS1v1_5Padding_PrivateOnly()
         {
@@ -556,7 +551,7 @@ public class Cipher
     }
 
     static public class PKCS1v1_5Padding_PublicOnly
-        extends Cipher
+        extends CipherSpi
     {
         public PKCS1v1_5Padding_PublicOnly()
         {
@@ -565,7 +560,7 @@ public class Cipher
     }
 
     static public class OAEPPadding
-        extends Cipher
+        extends CipherSpi
     {
         public OAEPPadding()
         {
@@ -574,7 +569,7 @@ public class Cipher
     }
     
     static public class ISO9796d1Padding
-        extends Cipher
+        extends CipherSpi
     {
         public ISO9796d1Padding()
         {

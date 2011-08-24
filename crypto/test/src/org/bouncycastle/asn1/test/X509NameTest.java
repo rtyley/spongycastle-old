@@ -96,7 +96,7 @@ public class X509NameTest
 
     private void testEncodingPrintableString(DERObjectIdentifier oid, String value)
     {
-        DEREncodable converted = createEntryValue(oid, value);
+        ASN1Encodable converted = createEntryValue(oid, value);
         if (!(converted instanceof DERPrintableString))
         {
             fail("encoding for " + oid + " not printable string");
@@ -105,7 +105,7 @@ public class X509NameTest
 
     private void testEncodingIA5String(DERObjectIdentifier oid, String value)
     {
-        DEREncodable converted = createEntryValue(oid, value);
+        ASN1Encodable converted = createEntryValue(oid, value);
         if (!(converted instanceof DERIA5String))
         {
             fail("encoding for " + oid + " not IA5String");
@@ -579,7 +579,7 @@ public class X509NameTest
         builder.addRDN(BCStyle.C, "DK");
 
         X500Name subject = builder.build();
-        DERObject derObject = subject.getDERObject();
+        ASN1Primitive derObject = subject.toASN1Primitive();
         X509Name instance = X509Name.getInstance(derObject);
     }
 

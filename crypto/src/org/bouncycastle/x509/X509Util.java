@@ -21,6 +21,7 @@ import java.util.Set;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -161,7 +162,7 @@ class X509Util
 
         if (params.containsKey(algorithmName))
         {
-            return new AlgorithmIdentifier(sigOid, (DEREncodable)params.get(algorithmName));
+            return new AlgorithmIdentifier(sigOid, (ASN1Encodable)params.get(algorithmName));
         }
         else
         {
@@ -230,7 +231,7 @@ class X509Util
             sig.initSign(key);
         }
 
-        sig.update(object.getEncoded(ASN1Encodable.DER));
+        sig.update(object.toASN1Primitive().getEncoded(ASN1Encoding.DER));
 
         return sig.sign();
     }
@@ -262,7 +263,7 @@ class X509Util
             sig.initSign(key);
         }
 
-        sig.update(object.getEncoded(ASN1Encodable.DER));
+        sig.update(object.toASN1Primitive().getEncoded(ASN1Encoding.DER));
 
         return sig.sign();
     }

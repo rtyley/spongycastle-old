@@ -136,7 +136,7 @@ public class PKIXNameConstraintValidator
         for (Iterator it = dns.iterator(); it.hasNext();)
         {
             ASN1Sequence dn = ASN1Sequence.getInstance(((GeneralSubtree)it
-                .next()).getBase().getName().getDERObject());
+                .next()).getBase().getName().toASN1Primitive());
             if (permitted == null)
             {
                 if (dn != null)
@@ -1470,7 +1470,7 @@ public class PKIXNameConstraintValidator
                 break;
             case 4:
                 checkPermittedDN(ASN1Sequence.getInstance(name.getName()
-                    .getDERObject()));
+                    .toASN1Primitive()));
                 break;
             case 6:
                 checkPermittedURI(permittedSubtreesURI, DERIA5String.getInstance(
@@ -1505,7 +1505,7 @@ public class PKIXNameConstraintValidator
                 break;
             case 4:
                 checkExcludedDN(ASN1Sequence.getInstance(name.getName()
-                    .getDERObject()));
+                    .toASN1Primitive()));
                 break;
             case 6:
                 checkExcludedURI(excludedSubtreesURI, DERIA5String.getInstance(
@@ -1618,7 +1618,7 @@ public class PKIXNameConstraintValidator
                 break;
             case 4:
                 excludedSubtreesDN = unionDN(excludedSubtreesDN,
-                    (ASN1Sequence)base.getName().getDERObject());
+                    (ASN1Sequence)base.getName().toASN1Primitive());
                 break;
             case 6:
                 excludedSubtreesURI = unionURI(excludedSubtreesURI,

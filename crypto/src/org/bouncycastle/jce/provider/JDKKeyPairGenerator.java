@@ -1,6 +1,5 @@
 package org.bouncycastle.jce.provider;
 
-import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidParameterException;
 import java.security.KeyPair;
@@ -8,7 +7,6 @@ import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.DSAParameterSpec;
-import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Hashtable;
 
 import javax.crypto.spec.DHParameterSpec;
@@ -19,10 +17,7 @@ import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
 import org.bouncycastle.crypto.generators.DHParametersGenerator;
 import org.bouncycastle.crypto.generators.DSAKeyPairGenerator;
 import org.bouncycastle.crypto.generators.DSAParametersGenerator;
-import org.bouncycastle.crypto.generators.ElGamalKeyPairGenerator;
-import org.bouncycastle.crypto.generators.ElGamalParametersGenerator;
 import org.bouncycastle.crypto.generators.GOST3410KeyPairGenerator;
-import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
 import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
@@ -31,18 +26,10 @@ import org.bouncycastle.crypto.params.DSAKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
-import org.bouncycastle.crypto.params.ElGamalKeyGenerationParameters;
-import org.bouncycastle.crypto.params.ElGamalParameters;
-import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
-import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
 import org.bouncycastle.crypto.params.GOST3410KeyGenerationParameters;
 import org.bouncycastle.crypto.params.GOST3410Parameters;
 import org.bouncycastle.crypto.params.GOST3410PrivateKeyParameters;
 import org.bouncycastle.crypto.params.GOST3410PublicKeyParameters;
-import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
-import org.bouncycastle.crypto.params.RSAKeyParameters;
-import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
-import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 
@@ -58,64 +45,6 @@ public abstract class JDKKeyPairGenerator
     public abstract void initialize(int strength, SecureRandom random);
 
     public abstract KeyPair generateKeyPair();
-
-    public static class RSA
-        extends JDKKeyPairGenerator
-    {
-        final static BigInteger defaultPublicExponent = BigInteger.valueOf(0x10001);
-        final static int defaultTests = 12;
-
-        RSAKeyGenerationParameters  param;
-        RSAKeyPairGenerator         engine;
-
-        public RSA()
-        {
-            super("RSA");
-
-            engine = new RSAKeyPairGenerator();
-            param = new RSAKeyGenerationParameters(defaultPublicExponent,
-                            new SecureRandom(), 2048, defaultTests);
-            engine.init(param);
-        }
-
-        public void initialize(
-            int             strength,
-            SecureRandom    random)
-        {
-            param = new RSAKeyGenerationParameters(defaultPublicExponent,
-                            random, strength, defaultTests);
-
-            engine.init(param);
-        }
-
-        public void initialize(
-            AlgorithmParameterSpec  params,
-            SecureRandom            random)
-            throws InvalidAlgorithmParameterException
-        {
-            if (!(params instanceof RSAKeyGenParameterSpec))
-            {
-                throw new InvalidAlgorithmParameterException("parameter object not a RSAKeyGenParameterSpec");
-            }
-            RSAKeyGenParameterSpec     rsaParams = (RSAKeyGenParameterSpec)params;
-
-            param = new RSAKeyGenerationParameters(
-                            rsaParams.getPublicExponent(),
-                            random, rsaParams.getKeysize(), defaultTests);
-
-            engine.init(param);
-        }
-
-        public KeyPair generateKeyPair()
-        {
-            AsymmetricCipherKeyPair     pair = engine.generateKeyPair();
-            RSAKeyParameters            pub = (RSAKeyParameters)pair.getPublic();
-            RSAPrivateCrtKeyParameters  priv = (RSAPrivateCrtKeyParameters)pair.getPrivate();
-
-            return new KeyPair(new JCERSAPublicKey(pub),
-                               new JCERSAPrivateCrtKey(priv));
-        }
-    }
 
     public static class DH
         extends JDKKeyPairGenerator
@@ -257,77 +186,6 @@ public abstract class JDKKeyPairGenerator
 
             return new KeyPair(new JDKDSAPublicKey(pub),
                                new JDKDSAPrivateKey(priv));
-        }
-    }
-
-    public static class ElGamal
-        extends JDKKeyPairGenerator
-    {
-        ElGamalKeyGenerationParameters  param;
-        ElGamalKeyPairGenerator         engine = new ElGamalKeyPairGenerator();
-        int                             strength = 1024;
-        int                             certainty = 20;
-        SecureRandom                    random = new SecureRandom();
-        boolean                         initialised = false;
-
-        public ElGamal()
-        {
-            super("ElGamal");
-        }
-
-        public void initialize(
-            int             strength,
-            SecureRandom    random)
-        {
-            this.strength = strength;
-            this.random = random;
-        }
-
-        public void initialize(
-            AlgorithmParameterSpec  params,
-            SecureRandom            random)
-            throws InvalidAlgorithmParameterException
-        {
-            if (!(params instanceof ElGamalParameterSpec) && !(params instanceof DHParameterSpec))
-            {
-                throw new InvalidAlgorithmParameterException("parameter object not a DHParameterSpec or an ElGamalParameterSpec");
-            }
-            
-            if (params instanceof ElGamalParameterSpec)
-            {
-                ElGamalParameterSpec     elParams = (ElGamalParameterSpec)params;
-
-                param = new ElGamalKeyGenerationParameters(random, new ElGamalParameters(elParams.getP(), elParams.getG()));
-            }
-            else
-            {
-                DHParameterSpec     dhParams = (DHParameterSpec)params;
-
-                param = new ElGamalKeyGenerationParameters(random, new ElGamalParameters(dhParams.getP(), dhParams.getG(), dhParams.getL()));
-            }
-
-            engine.init(param);
-            initialised = true;
-        }
-
-        public KeyPair generateKeyPair()
-        {
-            if (!initialised)
-            {
-                ElGamalParametersGenerator   pGen = new ElGamalParametersGenerator();
-
-                pGen.init(strength, certainty, random);
-                param = new ElGamalKeyGenerationParameters(random, pGen.generateParameters());
-                engine.init(param);
-                initialised = true;
-            }
-
-            AsymmetricCipherKeyPair         pair = engine.generateKeyPair();
-            ElGamalPublicKeyParameters      pub = (ElGamalPublicKeyParameters)pair.getPublic();
-            ElGamalPrivateKeyParameters     priv = (ElGamalPrivateKeyParameters)pair.getPrivate();
-
-            return new KeyPair(new JCEElGamalPublicKey(pub),
-                               new JCEElGamalPrivateKey(priv));
         }
     }
 

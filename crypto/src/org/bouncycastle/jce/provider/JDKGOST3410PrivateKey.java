@@ -16,6 +16,7 @@ import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.params.GOST3410PrivateKeyParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
 import org.bouncycastle.jce.interfaces.GOST3410Params;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;

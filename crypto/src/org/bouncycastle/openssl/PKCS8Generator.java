@@ -19,6 +19,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -187,7 +188,7 @@ public class PKCS8Generator
             {
                 cipher.init(Cipher.ENCRYPT_MODE, key, params);
 
-                EncryptionScheme scheme = new EncryptionScheme(new DERObjectIdentifier(algorithm), ASN1Primitive.fromByteArray(params.getEncoded()));
+                EncryptionScheme scheme = new EncryptionScheme(new ASN1ObjectIdentifier(algorithm), ASN1Primitive.fromByteArray(params.getEncoded()));
                 KeyDerivationFunc func = new KeyDerivationFunc(PKCSObjectIdentifiers.id_PBKDF2, new PBKDF2Params(salt, iterationCount));
 
                 ASN1EncodableVector v = new ASN1EncodableVector();

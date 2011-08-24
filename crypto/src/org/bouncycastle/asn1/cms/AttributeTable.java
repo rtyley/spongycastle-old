@@ -45,7 +45,7 @@ public class AttributeTable
     public AttributeTable(
         Attributes    attrs)
     {
-        this(ASN1Set.getInstance(attrs.getASN1Primitive()));
+        this(ASN1Set.getInstance(attrs.toASN1Primitive()));
     }
 
     private void addAttribute(

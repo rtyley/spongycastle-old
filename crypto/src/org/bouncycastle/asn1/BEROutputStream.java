@@ -20,13 +20,13 @@ public class BEROutputStream
         {
             writeNull();
         }
-        else if (obj instanceof DERObject)
+        else if (obj instanceof ASN1Primitive)
         {
-            ((DERObject)obj).encode(this);
+            ((ASN1Primitive)obj).encode(this);
         }
         else if (obj instanceof ASN1Encodable)
         {
-            ((ASN1Encodable)obj).getDERObject().encode(this);
+            ((ASN1Encodable)obj).toASN1Primitive().encode(this);
         }
         else
         {

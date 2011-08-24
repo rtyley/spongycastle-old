@@ -4,18 +4,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
 import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
@@ -75,11 +76,11 @@ public class PrivateKeyFactory
      */
     public static AsymmetricKeyParameter createKey(PrivateKeyInfo keyInfo) throws IOException
     {
-        AlgorithmIdentifier algId = keyInfo.getAlgorithmId();
+        AlgorithmIdentifier algId = keyInfo.getPrivateKeyAlgorithm();
 
         if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.rsaEncryption))
         {
-            RSAPrivateKeyStructure keyStructure = RSAPrivateKeyStructure.getInstance(
+            RSAPrivateKey keyStructure = RSAPrivateKey.getInstance(
                 keyInfo.parsePrivateKey());
 
             return new RSAPrivateCrtKeyParameters(keyStructure.getModulus(),
@@ -91,8 +92,7 @@ public class PrivateKeyFactory
 //      else if (algId.getObjectId().equals(X9ObjectIdentifiers.dhpublicnumber))
         else if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {
-            DHParameter params = new DHParameter(
-                (ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
+            DHParameter params = DHParameter.getInstance(keyInfo.getPrivateKeyAlgorithm().getParameters());
             DERInteger derX = (DERInteger)keyInfo.parsePrivateKey();
 
             BigInteger lVal = params.getL();
@@ -104,7 +104,7 @@ public class PrivateKeyFactory
         else if (algId.getAlgorithm().equals(OIWObjectIdentifiers.elGamalAlgorithm))
         {
             ElGamalParameter params = new ElGamalParameter(
-                (ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
+                (ASN1Sequence)keyInfo.getPrivateKeyAlgorithm().getParameters());
             DERInteger derX = (DERInteger)keyInfo.parsePrivateKey();
 
             return new ElGamalPrivateKeyParameters(derX.getValue(), new ElGamalParameters(
@@ -113,12 +113,12 @@ public class PrivateKeyFactory
         else if (algId.getAlgorithm().equals(X9ObjectIdentifiers.id_dsa))
         {
             DERInteger derX = (DERInteger)keyInfo.parsePrivateKey();
-            DEREncodable de = keyInfo.getAlgorithmId().getParameters();
+            ASN1Encodable de = keyInfo.getPrivateKeyAlgorithm().getParameters();
 
             DSAParameters parameters = null;
             if (de != null)
             {
-                DSAParameter params = DSAParameter.getInstance(de.getDERObject());
+                DSAParameter params = DSAParameter.getInstance(de.toASN1Primitive());
                 parameters = new DSAParameters(params.getP(), params.getQ(), params.getG());
             }
 
@@ -127,12 +127,12 @@ public class PrivateKeyFactory
         else if (algId.getAlgorithm().equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
             X962Parameters params = new X962Parameters(
-                (DERObject)keyInfo.getAlgorithmId().getParameters());
+                (ASN1Primitive)keyInfo.getPrivateKeyAlgorithm().getParameters());
             ECDomainParameters dParams = null;
 
             if (params.isNamedCurve())
             {
-                DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
+                ASN1ObjectIdentifier oid = ASN1ObjectIdentifier.getInstance(params.getParameters());
                 X9ECParameters ecP = X962NamedCurves.getByOID(oid);
 
                 if (ecP == null)
@@ -155,7 +155,7 @@ public class PrivateKeyFactory
             }
             else
             {
-                X9ECParameters ecP = new X9ECParameters((ASN1Sequence)params.getParameters());
+                X9ECParameters ecP = X9ECParameters.getInstance(params.getParameters());
                 dParams = new ECDomainParameters(ecP.getCurve(), ecP.getG(), ecP.getN(),
                     ecP.getH(), ecP.getSeed());
             }

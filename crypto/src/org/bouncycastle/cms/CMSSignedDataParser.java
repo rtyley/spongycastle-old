@@ -16,10 +16,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Generator;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1Set;
@@ -223,7 +225,7 @@ public class CMSSignedDataParser
             digests = new HashMap();
             
             ASN1SetParser digAlgs = _signedData.getDigestAlgorithms();
-            DEREncodable  o;
+            ASN1Encodable  o;
             
             while ((o = digAlgs.readObject()) != null)
             {
@@ -324,11 +326,11 @@ public class CMSSignedDataParser
             try
             {
                 ASN1SetParser     s = _signedData.getSignerInfos();
-                DEREncodable      o;
+                ASN1Encodable      o;
 
                 while ((o = s.readObject()) != null)
                 {
-                    SignerInfo info = SignerInfo.getInstance(o.getDERObject());
+                    SignerInfo info = SignerInfo.getInstance(o.toASN1Primitive());
 
                     byte[] hash = (byte[])hashes.get(info.getDigestAlgorithm().getAlgorithm());
 
@@ -531,7 +533,7 @@ public class CMSSignedDataParser
 
             for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
             {
-                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1Sequence)
                 {
@@ -558,7 +560,7 @@ public class CMSSignedDataParser
 
             for (Enumeration en = crlSet.getObjects(); en.hasMoreElements();)
             {
-                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1Sequence)
                 {
@@ -585,7 +587,7 @@ public class CMSSignedDataParser
 
             for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
             {
-                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1TaggedObject)
                 {
@@ -683,7 +685,7 @@ public class CMSSignedDataParser
         sigGen.addObject(signedData.getVersion());
 
         // digests
-        signedData.getDigestAlgorithms().getDERObject();  // skip old ones
+        signedData.getDigestAlgorithms().toASN1Primitive();  // skip old ones
 
         ASN1EncodableVector digestAlgs = new ASN1EncodableVector();
 
@@ -761,7 +763,7 @@ public class CMSSignedDataParser
         sigGen.addObject(signedData.getVersion());
 
         // digests
-        sigGen.getRawOutputStream().write(signedData.getDigestAlgorithms().getDERObject().getEncoded());
+        sigGen.getRawOutputStream().write(signedData.getDigestAlgorithms().toASN1Primitive().getEncoded());
 
         // encap content info
         ContentInfoParser encapContentInfo = signedData.getEncapContentInfo();
@@ -815,7 +817,7 @@ public class CMSSignedDataParser
             sigGen.getRawOutputStream().write(new DERTaggedObject(false, 1, crls).getEncoded());
         }
 
-        sigGen.getRawOutputStream().write(signedData.getSignerInfos().getDERObject().getEncoded());
+        sigGen.getRawOutputStream().write(signedData.getSignerInfos().toASN1Primitive().getEncoded());
 
         sigGen.close();
 
@@ -860,7 +862,7 @@ public class CMSSignedDataParser
         sigGen.addObject(signedData.getVersion());
 
         // digests
-        sigGen.getRawOutputStream().write(signedData.getDigestAlgorithms().getDERObject().getEncoded());
+        sigGen.getRawOutputStream().write(signedData.getDigestAlgorithms().toASN1Primitive().getEncoded());
 
         // encap content info
         ContentInfoParser encapContentInfo = signedData.getEncapContentInfo();
@@ -913,7 +915,7 @@ public class CMSSignedDataParser
             }
         }
 
-        sigGen.getRawOutputStream().write(signedData.getSignerInfos().getDERObject().getEncoded());
+        sigGen.getRawOutputStream().write(signedData.getSignerInfos().toASN1Primitive().getEncoded());
 
         sigGen.close();
 
@@ -945,7 +947,7 @@ public class CMSSignedDataParser
     {
         return asn1SetParser == null
             ?   null
-            :   ASN1Set.getInstance(asn1SetParser.getDERObject());
+            :   ASN1Set.getInstance(asn1SetParser.toASN1Primitive());
     }
 
     private static void pipeEncapsulatedOctetString(ContentInfoParser encapContentInfo,

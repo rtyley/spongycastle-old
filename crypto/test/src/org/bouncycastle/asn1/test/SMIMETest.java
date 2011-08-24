@@ -3,6 +3,7 @@ package org.bouncycastle.asn1.test;
 import java.io.ByteArrayInputStream;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cms.RecipientKeyIdentifier;
@@ -64,7 +65,7 @@ public class SMIMETest
             ByteArrayInputStream    bIn = new ByteArrayInputStream(attrBytes);
             ASN1InputStream         aIn = new ASN1InputStream(bIn);
             
-            DERObject   o = aIn.readObject();
+            ASN1Primitive o = aIn.readObject();
             if (!attr.equals(o))
             {
                 return new SimpleTestResult(false, getName() + ": Failed equality test for attr");

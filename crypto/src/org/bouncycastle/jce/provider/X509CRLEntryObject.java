@@ -11,7 +11,7 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREnumerated;
@@ -108,7 +108,7 @@ public class X509CRLEntryObject extends X509CRLEntry
             {
                 if (names[i].getTagNo() == GeneralName.directoryName)
                 {
-                    return new X500Principal(names[i].getName().getDERObject().getDEREncoded());
+                    return new X500Principal(names[i].getName().toASN1Primitive().getEncoded(ASN1Encoding.DER));
                 }
             }
             return null;
@@ -204,7 +204,7 @@ public class X509CRLEntryObject extends X509CRLEntry
     {
         try
         {
-            return c.getEncoded(ASN1Encodable.DER);
+            return c.getEncoded(ASN1Encoding.DER);
         }
         catch (IOException e)
         {

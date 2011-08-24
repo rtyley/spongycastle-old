@@ -11,8 +11,8 @@ import java.security.Security;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -76,12 +76,12 @@ public class ECKeyUtil
             }
             else
             {
-                X962Parameters params = new X962Parameters((DERObject)info.getAlgorithmId().getParameters());
+                X962Parameters params = X962Parameters.getInstance(info.getAlgorithmId().getParameters());
                 X9ECParameters curveParams;
 
                 if (params.isNamedCurve())
                 {
-                    DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
+                    ASN1ObjectIdentifier oid = ASN1ObjectIdentifier.getInstance(params.getParameters());
 
                     curveParams = ECUtil.getNamedCurveByOid(oid);
                     // ignore seed value due to JDK bug
@@ -98,7 +98,7 @@ public class ECKeyUtil
 
                 params = new X962Parameters(curveParams);
 
-                info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), info.getPublicKeyData().getBytes());
+                info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), info.getPublicKeyData().getBytes());
 
                 KeyFactory keyFact = KeyFactory.getInstance(key.getAlgorithm(), provider);
 
@@ -166,12 +166,12 @@ public class ECKeyUtil
             }
             else
             {
-                X962Parameters params = new X962Parameters((DERObject)info.getAlgorithmId().getParameters());
+                X962Parameters params = X962Parameters.getInstance(info.getAlgorithmId().getParameters());
                 X9ECParameters curveParams;
 
                 if (params.isNamedCurve())
                 {
-                    DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
+                    ASN1ObjectIdentifier oid = ASN1ObjectIdentifier.getInstance(params.getParameters());
 
                     curveParams = ECUtil.getNamedCurveByOid(oid);
                     // ignore seed value due to JDK bug
@@ -188,7 +188,7 @@ public class ECKeyUtil
 
                 params = new X962Parameters(curveParams);
 
-                info = new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), info.parsePrivateKey().toASN1Object());
+                info = new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), info.parsePrivateKey());
 
                 KeyFactory keyFact = KeyFactory.getInstance(key.getAlgorithm(), provider);
 

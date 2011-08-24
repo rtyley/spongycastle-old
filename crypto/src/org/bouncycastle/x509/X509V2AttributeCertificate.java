@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
@@ -216,7 +217,7 @@ public class X509V2AttributeCertificate
             {
                 try
                 {
-                    return ext.getValue().getEncoded(ASN1Encodable.DER);
+                    return ext.getValue().getEncoded(ASN1Encoding.DER);
                 }
                 catch (Exception e)
                 {

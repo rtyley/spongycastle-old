@@ -183,7 +183,7 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameters.DH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$DH");
         put("Alg.Alias.AlgorithmParameters.DIFFIEHELLMAN", "DH");
         put("AlgorithmParameters.DSA", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$DSA");
-        put("AlgorithmParameters.ELGAMAL", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$ElGamal");
+
         put("AlgorithmParameters.IES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IES");
         put("AlgorithmParameters.PKCS12PBE", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PKCS12PBE");
 
@@ -305,8 +305,6 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.BrokenECIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenECIES");
         put("Cipher.IES", "org.bouncycastle.jce.provider.JCEIESCipher$IES");
         put("Cipher.BrokenIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenIES");
-        put("Cipher.ELGAMAL", "org.bouncycastle.jce.provider.JCEElGamalCipher$NoPadding");
-        put("Cipher.ELGAMAL/PKCS1", "org.bouncycastle.jce.provider.JCEElGamalCipher$PKCS1v1_5Padding");
 
         put("Alg.Alias.Cipher.RSA//RAW", "RSA");
         put("Alg.Alias.Cipher.RSA//NOPADDING", "RSA");
@@ -420,8 +418,6 @@ public final class BouncyCastleProvider extends Provider
         put("KeyFactory.RSA", "org.bouncycastle.jce.provider.JDKKeyFactory$RSA");
         put("KeyFactory.DH", "org.bouncycastle.jce.provider.JDKKeyFactory$DH");
         put("KeyFactory.DSA", "org.bouncycastle.jce.provider.JDKKeyFactory$DSA");
-        put("KeyFactory.ELGAMAL", "org.bouncycastle.jce.provider.JDKKeyFactory$ElGamal");
-        put("KeyFactory.ElGamal", "org.bouncycastle.jce.provider.JDKKeyFactory$ElGamal");
 
         put("KeyFactory.X.509", "org.bouncycastle.jce.provider.JDKKeyFactory$X509");
         

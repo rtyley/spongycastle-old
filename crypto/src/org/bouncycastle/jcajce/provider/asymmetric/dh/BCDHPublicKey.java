@@ -19,7 +19,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.DHDomainParameters;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
-import org.bouncycastle.jcajce.provider.ProviderUtil;
+import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 
 public class BCDHPublicKey
     implements DHPublicKey
@@ -119,10 +119,10 @@ public class BCDHPublicKey
     {
         if (info != null)
         {
-            return ProviderUtil.getEncodedSubjectPublicKeyInfo(info);
+            return KeyUtil.getEncodedSubjectPublicKeyInfo(info);
         }
 
-        return ProviderUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.dhKeyAgreement, new DHParameter(dhSpec.getP(), dhSpec.getG(), dhSpec.getL()).toASN1Primitive()), new ASN1Integer(y));
+        return KeyUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.dhKeyAgreement, new DHParameter(dhSpec.getP(), dhSpec.getG(), dhSpec.getL()).toASN1Primitive()), new ASN1Integer(y));
     }
 
     public DHParameterSpec getParams()

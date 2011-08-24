@@ -33,13 +33,8 @@ import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
-import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
-import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
-import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
 import org.bouncycastle.jce.spec.GOST3410PrivateKeySpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeySpec;
 
@@ -148,39 +143,16 @@ public abstract class JDKKeyFactory
         Key    key)
         throws InvalidKeyException
     {
-        if (key instanceof RSAPublicKey)
+        if (key instanceof DHPublicKey)
         {
-            return new JCERSAPublicKey((RSAPublicKey)key);
-        }
-        else if (key instanceof RSAPrivateCrtKey)
-        {
-            return new JCERSAPrivateCrtKey((RSAPrivateCrtKey)key);
-        }
-        else if (key instanceof RSAPrivateKey)
-        {
-            return new JCERSAPrivateKey((RSAPrivateKey)key);
-        }
-        else if (key instanceof DHPublicKey)
-        {
-            if (elGamalFactory)
-            {
-                return new JCEElGamalPublicKey((DHPublicKey)key);
-            }
-            else
-            {
+
                 return new JCEDHPublicKey((DHPublicKey)key);
-            }
         }
         else if (key instanceof DHPrivateKey)
         {
-            if (elGamalFactory)
-            {
-                return new JCEElGamalPrivateKey((DHPrivateKey)key);
-            }
-            else
-            {
+
                 return new JCEDHPrivateKey((DHPrivateKey)key);
-            }
+
         }
         else if (key instanceof DSAPublicKey)
         {
@@ -189,14 +161,6 @@ public abstract class JDKKeyFactory
         else if (key instanceof DSAPrivateKey)
         {
             return new JDKDSAPrivateKey((DSAPrivateKey)key);
-        }
-        else if (key instanceof ElGamalPublicKey)
-        {
-            return new JCEElGamalPublicKey((ElGamalPublicKey)key);
-        }
-        else if (key instanceof ElGamalPrivateKey)
-        {
-            return new JCEElGamalPrivateKey((ElGamalPrivateKey)key);
         }
 
         throw new InvalidKeyException("key type unknown");
@@ -221,21 +185,13 @@ public abstract class JDKKeyFactory
     {
         DERObjectIdentifier     algOid = info.getAlgorithmId().getObjectId();
         
-        if (RSAUtil.isRsaOid(algOid))
-        {
-            return new JCERSAPublicKey(info);
-        }
-        else if (algOid.equals(PKCSObjectIdentifiers.dhKeyAgreement))
+        if (algOid.equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {
             return new JCEDHPublicKey(info);
         }
         else if (algOid.equals(X9ObjectIdentifiers.dhpublicnumber))
         {
             return new JCEDHPublicKey(info);
-        }
-        else if (algOid.equals(OIWObjectIdentifiers.elGamalAlgorithm))
-        {
-            return new JCEElGamalPublicKey(info);
         }
         else if (algOid.equals(X9ObjectIdentifiers.id_dsa))
         {
@@ -283,21 +239,13 @@ public abstract class JDKKeyFactory
     {
         DERObjectIdentifier     algOid = info.getAlgorithmId().getAlgorithm();
         
-        if (RSAUtil.isRsaOid(algOid))
-        {
-              return new JCERSAPrivateCrtKey(info);
-        }
-        else if (algOid.equals(PKCSObjectIdentifiers.dhKeyAgreement))
+        if (algOid.equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {
               return new JCEDHPrivateKey(info);
         }
         else if (algOid.equals(X9ObjectIdentifiers.dhpublicnumber))
         {
               return new JCEDHPrivateKey(info);
-        }
-        else if (algOid.equals(OIWObjectIdentifiers.elGamalAlgorithm))
-        {
-              return new JCEElGamalPrivateKey(info);
         }
         else if (algOid.equals(X9ObjectIdentifiers.id_dsa))
         {
@@ -318,66 +266,6 @@ public abstract class JDKKeyFactory
         else
         {
             throw new RuntimeException("algorithm identifier " + algOid + " in key not recognised");
-        }
-    }
-
-    public static class RSA
-        extends JDKKeyFactory
-    {
-        public RSA()
-        {
-        }
-
-        protected PrivateKey engineGeneratePrivate(
-            KeySpec    keySpec)
-            throws InvalidKeySpecException
-        {
-            if (keySpec instanceof PKCS8EncodedKeySpec)
-            {
-                try
-                {
-                    return JDKKeyFactory.createPrivateKeyFromDERStream(
-                                ((PKCS8EncodedKeySpec)keySpec).getEncoded());
-                }
-                catch (Exception e)
-                {
-                    //
-                    // in case it's just a RSAPrivateKey object...
-                    //
-                    try
-                    {
-                        return new JCERSAPrivateCrtKey(
-                            new RSAPrivateKeyStructure(
-                                (ASN1Sequence) ASN1Primitive.fromByteArray(((PKCS8EncodedKeySpec)keySpec).getEncoded())));
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidKeySpecException(ex.toString());
-                    }
-                }
-            }
-            else if (keySpec instanceof RSAPrivateCrtKeySpec)
-            {
-                return new JCERSAPrivateCrtKey((RSAPrivateCrtKeySpec)keySpec);
-            }
-            else if (keySpec instanceof RSAPrivateKeySpec)
-            {
-                return new JCERSAPrivateKey((RSAPrivateKeySpec)keySpec);
-            }
-    
-            throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
-        }
-    
-        protected PublicKey engineGeneratePublic(
-            KeySpec    keySpec)
-            throws InvalidKeySpecException
-        {
-            if (keySpec instanceof RSAPublicKeySpec)
-            {
-                return new JCERSAPublicKey((RSAPublicKeySpec)keySpec);
-            }
-
-            return super.engineGeneratePublic(keySpec);
         }
     }
 
@@ -471,47 +359,6 @@ public abstract class JDKKeyFactory
             if (keySpec instanceof GOST3410PublicKeySpec)
             {
                 return new JDKGOST3410PublicKey((GOST3410PublicKeySpec)keySpec);
-            }
-
-            return super.engineGeneratePublic(keySpec);
-        }
-    }
-    
-    public static class ElGamal
-        extends JDKKeyFactory
-    {
-        public ElGamal()
-        {
-            elGamalFactory = true;
-        }
-
-        protected PrivateKey engineGeneratePrivate(
-            KeySpec    keySpec)
-            throws InvalidKeySpecException
-        {
-            if (keySpec instanceof ElGamalPrivateKeySpec)
-            {
-                return new JCEElGamalPrivateKey((ElGamalPrivateKeySpec)keySpec);
-            }
-            else if (keySpec instanceof DHPrivateKeySpec)
-            {
-                return new JCEElGamalPrivateKey((DHPrivateKeySpec)keySpec);
-            }
-
-            return super.engineGeneratePrivate(keySpec);
-        }
-    
-        protected PublicKey engineGeneratePublic(
-            KeySpec    keySpec)
-            throws InvalidKeySpecException
-        {
-            if (keySpec instanceof ElGamalPublicKeySpec)
-            {
-                return new JCEElGamalPublicKey((ElGamalPublicKeySpec)keySpec);
-            }
-            else if (keySpec instanceof DHPublicKeySpec)
-            {
-                return new JCEElGamalPublicKey((DHPublicKeySpec)keySpec);
             }
 
             return super.engineGeneratePublic(keySpec);

@@ -1,9 +1,13 @@
 package org.bouncycastle.jcajce.provider.asymmetric;
 
+import java.io.IOException;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jcajce.provider.asymmetric.util.BCKeyFactory;
 
 /**
@@ -16,6 +20,16 @@ public class X509
     static void registerKeyFactory(ASN1ObjectIdentifier id, BCKeyFactory factory)
     {
         keyFactories.put(id, factory);
+    }
+
+    public static PublicKey getPublicKey(X509EncodedKeySpec keySpec)
+        throws IOException
+    {
+        SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(keySpec.getEncoded());
+
+        BCKeyFactory keyFact = (BCKeyFactory)keyFactories.get(info.getAlgorithm().getAlgorithm());
+
+        return keyFact.generatePublic(info);
     }
 
     public static BCKeyFactory getKeyFactory(ASN1ObjectIdentifier algorithm)

@@ -11,6 +11,9 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
+/**
+ * @deprecated use RSAPrivateKey
+ */
 public class RSAPrivateKeyStructure
     extends ASN1Object
 {

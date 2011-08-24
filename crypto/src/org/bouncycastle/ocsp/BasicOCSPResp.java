@@ -1,15 +1,5 @@
 package org.bouncycastle.ocsp;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1OutputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
-import org.bouncycastle.asn1.ocsp.ResponseData;
-import org.bouncycastle.asn1.ocsp.SingleResponse;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,6 +21,17 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
+import org.bouncycastle.asn1.ocsp.ResponseData;
+import org.bouncycastle.asn1.ocsp.SingleResponse;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.X509Extensions;
 
 /**
  * <pre>
@@ -176,7 +177,7 @@ public class BasicOCSPResp
             {
                 try
                 {
-                    return ext.getValue().getEncoded(ASN1Encodable.DER);
+                    return ext.getValue().getEncoded(ASN1Encoding.DER);
                 }
                 catch (Exception e)
                 {
@@ -244,7 +245,7 @@ public class BasicOCSPResp
             {
                 try
                 {
-                    aOut.writeObject(e.nextElement());
+                    aOut.writeObject((ASN1Encodable)e.nextElement());
 
                     certs.add(cf.generateCertificate(
                         new ByteArrayInputStream(bOut.toByteArray())));
@@ -315,7 +316,7 @@ public class BasicOCSPResp
 
             signature.initVerify(key);
 
-            signature.update(resp.getTbsResponseData().getEncoded(ASN1Encodable.DER));
+            signature.update(resp.getTbsResponseData().getEncoded(ASN1Encoding.DER));
 
             return signature.verify(this.getSignature());
         }

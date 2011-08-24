@@ -25,6 +25,11 @@ public class DERTaggedObject
         super(explicit, tagNo, obj);
     }
 
+    public DERTaggedObject(int tagNo, ASN1Encodable encodable)
+    {
+        super(true, tagNo, encodable);
+    }
+
     void encode(
         ASN1OutputStream out)
         throws IOException

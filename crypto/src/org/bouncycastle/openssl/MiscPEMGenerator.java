@@ -145,7 +145,7 @@ public class MiscPEMGenerator
             {
                 type = "RSA PRIVATE KEY";
 
-                encoding = info.parsePrivateKey().getEncoded();
+                encoding = info.parsePrivateKey().toASN1Primitive().getEncoded();
             }
             else if (o instanceof DSAPrivateKey)
             {
@@ -171,7 +171,7 @@ public class MiscPEMGenerator
             {
                 type = "EC PRIVATE KEY";
 
-                encoding = info.parsePrivateKey().getEncoded();
+                encoding = info.parsePrivateKey().toASN1Primitive().getEncoded();
             }
             else
             {
@@ -283,7 +283,7 @@ public class MiscPEMGenerator
 
             PrivateKeyInfo      privInfo = PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(((PrivateKey)obj).getEncoded()));
 
-            keyData = privInfo.parsePrivateKey().getEncoded();
+            keyData = privInfo.parsePrivateKey().toASN1Primitive().getEncoded();
         }
 
         if (type == null || keyData == null)

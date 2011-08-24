@@ -13,10 +13,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -403,7 +405,7 @@ public class CMSSignedData
 
             for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
             {
-                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1Sequence)
                 {
@@ -427,7 +429,7 @@ public class CMSSignedData
 
             for (Enumeration en = crlSet.getObjects(); en.hasMoreElements();)
             {
-                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1Sequence)
                 {
@@ -451,7 +453,7 @@ public class CMSSignedData
 
             for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
             {
-                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1TaggedObject)
                 {
@@ -538,7 +540,7 @@ public class CMSSignedData
 
         ASN1Set             digests = new DERSet(digestAlgs);
         ASN1Set             signers = new DERSet(vec);
-        ASN1Sequence        sD = (ASN1Sequence)signedData.signedData.getDERObject();
+        ASN1Sequence        sD = (ASN1Sequence)signedData.signedData.toASN1Primitive();
 
         vec = new ASN1EncodableVector();
         

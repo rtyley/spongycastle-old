@@ -6,6 +6,7 @@ import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
@@ -65,7 +66,7 @@ public class X9Test
         //
         X962Parameters          params = new X962Parameters(X9ObjectIdentifiers.prime192v1);
 
-        ASN1OctetString         p = (ASN1OctetString)(new X9ECPoint(new ECPoint.Fp(ecP.getCurve(), new ECFieldElement.Fp(BigInteger.valueOf(2), BigInteger.valueOf(1)), new ECFieldElement.Fp(BigInteger.valueOf(4), BigInteger.valueOf(3)), true)).getDERObject());
+        ASN1OctetString         p = ASN1OctetString.getInstance(new X9ECPoint(new ECPoint.Fp(ecP.getCurve(), new ECFieldElement.Fp(BigInteger.valueOf(2), BigInteger.valueOf(1)), new ECFieldElement.Fp(BigInteger.valueOf(4), BigInteger.valueOf(3)), true)));
 
         SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), p.getOctets());
 
@@ -75,7 +76,7 @@ public class X9Test
         }
         
         ASN1InputStream         aIn = new ASN1InputStream(new ByteArrayInputStream(namedPub));
-        DERObject               o = aIn.readObject();
+        ASN1Primitive o = aIn.readObject();
         
         if (!info.equals(o))
         {
@@ -115,9 +116,9 @@ public class X9Test
         //
         X962Parameters          params = new X962Parameters(X9ObjectIdentifiers.prime192v1);
 
-        ASN1OctetString         p = (ASN1OctetString)(new X9ECPoint(new ECPoint.Fp(ecP.getCurve(), new ECFieldElement.Fp(BigInteger.valueOf(2), BigInteger.valueOf(1)), new ECFieldElement.Fp(BigInteger.valueOf(4), BigInteger.valueOf(3)), true)).getDERObject());
+        ASN1OctetString         p = ASN1OctetString.getInstance(new X9ECPoint(new ECPoint.Fp(ecP.getCurve(), new ECFieldElement.Fp(BigInteger.valueOf(2), BigInteger.valueOf(1)), new ECFieldElement.Fp(BigInteger.valueOf(4), BigInteger.valueOf(3)), true)));
 
-        PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), new ECPrivateKeyStructure(BigInteger.valueOf(10)).getDERObject());
+        PrivateKeyInfo          info = new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), new ECPrivateKeyStructure(BigInteger.valueOf(10)));
 
         if (!areEqual(info.getEncoded(), namedPriv))
         {
@@ -125,7 +126,7 @@ public class X9Test
         }
         
         ASN1InputStream         aIn = new ASN1InputStream(new ByteArrayInputStream(namedPriv));
-        DERObject               o = aIn.readObject();
+        ASN1Primitive               o = aIn.readObject();
         
         if (!info.equals(o))
         {

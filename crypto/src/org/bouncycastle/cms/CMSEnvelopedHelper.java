@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javax.crypto.KeyGenerator;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.cms.KEKRecipientInfo;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientInfo;
@@ -264,7 +265,7 @@ class CMSEnvelopedHelper
     private static void readRecipientInfo(
         List infos, RecipientInfo info, AlgorithmIdentifier messageAlgorithm, CMSSecureReadable secureReadable, AuthAttributesProvider additionalData)
     {
-        DEREncodable recipInfo = info.getInfo();
+        ASN1Encodable recipInfo = info.getInfo();
         if (recipInfo instanceof KeyTransRecipientInfo)
         {
             infos.add(new KeyTransRecipientInformation(

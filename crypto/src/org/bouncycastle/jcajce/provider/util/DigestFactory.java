@@ -1,11 +1,11 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.util;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -18,7 +18,7 @@ import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.util.Strings;
 
-class JCEDigestUtil
+public class DigestFactory
 {
     private static Set md5 = new HashSet();
     private static Set sha1 = new HashSet();
@@ -78,7 +78,7 @@ class JCEDigestUtil
         oids.put(NISTObjectIdentifiers.id_sha512.getId(), NISTObjectIdentifiers.id_sha512); 
     }
     
-    static Digest getDigest(
+    public static Digest getDigest(
         String digestName) 
     {
         digestName = Strings.toUpperCase(digestName);
@@ -111,7 +111,7 @@ class JCEDigestUtil
         return null;
     }
     
-    static boolean isSameDigest(
+    public static boolean isSameDigest(
         String digest1,
         String digest2)
     {
@@ -123,9 +123,9 @@ class JCEDigestUtil
             || (md5.contains(digest1) && md5.contains(digest2));
     }
     
-    static DERObjectIdentifier getOID(
+    public static ASN1ObjectIdentifier getOID(
         String digestName)
     {
-        return (DERObjectIdentifier)oids.get(digestName);
+        return (ASN1ObjectIdentifier)oids.get(digestName);
     }
 }

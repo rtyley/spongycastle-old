@@ -330,7 +330,7 @@ public class PEMReader
 
                 ECPrivateKeyStructure pKey = new ECPrivateKeyStructure(seq);
                 AlgorithmIdentifier algId = new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, pKey.getParameters());
-                PrivateKeyInfo privInfo = new PrivateKeyInfo(algId, pKey.getDERObject());
+                PrivateKeyInfo privInfo = new PrivateKeyInfo(algId, pKey);
                 SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(algId, pKey.getPublicKey().getBytes());
 
                 PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privInfo.getEncoded());
@@ -706,7 +706,7 @@ public class PEMReader
                     Cipher cipher = Cipher.getInstance(algorithm, symProvider);
                     AlgorithmParameters algParams = AlgorithmParameters.getInstance(algorithm, symProvider);
 
-                    algParams.init(scheme.getParameters().getDERObject().getEncoded());
+                    algParams.init(scheme.getParameters().toASN1Primitive().getEncoded());
 
                     cipher.init(Cipher.DECRYPT_MODE, key, algParams);
 

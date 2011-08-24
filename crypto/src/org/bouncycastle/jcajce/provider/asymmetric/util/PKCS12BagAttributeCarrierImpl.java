@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.asymmetric.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 
-class PKCS12BagAttributeCarrierImpl
+public class PKCS12BagAttributeCarrierImpl
     implements PKCS12BagAttributeCarrier
 {
     private Hashtable pkcs12Attributes;

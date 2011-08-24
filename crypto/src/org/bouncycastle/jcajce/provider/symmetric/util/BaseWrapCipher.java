@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.symmetric.util;
 
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -28,21 +28,18 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Wrapper;
-import org.bouncycastle.crypto.engines.RC2WrapEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
-import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
-import org.bouncycastle.jcajce.provider.symmetric.util.PBE;
+import org.bouncycastle.jcajce.provider.asymmetric.X509;
+import org.bouncycastle.jcajce.provider.asymmetric.util.BCKeyFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-public abstract class WrapCipherSpi extends CipherSpi
+public abstract class BaseWrapCipher
+    extends CipherSpi
     implements PBE
 {
     //
@@ -68,19 +65,19 @@ public abstract class WrapCipherSpi extends CipherSpi
     private int                       ivSize;
     private byte[]                    iv;
 
-    protected WrapCipherSpi()
+    protected BaseWrapCipher()
     {
     }
 
-    protected WrapCipherSpi(
+    protected BaseWrapCipher(
         Wrapper wrapEngine)
     {
         this(wrapEngine, 0);
     }
 
-    protected WrapCipherSpi(
+    protected BaseWrapCipher(
         Wrapper wrapEngine,
-        int     ivSize)
+        int ivSize)
     {
         this.wrapEngine = wrapEngine;
         this.ivSize = ivSize;
@@ -139,10 +136,10 @@ public abstract class WrapCipherSpi extends CipherSpi
         if (key instanceof BCPBEKey)
         {
             BCPBEKey k = (BCPBEKey)key;
-            
+
             if (params instanceof PBEParameterSpec)
             {
-                param = PBE.Util.makePBEParameters(k, params, wrapEngine.getAlgorithmName());
+                param = Util.makePBEParameters(k, params, wrapEngine.getAlgorithmName());
             }
             else if (k.getParam() != null)
             {
@@ -158,7 +155,7 @@ public abstract class WrapCipherSpi extends CipherSpi
             param = new KeyParameter(key.getEncoded());
         }
 
-        if (params instanceof javax.crypto.spec.IvParameterSpec)
+        if (params instanceof IvParameterSpec)
         {
             IvParameterSpec iv = (IvParameterSpec) params;
             param = new ParametersWithIV(param, iv.getIV());
@@ -278,7 +275,7 @@ public abstract class WrapCipherSpi extends CipherSpi
 
     protected byte[] engineWrap(
         Key     key)
-    throws IllegalBlockSizeException, java.security.InvalidKeyException
+    throws IllegalBlockSizeException, InvalidKeyException
     {
         byte[] encoded = key.getEncoded();
         if (encoded == null)
@@ -341,9 +338,9 @@ public abstract class WrapCipherSpi extends CipherSpi
         else if (wrappedKeyAlgorithm.equals("") && wrappedKeyType == Cipher.PRIVATE_KEY)
         {
             /*
-             * The caller doesnt know the algorithm as it is part of
-             * the encrypted data.
-             */
+                 * The caller doesn't know the algorithm as it is part of
+                 * the encrypted data.
+                 */
             ASN1InputStream bIn = new ASN1InputStream(encoded);
             PrivateKey      privKey;
 
@@ -352,31 +349,15 @@ public abstract class WrapCipherSpi extends CipherSpi
                 ASN1Sequence         s = (ASN1Sequence)bIn.readObject();
                 PrivateKeyInfo       in = new PrivateKeyInfo(s);
 
-                DERObjectIdentifier  oid = in.getAlgorithmId().getObjectId();
+                BCKeyFactory fact = X509.getKeyFactory(in.getPrivateKeyAlgorithm().getAlgorithm());
 
-                if (oid.equals(X9ObjectIdentifiers.id_ecPublicKey))
+                if (fact != null)
                 {
-                    privKey = new JCEECPrivateKey(in);
+                    privKey = fact.generatePrivate(PrivateKeyInfo.getInstance(encoded));
                 }
-                else if (oid.equals(CryptoProObjectIdentifiers.gostR3410_94))
+                else
                 {
-                    privKey = new JDKGOST3410PrivateKey(in);
-                }
-                else if (oid.equals(X9ObjectIdentifiers.id_dsa))
-                {
-                    privKey = new JDKDSAPrivateKey(in);
-                }
-                else if (oid.equals(PKCSObjectIdentifiers.dhKeyAgreement))
-                {
-                    privKey = new JCEDHPrivateKey(in);
-                }
-                else if (oid.equals(X9ObjectIdentifiers.dhpublicnumber))
-                {
-                    privKey = new JCEDHPrivateKey(in);
-                }
-                else    // the old standby!
-                {
-                    privKey = new JCERSAPrivateCrtKey(in);
+                    throw new InvalidKeyException("algorithm " + in.getPrivateKeyAlgorithm().getAlgorithm() + " not supported");
                 }
             }
             catch (Exception e)
@@ -418,16 +399,4 @@ public abstract class WrapCipherSpi extends CipherSpi
         }
     }
 
-    //
-    // classes that inherit directly from us
-    //
-
-    public static class RC2Wrap
-        extends WrapCipherSpi
-    {
-        public RC2Wrap()
-        {
-            super(new RC2WrapEngine());
-        }
-    }
 }

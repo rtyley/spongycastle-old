@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -258,7 +259,7 @@ public class X509CertificateHolder
 
             OutputStream sOut = verifier.getOutputStream();
 
-            sOut.write(tbsCert.getDEREncoded());
+            sOut.write(tbsCert.getEncoded(ASN1Encoding.DER));
 
             sOut.close();
         }

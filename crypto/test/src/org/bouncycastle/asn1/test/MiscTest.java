@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.misc.CAST5CBCParameters;
 import org.bouncycastle.asn1.misc.IDEACBCPar;
@@ -64,7 +65,7 @@ public class MiscTest
                 aOut.writeObject(values[i]);
             }
             
-            DERObject[] readValues = new DERObject[values.length];
+            ASN1Primitive[] readValues = new ASN1Primitive[values.length];
             
             if (!isSameAs(bOut.toByteArray(), data))
             {
@@ -76,7 +77,7 @@ public class MiscTest
             
             for (int i = 0; i != values.length; i++)
             {
-                DERObject   o = aIn.readObject();
+                ASN1Primitive   o = aIn.readObject();
                 if (!values[i].equals(o))
                 {
                     return new SimpleTestResult(false, getName() + ": Failed equality test for " + o);

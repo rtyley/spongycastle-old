@@ -15,15 +15,15 @@ import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.PSource;
 import javax.crypto.spec.RC2ParameterSpec;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Null;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
@@ -37,6 +37,7 @@ import org.bouncycastle.asn1.pkcs.RSAESOAEPparams;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
+import org.bouncycastle.jcajce.provider.util.DigestFactory;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
@@ -383,7 +384,7 @@ public abstract class JDKAlgorithmParameters
         {
             try
             {
-                return params.getEncoded(ASN1Encodable.DER);
+                return params.getEncoded(ASN1Encoding.DER);
             }
             catch (IOException e)
             {
@@ -466,7 +467,7 @@ public abstract class JDKAlgorithmParameters
         {
             try
             {
-                return params.getEncoded(ASN1Encodable.DER);
+                return params.getEncoded(ASN1Encoding.DER);
             }
             catch (IOException e)
             {
@@ -561,7 +562,7 @@ public abstract class JDKAlgorithmParameters
 
             try
             {
-                return dhP.getEncoded(ASN1Encodable.DER);                
+                return dhP.getEncoded(ASN1Encoding.DER);
             }
             catch (IOException e)
             {
@@ -673,7 +674,7 @@ public abstract class JDKAlgorithmParameters
 
             try
             {
-                return dsaP.getEncoded(ASN1Encodable.DER);
+                return dsaP.getEncoded(ASN1Encoding.DER);
             }
             catch (IOException e)
             {
@@ -774,11 +775,11 @@ public abstract class JDKAlgorithmParameters
          */
         protected byte[] engineGetEncoded()
         {
-            GOST3410PublicKeyAlgParameters gost3410P = new GOST3410PublicKeyAlgParameters(new DERObjectIdentifier(currentSpec.getPublicKeyParamSetOID()), new DERObjectIdentifier(currentSpec.getDigestParamSetOID()), new DERObjectIdentifier(currentSpec.getEncryptionParamSetOID()));
+            GOST3410PublicKeyAlgParameters gost3410P = new GOST3410PublicKeyAlgParameters(new ASN1ObjectIdentifier(currentSpec.getPublicKeyParamSetOID()), new ASN1ObjectIdentifier(currentSpec.getDigestParamSetOID()), new ASN1ObjectIdentifier(currentSpec.getEncryptionParamSetOID()));
 
             try
             {
-                return gost3410P.getEncoded(ASN1Encodable.DER);
+                return gost3410P.getEncoded(ASN1Encoding.DER);
             }
             catch (IOException e)
             {
@@ -883,7 +884,7 @@ public abstract class JDKAlgorithmParameters
 
             try
             {
-                return elP.getEncoded(ASN1Encodable.DER);
+                return elP.getEncoded(ASN1Encoding.DER);
             }
             catch (IOException e)
             {
@@ -999,7 +1000,7 @@ public abstract class JDKAlgorithmParameters
                 v.add(new DEROctetString(currentSpec.getEncodingV()));
                 v.add(new DERInteger(currentSpec.getMacKeySize()));
 
-                return new DERSequence(v).getEncoded(ASN1Encodable.DER);
+                return new DERSequence(v).getEncoded(ASN1Encoding.DER);
             }
             catch (IOException e)
             {
@@ -1097,12 +1098,12 @@ public abstract class JDKAlgorithmParameters
         protected byte[] engineGetEncoded() 
         {
             AlgorithmIdentifier     hashAlgorithm = new AlgorithmIdentifier(
-                                                            JCEDigestUtil.getOID(currentSpec.getDigestAlgorithm()),
+                                                            DigestFactory.getOID(currentSpec.getDigestAlgorithm()),
                                                             new DERNull());
             MGF1ParameterSpec       mgfSpec = (MGF1ParameterSpec)currentSpec.getMGFParameters();
             AlgorithmIdentifier     maskGenAlgorithm = new AlgorithmIdentifier(
                                                             PKCSObjectIdentifiers.id_mgf1, 
-                                                            new AlgorithmIdentifier(JCEDigestUtil.getOID(mgfSpec.getDigestAlgorithm()), new DERNull()));
+                                                            new AlgorithmIdentifier(DigestFactory.getOID(mgfSpec.getDigestAlgorithm()), new DERNull()));
             PSource.PSpecified      pSource = (PSource.PSpecified)currentSpec.getPSource();
             AlgorithmIdentifier     pSourceAlgorithm = new AlgorithmIdentifier(
                                                             PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(pSource.getValue()));
@@ -1110,7 +1111,7 @@ public abstract class JDKAlgorithmParameters
     
             try
             {
-                return oaepP.getEncoded(ASN1Encodable.DER);
+                return oaepP.getEncoded(ASN1Encoding.DER);
             }
             catch (IOException e)
             {
@@ -1212,12 +1213,12 @@ public abstract class JDKAlgorithmParameters
         {
             PSSParameterSpec    pssSpec = currentSpec;
             AlgorithmIdentifier hashAlgorithm = new AlgorithmIdentifier(
-                                                JCEDigestUtil.getOID(pssSpec.getDigestAlgorithm()),
+                                                DigestFactory.getOID(pssSpec.getDigestAlgorithm()),
                                                 new DERNull());
             MGF1ParameterSpec   mgfSpec = (MGF1ParameterSpec)pssSpec.getMGFParameters();
             AlgorithmIdentifier maskGenAlgorithm = new AlgorithmIdentifier(
                                                 PKCSObjectIdentifiers.id_mgf1, 
-                                                new AlgorithmIdentifier(JCEDigestUtil.getOID(mgfSpec.getDigestAlgorithm()), new DERNull()));
+                                                new AlgorithmIdentifier(DigestFactory.getOID(mgfSpec.getDigestAlgorithm()), new DERNull()));
             RSASSAPSSparams     pssP = new RSASSAPSSparams(hashAlgorithm, maskGenAlgorithm, new DERInteger(pssSpec.getSaltLength()), new DERInteger(pssSpec.getTrailerField()));
             
             return pssP.getEncoded("DER");

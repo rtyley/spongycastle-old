@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.asymmetric.elgamal;
 
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -13,7 +13,6 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
 
 import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.interfaces.DHKey;
@@ -30,19 +29,24 @@ import org.bouncycastle.crypto.encodings.OAEPEncoding;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.ElGamalEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.jcajce.provider.asymmetric.util.BaseCipherSpi;
+import org.bouncycastle.jcajce.provider.util.DigestFactory;
 import org.bouncycastle.jce.interfaces.ElGamalKey;
 import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
 import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.provider.ElGamalUtil;
 import org.bouncycastle.util.Strings;
 
-public class JCEElGamalCipher extends WrapCipherSpi
+public class CipherSpi
+    extends BaseCipherSpi
 {
     private BufferedAsymmetricBlockCipher   cipher;
     private AlgorithmParameterSpec          paramSpec;
     private AlgorithmParameters             engineParams;
 
-    public JCEElGamalCipher(
-        AsymmetricBlockCipher   engine)
+    public CipherSpi(
+        AsymmetricBlockCipher engine)
     {
         cipher = new BufferedAsymmetricBlockCipher(engine);
     }
@@ -52,7 +56,7 @@ public class JCEElGamalCipher extends WrapCipherSpi
         throws NoSuchPaddingException
     {
         MGF1ParameterSpec   mgfParams = (MGF1ParameterSpec)pSpec.getMGFParameters();
-        Digest              digest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
+        Digest              digest = DigestFactory.getDigest(mgfParams.getDigestAlgorithm());
         
         if (digest == null)
         {
@@ -66,11 +70,6 @@ public class JCEElGamalCipher extends WrapCipherSpi
     protected int engineGetBlockSize() 
     {
         return cipher.getInputBlockSize();
-    }
-
-    protected byte[] engineGetIV() 
-    {
-        return null;
     }
 
     protected int engineGetKeySize(
@@ -221,12 +220,12 @@ public class JCEElGamalCipher extends WrapCipherSpi
 
         switch (opmode)
         {
-        case Cipher.ENCRYPT_MODE:
-        case Cipher.WRAP_MODE:
+        case javax.crypto.Cipher.ENCRYPT_MODE:
+        case javax.crypto.Cipher.WRAP_MODE:
             cipher.init(true, param);
             break;
-        case Cipher.DECRYPT_MODE:
-        case Cipher.UNWRAP_MODE:
+        case javax.crypto.Cipher.DECRYPT_MODE:
+        case javax.crypto.Cipher.UNWRAP_MODE:
             cipher.init(false, param);
             break;
         default:
@@ -323,7 +322,7 @@ public class JCEElGamalCipher extends WrapCipherSpi
      * classes that inherit from us.
      */
     static public class NoPadding
-        extends JCEElGamalCipher
+        extends CipherSpi
     {
         public NoPadding()
         {
@@ -332,7 +331,7 @@ public class JCEElGamalCipher extends WrapCipherSpi
     }
     
     static public class PKCS1v1_5Padding
-        extends JCEElGamalCipher
+        extends CipherSpi
     {
         public PKCS1v1_5Padding()
         {

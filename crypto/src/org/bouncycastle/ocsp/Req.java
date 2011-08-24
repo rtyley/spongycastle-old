@@ -4,7 +4,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.ocsp.Request;
 import org.bouncycastle.asn1.x509.X509Extension;
@@ -94,7 +94,7 @@ public class Req
             {
                 try
                 {
-                    return ext.getValue().getEncoded(ASN1Encodable.DER);
+                    return ext.getValue().getEncoded(ASN1Encoding.DER);
                 }
                 catch (Exception e)
                 {

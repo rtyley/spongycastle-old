@@ -21,6 +21,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -583,7 +584,7 @@ public class PKCS12StoreTest
             fail("Modulus doesn't match.");
         }
 
-        DEREncodable outer = new ASN1StreamParser(data).readObject();
+        ASN1Encodable outer = new ASN1StreamParser(data).readObject();
         if (!(outer instanceof DERSequenceParser))
         {
             fail("Failed DER encoding test.");
@@ -1059,7 +1060,7 @@ public class PKCS12StoreTest
         byte[] data = PKCS12Util.convertToDefiniteLength(pkcs12);
         kS.load(new ByteArrayInputStream(data), passwd);     // check MAC
 
-        DEREncodable obj = new ASN1StreamParser(data).readObject();
+        ASN1Encodable obj = new ASN1StreamParser(data).readObject();
         if (!(obj instanceof DERSequenceParser))
         {
             fail("Failed DER conversion test.");
@@ -1074,7 +1075,7 @@ public class PKCS12StoreTest
             fail("Failed deep DER conversion test - outer.");
         }
 
-        Pfx pfx = new Pfx(ASN1Sequence.getInstance(obj.getDERObject()));
+        Pfx pfx = new Pfx(ASN1Sequence.getInstance(obj));
 
         obj = new ASN1StreamParser(ASN1OctetString.getInstance(pfx.getAuthSafe().getContent()).getOctets()).readObject();
         if (!(obj instanceof DERSequenceParser))

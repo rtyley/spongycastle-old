@@ -1,6 +1,5 @@
 package org.bouncycastle.asn1;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 abstract class LimitedInputStream
@@ -24,7 +23,6 @@ abstract class LimitedInputStream
     }
     
     protected void setParentEofDetect(boolean on)
-        throws IOException
     {
         if (_in instanceof IndefiniteLengthInputStream)
         {

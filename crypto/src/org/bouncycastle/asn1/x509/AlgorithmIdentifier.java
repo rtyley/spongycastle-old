@@ -71,6 +71,16 @@ public class AlgorithmIdentifier
     /**
      * @deprecated use ASN1ObjectIdentifier
      * @param objectId
+     */
+    public AlgorithmIdentifier(
+        DERObjectIdentifier    objectId)
+    {
+        this.objectId = new ASN1ObjectIdentifier(objectId.getId());
+    }
+
+    /**
+     * @deprecated use ASN1ObjectIdentifier
+     * @param objectId
      * @param parameters
      */
     public AlgorithmIdentifier(

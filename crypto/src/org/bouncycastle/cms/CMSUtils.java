@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -205,7 +206,7 @@ class CMSUtils
 
         for (Iterator it = derObjects.iterator(); it.hasNext();)
         {
-            v.add((DEREncodable)it.next());
+            v.add((ASN1Encodable)it.next());
         }
 
         return new BERSet(v);
@@ -217,7 +218,7 @@ class CMSUtils
 
         for (Iterator it = derObjects.iterator(); it.hasNext();)
         {
-            v.add((DEREncodable)it.next());
+            v.add((ASN1Encodable)it.next());
         }
 
         return new DERSet(v);

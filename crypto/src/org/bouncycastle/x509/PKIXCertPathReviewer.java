@@ -36,6 +36,7 @@ import java.util.Vector;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -811,7 +812,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
 
         AlgorithmIdentifier workingAlgId = null;
         DERObjectIdentifier workingPublicKeyAlgorithm = null;
-        DEREncodable workingPublicKeyParameters = null;
+        ASN1Encodable workingPublicKeyParameters = null;
         
         if (trust != null)
         {
@@ -949,7 +950,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 CRLDistPoint crlDistPoints = null;
                 try
                 {
-                    DERObject crl_dp = getExtensionValue(cert,CRL_DIST_POINTS);
+                    ASN1Primitive crl_dp = getExtensionValue(cert,CRL_DIST_POINTS);
                     if (crl_dp != null)
                     {
                         crlDistPoints = CRLDistPoint.getInstance(crl_dp);
@@ -965,7 +966,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 AuthorityInformationAccess authInfoAcc = null;
                 try
                 {
-                    DERObject auth_info_acc = getExtensionValue(cert,AUTH_INFO_ACCESS);
+                    ASN1Primitive auth_info_acc = getExtensionValue(cert,AUTH_INFO_ACCESS);
                     if (auth_info_acc != null)
                     {
                         authInfoAcc = AuthorityInformationAccess.getInstance(auth_info_acc);
@@ -1409,7 +1410,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     
                     // a)
                     
-                    DERObject pm;
+                    ASN1Primitive pm;
                     try
                     {
                         pm = getExtensionValue(cert, POLICY_MAPPINGS);
@@ -2263,7 +2264,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             //
             // check the DeltaCRL indicator, base point and the issuing distribution point
             //
-            DERObject idp;
+            ASN1Primitive idp;
             try
             {
                 idp = getExtensionValue(crl, ISSUING_DISTRIBUTION_POINT);
@@ -2273,7 +2274,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.distrPtExtError");
                 throw new CertPathReviewerException(msg);
             }
-            DERObject dci;
+            ASN1Primitive dci;
             try
             {
                 dci = getExtensionValue(crl, DELTA_CRL_INDICATOR);
@@ -2324,7 +2325,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 {
                     X509CRL base = (X509CRL)it.next();
 
-                    DERObject baseIdp;
+                    ASN1Primitive baseIdp;
                     try
                     {
                         baseIdp = getExtensionValue(base, ISSUING_DISTRIBUTION_POINT);

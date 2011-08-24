@@ -4,18 +4,24 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.RSAPrivateKeySpec;
+import java.util.Enumeration;
 
-import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
+import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 
 public class BCRSAPrivateKey
-    implements java.security.interfaces.RSAPrivateKey
+    implements RSAPrivateKey, PKCS12BagAttributeCarrier
 {
     static final long serialVersionUID = 5110188922551353628L;
 
@@ -23,6 +29,8 @@ public class BCRSAPrivateKey
 
     protected BigInteger modulus;
     protected BigInteger privateExponent;
+
+    private PKCS12BagAttributeCarrierImpl   attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected BCRSAPrivateKey()
     {
@@ -43,7 +51,7 @@ public class BCRSAPrivateKey
     }
 
     BCRSAPrivateKey(
-        java.security.interfaces.RSAPrivateKey key)
+        RSAPrivateKey key)
     {
         this.modulus = key.getModulus();
         this.privateExponent = key.getPrivateExponent();
@@ -71,21 +79,12 @@ public class BCRSAPrivateKey
 
     public byte[] getEncoded()
     {
-        try
-        {
-            PrivateKeyInfo info = new PrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, new DERNull()), new RSAPrivateKey(getModulus(), ZERO, getPrivateExponent(), ZERO, ZERO, ZERO, ZERO, ZERO).toASN1Primitive());
-
-            return info.getEncoded(ASN1Encoding.DER);
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
+        return KeyUtil.getEncodedPrivateKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, new DERNull()), new RSAPrivateKeyStructure(getModulus(), ZERO, getPrivateExponent(), ZERO, ZERO, ZERO, ZERO, ZERO));
     }
 
     public boolean equals(Object o)
     {
-        if (!(o instanceof java.security.interfaces.RSAPrivateKey))
+        if (!(o instanceof RSAPrivateKey))
         {
             return false;
         }
@@ -95,7 +94,7 @@ public class BCRSAPrivateKey
             return true;
         }
 
-        java.security.interfaces.RSAPrivateKey key = (java.security.interfaces.RSAPrivateKey)o;
+        RSAPrivateKey key = (RSAPrivateKey)o;
 
         return getModulus().equals(key.getModulus())
             && getPrivateExponent().equals(key.getPrivateExponent());
@@ -106,19 +105,44 @@ public class BCRSAPrivateKey
         return getModulus().hashCode() ^ getPrivateExponent().hashCode();
     }
 
+    public void setBagAttribute(
+        ASN1ObjectIdentifier oid,
+        ASN1Encodable attribute)
+    {
+        attrCarrier.setBagAttribute(oid, attribute);
+    }
+
+    public ASN1Encodable getBagAttribute(
+        DERObjectIdentifier oid)
+    {
+        return attrCarrier.getBagAttribute(oid);
+    }
+
+    public Enumeration getBagAttributeKeys()
+    {
+        return attrCarrier.getBagAttributeKeys();
+    }
+
     private void readObject(
-        ObjectInputStream in)
+        ObjectInputStream   in)
         throws IOException, ClassNotFoundException
     {
         this.modulus = (BigInteger)in.readObject();
+        this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
+        
+        attrCarrier.readObject(in);
+
         this.privateExponent = (BigInteger)in.readObject();
     }
 
     private void writeObject(
-        ObjectOutputStream out)
+        ObjectOutputStream  out)
         throws IOException
     {
         out.writeObject(modulus);
+
+        attrCarrier.writeObject(out);
+
         out.writeObject(privateExponent);
     }
 }

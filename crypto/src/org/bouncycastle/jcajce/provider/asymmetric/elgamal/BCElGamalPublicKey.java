@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.asymmetric.elgamal;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,6 +9,7 @@ import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.DHPublicKeySpec;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
@@ -20,7 +21,7 @@ import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
 
-public class JCEElGamalPublicKey
+public class BCElGamalPublicKey
     implements ElGamalPublicKey, DHPublicKey
 {
     static final long serialVersionUID = 8712728417091216948L;
@@ -28,51 +29,51 @@ public class JCEElGamalPublicKey
     private BigInteger              y;
     private ElGamalParameterSpec    elSpec;
 
-    JCEElGamalPublicKey(
-        ElGamalPublicKeySpec    spec)
+    BCElGamalPublicKey(
+        ElGamalPublicKeySpec spec)
     {
         this.y = spec.getY();
         this.elSpec = new ElGamalParameterSpec(spec.getParams().getP(), spec.getParams().getG());
     }
 
-    JCEElGamalPublicKey(
-        DHPublicKeySpec    spec)
+    BCElGamalPublicKey(
+        DHPublicKeySpec spec)
     {
         this.y = spec.getY();
         this.elSpec = new ElGamalParameterSpec(spec.getP(), spec.getG());
     }
     
-    JCEElGamalPublicKey(
-        ElGamalPublicKey    key)
+    BCElGamalPublicKey(
+        ElGamalPublicKey key)
     {
         this.y = key.getY();
         this.elSpec = key.getParameters();
     }
 
-    JCEElGamalPublicKey(
-        DHPublicKey    key)
+    BCElGamalPublicKey(
+        DHPublicKey key)
     {
         this.y = key.getY();
         this.elSpec = new ElGamalParameterSpec(key.getParams().getP(), key.getParams().getG());
     }
     
-    JCEElGamalPublicKey(
-        ElGamalPublicKeyParameters  params)
+    BCElGamalPublicKey(
+        ElGamalPublicKeyParameters params)
     {
         this.y = params.getY();
         this.elSpec = new ElGamalParameterSpec(params.getParameters().getP(), params.getParameters().getG());
     }
 
-    JCEElGamalPublicKey(
-        BigInteger              y,
-        ElGamalParameterSpec    elSpec)
+    BCElGamalPublicKey(
+        BigInteger y,
+        ElGamalParameterSpec elSpec)
     {
         this.y = y;
         this.elSpec = elSpec;
     }
 
-    JCEElGamalPublicKey(
-        SubjectPublicKeyInfo    info)
+    BCElGamalPublicKey(
+        SubjectPublicKeyInfo info)
     {
         ElGamalParameter        params = new ElGamalParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
         DERInteger              derY = null;
@@ -102,9 +103,16 @@ public class JCEElGamalPublicKey
 
     public byte[] getEncoded()
     {
-        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(elSpec.getP(), elSpec.getG()).getDERObject()), new DERInteger(y));
+        try
+        {
+            SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(elSpec.getP(), elSpec.getG())), new DERInteger(y));
 
-        return info.getDEREncoded();
+            return info.getEncoded(ASN1Encoding.DER);
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
     }
 
     public ElGamalParameterSpec getParameters()

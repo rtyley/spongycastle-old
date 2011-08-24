@@ -11,12 +11,12 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
@@ -32,6 +32,7 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.EC5Util;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.ECUtil;
+import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
@@ -227,13 +228,13 @@ public class JCEECPublicKey
         }
         else
         {
-            X962Parameters params = new X962Parameters((DERObject)info.getAlgorithmId().getParameters());
+            X962Parameters params = new X962Parameters((ASN1Primitive)info.getAlgorithmId().getParameters());
             ECCurve                 curve;
             EllipticCurve           ellipticCurve;
 
             if (params.isNamedCurve())
             {
-                DERObjectIdentifier oid = (DERObjectIdentifier)params.getParameters();
+                ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)params.getParameters();
                 X9ECParameters ecP = ECUtil.getNamedCurveByOid(oid);
 
                 curve = ecP.getCurve();
@@ -255,7 +256,7 @@ public class JCEECPublicKey
             }
             else
             {
-                X9ECParameters          ecP = new X9ECParameters((ASN1Sequence)params.getParameters());
+                X9ECParameters          ecP = X9ECParameters.getInstance(params.getParameters());
 
                 curve = ecP.getCurve();
                 ellipticCurve = EC5Util.convertCurve(curve, ecP.getSeed());
@@ -350,16 +351,16 @@ public class JCEECPublicKey
             extractBytes(encKey, 0, bX);
             extractBytes(encKey, 32, bY);
 
-            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params.getDERObject()), new DEROctetString(encKey));
+            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params), new DEROctetString(encKey));
         }
         else
         {
             if (ecSpec instanceof ECNamedCurveSpec)
             {
-                DERObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveSpec)ecSpec).getName());
+                ASN1ObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveSpec)ecSpec).getName());
                 if (curveOid == null)
                 {
-                    curveOid = new DERObjectIdentifier(((ECNamedCurveSpec)ecSpec).getName());
+                    curveOid = new ASN1ObjectIdentifier(((ECNamedCurveSpec)ecSpec).getName());
                 }
                 params = new X962Parameters(curveOid);
             }
@@ -383,12 +384,12 @@ public class JCEECPublicKey
 
             ECCurve curve = this.engineGetQ().getCurve();
             ASN1OctetString p = (ASN1OctetString)
-                new X9ECPoint(curve.createPoint(this.getQ().getX().toBigInteger(), this.getQ().getY().toBigInteger(), withCompression)).getDERObject();
+                new X9ECPoint(curve.createPoint(this.getQ().getX().toBigInteger(), this.getQ().getY().toBigInteger(), withCompression)).toASN1Primitive();
 
-            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params.getDERObject()), p.getOctets());
+            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), p.getOctets());
         }
 
-        return info.getDEREncoded();
+        return KeyUtil.getEncodedSubjectPublicKeyInfo(info);
     }
 
     private void extractBytes(byte[] encKey, int offSet, BigInteger bI)

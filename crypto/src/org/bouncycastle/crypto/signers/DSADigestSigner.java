@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
@@ -98,7 +99,14 @@ public class DSADigestSigner
 
         BigInteger[] sig = dsaSigner.generateSignature(hash);
 
-        return derEncode(sig[0], sig[1]);
+        try
+        {
+            return derEncode(sig[0], sig[1]);
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException("unable to encode signature");
+        }
     }
 
     public boolean verifySignature(
@@ -131,12 +139,13 @@ public class DSADigestSigner
     private byte[] derEncode(
         BigInteger  r,
         BigInteger  s)
+        throws IOException
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
         v.add(new DERInteger(r));
         v.add(new DERInteger(s));
 
-        return new DERSequence(v).getDEREncoded();
+        return new DERSequence(v).getEncoded(ASN1Encoding.DER);
     }
 
     private BigInteger[] derDecode(

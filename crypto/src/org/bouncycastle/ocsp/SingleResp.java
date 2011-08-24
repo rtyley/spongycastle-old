@@ -1,18 +1,18 @@
 package org.bouncycastle.ocsp;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.ocsp.CertStatus;
 import org.bouncycastle.asn1.ocsp.RevokedInfo;
 import org.bouncycastle.asn1.ocsp.SingleResponse;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
-
-import java.text.ParseException;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
 
 public class SingleResp
     implements java.security.cert.X509Extension
@@ -150,7 +150,7 @@ public class SingleResp
             {
                 try
                 {
-                    return ext.getValue().getEncoded(ASN1Encodable.DER);
+                    return ext.getValue().getEncoded(ASN1Encoding.DER);
                 }
                 catch (Exception e)
                 {

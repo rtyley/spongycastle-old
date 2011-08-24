@@ -3,14 +3,14 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 import java.util.Enumeration;
 
-public class LazyDERSequence
-    extends DERSequence
+class LazyEncodedSequence
+    extends ASN1Sequence
 {
     private byte[] encoded;
     private boolean parsed = false;
     private int size = -1;
 
-    LazyDERSequence(
+    LazyEncodedSequence(
         byte[] encoded)
         throws IOException
     {
@@ -19,11 +19,11 @@ public class LazyDERSequence
 
     private void parse()
     {
-        Enumeration en = new LazyDERConstructionEnumeration(encoded);
+        Enumeration en = new LazyConstructionEnumeration(encoded);
 
         while (en.hasMoreElements())
         {
-            addObject((ASN1Encodable)en.nextElement());
+            seq.addElement(en.nextElement());
         }
 
         parsed = true;
@@ -46,30 +46,43 @@ public class LazyDERSequence
             return super.getObjects();
         }
 
-        return new LazyDERConstructionEnumeration(encoded);
+        return new LazyConstructionEnumeration(encoded);
     }
 
-    public int size()
+    public synchronized int size()
     {
-        if (size < 0)
+        if (!parsed)
         {
-            Enumeration en = new LazyDERConstructionEnumeration(encoded);
-
-            size = 0;
-            while (en.hasMoreElements())
-            {
-                en.nextElement();
-                size++;
-            }
+            parse();
         }
 
-        return size;
+        return super.size();
     }
-    
+
+    ASN1Primitive toDERObject()
+    {
+        if (!parsed)
+        {
+            parse();
+        }
+
+        return super.toDERObject();
+    }
+
+    ASN1Primitive toDLObject()
+    {
+        if (!parsed)
+        {
+            parse();
+        }
+
+        return super.toDLObject();
+    }
+
     void encode(
-        DEROutputStream out)
+        ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(SEQUENCE | CONSTRUCTED, encoded);
+        out.writeEncoded(BERTags.SEQUENCE | BERTags.CONSTRUCTED, encoded);
     }
 }

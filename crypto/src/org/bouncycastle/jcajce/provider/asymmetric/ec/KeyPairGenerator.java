@@ -9,7 +9,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Hashtable;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
@@ -170,7 +170,7 @@ public abstract class KeyPairGenerator
                             // See if it's actually an OID string (SunJSSE ServerHandshaker setupEphemeralECDHKeys bug)
                             try
                             {
-                                DERObjectIdentifier oid = new DERObjectIdentifier(curveName);
+                                ASN1ObjectIdentifier oid = new ASN1ObjectIdentifier(curveName);
                                 ecP = X962NamedCurves.getByOID(oid);
                                 if (ecP == null)
                                 {

@@ -182,7 +182,7 @@ public class ECUtil
     }
     
     public static X9ECParameters getNamedCurveByOid(
-        DERObjectIdentifier oid)
+        ASN1ObjectIdentifier oid)
     {
         X9ECParameters params = X962NamedCurves.getByOID(oid);
         
@@ -203,7 +203,7 @@ public class ECUtil
     }
 
     public static String getCurveName(
-        DERObjectIdentifier oid)
+        ASN1ObjectIdentifier oid)
     {
         String name = X962NamedCurves.getName(oid);
         

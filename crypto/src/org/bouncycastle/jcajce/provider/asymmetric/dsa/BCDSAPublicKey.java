@@ -17,7 +17,7 @@ import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
-import org.bouncycastle.jcajce.provider.ProviderUtil;
+import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 
 public class BCDSAPublicKey
     implements DSAPublicKey
@@ -100,10 +100,10 @@ public class BCDSAPublicKey
     {
         if (dsaSpec == null)
         {
-            return ProviderUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa), new ASN1Integer(y));
+            return KeyUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa), new ASN1Integer(y));
         }
 
-        return ProviderUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa, new DSAParameter(dsaSpec.getP(), dsaSpec.getQ(), dsaSpec.getG()).toASN1Primitive()), new ASN1Integer(y));
+        return KeyUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa, new DSAParameter(dsaSpec.getP(), dsaSpec.getQ(), dsaSpec.getG()).toASN1Primitive()), new ASN1Integer(y));
     }
 
     public DSAParams getParams()

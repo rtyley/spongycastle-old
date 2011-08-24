@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
@@ -199,7 +200,7 @@ public class PKCS10CertificationRequestHolder
 
             OutputStream sOut = verifier.getOutputStream();
 
-            sOut.write(requestInfo.getDEREncoded());
+            sOut.write(requestInfo.getEncoded(ASN1Encoding.DER));
 
             sOut.close();
         }

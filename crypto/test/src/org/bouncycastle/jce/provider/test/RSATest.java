@@ -1,6 +1,31 @@
 package org.bouncycastle.jce.provider.test;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.AlgorithmParameters;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.Signature;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.RSAKeyGenParameterSpec;
+import java.security.spec.RSAPrivateCrtKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
+
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -13,35 +38,9 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
-import org.bouncycastle.util.Arrays;
-
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PSource;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.AlgorithmParameters;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.MGF1ParameterSpec;
-import java.security.spec.RSAKeyGenParameterSpec;
-import java.security.spec.RSAPrivateCrtKeySpec;
-import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 
 public class RSATest
     extends SimpleTest
@@ -710,7 +709,7 @@ public class RSATest
         AlgorithmIdentifier algId = new AlgorithmIdentifier(oid, DERNull.INSTANCE);
         DigestInfo dInfo = new DigestInfo(algId, hash);
 
-        return dInfo.getEncoded(ASN1Encodable.DER);
+        return dInfo.getEncoded(ASN1Encoding.DER);
     }
 
     public String getName()

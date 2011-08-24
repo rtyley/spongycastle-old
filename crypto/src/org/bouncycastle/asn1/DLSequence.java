@@ -20,7 +20,7 @@ public class DLSequence
     public DLSequence(
         ASN1Encodable obj)
     {
-        addObject(obj);
+        super(obj);
     }
 
     /**
@@ -29,10 +29,16 @@ public class DLSequence
     public DLSequence(
         ASN1EncodableVector v)
     {
-        for (int i = 0; i != v.size(); i++)
-        {
-            this.addObject(v.get(i));
-        }
+        super(v);
+    }
+
+    /**
+     * create a sequence containing an array of objects.
+     */
+    public DLSequence(
+        ASN1Encodable[] array)
+    {
+        super(array);
     }
     
     /*
@@ -43,47 +49,26 @@ public class DLSequence
      * ASN.1 descriptions given. Rather than just outputting SEQUENCE,
      * we also have to specify CONSTRUCTED, and the objects length.
      */
-    void encode(DEROutputStream out)
+    void encode(
+        ASN1OutputStream out)
         throws IOException
     {
-                // TODO Intermediate buffer could be avoided if we could calculate expected length
-        if (out instanceof ASN1OutputStream)
+        // TODO Intermediate buffer could be avoided if we could calculate expected length
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+        DLOutputStream         dOut = new DLOutputStream(bOut);
+        Enumeration            e = this.getObjects();
+
+        while (e.hasMoreElements())
         {
-            ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-            ASN1OutputStream       dOut = new ASN1OutputStream(bOut);
-            Enumeration            e = this.getObjects();
+            Object    obj = e.nextElement();
 
-            while (e.hasMoreElements())
-            {
-                Object    obj = e.nextElement();
-
-                dOut.writeObject((ASN1Encodable)obj);
-            }
-
-            dOut.close();
-
-            byte[]  bytes = bOut.toByteArray();
-
-            out.writeEncoded(BERTags.SEQUENCE | BERTags.CONSTRUCTED, bytes);
+            dOut.writeObject((ASN1Encodable)obj);
         }
-        else
-        {
-            ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-            Enumeration            e = this.getObjects();
 
-            while (e.hasMoreElements())
-            {
-                Object    obj = e.nextElement();
+        dOut.close();
 
-                dOut.writeObject(obj);
-            }
+        byte[]  bytes = bOut.toByteArray();
 
-            dOut.close();
-
-            byte[]  bytes = bOut.toByteArray();
-
-            out.writeEncoded(BERTags.SEQUENCE | BERTags.CONSTRUCTED, bytes);
-        }
+        out.writeEncoded(BERTags.SEQUENCE | BERTags.CONSTRUCTED, bytes);
     }
 }

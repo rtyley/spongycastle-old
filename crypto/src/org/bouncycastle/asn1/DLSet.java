@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 
 /**
- * A Definite Length encoded set object
+ * A DER encoded set object
  */
 public class DLSet
     extends ASN1Set
@@ -21,85 +21,57 @@ public class DLSet
      * @param obj - a single object that makes up the set.
      */
     public DLSet(
-        ASN1Encodable   obj)
+        ASN1Encodable obj)
     {
-        this.addObject(obj);
+        super(obj);
     }
 
     /**
      * @param v - a vector of objects making up the set.
      */
     public DLSet(
-        ASN1EncodableVector   v)
+        ASN1EncodableVector v)
     {
-        for (int i = 0; i != v.size(); i++)
-        {
-            this.addObject(v.get(i));
-        }
+        super(v, false);
     }
 
     /**
      * create a set from an array of objects.
      */
     public DLSet(
-        ASN1Encodable[]   a)
+        ASN1Encodable[] a)
     {
-        for (int i = 0; i != a.length; i++)
-        {
-            this.addObject(a[i]);
-        }
+        super(a, false);
     }
 
     /*
      * A note on the implementation:
      * <p>
-     * As BER requires the constructed, definite-length model to
+     * As DER requires the constructed, definite-length model to
      * be used for structured types, this varies slightly from the
-     * ASN.1 descriptions given. Rather than just outputing SET,
+     * ASN.1 descriptions given. Rather than just outputting SET,
      * we also have to specify CONSTRUCTED, and the objects length.
      */
     void encode(
-        DEROutputStream out)
+        ASN1OutputStream out)
         throws IOException
     {
         // TODO Intermediate buffer could be avoided if we could calculate expected length
-        if (out instanceof ASN1OutputStream)
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+        DLOutputStream         dOut = new DLOutputStream(bOut);
+        Enumeration            e = this.getObjects();
+
+        while (e.hasMoreElements())
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new ASN1OutputStream(bOut);
-            Enumeration             e = this.getObjects();
+            Object    obj = e.nextElement();
 
-            while (e.hasMoreElements())
-            {
-                Object    obj = e.nextElement();
-
-                dOut.writeObject(obj);
-            }
-
-            dOut.close();
-
-            byte[]  bytes = bOut.toByteArray();
-
-            out.writeEncoded(SET | CONSTRUCTED, bytes);
+            dOut.writeObject((ASN1Encodable)obj);
         }
-        else
-        {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-            Enumeration             e = this.getObjects();
 
-            while (e.hasMoreElements())
-            {
-                Object    obj = e.nextElement();
+        dOut.close();
 
-                dOut.writeObject(obj);
-            }
+        byte[]  bytes = bOut.toByteArray();
 
-            dOut.close();
-
-            byte[]  bytes = bOut.toByteArray();
-
-            out.writeEncoded(SET | CONSTRUCTED, bytes);
-        }
+        out.writeEncoded(BERTags.SET | BERTags.CONSTRUCTED, bytes);
     }
 }

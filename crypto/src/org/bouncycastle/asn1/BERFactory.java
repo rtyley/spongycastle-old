@@ -14,9 +14,4 @@ class BERFactory
     {
         return v.size() < 1 ? EMPTY_SET : new BERSet(v);
     }
-
-    static BERSet createSet(ASN1EncodableVector v, boolean needsSorting)
-    {
-        return v.size() < 1 ? EMPTY_SET : new BERSet(v, needsSorting);
-    }
 }

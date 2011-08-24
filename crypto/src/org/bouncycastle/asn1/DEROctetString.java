@@ -15,16 +15,17 @@ public class DEROctetString
     }
 
     public DEROctetString(
-        ASN1Encodable  obj)
+        ASN1Encodable obj)
+        throws IOException
     {
-        super(obj);
+        super(obj.toASN1Primitive().getEncoded(ASN1Encoding.DER));
     }
 
     void encode(
-        DEROutputStream out)
+        ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(OCTET_STRING, string);
+        out.writeEncoded(BERTags.OCTET_STRING, string);
     }
 
     static void encode(

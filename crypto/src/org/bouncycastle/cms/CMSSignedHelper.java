@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -244,7 +246,7 @@ class CMSSignedHelper
             {
                 try
                 {
-                    DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                    ASN1Primitive obj = ((ASN1Encodable)e.nextElement()).toASN1Primitive();
 
                     if (obj instanceof ASN1TaggedObject)
                     {
@@ -389,7 +391,7 @@ class CMSSignedHelper
         {
             try
             {
-                DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)e.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1Sequence)
                 {
@@ -436,7 +438,7 @@ class CMSSignedHelper
         {
             try
             {
-                DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)e.nextElement()).toASN1Primitive();
 
                 crls.add(cf.generateCRL(
                     new ByteArrayInputStream(obj.getEncoded())));

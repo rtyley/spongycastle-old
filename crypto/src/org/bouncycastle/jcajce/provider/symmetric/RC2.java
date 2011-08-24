@@ -38,7 +38,6 @@ public final class RC2
         }
     }
 
-
     public static class Wrap
         extends BaseWrapCipher
     {

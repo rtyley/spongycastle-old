@@ -44,7 +44,7 @@ public class OtherCertID
                     + seq.size());
         }
 
-        if (seq.getObjectAt(0).getASN1Primitive() instanceof ASN1OctetString)
+        if (seq.getObjectAt(0).toASN1Primitive() instanceof ASN1OctetString)
         {
             otherCertHash = ASN1OctetString.getInstance(seq.getObjectAt(0));
         }
@@ -78,7 +78,7 @@ public class OtherCertID
 
     public AlgorithmIdentifier getAlgorithmHash()
     {
-        if (otherCertHash.getASN1Primitive() instanceof ASN1OctetString)
+        if (otherCertHash.toASN1Primitive() instanceof ASN1OctetString)
         {
             // SHA-1
             return new AlgorithmIdentifier("1.3.14.3.2.26");
@@ -91,10 +91,10 @@ public class OtherCertID
 
     public byte[] getCertHash()
     {
-        if (otherCertHash.getASN1Primitive() instanceof ASN1OctetString)
+        if (otherCertHash.toASN1Primitive() instanceof ASN1OctetString)
         {
             // SHA-1
-            return ((ASN1OctetString)otherCertHash.getASN1Primitive()).getOctets();
+            return ((ASN1OctetString)otherCertHash.toASN1Primitive()).getOctets();
         }
         else
         {

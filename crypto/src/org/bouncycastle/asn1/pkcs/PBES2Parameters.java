@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.pkcs;
 
 import java.util.Enumeration;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -35,7 +36,7 @@ public class PBES2Parameters
         ASN1Sequence  obj)
     {
         Enumeration e = obj.getObjects();
-        ASN1Sequence  funcSeq = ASN1Sequence.getInstance(((DEREncodable)e.nextElement()).getASN1Primitive());
+        ASN1Sequence  funcSeq = ASN1Sequence.getInstance(((ASN1Encodable)e.nextElement()).toASN1Primitive());
 
         if (funcSeq.getObjectAt(0).equals(id_PBKDF2))
         {

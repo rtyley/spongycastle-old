@@ -27,7 +27,7 @@ public class CompressedDataParser
         throws IOException
     {
         this._version = (DERInteger)seq.readObject();
-        this._compressionAlgorithm = AlgorithmIdentifier.getInstance(seq.readObject().getASN1Primitive());
+        this._compressionAlgorithm = AlgorithmIdentifier.getInstance(seq.readObject().toASN1Primitive());
         this._encapContentInfo = new ContentInfoParser((ASN1SequenceParser)seq.readObject());
     }
 

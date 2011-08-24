@@ -11,7 +11,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -253,7 +253,7 @@ public class JDKDigestSignature
 
         DigestInfo              dInfo = new DigestInfo(algId, hash);
 
-        return dInfo.getEncoded(ASN1Encodable.DER);
+        return dInfo.getEncoded(ASN1Encoding.DER);
     }
 
     static public class SHA1WithRSAEncryption

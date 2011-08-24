@@ -72,7 +72,7 @@ public class SignaturePolicyIdentifier
         }
         else
         {
-            return signaturePolicyId.getASN1Primitive();
+            return signaturePolicyId.toASN1Primitive();
         }
     }
 }

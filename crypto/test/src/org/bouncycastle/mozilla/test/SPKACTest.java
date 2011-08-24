@@ -6,6 +6,7 @@ import java.security.PublicKey;
 import java.security.Security;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.mozilla.PublicKeyAndChallenge;
@@ -42,16 +43,16 @@ public class SPKACTest
 
       PublicKeyAndChallenge pkac = spkac.getPublicKeyAndChallenge();
       PublicKey pubKey = spkac.getPublicKey("BC");
-      DERObject obj = pkac.getDERObject();
+      ASN1Primitive obj = pkac.toASN1Primitive();
       if (obj == null)
       {
-          fail("Error - " + testName + " PKAC DERObject was null.");
+          fail("Error - " + testName + " PKAC ASN1Primitive was null.");
       }
       
-      obj = spkac.getDERObject();
+      obj = spkac.toASN1Primitive();
       if (obj == null)
       {
-          fail("Error - "+testName+ " SPKAC DERObject was null.");
+          fail("Error - "+testName+ " SPKAC ASN1Primitive was null.");
       }
 
       SubjectPublicKeyInfo spki = pkac.getSubjectPublicKeyInfo();
@@ -74,7 +75,7 @@ public class SPKACTest
       ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
       DEROutputStream         dOut = new DEROutputStream(bOut);
 
-      dOut.writeObject(spkac.getDERObject());
+      dOut.writeObject(spkac.toASN1Primitive());
 
       byte[]                  bytes = bOut.toByteArray();
 

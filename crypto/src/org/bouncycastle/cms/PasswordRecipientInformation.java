@@ -8,6 +8,7 @@ import java.security.Provider;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
@@ -84,10 +85,10 @@ public class PasswordRecipientInformation
         {
             if (info.getKeyDerivationAlgorithm() != null)
             {
-                DEREncodable params = info.getKeyDerivationAlgorithm().getParameters();
+                ASN1Encodable params = info.getKeyDerivationAlgorithm().getParameters();
                 if (params != null)
                 {
-                    return params.getDERObject().getEncoded();
+                    return params.toASN1Primitive().getEncoded();
                 }
             }
 
@@ -123,12 +124,12 @@ public class PasswordRecipientInformation
         {
             if (info.getKeyDerivationAlgorithm() != null)
             {
-                DEREncodable params = info.getKeyDerivationAlgorithm().getParameters();
+                ASN1Encodable params = info.getKeyDerivationAlgorithm().getParameters();
                 if (params != null)
                 {
                     AlgorithmParameters algP = AlgorithmParameters.getInstance(info.getKeyDerivationAlgorithm().getObjectId().toString(), provider);
 
-                    algP.init(params.getDERObject().getEncoded());
+                    algP.init(params.toASN1Primitive().getEncoded());
 
                     return algP;
                 }

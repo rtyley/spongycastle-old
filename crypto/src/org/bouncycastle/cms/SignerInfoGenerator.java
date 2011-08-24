@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERNull;
@@ -206,7 +206,7 @@ public class SignerInfoGenerator
                 // sig must be composed from the DER encoding.
                 OutputStream sOut = signer.getOutputStream();
 
-                sOut.write(signedAttr.getEncoded(ASN1Encodable.DER));
+                sOut.write(signedAttr.getEncoded(ASN1Encoding.DER));
 
                 sOut.close();
             }

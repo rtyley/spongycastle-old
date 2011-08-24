@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -310,7 +311,7 @@ public class SignerInformation
     {
         if (signedAttributeSet != null)
         {
-            return signedAttributeSet.getEncoded(ASN1Encodable.DER);
+            return signedAttributeSet.getEncoded(ASN1Encoding.DER);
         }
 
         return null;
@@ -391,7 +392,7 @@ public class SignerInformation
 
         // RFC 3852 11.1 Check the content-type attribute is correct
         {
-            DERObject validContentType = getSingleValuedSignedAttribute(
+            ASN1Primitive validContentType = getSingleValuedSignedAttribute(
                 CMSAttributes.contentType, "content-type");
             if (validContentType == null)
             {
@@ -491,7 +492,7 @@ public class SignerInformation
                         {
                             DigestInfo digInfo = new DigestInfo(digestAlgorithm, resultDigest);
 
-                            return rawVerifier.verify(digInfo.getDEREncoded(), this.getSignature());
+                            return rawVerifier.verify(digInfo.getEncoded(ASN1Encoding.DER), this.getSignature());
                         }
 
                         return rawVerifier.verify(resultDigest, this.getSignature());
@@ -677,7 +678,7 @@ public class SignerInformation
                         + " attribute MUST have a single attribute value");
                 }
 
-                return attrValues.getObjectAt(0).getDERObject();
+                return attrValues.getObjectAt(0).toASN1Primitive();
             }
             default:
                 throw new CMSException("The SignedAttributes in a signerInfo MUST NOT include multiple instances of the "
@@ -687,7 +688,7 @@ public class SignerInformation
 
     private Time getSigningTime() throws CMSException
     {
-        DERObject validSigningTime = getSingleValuedSignedAttribute(
+        ASN1Primitive validSigningTime = getSingleValuedSignedAttribute(
             CMSAttributes.signingTime, "signing-time");
 
         if (validSigningTime == null)

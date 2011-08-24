@@ -11,7 +11,7 @@ import java.security.SignatureSpi;
 import java.security.interfaces.DSAKey;
 import java.security.spec.AlgorithmParameterSpec;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
@@ -209,7 +209,7 @@ public class JDKDSASigner
         throws IOException
     {
         DERInteger[] rs = new DERInteger[]{ new DERInteger(r), new DERInteger(s) };
-        return new DERSequence(rs).getEncoded(ASN1Encodable.DER);
+        return new DERSequence(rs).getEncoded(ASN1Encoding.DER);
     }
 
     private BigInteger[] derDecode(

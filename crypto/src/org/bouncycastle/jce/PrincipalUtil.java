@@ -32,7 +32,7 @@ public class PrincipalUtil
             TBSCertificateStructure tbsCert = TBSCertificateStructure.getInstance(
                     ASN1Primitive.fromByteArray(cert.getTBSCertificate()));
 
-            return new X509Principal(X509Name.getInstance(tbsCert.getIssuer().getDERObject()));
+            return new X509Principal(X509Name.getInstance(tbsCert.getIssuer()));
         }
         catch (IOException e)
         {
@@ -51,7 +51,7 @@ public class PrincipalUtil
         {
             TBSCertificateStructure tbsCert = TBSCertificateStructure.getInstance(
                     ASN1Primitive.fromByteArray(cert.getTBSCertificate()));
-            return new X509Principal(X509Name.getInstance(tbsCert.getSubject().getDERObject()));
+            return new X509Principal(X509Name.getInstance(tbsCert.getSubject()));
         }
         catch (IOException e)
         {
@@ -71,7 +71,7 @@ public class PrincipalUtil
             TBSCertList tbsCertList = TBSCertList.getInstance(
                 ASN1Primitive.fromByteArray(crl.getTBSCertList()));
 
-            return new X509Principal(X509Name.getInstance(tbsCertList.getIssuer().getDERObject()));
+            return new X509Principal(X509Name.getInstance(tbsCertList.getIssuer()));
         }
         catch (IOException e)
         {

@@ -22,6 +22,7 @@ import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.PSSSigner;
+import org.bouncycastle.jcajce.provider.util.DigestFactory;
 
 public class JDKPSSSigner
     extends SignatureSpi
@@ -87,7 +88,7 @@ public class JDKPSSSigner
             this.paramSpec = baseParamSpec;
         }
 
-        this.mgfDigest = JCEDigestUtil.getDigest(paramSpec.getDigestAlgorithm());
+        this.mgfDigest = DigestFactory.getDigest(paramSpec.getDigestAlgorithm());
         this.saltLength = paramSpec.getSaltLength();
         this.trailer = getTrailer(paramSpec.getTrailerField());
         this.isRaw = isRaw;
@@ -182,7 +183,7 @@ public class JDKPSSSigner
             
             if (originalSpec != null)
             {
-                if (!JCEDigestUtil.isSameDigest(originalSpec.getDigestAlgorithm(), newParamSpec.getDigestAlgorithm()))
+                if (!DigestFactory.isSameDigest(originalSpec.getDigestAlgorithm(), newParamSpec.getDigestAlgorithm()))
                 {
                     throw new InvalidParameterException("parameter must be using " + originalSpec.getDigestAlgorithm());
                 }
@@ -199,12 +200,12 @@ public class JDKPSSSigner
             
             MGF1ParameterSpec   mgfParams = (MGF1ParameterSpec)newParamSpec.getMGFParameters();
             
-            if (!JCEDigestUtil.isSameDigest(mgfParams.getDigestAlgorithm(), newParamSpec.getDigestAlgorithm()))
+            if (!DigestFactory.isSameDigest(mgfParams.getDigestAlgorithm(), newParamSpec.getDigestAlgorithm()))
             {
                 throw new InvalidParameterException("digest algorithm for MGF should be the same as for PSS parameters.");
             }
             
-            Digest newDigest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
+            Digest newDigest = DigestFactory.getDigest(mgfParams.getDigestAlgorithm());
             
             if (newDigest == null)
             {

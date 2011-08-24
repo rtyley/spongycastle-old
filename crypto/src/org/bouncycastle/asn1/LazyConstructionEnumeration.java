@@ -3,13 +3,13 @@ package org.bouncycastle.asn1;
 import java.io.IOException;
 import java.util.Enumeration;
 
-class LazyDERConstructionEnumeration
+class LazyConstructionEnumeration
     implements Enumeration
 {
     private ASN1InputStream aIn;
     private Object          nextObj;
 
-    public LazyDERConstructionEnumeration(byte[] encoded)
+    public LazyConstructionEnumeration(byte[] encoded)
     {
         aIn = new ASN1InputStream(encoded, true);
         nextObj = readObject();

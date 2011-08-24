@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.asymmetric.elgamal;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -22,12 +22,13 @@ import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
 import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
 
-public class JCEElGamalPrivateKey
+public class BCElGamalPrivateKey
     implements ElGamalPrivateKey, DHPrivateKey, PKCS12BagAttributeCarrier
 {
     static final long serialVersionUID = 4819350091141529678L;
@@ -36,42 +37,42 @@ public class JCEElGamalPrivateKey
 
     ElGamalParameterSpec   elSpec;
 
-    private PKCS12BagAttributeCarrierImpl   attrCarrier = new PKCS12BagAttributeCarrierImpl();
+    private PKCS12BagAttributeCarrierImpl attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
-    protected JCEElGamalPrivateKey()
+    protected BCElGamalPrivateKey()
     {
     }
 
-    JCEElGamalPrivateKey(
-        ElGamalPrivateKey    key)
+    BCElGamalPrivateKey(
+        ElGamalPrivateKey key)
     {
         this.x = key.getX();
         this.elSpec = key.getParameters();
     }
 
-    JCEElGamalPrivateKey(
-        DHPrivateKey    key)
+    BCElGamalPrivateKey(
+        DHPrivateKey key)
     {
         this.x = key.getX();
         this.elSpec = new ElGamalParameterSpec(key.getParams().getP(), key.getParams().getG());
     }
     
-    JCEElGamalPrivateKey(
-        ElGamalPrivateKeySpec    spec)
+    BCElGamalPrivateKey(
+        ElGamalPrivateKeySpec spec)
     {
         this.x = spec.getX();
         this.elSpec = new ElGamalParameterSpec(spec.getParams().getP(), spec.getParams().getG());
     }
 
-    JCEElGamalPrivateKey(
-        DHPrivateKeySpec    spec)
+    BCElGamalPrivateKey(
+        DHPrivateKeySpec spec)
     {
         this.x = spec.getX();
         this.elSpec = new ElGamalParameterSpec(spec.getP(), spec.getG());
     }
     
-    JCEElGamalPrivateKey(
-        PrivateKeyInfo  info)
+    BCElGamalPrivateKey(
+        PrivateKeyInfo info)
         throws IOException
     {
         ElGamalParameter     params = new ElGamalParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
@@ -81,8 +82,8 @@ public class JCEElGamalPrivateKey
         this.elSpec = new ElGamalParameterSpec(params.getP(), params.getG());
     }
 
-    JCEElGamalPrivateKey(
-        ElGamalPrivateKeyParameters  params)
+    BCElGamalPrivateKey(
+        ElGamalPrivateKeyParameters params)
     {
         this.x = params.getX();
         this.elSpec = new ElGamalParameterSpec(params.getParameters().getP(), params.getParameters().getG());

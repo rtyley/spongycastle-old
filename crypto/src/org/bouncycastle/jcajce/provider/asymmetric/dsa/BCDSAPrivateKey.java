@@ -15,7 +15,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
-import org.bouncycastle.jcajce.provider.ProviderUtil;
+import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 
 public class BCDSAPrivateKey
     implements DSAPrivateKey
@@ -84,7 +84,7 @@ public class BCDSAPrivateKey
      */
     public byte[] getEncoded()
     {
-        return ProviderUtil.getEncodedPrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa, new DSAParameter(dsaSpec.getP(), dsaSpec.getQ(), dsaSpec.getG()).toASN1Primitive()), new ASN1Integer(getX()));
+        return KeyUtil.getEncodedPrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_dsa, new DSAParameter(dsaSpec.getP(), dsaSpec.getQ(), dsaSpec.getG()).toASN1Primitive()), new ASN1Integer(getX()));
     }
 
     public DSAParams getParams()
