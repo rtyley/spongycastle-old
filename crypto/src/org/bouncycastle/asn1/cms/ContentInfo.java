@@ -20,16 +20,16 @@ public class ContentInfo
     public static ContentInfo getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof ContentInfo)
+        if (obj instanceof ContentInfo)
         {
             return (ContentInfo)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new ContentInfo((ASN1Sequence)obj);
+            return new ContentInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public ContentInfo(

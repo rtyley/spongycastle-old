@@ -106,7 +106,7 @@ public class TSPUtil
                 {
                     try
                     {
-                        ContentInfo contentInfo = ContentInfo.getInstance(tsAttrValues.getObjectAt(j).getDERObject());
+                        ContentInfo contentInfo = ContentInfo.getInstance(tsAttrValues.getObjectAt(j).toASN1Primitive());
                         TimeStampToken timeStampToken = new TimeStampToken(contentInfo);
                         TimeStampTokenInfo tstInfo = timeStampToken.getTimeStampInfo();
 
@@ -163,7 +163,7 @@ public class TSPUtil
                 {
                     try
                     {
-                        ContentInfo contentInfo = ContentInfo.getInstance(tsAttrValues.getObjectAt(j).getDERObject());
+                        ContentInfo contentInfo = ContentInfo.getInstance(tsAttrValues.getObjectAt(j).toASN1Primitive());
                         TimeStampToken timeStampToken = new TimeStampToken(contentInfo);
                         TimeStampTokenInfo tstInfo = timeStampToken.getTimeStampInfo();
 

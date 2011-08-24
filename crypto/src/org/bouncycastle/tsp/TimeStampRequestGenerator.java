@@ -23,7 +23,7 @@ import org.bouncycastle.asn1.x509.X509Extensions;
  */
 public class TimeStampRequestGenerator
 {
-    private DERObjectIdentifier reqPolicy;
+    private ASN1ObjectIdentifier reqPolicy;
 
     private DERBoolean certReq;
     
@@ -37,7 +37,7 @@ public class TimeStampRequestGenerator
     public void setReqPolicy(
         String reqPolicy)
     {
-        this.reqPolicy= new DERObjectIdentifier(reqPolicy);
+        this.reqPolicy= new ASN1ObjectIdentifier(reqPolicy);
     }
 
     public void setCertReq(
@@ -57,7 +57,7 @@ public class TimeStampRequestGenerator
         ASN1Encodable   value)
         throws IOException
     {
-        this.addExtension(OID, critical, value.getEncoded());
+        this.addExtension(OID, critical, value.toASN1Primitive().getEncoded());
     }
 
     /**
@@ -86,7 +86,7 @@ public class TimeStampRequestGenerator
         ASN1Encodable        value)
         throws IOException
     {
-        this.addExtension(oid, critical, value.getEncoded());
+        this.addExtension(oid, critical, value.toASN1Primitive().getEncoded());
     }
 
     /**
@@ -120,7 +120,7 @@ public class TimeStampRequestGenerator
             throw new IllegalArgumentException("No digest algorithm specified");
         }
 
-        DERObjectIdentifier digestAlgOID = new DERObjectIdentifier(digestAlgorithmOID);
+        ASN1ObjectIdentifier digestAlgOID = new ASN1ObjectIdentifier(digestAlgorithmOID);
 
         AlgorithmIdentifier algID = new AlgorithmIdentifier(digestAlgOID, new DERNull());
         MessageImprint messageImprint = new MessageImprint(algID, digest);

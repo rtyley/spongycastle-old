@@ -15,6 +15,7 @@ import java.util.Iterator;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERInteger;
@@ -146,7 +147,7 @@ public class X509V2AttributeCertificateGenerator
         ASN1Encodable   value)
         throws IOException
     {
-        extGenerator.addExtension(new DERObjectIdentifier(oid), critical, value);
+        extGenerator.addExtension(new ASN1ObjectIdentifier(oid), critical, value);
     }
 
     /**
@@ -159,7 +160,7 @@ public class X509V2AttributeCertificateGenerator
         boolean         critical,
         byte[]          value)
     {
-        extGenerator.addExtension(new DERObjectIdentifier(oid), critical, value);
+        extGenerator.addExtension(new ASN1ObjectIdentifier(oid), critical, value);
     }
 
     /**

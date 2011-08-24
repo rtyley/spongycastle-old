@@ -2,6 +2,7 @@ package org.bouncycastle.tsp.cms;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.cms.Attributes;
 import org.bouncycastle.asn1.cms.MetaData;
@@ -24,7 +25,7 @@ class MetaDataUtil
         {
             try
             {
-                calculator.getOutputStream().write(metaData.getDEREncoded());
+                calculator.getOutputStream().write(metaData.getEncoded(ASN1Encoding.DER));
             }
             catch (IOException e)
             {
