@@ -11,6 +11,7 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.CipherSpi;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
@@ -62,7 +63,8 @@ import org.bouncycastle.jce.spec.GOST28147ParameterSpec;
 import org.bouncycastle.jce.spec.RepeatedSecretKeySpec;
 import org.bouncycastle.util.Strings;
 
-public class JCEBlockCipher extends WrapCipherSpi
+public class JCEBlockCipher
+    extends CipherSpi
     implements PBE
 {
     //
@@ -89,6 +91,8 @@ public class JCEBlockCipher extends WrapCipherSpi
     private String                  pbeAlgorithm = null;
     
     private String                  modeName = null;
+
+    private AlgorithmParameters engineParams;
 
     protected JCEBlockCipher(
         BlockCipher engine)

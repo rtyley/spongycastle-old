@@ -2,7 +2,7 @@ package org.bouncycastle.jce;
 
 import java.util.Enumeration;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
@@ -27,7 +27,7 @@ public class ECGOST3410NamedCurveTable
         {
             try
             {
-                ecP = ECGOST3410NamedCurves.getByOID(new DERObjectIdentifier(name));
+                ecP = ECGOST3410NamedCurves.getByOID(new ASN1ObjectIdentifier(name));
             }
             catch (IllegalArgumentException e)
             {

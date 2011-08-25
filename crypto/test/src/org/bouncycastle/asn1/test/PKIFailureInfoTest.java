@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.test;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
@@ -31,7 +32,7 @@ public class PKIFailureInfoTest
                         
         PKIFailureInfo bug = new PKIFailureInfo(PKIFailureInfo.badRequest | PKIFailureInfo.badTime |PKIFailureInfo.badDataFormat | PKIFailureInfo.incorrectData);
 
-        if (!areEqual(correct.getDEREncoded(),bug.getDEREncoded()))
+        if (!areEqual(correct.getEncoded(ASN1Encoding.DER),bug.getEncoded(ASN1Encoding.DER)))
         {
             fail("encoding doesn't match");
         }

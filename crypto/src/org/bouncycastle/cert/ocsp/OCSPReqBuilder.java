@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.ocsp.OCSPRequest;
@@ -138,7 +139,7 @@ public class OCSPReqBuilder
             {
                 OutputStream sOut = contentSigner.getOutputStream();
 
-                sOut.write(tbsReq.getDEREncoded());
+                sOut.write(tbsReq.getEncoded(ASN1Encoding.DER));
 
                 sOut.close();
             }

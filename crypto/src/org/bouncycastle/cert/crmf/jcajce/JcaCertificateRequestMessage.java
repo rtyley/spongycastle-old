@@ -1,10 +1,12 @@
 package org.bouncycastle.cert.crmf.jcajce;
 
+import java.io.IOException;
 import java.security.Provider;
 import java.security.PublicKey;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -49,7 +51,14 @@ public class JcaCertificateRequestMessage
 
         if (subject != null)
         {
-            return new X500Principal(subject.getDEREncoded());
+            try
+            {
+                return new X500Principal(subject.getEncoded(ASN1Encoding.DER));
+            }
+            catch (IOException e)
+            {
+                throw new IllegalStateException("unable to construct DER encoding of name: " + e.getMessage());
+            }
         }
 
         return null;

@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OutputStream;
@@ -223,7 +224,7 @@ public class OCSPReq
             ContentVerifier verifier = verifierProvider.get(req.getOptionalSignature().getSignatureAlgorithm());
             OutputStream sOut = verifier.getOutputStream();
 
-            sOut.write(req.getTbsRequest().getDEREncoded());
+            sOut.write(req.getTbsRequest().getEncoded(ASN1Encoding.DER));
 
             return verifier.verify(this.getSignature());
         }

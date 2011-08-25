@@ -35,15 +35,14 @@ public class TargetInformation
     {
         if (obj instanceof TargetInformation)
         {
-            return (TargetInformation) obj;
+            return (TargetInformation)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new TargetInformation((ASN1Sequence) obj);
+            return new TargetInformation(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: "
-            + obj.getClass());
+        return null;
     }
 
     /**

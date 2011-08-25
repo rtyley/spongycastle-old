@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.X509CertSelector;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Selector;
 
@@ -47,7 +46,14 @@ public class SignerId
 
     private void setSubjectKeyID(byte[] subjectKeyId)
     {
-        super.setSubjectKeyIdentifier(new DEROctetString(subjectKeyId).getDEREncoded());
+        try
+        {
+            super.setSubjectKeyIdentifier(new DEROctetString(subjectKeyId).getEncoded(ASN1Encoding.DER));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException("unable to encode subjectKeyId: " + e.getMessage());
+        }
 
         this.subjectKeyId = subjectKeyId;
     }
@@ -70,7 +76,7 @@ public class SignerId
         this.serialNumber = serialNumber;
         try
         {
-            this.setIssuer(issuer.getDEREncoded());
+            this.setIssuer(issuer.getEncoded(ASN1Encoding.DER));
         }
         catch (IOException e)
         {
@@ -149,16 +155,7 @@ public class SignerId
 
                 if (ext == null)
                 {
-                    Digest dig = new SHA1Digest();
-                    byte[] hash = new byte[dig.getDigestSize()];
-                    byte[] spkiEnc = certHldr.getSubjectPublicKeyInfo().getDEREncoded();
-
-                    // try the outlook 2010 calculation
-                    dig.update(spkiEnc, 0, spkiEnc.length);
-
-                    dig.doFinal(hash, 0);
-
-                    return Arrays.areEqual(subjectKeyId, hash);
+                    return Arrays.areEqual(subjectKeyId, MSOutlookKeyIdCalculator.calculateKeyId(certHldr.getSubjectPublicKeyInfo()));
                 }
 
                 byte[] subKeyID = ASN1OctetString.getInstance(ext.getParsedValue()).getOctets();

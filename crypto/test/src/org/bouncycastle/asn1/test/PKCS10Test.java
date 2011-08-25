@@ -52,7 +52,7 @@ public class PKCS10Test
             ByteArrayOutputStream    bOut = new ByteArrayOutputStream();
             DEROutputStream            dOut = new DEROutputStream(bOut);
 
-            dOut.writeObject(r.getDERObject());
+            dOut.writeObject(r.toASN1Primitive());
 
             byte[]                    bytes = bOut.toByteArray();
 

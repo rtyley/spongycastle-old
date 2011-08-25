@@ -1,8 +1,11 @@
 package org.bouncycastle.crypto.agreement.kdf;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
@@ -22,7 +25,7 @@ public class ECDHKEKGenerator
 {
     private DerivationFunction kdf;
 
-    private DERObjectIdentifier algorithm;
+    private ASN1ObjectIdentifier algorithm;
     private int                 keySize;
     private byte[]              z;
 
@@ -56,7 +59,14 @@ public class ECDHKEKGenerator
         v.add(new AlgorithmIdentifier(algorithm, new DERNull()));
         v.add(new DERTaggedObject(true, 2, new DEROctetString(integerToBytes(keySize))));
 
-        kdf.init(new KDFParameters(z, new DERSequence(v).getDEREncoded()));
+        try
+        {
+            kdf.init(new KDFParameters(z, new DERSequence(v).getEncoded(ASN1Encoding.DER)));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException("unable to initialise kdf: " + e.getMessage());
+        }
 
         return kdf.generateBytes(out, outOff, len);
     }

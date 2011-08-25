@@ -6,6 +6,8 @@ package org.bouncycastle.crypto;
 public class CryptoException 
     extends Exception
 {
+    private Throwable cause;
+
     /**
      * base constructor.
      */
@@ -22,5 +24,25 @@ public class CryptoException
         String  message)
     {
         super(message);
+    }
+
+    /**
+     * Create a CryptoException with the given message and underlying cause.
+     *
+     * @param message message describing exception.
+     * @param cause the throwable that was the underlying cause.
+     */
+    public CryptoException(
+        String  message,
+        Throwable cause)
+    {
+        super(message);
+
+        this.cause = cause;
+    }
+
+    public Throwable getCause()
+    {
+        return cause;
     }
 }

@@ -12,7 +12,6 @@ import javax.crypto.spec.PBEParameterSpec;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -41,7 +40,7 @@ public class PKCS12Util
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         DEROutputStream dOut = new DEROutputStream(bOut);
 
-        Pfx pfx = new Pfx(ASN1Sequence.getInstance(ASN1Primitive.fromByteArray(berPKCS12File)));
+        Pfx pfx = Pfx.getInstance(berPKCS12File);
 
         bOut.reset();
 
@@ -62,7 +61,7 @@ public class PKCS12Util
     public static byte[] convertToDefiniteLength(byte[] berPKCS12File, char[] passwd, String provider)
         throws IOException
     {
-        Pfx pfx = new Pfx(ASN1Sequence.getInstance(ASN1Primitive.fromByteArray(berPKCS12File)));
+        Pfx pfx = Pfx.getInstance(berPKCS12File);
 
         ContentInfo info = pfx.getAuthSafe();
 

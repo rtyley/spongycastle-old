@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
@@ -47,7 +48,14 @@ public class BasicOCSPResp
      */
     public byte[] getTBSResponseData()
     {
-        return resp.getTbsResponseData().getDEREncoded();
+        try
+        {
+            return resp.getTbsResponseData().getEncoded(ASN1Encoding.DER);
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
     }
 
     public int getVersion()
@@ -160,7 +168,7 @@ public class BasicOCSPResp
             ContentVerifier verifier = verifierProvider.get(resp.getSignatureAlgorithm());
             OutputStream vOut = verifier.getOutputStream();
 
-            vOut.write(resp.getTbsResponseData().getDEREncoded());
+            vOut.write(resp.getTbsResponseData().getEncoded(ASN1Encoding.DER));
             vOut.close();
 
             return verifier.verify(this.getSignature());

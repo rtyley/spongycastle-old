@@ -25,7 +25,6 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -722,8 +721,8 @@ public class SignedDataStreamTest
     public void testAttributeGenerators()
         throws Exception
     {
-        final DERObjectIdentifier dummyOid1 = new DERObjectIdentifier("1.2.3");
-        final DERObjectIdentifier dummyOid2 = new DERObjectIdentifier("1.2.3.4");
+        final ASN1ObjectIdentifier dummyOid1 = new ASN1ObjectIdentifier("1.2.3");
+        final ASN1ObjectIdentifier dummyOid2 = new ASN1ObjectIdentifier("1.2.3.4");
         List                      certList = new ArrayList();
         ByteArrayOutputStream     bOut = new ByteArrayOutputStream();
 

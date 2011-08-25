@@ -34,15 +34,15 @@ public class Restriction
     }
 
     /**
-     * Constructor from DERString.
+     * Constructor from DirectoryString.
      * <p/>
-     * The DERString is of type RestrictionSyntax:
+     * The DirectoryString is of type RestrictionSyntax:
      * <p/>
      * <pre>
      *      RestrictionSyntax ::= DirectoryString (SIZE(1..1024))
      * </pre>
      *
-     * @param restriction A DERString.
+     * @param restriction A DirectoryString.
      */
     private Restriction(DirectoryString restriction)
     {

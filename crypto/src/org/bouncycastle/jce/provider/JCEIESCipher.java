@@ -10,6 +10,7 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.CipherSpi;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.interfaces.DHPrivateKey;
@@ -29,7 +30,7 @@ import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.IESKey;
 import org.bouncycastle.jce.spec.IESParameterSpec;
 
-public class JCEIESCipher extends WrapCipherSpi
+public class JCEIESCipher extends CipherSpi
 {
     private IESEngine               cipher;
     private int                     state = -1;

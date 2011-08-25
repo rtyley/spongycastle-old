@@ -944,7 +944,7 @@ public class PKCS12StoreTest
         //
         ASN1InputStream aIn = new ASN1InputStream(bOut.toByteArray());
 
-        Pfx pfx = new Pfx((ASN1Sequence)aIn.readObject());
+        Pfx pfx = Pfx.getInstance(aIn.readObject());
 
         ContentInfo cInfo = pfx.getAuthSafe();
 
@@ -958,11 +958,11 @@ public class PKCS12StoreTest
 
         aIn = new ASN1InputStream(((ASN1OctetString)c1.getContent()).getOctets());
 
-        SafeBag sb = new SafeBag((ASN1Sequence)(((ASN1Sequence)aIn.readObject()).getObjectAt(0)));
+        SafeBag sb = SafeBag.getInstance((((ASN1Sequence)aIn.readObject()).getObjectAt(0)));
 
         EncryptedPrivateKeyInfo encInfo = EncryptedPrivateKeyInfo.getInstance(sb.getBagValue());
 
-        if (!encInfo.getEncryptionAlgorithm().getObjectId().equals(PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC))
+        if (!encInfo.getEncryptionAlgorithm().getAlgorithm().equals(PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC))
         {
             fail("key encryption algorithm wrong");
         }
@@ -974,23 +974,23 @@ public class PKCS12StoreTest
 
         if (type.endsWith("3DES"))
         {
-            if (!cb.getEncryptionAlgorithm().getObjectId().equals(PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC))
+            if (!cb.getEncryptionAlgorithm().getAlgorithm().equals(PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC))
             {
-                fail("expected 3DES found: " + cb.getEncryptionAlgorithm().getObjectId());
+                fail("expected 3DES found: " + cb.getEncryptionAlgorithm().getAlgorithm());
             }
         }
         else if (type.endsWith("40RC2"))
         {
-            if (!cb.getEncryptionAlgorithm().getObjectId().equals(PKCSObjectIdentifiers.pbewithSHAAnd40BitRC2_CBC))
+            if (!cb.getEncryptionAlgorithm().getAlgorithm().equals(PKCSObjectIdentifiers.pbewithSHAAnd40BitRC2_CBC))
             {
-                fail("expected 40 bit RC2 found: " + cb.getEncryptionAlgorithm().getObjectId());
+                fail("expected 40 bit RC2 found: " + cb.getEncryptionAlgorithm().getAlgorithm());
             }
         }
         else
         {
-            if (!cb.getEncryptionAlgorithm().getObjectId().equals(PKCSObjectIdentifiers.pbewithSHAAnd40BitRC2_CBC))
+            if (!cb.getEncryptionAlgorithm().getAlgorithm().equals(PKCSObjectIdentifiers.pbewithSHAAnd40BitRC2_CBC))
             {
-                fail("expected 40 bit RC2 found: " + cb.getEncryptionAlgorithm().getObjectId());
+                fail("expected 40 bit RC2 found: " + cb.getEncryptionAlgorithm().getAlgorithm());
             }
         }
     }
@@ -1075,7 +1075,7 @@ public class PKCS12StoreTest
             fail("Failed deep DER conversion test - outer.");
         }
 
-        Pfx pfx = new Pfx(ASN1Sequence.getInstance(obj));
+        Pfx pfx = Pfx.getInstance(obj);
 
         obj = new ASN1StreamParser(ASN1OctetString.getInstance(pfx.getAuthSafe().getContent()).getOctets()).readObject();
         if (!(obj instanceof DERSequenceParser))

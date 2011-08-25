@@ -1,6 +1,9 @@
 package org.bouncycastle.crypto.agreement.kdf;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
@@ -93,9 +96,16 @@ public class DHKEKGenerator
 
             v1.add(new DERTaggedObject(true, 2, new DEROctetString(integerToBytes(keySize))));
 
-            byte[] other = new DERSequence(v1).getDEREncoded();
+            try
+            {
+                byte[] other = new DERSequence(v1).getEncoded(ASN1Encoding.DER);
 
-            digest.update(other, 0, other.length);
+                digest.update(other, 0, other.length);
+            }
+            catch (IOException e)
+            {
+                throw new IllegalArgumentException("unable to encode parameter info: " + e.getMessage());
+            }
 
             digest.doFinal(dig, 0);
 

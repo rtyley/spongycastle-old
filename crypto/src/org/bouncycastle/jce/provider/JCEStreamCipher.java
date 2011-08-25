@@ -8,6 +8,7 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.Cipher;
+import javax.crypto.CipherSpi;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
@@ -35,7 +36,8 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
 import org.bouncycastle.jcajce.provider.symmetric.util.PBE;
 
 public class JCEStreamCipher
-    extends WrapCipherSpi implements PBE
+    extends CipherSpi
+    implements PBE
 {
     //
     // specs we can handle.
@@ -55,6 +57,8 @@ public class JCEStreamCipher
 
     private PBEParameterSpec        pbeSpec = null;
     private String                  pbeAlgorithm = null;
+
+    private AlgorithmParameters engineParams;
 
     protected JCEStreamCipher(
         StreamCipher engine,

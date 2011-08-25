@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERSet;
@@ -119,7 +120,7 @@ public class PKCS10CertificationRequestBuilder
         {
             OutputStream sOut = signer.getOutputStream();
 
-            sOut.write(info.getDEREncoded());
+            sOut.write(info.getEncoded(ASN1Encoding.DER));
 
             sOut.close();
 

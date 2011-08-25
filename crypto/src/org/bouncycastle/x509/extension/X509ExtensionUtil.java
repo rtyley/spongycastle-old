@@ -9,15 +9,15 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1String;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x509.X509Extension;
 
 
 public class X509ExtensionUtil
@@ -34,7 +34,7 @@ public class X509ExtensionUtil
     public static Collection getIssuerAlternativeNames(X509Certificate cert)
             throws CertificateParsingException
     {
-        byte[] extVal = cert.getExtensionValue(X509Extensions.IssuerAlternativeName.getId());
+        byte[] extVal = cert.getExtensionValue(X509Extension.issuerAlternativeName.getId());
 
         return getAlternativeNames(extVal);
     }
@@ -42,7 +42,7 @@ public class X509ExtensionUtil
     public static Collection getSubjectAlternativeNames(X509Certificate cert)
             throws CertificateParsingException
     {        
-        byte[] extVal = cert.getExtensionValue(X509Extensions.SubjectAlternativeName.getId());
+        byte[] extVal = cert.getExtensionValue(X509Extension.subjectAlternativeName.getId());
 
         return getAlternativeNames(extVal);
     }
@@ -71,7 +71,7 @@ public class X509ExtensionUtil
                     list.add(genName.getName().toASN1Primitive());
                     break;
                 case GeneralName.directoryName:
-                    list.add(X509Name.getInstance(genName.getName()).toString());
+                    list.add(X500Name.getInstance(genName.getName()).toString());
                     break;
                 case GeneralName.dNSName:
                 case GeneralName.rfc822Name:
@@ -79,7 +79,7 @@ public class X509ExtensionUtil
                     list.add(((ASN1String)genName.getName()).getString());
                     break;
                 case GeneralName.registeredID:
-                    list.add(DERObjectIdentifier.getInstance(genName.getName()).getId());
+                    list.add(ASN1ObjectIdentifier.getInstance(genName.getName()).getId());
                     break;
                 case GeneralName.iPAddress:
                     list.add(DEROctetString.getInstance(genName.getName()).getOctets());

@@ -27,7 +27,8 @@ import javax.mail.internet.MimeMessage;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.i18n.ErrorBundle;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -286,13 +287,13 @@ public class ValidateSignedMail
         if (cert != null)
         {
             byte[] ncBytes = cert
-                    .getExtensionValue(X509Extensions.NameConstraints.getId());
+                    .getExtensionValue(X509Extension.nameConstraints.getId());
 
             if (ncBytes != null)
             {
                 ASN1Encodable extValue = X509ExtensionUtil
                         .fromExtensionValue(ncBytes);
-                return new TrustAnchor(cert, extValue.getDEREncoded());
+                return new TrustAnchor(cert, extValue.toASN1Primitive().getEncoded(ASN1Encoding.DER));
             }
             return new TrustAnchor(cert, null);
         }

@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERSequence;
@@ -72,7 +73,7 @@ class CertUtils
     {
         OutputStream sOut = signer.getOutputStream();
 
-        sOut.write(tbsObj.getDEREncoded());
+        sOut.write(tbsObj.toASN1Primitive().getEncoded(ASN1Encoding.DER));
 
         sOut.close();
 

@@ -22,7 +22,6 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.Attribute;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -354,7 +353,7 @@ public class AttrCertTest
             fail("wrong general name type found in role");
         }
         
-        if (!((DERString)role.getName()).getString().equals("DAU123456789"))
+        if (!((ASN1String)role.getName()).getString().equals("DAU123456789"))
         {
             fail("wrong general name value found in role");
         }

@@ -1,6 +1,6 @@
 package org.bouncycastle.asn1.test;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
 import org.bouncycastle.util.test.SimpleTest;
@@ -8,9 +8,9 @@ import org.bouncycastle.util.test.SimpleTest;
 public class X509ExtensionsTest
     extends SimpleTest
 {
-    private static final DERObjectIdentifier OID_2 = new DERObjectIdentifier("1.2.2");
-    private static final DERObjectIdentifier OID_3 = new DERObjectIdentifier("1.2.3");
-    private static final DERObjectIdentifier OID_1 = new DERObjectIdentifier("1.2.1");
+    private static final ASN1ObjectIdentifier OID_2 = new ASN1ObjectIdentifier("1.2.2");
+    private static final ASN1ObjectIdentifier OID_3 = new ASN1ObjectIdentifier("1.2.3");
+    private static final ASN1ObjectIdentifier OID_1 = new ASN1ObjectIdentifier("1.2.1");
 
     public String getName()
     {

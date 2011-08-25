@@ -1,12 +1,12 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.ess.ContentHints;
-
-import java.io.IOException;
 
 public class ContentHintsUnitTest
     extends ASN1UnitTest
@@ -20,7 +20,7 @@ public class ContentHintsUnitTest
         throws Exception
     {
         DERUTF8String contentDescription = new DERUTF8String("Description");
-        DERObjectIdentifier contentType = new DERObjectIdentifier("1.2.2.3");
+        ASN1ObjectIdentifier contentType = new ASN1ObjectIdentifier("1.2.2.3");
 
         ContentHints hints = new ContentHints(contentType);
 
@@ -51,7 +51,7 @@ public class ContentHintsUnitTest
 
     private void checkConstruction(
         ContentHints hints,
-        DERObjectIdentifier contentType,
+        ASN1ObjectIdentifier contentType,
         DERUTF8String description)
         throws IOException
     {
@@ -61,7 +61,7 @@ public class ContentHintsUnitTest
 
         checkValues(hints, contentType, description);
 
-        ASN1InputStream aIn = new ASN1InputStream(hints.toASN1Object().getEncoded());
+        ASN1InputStream aIn = new ASN1InputStream(hints.toASN1Primitive().getEncoded());
 
         ASN1Sequence seq = (ASN1Sequence)aIn.readObject();
 
@@ -72,7 +72,7 @@ public class ContentHintsUnitTest
 
     private void checkValues(
         ContentHints hints,
-        DERObjectIdentifier contentType,
+        ASN1ObjectIdentifier contentType,
         DERUTF8String description)
     {
         checkMandatoryField("contentType", contentType, hints.getContentType());

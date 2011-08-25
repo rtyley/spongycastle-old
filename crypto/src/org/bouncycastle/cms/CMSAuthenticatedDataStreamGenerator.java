@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequenceGenerator;
@@ -284,7 +285,7 @@ public class CMSAuthenticatedDataStreamGenerator
 
                 OutputStream mOut = macCalculator.getOutputStream();
 
-                mOut.write(authed.getDEREncoded());
+                mOut.write(authed.getEncoded(ASN1Encoding.DER));
 
                 mOut.close();
 

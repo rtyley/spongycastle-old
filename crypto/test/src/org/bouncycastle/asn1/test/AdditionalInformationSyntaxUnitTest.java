@@ -3,7 +3,7 @@ package org.bouncycastle.asn1.test;
 import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERString;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.isismtt.x509.AdditionalInformationSyntax;
 import org.bouncycastle.asn1.x500.DirectoryString;
 
@@ -47,7 +47,7 @@ public class AdditionalInformationSyntaxUnitTest
 
         ASN1InputStream aIn = new ASN1InputStream(syntax.toASN1Object().getEncoded());
 
-        DERString info = (DERString)aIn.readObject();
+        ASN1String info = (ASN1String)aIn.readObject();
 
         syntax = AdditionalInformationSyntax.getInstance(info);
 

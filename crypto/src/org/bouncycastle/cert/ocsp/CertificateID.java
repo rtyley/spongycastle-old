@@ -3,6 +3,7 @@ package org.bouncycastle.cert.ocsp;
 import java.io.OutputStream;
 import java.math.BigInteger;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERInteger;
@@ -102,12 +103,12 @@ public class CertificateID
 
         CertificateID obj = (CertificateID)o;
 
-        return id.getDERObject().equals(obj.id.getDERObject());
+        return id.toASN1Primitive().equals(obj.id.toASN1Primitive());
     }
 
     public int hashCode()
     {
-        return id.getDERObject().hashCode();
+        return id.toASN1Primitive().hashCode();
     }
 
     /**
@@ -131,7 +132,7 @@ public class CertificateID
         {
             OutputStream dgOut = digCalc.getOutputStream();
 
-            dgOut.write(issuerCert.toASN1Structure().getSubject().getDEREncoded());
+            dgOut.write(issuerCert.toASN1Structure().getSubject().getEncoded(ASN1Encoding.DER));
             dgOut.close();
 
             ASN1OctetString issuerNameHash = new DEROctetString(digCalc.getDigest());

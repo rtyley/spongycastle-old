@@ -5,6 +5,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.x509.CertificatePair;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
@@ -79,7 +80,7 @@ public class X509CertificatePair
                     throw new CertificateEncodingException("unable to get encoding for reverse");
                 }
             }
-            return new CertificatePair(f, r).getDEREncoded();
+            return new CertificatePair(f, r).getEncoded(ASN1Encoding.DER);
         }
         catch (IllegalArgumentException e)
         {

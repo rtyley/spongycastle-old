@@ -73,7 +73,7 @@ public class AttributeCertificateIssuer
                 try
                 {
                     l.add(new X500Principal(
-                        ((ASN1Encodable)names[i].getName()).getEncoded()));
+                        ((ASN1Encodable)names[i].getName()).toASN1Primitive().getEncoded()));
                 }
                 catch (IOException e)
                 {
@@ -119,7 +119,7 @@ public class AttributeCertificateIssuer
             {
                 try
                 {
-                    if (new X500Principal(((ASN1Encodable)gn.getName()).getEncoded()).equals(subject))
+                    if (new X500Principal(((ASN1Encodable)gn.getName()).toASN1Primitive().getEncoded()).equals(subject))
                     {
                         return true;
                     }

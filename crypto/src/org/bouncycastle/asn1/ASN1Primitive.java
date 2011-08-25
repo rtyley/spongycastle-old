@@ -5,6 +5,11 @@ import java.io.IOException;
 public abstract class ASN1Primitive
     extends ASN1Object
 {
+    ASN1Primitive()
+    {
+
+    }
+
     /**
      * Create a base ASN.1 object from a byte stream.
      *

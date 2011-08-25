@@ -62,6 +62,15 @@ public abstract class ASN1OctetString
                 throw new IllegalArgumentException("failed to construct OCTET STRING from byte[]: " + e.getMessage());
             }
         }
+        else if (obj instanceof ASN1Encodable)
+        {
+            ASN1Primitive primitive = ((ASN1Encodable)obj).toASN1Primitive();
+
+            if (primitive instanceof ASN1OctetString)
+            {
+                return (ASN1OctetString)primitive;
+            }
+        }
 
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }

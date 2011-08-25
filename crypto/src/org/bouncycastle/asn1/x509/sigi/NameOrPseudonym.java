@@ -59,7 +59,7 @@ public class NameOrPseudonym
     }
 
     /**
-     * Constructor from DERString.
+     * Constructor from DirectoryString.
      * <p/>
      * The sequence is of type NameOrPseudonym:
      * <p/>

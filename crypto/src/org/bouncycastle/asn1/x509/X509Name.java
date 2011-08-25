@@ -13,10 +13,10 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.DERUniversalString;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -416,9 +416,9 @@ public class X509Name
                    ordering.addElement(ASN1ObjectIdentifier.getInstance(s.getObjectAt(0)));
                    
                    ASN1Encodable value = s.getObjectAt(1);
-                   if (value instanceof DERString && !(value instanceof DERUniversalString))
+                   if (value instanceof ASN1String && !(value instanceof DERUniversalString))
                    {
-                       String v = ((DERString)value).getString();
+                       String v = ((ASN1String)value).getString();
                        if (v.length() > 0 && v.charAt(0) == '#')
                        {
                            values.addElement("\\" + v);
@@ -1081,9 +1081,9 @@ public class X509Name
         {
             ASN1Primitive obj = decodeObject(value);
 
-            if (obj instanceof DERString)
+            if (obj instanceof ASN1String)
             {
-                value = Strings.toLowerCase(((DERString)obj).getString().trim());
+                value = Strings.toLowerCase(((ASN1String)obj).getString().trim());
             }
         }
 

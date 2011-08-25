@@ -1,5 +1,7 @@
 package org.bouncycastle.cms;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -45,8 +47,15 @@ public abstract class KeyAgreeRecipientInfoGenerator
 
         if (userKeyingMaterial != null)
         {
-            return new RecipientInfo(new KeyAgreeRecipientInfo(originator, new DEROctetString(userKeyingMaterial),
-                keyAgreeAlg, recipients));
+            try
+            {
+                return new RecipientInfo(new KeyAgreeRecipientInfo(originator, new DEROctetString(userKeyingMaterial),
+                    keyAgreeAlg, recipients));
+            }
+            catch (IOException e)
+            {
+                throw new CMSException("unable to encode userKeyingMaterial: " + e.getMessage(), e);
+            }
         }
         else
         {

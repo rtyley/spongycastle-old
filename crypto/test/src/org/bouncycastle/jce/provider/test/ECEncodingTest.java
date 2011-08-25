@@ -15,7 +15,6 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -102,7 +101,7 @@ public class ECEncodingTest
         String keyStorePass = "myPass";
         ASN1InputStream in = new ASN1InputStream(new ByteArrayInputStream(
                 ecParameterEncoded));
-        X9ECParameters params = new X9ECParameters((ASN1Sequence)in
+        X9ECParameters params = X9ECParameters.getInstance(in
                 .readObject());
         KeyPair kp = null;
         boolean success = false;

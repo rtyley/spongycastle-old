@@ -115,12 +115,12 @@ public class CertificateID
 
         CertificateID   obj = (CertificateID)o;
 
-        return id.getDERObject().equals(obj.id.getDERObject());
+        return id.toASN1Primitive().equals(obj.id.toASN1Primitive());
     }
 
     public int hashCode()
     {
-        return id.getDERObject().hashCode();
+        return id.toASN1Primitive().hashCode();
     }
 
     /**

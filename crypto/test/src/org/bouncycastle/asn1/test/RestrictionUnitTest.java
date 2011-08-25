@@ -3,7 +3,7 @@ package org.bouncycastle.asn1.test;
 import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERString;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.isismtt.x509.Restriction;
 import org.bouncycastle.asn1.x500.DirectoryString;
 
@@ -48,7 +48,7 @@ public class RestrictionUnitTest
 
         ASN1InputStream aIn = new ASN1InputStream(restriction.toASN1Object().getEncoded());
 
-        DERString str = (DERString)aIn.readObject();
+        ASN1String str = (ASN1String)aIn.readObject();
 
         restriction = Restriction.getInstance(str);
 

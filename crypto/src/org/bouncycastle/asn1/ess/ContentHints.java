@@ -6,6 +6,7 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERUTF8String;
 
@@ -17,18 +18,16 @@ public class ContentHints
 
     public static ContentHints getInstance(Object o)
     {
-        if (o == null || o instanceof ContentHints)
+        if (o instanceof ContentHints)
         {
             return (ContentHints)o;
         }
-        else if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new ContentHints((ASN1Sequence)o);
+            return new ContentHints(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'ContentHints' factory : "
-                        + o.getClass().getName() + ".");
+        return null;
     }
 
     /**
@@ -46,6 +45,25 @@ public class ContentHints
         {
             contentType = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
         }
+    }
+
+    /**
+     * @deprecated use ASN1ObjectIdentifier
+     */
+    public ContentHints(
+        DERObjectIdentifier contentType)
+    {
+        this(new ASN1ObjectIdentifier(contentType.getId()));
+    }
+
+        /**
+     * @deprecated use ASN1ObjectIdentifier
+     */
+    public ContentHints(
+        DERObjectIdentifier contentType,
+        DERUTF8String contentDescription)
+    {
+        this(new ASN1ObjectIdentifier(contentType.getId()), contentDescription);
     }
 
     public ContentHints(

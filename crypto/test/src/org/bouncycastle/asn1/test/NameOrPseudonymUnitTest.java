@@ -1,13 +1,13 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.x500.DirectoryString;
 import org.bouncycastle.asn1.x509.sigi.NameOrPseudonym;
-
-import java.io.IOException;
 
 public class NameOrPseudonymUnitTest
     extends ASN1UnitTest
@@ -74,7 +74,7 @@ public class NameOrPseudonymUnitTest
         }
         else
         {
-            DERString s = (DERString)aIn.readObject();
+            ASN1String s = (ASN1String)aIn.readObject();
 
             id = NameOrPseudonym.getInstance(s);
         }

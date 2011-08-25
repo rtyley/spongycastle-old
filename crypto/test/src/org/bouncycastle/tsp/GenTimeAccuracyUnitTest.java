@@ -1,17 +1,16 @@
 package org.bouncycastle.tsp;
 
 import junit.framework.TestCase;
-
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.tsp.Accuracy;
 
 public class GenTimeAccuracyUnitTest
     extends TestCase
 {
-    private static final DERInteger ZERO_VALUE = new DERInteger(0);
-    private static final DERInteger ONE_VALUE = new DERInteger(1);
-    private static final DERInteger TWO_VALUE = new DERInteger(2);
-    private static final DERInteger THREE_VALUE = new DERInteger(3);
+    private static final ASN1Integer ZERO_VALUE = new ASN1Integer(0);
+    private static final ASN1Integer ONE_VALUE = new ASN1Integer(1);
+    private static final ASN1Integer TWO_VALUE = new ASN1Integer(2);
+    private static final ASN1Integer THREE_VALUE = new ASN1Integer(3);
 
     public void testOneTwoThree()
     {   
@@ -88,9 +87,9 @@ public class GenTimeAccuracyUnitTest
     
     private void checkValues(
         GenTimeAccuracy accuracy,
-        DERInteger      secs,
-        DERInteger      millis,
-        DERInteger      micros)
+        ASN1Integer      secs,
+        ASN1Integer      millis,
+        ASN1Integer      micros)
     {
         assertEquals(secs.getValue().intValue(), accuracy.getSeconds());
         assertEquals(millis.getValue().intValue(), accuracy.getMillis());

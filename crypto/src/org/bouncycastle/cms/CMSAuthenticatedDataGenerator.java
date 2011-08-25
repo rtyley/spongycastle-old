@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.crypto.KeyGenerator;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
@@ -125,7 +126,7 @@ public class CMSAuthenticatedDataGenerator
             {
                 OutputStream mOut = macCalculator.getOutputStream();
 
-                mOut.write(authed.getDEREncoded());
+                mOut.write(authed.getEncoded(ASN1Encoding.DER));
 
                 mOut.close();
 

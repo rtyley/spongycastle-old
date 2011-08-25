@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cmp.CMPCertificate;
 import org.bouncycastle.asn1.cmp.CMPObjectIdentifiers;
@@ -166,7 +167,7 @@ public class ProtectedPKIMessage
             v.add(pkiMessage.getHeader());
             v.add(pkiMessage.getBody());
 
-            macOut.write(new DERSequence(v).getDEREncoded());
+            macOut.write(new DERSequence(v).getEncoded(ASN1Encoding.DER));
 
             macOut.close();
 
@@ -188,7 +189,7 @@ public class ProtectedPKIMessage
 
         OutputStream sOut = verifier.getOutputStream();
 
-        sOut.write(new DERSequence(v).getDEREncoded());
+        sOut.write(new DERSequence(v).getEncoded(ASN1Encoding.DER));
 
         sOut.close();
 

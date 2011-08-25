@@ -1,12 +1,13 @@
 package org.bouncycastle.crypto.agreement.kdf;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.crypto.DerivationParameters;
 
 public class DHKDFParameters
     implements DerivationParameters
 {
-    private final DERObjectIdentifier algorithm;
+    private final ASN1ObjectIdentifier algorithm;
     private final int keySize;
     private final byte[] z;
     private final byte[] extraInfo;
@@ -16,10 +17,7 @@ public class DHKDFParameters
         int keySize,
         byte[] z)
     {
-        this.algorithm = algorithm;
-        this.keySize = keySize;
-        this.z = z;
-        this.extraInfo = null;
+        this(algorithm, keySize, z, null);
     }
 
     public DHKDFParameters(
@@ -28,13 +26,13 @@ public class DHKDFParameters
         byte[] z,
         byte[] extraInfo)
     {
-        this.algorithm = algorithm;
+        this.algorithm = new ASN1ObjectIdentifier(algorithm.getId());
         this.keySize = keySize;
         this.z = z;
         this.extraInfo = extraInfo;
     }
 
-    public DERObjectIdentifier getAlgorithm()
+    public ASN1ObjectIdentifier getAlgorithm()
     {
         return algorithm;
     }

@@ -674,7 +674,7 @@ public class JDKPKCS12KeyStore
 
         ASN1InputStream bIn = new ASN1InputStream(bufIn);
         ASN1Sequence    obj = (ASN1Sequence)bIn.readObject();
-        Pfx             bag = new Pfx(obj);
+        Pfx             bag = Pfx.getInstance(obj);
         ContentInfo     info = bag.getAuthSafe();
         Vector          chain = new Vector();
         boolean         unmarkedKey = false;
@@ -730,7 +730,7 @@ public class JDKPKCS12KeyStore
         {
             bIn = new ASN1InputStream(((ASN1OctetString)info.getContent()).getOctets());
 
-            AuthenticatedSafe   authSafe = new AuthenticatedSafe((ASN1Sequence)bIn.readObject());
+            AuthenticatedSafe   authSafe = AuthenticatedSafe.getInstance(bIn.readObject());
             ContentInfo[]       c = authSafe.getContentInfo();
 
             for (int i = 0; i != c.length; i++)
@@ -742,7 +742,7 @@ public class JDKPKCS12KeyStore
 
                     for (int j = 0; j != seq.size(); j++)
                     {
-                        SafeBag b = new SafeBag((ASN1Sequence)seq.getObjectAt(j));
+                        SafeBag b = SafeBag.getInstance(seq.getObjectAt(j));
                         if (b.getBagId().equals(pkcs8ShroudedKeyBag))
                         {
                             org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo eIn = new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo((ASN1Sequence)b.getBagValue());
@@ -836,7 +836,7 @@ public class JDKPKCS12KeyStore
 
                     for (int j = 0; j != seq.size(); j++)
                     {
-                        SafeBag b = new SafeBag((ASN1Sequence)seq.getObjectAt(j));
+                        SafeBag b = SafeBag.getInstance(seq.getObjectAt(j));
                         
                         if (b.getBagId().equals(certBag))
                         {

@@ -6,19 +6,20 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DLSequence;
+import org.bouncycastle.asn1.DLTaggedObject;
 
 public class SafeBag
     extends ASN1Object
 {
-    ASN1ObjectIdentifier         bagId;
+    ASN1ObjectIdentifier bagId;
     ASN1Primitive bagValue;
     ASN1Set                     bagAttributes;
 
     public SafeBag(
-        ASN1ObjectIdentifier     oid,
-        ASN1Primitive               obj)
+        ASN1ObjectIdentifier oid,
+        ASN1Primitive obj)
     {
         this.bagId = oid;
         this.bagValue = obj;
@@ -26,8 +27,8 @@ public class SafeBag
     }
 
     public SafeBag(
-        ASN1ObjectIdentifier     oid,
-        ASN1Primitive               obj,
+        ASN1ObjectIdentifier oid,
+        ASN1Primitive obj,
         ASN1Set                 bagAttributes)
     {
         this.bagId = oid;
@@ -35,11 +36,27 @@ public class SafeBag
         this.bagAttributes = bagAttributes;
     }
 
-    public SafeBag(
+    public static SafeBag getInstance(
+        Object  obj)
+    {
+        if (obj instanceof SafeBag)
+        {
+            return (SafeBag)obj;
+        }
+
+        if (obj != null)
+        {
+            return new SafeBag(ASN1Sequence.getInstance(obj));
+        }
+
+        return null;
+    }
+
+    private SafeBag(
         ASN1Sequence    seq)
     {
         this.bagId = (ASN1ObjectIdentifier)seq.getObjectAt(0);
-        this.bagValue = ((DERTaggedObject)seq.getObjectAt(1)).getObject();
+        this.bagValue = ((ASN1TaggedObject)seq.getObjectAt(1)).getObject();
         if (seq.size() == 3)
         {
             this.bagAttributes = (ASN1Set)seq.getObjectAt(2);
@@ -66,13 +83,13 @@ public class SafeBag
         ASN1EncodableVector v = new ASN1EncodableVector();
 
         v.add(bagId);
-        v.add(new DERTaggedObject(0, bagValue));
+        v.add(new DLTaggedObject(true, 0, bagValue));
 
         if (bagAttributes != null)
         {
             v.add(bagAttributes);
         }
 
-        return new DERSequence(v);
+        return new DLSequence(v);
     }
 }

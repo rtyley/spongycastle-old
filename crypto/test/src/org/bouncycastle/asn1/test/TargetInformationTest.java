@@ -32,8 +32,8 @@ public class TargetInformationTest
         {
             fail("targetInformation1 and targetInformation2 should have the same encoding.");
         }
-        TargetInformation targetInformation3 = TargetInformation.getInstance(targetInformation1.getDERObject());
-        TargetInformation targetInformation4 = TargetInformation.getInstance(targetInformation2.getDERObject());
+        TargetInformation targetInformation3 = TargetInformation.getInstance(targetInformation1);
+        TargetInformation targetInformation4 = TargetInformation.getInstance(targetInformation2);
         if (!targetInformation3.equals(targetInformation4))
         {
             fail("targetInformation3 and targetInformation4 should have the same encoding.");

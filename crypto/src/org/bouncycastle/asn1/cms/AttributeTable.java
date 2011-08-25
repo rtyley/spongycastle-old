@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 
 public class AttributeTable
@@ -81,6 +82,14 @@ public class AttributeTable
     }
 
     /**
+     * @deprecated use ASN1ObjectIdentifier
+     */
+    public Attribute get(DERObjectIdentifier oid)
+    {
+        return get(new ASN1ObjectIdentifier(oid.getId()));
+    }
+
+    /**
      * Return the first attribute matching the OBJECT IDENTIFIER oid.
      * 
      * @param oid type of attribute required.
@@ -97,6 +106,14 @@ public class AttributeTable
         }
         
         return (Attribute)value;
+    }
+
+     /**
+     * @deprecated use ASN1ObjectIdentifier
+     */
+    public ASN1EncodableVector getAll(DERObjectIdentifier oid)
+    {
+        return getAll(new ASN1ObjectIdentifier(oid.getId()));
     }
 
     /**

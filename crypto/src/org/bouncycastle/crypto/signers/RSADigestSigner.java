@@ -1,9 +1,11 @@
 package org.bouncycastle.crypto.signers;
 
+import java.io.IOException;
 import java.util.Hashtable;
 
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
@@ -57,7 +59,7 @@ public class RSADigestSigner
     {
         this.digest = digest;
 
-        algId = new AlgorithmIdentifier((DERObjectIdentifier)oidMap.get(digest.getAlgorithmName()), DERNull.INSTANCE);
+        algId = new AlgorithmIdentifier((ASN1ObjectIdentifier)oidMap.get(digest.getAlgorithmName()), DERNull.INSTANCE);
     }
 
     /**
@@ -142,8 +144,15 @@ public class RSADigestSigner
         byte[] hash = new byte[digest.getDigestSize()];
         digest.doFinal(hash, 0);
 
-        byte[] data = derEncode(hash);
-        return rsaEngine.processBlock(data, 0, data.length);
+        try
+        {
+            byte[] data = derEncode(hash);
+            return rsaEngine.processBlock(data, 0, data.length);
+        }
+        catch (IOException e)
+        {
+            throw new CryptoException("unable to encode signature: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -214,9 +223,10 @@ public class RSADigestSigner
 
     private byte[] derEncode(
         byte[] hash)
+        throws IOException
     {
         DigestInfo dInfo = new DigestInfo(algId, hash);
 
-        return dInfo.getDEREncoded();
+        return dInfo.getEncoded(ASN1Encoding.DER);
     }
 }

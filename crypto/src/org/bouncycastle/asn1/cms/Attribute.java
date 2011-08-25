@@ -6,6 +6,7 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 public class Attribute
@@ -23,24 +24,35 @@ public class Attribute
     public static Attribute getInstance(
         Object o)
     {
-        if (o == null || o instanceof Attribute)
+        if (o instanceof Attribute)
         {
             return (Attribute)o;
         }
         
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new Attribute((ASN1Sequence)o);
+            return new Attribute(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + o.getClass().getName());
+        return null;
     }
     
-    public Attribute(
+    private Attribute(
         ASN1Sequence seq)
     {
         attrType = (ASN1ObjectIdentifier)seq.getObjectAt(0);
         attrValues = (ASN1Set)seq.getObjectAt(1);
+    }
+
+    /**
+     * @deprecated use ASN1ObjectIdentifier
+     */
+    public Attribute(
+        DERObjectIdentifier attrType,
+        ASN1Set             attrValues)
+    {
+        this.attrType = new ASN1ObjectIdentifier(attrType.getId());
+        this.attrValues = attrValues;
     }
 
     public Attribute(

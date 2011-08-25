@@ -39,6 +39,15 @@ abstract public class ASN1Set
                 throw new IllegalArgumentException("failed to construct set from byte[]: " + e.getMessage());
             }
         }
+        else if (obj instanceof ASN1Encodable)
+        {
+            ASN1Primitive primitive = ((ASN1Encodable)obj).toASN1Primitive();
+
+            if (primitive instanceof ASN1Set)
+            {
+                return (ASN1Set)primitive;
+            }
+        }
 
         throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
     }

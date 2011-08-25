@@ -2,7 +2,7 @@ package org.bouncycastle.jce.spec;
 
 import java.security.spec.AlgorithmParameterSpec;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.GOST3410NamedParameters;
 import org.bouncycastle.asn1.cryptopro.GOST3410ParamSetParameters;
@@ -29,11 +29,11 @@ public class GOST3410ParameterSpec
         
         try
         {
-            ecP = GOST3410NamedParameters.getByOID(new DERObjectIdentifier(keyParamSetID));
+            ecP = GOST3410NamedParameters.getByOID(new ASN1ObjectIdentifier(keyParamSetID));
         }
         catch (IllegalArgumentException e)
         {
-            DERObjectIdentifier oid = GOST3410NamedParameters.getOID(keyParamSetID);
+            ASN1ObjectIdentifier oid = GOST3410NamedParameters.getOID(keyParamSetID);
             if (oid != null)
             {
                 keyParamSetID = oid.getId();

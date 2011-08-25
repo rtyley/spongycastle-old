@@ -1,11 +1,14 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.ByteArrayInputStream;
+import java.util.Enumeration;
+
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttCertIssuer;
@@ -31,9 +34,6 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
-
-import java.io.ByteArrayInputStream;
-import java.util.Enumeration;
 
 public class CertificateTest
     extends SimpleTest
@@ -246,51 +246,51 @@ public class CertificateTest
                 Enumeration    en = ext.oids();
                 while (en.hasMoreElements())
                 {
-                    DERObjectIdentifier    oid = (DERObjectIdentifier)en.nextElement();
+                    ASN1ObjectIdentifier    oid = (ASN1ObjectIdentifier)en.nextElement();
                     X509Extension            extVal = ext.getExtension(oid);
                     
                     ASN1OctetString        oct = extVal.getValue();
                     ASN1InputStream        extIn = new ASN1InputStream(new ByteArrayInputStream(oct.getOctets()));
                     
-                    if (oid.equals(X509Extensions.SubjectKeyIdentifier))
+                    if (oid.equals(X509Extension.subjectKeyIdentifier))
                     {
                         SubjectKeyIdentifier si = SubjectKeyIdentifier.getInstance(extIn.readObject());
                     }
-                    else if (oid.equals(X509Extensions.KeyUsage))
+                    else if (oid.equals(X509Extension.keyUsage))
                     {
                         DERBitString ku = KeyUsage.getInstance(extIn.readObject());
                     }
-                    else if (oid.equals(X509Extensions.ExtendedKeyUsage))
+                    else if (oid.equals(X509Extension.extendedKeyUsage))
                     {
                         ExtendedKeyUsage ku = ExtendedKeyUsage.getInstance(extIn.readObject());
                         
-                        ASN1Sequence    sq = (ASN1Sequence)ku.getDERObject();
+                        ASN1Sequence    sq = (ASN1Sequence)ku.toASN1Primitive();
                         for (int i = 0; i != sq.size(); i++)
                         {
-                            DERObjectIdentifier    p = KeyPurposeId.getInstance(sq.getObjectAt(i));
+                            ASN1ObjectIdentifier    p = KeyPurposeId.getInstance(sq.getObjectAt(i));
                         }
                     }
-                    else if (oid.equals(X509Extensions.SubjectAlternativeName))
+                    else if (oid.equals(X509Extension.subjectAlternativeName))
                     {
                         GeneralNames    gn = GeneralNames.getInstance(extIn.readObject());
                         
-                        ASN1Sequence    sq = (ASN1Sequence)gn.getDERObject();
+                        ASN1Sequence    sq = (ASN1Sequence)gn.toASN1Primitive();
                         for (int i = 0; i != sq.size(); i++)
                         {
                             GeneralName    n = GeneralName.getInstance(sq.getObjectAt(i));
                         }
                     }
-                    else if (oid.equals(X509Extensions.IssuerAlternativeName))
+                    else if (oid.equals(X509Extension.issuerAlternativeName))
                     {
                         GeneralNames    gn = GeneralNames.getInstance(extIn.readObject());
                         
-                        ASN1Sequence    sq = (ASN1Sequence)gn.getDERObject();
+                        ASN1Sequence    sq = (ASN1Sequence)gn.toASN1Primitive();
                         for (int i = 0; i != sq.size(); i++)
                         {
                             GeneralName    n = GeneralName.getInstance(sq.getObjectAt(i));
                         }
                     }
-                    else if (oid.equals(X509Extensions.CRLDistributionPoints))
+                    else if (oid.equals(X509Extension.cRLDistributionPoints))
                     {
                         CRLDistPoint    p = CRLDistPoint.getInstance(extIn.readObject());
                         
@@ -300,7 +300,7 @@ public class CertificateTest
                             // do nothing
                         }
                     }
-                    else if (oid.equals(X509Extensions.CertificatePolicies))
+                    else if (oid.equals(X509Extension.certificatePolicies))
                     {
                         ASN1Sequence    cp = (ASN1Sequence)extIn.readObject();
                         
@@ -309,11 +309,11 @@ public class CertificateTest
                             PolicyInformation.getInstance(cp.getObjectAt(i));
                         }
                     }
-                    else if (oid.equals(X509Extensions.AuthorityKeyIdentifier))
+                    else if (oid.equals(X509Extension.authorityKeyIdentifier))
                     {
                         AuthorityKeyIdentifier    auth = AuthorityKeyIdentifier.getInstance(extIn.readObject());
                     }
-                    else if (oid.equals(X509Extensions.BasicConstraints))
+                    else if (oid.equals(X509Extension.basicConstraints))
                     {
                         BasicConstraints    bc = BasicConstraints.getInstance(extIn.readObject());
                     }
@@ -405,7 +405,7 @@ public class CertificateTest
             Enumeration en = ext.oids();
             while (en.hasMoreElements())
             {
-                DERObjectIdentifier oid = (DERObjectIdentifier) en
+                ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier) en
                         .nextElement();
                 X509Extension extVal = ext.getExtension(oid);
             }

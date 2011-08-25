@@ -11,7 +11,7 @@ public class AuthenticatedSafe
 {
     ContentInfo[]    info;
 
-    public AuthenticatedSafe(
+    private AuthenticatedSafe(
         ASN1Sequence  seq)
     {
         info = new ContentInfo[seq.size()];
@@ -20,6 +20,22 @@ public class AuthenticatedSafe
         {
             info[i] = ContentInfo.getInstance(seq.getObjectAt(i));
         }
+    }
+
+    public static AuthenticatedSafe getInstance(
+        Object o)
+    {
+        if (o instanceof AuthenticatedSafe)
+        {
+            return (AuthenticatedSafe)o;
+        }
+
+        if (o != null)
+        {
+            return new AuthenticatedSafe(ASN1Sequence.getInstance(o));
+        }
+
+        return null;
     }
 
     public AuthenticatedSafe(
@@ -35,7 +51,7 @@ public class AuthenticatedSafe
 
     public ASN1Primitive toASN1Primitive()
     {
-        ASN1EncodableVector  v = new ASN1EncodableVector();
+        ASN1EncodableVector v = new ASN1EncodableVector();
 
         for (int i = 0; i != info.length; i++)
         {
