@@ -30,6 +30,9 @@ You can see an example of Spongy Castle in active use in the [toy-android-ssh-ag
 
 https://github.com/rtyley/toy-android-ssh-agent/blob/d768a9ba853272d396f3b528eb991ea38244e6bc/src/main/java/com/madgag/ssh/toysshagent/ToyAuthAgentService.java#L28
 
+There's also an even simpler demo project showing how to include Spongy Castle in a vanilla Eclipse project:
+
+https://github.com/rtyley/spongycastle-eclipse#readme
 
 #### Maven
 
@@ -41,3 +44,6 @@ I suggest you use the [maven-android-plugin](http://code.google.com/p/maven-andr
 
 Bouncy Castle uses an [adaptation of the MIT X11 License](http://www.bouncycastle.org/licence.html) and as Spongy Castle is a simple re-package of Bouncy Castle, you should consider it to be licenced under those same terms.
 
+#### Projects using Spongy Castle
+
+[JMRTD for Android](http://martijno.blogspot.com/2011/07/jmrtd-for-android.html)
