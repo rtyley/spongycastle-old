@@ -1,5 +1,6 @@
 package org.bouncycastle.jcajce.provider.asymmetric.ec;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.PrivateKey;
@@ -11,20 +12,24 @@ import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-import org.bouncycastle.jce.provider.JCEECPrivateKey;
-import org.bouncycastle.jce.provider.JCEECPublicKey;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jcajce.provider.asymmetric.util.BCKeyFactory;
 import org.bouncycastle.jce.provider.JDKKeyFactory;
 import org.bouncycastle.jce.provider.ProviderUtil;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 
-public class KeyFactory
+public class KeyFactorySpi
     extends JDKKeyFactory
+    implements BCKeyFactory
 {
     String algorithm;
 
-    KeyFactory(
+    KeyFactorySpi(
         String algorithm)
     {
         this.algorithm = algorithm;
@@ -36,11 +41,11 @@ public class KeyFactory
     {
         if (key instanceof ECPublicKey)
         {
-            return new JCEECPublicKey((ECPublicKey)key);
+            return new BCECPublicKey((ECPublicKey)key);
         }
         else if (key instanceof ECPrivateKey)
         {
-            return new JCEECPrivateKey((ECPrivateKey)key);
+            return new BCECPrivateKey((ECPrivateKey)key);
         }
 
         throw new InvalidKeyException("key type unknown");
@@ -100,10 +105,10 @@ public class KeyFactory
         {
             try
             {
-                JCEECPrivateKey key = (JCEECPrivateKey)JDKKeyFactory.createPrivateKeyFromDERStream(
+                BCECPrivateKey key = (BCECPrivateKey)JDKKeyFactory.createPrivateKeyFromDERStream(
                     ((PKCS8EncodedKeySpec)keySpec).getEncoded());
 
-                return new JCEECPrivateKey(algorithm, key);
+                return new BCECPrivateKey(algorithm, key);
             }
             catch (Exception e)
             {
@@ -112,11 +117,11 @@ public class KeyFactory
         }
         else if (keySpec instanceof ECPrivateKeySpec)
         {
-            return new JCEECPrivateKey(algorithm, (ECPrivateKeySpec)keySpec);
+            return new BCECPrivateKey(algorithm, (ECPrivateKeySpec)keySpec);
         }
         else if (keySpec instanceof java.security.spec.ECPrivateKeySpec)
         {
-            return new JCEECPrivateKey(algorithm, (java.security.spec.ECPrivateKeySpec)keySpec);
+            return new BCECPrivateKey(algorithm, (java.security.spec.ECPrivateKeySpec)keySpec);
         }
 
         throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
@@ -130,10 +135,10 @@ public class KeyFactory
         {
             try
             {
-                JCEECPublicKey key = (JCEECPublicKey)JDKKeyFactory.createPublicKeyFromDERStream(
+                BCECPublicKey key = (BCECPublicKey)JDKKeyFactory.createPublicKeyFromDERStream(
                     ((X509EncodedKeySpec)keySpec).getEncoded());
 
-                return new JCEECPublicKey(algorithm, key);
+                return new BCECPublicKey(algorithm, key);
             }
             catch (Exception e)
             {
@@ -142,18 +147,48 @@ public class KeyFactory
         }
         else if (keySpec instanceof ECPublicKeySpec)
         {
-            return new JCEECPublicKey(algorithm, (ECPublicKeySpec)keySpec);
+            return new BCECPublicKey(algorithm, (ECPublicKeySpec)keySpec);
         }
         else if (keySpec instanceof java.security.spec.ECPublicKeySpec)
         {
-            return new JCEECPublicKey(algorithm, (java.security.spec.ECPublicKeySpec)keySpec);
+            return new BCECPublicKey(algorithm, (java.security.spec.ECPublicKeySpec)keySpec);
         }
 
         throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
     }
 
+    public PrivateKey generatePrivate(PrivateKeyInfo keyInfo)
+        throws IOException
+    {
+        ASN1ObjectIdentifier algOid = keyInfo.getPrivateKeyAlgorithm().getAlgorithm();
+
+        if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
+        {
+            return new BCECPrivateKey(keyInfo);
+        }
+        else
+        {
+            throw new IOException("algorithm identifier " + algOid + " in key not recognised");
+        }
+    }
+
+    public PublicKey generatePublic(SubjectPublicKeyInfo keyInfo)
+        throws IOException
+    {
+        ASN1ObjectIdentifier algOid = keyInfo.getAlgorithm().getAlgorithm();
+
+        if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
+        {
+            return new BCECPublicKey(keyInfo);
+        }
+        else
+        {
+            throw new IOException("algorithm identifier " + algOid + " in key not recognised");
+        }
+    }
+
     public static class EC
-        extends KeyFactory
+        extends KeyFactorySpi
     {
         public EC()
         {
@@ -162,7 +197,7 @@ public class KeyFactory
     }
 
     public static class ECDSA
-        extends KeyFactory
+        extends KeyFactorySpi
     {
         public ECDSA()
         {
@@ -171,7 +206,7 @@ public class KeyFactory
     }
 
     public static class ECGOST3410
-        extends KeyFactory
+        extends KeyFactorySpi
     {
         public ECGOST3410()
         {
@@ -180,7 +215,7 @@ public class KeyFactory
     }
 
     public static class ECDH
-        extends KeyFactory
+        extends KeyFactorySpi
     {
         public ECDH()
         {
@@ -189,7 +224,7 @@ public class KeyFactory
     }
 
     public static class ECDHC
-        extends KeyFactory
+        extends KeyFactorySpi
     {
         public ECDHC()
         {
@@ -198,7 +233,7 @@ public class KeyFactory
     }
 
     public static class ECMQV
-        extends KeyFactory
+        extends KeyFactorySpi
     {
         public ECMQV()
         {

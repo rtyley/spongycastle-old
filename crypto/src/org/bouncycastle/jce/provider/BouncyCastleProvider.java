@@ -223,26 +223,6 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes192_cbc.getId(), "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.bc_pbe_sha256_pkcs12_aes256_cbc.getId(), "PKCS12PBE");
 
-        put("Alg.Alias.AlgorithmParameters." + PKCSObjectIdentifiers.id_RSAES_OAEP, "OAEP");
-        
-        put("Alg.Alias.AlgorithmParameters.RSAPSS", "PSS");
-        put("Alg.Alias.AlgorithmParameters.RSASSA-PSS", "PSS");
-        put("Alg.Alias.AlgorithmParameters." + PKCSObjectIdentifiers.id_RSASSA_PSS, "PSS");
-        put("Alg.Alias.AlgorithmParameters.SHA1withRSA/PSS", "PSS");
-        put("Alg.Alias.AlgorithmParameters.SHA224withRSA/PSS", "PSS");
-        put("Alg.Alias.AlgorithmParameters.SHA256withRSA/PSS", "PSS");
-        put("Alg.Alias.AlgorithmParameters.SHA384withRSA/PSS", "PSS");
-        put("Alg.Alias.AlgorithmParameters.SHA512withRSA/PSS", "PSS");
-        put("Alg.Alias.AlgorithmParameters.SHA1WITHRSAANDMGF1", "PSS");
-        put("Alg.Alias.AlgorithmParameters.SHA224WITHRSAANDMGF1", "PSS");
-        put("Alg.Alias.AlgorithmParameters.SHA256WITHRSAANDMGF1", "PSS");
-        put("Alg.Alias.AlgorithmParameters.SHA384WITHRSAANDMGF1", "PSS");
-        put("Alg.Alias.AlgorithmParameters.SHA512WITHRSAANDMGF1", "PSS");
-        put("Alg.Alias.AlgorithmParameters.RAWRSAPSS", "PSS");
-        put("Alg.Alias.AlgorithmParameters.NONEWITHRSAPSS", "PSS");
-        put("Alg.Alias.AlgorithmParameters.NONEWITHRSASSA-PSS", "PSS");
-        put("Alg.Alias.AlgorithmParameters.NONEWITHRSAANDMGF1", "PSS");
-
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND128BITAES-CBC-BC", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND192BITAES-CBC-BC", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND256BITAES-CBC-BC", "PKCS12PBE");
@@ -290,28 +270,11 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Cipher.GOST-28147", "GOST28147");
         put("Cipher." + CryptoProObjectIdentifiers.gostR28147_cbc, "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147cbc");
 
-        put("Cipher.RSA", "org.bouncycastle.jce.provider.JCERSACipher$NoPadding");
-        put("Cipher.RSA/RAW", "org.bouncycastle.jce.provider.JCERSACipher$NoPadding");
-        put("Cipher.RSA/PKCS1", "org.bouncycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding");
-        put("Cipher.1.2.840.113549.1.1.1", "org.bouncycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding");
-        put("Cipher.2.5.8.1.1", "org.bouncycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding");
-        put("Cipher.RSA/1", "org.bouncycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding_PrivateOnly");
-        put("Cipher.RSA/2", "org.bouncycastle.jce.provider.JCERSACipher$PKCS1v1_5Padding_PublicOnly");
-        put("Cipher.RSA/OAEP", "org.bouncycastle.jce.provider.JCERSACipher$OAEPPadding");
-        put("Cipher." + PKCSObjectIdentifiers.id_RSAES_OAEP, "org.bouncycastle.jce.provider.JCERSACipher$OAEPPadding");
-        put("Cipher.RSA/ISO9796-1", "org.bouncycastle.jce.provider.JCERSACipher$ISO9796d1Padding");
-
         put("Cipher.ECIES", "org.bouncycastle.jce.provider.JCEIESCipher$ECIES");
         put("Cipher.BrokenECIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenECIES");
         put("Cipher.IES", "org.bouncycastle.jce.provider.JCEIESCipher$IES");
         put("Cipher.BrokenIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenIES");
 
-        put("Alg.Alias.Cipher.RSA//RAW", "RSA");
-        put("Alg.Alias.Cipher.RSA//NOPADDING", "RSA");
-        put("Alg.Alias.Cipher.RSA//PKCS1PADDING", "RSA/PKCS1");
-        put("Alg.Alias.Cipher.RSA//OAEPPADDING", "RSA/OAEP");
-        put("Alg.Alias.Cipher.RSA//ISO9796-1PADDING", "RSA/ISO9796-1");
-        
         put("Alg.Alias.Cipher.ELGAMAL/ECB/PKCS1PADDING", "ELGAMAL/PKCS1");
         put("Alg.Alias.Cipher.ELGAMAL/NONE/PKCS1PADDING", "ELGAMAL/PKCS1");
         put("Alg.Alias.Cipher.ELGAMAL/NONE/NOPADDING", "ELGAMAL");
@@ -400,7 +363,6 @@ public final class BouncyCastleProvider extends Provider
         //
         // key pair generators.
         //
-        put("KeyPairGenerator.RSA", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$RSA");
         put("KeyPairGenerator.DH", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$DH");
         put("KeyPairGenerator.DSA", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$DSA");
         put("KeyPairGenerator.ELGAMAL", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$ElGamal");
@@ -415,12 +377,9 @@ public final class BouncyCastleProvider extends Provider
         //
         // key factories
         //
-        put("KeyFactory.RSA", "org.bouncycastle.jce.provider.JDKKeyFactory$RSA");
         put("KeyFactory.DH", "org.bouncycastle.jce.provider.JDKKeyFactory$DH");
         put("KeyFactory.DSA", "org.bouncycastle.jce.provider.JDKKeyFactory$DSA");
 
-        put("KeyFactory.X.509", "org.bouncycastle.jce.provider.JDKKeyFactory$X509");
-        
         put("Alg.Alias.KeyFactory.1.2.840.113549.1.1.1", "RSA");
         put("Alg.Alias.KeyFactory.1.2.840.10040.4.1", "DSA");
 

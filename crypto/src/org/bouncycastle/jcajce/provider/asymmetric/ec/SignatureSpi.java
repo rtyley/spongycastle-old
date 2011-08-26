@@ -32,10 +32,10 @@ import org.bouncycastle.jce.provider.DSABase;
 import org.bouncycastle.jce.provider.DSAEncoder;
 import org.bouncycastle.jce.provider.JDKKeyFactory;
 
-public class Signature
+public class SignatureSpi
     extends DSABase
 {
-    Signature(Digest digest, DSA signer, DSAEncoder encoder)
+    SignatureSpi(Digest digest, DSA signer, DSAEncoder encoder)
     {
         super(digest, signer, encoder);
     }
@@ -105,7 +105,7 @@ public class Signature
     }
 
     static public class ecDSA
-        extends Signature
+        extends SignatureSpi
     {
         public ecDSA()
         {
@@ -114,7 +114,7 @@ public class Signature
     }
 
     static public class ecDSAnone
-        extends Signature
+        extends SignatureSpi
     {
         public ecDSAnone()
         {
@@ -123,7 +123,7 @@ public class Signature
     }
 
     static public class ecDSA224
-        extends Signature
+        extends SignatureSpi
     {
         public ecDSA224()
         {
@@ -132,7 +132,7 @@ public class Signature
     }
 
     static public class ecDSA256
-        extends Signature
+        extends SignatureSpi
     {
         public ecDSA256()
         {
@@ -141,7 +141,7 @@ public class Signature
     }
 
     static public class ecDSA384
-        extends Signature
+        extends SignatureSpi
     {
         public ecDSA384()
         {
@@ -150,7 +150,7 @@ public class Signature
     }
 
     static public class ecDSA512
-        extends Signature
+        extends SignatureSpi
     {
         public ecDSA512()
         {
@@ -159,7 +159,7 @@ public class Signature
     }
 
     static public class ecDSARipeMD160
-        extends Signature
+        extends SignatureSpi
     {
         public ecDSARipeMD160()
         {
@@ -168,7 +168,7 @@ public class Signature
     }
 
     static public class ecNR
-        extends Signature
+        extends SignatureSpi
     {
         public ecNR()
         {
@@ -177,7 +177,7 @@ public class Signature
     }
 
     static public class ecNR224
-        extends Signature
+        extends SignatureSpi
     {
         public ecNR224()
         {
@@ -186,7 +186,7 @@ public class Signature
     }
 
     static public class ecNR256
-        extends Signature
+        extends SignatureSpi
     {
         public ecNR256()
         {
@@ -195,7 +195,7 @@ public class Signature
     }
 
     static public class ecNR384
-        extends Signature
+        extends SignatureSpi
     {
         public ecNR384()
         {
@@ -204,7 +204,7 @@ public class Signature
     }
 
     static public class ecNR512
-        extends Signature
+        extends SignatureSpi
     {
         public ecNR512()
         {
@@ -213,7 +213,7 @@ public class Signature
     }
 
     static public class ecCVCDSA
-        extends Signature
+        extends SignatureSpi
     {
         public ecCVCDSA()
         {
@@ -222,7 +222,7 @@ public class Signature
     }
 
     static public class ecCVCDSA224
-        extends Signature
+        extends SignatureSpi
     {
         public ecCVCDSA224()
         {
@@ -231,7 +231,7 @@ public class Signature
     }
 
     static public class ecCVCDSA256
-        extends Signature
+        extends SignatureSpi
     {
         public ecCVCDSA256()
         {

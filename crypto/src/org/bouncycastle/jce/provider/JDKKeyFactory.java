@@ -364,17 +364,4 @@ public abstract class JDKKeyFactory
             return super.engineGeneratePublic(keySpec);
         }
     }
-
-
-    /**
-     * This isn't really correct, however the class path project API seems to think such
-     * a key factory will exist.
-     */
-    public static class X509
-        extends JDKKeyFactory
-    {
-        public X509()
-        {
-        }
-    }
 }

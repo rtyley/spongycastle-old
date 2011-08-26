@@ -11,7 +11,6 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Hashtable;
 
-import javax.crypto.KeyAgreementSpi;
 import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
@@ -45,8 +44,8 @@ import org.bouncycastle.jce.interfaces.MQVPublicKey;
  *
  * Also, MQV key agreement per SEC-1
  */
-public class KeyAgreement
-    extends KeyAgreementSpi
+public class KeyAgreementSpi
+    extends javax.crypto.KeyAgreementSpi
 {
     private static final X9IntegerConverter converter = new X9IntegerConverter();
     private static final Hashtable algorithms = new Hashtable();
@@ -78,10 +77,10 @@ public class KeyAgreement
         return converter.integerToBytes(r, converter.getByteLength(parameters.getG().getX()));
     }
 
-    protected KeyAgreement(
-        String              kaAlgorithm,
-        BasicAgreement      agreement,
-        DerivationFunction  kdf)
+    protected KeyAgreementSpi(
+        String kaAlgorithm,
+        BasicAgreement agreement,
+        DerivationFunction kdf)
     {
         this.kaAlgorithm = kaAlgorithm;
         this.agreement = agreement;
@@ -270,7 +269,7 @@ public class KeyAgreement
     }
 
     public static class DH
-        extends KeyAgreement
+        extends KeyAgreementSpi
     {
         public DH()
         {
@@ -279,7 +278,7 @@ public class KeyAgreement
     }
 
     public static class DHC
-        extends KeyAgreement
+        extends KeyAgreementSpi
     {
         public DHC()
         {
@@ -288,7 +287,7 @@ public class KeyAgreement
     }
 
     public static class MQV
-        extends KeyAgreement
+        extends KeyAgreementSpi
     {
         public MQV()
         {
@@ -297,7 +296,7 @@ public class KeyAgreement
     }
 
     public static class DHwithSHA1KDF
-        extends KeyAgreement
+        extends KeyAgreementSpi
     {
         public DHwithSHA1KDF()
         {
@@ -306,7 +305,7 @@ public class KeyAgreement
     }
 
     public static class MQVwithSHA1KDF
-        extends KeyAgreement
+        extends KeyAgreementSpi
     {
         public MQVwithSHA1KDF()
         {

@@ -10,8 +10,7 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 
-import org.bouncycastle.asn1.ASN1Encoding;
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -31,6 +30,7 @@ import org.bouncycastle.asn1.x9.X9IntegerConverter;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.provider.ProviderUtil;
@@ -170,7 +170,7 @@ public class BCECPublicKey
         this.q = EC5Util.convertPoint(this.ecSpec, key.getW(), false);
     }
 
-    public BCECPublicKey(
+    BCECPublicKey(
         SubjectPublicKeyInfo info)
     {
         populateFromPubKeyInfo(info);
@@ -178,7 +178,7 @@ public class BCECPublicKey
 
     private void populateFromPubKeyInfo(SubjectPublicKeyInfo info)
     {
-        if (info.getAlgorithm().getAlgorithm().equals(CryptoProObjectIdentifiers.gostR3410_2001))
+        if (info.getAlgorithmId().getObjectId().equals(CryptoProObjectIdentifiers.gostR3410_2001))
         {
             DERBitString bits = info.getPublicKeyData();
             ASN1OctetString key;
@@ -207,7 +207,7 @@ public class BCECPublicKey
                 y[i] = keyEnc[64 - 1 - i];
             }
 
-            gostParams = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithm().getParameters());
+            gostParams = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithmId().getParameters());
 
             ECNamedCurveParameterSpec spec = ECGOST3410NamedCurveTable.getParameterSpec(ECGOST3410NamedCurves.getName(gostParams.getPublicKeyParamSet()));
 
@@ -227,7 +227,7 @@ public class BCECPublicKey
         }
         else
         {
-            X962Parameters params = X962Parameters.getInstance(info.getAlgorithm().getParameters());
+            X962Parameters params = new X962Parameters((ASN1Primitive)info.getAlgorithmId().getParameters());
             ECCurve                 curve;
             EllipticCurve           ellipticCurve;
 
@@ -311,7 +311,7 @@ public class BCECPublicKey
 
     public byte[] getEncoded()
     {
-        ASN1Object           params;
+        ASN1Encodable        params;
         SubjectPublicKeyInfo info;
 
         if (algorithm.equals("ECGOST3410"))
@@ -350,7 +350,7 @@ public class BCECPublicKey
             extractBytes(encKey, 0, bX);
             extractBytes(encKey, 32, bY);
 
-            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params.toASN1Primitive()), new DEROctetString(encKey));
+            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params), new DEROctetString(encKey));
         }
         else
         {
@@ -365,7 +365,7 @@ public class BCECPublicKey
             }
             else if (ecSpec == null)
             {
-                params = X962Parameters.getInstance(DERNull.INSTANCE);
+                params = new X962Parameters(DERNull.INSTANCE);
             }
             else
             {
@@ -388,14 +388,7 @@ public class BCECPublicKey
             info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), p.getOctets());
         }
 
-        try
-        {
-            return info.getEncoded(ASN1Encoding.DER);
-        }
-        catch (IOException e)
-        {
-            return null;
-        }
+        return KeyUtil.getEncodedSubjectPublicKeyInfo(info);
     }
 
     private void extractBytes(byte[] encKey, int offSet, BigInteger bI)
@@ -507,7 +500,7 @@ public class BCECPublicKey
     {
         byte[] enc = (byte[])in.readObject();
 
-        populateFromPubKeyInfo(SubjectPublicKeyInfo.getInstance(enc));
+        populateFromPubKeyInfo(SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(enc)));
 
         this.algorithm = (String)in.readObject();
         this.withCompression = in.readBoolean();

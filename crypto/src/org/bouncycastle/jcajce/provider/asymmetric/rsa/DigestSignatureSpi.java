@@ -38,7 +38,7 @@ import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
 
-public class DigestSigner
+public class DigestSignatureSpi
     extends SignatureSpi
 {
     private Digest digest;
@@ -46,7 +46,7 @@ public class DigestSigner
     private AlgorithmIdentifier algId;
 
     // care - this constructor is actually used by outside organisations
-    protected DigestSigner(
+    protected DigestSignatureSpi(
         Digest digest,
         AsymmetricBlockCipher cipher)
     {
@@ -56,7 +56,7 @@ public class DigestSigner
     }
 
     // care - this constructor is actually used by outside organisations
-    protected DigestSigner(
+    protected DigestSignatureSpi(
         ASN1ObjectIdentifier objId,
         Digest digest,
         AsymmetricBlockCipher cipher)
@@ -257,7 +257,7 @@ public class DigestSigner
     }
 
     static public class SHA1
-        extends DigestSigner
+        extends DigestSignatureSpi
     {
         public SHA1()
         {
@@ -266,7 +266,7 @@ public class DigestSigner
     }
 
     static public class SHA224
-        extends DigestSigner
+        extends DigestSignatureSpi
     {
         public SHA224()
         {
@@ -275,7 +275,7 @@ public class DigestSigner
     }
 
     static public class SHA256
-        extends DigestSigner
+        extends DigestSignatureSpi
     {
         public SHA256()
         {
@@ -284,7 +284,7 @@ public class DigestSigner
     }
 
     static public class SHA384
-        extends DigestSigner
+        extends DigestSignatureSpi
     {
         public SHA384()
         {
@@ -293,7 +293,7 @@ public class DigestSigner
     }
 
     static public class SHA512
-        extends DigestSigner
+        extends DigestSignatureSpi
     {
         public SHA512()
         {
@@ -302,7 +302,7 @@ public class DigestSigner
     }
 
     static public class MD2
-        extends DigestSigner
+        extends DigestSignatureSpi
     {
         public MD2()
         {
@@ -311,7 +311,7 @@ public class DigestSigner
     }
 
     static public class MD4
-        extends DigestSigner
+        extends DigestSignatureSpi
     {
         public MD4()
         {
@@ -320,7 +320,7 @@ public class DigestSigner
     }
 
     static public class MD5
-        extends DigestSigner
+        extends DigestSignatureSpi
     {
         public MD5()
         {
@@ -329,7 +329,7 @@ public class DigestSigner
     }
 
     static public class RIPEMD160
-        extends DigestSigner
+        extends DigestSignatureSpi
     {
         public RIPEMD160()
         {
@@ -338,7 +338,7 @@ public class DigestSigner
     }
 
     static public class RIPEMD128
-        extends DigestSigner
+        extends DigestSignatureSpi
     {
         public RIPEMD128()
         {
@@ -347,7 +347,7 @@ public class DigestSigner
     }
 
     static public class RIPEMD256
-        extends DigestSigner
+        extends DigestSignatureSpi
     {
         public RIPEMD256()
         {
@@ -356,7 +356,7 @@ public class DigestSigner
     }
 
     static public class noneRSA
-        extends DigestSigner
+        extends DigestSignatureSpi
     {
         public noneRSA()
         {

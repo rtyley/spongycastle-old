@@ -3,13 +3,13 @@ package org.bouncycastle.asn1.x9;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.math.ec.ECCurve;
 
@@ -49,7 +49,7 @@ public class X9Curve
         fieldIdentifier = fieldID.getIdentifier();
         if (fieldIdentifier.equals(prime_field))
         {
-            BigInteger      p = ((DERInteger)fieldID.getParameters()).getValue();
+            BigInteger      p = ((ASN1Integer)fieldID.getParameters()).getValue();
             X9FieldElement  x9A = new X9FieldElement(p, (ASN1OctetString)seq.getObjectAt(0));
             X9FieldElement  x9B = new X9FieldElement(p, (ASN1OctetString)seq.getObjectAt(1));
             curve = new ECCurve.Fp(p, x9A.getValue().toBigInteger(), x9B.getValue().toBigInteger());
@@ -59,8 +59,8 @@ public class X9Curve
             if (fieldIdentifier.equals(characteristic_two_field)) 
             {
                 // Characteristic two field
-                DERSequence parameters = (DERSequence)fieldID.getParameters();
-                int m = ((DERInteger)parameters.getObjectAt(0)).getValue().
+                ASN1Sequence parameters = ASN1Sequence.getInstance(fieldID.getParameters());
+                int m = ((ASN1Integer)parameters.getObjectAt(0)).getValue().
                     intValue();
                 ASN1ObjectIdentifier representation
                     = (ASN1ObjectIdentifier)parameters.getObjectAt(1);
@@ -71,7 +71,7 @@ public class X9Curve
                 if (representation.equals(tpBasis)) 
                 {
                     // Trinomial basis representation
-                    k1 = ((DERInteger)parameters.getObjectAt(2)).getValue().
+                    k1 = ((ASN1Integer)parameters.getObjectAt(2)).getValue().
                         intValue();
                 }
                 else 
@@ -79,11 +79,11 @@ public class X9Curve
                     // Pentanomial basis representation
                     DERSequence pentanomial
                         = (DERSequence)parameters.getObjectAt(2);
-                    k1 = ((DERInteger)pentanomial.getObjectAt(0)).getValue().
+                    k1 = ((ASN1Integer)pentanomial.getObjectAt(0)).getValue().
                         intValue();
-                    k2 = ((DERInteger)pentanomial.getObjectAt(1)).getValue().
+                    k2 = ((ASN1Integer)pentanomial.getObjectAt(1)).getValue().
                         intValue();
-                    k3 = ((DERInteger)pentanomial.getObjectAt(2)).getValue().
+                    k3 = ((ASN1Integer)pentanomial.getObjectAt(2)).getValue().
                         intValue();
                 }
                 X9FieldElement x9A = new X9FieldElement(m, k1, k2, k3, (ASN1OctetString)seq.getObjectAt(0));

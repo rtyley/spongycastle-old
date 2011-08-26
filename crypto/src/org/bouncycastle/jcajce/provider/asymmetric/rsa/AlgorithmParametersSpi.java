@@ -1,13 +1,11 @@
 package org.bouncycastle.jcajce.provider.asymmetric.rsa;
 
 import java.io.IOException;
-import java.security.AlgorithmParametersSpi;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 
@@ -20,10 +18,9 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSAESOAEPparams;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.util.Arrays;
 
-public abstract class AlgorithmParameters
-    extends AlgorithmParametersSpi
+public abstract class AlgorithmParametersSpi
+    extends java.security.AlgorithmParametersSpi
 {
     protected boolean isASN1FormatString(String format)
     {
@@ -45,114 +42,8 @@ public abstract class AlgorithmParameters
     protected abstract AlgorithmParameterSpec localEngineGetParameterSpec(Class paramSpec)
         throws InvalidParameterSpecException;
 
-    public static class IVAlgorithmParameters
-        extends AlgorithmParameters
-    {
-        private byte[]  iv;
-
-        protected byte[] engineGetEncoded() 
-            throws IOException
-        {
-            return engineGetEncoded("ASN.1");
-        }
-
-        protected byte[] engineGetEncoded(
-            String format)
-            throws IOException
-        {
-            if (isASN1FormatString(format))
-            {
-                 return new DEROctetString(engineGetEncoded("RAW")).getEncoded();
-            }
-            
-            if (format.equals("RAW"))
-            {
-                return Arrays.clone(iv);
-            }
-
-            return null;
-        }
-
-        protected AlgorithmParameterSpec localEngineGetParameterSpec(
-            Class paramSpec)
-            throws InvalidParameterSpecException
-        {
-            if (paramSpec == IvParameterSpec.class)
-            {
-                return new IvParameterSpec(iv);
-            }
-
-            throw new InvalidParameterSpecException("unknown parameter spec passed to IV parameters object.");
-        }
-
-        protected void engineInit(
-            AlgorithmParameterSpec paramSpec)
-            throws InvalidParameterSpecException
-        {
-            if (!(paramSpec instanceof IvParameterSpec))
-            {
-                throw new InvalidParameterSpecException("IvParameterSpec required to initialise a IV parameters algorithm parameters object");
-            }
-
-            this.iv = ((IvParameterSpec)paramSpec).getIV();
-        }
-
-        protected void engineInit(
-            byte[] params) 
-            throws IOException
-        {
-            //
-            // check that we don't have a DER encoded octet string
-            //
-            if ((params.length % 8) != 0
-                    && params[0] == 0x04 && params[1] == params.length - 2)
-            {
-                ASN1OctetString oct = ASN1OctetString.getInstance(params);
-
-                params = oct.getOctets();
-            }
-
-            this.iv = Arrays.clone(params);
-        }
-
-        protected void engineInit(
-            byte[] params,
-            String format)
-            throws IOException
-        {
-            if (isASN1FormatString(format))
-            {
-                try
-                {
-                    ASN1OctetString oct = ASN1OctetString.getInstance(params);
-
-                    engineInit(oct.getOctets());
-                }
-                catch (Exception e)
-                {
-                    throw new IOException("Exception decoding: " + e);
-                }
-                
-                return;
-            }
-
-            if (format.equals("RAW"))
-            {
-                engineInit(params);
-                return;
-            }
-
-            throw new IOException("Unknown parameters format in IV parameters object");
-        }
-
-        protected String engineToString()
-        {
-            return "IV Parameters";
-        }
-    }
-
     public static class OAEP
-        extends AlgorithmParameters
+        extends AlgorithmParametersSpi
     {
         OAEPParameterSpec currentSpec;
     
@@ -265,7 +156,7 @@ public abstract class AlgorithmParameters
     }
     
     public static class PSS
-        extends AlgorithmParameters
+        extends AlgorithmParametersSpi
     {  
         PSSParameterSpec currentSpec;
     

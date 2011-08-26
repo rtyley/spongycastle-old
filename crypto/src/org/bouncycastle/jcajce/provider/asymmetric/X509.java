@@ -27,9 +27,15 @@ public class X509
     {
         SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(keySpec.getEncoded());
 
-        BCKeyFactory keyFact = (BCKeyFactory)keyFactories.get(info.getAlgorithm().getAlgorithm());
+        return getPublicKey(info);
+    }
 
-        return keyFact.generatePublic(info);
+    public static PublicKey getPublicKey(SubjectPublicKeyInfo keyInfo)
+        throws IOException
+    {
+        BCKeyFactory keyFact = (BCKeyFactory)keyFactories.get(keyInfo.getAlgorithm().getAlgorithm());
+
+        return keyFact.generatePublic(keyInfo);
     }
 
     public static BCKeyFactory getKeyFactory(ASN1ObjectIdentifier algorithm)

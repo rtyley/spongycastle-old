@@ -6,18 +6,21 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.KeyFactory;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.KeyFactorySpi;
 import org.bouncycastle.jcajce.provider.asymmetric.rsa.RSAUtil;
+import org.bouncycastle.jcajce.provider.asymmetric.util.BCKeyFactory;
 
 public class RSA
 {
+    private static final String PREFIX = RSA.class.getPackage().getName() + ".rsa.";
+
     public static class Mappings
         extends HashMap
     {
         public Mappings()
         {
-            put("AlgorithmParameters.OAEP", "org.bouncycastle.jcajce.provider.asymmetric.rsa.AlgorithmParameters$OAEP");
-            put("AlgorithmParameters.PSS", "org.bouncycastle.jcajce.provider.asymmetric.rsa.AlgorithmParameters$PSS");
+            put("AlgorithmParameters.OAEP", PREFIX + "AlgorithmParametersSpi$OAEP");
+            put("AlgorithmParameters.PSS", PREFIX + "AlgorithmParametersSpi$PSS");
 
             put("Alg.Alias.AlgorithmParameters." + PKCSObjectIdentifiers.id_RSAES_OAEP, "OAEP");
 
@@ -39,16 +42,16 @@ public class RSA
             put("Alg.Alias.AlgorithmParameters.NONEWITHRSASSA-PSS", "PSS");
             put("Alg.Alias.AlgorithmParameters.NONEWITHRSAANDMGF1", "PSS");
 
-            put("Cipher.RSA", "org.bouncycastle.jcajce.provider.asymmetric.rsa.Cipher$NoPadding");
-            put("Cipher.RSA/RAW", "org.bouncycastle.jcajce.provider.asymmetric.rsa.Cipher$NoPadding");
-            put("Cipher.RSA/PKCS1", "org.bouncycastle.jcajce.provider.asymmetric.rsa.Cipher$PKCS1v1_5Padding");
-            put("Cipher.1.2.840.113549.1.1.1", "org.bouncycastle.jcajce.provider.asymmetric.rsa.Cipher$PKCS1v1_5Padding");
-            put("Cipher.2.5.8.1.1", "org.bouncycastle.jcajce.provider.asymmetric.rsa.Cipher$PKCS1v1_5Padding");
-            put("Cipher.RSA/1", "org.bouncycastle.jcajce.provider.asymmetric.rsa.Cipher$PKCS1v1_5Padding_PrivateOnly");
-            put("Cipher.RSA/2", "org.bouncycastle.jcajce.provider.asymmetric.rsa.Cipher$PKCS1v1_5Padding_PublicOnly");
-            put("Cipher.RSA/OAEP", "org.bouncycastle.jcajce.provider.asymmetric.rsa.Cipher$OAEPPadding");
-            put("Cipher." + PKCSObjectIdentifiers.id_RSAES_OAEP, "org.bouncycastle.jcajce.provider.asymmetric.rsa.Cipher$OAEPPadding");
-            put("Cipher.RSA/ISO9796-1", "org.bouncycastle.jcajce.provider.asymmetric.rsa.Cipher$ISO9796d1Padding");
+            put("Cipher.RSA", PREFIX + "CipherSpi$NoPadding");
+            put("Cipher.RSA/RAW", PREFIX + "CipherSpi$NoPadding");
+            put("Cipher.RSA/PKCS1", PREFIX + "CipherSpi$PKCS1v1_5Padding");
+            put("Cipher.1.2.840.113549.1.1.1", PREFIX + "CipherSpi$PKCS1v1_5Padding");
+            put("Cipher.2.5.8.1.1", PREFIX + "CipherSpi$PKCS1v1_5Padding");
+            put("Cipher.RSA/1", PREFIX + "CipherSpi$PKCS1v1_5Padding_PrivateOnly");
+            put("Cipher.RSA/2", PREFIX + "CipherSpi$PKCS1v1_5Padding_PublicOnly");
+            put("Cipher.RSA/OAEP", PREFIX + "Cipher$OAEPPadding");
+            put("Cipher." + PKCSObjectIdentifiers.id_RSAES_OAEP, PREFIX + "CipherSpi$OAEPPadding");
+            put("Cipher.RSA/ISO9796-1", PREFIX + "CipherSpi$ISO9796d1Padding");
 
             put("Alg.Alias.Cipher.RSA//RAW", "RSA");
             put("Alg.Alias.Cipher.RSA//NOPADDING", "RSA");
@@ -56,33 +59,35 @@ public class RSA
             put("Alg.Alias.Cipher.RSA//OAEPPADDING", "RSA/OAEP");
             put("Alg.Alias.Cipher.RSA//ISO9796-1PADDING", "RSA/ISO9796-1");
 
-            put("KeyFactory.RSA", "org.bouncycastle.jcajce.provider.asymmetric.rsa.KeyFactory");
+            BCKeyFactory keyFact = new KeyFactorySpi();
+
+            put("KeyFactory.RSA", PREFIX + "KeyFactorySpi");
             for (int i = 0; i != RSAUtil.rsaOids.length; i++)
             {
-                addKeyFactory(RSAUtil.rsaOids[i]);
+                addKeyFactory(RSAUtil.rsaOids[i], keyFact);
             }
 
-            put("KeyPairGenerator.RSA", "org.bouncycastle.jcajce.provider.asymmetric.rsa.KeyPairGenerator");
+            put("KeyPairGenerator.RSA", PREFIX + "KeyPairGeneratorSpi");
             for (int i = 0; i != RSAUtil.rsaOids.length; i++)
             {
                 addKeyPairGenerator(RSAUtil.rsaOids[i]);
             }
 
-            put("Signature.SHA1withRSA/ISO9796-2", "org.bouncycastle.jcajce.provider.asymmetric.rsa.ISOSignature$SHA1WithRSAEncryption");
-            put("Signature.MD5withRSA/ISO9796-2", "org.bouncycastle.jcajce.provider.asymmetric.rsa.ISOSignature$MD5WithRSAEncryption");
-            put("Signature.RIPEMD160withRSA/ISO9796-2", "org.bouncycastle.jcajce.provider.asymmetric.rsa.ISOSignature$RIPEMD160WithRSAEncryption");
+            put("Signature.SHA1withRSA/ISO9796-2", PREFIX + "ISOSignatureSpi$SHA1WithRSAEncryption");
+            put("Signature.MD5withRSA/ISO9796-2", PREFIX + "ISOSignatureSpi$MD5WithRSAEncryption");
+            put("Signature.RIPEMD160withRSA/ISO9796-2", PREFIX + "ISOSignatureSpi$RIPEMD160WithRSAEncryption");
 
-            put("Signature.RSASSA-PSS", "org.bouncycastle.jcajce.provider.asymmetric.rsa.PSSSigner$PSSwithRSA");
-            put("Signature." + PKCSObjectIdentifiers.id_RSASSA_PSS, "org.bouncycastle.jcajce.provider.asymmetric.rsa.PSSSigner$PSSwithRSA");
-            put("Signature.OID." + PKCSObjectIdentifiers.id_RSASSA_PSS, "org.bouncycastle.jcajce.provider.asymmetric.rsa.PSSSigner$PSSwithRSA");
-            put("Signature.SHA1withRSA/PSS", "org.bouncycastle.jcajce.provider.asymmetric.rsa.PSSSigner$SHA1withRSA");
-            put("Signature.SHA224withRSA/PSS", "org.bouncycastle.jcajce.provider.asymmetric.rsa.PSSSigner$SHA224withRSA");
-            put("Signature.SHA256withRSA/PSS", "org.bouncycastle.jcajce.provider.asymmetric.rsa.PSSSigner$SHA256withRSA");
-            put("Signature.SHA384withRSA/PSS", "org.bouncycastle.jcajce.provider.asymmetric.rsa.PSSSigner$SHA384withRSA");
-            put("Signature.SHA512withRSA/PSS", "org.bouncycastle.jcajce.provider.asymmetric.rsa.PSSSigner$SHA512withRSA");
+            put("Signature.RSASSA-PSS", PREFIX + "PSSSignatureSpi$PSSwithRSA");
+            put("Signature." + PKCSObjectIdentifiers.id_RSASSA_PSS, PREFIX + "PSSSignatureSpi$PSSwithRSA");
+            put("Signature.OID." + PKCSObjectIdentifiers.id_RSASSA_PSS, PREFIX + "PSSSignatureSpi$PSSwithRSA");
+            put("Signature.SHA1withRSA/PSS", PREFIX + "PSSSignatureSpi$SHA1withRSA");
+            put("Signature.SHA224withRSA/PSS", PREFIX + "PSSSignatureSpi$SHA224withRSA");
+            put("Signature.SHA256withRSA/PSS", PREFIX + "PSSSignatureSpi$SHA256withRSA");
+            put("Signature.SHA384withRSA/PSS", PREFIX + "PSSSignatureSpi$SHA384withRSA");
+            put("Signature.SHA512withRSA/PSS", PREFIX + "PSSSignatureSpi$SHA512withRSA");
 
-            put("Signature.RSA", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$noneRSA");
-            put("Signature.RAWRSASSA-PSS", "org.bouncycastle.jcajce.provider.asymmetric.rsa.PSSSigner$nonePSS");
+            put("Signature.RSA", PREFIX + "DigestSignatureSpi$noneRSA");
+            put("Signature.RAWRSASSA-PSS", PREFIX + "PSSSignatureSpi$nonePSS");
 
             put("Alg.Alias.Signature.RAWRSA", "RSA");
             put("Alg.Alias.Signature.NONEWITHRSA", "RSA");
@@ -105,26 +110,26 @@ public class RSA
             put("Alg.Alias.Signature.1.3.36.3.3.1.3", "RIPEMD128WithRSAEncryption");
             put("Alg.Alias.Signature.1.3.36.3.3.1.4", "RIPEMD256WithRSAEncryption");
 
-            addDigestSignature("MD2", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$MD2", PKCSObjectIdentifiers.md2WithRSAEncryption);
-            addDigestSignature("MD4", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$MD4", PKCSObjectIdentifiers.md4WithRSAEncryption);
-            addDigestSignature("MD5", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$MD5", PKCSObjectIdentifiers.md5WithRSAEncryption);
-            addDigestSignature("SHA1", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$SHA1", PKCSObjectIdentifiers.sha1WithRSAEncryption);
+            addDigestSignature("MD2", PREFIX + "DigestSignatureSpi$MD2", PKCSObjectIdentifiers.md2WithRSAEncryption);
+            addDigestSignature("MD4", PREFIX + "DigestSignatureSpi$MD4", PKCSObjectIdentifiers.md4WithRSAEncryption);
+            addDigestSignature("MD5", PREFIX + "DigestSignatureSpi$MD5", PKCSObjectIdentifiers.md5WithRSAEncryption);
+            addDigestSignature("SHA1", PREFIX + "DigestSignatureSpi$SHA1", PKCSObjectIdentifiers.sha1WithRSAEncryption);
 
             put("Alg.Alias.Signature." + OIWObjectIdentifiers.sha1WithRSA, "SHA1WITHRSA");
             put("Alg.Alias.Signature.OID." + OIWObjectIdentifiers.sha1WithRSA, "SHA1WITHRSA");
 
-            addDigestSignature("SHA224", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$SHA224", PKCSObjectIdentifiers.sha224WithRSAEncryption);
-            addDigestSignature("SHA256", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$SHA256", PKCSObjectIdentifiers.sha256WithRSAEncryption);
-            addDigestSignature("SHA384", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$SHA384", PKCSObjectIdentifiers.sha384WithRSAEncryption);
-            addDigestSignature("SHA512", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$SHA512", PKCSObjectIdentifiers.sha512WithRSAEncryption);
+            addDigestSignature("SHA224", PREFIX + "DigestSignatureSpi$SHA224", PKCSObjectIdentifiers.sha224WithRSAEncryption);
+            addDigestSignature("SHA256", PREFIX + "DigestSignatureSpi$SHA256", PKCSObjectIdentifiers.sha256WithRSAEncryption);
+            addDigestSignature("SHA384", PREFIX + "DigestSignatureSpi$SHA384", PKCSObjectIdentifiers.sha384WithRSAEncryption);
+            addDigestSignature("SHA512", PREFIX + "DigestSignatureSpi$SHA512", PKCSObjectIdentifiers.sha512WithRSAEncryption);
 
-            addDigestSignature("RIPEMD128", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$RIPEMD128", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
-            addDigestSignature("RIPEMD160", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$RIPEMD160", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
-            addDigestSignature("RIPEMD256", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$RIPEMD256", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
+            addDigestSignature("RIPEMD128", PREFIX + "DigestSignatureSpi$RIPEMD128", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
+            addDigestSignature("RIPEMD160", PREFIX + "DigestSignatureSpi$RIPEMD160", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
+            addDigestSignature("RIPEMD256", PREFIX + "DigestSignatureSpi$RIPEMD256", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
 
-            addDigestSignature("RMD128", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$RIPEMD128", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
-            addDigestSignature("RMD160", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$RIPEMD160", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
-            addDigestSignature("RMD256", "org.bouncycastle.jcajce.provider.asymmetric.rsa.DigestSigner$RIPEMD256", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
+            addDigestSignature("RMD128", PREFIX + "DigestSignatureSpi$RIPEMD128", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
+            addDigestSignature("RMD160", PREFIX + "DigestSignatureSpi$RIPEMD160", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
+            addDigestSignature("RMD256", PREFIX + "DigestSignatureSpi$RIPEMD256", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
         }
 
         private void addDigestSignature(
@@ -151,10 +156,10 @@ public class RSA
             put("Alg.Alias.Signature.OID." + oid, mainName);
         }
 
-        private void addKeyFactory(ASN1ObjectIdentifier oid)
+        private void addKeyFactory(ASN1ObjectIdentifier oid, BCKeyFactory keyFactory)
         {
             put("Alg.Alias.KeyFactory." + oid, "RSA");
-            X509.registerKeyFactory(oid, new KeyFactory());
+            X509.registerKeyFactory(oid, keyFactory);
         }
 
         private void addKeyPairGenerator(ASN1ObjectIdentifier oid)

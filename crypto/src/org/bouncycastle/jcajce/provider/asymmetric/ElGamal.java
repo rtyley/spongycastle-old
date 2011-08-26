@@ -3,7 +3,7 @@ package org.bouncycastle.jcajce.provider.asymmetric;
 import java.util.HashMap;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.KeyFactory;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.KeyFactorySpi;
 
 public class ElGamal
 {
@@ -22,7 +22,7 @@ public class ElGamal
         private void addKeyFactory(ASN1ObjectIdentifier oid)
         {
             put("Alg.Alias.KeyFactory." + oid, "ELGAMAL");
-            X509.registerKeyFactory(oid, new KeyFactory());
+            X509.registerKeyFactory(oid, new KeyFactorySpi());
         }
 
         private void addKeyPairGenerator(ASN1ObjectIdentifier oid)

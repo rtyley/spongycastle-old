@@ -52,6 +52,7 @@ import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.jcajce.provider.asymmetric.X509;
 import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
@@ -534,7 +535,14 @@ public class X509CertificateObject
 
     public PublicKey getPublicKey()
     {
-        return JDKKeyFactory.createPublicKeyFromPublicKeyInfo(c.getSubjectPublicKeyInfo());
+        try
+        {
+            return X509.getPublicKey(c.getSubjectPublicKeyInfo());
+        }
+        catch (IOException e)
+        {
+            return null;   // should never happen...
+        }
     }
 
     public byte[] getEncoded()

@@ -13,10 +13,10 @@ import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 
-public class KeyPairGenerator
+public class KeyPairGeneratorSpi
     extends java.security.KeyPairGenerator
 {
-    public KeyPairGenerator(
+    public KeyPairGeneratorSpi(
         String algorithmName)
     {
         super(algorithmName);
@@ -28,7 +28,7 @@ public class KeyPairGenerator
     RSAKeyGenerationParameters param;
     RSAKeyPairGenerator engine;
 
-    public KeyPairGenerator()
+    public KeyPairGeneratorSpi()
     {
         super("RSA");
 

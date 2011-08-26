@@ -23,7 +23,7 @@ import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-public class PSSSigner
+public class PSSSignatureSpi
     extends SignatureSpi
 {
     private AlgorithmParameters engineParams;
@@ -62,7 +62,7 @@ public class PSSSigner
     }
 
     // care - this constructor is actually used by outside organisations
-    protected PSSSigner(
+    protected PSSSignatureSpi(
         AsymmetricBlockCipher signer,
         PSSParameterSpec paramSpecArg)
     {
@@ -70,7 +70,7 @@ public class PSSSigner
     }
 
     // care - this constructor is actually used by outside organisations
-    protected PSSSigner(
+    protected PSSSignatureSpi(
         AsymmetricBlockCipher signer,
         PSSParameterSpec baseParamSpec,
         boolean isRaw)
@@ -263,7 +263,7 @@ public class PSSSigner
     }
 
     static public class nonePSS
-        extends PSSSigner
+        extends PSSSignatureSpi
     {
         public nonePSS()
         {
@@ -272,7 +272,7 @@ public class PSSSigner
     }
 
     static public class PSSwithRSA
-        extends PSSSigner
+        extends PSSSignatureSpi
     {
         public PSSwithRSA()
         {
@@ -281,7 +281,7 @@ public class PSSSigner
     }
     
     static public class SHA1withRSA
-        extends PSSSigner
+        extends PSSSignatureSpi
     {
         public SHA1withRSA()
         {
@@ -290,7 +290,7 @@ public class PSSSigner
     }
 
     static public class SHA224withRSA
-        extends PSSSigner
+        extends PSSSignatureSpi
     {
         public SHA224withRSA()
         {
@@ -299,7 +299,7 @@ public class PSSSigner
     }
     
     static public class SHA256withRSA
-        extends PSSSigner
+        extends PSSSignatureSpi
     {
         public SHA256withRSA()
         {
@@ -308,7 +308,7 @@ public class PSSSigner
     }
 
     static public class SHA384withRSA
-        extends PSSSigner
+        extends PSSSignatureSpi
     {
         public SHA384withRSA()
         {
@@ -317,7 +317,7 @@ public class PSSSigner
     }
 
     static public class SHA512withRSA
-        extends PSSSigner
+        extends PSSSignatureSpi
     {
         public SHA512withRSA()
         {

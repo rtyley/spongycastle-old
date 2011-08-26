@@ -18,12 +18,12 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.signers.ISO9796d2Signer;
 
-public class ISOSignature
+public class ISOSignatureSpi
     extends SignatureSpi
 {
     private ISO9796d2Signer signer;
 
-    protected ISOSignature(
+    protected ISOSignatureSpi(
         Digest digest,
         AsymmetricBlockCipher cipher)
     {
@@ -114,7 +114,7 @@ public class ISOSignature
     }
 
     static public class SHA1WithRSAEncryption
-        extends ISOSignature
+        extends ISOSignatureSpi
     {
         public SHA1WithRSAEncryption()
         {
@@ -123,7 +123,7 @@ public class ISOSignature
     }
 
     static public class MD5WithRSAEncryption
-        extends ISOSignature
+        extends ISOSignatureSpi
     {
         public MD5WithRSAEncryption()
         {
@@ -132,7 +132,7 @@ public class ISOSignature
     }
 
     static public class RIPEMD160WithRSAEncryption
-        extends ISOSignature
+        extends ISOSignatureSpi
     {
         public RIPEMD160WithRSAEncryption()
         {
