@@ -829,7 +829,7 @@ public class JDKPKCS12KeyStore
                 }
                 else if (c[i].getContentType().equals(encryptedData))
                 {
-                    EncryptedData d = new EncryptedData((ASN1Sequence)c[i].getContent());
+                    EncryptedData d = EncryptedData.getInstance(c[i].getContent());
                     byte[] octets = cryptData(false, d.getEncryptionAlgorithm(),
                         password, wrongPKCS12Zero, d.getContent().getOctets());
                     ASN1Sequence seq = (ASN1Sequence) ASN1Primitive.fromByteArray(octets);

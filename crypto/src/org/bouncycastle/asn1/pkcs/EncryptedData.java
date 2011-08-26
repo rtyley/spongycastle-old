@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.pkcs;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -9,7 +10,6 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.BERTaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
@@ -35,7 +35,7 @@ public class EncryptedData
     extends ASN1Object
 {
     ASN1Sequence                data;
-    ASN1ObjectIdentifier         bagId;
+    ASN1ObjectIdentifier bagId;
     ASN1Primitive bagValue;
 
     public static EncryptedData getInstance(
@@ -45,18 +45,19 @@ public class EncryptedData
          {
              return (EncryptedData)obj;
          }
-         else if (obj instanceof ASN1Sequence)
+
+         if (obj != null)
          {
-             return new EncryptedData((ASN1Sequence)obj);
+             return new EncryptedData(ASN1Sequence.getInstance(obj));
          }
 
-         throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+         return null;
     }
      
-    public EncryptedData(
+    private EncryptedData(
         ASN1Sequence seq)
     {
-        int version = ((DERInteger)seq.getObjectAt(0)).getValue().intValue();
+        int version = ((ASN1Integer)seq.getObjectAt(0)).getValue().intValue();
 
         if (version != 0)
         {
@@ -67,9 +68,9 @@ public class EncryptedData
     }
 
     public EncryptedData(
-        ASN1ObjectIdentifier     contentType,
+        ASN1ObjectIdentifier contentType,
         AlgorithmIdentifier     encryptionAlgorithm,
-        ASN1Encodable            content)
+        ASN1Encodable content)
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
@@ -104,9 +105,9 @@ public class EncryptedData
 
     public ASN1Primitive toASN1Primitive()
     {
-        ASN1EncodableVector  v = new ASN1EncodableVector();
+        ASN1EncodableVector v = new ASN1EncodableVector();
 
-        v.add(new DERInteger(0));
+        v.add(new ASN1Integer(0));
         v.add(data);
 
         return new BERSequence(v);

@@ -970,7 +970,7 @@ public class PKCS12StoreTest
         // check the key encryption
 
         // check the certificate encryption
-        EncryptedData cb = new EncryptedData((ASN1Sequence)c2.getContent());
+        EncryptedData cb = EncryptedData.getInstance(c2.getContent());
 
         if (type.endsWith("3DES"))
         {
