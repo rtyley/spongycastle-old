@@ -482,8 +482,7 @@ public class CMSSignedDataGenerator
      */
     public CMSSignedData generate(
         String                  eContentType,
-        // FIXME Avoid accessing more than once to support CMSProcessableInputStream
-        final CMSProcessable          content,
+        final CMSProcessable    content,
         boolean                 encapsulate,
         Provider                sigProvider,
         boolean                 addDefaultAttributes)
@@ -601,6 +600,7 @@ public class CMSSignedDataGenerator
     }
 
     public CMSSignedData generate(
+        // FIXME Avoid accessing more than once to support CMSProcessableInputStream
         CMSTypedData content,
         boolean encapsulate)
         throws CMSException
