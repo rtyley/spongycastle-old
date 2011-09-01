@@ -10,7 +10,6 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
@@ -84,7 +83,7 @@ public class PublicKeyFactory
      */
     public static AsymmetricKeyParameter createKey(SubjectPublicKeyInfo keyInfo) throws IOException
     {
-        AlgorithmIdentifier algId = keyInfo.getAlgorithmId();
+        AlgorithmIdentifier algId = keyInfo.getAlgorithm();
 
         if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.rsaEncryption)
             || algId.getAlgorithm().equals(X509ObjectIdentifiers.id_ea_rsa))
@@ -100,7 +99,7 @@ public class PublicKeyFactory
 
             BigInteger y = dhPublicKey.getY().getValue();
 
-            DHDomainParameters dhParams = DHDomainParameters.getInstance(keyInfo.getAlgorithmId().getParameters());
+            DHDomainParameters dhParams = DHDomainParameters.getInstance(algId.getParameters());
 
             BigInteger p = dhParams.getP().getValue();
             BigInteger g = dhParams.getG().getValue();
@@ -128,8 +127,7 @@ public class PublicKeyFactory
         }
         else if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {
-            DHParameter params = DHParameter.getInstance(
-                keyInfo.getAlgorithmId().getParameters());
+            DHParameter params = DHParameter.getInstance(algId.getParameters());
             DERInteger derY = (DERInteger)keyInfo.parsePublicKey();
 
             BigInteger lVal = params.getL();
@@ -140,8 +138,7 @@ public class PublicKeyFactory
         }
         else if (algId.getAlgorithm().equals(OIWObjectIdentifiers.elGamalAlgorithm))
         {
-            ElGamalParameter params = new ElGamalParameter(
-                (ASN1Sequence)keyInfo.getAlgorithmId().getParameters());
+            ElGamalParameter params = new ElGamalParameter((ASN1Sequence)algId.getParameters());
             DERInteger derY = (DERInteger)keyInfo.parsePublicKey();
 
             return new ElGamalPublicKeyParameters(derY.getValue(), new ElGamalParameters(
@@ -151,7 +148,7 @@ public class PublicKeyFactory
             || algId.getAlgorithm().equals(OIWObjectIdentifiers.dsaWithSHA1))
         {
             DERInteger derY = (DERInteger)keyInfo.parsePublicKey();
-            ASN1Encodable de = keyInfo.getAlgorithmId().getParameters();
+            ASN1Encodable de = algId.getParameters();
 
             DSAParameters parameters = null;
             if (de != null)
@@ -165,44 +162,41 @@ public class PublicKeyFactory
         else if (algId.getAlgorithm().equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
             X962Parameters params = new X962Parameters(
-                (ASN1Primitive)keyInfo.getAlgorithmId().getParameters());
-            ECDomainParameters dParams = null;
+                (ASN1Primitive)algId.getParameters());
 
+            X9ECParameters x9;
             if (params.isNamedCurve())
             {
                 ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)params.getParameters();
-                X9ECParameters ecP = X962NamedCurves.getByOID(oid);
+                x9 = X962NamedCurves.getByOID(oid);
 
-                if (ecP == null)
+                if (x9 == null)
                 {
-                    ecP = SECNamedCurves.getByOID(oid);
+                    x9 = SECNamedCurves.getByOID(oid);
 
-                    if (ecP == null)
+                    if (x9 == null)
                     {
-                        ecP = NISTNamedCurves.getByOID(oid);
+                        x9 = NISTNamedCurves.getByOID(oid);
 
-                        if (ecP == null)
+                        if (x9 == null)
                         {
-                            ecP = TeleTrusTNamedCurves.getByOID(oid);
+                            x9 = TeleTrusTNamedCurves.getByOID(oid);
                         }
                     }
                 }
-
-                dParams = new ECDomainParameters(ecP.getCurve(), ecP.getG(), ecP.getN(),
-                    ecP.getH(), ecP.getSeed());
             }
             else
             {
-                X9ECParameters ecP = X9ECParameters.getInstance(params.getParameters());
-                dParams = new ECDomainParameters(ecP.getCurve(), ecP.getG(), ecP.getN(),
-                    ecP.getH(), ecP.getSeed());
+                x9 = X9ECParameters.getInstance(params.getParameters());
             }
 
-            DERBitString bits = keyInfo.getPublicKeyData();
-            byte[] data = bits.getBytes();
-            ASN1OctetString key = new DEROctetString(data);
+            ASN1OctetString key = new DEROctetString(keyInfo.getPublicKeyData().getBytes());
+            X9ECPoint derQ = new X9ECPoint(x9.getCurve(), key);
 
-            X9ECPoint derQ = new X9ECPoint(dParams.getCurve(), key);
+            // TODO We lose any named parameters here
+            
+            ECDomainParameters dParams = new ECDomainParameters(
+                    x9.getCurve(), x9.getG(), x9.getN(), x9.getH(), x9.getSeed());
 
             return new ECPublicKeyParameters(derQ.getPoint(), dParams);
         }
