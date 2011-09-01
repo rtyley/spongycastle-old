@@ -12,9 +12,10 @@ import org.bouncycastle.crypto.params.IESParameters;
 import org.bouncycastle.crypto.params.IESWithCipherParameters;
 import org.bouncycastle.crypto.params.KDFParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.util.BigIntegers;
 
 /**
- * support class for constructing intergrated encryption ciphers
+ * support class for constructing integrated encryption ciphers
  * for doing basic message exchanges on top of key agreement ciphers
  */
 public class IESEngine
@@ -243,31 +244,13 @@ public class IESEngine
     {
         agree.init(privParam);
 
-        BigInteger  z = agree.calculateAgreement(pubParam);
+        BigInteger z = agree.calculateAgreement(pubParam);
 
-        if (forEncryption)
-        {
-            return encryptBlock(in, inOff, inLen, convert(z));
-        }
-        else
-        {
-            return decryptBlock(in, inOff, inLen, convert(z));
-        }
-    }
+		// TODO Is a fixed length result expected?
+        byte[] zBytes = BigIntegers.asUnsignedByteArray(z);
 
-    private byte[] convert(BigInteger v)
-    {
-        byte[] bytes = v.toByteArray();
-
-        if (bytes[0] == 0) // added sign byte
-        {
-            byte[] tmp = new byte[bytes.length - 1];
-
-            System.arraycopy(bytes, 1, tmp, 0, tmp.length);
-
-            return tmp;
-        }
-
-        return bytes;
+        return forEncryption
+			?	encryptBlock(in, inOff, inLen, zBytes)
+            :	decryptBlock(in, inOff, inLen, zBytes);
     }
 }
