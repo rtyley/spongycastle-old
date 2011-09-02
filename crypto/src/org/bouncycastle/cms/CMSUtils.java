@@ -3,7 +3,6 @@ package org.bouncycastle.cms;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.MessageDigest;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.Security;
