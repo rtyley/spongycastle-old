@@ -10,7 +10,6 @@ import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -62,7 +61,6 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 public class CMSSignedDataStreamGenerator
     extends CMSSignedGenerator
 {
-    private List _messageDigests = new ArrayList();
     private int  _bufferSize;
 
     /**
@@ -782,11 +780,8 @@ public class CMSSignedDataStreamGenerator
         // Also send the data to 'dataOutputStream' if necessary
         OutputStream contentStream = CMSUtils.getSafeTeeOutputStream(dataOutputStream, encapStream);
 
-        // Let all the digests see the data as it is written
-        OutputStream digStream = CMSUtils.attachDigestsToOutputStream(_messageDigests, contentStream);
-
         // Let all the signers see the data as it is written
-        OutputStream sigStream = CMSUtils.attachSignersToOutputStream(signerGens, digStream);
+        OutputStream sigStream = CMSUtils.attachSignersToOutputStream(signerGens, contentStream);
 
         return new CmsSignedDataOutputStream(sigStream, eContentType, sGen, sigGen, eiGen);
     }
