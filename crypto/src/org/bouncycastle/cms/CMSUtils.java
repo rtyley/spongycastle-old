@@ -316,22 +316,11 @@ class CMSUtils
     static InputStream attachDigestsToInputStream(Collection digests, InputStream s)
     {
         InputStream result = s;
-        for (Iterator it = digests.iterator(); it.hasNext();)
-        {
-            DigestCalculator digest = (DigestCalculator)it.next();
-            result = new TeeInputStream(result, digest.getOutputStream());
-        }
-        return result;
-    }
-
-    static OutputStream attachDigestsToOutputStream(Collection digests, OutputStream s)
-    {
-        OutputStream result = s;
         Iterator it = digests.iterator();
         while (it.hasNext())
         {
-            MessageDigest digest = (MessageDigest)it.next();
-            result = getSafeTeeOutputStream(result, new DigOutputStream(digest));
+            DigestCalculator digest = (DigestCalculator)it.next();
+            result = new TeeInputStream(result, digest.getOutputStream());
         }
         return result;
     }
