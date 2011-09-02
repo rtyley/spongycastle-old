@@ -18,7 +18,7 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.BEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
@@ -664,25 +664,6 @@ public class CMSSignedDataGenerator
 
         ASN1OctetString octs = null;
 
-        if (encapsulate)
-        {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-
-            if (content != null)
-            {
-                try
-                {
-                    content.write(bOut);
-                }
-                catch (IOException e)
-                {
-                    throw new CMSException("encapsulation error.", e);
-                }
-            }
-
-            octs = new BERConstructedOctetString(bOut.toByteArray());
-        }
-
         if (content != null)
         {
             ByteArrayOutputStream bOut = null;
@@ -710,7 +691,7 @@ public class CMSSignedDataGenerator
 
             if (encapsulate)
             {
-                octs = new BERConstructedOctetString(bOut.toByteArray());
+                octs = new BEROctetString(bOut.toByteArray());
             }
         }
 
