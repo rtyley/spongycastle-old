@@ -402,17 +402,19 @@ public final class TwofishEngine
                     gSBox[i*2+0x200] = gMDS2[(P[P_21][b2] & 0xff) ^ b2(k0)];
                     gSBox[i*2+0x201] = gMDS3[(P[P_31][b3] & 0xff) ^ b3(k0)];
                 break;
-                case 0: /* 256 bits of key */
+                case 0: // 256 bits of key
                     b0 = (P[P_04][b0] & 0xff) ^ b0(k3);
                     b1 = (P[P_14][b1] & 0xff) ^ b1(k3);
                     b2 = (P[P_24][b2] & 0xff) ^ b2(k3);
                     b3 = (P[P_34][b3] & 0xff) ^ b3(k3);
-                case 3: 
+                    // fall through, having pre-processed b[0]..b[3] with k32[3]
+                case 3: // 192 bits of key
                     b0 = (P[P_03][b0] & 0xff) ^ b0(k2);
                     b1 = (P[P_13][b1] & 0xff) ^ b1(k2);
                     b2 = (P[P_23][b2] & 0xff) ^ b2(k2);
                     b3 = (P[P_33][b3] & 0xff) ^ b3(k2);
-                case 2:
+                    // fall through, having pre-processed b[0]..b[3] with k32[2]
+                case 2: // 128 bits of key
                     gSBox[i*2]   = gMDS0[(P[P_01]
                         [(P[P_02][b0] & 0xff) ^ b0(k1)] & 0xff) ^ b0(k0)];
                     gSBox[i*2+1] = gMDS1[(P[P_11]
