@@ -5,7 +5,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
@@ -158,7 +157,7 @@ public class ECUtil
     public static ASN1ObjectIdentifier getNamedCurveOid(
         String name)
     {
-        DERObjectIdentifier oid = X962NamedCurves.getOID(name);
+        ASN1ObjectIdentifier oid = X962NamedCurves.getOID(name);
         
         if (oid == null)
         {
@@ -177,7 +176,7 @@ public class ECUtil
             }
         }
 
-        return new ASN1ObjectIdentifier(oid.getId());
+        return oid;
     }
     
     public static X9ECParameters getNamedCurveByOid(

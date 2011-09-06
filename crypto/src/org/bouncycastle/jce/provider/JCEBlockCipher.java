@@ -28,7 +28,6 @@ import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.DESEngine;
-import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.GOST28147Engine;
 import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
@@ -862,29 +861,7 @@ public class JCEBlockCipher
         }
     }
 
-    /**
-     * PBEWithSHAAnd3-KeyTripleDES-CBC
-     */
-    static public class PBEWithSHAAndDES3Key
-        extends JCEBlockCipher
-    {
-        public PBEWithSHAAndDES3Key()
-        {
-            super(new CBCBlockCipher(new DESedeEngine()));
-        }
-    }
 
-    /**
-     * PBEWithSHAAnd2-KeyTripleDES-CBC
-     */
-    static public class PBEWithSHAAndDES2Key
-        extends JCEBlockCipher
-    {
-        public PBEWithSHAAndDES2Key()
-        {
-            super(new CBCBlockCipher(new DESedeEngine()));
-        }
-    }
 
     /**
      * PBEWithSHAAnd128BitRC2-CBC

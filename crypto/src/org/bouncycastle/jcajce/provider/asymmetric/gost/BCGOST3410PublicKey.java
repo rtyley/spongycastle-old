@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.asymmetric.gost;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -18,44 +18,44 @@ import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeySpec;
 
-public class JDKGOST3410PublicKey
+public class BCGOST3410PublicKey
     implements GOST3410PublicKey
 {
     private BigInteger      y;
     private GOST3410Params  gost3410Spec;
 
-    JDKGOST3410PublicKey(
-        GOST3410PublicKeySpec    spec)
+    BCGOST3410PublicKey(
+        GOST3410PublicKeySpec spec)
     {
         this.y = spec.getY();
         this.gost3410Spec = new GOST3410ParameterSpec(new GOST3410PublicKeyParameterSetSpec(spec.getP(), spec.getQ(), spec.getA()));
     }
 
-    JDKGOST3410PublicKey(
-        GOST3410PublicKey    key)
+    BCGOST3410PublicKey(
+        GOST3410PublicKey key)
     {
         this.y = key.getY();
         this.gost3410Spec = key.getParameters();
     }
 
-    JDKGOST3410PublicKey(
-        GOST3410PublicKeyParameters  params,
-        GOST3410ParameterSpec        spec)
+    BCGOST3410PublicKey(
+        GOST3410PublicKeyParameters params,
+        GOST3410ParameterSpec spec)
     {
         this.y = params.getY();
         this.gost3410Spec = spec;
     }
 
-    JDKGOST3410PublicKey(
-        BigInteger        y,
-        GOST3410ParameterSpec  gost3410Spec)
+    BCGOST3410PublicKey(
+        BigInteger y,
+        GOST3410ParameterSpec gost3410Spec)
     {
         this.y = y;
         this.gost3410Spec = gost3410Spec;
     }
 
-    JDKGOST3410PublicKey(
-        SubjectPublicKeyInfo    info)
+    BCGOST3410PublicKey(
+        SubjectPublicKeyInfo info)
     {
         GOST3410PublicKeyAlgParameters    params = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithmId().getParameters());
         DEROctetString                    derY;
@@ -154,9 +154,9 @@ public class JDKGOST3410PublicKey
     
     public boolean equals(Object o)
     {
-        if (o instanceof JDKGOST3410PublicKey)
+        if (o instanceof BCGOST3410PublicKey)
         {
-            JDKGOST3410PublicKey other = (JDKGOST3410PublicKey)o;
+            BCGOST3410PublicKey other = (BCGOST3410PublicKey)o;
             
             return this.y.equals(other.y) && this.gost3410Spec.equals(other.gost3410Spec);
         }

@@ -15,7 +15,7 @@ import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 
-public class KeyPairGenerator
+public class KeyPairGeneratorSpi
     extends java.security.KeyPairGenerator
 {
     DSAKeyGenerationParameters param;
@@ -25,7 +25,7 @@ public class KeyPairGenerator
     SecureRandom random = new SecureRandom();
     boolean initialised = false;
 
-    public KeyPairGenerator()
+    public KeyPairGeneratorSpi()
     {
         super("DSA");
     }

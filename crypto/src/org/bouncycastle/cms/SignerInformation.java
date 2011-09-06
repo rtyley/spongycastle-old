@@ -311,7 +311,7 @@ public class SignerInformation
     {
         if (signedAttributeSet != null)
         {
-            return signedAttributeSet.getEncoded(ASN1Encoding.DER);
+            return signedAttributeSet.getEncoded();
         }
 
         return null;

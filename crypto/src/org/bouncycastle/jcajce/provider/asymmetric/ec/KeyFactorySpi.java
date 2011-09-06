@@ -9,22 +9,20 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jcajce.provider.asymmetric.util.BCKeyFactory;
-import org.bouncycastle.jce.provider.JDKKeyFactory;
+import org.bouncycastle.jcajce.provider.asymmetric.util.BaseKeyFactorySpi;
 import org.bouncycastle.jce.provider.ProviderUtil;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 
 public class KeyFactorySpi
-    extends JDKKeyFactory
+    extends BaseKeyFactorySpi
     implements BCKeyFactory
 {
     String algorithm;
@@ -56,15 +54,7 @@ public class KeyFactorySpi
         Class    spec)
     throws InvalidKeySpecException
     {
-       if (spec.isAssignableFrom(PKCS8EncodedKeySpec.class) && key.getFormat().equals("PKCS#8"))
-       {
-               return new PKCS8EncodedKeySpec(key.getEncoded());
-       }
-       else if (spec.isAssignableFrom(X509EncodedKeySpec.class) && key.getFormat().equals("X.509"))
-       {
-               return new X509EncodedKeySpec(key.getEncoded());
-       }
-       else if (spec.isAssignableFrom(java.security.spec.ECPublicKeySpec.class) && key instanceof ECPublicKey)
+       if (spec.isAssignableFrom(java.security.spec.ECPublicKeySpec.class) && key instanceof ECPublicKey)
        {
            ECPublicKey k = (ECPublicKey)key;
            if (k.getParams() != null)
@@ -94,28 +84,14 @@ public class KeyFactorySpi
            }
        }
 
-       throw new RuntimeException("not implemented yet " + key + " " + spec);
+       return super.engineGetKeySpec(key, spec);
     }
 
     protected PrivateKey engineGeneratePrivate(
         KeySpec keySpec)
         throws InvalidKeySpecException
     {
-        if (keySpec instanceof PKCS8EncodedKeySpec)
-        {
-            try
-            {
-                BCECPrivateKey key = (BCECPrivateKey)JDKKeyFactory.createPrivateKeyFromDERStream(
-                    ((PKCS8EncodedKeySpec)keySpec).getEncoded());
-
-                return new BCECPrivateKey(algorithm, key);
-            }
-            catch (Exception e)
-            {
-                throw new InvalidKeySpecException(e.toString());
-            }
-        }
-        else if (keySpec instanceof ECPrivateKeySpec)
+        if (keySpec instanceof ECPrivateKeySpec)
         {
             return new BCECPrivateKey(algorithm, (ECPrivateKeySpec)keySpec);
         }
@@ -124,28 +100,14 @@ public class KeyFactorySpi
             return new BCECPrivateKey(algorithm, (java.security.spec.ECPrivateKeySpec)keySpec);
         }
 
-        throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+        return super.engineGeneratePrivate(keySpec);
     }
 
     protected PublicKey engineGeneratePublic(
         KeySpec keySpec)
         throws InvalidKeySpecException
     {
-        if (keySpec instanceof X509EncodedKeySpec)
-        {
-            try
-            {
-                BCECPublicKey key = (BCECPublicKey)JDKKeyFactory.createPublicKeyFromDERStream(
-                    ((X509EncodedKeySpec)keySpec).getEncoded());
-
-                return new BCECPublicKey(algorithm, key);
-            }
-            catch (Exception e)
-            {
-                throw new InvalidKeySpecException(e.toString());
-            }
-        }
-        else if (keySpec instanceof ECPublicKeySpec)
+        if (keySpec instanceof ECPublicKeySpec)
         {
             return new BCECPublicKey(algorithm, (ECPublicKeySpec)keySpec);
         }
@@ -154,7 +116,7 @@ public class KeyFactorySpi
             return new BCECPublicKey(algorithm, (java.security.spec.ECPublicKeySpec)keySpec);
         }
 
-        throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+        return super.engineGeneratePublic(keySpec);
     }
 
     public PrivateKey generatePrivate(PrivateKeyInfo keyInfo)

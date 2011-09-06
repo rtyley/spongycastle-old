@@ -50,7 +50,7 @@ public class WrapTest
         }
         catch (Exception e)
         {
-            return new SimpleTestResult(false, getName() + ": exception - " + e.toString());
+            return new SimpleTestResult(false, getName() + ": exception - " + e.toString(), e);
         }
     }
 
@@ -68,5 +68,9 @@ public class WrapTest
         TestResult      result = test.perform();
 
         System.out.println(result.toString());
+        if (result.getException() != null)
+        {
+            result.getException().printStackTrace();
+        }
     }
 }

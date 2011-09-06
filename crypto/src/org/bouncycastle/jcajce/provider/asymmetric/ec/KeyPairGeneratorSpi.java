@@ -277,15 +277,6 @@ public abstract class KeyPairGeneratorSpi
         }
     }
 
-    public static class ECGOST3410
-        extends EC
-    {
-        public ECGOST3410()
-        {
-            super("ECGOST3410");
-        }
-    }
-
     public static class ECDH
         extends EC
     {

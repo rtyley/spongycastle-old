@@ -2,6 +2,7 @@ package org.bouncycastle.jcajce.provider.symmetric;
 
 import java.util.HashMap;
 
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.engines.RC2WrapEngine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
@@ -59,7 +60,7 @@ public final class RC2
 
             put("Cipher.RC2", PREFIX + "$ECB");
             put("Cipher.RC2WRAP", PREFIX + "$Wrap");
-            put("Cipher.1.2.840.113549.1.9.16.3.7", PREFIX + "$Wrap");
+            put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.id_alg_CMSRC2wrap, "RC2WRAP");
 
             put("Cipher.1.2.840.113549.3.2", PREFIX + "$CBC");
         }

@@ -59,18 +59,14 @@ public class RSA
             put("Alg.Alias.Cipher.RSA//OAEPPADDING", "RSA/OAEP");
             put("Alg.Alias.Cipher.RSA//ISO9796-1PADDING", "RSA/ISO9796-1");
 
+            put("KeyFactory.RSA", PREFIX + "KeyFactorySpi");
+            put("KeyPairGenerator.RSA", PREFIX + "KeyPairGeneratorSpi");
+
             BCKeyFactory keyFact = new KeyFactorySpi();
 
-            put("KeyFactory.RSA", PREFIX + "KeyFactorySpi");
             for (int i = 0; i != RSAUtil.rsaOids.length; i++)
             {
-                addKeyFactory(RSAUtil.rsaOids[i], keyFact);
-            }
-
-            put("KeyPairGenerator.RSA", PREFIX + "KeyPairGeneratorSpi");
-            for (int i = 0; i != RSAUtil.rsaOids.length; i++)
-            {
-                addKeyPairGenerator(RSAUtil.rsaOids[i]);
+                registerOid(RSAUtil.rsaOids[i], keyFact);
             }
 
             put("Signature.SHA1withRSA/ISO9796-2", PREFIX + "ISOSignatureSpi$SHA1WithRSAEncryption");
@@ -156,15 +152,12 @@ public class RSA
             put("Alg.Alias.Signature.OID." + oid, mainName);
         }
 
-        private void addKeyFactory(ASN1ObjectIdentifier oid, BCKeyFactory keyFactory)
+        private void registerOid(ASN1ObjectIdentifier oid, BCKeyFactory keyFactory)
         {
             put("Alg.Alias.KeyFactory." + oid, "RSA");
-            X509.registerKeyFactory(oid, keyFactory);
-        }
-
-        private void addKeyPairGenerator(ASN1ObjectIdentifier oid)
-        {
             put("Alg.Alias.KeyPairGenerator." + oid, "RSA");
+
+            X509.registerKeyFactory(oid, keyFactory);
         }
     }
 }

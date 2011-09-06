@@ -546,7 +546,7 @@ public class JDKPKCS12KeyStore
         boolean               wrongPKCS12Zero)
         throws IOException
     {
-        String              algorithm = algId.getObjectId().getId();
+        String              algorithm = algId.getAlgorithm().getId();
         PKCS12PBEParams     pbeParams = new PKCS12PBEParams((ASN1Sequence)algId.getParameters());
 
         PBEKeySpec          pbeSpec = new PBEKeySpec(password);

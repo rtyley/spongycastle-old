@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.asymmetric.gost;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -24,7 +24,7 @@ import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.jce.spec.GOST3410PrivateKeySpec;
 import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 
-public class JDKGOST3410PrivateKey
+public class BCGOST3410PrivateKey
     implements GOST3410PrivateKey, PKCS12BagAttributeCarrier
 {
     BigInteger          x;
@@ -32,26 +32,26 @@ public class JDKGOST3410PrivateKey
 
     private PKCS12BagAttributeCarrier attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
-    protected JDKGOST3410PrivateKey()
+    protected BCGOST3410PrivateKey()
     {
     }
 
-    JDKGOST3410PrivateKey(
-        GOST3410PrivateKey    key)
+    BCGOST3410PrivateKey(
+        GOST3410PrivateKey key)
     {
         this.x = key.getX();
         this.gost3410Spec = key.getParameters();
     }
 
-    JDKGOST3410PrivateKey(
-        GOST3410PrivateKeySpec    spec)
+    BCGOST3410PrivateKey(
+        GOST3410PrivateKeySpec spec)
     {
         this.x = spec.getX();
         this.gost3410Spec = new GOST3410ParameterSpec(new GOST3410PublicKeyParameterSetSpec(spec.getP(), spec.getQ(), spec.getA()));
     }
 
-    JDKGOST3410PrivateKey(
-        PrivateKeyInfo  info)
+    BCGOST3410PrivateKey(
+        PrivateKeyInfo info)
         throws IOException
     {
         GOST3410PublicKeyAlgParameters    params = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithmId().getParameters());
@@ -68,9 +68,9 @@ public class JDKGOST3410PrivateKey
         this.gost3410Spec = GOST3410ParameterSpec.fromPublicKeyAlg(params);
     }
 
-    JDKGOST3410PrivateKey(
-        GOST3410PrivateKeyParameters  params,
-        GOST3410ParameterSpec         spec)
+    BCGOST3410PrivateKey(
+        GOST3410PrivateKeyParameters params,
+        GOST3410ParameterSpec spec)
     {
         this.x = params.getX();
         this.gost3410Spec = spec;

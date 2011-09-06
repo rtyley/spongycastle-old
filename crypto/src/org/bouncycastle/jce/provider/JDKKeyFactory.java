@@ -35,8 +35,6 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.spec.GOST3410PrivateKeySpec;
-import org.bouncycastle.jce.spec.GOST3410PublicKeySpec;
 
 public abstract class JDKKeyFactory
     extends KeyFactorySpi
@@ -205,10 +203,6 @@ public abstract class JDKKeyFactory
         {
             return new JCEECPublicKey(info);
         }
-        else if (algOid.equals(CryptoProObjectIdentifiers.gostR3410_94))
-        {
-            return new JDKGOST3410PublicKey(info);
-        }
         else if (algOid.equals(CryptoProObjectIdentifiers.gostR3410_2001))
         {
             return new JCEECPublicKey(info);
@@ -254,10 +248,6 @@ public abstract class JDKKeyFactory
         else if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
               return new JCEECPrivateKey(info);
-        }
-        else if (algOid.equals(CryptoProObjectIdentifiers.gostR3410_94))
-        {
-              return new JDKGOST3410PrivateKey(info);
         }
         else if (algOid.equals(CryptoProObjectIdentifiers.gostR3410_2001))
         {
@@ -327,38 +317,6 @@ public abstract class JDKKeyFactory
             if (keySpec instanceof DSAPublicKeySpec)
             {
                 return new JDKDSAPublicKey((DSAPublicKeySpec)keySpec);
-            }
-
-            return super.engineGeneratePublic(keySpec);
-        }
-    }
-
-    public static class GOST3410
-        extends JDKKeyFactory
-    {
-        public GOST3410()
-        {
-        }
-        
-        protected PrivateKey engineGeneratePrivate(
-                KeySpec    keySpec)
-        throws InvalidKeySpecException
-        {
-            if (keySpec instanceof GOST3410PrivateKeySpec)
-            {
-                return new JDKGOST3410PrivateKey((GOST3410PrivateKeySpec)keySpec);
-            }
-
-            return super.engineGeneratePrivate(keySpec);
-        }
-        
-        protected PublicKey engineGeneratePublic(
-                KeySpec    keySpec)
-        throws InvalidKeySpecException
-        {
-            if (keySpec instanceof GOST3410PublicKeySpec)
-            {
-                return new JDKGOST3410PublicKey((GOST3410PublicKeySpec)keySpec);
             }
 
             return super.engineGeneratePublic(keySpec);

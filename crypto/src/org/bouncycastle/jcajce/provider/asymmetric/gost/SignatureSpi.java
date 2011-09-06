@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.asymmetric.gost;
 
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -6,7 +6,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.SignatureException;
-import java.security.SignatureSpi;
 import java.security.spec.AlgorithmParameterSpec;
 
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -16,27 +15,26 @@ import org.bouncycastle.crypto.DSA;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.GOST3411Digest;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.crypto.signers.ECGOST3410Signer;
 import org.bouncycastle.crypto.signers.GOST3410Signer;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.jce.interfaces.ECKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.GOST3410Key;
+import org.bouncycastle.jce.provider.GOST3410Util;
+import org.bouncycastle.jce.provider.JDKKeyFactory;
 
-public class JDKGOST3410Signer
-    extends SignatureSpi
+public class SignatureSpi
+    extends java.security.SignatureSpi
     implements PKCSObjectIdentifiers, X509ObjectIdentifiers
 {
     private Digest                  digest;
     private DSA                     signer;
     private SecureRandom            random;
 
-    protected JDKGOST3410Signer(
-        Digest digest,
-        DSA signer)
+    public SignatureSpi()
     {
-        this.digest = digest;
-        this.signer = signer;
+        this.digest = new GOST3411Digest();
+        this.signer = new GOST3410Signer();
     }
 
     protected void engineInitVerify(
@@ -226,23 +224,5 @@ public class JDKGOST3410Signer
         String      param)
     {
         throw new UnsupportedOperationException("engineSetParameter unsupported");
-    }
-
-    static public class gost3410
-        extends JDKGOST3410Signer
-    {
-        public gost3410()
-        {
-            super(new GOST3411Digest(), new GOST3410Signer());
-        }
-    }
-    
-    static public class ecgost3410
-        extends JDKGOST3410Signer
-    {
-        public ecgost3410()
-        {
-            super(new GOST3411Digest(), new ECGOST3410Signer());
-        }
     }
 }

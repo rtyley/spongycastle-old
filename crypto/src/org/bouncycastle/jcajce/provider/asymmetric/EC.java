@@ -3,7 +3,6 @@ package org.bouncycastle.jcajce.provider.asymmetric;
 import java.util.HashMap;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
@@ -25,21 +24,16 @@ public class EC
             put("KeyAgreement." + X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, PREFIX + "KeyAgreementSpi$DHwithSHA1KDF");
             put("KeyAgreement." + X9ObjectIdentifiers.mqvSinglePass_sha1kdf_scheme, PREFIX + "KeyAgreementSpi$MQVwithSHA1KDF");
 
-            addKeyFactory("EC", X9ObjectIdentifiers.id_ecPublicKey, new KeyFactorySpi.EC());
+            registerOid(X9ObjectIdentifiers.id_ecPublicKey, "EC", new KeyFactorySpi.EC());
             // TODO Should this be an alias for ECDH?
-            addKeyFactory("EC", X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, new KeyFactorySpi.EC());
-            addKeyFactory("ECMQV", X9ObjectIdentifiers.mqvSinglePass_sha1kdf_scheme, new KeyFactorySpi.ECMQV());
+            registerOid(X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, "EC", new KeyFactorySpi.EC());
+            registerOid(X9ObjectIdentifiers.mqvSinglePass_sha1kdf_scheme, "ECMQV", new KeyFactorySpi.ECMQV());
 
             put("KeyFactory.EC", PREFIX + "KeyFactorySpi$EC");
             put("KeyFactory.ECDSA", PREFIX + "KeyFactorySpi$ECDSA");
             put("KeyFactory.ECDH", PREFIX + "KeyFactorySpi$ECDH");
             put("KeyFactory.ECDHC", PREFIX + "KeyFactorySpi$ECDHC");
             put("KeyFactory.ECMQV", PREFIX + "KeyFactorySpi$ECMQV");
-
-            put("KeyFactory.ECGOST3410", PREFIX + "KeyFactorySpi$ECGOST3410");
-            put("Alg.Alias.KeyFactory.GOST-3410-2001", "ECGOST3410");
-            put("Alg.Alias.KeyFactory.ECGOST-3410", "ECGOST3410");
-            put("Alg.Alias.KeyFactory." + CryptoProObjectIdentifiers.gostR3410_2001, "ECGOST3410");
 
             put("KeyPairGenerator.EC", PREFIX + "KeyPairGeneratorSpi$EC");
             put("KeyPairGenerator.ECDSA", PREFIX + "KeyPairGeneratorSpi$ECDSA");
@@ -50,10 +44,6 @@ public class EC
             // TODO Should this be an alias for ECDH?
             put("Alg.Alias.KeyPairGenerator." + X9ObjectIdentifiers.dhSinglePass_stdDH_sha1kdf_scheme, "EC");
             put("Alg.Alias.KeyPairGenerator." + X9ObjectIdentifiers.mqvSinglePass_sha1kdf_scheme, "ECMQV");
-
-            put("KeyPairGenerator.ECGOST3410", PREFIX + "KeyPairGeneratorSpi$ECGOST3410");
-            put("Alg.Alias.KeyPairGenerator.ECGOST-3410", "ECGOST3410");
-            put("Alg.Alias.KeyPairGenerator.GOST-3410-2001", "ECGOST3410");
 
             put("Signature.ECDSA", PREFIX + "SignatureSpi$ecDSA");
             put("Signature.NONEwithECDSA", PREFIX + "SignatureSpi$ecDSAnone");
@@ -103,9 +93,11 @@ public class EC
             put("Alg.Alias.Signature.OID." + oid, mainName);
         }
 
-        private void addKeyFactory(String name, ASN1ObjectIdentifier oid, BCKeyFactory keyFactory)
+        private void registerOid(ASN1ObjectIdentifier oid, String name, BCKeyFactory keyFactory)
         {
             put("Alg.Alias.KeyFactory." + oid, name);
+            put("Alg.Alias.KeyPairGenerator." + oid, name);
+
             X509.registerKeyFactory(oid, keyFactory);
         }
     }

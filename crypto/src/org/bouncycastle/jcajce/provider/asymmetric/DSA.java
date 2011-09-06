@@ -4,9 +4,14 @@ import java.util.HashMap;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.jcajce.provider.asymmetric.dsa.DSAUtil;
+import org.bouncycastle.jcajce.provider.asymmetric.dsa.KeyFactorySpi;
+import org.bouncycastle.jcajce.provider.asymmetric.util.BCKeyFactory;
 
 public class DSA
 {
+    private static final String PREFIX = DSA.class.getPackage().getName() + ".dsa.";
+
     public static class Mappings
         extends HashMap
     {
@@ -14,8 +19,8 @@ public class DSA
         {
             put("AlgorithmParameterGenerator.DSA", "org.bouncycastle.jcajce.provider.asymmetric.dsa.AlgorithmParameterGenerator");
 
-            put("KeyPairGenerator.DSA", "org.bouncycastle.jcajce.provider.asymmetric.dsa.KeyPairGenerator");
-            put("KeyFactory.DSA", "org.bouncycastle.jcajce.provider.asymmetric.dsa.KeyFactory");
+            put("KeyPairGenerator.DSA", PREFIX + "KeyPairGeneratorSpi");
+            put("KeyFactory.DSA", PREFIX + "KeyFactorySpi");
 
             put("Signature.DSA", "org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner$stdDSA");
             put("Signature.NONEWITHDSA", "org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner$noneDSA");
@@ -38,6 +43,12 @@ public class DSA
             put("Alg.Alias.Signature.DSAWithSHA1", "DSA");
             put("Alg.Alias.Signature.1.2.840.10040.4.3", "DSA");
 
+            BCKeyFactory keyFact = new KeyFactorySpi();
+
+            for (int i = 0; i != DSAUtil.dsaOids.length; i++)
+            {
+                registerOid(DSAUtil.dsaOids[i], keyFact);
+            }
         }
 
         private void addSignatureAlgorithm(
@@ -56,6 +67,16 @@ public class DSA
             put("Alg.Alias.Signature." + alias, mainName);
             put("Alg.Alias.Signature." + oid, mainName);
             put("Alg.Alias.Signature.OID." + oid, mainName);
+        }
+
+        private void registerOid(ASN1ObjectIdentifier oid, BCKeyFactory keyFactory)
+        {
+            put("Alg.Alias.KeyPairGenerator." + oid, "DSA");
+            put("Alg.Alias.KeyFactory." + oid, "DSA");
+            put("Alg.Alias.AlgorithmParameters." + oid, "DSA");
+            put("Alg.Alias.AlgorithmParameterGenerator." + oid, "DSA");
+
+            X509.registerKeyFactory(oid, keyFactory);
         }
     }
 }

@@ -24,7 +24,7 @@ public abstract class BaseKeyFactorySpi
         {
             try
             {
-                return generatePrivate(PrivateKeyInfo.getInstance(((X509EncodedKeySpec)keySpec).getEncoded()));
+                return generatePrivate(PrivateKeyInfo.getInstance(((PKCS8EncodedKeySpec)keySpec).getEncoded()));
             }
             catch (IOException e)
             {

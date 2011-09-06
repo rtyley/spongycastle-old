@@ -9,7 +9,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.engines.DESedeEngine;
@@ -187,6 +186,30 @@ public final class DESede
         }
     }
 
+    /**
+     * PBEWithSHAAnd3-KeyTripleDES-CBC
+     */
+    static public class PBEWithSHAAndDES3Key
+        extends BaseBlockCipher
+    {
+        public PBEWithSHAAndDES3Key()
+        {
+            super(new CBCBlockCipher(new DESedeEngine()));
+        }
+    }
+
+    /**
+     * PBEWithSHAAnd2-KeyTripleDES-CBC
+     */
+    static public class PBEWithSHAAndDES2Key
+        extends BaseBlockCipher
+    {
+        public PBEWithSHAAndDES2Key()
+        {
+            super(new CBCBlockCipher(new DESedeEngine()));
+        }
+    }
+
     static public class KeyFactory
         extends BaseSecretKeyFactory
     {
@@ -265,10 +288,20 @@ public final class DESede
         {
             put("Cipher.DESEDE", PREFIX + "$ECB");
             put("Cipher." + PKCSObjectIdentifiers.des_EDE3_CBC, PREFIX + "$CBC");
-            put("Cipher." + OIWObjectIdentifiers.desCBC, PREFIX + "$CBC");
             put("Cipher.DESEDEWRAP", PREFIX + "$Wrap");
             put("Cipher." + PKCSObjectIdentifiers.id_alg_CMS3DESwrap, PREFIX + "$Wrap");
             put("Cipher.DESEDERFC3211WRAP", PREFIX + "$RFC3211");
+
+            put("Cipher.PBEWITHSHAAND3-KEYTRIPLEDES-CBC", PREFIX + "$PBEWithSHAAndDES3Key");
+            put("Cipher.BROKENPBEWITHSHAAND3-KEYTRIPLEDES-CBC", PREFIX + "$BrokePBEWithSHAAndDES3Key");
+            put("Cipher.OLDPBEWITHSHAAND3-KEYTRIPLEDES-CBC", PREFIX + "$OldPBEWithSHAAndDES3Key");
+            put("Cipher.PBEWITHSHAAND2-KEYTRIPLEDES-CBC", PREFIX + "$PBEWithSHAAndDES2Key");
+            put("Cipher.BROKENPBEWITHSHAAND2-KEYTRIPLEDES-CBC", PREFIX + "$BrokePBEWithSHAAndDES2Key");
+            put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC, "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
+            put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.pbeWithSHAAnd2_KeyTripleDES_CBC, "PBEWITHSHAAND2-KEYTRIPLEDES-CBC");
+            put("Alg.Alias.Cipher.PBEWITHSHA1ANDDESEDE", "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
+            put("Alg.Alias.Cipher.PBEWITHSHA1AND3-KEYTRIPLEDES-CBC", "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
+            put("Alg.Alias.Cipher.PBEWITHSHA1AND2-KEYTRIPLEDES-CBC", "PBEWITHSHAAND2-KEYTRIPLEDES-CBC");
 
             put("KeyGenerator.DESEDE", PREFIX + "$KeyGenerator");
             put("KeyGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, PREFIX + "$KeyGenerator3");
@@ -290,6 +323,10 @@ public final class DESede
             put("Alg.Alias.Mac.DESEDE64WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
             put("Alg.Alias.Mac.DESEDEISO9797ALG1MACWITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
             put("Alg.Alias.Mac.DESEDEISO9797ALG1WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
+
+            put("AlgorithmParameters.DESEDE", DESede.class.getPackage().getName() + ".util.IvAlgorithmParameters");
+            put("Alg.Alias.AlgorithmParameters." + PKCSObjectIdentifiers.des_EDE3_CBC, "DESEDE");
+            put("Alg.Alias.AlgorithmParameterGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, "DESEDE");
         }
     }
 }
