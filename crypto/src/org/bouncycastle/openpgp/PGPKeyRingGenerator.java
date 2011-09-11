@@ -114,7 +114,7 @@ public class PGPKeyRingGenerator
      *
      * @throws PGPException
      * @throws NoSuchProviderException
-     * @deprecated  use method taking PBESecretKeyDecryptor
+     * @deprecated  use method taking PBESecretKeyEncryptor
      */
     public PGPKeyRingGenerator(
         int                            certificationLevel,
