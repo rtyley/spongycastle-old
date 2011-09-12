@@ -38,7 +38,7 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
  * <p>
  * <b>Note</b>: this example encrypts the secret key using AES_256, many PGP products still
  * do not support this, if you are having problems importing keys try changing the algorithm
- * id to PGPEncryptedData.CAST5. CAST5 is more widelysupported.
+ * id to PGPEncryptedData.CAST5. CAST5 is more widely supported.
  */
 public class DSAElGamalKeyRingGenerator
 {
