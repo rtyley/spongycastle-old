@@ -15,9 +15,9 @@ import org.bouncycastle.asn1.DERSequence;
 public class PBKDF2Params
     extends ASN1Object
 {
-    ASN1OctetString     octStr;
-    DERInteger          iterationCount;
-    DERInteger          keyLength;
+    private ASN1OctetString octStr;
+    private DERInteger      iterationCount;
+    private DERInteger      keyLength;
 
     public static PBKDF2Params getInstance(
         Object  obj)
@@ -42,7 +42,17 @@ public class PBKDF2Params
         this.octStr = new DEROctetString(salt);
         this.iterationCount = new DERInteger(iterationCount);
     }
-    
+
+    public PBKDF2Params(
+        byte[]  salt,
+        int     iterationCount,
+        int     keyLength)
+    {
+    	this(salt, iterationCount);
+
+        this.keyLength = new DERInteger(keyLength);
+    }
+
     public PBKDF2Params(
         ASN1Sequence  seq)
     {
