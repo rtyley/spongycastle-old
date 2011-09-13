@@ -99,7 +99,7 @@ public class Salsa20Engine
 
         if (index == 0)
         {
-        	salsaWordToByte(20, engineState, keyStream, x);
+			generateKeyStream(keyStream);
 
             if (++engineState[8] == 0)
             {
@@ -144,7 +144,7 @@ public class Salsa20Engine
         {
             if (index == 0)
             {
-            	salsaWordToByte(20, engineState, keyStream, x);
+				generateKeyStream(keyStream);
 
                 if (++engineState[8] == 0)
                 {
@@ -207,6 +207,12 @@ public class Salsa20Engine
         initialised = true;
     }
 
+	private void generateKeyStream(byte[] output)
+	{
+		salsaCore(20, engineState, x);
+		Pack.intToLittleEndian(x, output, 0);
+	}
+
     /**
      * Salsa20 function
      *
@@ -214,7 +220,7 @@ public class Salsa20Engine
      *
      * @return  keystream
      */    
-    static void salsaWordToByte(int rounds, int[] input, byte[] output, int[] x)
+    public static void salsaCore(int rounds, int[] input, int[] x)
     {
         System.arraycopy(input, 0, x, 0, input.length);
 
@@ -254,18 +260,10 @@ public class Salsa20Engine
             x[15] ^= rotl((x[14]+x[13]),18);
         }
 
-        int offset = 0;
-        for (int i = 0; i < STATE_SIZE; i++)
-        {
-            Pack.intToLittleEndian(x[i] + input[i], output, offset);
-            offset += 4;
-        }
-
-//        for (int i = STATE_SIZE; i < x.length; i++)
-//        {
-//            Pack.intToLittleEndian(x[i], output, offset);
-//            offset += 4;
-//        }
+		for (int i = 0; i < STATE_SIZE; ++i)
+		{
+			x[i] += input[i];
+		}
     }
 
     /**
