@@ -1,6 +1,7 @@
 package org.bouncycastle.crypto.generators;
 
 import org.bouncycastle.crypto.CipherParameters;
+import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.PBEParametersGenerator;
 import org.bouncycastle.crypto.digests.SHA1Digest;
@@ -19,13 +20,19 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 public class PKCS5S2ParametersGenerator
     extends PBEParametersGenerator
 {
-    private Mac    hMac = new HMac(new SHA1Digest());
+    private Mac hMac;
 
     /**
      * construct a PKCS5 Scheme 2 Parameters generator.
      */
     public PKCS5S2ParametersGenerator()
     {
+    	this(new SHA1Digest());
+    }
+
+    public PKCS5S2ParametersGenerator(Digest digest)
+    {
+        hMac = new HMac(digest);
     }
 
     private void F(
