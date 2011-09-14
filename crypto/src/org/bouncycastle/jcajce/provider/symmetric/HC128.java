@@ -1,11 +1,11 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.HC128Engine;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseStreamCipher;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class HC128
 {
@@ -32,14 +32,18 @@ public final class HC128
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = HC128.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.HC128", PREFIX + "$Base");
-            put("KeyGenerator.HC128", PREFIX + "$KeyGen");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+            provider.addAlgorithm("Cipher.HC128", PREFIX + "$Base");
+            provider.addAlgorithm("KeyGenerator.HC128", PREFIX + "$KeyGen");
         }
     }
 }

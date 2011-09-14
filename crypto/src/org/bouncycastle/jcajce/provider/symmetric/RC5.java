@@ -4,7 +4,6 @@ import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.HashMap;
 
 import javax.crypto.spec.IvParameterSpec;
 
@@ -19,6 +18,8 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class RC5
@@ -147,24 +148,30 @@ public final class RC5
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = RC5.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.RC5", PREFIX + "$ECB32");
-            put("Alg.Alias.Cipher.RC5-32", "RC5");
-            put("Cipher.RC5-64", PREFIX + "$ECB64");
-            put("KeyGenerator.RC5", PREFIX + "$KeyGen32");
-            put("Alg.Alias.KeyGenerator.RC5-32", "RC5");
-            put("KeyGenerator.RC5-64", PREFIX + "$KeyGen64");
-            put("AlgorithmParameters.RC5", PREFIX + "$AlgParams");
-            put("AlgorithmParameters.RC5-64", PREFIX + "$AlgParams");
-            put("Mac.RC5MAC", PREFIX + "$Mac32");
-            put("Alg.Alias.Mac.RC5", "RC5MAC");
-            put("Mac.RC5MAC/CFB8", PREFIX + "$CFB8Mac32");
-            put("Alg.Alias.Mac.RC5/CFB8", "RC5MAC/CFB8");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+
+            provider.addAlgorithm("Cipher.RC5", PREFIX + "$ECB32");
+            provider.addAlgorithm("Alg.Alias.Cipher.RC5-32", "RC5");
+            provider.addAlgorithm("Cipher.RC5-64", PREFIX + "$ECB64");
+            provider.addAlgorithm("KeyGenerator.RC5", PREFIX + "$KeyGen32");
+            provider.addAlgorithm("Alg.Alias.KeyGenerator.RC5-32", "RC5");
+            provider.addAlgorithm("KeyGenerator.RC5-64", PREFIX + "$KeyGen64");
+            provider.addAlgorithm("AlgorithmParameters.RC5", PREFIX + "$AlgParams");
+            provider.addAlgorithm("AlgorithmParameters.RC5-64", PREFIX + "$AlgParams");
+            provider.addAlgorithm("Mac.RC5MAC", PREFIX + "$Mac32");
+            provider.addAlgorithm("Alg.Alias.Mac.RC5", "RC5MAC");
+            provider.addAlgorithm("Mac.RC5MAC/CFB8", PREFIX + "$CFB8Mac32");
+            provider.addAlgorithm("Alg.Alias.Mac.RC5/CFB8", "RC5MAC/CFB8");
+
         }
     }
 }

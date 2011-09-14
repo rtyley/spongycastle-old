@@ -1,12 +1,12 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.TwofishEngine;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class Twofish
 {
@@ -42,15 +42,21 @@ public final class Twofish
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = Twofish.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.Twofish", PREFIX + "$ECB");
-            put("KeyGenerator.Twofish", PREFIX + "$KeyGen");
-            put("AlgorithmParameters.Twofish", PREFIX + "$AlgParams");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+
+            provider.addAlgorithm("Cipher.Twofish", PREFIX + "$ECB");
+            provider.addAlgorithm("KeyGenerator.Twofish", PREFIX + "$KeyGen");
+            provider.addAlgorithm("AlgorithmParameters.Twofish", PREFIX + "$AlgParams");
+
         }
     }
 }

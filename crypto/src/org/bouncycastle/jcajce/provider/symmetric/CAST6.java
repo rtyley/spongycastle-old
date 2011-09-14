@@ -1,11 +1,11 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.CAST6Engine;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class CAST6
 {
@@ -32,14 +32,18 @@ public final class CAST6
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = CAST6.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.CAST6", PREFIX + "$ECB");
-            put("KeyGenerator.CAST6", PREFIX + "$KeyGen");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+            provider.addAlgorithm("Cipher.CAST6", PREFIX + "$ECB");
+            provider.addAlgorithm("KeyGenerator.CAST6", PREFIX + "$KeyGen");
         }
     }
 }

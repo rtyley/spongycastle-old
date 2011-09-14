@@ -1,11 +1,11 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.Salsa20Engine;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseStreamCipher;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class Salsa20
 {
@@ -32,14 +32,20 @@ public final class Salsa20
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = Salsa20.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.SALSA20", PREFIX + "$Base");
-            put("KeyGenerator.SALSA20", PREFIX + "$KeyGen");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+
+            provider.addAlgorithm("Cipher.SALSA20", PREFIX + "$Base");
+            provider.addAlgorithm("KeyGenerator.SALSA20", PREFIX + "$KeyGen");
+
         }
     }
 }

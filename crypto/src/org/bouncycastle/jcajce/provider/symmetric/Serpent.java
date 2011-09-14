@@ -1,12 +1,12 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.SerpentEngine;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class Serpent
 {
@@ -42,15 +42,21 @@ public final class Serpent
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = Serpent.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.Serpent", PREFIX + "$ECB");
-            put("KeyGenerator.Serpent", PREFIX + "$KeyGen");
-            put("AlgorithmParameters.Serpent", PREFIX + "$AlgParams");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+
+            provider.addAlgorithm("Cipher.Serpent", PREFIX + "$ECB");
+            provider.addAlgorithm("KeyGenerator.Serpent", PREFIX + "$KeyGen");
+            provider.addAlgorithm("AlgorithmParameters.Serpent", PREFIX + "$AlgParams");
+
         }
     }
 }

@@ -1,7 +1,5 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.SkipjackEngine;
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
@@ -10,6 +8,8 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class Skipjack
 {
@@ -63,19 +63,25 @@ public final class Skipjack
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = Skipjack.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.SKIPJACK", PREFIX + "$ECB");
-            put("KeyGenerator.SKIPJACK", PREFIX + "$KeyGen");
-            put("AlgorithmParameters.SKIPJACK", PREFIX + "$AlgParams");
-            put("Mac.SKIPJACKMAC", PREFIX + "$Mac");
-            put("Alg.Alias.Mac.SKIPJACK", "SKIPJACKMAC");
-            put("Mac.SKIPJACKMAC/CFB8", PREFIX + "$MacCFB8");
-            put("Alg.Alias.Mac.SKIPJACK/CFB8", "SKIPJACKMAC/CFB8");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+
+            provider.addAlgorithm("Cipher.SKIPJACK", PREFIX + "$ECB");
+            provider.addAlgorithm("KeyGenerator.SKIPJACK", PREFIX + "$KeyGen");
+            provider.addAlgorithm("AlgorithmParameters.SKIPJACK", PREFIX + "$AlgParams");
+            provider.addAlgorithm("Mac.SKIPJACKMAC", PREFIX + "$Mac");
+            provider.addAlgorithm("Alg.Alias.Mac.SKIPJACK", "SKIPJACKMAC");
+            provider.addAlgorithm("Mac.SKIPJACKMAC/CFB8", PREFIX + "$MacCFB8");
+            provider.addAlgorithm("Alg.Alias.Mac.SKIPJACK/CFB8", "SKIPJACKMAC/CFB8");
+
         }
     }
 }

@@ -6,7 +6,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
-import java.util.HashMap;
 
 import javax.crypto.spec.IvParameterSpec;
 
@@ -24,6 +23,8 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.PBESecretKeyFactory;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class IDEA
@@ -226,29 +227,32 @@ public final class IDEA
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = IDEA.class.getName();
-                
+
         public Mappings()
         {
-            put("AlgorithmParameterGenerator.IDEA", PREFIX + "$AlgParamGen");
-            put("AlgorithmParameterGenerator.1.3.6.1.4.1.188.7.1.1.2", PREFIX + "$AlgParamGen");
-            put("AlgorithmParameters.IDEA", PREFIX + "$AlgParams");
-            put("AlgorithmParameters.1.3.6.1.4.1.188.7.1.1.2", PREFIX + "$AlgParams");
-            put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDIDEA", "PKCS12PBE");
-            put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDIDEA", "PKCS12PBE");
-            put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDIDEA-CBC", "PKCS12PBE");
-            put("Cipher.IDEA", PREFIX + "$ECB");
-            put("Cipher.1.3.6.1.4.1.188.7.1.1.2", PREFIX + "$CBC");
-            put("Cipher.PBEWITHSHAANDIDEA-CBC", PREFIX + "$PBEWithSHAAndIDEA");
-            put("KeyGenerator.IDEA", PREFIX + "$KeyGen");
-            put("KeyGenerator.1.3.6.1.4.1.188.7.1.1.2", PREFIX + "$KeyGen");
-            put("SecretKeyFactory.PBEWITHSHAANDIDEA-CBC", PREFIX + "$PBEWithSHAAndIDEAKeyGen");
-            put("Mac.IDEAMAC", PREFIX + "$Mac");
-            put("Alg.Alias.Mac.IDEA", "IDEAMAC");
-            put("Mac.IDEAMAC/CFB8", PREFIX + "$CFB8Mac");
-            put("Alg.Alias.Mac.IDEA/CFB8", "IDEAMAC/CFB8");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+            provider.addAlgorithm("AlgorithmParameterGenerator.IDEA", PREFIX + "$AlgParamGen");
+            provider.addAlgorithm("AlgorithmParameterGenerator.1.3.6.1.4.1.188.7.1.1.2", PREFIX + "$AlgParamGen");
+            provider.addAlgorithm("AlgorithmParameters.IDEA", PREFIX + "$AlgParams");
+            provider.addAlgorithm("AlgorithmParameters.1.3.6.1.4.1.188.7.1.1.2", PREFIX + "$AlgParams");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDIDEA", "PKCS12PBE");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDIDEA-CBC", "PKCS12PBE");
+            provider.addAlgorithm("Cipher.IDEA", PREFIX + "$ECB");
+            provider.addAlgorithm("Cipher.1.3.6.1.4.1.188.7.1.1.2", PREFIX + "$CBC");
+            provider.addAlgorithm("Cipher.PBEWITHSHAANDIDEA-CBC", PREFIX + "$PBEWithSHAAndIDEA");
+            provider.addAlgorithm("KeyGenerator.IDEA", PREFIX + "$KeyGen");
+            provider.addAlgorithm("KeyGenerator.1.3.6.1.4.1.188.7.1.1.2", PREFIX + "$KeyGen");
+            provider.addAlgorithm("SecretKeyFactory.PBEWITHSHAANDIDEA-CBC", PREFIX + "$PBEWithSHAAndIDEAKeyGen");
+            provider.addAlgorithm("Mac.IDEAMAC", PREFIX + "$Mac");
+            provider.addAlgorithm("Alg.Alias.Mac.IDEA", "IDEAMAC");
+            provider.addAlgorithm("Mac.IDEAMAC/CFB8", PREFIX + "$CFB8Mac");
+            provider.addAlgorithm("Alg.Alias.Mac.IDEA/CFB8", "IDEAMAC/CFB8");
         }
     }
 }

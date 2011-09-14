@@ -1,11 +1,11 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.HC256Engine;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseStreamCipher;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class HC256
 {
@@ -32,14 +32,18 @@ public final class HC256
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = HC256.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.HC256", PREFIX + "$Base");
-            put("KeyGenerator.HC256", PREFIX + "$KeyGen");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+            provider.addAlgorithm("Cipher.HC256", PREFIX + "$Base");
+            provider.addAlgorithm("KeyGenerator.HC256", PREFIX + "$KeyGen");
         }
     }
 }

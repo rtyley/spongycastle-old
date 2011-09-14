@@ -1,12 +1,12 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.XTEAEngine;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class XTEA
 {
@@ -42,15 +42,21 @@ public final class XTEA
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = XTEA.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.XTEA", PREFIX + "$ECB");
-            put("KeyGenerator.XTEA", PREFIX + "$KeyGen");
-            put("AlgorithmParameters.XTEA", PREFIX + "$AlgParams");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+
+            provider.addAlgorithm("Cipher.XTEA", PREFIX + "$ECB");
+            provider.addAlgorithm("KeyGenerator.XTEA", PREFIX + "$KeyGen");
+            provider.addAlgorithm("AlgorithmParameters.XTEA", PREFIX + "$AlgParams");
+
         }
     }
 }

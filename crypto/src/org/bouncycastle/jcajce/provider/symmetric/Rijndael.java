@@ -1,12 +1,12 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.RijndaelEngine;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class Rijndael
 {
@@ -42,15 +42,21 @@ public final class Rijndael
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = Rijndael.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.RIJNDAEL", PREFIX + "$ECB");
-            put("KeyGenerator.RIJNDAEL", PREFIX + "$KeyGen");
-            put("AlgorithmParameters.RIJNDAEL", PREFIX + "$AlgParams");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+
+            provider.addAlgorithm("Cipher.RIJNDAEL", PREFIX + "$ECB");
+            provider.addAlgorithm("KeyGenerator.RIJNDAEL", PREFIX + "$KeyGen");
+            provider.addAlgorithm("AlgorithmParameters.RIJNDAEL", PREFIX + "$AlgParams");
+
         }
     }
 }

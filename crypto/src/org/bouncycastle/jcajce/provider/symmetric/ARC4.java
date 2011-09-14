@@ -1,11 +1,11 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.RC4Engine;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseStreamCipher;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class ARC4
 {
@@ -32,19 +32,25 @@ public final class ARC4
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = ARC4.class.getName();
 
         public Mappings()
         {
-            put("Cipher.ARC4", PREFIX + "$Base");
-            put("Alg.Alias.Cipher.1.2.840.113549.3.4", "ARC4");
-            put("Alg.Alias.Cipher.ARCFOUR", "ARC4");
-            put("Alg.Alias.Cipher.RC4", "ARC4");
-            put("KeyGenerator.ARC4", PREFIX + "$KeyGen");
-            put("Alg.Alias.KeyGenerator.RC4", "ARC4");
-            put("Alg.Alias.KeyGenerator.1.2.840.113549.3.4", "ARC4");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+
+            provider.addAlgorithm("Cipher.ARC4", PREFIX + "$Base");
+            provider.addAlgorithm("Alg.Alias.Cipher.1.2.840.113549.3.4", "ARC4");
+            provider.addAlgorithm("Alg.Alias.Cipher.ARCFOUR", "ARC4");
+            provider.addAlgorithm("Alg.Alias.Cipher.RC4", "ARC4");
+            provider.addAlgorithm("KeyGenerator.ARC4", PREFIX + "$KeyGen");
+            provider.addAlgorithm("Alg.Alias.KeyGenerator.RC4", "ARC4");
+            provider.addAlgorithm("Alg.Alias.KeyGenerator.1.2.840.113549.3.4", "ARC4");
+
         }
     }
 }

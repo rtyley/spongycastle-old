@@ -4,7 +4,6 @@ import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.HashMap;
 
 import javax.crypto.spec.IvParameterSpec;
 
@@ -24,6 +23,8 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class AES
@@ -184,7 +185,7 @@ public final class AES
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = AES.class.getName();
         
@@ -199,66 +200,70 @@ public final class AES
 
         public Mappings()
         {
-            put("AlgorithmParameters.AES", PREFIX + "$AlgParams");
-            put("Alg.Alias.AlgorithmParameters." + wrongAES128, "AES");
-            put("Alg.Alias.AlgorithmParameters." + wrongAES192, "AES");
-            put("Alg.Alias.AlgorithmParameters." + wrongAES256, "AES");
-            put("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes128_CBC, "AES");
-            put("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes192_CBC, "AES");
-            put("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes256_CBC, "AES");
+        }
 
-            put("AlgorithmParameterGenerator.AES", PREFIX + "$AlgParamGen");
-            put("Alg.Alias.AlgorithmParameterGenerator." + wrongAES128, "AES");
-            put("Alg.Alias.AlgorithmParameterGenerator." + wrongAES192, "AES");
-            put("Alg.Alias.AlgorithmParameterGenerator." + wrongAES256, "AES");
-            put("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes128_CBC, "AES");
-            put("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes192_CBC, "AES");
-            put("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_CBC, "AES");
+        public void configure(ConfigurableProvider provider)
+        {
+            provider.addAlgorithm("AlgorithmParameters.AES", PREFIX + "$AlgParams");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + wrongAES128, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + wrongAES192, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + wrongAES256, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes128_CBC, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes192_CBC, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + NISTObjectIdentifiers.id_aes256_CBC, "AES");
 
-            put("Cipher.AES", PREFIX + "$ECB");
-            put("Alg.Alias.Cipher." + wrongAES128, "AES");
-            put("Alg.Alias.Cipher." + wrongAES192, "AES");
-            put("Alg.Alias.Cipher." + wrongAES256, "AES");
-            put("Cipher." + NISTObjectIdentifiers.id_aes128_ECB, PREFIX + "$ECB");
-            put("Cipher." + NISTObjectIdentifiers.id_aes192_ECB, PREFIX + "$ECB");
-            put("Cipher." + NISTObjectIdentifiers.id_aes256_ECB, PREFIX + "$ECB");
-            put("Cipher." + NISTObjectIdentifiers.id_aes128_CBC, PREFIX + "$CBC");
-            put("Cipher." + NISTObjectIdentifiers.id_aes192_CBC, PREFIX + "$CBC");
-            put("Cipher." + NISTObjectIdentifiers.id_aes256_CBC, PREFIX + "$CBC");
-            put("Cipher." + NISTObjectIdentifiers.id_aes128_OFB, PREFIX + "$OFB");
-            put("Cipher." + NISTObjectIdentifiers.id_aes192_OFB, PREFIX + "$OFB");
-            put("Cipher." + NISTObjectIdentifiers.id_aes256_OFB, PREFIX + "$OFB");
-            put("Cipher." + NISTObjectIdentifiers.id_aes128_CFB, PREFIX + "$CFB");
-            put("Cipher." + NISTObjectIdentifiers.id_aes192_CFB, PREFIX + "$CFB");
-            put("Cipher." + NISTObjectIdentifiers.id_aes256_CFB, PREFIX + "$CFB");
-            put("Cipher.AESWRAP", PREFIX + "$Wrap");
-            put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_wrap, "AESWRAP");
-            put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_wrap, "AESWRAP");
-            put("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_wrap, "AESWRAP");
-            put("Cipher.AESRFC3211WRAP", PREFIX + "$RFC3211Wrap");
+            provider.addAlgorithm("AlgorithmParameterGenerator.AES", PREFIX + "$AlgParamGen");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + wrongAES128, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + wrongAES192, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + wrongAES256, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes128_CBC, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes192_CBC, "AES");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + NISTObjectIdentifiers.id_aes256_CBC, "AES");
 
-            put("KeyGenerator.AES", PREFIX + "$KeyGen");
-            put("KeyGenerator.2.16.840.1.101.3.4.2", PREFIX + "$KeyGen128");
-            put("KeyGenerator.2.16.840.1.101.3.4.22", PREFIX + "$KeyGen192");
-            put("KeyGenerator.2.16.840.1.101.3.4.42", PREFIX + "$KeyGen256");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_ECB, PREFIX + "$KeyGen128");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_CBC, PREFIX + "$KeyGen128");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_OFB, PREFIX + "$KeyGen128");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_CFB, PREFIX + "$KeyGen128");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_ECB, PREFIX + "$KeyGen192");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_CBC, PREFIX + "$KeyGen192");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_OFB, PREFIX + "$KeyGen192");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_CFB, PREFIX + "$KeyGen192");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_ECB, PREFIX + "$KeyGen256");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_CBC, PREFIX + "$KeyGen256");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_OFB, PREFIX + "$KeyGen256");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_CFB, PREFIX + "$KeyGen256");
-            put("KeyGenerator.AESWRAP", PREFIX + "$KeyGen");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes128_wrap, PREFIX + "$KeyGen128");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes192_wrap, PREFIX + "$KeyGen192");
-            put("KeyGenerator." + NISTObjectIdentifiers.id_aes256_wrap, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("Cipher.AES", PREFIX + "$ECB");
+            provider.addAlgorithm("Alg.Alias.Cipher." + wrongAES128, "AES");
+            provider.addAlgorithm("Alg.Alias.Cipher." + wrongAES192, "AES");
+            provider.addAlgorithm("Alg.Alias.Cipher." + wrongAES256, "AES");
+            provider.addAlgorithm("Cipher." + NISTObjectIdentifiers.id_aes128_ECB, PREFIX + "$ECB");
+            provider.addAlgorithm("Cipher." + NISTObjectIdentifiers.id_aes192_ECB, PREFIX + "$ECB");
+            provider.addAlgorithm("Cipher." + NISTObjectIdentifiers.id_aes256_ECB, PREFIX + "$ECB");
+            provider.addAlgorithm("Cipher." + NISTObjectIdentifiers.id_aes128_CBC, PREFIX + "$CBC");
+            provider.addAlgorithm("Cipher." + NISTObjectIdentifiers.id_aes192_CBC, PREFIX + "$CBC");
+            provider.addAlgorithm("Cipher." + NISTObjectIdentifiers.id_aes256_CBC, PREFIX + "$CBC");
+            provider.addAlgorithm("Cipher." + NISTObjectIdentifiers.id_aes128_OFB, PREFIX + "$OFB");
+            provider.addAlgorithm("Cipher." + NISTObjectIdentifiers.id_aes192_OFB, PREFIX + "$OFB");
+            provider.addAlgorithm("Cipher." + NISTObjectIdentifiers.id_aes256_OFB, PREFIX + "$OFB");
+            provider.addAlgorithm("Cipher." + NISTObjectIdentifiers.id_aes128_CFB, PREFIX + "$CFB");
+            provider.addAlgorithm("Cipher." + NISTObjectIdentifiers.id_aes192_CFB, PREFIX + "$CFB");
+            provider.addAlgorithm("Cipher." + NISTObjectIdentifiers.id_aes256_CFB, PREFIX + "$CFB");
+            provider.addAlgorithm("Cipher.AESWRAP", PREFIX + "$Wrap");
+            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes128_wrap, "AESWRAP");
+            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes192_wrap, "AESWRAP");
+            provider.addAlgorithm("Alg.Alias.Cipher." + NISTObjectIdentifiers.id_aes256_wrap, "AESWRAP");
+            provider.addAlgorithm("Cipher.AESRFC3211WRAP", PREFIX + "$RFC3211Wrap");
 
-            put("Mac.AESCMAC", PREFIX + "$AESCMAC");
+            provider.addAlgorithm("KeyGenerator.AES", PREFIX + "$KeyGen");
+            provider.addAlgorithm("KeyGenerator." + wrongAES128, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator." + wrongAES192, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator." + wrongAES256, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes128_ECB, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes128_CBC, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes128_OFB, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes128_CFB, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes192_ECB, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes192_CBC, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes192_OFB, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes192_CFB, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes256_ECB, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes256_CBC, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes256_OFB, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes256_CFB, PREFIX + "$KeyGen256");
+            provider.addAlgorithm("KeyGenerator.AESWRAP", PREFIX + "$KeyGen");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes128_wrap, PREFIX + "$KeyGen128");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes192_wrap, PREFIX + "$KeyGen192");
+            provider.addAlgorithm("KeyGenerator." + NISTObjectIdentifiers.id_aes256_wrap, PREFIX + "$KeyGen256");
+
+            provider.addAlgorithm("Mac.AESCMAC", PREFIX + "$AESCMAC");
         }
     }
 }

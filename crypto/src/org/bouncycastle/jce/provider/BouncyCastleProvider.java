@@ -1,11 +1,15 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.IOException;
 import java.security.AccessController;
+import java.security.PrivateKey;
 import java.security.PrivilegedAction;
 import java.security.Provider;
-import java.util.Iterator;
+import java.security.PublicKey;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.bc.BCObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -13,7 +17,11 @@ import org.bouncycastle.asn1.iana.IANAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 /**
@@ -46,6 +54,8 @@ public final class BouncyCastleProvider extends Provider
     private static String info = "BouncyCastle Security Provider v1.47b";
 
     public static String PROVIDER_NAME = "BC";
+
+    private static final Map keyInfoConverters = new HashMap();
 
     /*
      * Configurable symmetric ciphers
@@ -163,8 +173,6 @@ public final class BouncyCastleProvider extends Provider
         // algorithm parameter generators
         //
         put("AlgorithmParameterGenerator.DH", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DH");
-        put("AlgorithmParameterGenerator.DSA", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DSA");
-        put("AlgorithmParameterGenerator.GOST3410", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$GOST3410");
 
         put("AlgorithmParameterGenerator.DES", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
         put("AlgorithmParameterGenerator.DESEDE", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
@@ -182,7 +190,6 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameters.PSS", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PSS");
         put("AlgorithmParameters.DH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$DH");
         put("Alg.Alias.AlgorithmParameters.DIFFIEHELLMAN", "DH");
-        put("AlgorithmParameters.DSA", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$DSA");
 
         put("AlgorithmParameters.IES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IES");
         put("AlgorithmParameters.PKCS12PBE", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PKCS12PBE");
@@ -348,9 +355,8 @@ public final class BouncyCastleProvider extends Provider
         // key pair generators.
         //
         put("KeyPairGenerator.DH", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$DH");
-        put("KeyPairGenerator.DSA", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$DSA");
 
-        put("Alg.Alias.KeyPairGenerator.1.2.840.113549.1.1.1", "RSA");
+
         put("Alg.Alias.KeyPairGenerator.DIFFIEHELLMAN", "DH");
         
 
@@ -359,10 +365,7 @@ public final class BouncyCastleProvider extends Provider
         // key factories
         //
         put("KeyFactory.DH", "org.bouncycastle.jce.provider.JDKKeyFactory$DH");
-        put("KeyFactory.DSA", "org.bouncycastle.jce.provider.JDKKeyFactory$DSA");
 
-        put("Alg.Alias.KeyFactory.1.2.840.113549.1.1.1", "RSA");
-        put("Alg.Alias.KeyFactory.1.2.840.10040.4.1", "DSA");
 
         put("Alg.Alias.KeyFactory.DIFFIEHELLMAN", "DH");
 
@@ -468,8 +471,6 @@ public final class BouncyCastleProvider extends Provider
 
         addMessageDigestAlgorithms();
 
-        addSignatureAlgorithms();
-
     // Certification Path API
         put("CertPathValidator.RFC3281", "org.bouncycastle.jce.provider.PKIXAttrCertPathValidatorSpi");
         put("CertPathBuilder.RFC3281", "org.bouncycastle.jce.provider.PKIXAttrCertPathBuilderSpi");
@@ -510,7 +511,7 @@ public final class BouncyCastleProvider extends Provider
             {
                 try
                 {
-                    addMappings((Map)clazz.newInstance());
+                    ((AlgorithmProvider)clazz.newInstance()).configure(this);
                 }
                 catch (Exception e)
                 {   // this should never ever happen!!
@@ -518,21 +519,6 @@ public final class BouncyCastleProvider extends Provider
                         + packageName + names[i] + "$Mappings : " + e);
                 }
             }
-        }
-    }
-
-    private void addMappings(Map mappings)
-    {
-        // can't use putAll due to JDK 1.1
-        for (Iterator it = mappings.keySet().iterator(); it.hasNext();)
-        {
-            Object key = it.next();
-
-            if (containsKey(key))
-            {
-                throw new IllegalStateException("duplicate provider key (" + key + ") found in " + mappings.getClass().getName());
-            }
-            put(key, mappings.get(key));
         }
     }
 
@@ -668,178 +654,61 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.MessageDigest.GOST-3411", "GOST3411");
         put("Alg.Alias.MessageDigest." + CryptoProObjectIdentifiers.gostR3411, "GOST3411");
     }
-    
-    //
-    // signature algorithms.
-    //
-    private void addSignatureAlgorithms()
-    {
-        put("Signature.MD2WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$MD2WithRSAEncryption");
-        put("Signature.MD4WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$MD4WithRSAEncryption");
-        put("Signature.MD5WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$MD5WithRSAEncryption");
-        put("Signature.SHA1WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA1WithRSAEncryption");
-        put("Signature.SHA224WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA224WithRSAEncryption");
-        put("Signature.SHA256WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA256WithRSAEncryption");
-        put("Signature.SHA384WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA384WithRSAEncryption");
-        put("Signature.SHA512WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$SHA512WithRSAEncryption");
-        put("Signature.RIPEMD160WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$RIPEMD160WithRSAEncryption");
-        put("Signature.RIPEMD128WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$RIPEMD128WithRSAEncryption");
-        put("Signature.RIPEMD256WithRSAEncryption", "org.bouncycastle.jce.provider.JDKDigestSignature$RIPEMD256WithRSAEncryption");
-        put("Signature.DSA", "org.bouncycastle.jce.provider.JDKDSASigner$stdDSA");
-        put("Signature.NONEWITHDSA", "org.bouncycastle.jce.provider.JDKDSASigner$noneDSA");
-        put("Signature.SHA1withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$SHA1WithRSAEncryption");
-        put("Signature.MD5withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$MD5WithRSAEncryption");
-        put("Signature.RIPEMD160withRSA/ISO9796-2", "org.bouncycastle.jce.provider.JDKISOSignature$RIPEMD160WithRSAEncryption");
 
-        put("Signature.RSASSA-PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$PSSwithRSA");
-        put("Signature." + PKCSObjectIdentifiers.id_RSASSA_PSS, "org.bouncycastle.jce.provider.JDKPSSSigner$PSSwithRSA");
-        put("Signature.SHA1withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA1withRSA");
-        put("Signature.SHA224withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA224withRSA");
-        put("Signature.SHA256withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA256withRSA");
-        put("Signature.SHA384withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA384withRSA");
-        put("Signature.SHA512withRSA/PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$SHA512withRSA");
-
-        put("Signature.RSA", "org.bouncycastle.jce.provider.JDKDigestSignature$noneRSA");
-        put("Signature.RAWRSASSA-PSS", "org.bouncycastle.jce.provider.JDKPSSSigner$nonePSS");
-
-        put("Alg.Alias.Signature.RAWDSA", "NONEWITHDSA");
-
-        put("Alg.Alias.Signature.RAWRSA", "RSA");
-        put("Alg.Alias.Signature.NONEWITHRSA", "RSA");
-        put("Alg.Alias.Signature.RAWRSAPSS", "RAWRSASSA-PSS");
-        put("Alg.Alias.Signature.NONEWITHRSAPSS", "RAWRSASSA-PSS");
-        put("Alg.Alias.Signature.NONEWITHRSASSA-PSS", "RAWRSASSA-PSS");
-        put("Alg.Alias.Signature.NONEWITHRSAANDMGF1", "RAWRSASSA-PSS");
-
-        put("Alg.Alias.Signature.RSAPSS", "RSASSA-PSS");
-
-        put("Alg.Alias.Signature.SHA1withRSAandMGF1", "SHA1withRSA/PSS");
-        put("Alg.Alias.Signature.SHA224withRSAandMGF1", "SHA224withRSA/PSS");
-        put("Alg.Alias.Signature.SHA256withRSAandMGF1", "SHA256withRSA/PSS");
-        put("Alg.Alias.Signature.SHA384withRSAandMGF1", "SHA384withRSA/PSS");
-        put("Alg.Alias.Signature.SHA512withRSAandMGF1", "SHA512withRSA/PSS");
-        
-        put("Alg.Alias.Signature.MD2withRSAEncryption", "MD2WithRSAEncryption");
-        put("Alg.Alias.Signature.MD4withRSAEncryption", "MD4WithRSAEncryption");
-        put("Alg.Alias.Signature.MD5withRSAEncryption", "MD5WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA1withRSAEncryption", "SHA1WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA224withRSAEncryption", "SHA224WithRSAEncryption");
-
-        put("Alg.Alias.Signature.SHA256withRSAEncryption", "SHA256WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA384withRSAEncryption", "SHA384WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA512withRSAEncryption", "SHA512WithRSAEncryption");
-
-        put("Alg.Alias.Signature.SHA256WithRSAEncryption", "SHA256WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA384WithRSAEncryption", "SHA384WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA512WithRSAEncryption", "SHA512WithRSAEncryption");
-
-        put("Alg.Alias.Signature.SHA256WITHRSAENCRYPTION", "SHA256WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA384WITHRSAENCRYPTION", "SHA384WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA512WITHRSAENCRYPTION", "SHA512WithRSAEncryption");
-
-        put("Alg.Alias.Signature.RIPEMD160withRSAEncryption", "RIPEMD160WithRSAEncryption");
-
-        put("Alg.Alias.Signature." + PKCSObjectIdentifiers.md2WithRSAEncryption, "MD2WithRSAEncryption");
-        put("Alg.Alias.Signature.MD2WithRSA", "MD2WithRSAEncryption");
-        put("Alg.Alias.Signature.MD2withRSA", "MD2WithRSAEncryption");
-        put("Alg.Alias.Signature.MD2/RSA", "MD2WithRSAEncryption");
-        put("Alg.Alias.Signature.MD5WithRSA", "MD5WithRSAEncryption");
-        put("Alg.Alias.Signature.MD5withRSA", "MD5WithRSAEncryption");
-        put("Alg.Alias.Signature.MD5/RSA", "MD5WithRSAEncryption");
-        put("Alg.Alias.Signature." + PKCSObjectIdentifiers.md5WithRSAEncryption, "MD5WithRSAEncryption");
-        put("Alg.Alias.Signature.MD4WithRSA", "MD4WithRSAEncryption");
-        put("Alg.Alias.Signature.MD4withRSA", "MD4WithRSAEncryption");
-        put("Alg.Alias.Signature.MD4/RSA", "MD4WithRSAEncryption");
-        put("Alg.Alias.Signature." + PKCSObjectIdentifiers.md4WithRSAEncryption, "MD4WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA1WithRSA", "SHA1WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA1withRSA", "SHA1WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA224WithRSA", "SHA224WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA224withRSA", "SHA224WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA256WithRSA", "SHA256WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA256withRSA", "SHA256WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA384WithRSA", "SHA384WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA384withRSA", "SHA384WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA512WithRSA", "SHA512WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA512withRSA", "SHA512WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA1/RSA", "SHA1WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA-1/RSA", "SHA1WithRSAEncryption");
-        put("Alg.Alias.Signature." + PKCSObjectIdentifiers.sha1WithRSAEncryption, "SHA1WithRSAEncryption");
-        put("Alg.Alias.Signature." + PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224WithRSAEncryption");
-        put("Alg.Alias.Signature." + PKCSObjectIdentifiers.sha256WithRSAEncryption, "SHA256WithRSAEncryption");
-        put("Alg.Alias.Signature." + PKCSObjectIdentifiers.sha384WithRSAEncryption, "SHA384WithRSAEncryption");
-        put("Alg.Alias.Signature." + PKCSObjectIdentifiers.sha512WithRSAEncryption, "SHA512WithRSAEncryption");
-        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.113549.1.1.1", "SHA1WithRSAEncryption");
-        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.113549.1.1.5", "SHA1WithRSAEncryption");
-        put("Alg.Alias.Signature.1.2.840.113549.2.5with1.2.840.113549.1.1.1", "MD5WithRSAEncryption");
-        put("Alg.Alias.Signature.RIPEMD160WithRSA", "RIPEMD160WithRSAEncryption");
-        put("Alg.Alias.Signature.RIPEMD160withRSA", "RIPEMD160WithRSAEncryption");
-        put("Alg.Alias.Signature.RIPEMD128WithRSA", "RIPEMD128WithRSAEncryption");
-        put("Alg.Alias.Signature.RIPEMD128withRSA", "RIPEMD128WithRSAEncryption");
-        put("Alg.Alias.Signature.RIPEMD256WithRSA", "RIPEMD256WithRSAEncryption");
-        put("Alg.Alias.Signature.RIPEMD256withRSA", "RIPEMD256WithRSAEncryption");
-        put("Alg.Alias.Signature.RIPEMD-160/RSA", "RIPEMD160WithRSAEncryption");
-        put("Alg.Alias.Signature.RMD160withRSA", "RIPEMD160WithRSAEncryption");
-        put("Alg.Alias.Signature.RMD160/RSA", "RIPEMD160WithRSAEncryption");
-        put("Alg.Alias.Signature.1.3.36.3.3.1.2", "RIPEMD160WithRSAEncryption");
-        put("Alg.Alias.Signature.1.3.36.3.3.1.3", "RIPEMD128WithRSAEncryption");
-        put("Alg.Alias.Signature.1.3.36.3.3.1.4", "RIPEMD256WithRSAEncryption");
-        put("Alg.Alias.Signature." + OIWObjectIdentifiers.sha1WithRSA, "SHA1WithRSAEncryption");
-        
-        put("Alg.Alias.Signature.MD2WITHRSAENCRYPTION", "MD2WithRSAEncryption");
-        put("Alg.Alias.Signature.MD5WITHRSAENCRYPTION", "MD5WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA1WITHRSAENCRYPTION", "SHA1WithRSAEncryption");
-        put("Alg.Alias.Signature.RIPEMD160WITHRSAENCRYPTION", "RIPEMD160WithRSAEncryption");
-
-        put("Alg.Alias.Signature.MD5WITHRSA", "MD5WithRSAEncryption");
-        put("Alg.Alias.Signature.SHA1WITHRSA", "SHA1WithRSAEncryption");
-        put("Alg.Alias.Signature.RIPEMD160WITHRSA", "RIPEMD160WithRSAEncryption");
-        put("Alg.Alias.Signature.RMD160WITHRSA", "RIPEMD160WithRSAEncryption");
-        put("Alg.Alias.Signature.RIPEMD160WITHRSA", "RIPEMD160WithRSAEncryption");
-
-        addSignatureAlgorithm("SHA224", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa224", NISTObjectIdentifiers.dsa_with_sha224);
-        addSignatureAlgorithm("SHA256", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa256", NISTObjectIdentifiers.dsa_with_sha256);
-        addSignatureAlgorithm("SHA384", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa384", NISTObjectIdentifiers.dsa_with_sha384);
-        addSignatureAlgorithm("SHA512", "DSA", "org.bouncycastle.jce.provider.JDKDSASigner$dsa512", NISTObjectIdentifiers.dsa_with_sha512);
-
-        put("Alg.Alias.Signature.SHA/DSA", "DSA");
-        put("Alg.Alias.Signature.SHA1withDSA", "DSA");
-        put("Alg.Alias.Signature.SHA1WITHDSA", "DSA");
-        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.10040.4.1", "DSA");
-        put("Alg.Alias.Signature.1.3.14.3.2.26with1.2.840.10040.4.3", "DSA");
-        put("Alg.Alias.Signature.DSAwithSHA1", "DSA");
-        put("Alg.Alias.Signature.DSAWITHSHA1", "DSA");
-        put("Alg.Alias.Signature.SHA1WithDSA", "DSA");
-        put("Alg.Alias.Signature.DSAWithSHA1", "DSA");
-        put("Alg.Alias.Signature.1.2.840.10040.4.3", "DSA");
-        put("Alg.Alias.Signature.MD5WithRSA/ISO9796-2", "MD5withRSA/ISO9796-2");
-        put("Alg.Alias.Signature.SHA1WithRSA/ISO9796-2", "SHA1withRSA/ISO9796-2");
-        put("Alg.Alias.Signature.RIPEMD160WithRSA/ISO9796-2", "RIPEMD160withRSA/ISO9796-2");
-        
-
-
-    }
-
-    private void addSignatureAlgorithm(
-        String digest,
-        String algorithm,
-        String className,
-        DERObjectIdentifier oid)
-    {
-        String mainName = digest + "WITH" + algorithm;
-        String jdk11Variation1 = digest + "with" + algorithm;
-        String jdk11Variation2 = digest + "With" + algorithm;
-        String alias = digest + "/" + algorithm;
-
-        put("Signature." + mainName, className);
-        put("Alg.Alias.Signature." + jdk11Variation1, mainName);
-        put("Alg.Alias.Signature." + jdk11Variation2, mainName);
-        put("Alg.Alias.Signature." + alias, mainName);
-        put("Alg.Alias.Signature." + oid, mainName);
-        put("Alg.Alias.Signature.OID." + oid, mainName);
-    }
 
     public void setParameter(String parameterName, Object parameter)
     {
         ProviderUtil.setParameter(parameterName, parameter);
+    }
+
+    public boolean hasAlgorithm(String type, String name)
+    {
+        return containsKey(type + "." + name);
+    }
+
+    public void addAlgorithm(String key, String value)
+    {
+        if (containsKey(key))
+        {
+            throw new IllegalStateException("duplicate provider key (" + key + ") found");
+        }
+
+        put(key, value);
+    }
+
+    public void addKeyInfoConverter(ASN1ObjectIdentifier oid, AsymmetricKeyInfoConverter keyInfoConverter)
+    {
+        keyInfoConverters.put(oid, keyInfoConverter);
+    }
+
+    public AsymmetricKeyInfoConverter getConverter(ASN1ObjectIdentifier oid)
+    {
+        return (AsymmetricKeyInfoConverter)keyInfoConverters.get(oid);
+    }
+
+    public static PublicKey getPublicKey(SubjectPublicKeyInfo publicKeyInfo)
+        throws IOException
+    {
+        AsymmetricKeyInfoConverter converter = (AsymmetricKeyInfoConverter)keyInfoConverters.get(publicKeyInfo.getAlgorithm().getAlgorithm());
+
+        if (converter == null)
+        {
+            return null;
+        }
+
+        return converter.generatePublic(publicKeyInfo);
+    }
+
+    public static PrivateKey getPrivateKey(PrivateKeyInfo privateKeyInfo)
+        throws IOException
+    {
+        AsymmetricKeyInfoConverter converter = (AsymmetricKeyInfoConverter)keyInfoConverters.get(privateKeyInfo.getPrivateKeyAlgorithm().getAlgorithm());
+
+        if (converter == null)
+        {
+            return null;
+        }
+
+        return converter.generatePrivate(privateKeyInfo);
     }
 }

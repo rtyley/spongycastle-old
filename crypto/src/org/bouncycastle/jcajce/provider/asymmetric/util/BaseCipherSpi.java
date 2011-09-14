@@ -22,12 +22,9 @@ import javax.crypto.spec.RC2ParameterSpec;
 import javax.crypto.spec.RC5ParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.Wrapper;
-import org.bouncycastle.jcajce.provider.asymmetric.X509;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public abstract class BaseCipherSpi
@@ -165,19 +162,15 @@ public abstract class BaseCipherSpi
                  * The caller doesn't know the algorithm as it is part of
                  * the encrypted data.
                  */
-            ASN1InputStream bIn = new ASN1InputStream(encoded);
-            PrivateKey      privKey;
-
             try
             {
-                ASN1Sequence         s = (ASN1Sequence)bIn.readObject();
-                PrivateKeyInfo       in = new PrivateKeyInfo(s);
+                PrivateKeyInfo       in = PrivateKeyInfo.getInstance(encoded);
 
-                BCKeyFactory fact = X509.getKeyFactory(in.getPrivateKeyAlgorithm().getAlgorithm());
+                PrivateKey privKey = BouncyCastleProvider.getPrivateKey(in);
 
-                if (fact != null)
+                if (privKey != null)
                 {
-                    privKey = fact.generatePrivate(PrivateKeyInfo.getInstance(encoded));
+                    return privKey;
                 }
                 else
                 {
@@ -188,8 +181,6 @@ public abstract class BaseCipherSpi
             {
                 throw new InvalidKeyException("Invalid key encoding.");
             }
-
-            return privKey;
         }
         else
         {

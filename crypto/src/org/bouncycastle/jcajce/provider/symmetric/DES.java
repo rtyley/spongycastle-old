@@ -3,7 +3,6 @@ package org.bouncycastle.jcajce.provider.symmetric;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.util.HashMap;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.DESKeySpec;
@@ -25,6 +24,8 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseSecretKeyFactory;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class DES
 {
@@ -205,45 +206,51 @@ public final class DES
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = DES.class.getName();
-                
+
         public Mappings()
         {
-            put("Cipher.DES", PREFIX + "$ECB");
-            put("Cipher." + OIWObjectIdentifiers.desCBC, PREFIX + "$CBC");
-
-            addAlias(OIWObjectIdentifiers.desCBC, "DES");
-
-            put("Cipher.DESRFC3211WRAP", PREFIX + "$RFC3211");
-
-            put("KeyGenerator.DES", PREFIX + "$KeyGenerator");
-
-            put("SecretKeyFactory.DES", PREFIX + "$KeyFactory");
-
-            put("Mac.DESCMAC", PREFIX + "$CMAC");
-            put("Mac.DESMAC", PREFIX + "$CBCMAC");
-            put("Alg.Alias.Mac.DES", "DESMAC");
-
-            put("Mac.DESMAC/CFB8", PREFIX + "$DESCFB8");
-            put("Alg.Alias.Mac.DES/CFB8", "DESMAC/CFB8");
-
-            put("Mac.DESMAC64", PREFIX + "$DES64");
-            put("Alg.Alias.Mac.DES64", "DESMAC64");
-
-            put("Mac.DESMAC64WITHISO7816-4PADDING", PREFIX + "$DES64with7816d4");
-            put("Alg.Alias.Mac.DES64WITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
-            put("Alg.Alias.Mac.DESISO9797ALG1MACWITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
-            put("Alg.Alias.Mac.DESISO9797ALG1WITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
-
-            put("AlgorithmParameters.DES", DES.class.getPackage().getName() + ".util.IvAlgorithmParameters");
         }
 
-        private void addAlias(ASN1ObjectIdentifier oid, String name)
+        public void configure(ConfigurableProvider provider)
         {
-            put("Alg.Alias.KeyGenerator." + oid.getId(), name);
-            put("Alg.Alias.KeyFactory." + oid.getId(), name);
+
+            provider.addAlgorithm("Cipher.DES", PREFIX + "$ECB");
+            provider.addAlgorithm("Cipher." + OIWObjectIdentifiers.desCBC, PREFIX + "$CBC");
+
+            addAlias(provider, OIWObjectIdentifiers.desCBC, "DES");
+
+            provider.addAlgorithm("Cipher.DESRFC3211WRAP", PREFIX + "$RFC3211");
+
+            provider.addAlgorithm("KeyGenerator.DES", PREFIX + "$KeyGenerator");
+
+            provider.addAlgorithm("SecretKeyFactory.DES", PREFIX + "$KeyFactory");
+
+            provider.addAlgorithm("Mac.DESCMAC", PREFIX + "$CMAC");
+            provider.addAlgorithm("Mac.DESMAC", PREFIX + "$CBCMAC");
+            provider.addAlgorithm("Alg.Alias.Mac.DES", "DESMAC");
+
+            provider.addAlgorithm("Mac.DESMAC/CFB8", PREFIX + "$DESCFB8");
+            provider.addAlgorithm("Alg.Alias.Mac.DES/CFB8", "DESMAC/CFB8");
+
+            provider.addAlgorithm("Mac.DESMAC64", PREFIX + "$DES64");
+            provider.addAlgorithm("Alg.Alias.Mac.DES64", "DESMAC64");
+
+            provider.addAlgorithm("Mac.DESMAC64WITHISO7816-4PADDING", PREFIX + "$DES64with7816d4");
+            provider.addAlgorithm("Alg.Alias.Mac.DES64WITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
+            provider.addAlgorithm("Alg.Alias.Mac.DESISO9797ALG1MACWITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
+            provider.addAlgorithm("Alg.Alias.Mac.DESISO9797ALG1WITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
+
+            provider.addAlgorithm("AlgorithmParameters.DES", DES.class.getPackage().getName() + ".util.IvAlgorithmParameters");
+
+        }
+
+        private void addAlias(ConfigurableProvider provider, ASN1ObjectIdentifier oid, String name)
+        {
+            provider.addAlgorithm("Alg.Alias.KeyGenerator." + oid.getId(), name);
+            provider.addAlgorithm("Alg.Alias.KeyFactory." + oid.getId(), name);
         }
     }
 }

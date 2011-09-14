@@ -11,10 +11,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.jcajce.provider.asymmetric.X509;
-import org.bouncycastle.jcajce.provider.asymmetric.util.BCKeyFactory;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class KeyFactory
     extends KeyFactorySpi
@@ -29,9 +27,14 @@ public class KeyFactory
             try
             {
                 PrivateKeyInfo info = PrivateKeyInfo.getInstance(((PKCS8EncodedKeySpec)keySpec).getEncoded());
-                BCKeyFactory fact = getFactory(info.getPrivateKeyAlgorithm());
+                PrivateKey     key = BouncyCastleProvider.getPrivateKey(info);
 
-                return fact.generatePrivate(info);
+                if (key != null)
+                {
+                    return key;
+                }
+
+                throw new InvalidKeySpecException("no factory found for OID: " + info.getPrivateKeyAlgorithm().getAlgorithm());
             }
             catch (Exception e)
             {
@@ -51,9 +54,14 @@ public class KeyFactory
             try
             {
                 SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(((X509EncodedKeySpec)keySpec).getEncoded());
-                BCKeyFactory fact = getFactory(info.getAlgorithm());
+                PublicKey            key = BouncyCastleProvider.getPublicKey(info);
 
-                return fact.generatePublic(info);
+                if (key != null)
+                {
+                    return key;
+                }
+
+                throw new InvalidKeySpecException("no factory found for OID: " + info.getAlgorithm().getAlgorithm());
             }
             catch (Exception e)
             {
@@ -62,19 +70,6 @@ public class KeyFactory
         }
 
         throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
-    }
-
-    private BCKeyFactory getFactory(AlgorithmIdentifier algId)
-        throws InvalidKeySpecException
-    {
-        BCKeyFactory fact = X509.getKeyFactory(algId.getAlgorithm());
-
-        if (fact == null)
-        {
-            throw new InvalidKeySpecException("no match for algorithm: " + algId.getAlgorithm());
-        }
-
-        return fact;
     }
 
     protected KeySpec engineGetKeySpec(Key key, Class keySpec)

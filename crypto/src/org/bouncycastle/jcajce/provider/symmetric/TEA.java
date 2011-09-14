@@ -1,12 +1,12 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.TEAEngine;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class TEA
 {
@@ -42,15 +42,21 @@ public final class TEA
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = TEA.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.TEA", PREFIX + "$ECB");
-            put("KeyGenerator.TEA", PREFIX + "$KeyGen");
-            put("AlgorithmParameters.TEA", PREFIX + "$AlgParams");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+
+            provider.addAlgorithm("Cipher.TEA", PREFIX + "$ECB");
+            provider.addAlgorithm("KeyGenerator.TEA", PREFIX + "$KeyGen");
+            provider.addAlgorithm("AlgorithmParameters.TEA", PREFIX + "$AlgParams");
+
         }
     }
 }

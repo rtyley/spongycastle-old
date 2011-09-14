@@ -6,7 +6,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
-import java.util.HashMap;
 
 import javax.crypto.spec.IvParameterSpec;
 
@@ -19,6 +18,8 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameterGen
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameters;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class CAST5
@@ -192,23 +193,29 @@ public final class CAST5
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = CAST5.class.getName();
 
         public Mappings()
         {
-            put("AlgorithmParameters.CAST5", PREFIX + "$AlgParams");
-            put("Alg.Alias.AlgorithmParameters.1.2.840.113533.7.66.10", "CAST5");
+        }
 
-            put("AlgorithmParameterGenerator.CAST5", PREFIX + "$AlgParamGen");
-            put("Alg.Alias.AlgorithmParameterGenerator.1.2.840.113533.7.66.10", "CAST5");
+        public void configure(ConfigurableProvider provider)
+        {
 
-            put("Cipher.CAST5", PREFIX + "$ECB");
-            put("Cipher.1.2.840.113533.7.66.10", PREFIX + "$CBC");
+            provider.addAlgorithm("AlgorithmParameters.CAST5", PREFIX + "$AlgParams");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters.1.2.840.113533.7.66.10", "CAST5");
 
-            put("KeyGenerator.CAST5", PREFIX + "$KeyGen");
-            put("Alg.Alias.KeyGenerator.1.2.840.113533.7.66.10", "CAST5");
+            provider.addAlgorithm("AlgorithmParameterGenerator.CAST5", PREFIX + "$AlgParamGen");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator.1.2.840.113533.7.66.10", "CAST5");
+
+            provider.addAlgorithm("Cipher.CAST5", PREFIX + "$ECB");
+            provider.addAlgorithm("Cipher.1.2.840.113533.7.66.10", PREFIX + "$CBC");
+
+            provider.addAlgorithm("KeyGenerator.CAST5", PREFIX + "$KeyGen");
+            provider.addAlgorithm("Alg.Alias.KeyGenerator.1.2.840.113533.7.66.10", "CAST5");
+
         }
     }
 }

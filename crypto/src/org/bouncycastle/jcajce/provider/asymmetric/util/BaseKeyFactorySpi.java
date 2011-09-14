@@ -11,10 +11,11 @@ import java.security.spec.X509EncodedKeySpec;
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
 
 public abstract class BaseKeyFactorySpi
     extends java.security.KeyFactorySpi
-    implements BCKeyFactory
+    implements AsymmetricKeyInfoConverter
 {
     protected PrivateKey engineGeneratePrivate(
         KeySpec keySpec)

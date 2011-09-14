@@ -4,7 +4,6 @@ import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.HashMap;
 
 import javax.crypto.spec.IvParameterSpec;
 
@@ -18,6 +17,8 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class SEED
@@ -110,27 +111,33 @@ public final class SEED
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = SEED.class.getName();
-                
+
         public Mappings()
         {
-            put("AlgorithmParameters.SEED", PREFIX + "$AlgParams");
-            put("Alg.Alias.AlgorithmParameters." + KISAObjectIdentifiers.id_seedCBC, "SEED");
+        }
 
-            put("AlgorithmParameterGenerator.SEED", PREFIX + "$AlgParamGen");
-            put("Alg.Alias.AlgorithmParameterGenerator." + KISAObjectIdentifiers.id_seedCBC, "SEED");
+        public void configure(ConfigurableProvider provider)
+        {
 
-            put("Cipher.SEED", PREFIX + "$ECB");
-            put("Cipher." + KISAObjectIdentifiers.id_seedCBC, PREFIX + "$CBC");
+            provider.addAlgorithm("AlgorithmParameters.SEED", PREFIX + "$AlgParams");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + KISAObjectIdentifiers.id_seedCBC, "SEED");
 
-            put("Cipher.SEEDWRAP", PREFIX + "$Wrap");
-            put("Alg.Alias.Cipher." + KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap, "SEEDWRAP");
+            provider.addAlgorithm("AlgorithmParameterGenerator.SEED", PREFIX + "$AlgParamGen");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + KISAObjectIdentifiers.id_seedCBC, "SEED");
 
-            put("KeyGenerator.SEED", PREFIX + "$KeyGen");
-            put("KeyGenerator." + KISAObjectIdentifiers.id_seedCBC, PREFIX + "$KeyGen");
-            put("KeyGenerator." + KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap, PREFIX + "$KeyGen");
+            provider.addAlgorithm("Cipher.SEED", PREFIX + "$ECB");
+            provider.addAlgorithm("Cipher." + KISAObjectIdentifiers.id_seedCBC, PREFIX + "$CBC");
+
+            provider.addAlgorithm("Cipher.SEEDWRAP", PREFIX + "$Wrap");
+            provider.addAlgorithm("Alg.Alias.Cipher." + KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap, "SEEDWRAP");
+
+            provider.addAlgorithm("KeyGenerator.SEED", PREFIX + "$KeyGen");
+            provider.addAlgorithm("KeyGenerator." + KISAObjectIdentifiers.id_seedCBC, PREFIX + "$KeyGen");
+            provider.addAlgorithm("KeyGenerator." + KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap, PREFIX + "$KeyGen");
+
         }
     }
 }

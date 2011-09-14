@@ -1,13 +1,13 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.engines.RC2WrapEngine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class RC2
 {
@@ -49,20 +49,26 @@ public final class RC2
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = RC2.class.getName();
-                 
+
         public Mappings()
         {
-            put("AlgorithmParameterGenerator.RC2", PREFIX + "$RC2");
-            put("AlgorithmParameterGenerator.1.2.840.113549.3.2", PREFIX + "$RC2");
+        }
 
-            put("Cipher.RC2", PREFIX + "$ECB");
-            put("Cipher.RC2WRAP", PREFIX + "$Wrap");
-            put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.id_alg_CMSRC2wrap, "RC2WRAP");
+        public void configure(ConfigurableProvider provider)
+        {
 
-            put("Cipher.1.2.840.113549.3.2", PREFIX + "$CBC");
+            provider.addAlgorithm("AlgorithmParameterGenerator.RC2", PREFIX + "$RC2");
+            provider.addAlgorithm("AlgorithmParameterGenerator.1.2.840.113549.3.2", PREFIX + "$RC2");
+
+            provider.addAlgorithm("Cipher.RC2", PREFIX + "$ECB");
+            provider.addAlgorithm("Cipher.RC2WRAP", PREFIX + "$Wrap");
+            provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.id_alg_CMSRC2wrap, "RC2WRAP");
+
+            provider.addAlgorithm("Cipher.1.2.840.113549.3.2", PREFIX + "$CBC");
+
         }
     }
 }

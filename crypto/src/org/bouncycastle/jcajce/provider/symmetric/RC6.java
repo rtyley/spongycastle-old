@@ -4,7 +4,6 @@ import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.HashMap;
 
 import javax.crypto.spec.IvParameterSpec;
 
@@ -18,6 +17,8 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameterGen
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class RC6
@@ -119,15 +120,21 @@ public final class RC6
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = RC6.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.RC6", PREFIX + "$ECB");
-            put("KeyGenerator.RC6", PREFIX + "$KeyGen");
-            put("AlgorithmParameters.RC6", PREFIX + "$AlgParams");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+
+            provider.addAlgorithm("Cipher.RC6", PREFIX + "$ECB");
+            provider.addAlgorithm("KeyGenerator.RC6", PREFIX + "$KeyGen");
+            provider.addAlgorithm("AlgorithmParameters.RC6", PREFIX + "$AlgParams");
+
         }
     }
 }

@@ -4,7 +4,6 @@ import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.HashMap;
 
 import javax.crypto.spec.IvParameterSpec;
 
@@ -14,6 +13,8 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameterGen
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class Noekeon
@@ -88,19 +89,25 @@ public final class Noekeon
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = Noekeon.class.getName();
-                 
+
         public Mappings()
         {
-            put("AlgorithmParameters.NOEKEON", PREFIX + "$AlgParams");
+        }
 
-            put("AlgorithmParameterGenerator.NOEKEON", PREFIX + "$AlgParamGen");
+        public void configure(ConfigurableProvider provider)
+        {
 
-            put("Cipher.NOEKEON", PREFIX + "$ECB");
+            provider.addAlgorithm("AlgorithmParameters.NOEKEON", PREFIX + "$AlgParams");
 
-            put("KeyGenerator.NOEKEON", PREFIX + "$KeyGen");
+            provider.addAlgorithm("AlgorithmParameterGenerator.NOEKEON", PREFIX + "$AlgParamGen");
+
+            provider.addAlgorithm("Cipher.NOEKEON", PREFIX + "$ECB");
+
+            provider.addAlgorithm("KeyGenerator.NOEKEON", PREFIX + "$KeyGen");
+
         }
     }
 }

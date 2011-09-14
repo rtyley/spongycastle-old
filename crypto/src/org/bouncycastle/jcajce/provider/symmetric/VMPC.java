@@ -1,13 +1,13 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
-import java.util.HashMap;
-
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.VMPCEngine;
 import org.bouncycastle.crypto.macs.VMPCMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseStreamCipher;
+import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class VMPC
 {
@@ -43,17 +43,23 @@ public final class VMPC
     }
 
     public static class Mappings
-        extends HashMap
+        extends AlgorithmProvider
     {
         private static final String PREFIX = VMPC.class.getName();
-                 
+
         public Mappings()
         {
-            put("Cipher.VMPC", PREFIX + "$Base");
-            put("KeyGenerator.VMPC", PREFIX + "$KeyGen");
-            put("Mac.VMPCMAC", PREFIX + "$Mac");
-            put("Alg.Alias.Mac.VMPC", "VMPCMAC");
-            put("Alg.Alias.Mac.VMPC-MAC", "VMPCMAC");
+        }
+
+        public void configure(ConfigurableProvider provider)
+        {
+
+            provider.addAlgorithm("Cipher.VMPC", PREFIX + "$Base");
+            provider.addAlgorithm("KeyGenerator.VMPC", PREFIX + "$KeyGen");
+            provider.addAlgorithm("Mac.VMPCMAC", PREFIX + "$Mac");
+            provider.addAlgorithm("Alg.Alias.Mac.VMPC", "VMPCMAC");
+            provider.addAlgorithm("Alg.Alias.Mac.VMPC-MAC", "VMPCMAC");
+
         }
     }
 }

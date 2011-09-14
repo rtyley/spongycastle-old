@@ -1,44 +1,38 @@
 package org.bouncycastle.jcajce.provider.asymmetric;
 
-import java.util.HashMap;
-
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.jcajce.provider.asymmetric.elgamal.KeyFactorySpi;
-import org.bouncycastle.jcajce.provider.asymmetric.util.BCKeyFactory;
+import org.bouncycastle.jcajce.provider.util.AsymmetricAlgorithmProvider;
+import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
+import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public class ElGamal
 {
     private static final String PREFIX = ElGamal.class.getPackage().getName() + ".elgamal.";
 
     public static class Mappings
-        extends HashMap
+        extends AsymmetricAlgorithmProvider
     {
         public Mappings()
         {
-            put("AlgorithmParameterGenerator.ELGAMAL", PREFIX + "AlgorithmParameterGeneratorSpi");
-            put("AlgorithmParameters.ELGAMAL", PREFIX + "AlgorithmParametersSpi");
-
-            put("Cipher.ELGAMAL", PREFIX + "CipherSpi$NoPadding");
-            put("Cipher.ELGAMAL/PKCS1", PREFIX + "CipherSpi$PKCS1v1_5Padding");
-            put("KeyFactory.ELGAMAL", PREFIX + "KeyFactorySpi");
-            put("KeyFactory.ElGamal", PREFIX + "KeyFactorySpi");
-
-            put("KeyPairGenerator.ELGAMAL", PREFIX + "KeyPairGeneratorSpi");
-
-            BCKeyFactory keyFact = new KeyFactorySpi();
-
-            registerOid(OIWObjectIdentifiers.elGamalAlgorithm, keyFact);
         }
-
-        private void registerOid(ASN1ObjectIdentifier oid, BCKeyFactory keyFactory)
+        
+        public void configure(ConfigurableProvider provider)
         {
-            put("Alg.Alias.KeyPairGenerator." + oid, "ELGAMAL");
-            put("Alg.Alias.KeyFactory." + oid, "ELGAMAL");
-            put("Alg.Alias.AlgorithmParameters." + oid, "ELGAMAL");
-            put("Alg.Alias.AlgorithmParameterGenerator." + oid, "ELGAMAL");
+            provider.addAlgorithm("AlgorithmParameterGenerator.ELGAMAL", PREFIX + "AlgorithmParameterGeneratorSpi");
+            provider.addAlgorithm("AlgorithmParameters.ELGAMAL", PREFIX + "AlgorithmParametersSpi");
 
-            X509.registerKeyFactory(oid, keyFactory);
+            provider.addAlgorithm("Cipher.ELGAMAL", PREFIX + "CipherSpi$NoPadding");
+            provider.addAlgorithm("Cipher.ELGAMAL/PKCS1", PREFIX + "CipherSpi$PKCS1v1_5Padding");
+            provider.addAlgorithm("KeyFactory.ELGAMAL", PREFIX + "KeyFactorySpi");
+            provider.addAlgorithm("KeyFactory.ElGamal", PREFIX + "KeyFactorySpi");
+
+            provider.addAlgorithm("KeyPairGenerator.ELGAMAL", PREFIX + "KeyPairGeneratorSpi");
+
+            AsymmetricKeyInfoConverter keyFact = new KeyFactorySpi();
+
+            registerOid(provider, OIWObjectIdentifiers.elGamalAlgorithm, "ELGAMAL", keyFact);
+            registerOidAlgorithmParameters(provider, OIWObjectIdentifiers.elGamalAlgorithm, "ELGAMAL");
         }
     }
 }
