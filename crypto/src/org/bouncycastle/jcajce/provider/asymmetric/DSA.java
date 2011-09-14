@@ -32,10 +32,10 @@ public class DSA
 
             provider.addAlgorithm("Alg.Alias.Signature.RAWDSA", "NONEWITHDSA");
 
-            addSignatureAlgorithm(provider, "SHA224", "DSA", "org.bouncycastle.jcajce.provider.dsa.DSASigner$dsa224", NISTObjectIdentifiers.dsa_with_sha224);
-            addSignatureAlgorithm(provider, "SHA256", "DSA", "org.bouncycastle.jcajce.provider.dsa.DSASigner$dsa256", NISTObjectIdentifiers.dsa_with_sha256);
-            addSignatureAlgorithm(provider, "SHA384", "DSA", "org.bouncycastle.jcajce.provider.dsa.DSASigner$dsa384", NISTObjectIdentifiers.dsa_with_sha384);
-            addSignatureAlgorithm(provider, "SHA512", "DSA", "org.bouncycastle.jcajce.provider.dsa.DSASigner$dsa512", NISTObjectIdentifiers.dsa_with_sha512);
+            addSignatureAlgorithm(provider, "SHA224", "DSA", "org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner$dsa224", NISTObjectIdentifiers.dsa_with_sha224);
+            addSignatureAlgorithm(provider, "SHA256", "DSA", "org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner$dsa256", NISTObjectIdentifiers.dsa_with_sha256);
+            addSignatureAlgorithm(provider, "SHA384", "DSA", "org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner$dsa384", NISTObjectIdentifiers.dsa_with_sha384);
+            addSignatureAlgorithm(provider, "SHA512", "DSA", "org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner$dsa512", NISTObjectIdentifiers.dsa_with_sha512);
 
             provider.addAlgorithm("Alg.Alias.Signature.SHA/DSA", "DSA");
             provider.addAlgorithm("Alg.Alias.Signature.SHA1withDSA", "DSA");
