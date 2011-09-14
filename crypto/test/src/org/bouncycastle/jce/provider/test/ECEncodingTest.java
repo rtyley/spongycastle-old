@@ -17,9 +17,10 @@ import java.util.Date;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.interfaces.ECPointEncoder;
+import org.bouncycastle.jce.interfaces.ECPrivateKey;
+import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.provider.JCEECPrivateKey;
-import org.bouncycastle.jce.provider.JCEECPublicKey;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Hex;
@@ -114,10 +115,10 @@ public class ECEncodingTest
             kp = kpg.generateKeyPair();
             // The very old Problem... we need a certificate chain to
             // save a private key...
-            JCEECPublicKey pubKey = (JCEECPublicKey)kp.getPublic();
+            ECPublicKey pubKey = (ECPublicKey)kp.getPublic();
             if (!compress)
             {
-                pubKey.setPointFormat("UNCOMPRESSED");
+                ((ECPointEncoder)pubKey).setPointFormat("UNCOMPRESSED");
             }
             byte[] x = pubKey.getQ().getX().toBigInteger().toByteArray();
             byte[] y = pubKey.getQ().getY().toBigInteger().toByteArray();
@@ -138,22 +139,22 @@ public class ECEncodingTest
 
         keyStore.setCertificateEntry("ECCert", chain[0]);
 
-        JCEECPrivateKey privateECKey = (JCEECPrivateKey)kp.getPrivate();
+        ECPrivateKey privateECKey = (ECPrivateKey)kp.getPrivate();
         keyStore.setKeyEntry("ECPrivKey", privateECKey, keyStorePass
                 .toCharArray(), chain);
 
         // Test ec sign / verify
-        JCEECPublicKey pub = (JCEECPublicKey)kp.getPublic();
+        ECPublicKey pub = (ECPublicKey)kp.getPublic();
         String oldPrivateKey = new String(Hex.encode(privateECKey.getEncoded()));
         String oldPublicKey = new String(Hex.encode(pub.getEncoded()));
-        JCEECPrivateKey newKey = (JCEECPrivateKey)keyStore.getKey("ECPrivKey",
+        ECPrivateKey newKey = (ECPrivateKey)keyStore.getKey("ECPrivKey",
                 keyStorePass.toCharArray());
-        JCEECPublicKey newPubKey = (JCEECPublicKey)keyStore.getCertificate(
+        ECPublicKey newPubKey = (ECPublicKey)keyStore.getCertificate(
                 "ECCert").getPublicKey();
         if (!compress)
         {
-            newKey.setPointFormat("UNCOMPRESSED");
-            newPubKey.setPointFormat("UNCOMPRESSED");
+            ((ECPointEncoder)newKey).setPointFormat("UNCOMPRESSED");
+            ((ECPointEncoder)newPubKey).setPointFormat("UNCOMPRESSED");
         }
 
         String newPrivateKey = new String(Hex.encode(newKey.getEncoded()));
@@ -185,12 +186,12 @@ public class ECEncodingTest
             boolean compress) throws Exception
     {
         X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-        JCEECPrivateKey privECKey = (JCEECPrivateKey)kp.getPrivate();
-        JCEECPublicKey pubECKey = (JCEECPublicKey)kp.getPublic();
+        ECPrivateKey privECKey = (ECPrivateKey)kp.getPrivate();
+        ECPublicKey pubECKey = (ECPublicKey)kp.getPublic();
         if (!compress)
         {
-            privECKey.setPointFormat("UNCOMPRESSED");
-            pubECKey.setPointFormat("UNCOMPRESSED");
+            ((ECPointEncoder)privECKey).setPointFormat("UNCOMPRESSED");
+            ((ECPointEncoder)pubECKey).setPointFormat("UNCOMPRESSED");
         }
         certGen.setSignatureAlgorithm("ECDSAwithSHA1");
         certGen.setSerialNumber(BigInteger.valueOf(1));
