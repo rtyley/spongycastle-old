@@ -3,12 +3,10 @@ package org.bouncycastle.jce.provider;
 import java.io.IOException;
 import java.security.AlgorithmParametersSpi;
 import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.DSAParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
-import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
@@ -18,7 +16,6 @@ import javax.crypto.spec.RC2ParameterSpec;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Null;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -26,8 +23,6 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
-import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.pkcs.PKCS12PBEParams;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -35,10 +30,7 @@ import org.bouncycastle.asn1.pkcs.RC2CBCParameter;
 import org.bouncycastle.asn1.pkcs.RSAESOAEPparams;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.jcajce.provider.util.DigestFactory;
-import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
-import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 import org.bouncycastle.jce.spec.IESParameterSpec;
 import org.bouncycastle.util.Arrays;
 
@@ -536,329 +528,6 @@ public abstract class JDKAlgorithmParameters
         protected String engineToString() 
         {
             return "PKCS12 PBE Parameters";
-        }
-    }
-
-    public static class DH
-        extends JDKAlgorithmParameters
-    {
-        DHParameterSpec     currentSpec;
-
-        /**
-         * Return the PKCS#3 ASN.1 structure DHParameter.
-         * <p>
-         * <pre>
-         *  DHParameter ::= SEQUENCE {
-         *                   prime INTEGER, -- p
-         *                   base INTEGER, -- g
-         *                   privateValueLength INTEGER OPTIONAL}
-         * </pre>
-         */
-        protected byte[] engineGetEncoded() 
-        {
-            DHParameter dhP = new DHParameter(currentSpec.getP(), currentSpec.getG(), currentSpec.getL());
-
-            try
-            {
-                return dhP.getEncoded(ASN1Encoding.DER);
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException("Error encoding DHParameters");
-            }
-        }
-
-        protected byte[] engineGetEncoded(
-            String format) 
-        {
-            if (isASN1FormatString(format))
-            {
-                return engineGetEncoded();
-            }
-
-            return null;
-        }
-
-        protected AlgorithmParameterSpec localEngineGetParameterSpec(
-            Class paramSpec) 
-            throws InvalidParameterSpecException
-        {
-            if (paramSpec == DHParameterSpec.class)
-            {
-                return currentSpec;
-            }
-
-            throw new InvalidParameterSpecException("unknown parameter spec passed to DH parameters object.");
-        }
-
-        protected void engineInit(
-            AlgorithmParameterSpec paramSpec) 
-            throws InvalidParameterSpecException
-        {
-            if (!(paramSpec instanceof DHParameterSpec))
-            {
-                throw new InvalidParameterSpecException("DHParameterSpec required to initialise a Diffie-Hellman algorithm parameters object");
-            }
-
-            this.currentSpec = (DHParameterSpec)paramSpec;
-        }
-
-        protected void engineInit(
-            byte[] params) 
-            throws IOException
-        {
-            try
-            {
-                DHParameter dhP = DHParameter.getInstance(params);
-
-                if (dhP.getL() != null)
-                {
-                    currentSpec = new DHParameterSpec(dhP.getP(), dhP.getG(), dhP.getL().intValue());
-                }
-                else
-                {
-                    currentSpec = new DHParameterSpec(dhP.getP(), dhP.getG());
-                }
-            }
-            catch (ClassCastException e)
-            {
-                throw new IOException("Not a valid DH Parameter encoding.");
-            }
-            catch (ArrayIndexOutOfBoundsException e)
-            {
-                throw new IOException("Not a valid DH Parameter encoding.");
-            }
-        }
-
-        protected void engineInit(
-            byte[] params,
-            String format) 
-            throws IOException
-        {
-            if (isASN1FormatString(format))
-            {
-                engineInit(params);
-            }
-            else
-            {
-                throw new IOException("Unknown parameter format " + format);
-            }
-        }
-
-        protected String engineToString() 
-        {
-            return "Diffie-Hellman Parameters";
-        }
-    }
-
-    public static class DSA
-        extends JDKAlgorithmParameters
-    {
-        DSAParameterSpec     currentSpec;
-
-        /**
-         * Return the X.509 ASN.1 structure DSAParameter.
-         * <p>
-         * <pre>
-         *  DSAParameter ::= SEQUENCE {
-         *                   prime INTEGER, -- p
-         *                   subprime INTEGER, -- q
-         *                   base INTEGER, -- g}
-         * </pre>
-         */
-        protected byte[] engineGetEncoded() 
-        {
-            DSAParameter dsaP = new DSAParameter(currentSpec.getP(), currentSpec.getQ(), currentSpec.getG());
-
-            try
-            {
-                return dsaP.getEncoded(ASN1Encoding.DER);
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException("Error encoding DSAParameters");
-            }
-        }
-
-        protected byte[] engineGetEncoded(
-            String format) 
-        {
-            if (isASN1FormatString(format))
-            {
-                return engineGetEncoded();
-            }
-
-            return null;
-        }
-
-        protected AlgorithmParameterSpec localEngineGetParameterSpec(
-            Class paramSpec) 
-            throws InvalidParameterSpecException
-        {
-            if (paramSpec == DSAParameterSpec.class)
-            {
-                return currentSpec;
-            }
-
-            throw new InvalidParameterSpecException("unknown parameter spec passed to DSA parameters object.");
-        }
-
-        protected void engineInit(
-            AlgorithmParameterSpec paramSpec) 
-            throws InvalidParameterSpecException
-        {
-            if (!(paramSpec instanceof DSAParameterSpec))
-            {
-                throw new InvalidParameterSpecException("DSAParameterSpec required to initialise a DSA algorithm parameters object");
-            }
-
-            this.currentSpec = (DSAParameterSpec)paramSpec;
-        }
-
-        protected void engineInit(
-            byte[] params) 
-            throws IOException
-        {
-            try
-            {
-                DSAParameter dsaP = new DSAParameter((ASN1Sequence)ASN1Primitive.fromByteArray(params));
-
-                currentSpec = new DSAParameterSpec(dsaP.getP(), dsaP.getQ(), dsaP.getG());
-            }
-            catch (ClassCastException e)
-            {
-                throw new IOException("Not a valid DSA Parameter encoding.");
-            }
-            catch (ArrayIndexOutOfBoundsException e)
-            {
-                throw new IOException("Not a valid DSA Parameter encoding.");
-            }
-        }
-
-        protected void engineInit(
-            byte[] params,
-            String format) 
-            throws IOException
-        {
-            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
-            {
-                engineInit(params);
-            }
-            else
-            {
-                throw new IOException("Unknown parameter format " + format);
-            }
-        }
-
-        protected String engineToString() 
-        {
-            return "DSA Parameters";
-        }
-    }
-    
-    public static class GOST3410
-        extends JDKAlgorithmParameters
-    {
-        GOST3410ParameterSpec     currentSpec;
-        
-        /**
-         * Return the X.509 ASN.1 structure GOST3410Parameter.
-         * <p>
-         * <pre>
-         *  GOST3410Parameter ::= SEQUENCE {
-         *                   prime INTEGER, -- p
-         *                   subprime INTEGER, -- q
-         *                   base INTEGER, -- a}
-         * </pre>
-         */
-        protected byte[] engineGetEncoded()
-        {
-            GOST3410PublicKeyAlgParameters gost3410P = new GOST3410PublicKeyAlgParameters(new ASN1ObjectIdentifier(currentSpec.getPublicKeyParamSetOID()), new ASN1ObjectIdentifier(currentSpec.getDigestParamSetOID()), new ASN1ObjectIdentifier(currentSpec.getEncryptionParamSetOID()));
-
-            try
-            {
-                return gost3410P.getEncoded(ASN1Encoding.DER);
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException("Error encoding GOST3410Parameters");
-            }
-        }
-        
-        protected byte[] engineGetEncoded(
-                String format)
-        {
-            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
-            {
-                return engineGetEncoded();
-            }
-            
-            return null;
-        }
-        
-        protected AlgorithmParameterSpec localEngineGetParameterSpec(
-                Class paramSpec)
-        throws InvalidParameterSpecException
-        {
-            if (paramSpec == GOST3410PublicKeyParameterSetSpec.class)
-            {
-                return currentSpec;
-            }
-            
-            throw new InvalidParameterSpecException("unknown parameter spec passed to GOST3410 parameters object.");
-        }
-        
-        protected void engineInit(
-                AlgorithmParameterSpec paramSpec)
-        throws InvalidParameterSpecException
-        {
-            if (!(paramSpec instanceof GOST3410ParameterSpec))
-            {
-                throw new InvalidParameterSpecException("GOST3410ParameterSpec required to initialise a GOST3410 algorithm parameters object");
-            }
-            
-            this.currentSpec = (GOST3410ParameterSpec)paramSpec;
-        }
-        
-        protected void engineInit(
-                byte[] params)
-        throws IOException
-        {
-            try
-            {
-                ASN1Sequence seq = (ASN1Sequence) ASN1Primitive.fromByteArray(params);
-
-                this.currentSpec = GOST3410ParameterSpec.fromPublicKeyAlg(
-                    new GOST3410PublicKeyAlgParameters(seq));
-            }
-            catch (ClassCastException e)
-            {
-                throw new IOException("Not a valid GOST3410 Parameter encoding.");
-            }
-            catch (ArrayIndexOutOfBoundsException e)
-            {
-                throw new IOException("Not a valid GOST3410 Parameter encoding.");
-            }
-        }
-        
-        protected void engineInit(
-                byte[] params,
-                String format)
-        throws IOException
-        {
-            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
-            {
-                engineInit(params);
-            }
-            else
-            {
-                throw new IOException("Unknown parameter format " + format);
-            }
-        }
-        
-        protected String engineToString()
-        {
-            return "GOST3410 Parameters";
         }
     }
 

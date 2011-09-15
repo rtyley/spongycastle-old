@@ -14,11 +14,10 @@ import org.bouncycastle.crypto.params.ElGamalKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ElGamalParameters;
 import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
-import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 
 public class KeyPairGeneratorSpi
-    extends JDKKeyPairGenerator
+    extends java.security.KeyPairGenerator
 {
     ElGamalKeyGenerationParameters param;
     ElGamalKeyPairGenerator engine = new ElGamalKeyPairGenerator();

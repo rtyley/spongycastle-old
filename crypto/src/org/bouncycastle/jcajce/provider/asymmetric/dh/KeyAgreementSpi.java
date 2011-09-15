@@ -8,7 +8,6 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Hashtable;
 
-import javax.crypto.KeyAgreementSpi;
 import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.interfaces.DHPrivateKey;
@@ -24,8 +23,8 @@ import org.bouncycastle.util.Strings;
  * if you are using long term public keys, see the light-weight version for
  * details.
  */
-public class JCEDHKeyAgreement
-    extends KeyAgreementSpi
+public class KeyAgreementSpi
+    extends javax.crypto.KeyAgreementSpi
 {
     private BigInteger      x;
     private BigInteger      p;

@@ -22,7 +22,7 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 
 
-public class JCEDHPrivateKey
+public class BCDHPrivateKey
     implements DHPrivateKey
 {
     static final long serialVersionUID = 311058815616901812L;
@@ -32,25 +32,25 @@ public class JCEDHPrivateKey
     private DHParameterSpec dhSpec;
     private PrivateKeyInfo  info;
 
-    protected JCEDHPrivateKey()
+    protected BCDHPrivateKey()
     {
     }
 
-    JCEDHPrivateKey(
-        DHPrivateKey    key)
+    BCDHPrivateKey(
+        DHPrivateKey key)
     {
         this.x = key.getX();
         this.dhSpec = key.getParams();
     }
 
-    JCEDHPrivateKey(
-        DHPrivateKeySpec    spec)
+    BCDHPrivateKey(
+        DHPrivateKeySpec spec)
     {
         this.x = spec.getX();
         this.dhSpec = new DHParameterSpec(spec.getP(), spec.getG());
     }
 
-    public JCEDHPrivateKey(
+    public BCDHPrivateKey(
         PrivateKeyInfo info)
         throws IOException
     {
@@ -86,8 +86,8 @@ public class JCEDHPrivateKey
         }
     }
 
-    JCEDHPrivateKey(
-        DHPrivateKeyParameters  params)
+    BCDHPrivateKey(
+        DHPrivateKeyParameters params)
     {
         this.x = params.getX();
         this.dhSpec = new DHParameterSpec(params.getParameters().getP(), params.getParameters().getG(), params.getParameters().getL());

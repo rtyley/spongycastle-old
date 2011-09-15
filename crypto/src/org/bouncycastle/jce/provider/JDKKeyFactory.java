@@ -11,8 +11,6 @@ import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.DSAPrivateKeySpec;
-import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -259,67 +257,4 @@ public abstract class JDKKeyFactory
         }
     }
 
-    public static class DH
-        extends JDKKeyFactory
-    {
-        public DH()
-        {
-        }
-
-        protected PrivateKey engineGeneratePrivate(
-            KeySpec    keySpec)
-            throws InvalidKeySpecException
-        {
-            if (keySpec instanceof DHPrivateKeySpec)
-            {
-                return new JCEDHPrivateKey((DHPrivateKeySpec)keySpec);
-            }
-
-            return super.engineGeneratePrivate(keySpec);
-        }
-    
-        protected PublicKey engineGeneratePublic(
-            KeySpec    keySpec)
-            throws InvalidKeySpecException
-        {
-            if (keySpec instanceof DHPublicKeySpec)
-            {
-                return new JCEDHPublicKey((DHPublicKeySpec)keySpec);
-            }
-
-            return super.engineGeneratePublic(keySpec);
-        }
-    }
-
-    public static class DSA
-        extends JDKKeyFactory
-    {
-        public DSA()
-        {
-        }
-
-        protected PrivateKey engineGeneratePrivate(
-            KeySpec    keySpec)
-            throws InvalidKeySpecException
-        {
-            if (keySpec instanceof DSAPrivateKeySpec)
-            {
-                return new JDKDSAPrivateKey((DSAPrivateKeySpec)keySpec);
-            }
-
-            return super.engineGeneratePrivate(keySpec);
-        }
-    
-        protected PublicKey engineGeneratePublic(
-            KeySpec    keySpec)
-            throws InvalidKeySpecException
-        {
-            if (keySpec instanceof DSAPublicKeySpec)
-            {
-                return new JDKDSAPublicKey((DSAPublicKeySpec)keySpec);
-            }
-
-            return super.engineGeneratePublic(keySpec);
-        }
-    }
 }

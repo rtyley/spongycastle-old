@@ -1,6 +1,5 @@
 package org.bouncycastle.jcajce.provider.asymmetric.dsa;
 
-import java.security.AlgorithmParameterGeneratorSpi;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidParameterException;
@@ -14,8 +13,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 //import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 //import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 
-public class AlgorithmParameterGenerator
-    extends AlgorithmParameterGeneratorSpi
+public class AlgorithmParameterGeneratorSpi
+    extends java.security.AlgorithmParameterGeneratorSpi
 {
     protected SecureRandom random;
     protected int strength = 1024;

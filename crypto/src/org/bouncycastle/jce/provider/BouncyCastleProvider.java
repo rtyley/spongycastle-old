@@ -81,7 +81,7 @@ public final class BouncyCastleProvider extends Provider
 
     private static final String[] ASYMMETRIC_CIPHERS =
     {
-        "DSA", "EC", "RSA", "GOST", "ECGOST", "ElGamal"
+        "DSA", "DH", "EC", "RSA", "GOST", "ECGOST", "ElGamal"
     };
 
     /*
@@ -172,7 +172,6 @@ public final class BouncyCastleProvider extends Provider
         //
         // algorithm parameter generators
         //
-        put("AlgorithmParameterGenerator.DH", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DH");
 
         put("AlgorithmParameterGenerator.DES", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
         put("AlgorithmParameterGenerator.DESEDE", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$DES");
@@ -181,23 +180,19 @@ public final class BouncyCastleProvider extends Provider
         put("AlgorithmParameterGenerator.RC2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
         put("AlgorithmParameterGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JDKAlgorithmParameterGenerator$RC2");
 
-        put("Alg.Alias.AlgorithmParameterGenerator.DIFFIEHELLMAN", "DH");
-        put("Alg.Alias.AlgorithmParameterGenerator.GOST-3410", "GOST3410");
+
         //
         // algorithm parameters
         //
         put("AlgorithmParameters.OAEP", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$OAEP");
         put("AlgorithmParameters.PSS", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PSS");
-        put("AlgorithmParameters.DH", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$DH");
-        put("Alg.Alias.AlgorithmParameters.DIFFIEHELLMAN", "DH");
 
         put("AlgorithmParameters.IES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IES");
         put("AlgorithmParameters.PKCS12PBE", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PKCS12PBE");
 
         put("AlgorithmParameters." + PKCSObjectIdentifiers.id_PBKDF2, "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PBKDF2");
 
-        put("AlgorithmParameters.GOST3410", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$GOST3410");
-        put("Alg.Alias.AlgorithmParameters.GOST-3410", "GOST3410");
+
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHA1ANDRC2", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND3-KEYTRIPLEDES", "PKCS12PBE");
         put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND2-KEYTRIPLEDES", "PKCS12PBE");
@@ -255,8 +250,7 @@ public final class BouncyCastleProvider extends Provider
         //
         // key agreement
         //
-        put("KeyAgreement.DH", "org.bouncycastle.jce.provider.JCEDHKeyAgreement");
-        put("Alg.Alias.KeyAgreement.DIFFIEHELLMAN", "DH");
+
         
         //
         // cipher engines
@@ -354,20 +348,13 @@ public final class BouncyCastleProvider extends Provider
         //
         // key pair generators.
         //
-        put("KeyPairGenerator.DH", "org.bouncycastle.jce.provider.JDKKeyPairGenerator$DH");
 
-
-        put("Alg.Alias.KeyPairGenerator.DIFFIEHELLMAN", "DH");
-        
 
 
         //
         // key factories
         //
-        put("KeyFactory.DH", "org.bouncycastle.jce.provider.JDKKeyFactory$DH");
 
-
-        put("Alg.Alias.KeyFactory.DIFFIEHELLMAN", "DH");
 
 
 

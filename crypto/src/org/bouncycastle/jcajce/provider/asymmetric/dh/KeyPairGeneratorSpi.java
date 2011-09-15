@@ -16,7 +16,7 @@ import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 
-public abstract class KeyPairGenerator
+public class KeyPairGeneratorSpi
     extends java.security.KeyPairGenerator
 {
     private static Hashtable params = new Hashtable();
@@ -28,7 +28,7 @@ public abstract class KeyPairGenerator
     SecureRandom random = new SecureRandom();
     boolean initialised = false;
 
-    public KeyPairGenerator()
+    public KeyPairGeneratorSpi()
     {
         super("DH");
     }
@@ -89,6 +89,6 @@ public abstract class KeyPairGenerator
         DHPrivateKeyParameters priv = (DHPrivateKeyParameters)pair.getPrivate();
 
         return new KeyPair(new BCDHPublicKey(pub),
-            new JCEDHPrivateKey(priv));
+            new BCDHPrivateKey(priv));
     }
 }

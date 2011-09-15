@@ -26,6 +26,10 @@ public class GOST
             provider.addAlgorithm("Alg.Alias.KeyFactory.GOST-3410", "GOST3410");
             provider.addAlgorithm("Alg.Alias.KeyFactory.GOST-3410-94", "GOST3410");
 
+
+            provider.addAlgorithm("AlgorithmParameters.GOST3410", PREFIX + "AlgorithmParametersSpi");
+            provider.addAlgorithm("AlgorithmParameterGenerator.GOST3410", PREFIX + "AlgorithmParameterGeneratorSpi");
+
             registerOid(provider, CryptoProObjectIdentifiers.gostR3410_94, "GOST3410", new KeyFactorySpi());
             registerOidAlgorithmParameters(provider, CryptoProObjectIdentifiers.gostR3410_94, "GOST3410");
 
@@ -36,6 +40,10 @@ public class GOST
             provider.addAlgorithm("Alg.Alias.Signature.GOST3411WITHGOST3410", "GOST3410");
             provider.addAlgorithm("Alg.Alias.Signature.GOST3411WithGOST3410", "GOST3410");
             provider.addAlgorithm("Alg.Alias.Signature." + CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94, "GOST3410");
+
+
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator.GOST-3410", "GOST3410");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters.GOST-3410", "GOST3410");
         }
     }
 }
