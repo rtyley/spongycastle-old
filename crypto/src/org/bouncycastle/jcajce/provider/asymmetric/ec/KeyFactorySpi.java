@@ -126,7 +126,7 @@ public class KeyFactorySpi
 
         if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
-            return new BCECPrivateKey(keyInfo);
+            return new BCECPrivateKey(algorithm, keyInfo);
         }
         else
         {
@@ -141,7 +141,7 @@ public class KeyFactorySpi
 
         if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
-            return new BCECPublicKey(keyInfo);
+            return new BCECPublicKey(algorithm, keyInfo);
         }
         else
         {

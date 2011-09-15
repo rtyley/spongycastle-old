@@ -186,16 +186,18 @@ public class BCECPrivateKey
     }
 
     BCECPrivateKey(
+        String         algorithm,
         PrivateKeyInfo info)
         throws IOException
     {
+        this.algorithm = algorithm;
         populateFromPrivKeyInfo(info);
     }
 
     private void populateFromPrivKeyInfo(PrivateKeyInfo info)
         throws IOException
     {
-        X962Parameters params = new X962Parameters((ASN1Primitive)info.getAlgorithmId().getParameters());
+        X962Parameters params = X962Parameters.getInstance(info.getPrivateKeyAlgorithm().getParameters());
 
         if (params.isNamedCurve())
         {

@@ -202,7 +202,7 @@ public class ReaderTest
 
         doDudPasswordTest("7fd98", 0, "corrupted stream - out of bounds length found");
         doDudPasswordTest("ef677", 1, "corrupted stream - out of bounds length found");
-        doDudPasswordTest("800ce", 2, "cannot recognise object in stream");
+        doDudPasswordTest("800ce", 2, "unknown tag 26 encountered");
         doDudPasswordTest("b6cd8", 3, "DEF length 81 object truncated by 56");
         doDudPasswordTest("28ce09", 4, "DEF length 110 object truncated by 28");
         doDudPasswordTest("2ac3b9", 5, "DER length more than 4 bytes: 11");
@@ -211,7 +211,7 @@ public class ReaderTest
         doDudPasswordTest("2f4142", 8, "DER length more than 4 bytes: 14");
         doDudPasswordTest("2fe9bb", 9, "DER length more than 4 bytes: 65");
         doDudPasswordTest("3ee7a8", 10, "DER length more than 4 bytes: 57");
-        doDudPasswordTest("41af75", 11, "malformed sequence in DSA private key");
+        doDudPasswordTest("41af75", 11, "unknown tag 16 encountered");
         doDudPasswordTest("1704a5", 12, "corrupted stream detected");
         doDudPasswordTest("1c5822", 13, "corrupted stream detected");
         doDudPasswordTest("5a3d16", 14, "corrupted stream detected");

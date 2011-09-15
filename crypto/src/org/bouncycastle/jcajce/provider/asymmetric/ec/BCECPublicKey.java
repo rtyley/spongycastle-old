@@ -171,14 +171,16 @@ public class BCECPublicKey
     }
 
     BCECPublicKey(
+        String algorithm,
         SubjectPublicKeyInfo info)
     {
+        this.algorithm = algorithm;
         populateFromPubKeyInfo(info);
     }
 
     private void populateFromPubKeyInfo(SubjectPublicKeyInfo info)
     {
-        if (info.getAlgorithmId().getObjectId().equals(CryptoProObjectIdentifiers.gostR3410_2001))
+        if (info.getAlgorithm().getAlgorithm().equals(CryptoProObjectIdentifiers.gostR3410_2001))
         {
             DERBitString bits = info.getPublicKeyData();
             ASN1OctetString key;
