@@ -9,10 +9,7 @@ public class Tables1kGCMExponentiator implements GCMExponentiator
 
     public void init(byte[] x)
     {
-        // Initial value is little-endian 1
-        lookupPowX2[0] = new byte[16];
-        lookupPowX2[0][0] = (byte)0x80;
-
+        lookupPowX2[0] = GCMUtil.oneAsBytes();
         lookupPowX2[1] = Arrays.clone(x); 
 
         for (int i = 2; i != 64; ++i)
@@ -25,7 +22,6 @@ public class Tables1kGCMExponentiator implements GCMExponentiator
 
     public void exponentiateX(long pow, byte[] output)
     {
-        // Initial value is little-endian 1
         byte[] y = GCMUtil.oneAsBytes();
         int powX2 = 1;
 

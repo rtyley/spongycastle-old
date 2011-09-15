@@ -1,6 +1,5 @@
 package org.bouncycastle.crypto.test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
 
@@ -55,7 +54,7 @@ public class GCMReorderTest
             byte[] P = randomBlocks(100);
             byte[] A = randomBytes(1000);
             byte[] PA = concatArrays(P, A);
-    
+
             byte[] ghashP_ = GHASH(P, EMPTY);
             byte[] ghashA_ = GHASH(A, EMPTY);
             byte[] ghashPA_ = GHASH(PA, EMPTY);
@@ -176,17 +175,17 @@ public class GCMReorderTest
         return bs;
     }
 
-    private byte[] concatArrays(byte[] P, byte[] A) throws IOException
+    private byte[] concatArrays(byte[] a, byte[] b) throws IOException
     {
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        buf.write(P);
-        buf.write(A);
-        return buf.toByteArray();
+        byte[] ab = new byte[a.length + b.length];
+        System.arraycopy(a, 0, ab, 0, a.length);
+        System.arraycopy(b, 0, ab, a.length, b.length);
+        return ab;
     }
 
     private byte[] combine_GHASH(byte[] ghashA_, long bitlenA, byte[] ghash_C, long bitlenC)
     {
-        // Note: bitlenP must be aligned to the block size
+        // Note: bitlenA must be aligned to the block size
 
         long c = (bitlenC + 127) >>> 7;
 
@@ -289,8 +288,8 @@ public class GCMReorderTest
     private static byte[] lengthBlock(long bitlenA, long bitlenC)
     {
         byte[] tmp = new byte[16];
-        packLength(bitlenA, tmp, 0);
-        packLength(bitlenC, tmp, 8);
+        Pack.longToBigEndian(bitlenA, tmp, 0);
+        Pack.longToBigEndian(bitlenC, tmp, 8);
         return tmp;
     }
 
@@ -300,12 +299,6 @@ public class GCMReorderTest
         {
             block[i] ^= val[i];
         }
-    }
-
-    private static void packLength(long count, byte[] bs, int off)
-    {
-        Pack.intToBigEndian((int)(count >>> 32), bs, off); 
-        Pack.intToBigEndian((int)count, bs, off + 4);
     }
 
     private static byte[] multiply(byte[] a, byte[] b)

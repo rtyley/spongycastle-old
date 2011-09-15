@@ -67,9 +67,6 @@ public class Tables64kGCMMultiplier
             z[3] ^= m[3];
         }
 
-        Pack.intToBigEndian(z[0], x, 0);
-        Pack.intToBigEndian(z[1], x, 4);
-        Pack.intToBigEndian(z[2], x, 8);
-        Pack.intToBigEndian(z[3], x, 12);
+        Pack.intToBigEndian(z, x, 0);
     }
 }
