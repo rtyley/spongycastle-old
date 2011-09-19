@@ -47,3 +47,4 @@ Bouncy Castle uses an [adaptation of the MIT X11 License](http://www.bouncycastl
 #### Projects using Spongy Castle
 
 [JMRTD for Android](http://martijno.blogspot.com/2011/07/jmrtd-for-android.html)
+[Gorilla for Android](https://github.com/zdia/gorilla/wiki/Gorilla-for-Android)
