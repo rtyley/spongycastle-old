@@ -282,6 +282,11 @@ public class PGPSignature
         PGPPublicKey    key)
         throws PGPException, SignatureException
     {
+        if (verifier == null)
+        {
+            throw new PGPException("PGPSignature not initialised - call init().");
+        }
+
         updateWithPublicKey(key);
 
         //
@@ -322,6 +327,11 @@ public class PGPSignature
         PGPPublicKey    key)
         throws PGPException, SignatureException
     {
+        if (verifier == null)
+        {
+            throw new PGPException("PGPSignature not initialised - call init().");
+        }
+
         updateWithPublicKey(key);
             
         //
@@ -349,6 +359,11 @@ public class PGPSignature
         PGPPublicKey    pubKey) 
         throws SignatureException, PGPException
     {
+        if (verifier == null)
+        {
+            throw new PGPException("PGPSignature not initialised - call init().");
+        }
+
         updateWithPublicKey(masterKey);
         updateWithPublicKey(pubKey);
 
@@ -384,10 +399,15 @@ public class PGPSignature
         PGPPublicKey    pubKey) 
         throws SignatureException, PGPException
     {
+        if (verifier == null)
+        {
+            throw new PGPException("PGPSignature not initialised - call init().");
+        }
+
         if (this.getSignatureType() != KEY_REVOCATION
             && this.getSignatureType() != SUBKEY_REVOCATION)
         {
-            throw new IllegalStateException("signature is not a key signature");
+            throw new PGPException("signature is not a key signature");
         }
 
         updateWithPublicKey(pubKey);
