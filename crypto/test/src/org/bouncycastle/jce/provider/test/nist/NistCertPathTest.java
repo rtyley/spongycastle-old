@@ -22,6 +22,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -695,7 +696,8 @@ public class NistCertPathTest
         
         params.addCertStore(store);
         params.setRevocationEnabled(true);
-        
+        params.setDate(new GregorianCalendar(2010, 1, 1).getTime());
+
         if (policies != null)
         {
             params.setExplicitPolicyRequired(true);
@@ -755,6 +757,7 @@ public class NistCertPathTest
         }
 
         builderParams.addCertStore(store);
+        builderParams.setDate(new GregorianCalendar(2010, 1, 1).getTime());
 
         try
         {
