@@ -30,16 +30,16 @@ public class RSASSAPSSparams
     public static RSASSAPSSparams getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof RSASSAPSSparams)
+        if (obj instanceof RSASSAPSSparams)
         {
             return (RSASSAPSSparams)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new RSASSAPSSparams((ASN1Sequence)obj);
+            return new RSASSAPSSparams(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
     
     /**
@@ -65,7 +65,7 @@ public class RSASSAPSSparams
         this.trailerField = trailerField;
     }
     
-    public RSASSAPSSparams(
+    private RSASSAPSSparams(
         ASN1Sequence seq)
     {
         hashAlgorithm = DEFAULT_HASH_ALGORITHM;

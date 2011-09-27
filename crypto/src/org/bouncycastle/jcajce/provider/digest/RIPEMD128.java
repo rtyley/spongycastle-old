@@ -1,15 +1,14 @@
 package org.bouncycastle.jcajce.provider.digest;
 
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.crypto.CipherKeyGenerator;
-import org.bouncycastle.crypto.digests.SHA224Digest;
+import org.bouncycastle.crypto.digests.RIPEMD128Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.provider.JCEKeyGenerator;
 import org.bouncycastle.jce.provider.JCEMac;
 
-public class SHA224
+public class RIPEMD128
 {
     static public class Digest
         extends BCMessageDigest
@@ -17,25 +16,28 @@ public class SHA224
     {
         public Digest()
         {
-            super(new SHA224Digest());
+            super(new RIPEMD128Digest());
         }
 
         public Object clone()
             throws CloneNotSupportedException
         {
             Digest d = (Digest)super.clone();
-            d.digest = new SHA224Digest((SHA224Digest)digest);
+            d.digest = new RIPEMD128Digest((RIPEMD128Digest)digest);
 
             return d;
         }
     }
 
+    /**
+     * RIPEMD128 HMac
+     */
     public static class HashMac
         extends JCEMac
     {
         public HashMac()
         {
-            super(new HMac(new SHA224Digest()));
+            super(new HMac(new RIPEMD128Digest()));
         }
     }
 
@@ -44,14 +46,14 @@ public class SHA224
     {
         public KeyGenerator()
         {
-            super("HMACSHA224", 224, new CipherKeyGenerator());
+            super("HMACRIPEMD128", 128, new CipherKeyGenerator());
         }
     }
 
     public static class Mappings
         extends DigestAlgorithmProvider
     {
-        private static final String PREFIX = SHA224.class.getName();
+        private static final String PREFIX = RIPEMD128.class.getName();
 
         public Mappings()
         {
@@ -59,13 +61,10 @@ public class SHA224
 
         public void configure(ConfigurableProvider provider)
         {
-            provider.addAlgorithm("MessageDigest.SHA-224", PREFIX + "$Digest");
-            provider.addAlgorithm("Alg.Alias.MessageDigest.SHA224", "SHA-224");
-            provider.addAlgorithm("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha224, "SHA-224");
+            provider.addAlgorithm("MessageDigest.RIPEMD128", PREFIX + "$Digest");
+            provider.addAlgorithm("Alg.Alias.MessageDigest." + TeleTrusTObjectIdentifiers.ripemd128, "RIPEMD128");            
 
-            addHMACAlgorithm(provider, "SHA224", PREFIX + "$HashMac",  PREFIX + "$KeyGenerator");
-            addHMACAlias(provider, "SHA224", PKCSObjectIdentifiers.id_hmacWithSHA224);
-
+            addHMACAlgorithm(provider, "RIPEMD128", PREFIX + "$HashMac", PREFIX + "$KeyGenerator");
         }
     }
 }

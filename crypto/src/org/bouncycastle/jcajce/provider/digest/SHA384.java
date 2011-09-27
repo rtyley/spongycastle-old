@@ -1,8 +1,13 @@
 package org.bouncycastle.jcajce.provider.digest;
 
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.digests.SHA384Digest;
+import org.bouncycastle.crypto.macs.HMac;
+import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
+import org.bouncycastle.jce.provider.JCEMac;
 
 public class SHA384
 {
@@ -25,6 +30,27 @@ public class SHA384
         }
     }
 
+    public static class HashMac
+        extends JCEMac
+    {
+        public HashMac()
+        {
+            super(new HMac(new SHA384Digest()));
+        }
+    }
+
+    /**
+     * HMACSHA384
+     */
+    public static class KeyGenerator
+        extends BaseKeyGenerator
+    {
+        public KeyGenerator()
+        {
+            super("HMACSHA384", 384, new CipherKeyGenerator());
+        }
+    }
+
     public static class Mappings
         extends DigestAlgorithmProvider
     {
@@ -39,6 +65,9 @@ public class SHA384
             provider.addAlgorithm("MessageDigest.SHA-384", PREFIX + "$Digest");
             provider.addAlgorithm("Alg.Alias.MessageDigest.SHA384", "SHA-384");
             provider.addAlgorithm("Alg.Alias.MessageDigest." + NISTObjectIdentifiers.id_sha384, "SHA-384");
+
+            addHMACAlgorithm(provider, "SHA384", PREFIX + "$HashMac",  PREFIX + "$KeyGenerator");
+            addHMACAlias(provider, "SHA384", PKCSObjectIdentifiers.id_hmacWithSHA384);
         }
     }
 }
