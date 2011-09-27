@@ -78,7 +78,6 @@ public class TimeStampTokenGenerator
     String          digestOID;
     AttributeTable  signedAttr;
     AttributeTable  unsignedAttr;
-    CertStore       certsAndCrls;
 
     private List certs = new ArrayList();
     private List crls = new ArrayList();
