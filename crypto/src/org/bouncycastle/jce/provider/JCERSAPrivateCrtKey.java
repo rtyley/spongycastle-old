@@ -1,4 +1,4 @@
-package org.bouncycastle.jcajce.provider.asymmetric.rsa;
+package org.bouncycastle.jce.provider;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -16,8 +16,8 @@ import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 /**
  * A provider representation for a RSA private key, with CRT factors included.
  */
-public class BCRSAPrivateCrtKey
-    extends BCRSAPrivateKey
+public class JCERSAPrivateCrtKey
+    extends JCERSAPrivateKey
     implements RSAPrivateCrtKey
 {
     static final long serialVersionUID = 7834723820638524718L;
@@ -34,7 +34,7 @@ public class BCRSAPrivateCrtKey
      *
      * @param key the parameters object representing the private key.
      */
-    BCRSAPrivateCrtKey(
+    JCERSAPrivateCrtKey(
         RSAPrivateCrtKeyParameters key)
     {
         super(key);
@@ -52,7 +52,7 @@ public class BCRSAPrivateCrtKey
      *
      * @param spec the spec to be used in construction.
      */
-    BCRSAPrivateCrtKey(
+    JCERSAPrivateCrtKey(
         RSAPrivateCrtKeySpec spec)
     {
         this.modulus = spec.getModulus();
@@ -70,7 +70,7 @@ public class BCRSAPrivateCrtKey
      *
      * @param key the object implementing the RSAPrivateCrtKey interface.
      */
-    BCRSAPrivateCrtKey(
+    JCERSAPrivateCrtKey(
         RSAPrivateCrtKey key)
     {
         this.modulus = key.getModulus();
@@ -86,18 +86,18 @@ public class BCRSAPrivateCrtKey
     /**
      * construct an RSA key from a private key info object.
      */
-    BCRSAPrivateCrtKey(
-        PrivateKeyInfo info)
+    JCERSAPrivateCrtKey(
+        PrivateKeyInfo  info)
         throws IOException
     {
-        this(RSAPrivateKey.getInstance(info.parsePrivateKey()));
+        this(org.bouncycastle.asn1.pkcs.RSAPrivateKey.getInstance(info.parsePrivateKey()));
     }
 
     /**
      * construct an RSA key from a ASN.1 RSA private key object.
      */
-    BCRSAPrivateCrtKey(
-        RSAPrivateKey key)
+    JCERSAPrivateCrtKey(
+        RSAPrivateKey  key)
     {
         this.modulus = key.getModulus();
         this.publicExponent = key.getPublicExponent();
