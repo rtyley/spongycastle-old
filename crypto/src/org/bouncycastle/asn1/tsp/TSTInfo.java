@@ -77,7 +77,7 @@ public class TSTInfo
         
         while (e.hasMoreElements())
         {
-            ASN1Primitive o = (ASN1Primitive) e.nextElement();
+            ASN1Object o = (ASN1Object) e.nextElement();
 
             if (o instanceof ASN1TaggedObject)
             {
@@ -95,7 +95,7 @@ public class TSTInfo
                     throw new IllegalArgumentException("Unknown tag value " + tagged.getTagNo());
                 }
             }
-            else if (o instanceof DERSequence)
+            else if (o instanceof ASN1Sequence || o instanceof Accuracy)
             {
                 accuracy = Accuracy.getInstance(o);
             }
