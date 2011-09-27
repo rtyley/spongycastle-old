@@ -10,10 +10,12 @@ import javax.crypto.spec.IvParameterSpec;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.GOST28147Engine;
+import org.bouncycastle.crypto.macs.GOST28147Mac;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameterGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
+import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
 import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
 import org.bouncycastle.jce.interfaces.ConfigurableProvider;
@@ -40,6 +42,18 @@ public final class GOST28147
         public CBC()
         {
             super(new CBCBlockCipher(new GOST28147Engine()), 64);
+        }
+    }
+
+    /**
+     * GOST28147
+     */
+    public static class Mac
+        extends BaseMac
+    {
+        public Mac()
+        {
+            super(new GOST28147Mac());
         }
     }
 
@@ -83,7 +97,7 @@ public final class GOST28147
 
             try
             {
-                params = AlgorithmParameters.getInstance("AES", BouncyCastleProvider.PROVIDER_NAME);
+                params = AlgorithmParameters.getInstance("GOST28147", BouncyCastleProvider.PROVIDER_NAME);
                 params.init(new IvParameterSpec(iv));
             }
             catch (Exception e)
@@ -115,7 +129,6 @@ public final class GOST28147
 
         public void configure(ConfigurableProvider provider)
         {
-
             provider.addAlgorithm("Cipher.GOST28147", PREFIX + "$ECB");
             provider.addAlgorithm("Alg.Alias.Cipher.GOST", "GOST28147");
             provider.addAlgorithm("Alg.Alias.Cipher.GOST-28147", "GOST28147");
@@ -126,6 +139,8 @@ public final class GOST28147
             provider.addAlgorithm("Alg.Alias.KeyGenerator.GOST-28147", "GOST28147");
             provider.addAlgorithm("Alg.Alias.KeyGenerator." + CryptoProObjectIdentifiers.gostR28147_cbc, "GOST28147");
 
+            provider.addAlgorithm("Mac.GOST28147MAC", PREFIX + "$Mac");
+            provider.addAlgorithm("Alg.Alias.Mac.GOST28147", "GOST28147MAC");
         }
     }
 }

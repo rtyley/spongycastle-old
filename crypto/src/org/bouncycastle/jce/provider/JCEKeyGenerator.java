@@ -104,16 +104,4 @@ public class JCEKeyGenerator
             super("RC2", 128, new CipherKeyGenerator());
         }
     }
-
-    /**
-     * GOST28147
-     */
-    public static class GOST28147
-        extends JCEKeyGenerator
-    {
-        public GOST28147()
-        {
-            super("GOST28147", 256, new CipherKeyGenerator());
-        }
-    }
 }

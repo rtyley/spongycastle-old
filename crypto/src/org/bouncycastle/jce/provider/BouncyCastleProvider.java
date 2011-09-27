@@ -11,7 +11,6 @@ import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.bc.BCObjectIdentifiers;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -59,7 +58,7 @@ public final class BouncyCastleProvider extends Provider
     private static final String SYMMETRIC_CIPHER_PACKAGE = "org.bouncycastle.jcajce.provider.symmetric.";
     private static final String[] SYMMETRIC_CIPHERS =
     {
-        "AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "DES", "DESede", "Grainv1", "Grain128", "HC128", "HC256", "IDEA",
+        "AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "DES", "DESede", "GOST28147", "Grainv1", "Grain128", "HC128", "HC256", "IDEA",
         "Noekeon", "RC2", "RC5", "RC6", "Rijndael", "Salsa20", "SEED", "Serpent", "Skipjack", "TEA", "Twofish", "VMPC", "VMPCKSA3", "XTEA"
     };
 
@@ -252,10 +251,6 @@ public final class BouncyCastleProvider extends Provider
         
         put("Alg.Alias.Cipher.PBEWithSHAAnd3KeyTripleDES",  "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
         
-        put("Cipher.GOST28147", "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147");
-        put("Alg.Alias.Cipher.GOST", "GOST28147");
-        put("Alg.Alias.Cipher.GOST-28147", "GOST28147");
-        put("Cipher." + CryptoProObjectIdentifiers.gostR28147_cbc, "org.bouncycastle.jce.provider.JCEBlockCipher$GOST28147cbc");
 
         put("Cipher.ECIES", "org.bouncycastle.jce.provider.JCEIESCipher$ECIES");
         put("Cipher.BrokenECIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenECIES");
@@ -333,10 +328,6 @@ public final class BouncyCastleProvider extends Provider
         put("KeyGenerator.RC2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
         put("KeyGenerator.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEKeyGenerator$RC2");
 
-        put("KeyGenerator.GOST28147", "org.bouncycastle.jce.provider.JCEKeyGenerator$GOST28147");
-        put("Alg.Alias.KeyGenerator.GOST", "GOST28147");
-        put("Alg.Alias.KeyGenerator.GOST-28147", "GOST28147");
-        put("Alg.Alias.KeyGenerator." + CryptoProObjectIdentifiers.gostR28147_cbc, "GOST28147");
 
         //
         // key pair generators.
@@ -526,8 +517,7 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.Mac.RC2/CFB8", "RC2MAC/CFB8");
 
 
-        put("Mac.GOST28147MAC", "org.bouncycastle.jce.provider.JCEMac$GOST28147");
-        put("Alg.Alias.Mac.GOST28147", "GOST28147MAC");
+
 
         put("Mac.OLDHMACSHA384", "org.bouncycastle.jce.provider.JCEMac$OldSHA384");
 
@@ -547,7 +537,7 @@ public final class BouncyCastleProvider extends Provider
 
     public boolean hasAlgorithm(String type, String name)
     {
-        return containsKey(type + "." + name);
+        return containsKey(type + "." + name) || containsKey("Alg.Alias." + type + "." + name);
     }
 
     public void addAlgorithm(String key, String value)

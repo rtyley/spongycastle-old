@@ -26,7 +26,6 @@ import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
 import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
-import org.bouncycastle.crypto.macs.GOST28147Mac;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.macs.ISO9797Alg3Mac;
 import org.bouncycastle.crypto.macs.OldHMac;
@@ -181,17 +180,6 @@ public class JCEMac
         }
     }
 
-    /**
-     * GOST28147
-     */
-    public static class GOST28147
-        extends JCEMac
-    {
-        public GOST28147()
-        {
-            super(new GOST28147Mac());
-        }
-    }
 
     
 
