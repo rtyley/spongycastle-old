@@ -31,6 +31,7 @@ public class ASN1ObjectIdentifier
      */
     public boolean on(ASN1ObjectIdentifier stem)
     {
-        return this.getId().startsWith(stem.getId());
+        String id = getId(), stemId = stem.getId();
+        return id.length() > stemId.length() && id.charAt(stemId.length()) == '.' && id.startsWith(stemId);
     }
 }
