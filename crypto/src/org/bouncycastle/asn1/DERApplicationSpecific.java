@@ -46,9 +46,11 @@ public class DERApplicationSpecific
         ASN1Encodable object)
         throws IOException
     {
-        byte[] data = object.toASN1Primitive().getEncoded(ASN1Encoding.DER);
+        ASN1Primitive primitive = object.toASN1Primitive();
 
-        this.isConstructed = explicit;
+        byte[] data = primitive.getEncoded(ASN1Encoding.DER);
+
+        this.isConstructed = explicit || (primitive instanceof ASN1Set || primitive instanceof ASN1Sequence);
         this.tag = tag;
 
         if (explicit)
@@ -57,7 +59,7 @@ public class DERApplicationSpecific
         }
         else
         {
-            int lenBytes = getLengthOfLength(data);
+            int lenBytes = getLengthOfHeader(data);
             byte[] tmp = new byte[data.length - lenBytes];
             System.arraycopy(data, lenBytes, tmp, 0, tmp.length);
             this.octets = tmp;
@@ -84,16 +86,29 @@ public class DERApplicationSpecific
         this.octets = bOut.toByteArray();
     }
 
-    private int getLengthOfLength(byte[] data)
+    private int getLengthOfHeader(byte[] data)
     {
-        int count = 2;               // TODO: assumes only a 1 byte tag number
+        int length = data[1] & 0xff; // TODO: assumes 1 byte tag
 
-        while((data[count - 1] & 0x80) != 0)
+        if (length == 0x80)
         {
-            count++;
+            return 2;      // indefinite-length encoding
         }
 
-        return count;
+        if (length > 127)
+        {
+            int size = length & 0x7f;
+
+            // Note: The invalid long form "0xff" (see X.690 8.1.3.5c) will be caught here
+            if (size > 4)
+            {
+                throw new IllegalStateException("DER length more than 4 bytes: " + size);
+            }
+
+            return size + 2;
+        }
+
+        return 2;
     }
 
     public boolean isConstructed()

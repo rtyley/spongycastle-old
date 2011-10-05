@@ -23,4 +23,14 @@ public class ASN1ObjectIdentifier
     {
         return new ASN1ObjectIdentifier(getId() + "." + branchID);
     }
+
+    /**
+     * Return  true if this oid is an extension of the passed in branch, stem.
+     * @param stem the arc or branch that is a possible parent.
+     * @return  true if the branch is on the passed in stem, false otherwise.
+     */
+    public boolean on(ASN1ObjectIdentifier stem)
+    {
+        return this.getId().startsWith(stem.getId());
+    }
 }
