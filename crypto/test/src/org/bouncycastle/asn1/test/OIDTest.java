@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -99,6 +100,25 @@ public class OIDTest
         }
     }
 
+    private void branchCheck(String stem, String branch)
+    {
+        String expected = stem + "." + branch;
+        String actual = new ASN1ObjectIdentifier(stem).branch(branch).getId();
+
+        if (!expected.equals(actual))
+        {
+            fail("failed 'branch' check for " + stem + "/" + branch);
+        }
+    }
+
+    private void onCheck(String stem, String test, boolean expected)
+    {
+        if (expected != new ASN1ObjectIdentifier(test).on(new ASN1ObjectIdentifier(stem)))
+        {
+            fail("failed 'on' check for " + stem + "/" + test);
+        }
+    }
+
     public void performTest()
         throws IOException
     {
@@ -125,6 +145,17 @@ public class OIDTest
         invalidOidCheck(".12.345.77.234.");
         invalidOidCheck("1.2.3.4.A.5");
         invalidOidCheck("1,2");
+
+        branchCheck("1.1", "2.2");
+
+        onCheck("1.1", "1.1", false);
+        onCheck("1.1", "1.2", false);
+        onCheck("1.1", "1.2.1", false);
+        onCheck("1.1", "2.1", false);
+        onCheck("1.1", "1.11", false);
+        onCheck("1.12", "1.1.2", false);
+        onCheck("1.1", "1.1.1", true);
+        onCheck("1.1", "1.1.2", true);
     }
 
     public static void main(
