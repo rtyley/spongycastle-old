@@ -68,7 +68,16 @@
 			<testResource>
 				<directory>test/src</directory>
 			</testResource>
+			<testResource>
+				<directory>./</directory>
+				<includes>
+					<include>test.*</include>
+					<include>secret.bpg</include>
+					<include>pub.bpg</include>
+				</includes>
+			</testResource>
 		</testResources>
+		
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -86,8 +95,6 @@
 						<exclude>org/*castle/jcajce/**/*.java</exclude>
 						<exclude>org/*castle/sasn1/**/*.java</exclude>
 						<exclude>org/*castle/tsp/**/*.java</exclude>
-						<exclude>org/*castle/openpgp/**/*.java</exclude>
-						<exclude>org/*castle/bcpg/**/*.java</exclude>
 					</excludes>
 				</configuration>
 
@@ -106,8 +113,6 @@
 								<exclude>org/*castle/jcajce/**/*.java</exclude>
 								<exclude>org/*castle/sasn1/**/*.java</exclude>
 								<exclude>org/*castle/tsp/**/*.java</exclude>
-								<exclude>org/*castle/openpgp/**/*.java</exclude>
-								<exclude>org/*castle/bcpg/**/*.java</exclude>
 							</testExcludes>
 						</configuration>
 						<goals>
