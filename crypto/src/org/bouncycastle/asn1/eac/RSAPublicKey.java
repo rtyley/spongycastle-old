@@ -1,6 +1,5 @@
 package org.bouncycastle.asn1.eac;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Enumeration;
 
@@ -34,18 +33,11 @@ public class RSAPublicKey
     private static int exponentValid = 0x02;
 
     RSAPublicKey(ASN1Sequence seq)
-        throws IOException
     {
         Enumeration en = seq.getObjects();
 
-        this.usage = (ASN1ObjectIdentifier)ASN1ObjectIdentifier.getInstance(en.nextElement());
+        this.usage = ASN1ObjectIdentifier.getInstance(en.nextElement());
 
-        // TODO: add later
-//        if (!SignatureType.isRSA(type))
-//        {
-//            throw new IllegalArgumentException("Not an RSA object");
-//        }
-//
         while (en.hasMoreElements())
         {
             UnsignedInteger val = UnsignedInteger.getInstance(en.nextElement());
@@ -59,23 +51,21 @@ public class RSAPublicKey
                 setExponent(val);
                 break;
             default:
-                throw new IOException("Unknown DERTaggedObject :" + val.getTagNo() + "-> not an Iso7816RSAPublicKeyStructure");
+                throw new IllegalArgumentException("Unknown DERTaggedObject :" + val.getTagNo() + "-> not an Iso7816RSAPublicKeyStructure");
             }
         }
         if (valid != 0x3)
         {
-            throw new IOException("missing argument -> not an Iso7816RSAPublicKeyStructure");
+            throw new IllegalArgumentException("missing argument -> not an Iso7816RSAPublicKeyStructure");
         }
     }
 
-    public RSAPublicKey(BigInteger modulus, BigInteger exponent)
-        throws IOException
+    public RSAPublicKey(ASN1ObjectIdentifier usage, BigInteger modulus, BigInteger exponent)
     {
+        this.usage = usage;
         this.modulus = modulus;
         this.exponent = exponent;
     }
-
-
 
     public ASN1ObjectIdentifier getUsage()
     {
@@ -93,7 +83,6 @@ public class RSAPublicKey
     }
 
     private void setModulus(UnsignedInteger modulus)
-        throws IOException
     {
         if ((valid & modulusValid) == 0)
         {
@@ -102,12 +91,11 @@ public class RSAPublicKey
         }
         else
         {
-            throw new IOException("Modulus already set");
+            throw new IllegalArgumentException("Modulus already set");
         }
     }
 
     private void setExponent(UnsignedInteger exponent)
-        throws IOException
     {
         if ((valid & exponentValid) == 0)
         {
@@ -116,7 +104,7 @@ public class RSAPublicKey
         }
         else
         {
-            throw new IOException("Exponent already set");
+            throw new IllegalArgumentException("Exponent already set");
         }
     }
 
@@ -125,8 +113,8 @@ public class RSAPublicKey
         ASN1EncodableVector v = new ASN1EncodableVector();
 
         v.add(usage);
-        v.add(new UnsignedInteger(modulusValid, getModulus()));
-        v.add(new UnsignedInteger(exponentValid, getPublicExponent()));
+        v.add(new UnsignedInteger(0x01, getModulus()));
+        v.add(new UnsignedInteger(0x02, getPublicExponent()));
 
         return new DERSequence(v);
     }

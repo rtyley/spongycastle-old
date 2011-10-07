@@ -86,6 +86,36 @@ public class DERApplicationSpecific
         this.octets = bOut.toByteArray();
     }
 
+    public static DERApplicationSpecific getInstance(Object obj)
+    {
+        if (obj == null || obj instanceof DERApplicationSpecific)
+        {
+            return (DERApplicationSpecific)obj;
+        }
+        else if (obj instanceof byte[])
+        {
+            try
+            {
+                return DERApplicationSpecific.getInstance(ASN1Primitive.fromByteArray((byte[])obj));
+            }
+            catch (IOException e)
+            {
+                throw new IllegalArgumentException("failed to construct object from byte[]: " + e.getMessage());
+            }
+        }
+        else if (obj instanceof ASN1Encodable)
+        {
+            ASN1Primitive primitive = ((ASN1Encodable)obj).toASN1Primitive();
+
+            if (primitive instanceof ASN1Sequence)
+            {
+                return (DERApplicationSpecific)primitive;
+            }
+        }
+
+        throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
+    }
+
     private int getLengthOfHeader(byte[] data)
     {
         int length = data[1] & 0xff; // TODO: assumes 1 byte tag

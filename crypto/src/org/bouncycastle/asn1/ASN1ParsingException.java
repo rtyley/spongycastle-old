@@ -5,12 +5,12 @@ public class ASN1ParsingException
 {
     private Throwable cause;
 
-    ASN1ParsingException(String message)
+    public ASN1ParsingException(String message)
     {
         super(message);
     }
 
-    ASN1ParsingException(String message, Throwable cause)
+    public ASN1ParsingException(String message, Throwable cause)
     {
         super(message);
         this.cause = cause;

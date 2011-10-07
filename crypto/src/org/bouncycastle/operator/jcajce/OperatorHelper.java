@@ -75,9 +75,9 @@ class OperatorHelper
         symmetricWrapperAlgNames.put(NISTObjectIdentifiers.id_aes128_wrap, "AESWrap");
         symmetricWrapperAlgNames.put(NISTObjectIdentifiers.id_aes192_wrap, "AESWrap");
         symmetricWrapperAlgNames.put(NISTObjectIdentifiers.id_aes256_wrap, "AESWrap");
-        symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia128_wrap, "CamilliaWrap");
-        symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia192_wrap, "CamilliaWrap");
-        symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia256_wrap, "CamilliaWrap");
+        symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia128_wrap, "CamelliaWrap");
+        symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia192_wrap, "CamelliaWrap");
+        symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia256_wrap, "CamelliaWrap");
         symmetricWrapperAlgNames.put(KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap, "SEEDWrap");
         symmetricWrapperAlgNames.put(PKCSObjectIdentifiers.des_EDE3_CBC, "DESede");
 

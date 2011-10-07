@@ -1,7 +1,5 @@
 package org.bouncycastle.asn1.eac;
 
-import java.io.IOException;
-
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -10,7 +8,6 @@ public abstract class PublicKeyDataObject
     extends ASN1Object
 {
     public static PublicKeyDataObject getInstance(Object obj)
-        throws IOException
     {
         if (obj instanceof PublicKeyDataObject)
         {
@@ -18,7 +15,17 @@ public abstract class PublicKeyDataObject
         }
         if (obj != null)
         {
-            return new RSAPublicKey(ASN1Sequence.getInstance(obj));
+            ASN1Sequence seq = ASN1Sequence.getInstance(obj);
+            ASN1ObjectIdentifier usage = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
+
+            if (usage.on(EACObjectIdentifiers.id_TA_ECDSA))
+            {
+                return new ECDSAPublicKey(seq);
+            }
+            else
+            {
+                return new RSAPublicKey(seq);
+            }
         }
 
         return null;

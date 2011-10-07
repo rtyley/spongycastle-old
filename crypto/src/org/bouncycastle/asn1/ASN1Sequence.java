@@ -30,7 +30,7 @@ public abstract class ASN1Sequence
         {
             try
             {
-                return ASN1Sequence.getInstance(ASN1Primitive.fromByteArray((byte[])obj));
+                return ASN1Sequence.getInstance(fromByteArray((byte[])obj));
             }
             catch (IOException e)
             {

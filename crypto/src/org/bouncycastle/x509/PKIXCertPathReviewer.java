@@ -2092,7 +2092,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             crl = (X509CRL)crl_iter.next();
             
             if (crl.getNextUpdate() == null
-                || new Date().before(crl.getNextUpdate()))
+                || paramsPKIX.getDate().before(crl.getNextUpdate()))
             {
                 validCrlFound = true;
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
@@ -2137,7 +2137,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                         }
                         
                         if (onlineCRL.getNextUpdate() == null
-                            || new Date().before(onlineCRL.getNextUpdate()))
+                            || pkixParams.getDate().before(onlineCRL.getNextUpdate()))
                         {
                             validCrlFound = true;
                             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
@@ -2254,7 +2254,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
             //
             // warn if a new crl is available
             //
-            if (crl.getNextUpdate() != null && crl.getNextUpdate().before(new Date()))
+            if (crl.getNextUpdate() != null && crl.getNextUpdate().before(pkixParams.getDate()))
             {
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlUpdateAvailable",
                         new Object[] {new TrustedInput(crl.getNextUpdate())});

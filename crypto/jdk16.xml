@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="crypto1.5" default="build" basedir=".">
+<project name="crypto1.6" default="build" basedir=".">
 
     <property name="bc.javac.source" value="1.6" />
     <property name="bc.javac.target" value="1.6" />
@@ -36,6 +36,8 @@
             <fileset dir="test/data" includes="**/*.crt" />
             <fileset dir="test/data" includes="**/*.crl" />
             <fileset dir="test/data" includes="**/*.der" />
+            <fileset dir="test/data" includes="**/*.csr" />
+            <fileset dir="test/data" includes="**/*.cvcert" />
         </copy>
         <available classname="com.puppycrawl.tools.checkstyle.CheckStyleTask" property="checkstyle.on" />
     </target>

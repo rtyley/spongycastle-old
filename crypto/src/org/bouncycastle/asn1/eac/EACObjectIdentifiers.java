@@ -38,6 +38,8 @@ public interface EACObjectIdentifiers
     static final ASN1ObjectIdentifier    id_TA_RSA_v1_5_SHA_256 = id_TA_RSA.branch("2");
     static final ASN1ObjectIdentifier    id_TA_RSA_PSS_SHA_1 = id_TA_RSA.branch("3");
     static final ASN1ObjectIdentifier    id_TA_RSA_PSS_SHA_256 = id_TA_RSA.branch("4");
+    static final ASN1ObjectIdentifier    id_TA_RSA_v1_5_SHA_512 = id_TA_RSA.branch("5");
+    static final ASN1ObjectIdentifier    id_TA_RSA_PSS_SHA_512 = id_TA_RSA.branch("6");
     static final ASN1ObjectIdentifier    id_TA_ECDSA = id_TA.branch("2");
     static final ASN1ObjectIdentifier    id_TA_ECDSA_SHA_1 = id_TA_ECDSA.branch("1");
     static final ASN1ObjectIdentifier    id_TA_ECDSA_SHA_224 = id_TA_ECDSA.branch("2");
@@ -50,5 +52,4 @@ public interface EACObjectIdentifiers
      * bsi-de applications(3) mrtd(1) roles(2) 1}
      */
     static final ASN1ObjectIdentifier id_EAC_ePassport = bsi_de.branch("3.1.2.1");
-
 }
