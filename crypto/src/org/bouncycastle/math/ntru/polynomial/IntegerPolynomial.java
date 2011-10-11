@@ -18,9 +18,6 @@ import org.bouncycastle.math.ntru.euclid.BigIntEuclidean;
 import org.bouncycastle.math.ntru.util.ArrayEncoder;
 import org.bouncycastle.math.ntru.util.Util;
 
-import static java.math.BigInteger.ONE;
-import static java.math.BigInteger.ZERO;
-
 /**
  * A polynomial with <code>int</code> coefficients.<br/>
  * Some methods (like <code>add</code>) change the polynomial, others (like <code>mult</code>) do
@@ -98,14 +95,14 @@ public class IntegerPolynomial
         9739, 9743, 9749, 9767, 9769, 9781, 9787, 9791, 9803, 9811,
         9817, 9829, 9833, 9839, 9851, 9857, 9859, 9871, 9883, 9887,
         9901, 9907, 9923, 9929, 9931, 9941, 9949, 9967, 9973};
-    private static final List<BigInteger> BIGINT_PRIMES;
+    private static final List BIGINT_PRIMES;
 
     static
     {
-        BIGINT_PRIMES = new ArrayList<BigInteger>();
-        for (int p : PRIMES)
+        BIGINT_PRIMES = new ArrayList();
+        for (int i = 0; i != PRIMES.length; i++)
         {
-            BIGINT_PRIMES.add(BigInteger.valueOf(p));
+            BIGINT_PRIMES.add(BigInteger.valueOf(PRIMES[i]));
         }
     }
 
@@ -233,7 +230,7 @@ public class IntegerPolynomial
      */
     public byte[] toBinary3Tight()
     {
-        BigInteger sum = ZERO;
+        BigInteger sum = Constants.BIGINT_ZERO;
         for (int i = coeffs.length - 1; i >= 0; i--)
         {
             sum = sum.multiply(BigInteger.valueOf(3));
@@ -594,8 +591,8 @@ public class IntegerPolynomial
         // Compute resultants modulo prime numbers. Continue until NUM_EQUAL_RESULTANTS consecutive modular resultants are equal.
         LinkedList<ModularResultant> modResultants = new LinkedList<ModularResultant>();
         BigInteger prime = null;
-        BigInteger pProd = ONE;
-        BigInteger res = ONE;
+        BigInteger pProd = Constants.BIGINT_ONE;
+        BigInteger res = Constants.BIGINT_ONE;
         int numEqual = 1;   // number of consecutive modular resultants equal to each other
         Iterator<BigInteger> primes = BIGINT_PRIMES.iterator();
         while (true)
@@ -693,7 +690,7 @@ public class IntegerPolynomial
 
         // compute resultants modulo prime numbers
         BigInteger prime = BigInteger.valueOf(10000);
-        BigInteger pProd = ONE;
+        BigInteger pProd = Constants.BIGINT_ONE;
         LinkedBlockingQueue<Future<ModularResultant>> resultantTasks = new LinkedBlockingQueue<Future<ModularResultant>>();
         Iterator<BigInteger> primes = BIGINT_PRIMES.iterator();
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -858,7 +855,7 @@ public class IntegerPolynomial
      */
     private BigInteger squareSum()
     {
-        BigInteger sum = ZERO;
+        BigInteger sum = Constants.BIGINT_ZERO;
         for (int i = 0; i < coeffs.length; i++)
         {
             sum = sum.add(BigInteger.valueOf(coeffs[i] * coeffs[i]));
@@ -1098,8 +1095,9 @@ public class IntegerPolynomial
 
         long sum = 0;
         long sqSum = 0;
-        for (int c : p.coeffs)
+        for (int i = 0; i != p.coeffs.length; i++)
         {
+            int c = p.coeffs[i];
             sum += c;
             sqSum += c * c;
         }
@@ -1243,9 +1241,9 @@ public class IntegerPolynomial
     public int count(int value)
     {
         int count = 0;
-        for (int coeff : coeffs)
+        for (int i = 0; i != coeffs.length; i++)
         {
-            if (coeff == value)
+            if (coeffs[i] == value)
             {
                 count++;
             }

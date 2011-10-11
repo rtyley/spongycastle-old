@@ -132,8 +132,9 @@ public class SparseTernaryPolynomial
         }
 
         int[] c = new int[N];
-        for (int i : ones)
+        for (int idx = 0; idx != ones.length; idx++)
         {
+            int i = ones[idx];
             int j = N - 1 - i;
             for (int k = N - 1; k >= 0; k--)
             {
@@ -146,8 +147,9 @@ public class SparseTernaryPolynomial
             }
         }
 
-        for (int i : negOnes)
+        for (int idx = 0; idx != negOnes.length; idx++)
         {
+            int i = negOnes[idx];
             int j = N - 1 - i;
             for (int k = N - 1; k >= 0; k--)
             {
@@ -184,8 +186,9 @@ public class SparseTernaryPolynomial
             c[i] = BigInteger.ZERO;
         }
 
-        for (int i : ones)
+        for (int idx = 0; idx != ones.length; idx++)
         {
+            int i = ones[idx];
             int j = N - 1 - i;
             for (int k = N - 1; k >= 0; k--)
             {
@@ -198,8 +201,9 @@ public class SparseTernaryPolynomial
             }
         }
 
-        for (int i : negOnes)
+        for (int idx = 0; idx != negOnes.length; idx++)
         {
+            int i = negOnes[idx];
             int j = N - 1 - i;
             for (int k = N - 1; k >= 0; k--)
             {
@@ -244,12 +248,14 @@ public class SparseTernaryPolynomial
     public IntegerPolynomial toIntegerPolynomial()
     {
         int[] coeffs = new int[N];
-        for (int i : ones)
+        for (int idx = 0; idx != ones.length; idx++)
         {
+            int i = ones[idx];
             coeffs[i] = 1;
         }
-        for (int i : negOnes)
+        for (int idx = 0; idx != negOnes.length; idx++)
         {
+            int i = negOnes[idx];
             coeffs[i] = -1;
         }
         return new IntegerPolynomial(coeffs);

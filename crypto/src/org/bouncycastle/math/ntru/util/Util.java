@@ -89,25 +89,30 @@ public class Util
      */
     public static int[] generateRandomTernary(int N, int numOnes, int numNegOnes, SecureRandom random)
     {
-        List<Integer> list = new ArrayList<Integer>();
+        Integer one = new Integer(1);
+        Integer minusOne = new Integer(-1);
+        Integer zero = new Integer(0);
+
+        List list = new ArrayList();
         for (int i = 0; i < numOnes; i++)
         {
-            list.add(1);
+            list.add(one);
         }
         for (int i = 0; i < numNegOnes; i++)
         {
-            list.add(-1);
+            list.add(minusOne);
         }
         while (list.size() < N)
         {
-            list.add(0);
+            list.add(zero);
         }
+
         Collections.shuffle(list, random);
 
         int[] arr = new int[N];
         for (int i = 0; i < N; i++)
         {
-            arr[i] = list.get(i);
+            arr[i] = ((Integer)list.get(i)).intValue();
         }
         return arr;
     }

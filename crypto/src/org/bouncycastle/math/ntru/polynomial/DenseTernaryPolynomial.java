@@ -48,8 +48,9 @@ public class DenseTernaryPolynomial
 
     private void checkTernarity()
     {
-        for (int c : coeffs)
+        for (int i = 0; i != coeffs.length; i++)
         {
+            int c = coeffs[i];
             if (c < -1 || c > 1)
             {
                 throw new IllegalStateException("Illegal value: " + c + ", must be one of {-1, 0, 1}");

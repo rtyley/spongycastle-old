@@ -271,7 +271,6 @@ public class NTRUEncryptionParameters
     }
 
 
-    @Override
     public int hashCode()
     {
         final int prime = 31;
@@ -306,7 +305,6 @@ public class NTRUEncryptionParameters
         return result;
     }
 
-    @Override
     public boolean equals(Object obj)
     {
         if (this == obj)

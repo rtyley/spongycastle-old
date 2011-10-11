@@ -70,7 +70,7 @@ public class BigIntPolynomial
      */
     static BigIntPolynomial generateRandomSmall(int N, int numOnes, int numNegOnes)
     {
-        List<BigInteger> coeffs = new ArrayList<BigInteger>();
+        List coeffs = new ArrayList();
         for (int i = 0; i < numOnes; i++)
         {
             coeffs.add(Constants.BIGINT_ONE);
@@ -88,7 +88,7 @@ public class BigIntPolynomial
         BigIntPolynomial poly = new BigIntPolynomial(N);
         for (int i = 0; i < coeffs.size(); i++)
         {
-            poly.coeffs[i] = coeffs.get(i);
+            poly.coeffs[i] = (BigInteger)coeffs.get(i);
         }
         return poly;
     }

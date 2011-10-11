@@ -223,7 +223,6 @@ public class NTRUSigningParameters
         dos.write(polyType.ordinal());
     }
 
-    @Override
     public NTRUSigningParameters clone()
     {
         if (polyType == TernaryPolynomialType.SIMPLE)
@@ -236,7 +235,6 @@ public class NTRUSigningParameters
         }
     }
 
-    @Override
     public int hashCode()
     {
         final int prime = 31;
@@ -272,7 +270,6 @@ public class NTRUSigningParameters
         return result;
     }
 
-    @Override
     public boolean equals(Object obj)
     {
         if (this == obj)

@@ -133,9 +133,9 @@ class IndexGenerator
          */
         void appendBits(byte[] bytes)
         {
-            for (byte b : bytes)
+            for (int i = 0; i != bytes.length; i++)
             {
-                appendBits(b);
+                appendBits(bytes[i]);
             }
         }
 
