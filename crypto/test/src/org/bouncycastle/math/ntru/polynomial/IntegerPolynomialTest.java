@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import junit.framework.TestCase;
-import org.bouncycastle.crypto.params.NTRUSignatureParameters;
+import org.bouncycastle.crypto.params.NTRUSigningParameters;
 import org.bouncycastle.util.Arrays;
 
 
@@ -150,7 +150,7 @@ public class IntegerPolynomialTest
     public void testResultant()
     {
         SecureRandom random = new SecureRandom();
-        NTRUSignatureParameters params = NTRUSignatureParameters.APR2011_439;
+        NTRUSigningParameters params = NTRUSigningParameters.APR2011_439;
         IntegerPolynomial a = DenseTernaryPolynomial.generateRandom(params.N, params.d, params.d, random);
         verifyResultant(a, a.resultant());
 

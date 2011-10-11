@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import junit.framework.TestCase;
-import org.bouncycastle.crypto.params.NTRUSignatureParameters;
+import org.bouncycastle.crypto.params.NTRUSigningParameters;
 
 public class NTRUSignatureParametersTest
     extends TestCase
@@ -13,37 +13,37 @@ public class NTRUSignatureParametersTest
     public void testLoadSave()
         throws IOException
     {
-        for (NTRUSignatureParameters params : new NTRUSignatureParameters[]{NTRUSignatureParameters.TEST157, NTRUSignatureParameters.TEST157_PROD})
+        for (NTRUSigningParameters params : new NTRUSigningParameters[]{NTRUSigningParameters.TEST157, NTRUSigningParameters.TEST157_PROD})
         {
             testLoadSave(params);
         }
     }
 
-    private void testLoadSave(NTRUSignatureParameters params)
+    private void testLoadSave(NTRUSigningParameters params)
         throws IOException
     {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         params.writeTo(os);
         ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
-        assertEquals(params, new NTRUSignatureParameters(is));
+        assertEquals(params, new NTRUSigningParameters(is));
     }
 
     public void testEqualsHashCode()
         throws IOException
     {
-        for (NTRUSignatureParameters params : new NTRUSignatureParameters[]{NTRUSignatureParameters.TEST157, NTRUSignatureParameters.TEST157_PROD})
+        for (NTRUSigningParameters params : new NTRUSigningParameters[]{NTRUSigningParameters.TEST157, NTRUSigningParameters.TEST157_PROD})
         {
             testEqualsHashCode(params);
         }
     }
 
-    private void testEqualsHashCode(NTRUSignatureParameters params)
+    private void testEqualsHashCode(NTRUSigningParameters params)
         throws IOException
     {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         params.writeTo(os);
         ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
-        NTRUSignatureParameters params2 = new NTRUSignatureParameters(is);
+        NTRUSigningParameters params2 = new NTRUSigningParameters(is);
 
         assertEquals(params, params2);
         assertEquals(params.hashCode(), params2.hashCode());
@@ -56,7 +56,7 @@ public class NTRUSignatureParametersTest
 
     public void testClone()
     {
-        for (NTRUSignatureParameters params : new NTRUSignatureParameters[]{NTRUSignatureParameters.TEST157, NTRUSignatureParameters.TEST157_PROD})
+        for (NTRUSigningParameters params : new NTRUSigningParameters[]{NTRUSigningParameters.TEST157, NTRUSigningParameters.TEST157_PROD})
         {
             assertEquals(params, params.clone());
         }

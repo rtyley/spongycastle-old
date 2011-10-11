@@ -96,12 +96,5 @@ public class JCEKeyGenerator
     /**
      * RC2
      */
-    public static class RC2
-        extends JCEKeyGenerator
-    {
-        public RC2()
-        {
-            super("RC2", 128, new CipherKeyGenerator());
-        }
-    }
+
 }

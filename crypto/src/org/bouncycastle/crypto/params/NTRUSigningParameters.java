@@ -14,37 +14,37 @@ import org.bouncycastle.crypto.digests.SHA512Digest;
 /**
  * A set of parameters for NtruSign. Several predefined parameter sets are available and new ones can be created as well.
  */
-public class NTRUSignatureParameters
+public class NTRUSigningParameters
     implements Cloneable
 {
     /**
      * Gives 128 bits of security
      */
-    public static final NTRUSignatureParameters APR2011_439 = new NTRUSignatureParameters(439, 2048, 146, 1, BasisType.TRANSPOSE, 0.165, 400, 280, false, true, KeyGenAlg.RESULTANT, new SHA256Digest());
+    public static final NTRUSigningParameters APR2011_439 = new NTRUSigningParameters(439, 2048, 146, 1, BasisType.TRANSPOSE, 0.165, 400, 280, false, true, KeyGenAlg.RESULTANT, new SHA256Digest());
 
     /**
      * Like <code>APR2011_439</code>, this parameter set gives 128 bits of security but uses product-form polynomials
      */
-    public static final NTRUSignatureParameters APR2011_439_PROD = new NTRUSignatureParameters(439, 2048, 9, 8, 5, 1, BasisType.TRANSPOSE, 0.165, 400, 280, false, true, KeyGenAlg.RESULTANT, new SHA256Digest());
+    public static final NTRUSigningParameters APR2011_439_PROD = new NTRUSigningParameters(439, 2048, 9, 8, 5, 1, BasisType.TRANSPOSE, 0.165, 400, 280, false, true, KeyGenAlg.RESULTANT, new SHA256Digest());
 
     /**
      * Gives 256 bits of security
      */
-    public static final NTRUSignatureParameters APR2011_743 = new NTRUSignatureParameters(743, 2048, 248, 1, BasisType.TRANSPOSE, 0.127, 405, 360, true, false, KeyGenAlg.RESULTANT, new SHA512Digest());
+    public static final NTRUSigningParameters APR2011_743 = new NTRUSigningParameters(743, 2048, 248, 1, BasisType.TRANSPOSE, 0.127, 405, 360, true, false, KeyGenAlg.RESULTANT, new SHA512Digest());
 
     /**
      * Like <code>APR2011_439</code>, this parameter set gives 256 bits of security but uses product-form polynomials
      */
-    public static final NTRUSignatureParameters APR2011_743_PROD = new NTRUSignatureParameters(743, 2048, 11, 11, 15, 1, BasisType.TRANSPOSE, 0.127, 405, 360, true, false, KeyGenAlg.RESULTANT, new SHA512Digest());
+    public static final NTRUSigningParameters APR2011_743_PROD = new NTRUSigningParameters(743, 2048, 11, 11, 15, 1, BasisType.TRANSPOSE, 0.127, 405, 360, true, false, KeyGenAlg.RESULTANT, new SHA512Digest());
 
     /**
      * Generates key pairs quickly. Use for testing only.
      */
-    public static final NTRUSignatureParameters TEST157 = new NTRUSignatureParameters(157, 256, 29, 1, BasisType.TRANSPOSE, 0.38, 200, 80, false, false, KeyGenAlg.RESULTANT, new SHA256Digest());
+    public static final NTRUSigningParameters TEST157 = new NTRUSigningParameters(157, 256, 29, 1, BasisType.TRANSPOSE, 0.38, 200, 80, false, false, KeyGenAlg.RESULTANT, new SHA256Digest());
     /**
      * Generates key pairs quickly. Use for testing only.
      */
-    public static final NTRUSignatureParameters TEST157_PROD = new NTRUSignatureParameters(157, 256, 5, 5, 8, 1, BasisType.TRANSPOSE, 0.38, 200, 80, false, false, KeyGenAlg.RESULTANT, new SHA256Digest());
+    public static final NTRUSigningParameters TEST157_PROD = new NTRUSigningParameters(157, 256, 5, 5, 8, 1, BasisType.TRANSPOSE, 0.38, 200, 80, false, false, KeyGenAlg.RESULTANT, new SHA256Digest());
 
     public enum BasisType
     {
@@ -91,7 +91,7 @@ public class NTRUSignatureParameters
      * @param keyGenAlg    <code>RESULTANT</code> produces better bases, <code>FLOAT</code> is slightly faster. <code>RESULTANT</code> follows the EESS standard while <code>FLOAT</code> is described in Hoffstein et al: An Introduction to Mathematical Cryptography.
      * @param hashAlg      a valid identifier for a <code>java.security.MessageDigest</code> instance such as <code>SHA-256</code>. The <code>MessageDigest</code> must support the <code>getDigestLength()</code> method.
      */
-    public NTRUSignatureParameters(int N, int q, int d, int B, BasisType basisType, double beta, double normBound, double keyNormBound, boolean primeCheck, boolean sparse, KeyGenAlg keyGenAlg, Digest hashAlg)
+    public NTRUSigningParameters(int N, int q, int d, int B, BasisType basisType, double beta, double normBound, double keyNormBound, boolean primeCheck, boolean sparse, KeyGenAlg keyGenAlg, Digest hashAlg)
     {
         this.N = N;
         this.q = q;
@@ -127,7 +127,7 @@ public class NTRUSignatureParameters
      * @param keyGenAlg    <code>RESULTANT</code> produces better bases, <code>FLOAT</code> is slightly faster. <code>RESULTANT</code> follows the EESS standard while <code>FLOAT</code> is described in Hoffstein et al: An Introduction to Mathematical Cryptography.
      * @param hashAlg      a valid identifier for a <code>java.security.MessageDigest</code> instance such as <code>SHA-256</code>. The <code>MessageDigest</code> must support the <code>getDigestLength()</code> method.
      */
-    public NTRUSignatureParameters(int N, int q, int d1, int d2, int d3, int B, BasisType basisType, double beta, double normBound, double keyNormBound, boolean primeCheck, boolean sparse, KeyGenAlg keyGenAlg, Digest hashAlg)
+    public NTRUSigningParameters(int N, int q, int d1, int d2, int d3, int B, BasisType basisType, double beta, double normBound, double keyNormBound, boolean primeCheck, boolean sparse, KeyGenAlg keyGenAlg, Digest hashAlg)
     {
         this.N = N;
         this.q = q;
@@ -160,7 +160,7 @@ public class NTRUSignatureParameters
      * @param is an input stream
      * @throws IOException
      */
-    public NTRUSignatureParameters(InputStream is)
+    public NTRUSigningParameters(InputStream is)
         throws IOException
     {
         DataInputStream dis = new DataInputStream(is);
@@ -224,15 +224,15 @@ public class NTRUSignatureParameters
     }
 
     @Override
-    public NTRUSignatureParameters clone()
+    public NTRUSigningParameters clone()
     {
         if (polyType == TernaryPolynomialType.SIMPLE)
         {
-            return new NTRUSignatureParameters(N, q, d, B, basisType, beta, normBound, keyNormBound, primeCheck, sparse, keyGenAlg, hashAlg);
+            return new NTRUSigningParameters(N, q, d, B, basisType, beta, normBound, keyNormBound, primeCheck, sparse, keyGenAlg, hashAlg);
         }
         else
         {
-            return new NTRUSignatureParameters(N, q, d1, d2, d3, B, basisType, beta, normBound, keyNormBound, primeCheck, sparse, keyGenAlg, hashAlg);
+            return new NTRUSigningParameters(N, q, d1, d2, d3, B, basisType, beta, normBound, keyNormBound, primeCheck, sparse, keyGenAlg, hashAlg);
         }
     }
 
@@ -283,11 +283,11 @@ public class NTRUSignatureParameters
         {
             return false;
         }
-        if (!(obj instanceof NTRUSignatureParameters))
+        if (!(obj instanceof NTRUSigningParameters))
         {
             return false;
         }
-        NTRUSignatureParameters other = (NTRUSignatureParameters)obj;
+        NTRUSigningParameters other = (NTRUSigningParameters)obj;
         if (B != other.B)
         {
             return false;
