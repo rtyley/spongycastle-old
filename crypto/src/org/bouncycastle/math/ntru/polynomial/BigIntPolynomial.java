@@ -9,9 +9,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static java.math.BigInteger.ONE;
-import static java.math.BigInteger.ZERO;
-
 /**
  * A polynomial with {@link BigInteger} coefficients.<br/>
  * Some methods (like <code>add</code>) change the polynomial, others (like <code>mult</code>) do
@@ -33,7 +30,7 @@ public class BigIntPolynomial
         coeffs = new BigInteger[N];
         for (int i = 0; i < N; i++)
         {
-            coeffs[i] = ZERO;
+            coeffs[i] = Constants.BIGINT_ZERO;
         }
     }
 
@@ -76,7 +73,7 @@ public class BigIntPolynomial
         List<BigInteger> coeffs = new ArrayList<BigInteger>();
         for (int i = 0; i < numOnes; i++)
         {
-            coeffs.add(ONE);
+            coeffs.add(Constants.BIGINT_ONE);
         }
         for (int i = 0; i < numNegOnes; i++)
         {
@@ -84,7 +81,7 @@ public class BigIntPolynomial
         }
         while (coeffs.size() < N)
         {
-            coeffs.add(ZERO);
+            coeffs.add(Constants.BIGINT_ZERO);
         }
         Collections.shuffle(coeffs, new SecureRandom());
 
@@ -205,7 +202,7 @@ public class BigIntPolynomial
             coeffs = Arrays.copyOf(coeffs, b.coeffs.length);
             for (int i = N; i < coeffs.length; i++)
             {
-                coeffs[i] = ZERO;
+                coeffs[i] = Constants.BIGINT_ZERO;
             }
         }
         for (int i = 0; i < b.coeffs.length; i++)
@@ -227,7 +224,7 @@ public class BigIntPolynomial
             coeffs = Arrays.copyOf(coeffs, b.coeffs.length);
             for (int i = N; i < coeffs.length; i++)
             {
-                coeffs[i] = ZERO;
+                coeffs[i] = Constants.BIGINT_ZERO;
             }
         }
         for (int i = 0; i < b.coeffs.length; i++)
@@ -267,10 +264,10 @@ public class BigIntPolynomial
      */
     public void div(BigInteger divisor)
     {
-        BigInteger d = divisor.add(ONE).divide(BigInteger.valueOf(2));
+        BigInteger d = divisor.add(Constants.BIGINT_ONE).divide(BigInteger.valueOf(2));
         for (int i = 0; i < coeffs.length; i++)
         {
-            coeffs[i] = coeffs[i].compareTo(ZERO) > 0 ? coeffs[i].add(d) : coeffs[i].add(d.negate());
+            coeffs[i] = coeffs[i].compareTo(Constants.BIGINT_ZERO) > 0 ? coeffs[i].add(d) : coeffs[i].add(d.negate());
             coeffs[i] = coeffs[i].divide(divisor);
         }
     }
@@ -344,7 +341,7 @@ public class BigIntPolynomial
      */
     BigInteger sumCoeffs()
     {
-        BigInteger sum = ZERO;
+        BigInteger sum = Constants.BIGINT_ZERO;
         for (int i = 0; i < coeffs.length; i++)
         {
             sum = sum.add(coeffs[i]);
