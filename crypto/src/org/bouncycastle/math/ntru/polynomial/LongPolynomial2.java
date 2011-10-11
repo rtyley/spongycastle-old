@@ -234,7 +234,6 @@ class LongPolynomial2
         }
     }
 
-    @Override
     public LongPolynomial2 clone()
     {
         LongPolynomial2 p = new LongPolynomial2(coeffs.clone());
@@ -242,7 +241,6 @@ class LongPolynomial2
         return p;
     }
 
-    @Override
     public boolean equals(Object obj)
     {
         if (obj instanceof LongPolynomial2)

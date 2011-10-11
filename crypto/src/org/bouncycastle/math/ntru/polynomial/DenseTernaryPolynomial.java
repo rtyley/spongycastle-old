@@ -86,7 +86,6 @@ public class DenseTernaryPolynomial
         return poly;
     }
 
-    @Override
     public IntegerPolynomial mult(IntegerPolynomial poly2, int modulus)
     {
         // even on 32-bit systems, LongPolynomial5 multiplies faster than IntegerPolynomial
