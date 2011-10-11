@@ -334,7 +334,6 @@ public class ECDSAPublicKey
         return v;
     }
 
-    @Override
     public ASN1Primitive toASN1Primitive()
     {
         return new DERSequence(getASN1EncodableVector(usage, false));
