@@ -74,7 +74,7 @@ public class NTRUEncryptionEngine
 
     public int getOutputBlockSize()
     {
-        return -1;
+        return ((params.N * log2(params.q)) + 7) / 8;
     }
 
     public byte[] processBlock(byte[] in, int inOff, int len)
@@ -484,5 +484,15 @@ public class NTRUEncryptionEngine
         System.arraycopy(src, 0, tmp, 0, len < src.length ? len : src.length);
 
         return tmp;
+    }
+
+    private int log2(int value)
+    {
+        if (value == 2048)
+        {
+            return 11;
+        }
+
+        throw new IllegalStateException("log2 not fully implemented");
     }
 }

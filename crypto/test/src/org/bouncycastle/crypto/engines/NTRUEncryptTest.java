@@ -264,6 +264,8 @@ public class NTRUEncryptTest
 
         byte[] encrypted = ntru.processBlock(plainText, 0, plainText.length);
 
+        assertEquals(encrypted.length, ntru.getOutputBlockSize());
+
         ntru.init(false, kp.getPrivate());
 
         byte[] decrypted = ntru.processBlock(encrypted, 0, encrypted.length);
