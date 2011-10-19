@@ -35,7 +35,7 @@ public class SRP6Util
         digest.update(output, 0, output.length);
         digest.doFinal(output, 0);
 
-        return new BigInteger(1, output).mod(N);
+        return new BigInteger(1, output);
     }
 
     public static BigInteger generatePrivateValue(Digest digest, BigInteger N, BigInteger g, SecureRandom random)
@@ -74,7 +74,7 @@ public class SRP6Util
         byte[] output = new byte[digest.getDigestSize()];
         digest.doFinal(output, 0);
 
-        return new BigInteger(1, output).mod(N);
+        return new BigInteger(1, output);
     }
 
     private static byte[] getPadded(BigInteger n, int length)
