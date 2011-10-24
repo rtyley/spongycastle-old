@@ -1188,6 +1188,16 @@ public class NewSMIMESignedTest
         verifySigners(s.getCertificates(), s.getSignerInfos());
     }
 
+    public void testRawAS2Parser()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("rawAS2.message");
+
+        SMIMESignedParser s = new SMIMESignedParser(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build(), (MimeMultipart)message.getContent());
+
+        verifySigners(s.getCertificates(), s.getSignerInfos());
+    }
+
     private String getDigestOid(SignerInformationStore s)
     {
         return ((SignerInformation)s.getSigners().iterator().next()).getDigestAlgOID();
@@ -1206,7 +1216,7 @@ public class NewSMIMESignedTest
     
             Iterator        certIt = certCollection.iterator();
             X509CertificateHolder certHolder = (X509CertificateHolder)certIt.next();
-    
+
             assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().build(certHolder)));
         }
     }
