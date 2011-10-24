@@ -19,7 +19,6 @@ public class PGPCompressedDataGenerator
     private int                     algorithm;
     private int                     compression;
 
-    private OutputStream            out;
     private OutputStream            dOut;
     private BCPGOutputStream        pkOut;
     
@@ -33,28 +32,31 @@ public class PGPCompressedDataGenerator
         int                    algorithm,
         int                    compression)
     {
-        if (algorithm != PGPCompressedData.UNCOMPRESSED
-            && algorithm != PGPCompressedData.ZIP
-            && algorithm != PGPCompressedData.ZLIB
-            && algorithm != PGPCompressedData.BZIP2)
+        switch (algorithm)
         {
-            throw new IllegalArgumentException("unknown compression algorithm");
+            case CompressionAlgorithmTags.UNCOMPRESSED:
+            case CompressionAlgorithmTags.ZIP:
+            case CompressionAlgorithmTags.ZLIB:
+            case CompressionAlgorithmTags.BZIP2:
+                break;
+            default:
+                throw new IllegalArgumentException("unknown compression algorithm");
         }
 
         if (compression != Deflater.DEFAULT_COMPRESSION)
         {
-            if ((compression < 0) || (compression > 9))
+            if ((compression < Deflater.NO_COMPRESSION) || (compression > Deflater.BEST_COMPRESSION))
             {
                 throw new IllegalArgumentException("unknown compression level: " + compression);
             }
         }
-        
+
         this.algorithm = algorithm;
         this.compression = compression;
     }
 
     /**
-     * Return an outputstream which will save the data being written to 
+     * Return an OutputStream which will save the data being written to 
      * the compressed object.
      * <p>
      * The stream created can be closed off by either calling close()
@@ -74,39 +76,15 @@ public class PGPCompressedDataGenerator
             throw new IllegalStateException("generator already in open state");
         }
 
-        this.out = out;
+        this.pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA);
 
-        switch (algorithm)
-        {
-        case PGPCompressedData.ZIP:
-            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA);
-            pkOut.write(PGPCompressedData.ZIP);
-            dOut = new DeflaterOutputStream(pkOut, new Deflater(compression, true));
-            break;
-        case PGPCompressedData.ZLIB:
-            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA);
-            pkOut.write(PGPCompressedData.ZLIB);
-            dOut = new DeflaterOutputStream(pkOut, new Deflater(compression));
-            break;
-        case BZIP2:
-            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA);
-            pkOut.write(PGPCompressedData.BZIP2);
-            dOut = new CBZip2OutputStream(pkOut);
-            break;
-        case PGPCompressedData.UNCOMPRESSED:
-            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA);
-            pkOut.write(PGPCompressedData.UNCOMPRESSED);
-            dOut = pkOut;
-            break;
-        default:
-            throw new IllegalStateException("generator not initialised");
-        }
+        doOpen();
 
         return new WrappedGeneratorStream(dOut, this);
     }
     
     /**
-     * Return an outputstream which will compress the data as it is written
+     * Return an OutputStream which will compress the data as it is written
      * to it. The stream will be written out in chunks according to the size of the
      * passed in buffer.
      * <p>
@@ -118,7 +96,7 @@ public class PGPCompressedDataGenerator
      * bytes worth of the buffer will be used.
      * </p>
      * <p>
-     * <b>Note</b>: using this may break compatability with RFC 1991 compliant tools. Only recent OpenPGP
+     * <b>Note</b>: using this may break compatibility with RFC 1991 compliant tools. Only recent OpenPGP
      * implementations are capable of accepting these streams.
      * </p>
      * 
@@ -137,38 +115,38 @@ public class PGPCompressedDataGenerator
         {
             throw new IllegalStateException("generator already in open state");
         }
-                
-        this.out = out;
 
-        switch (algorithm)
-        {
-        case PGPCompressedData.ZIP:
-            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA, buffer);
-            pkOut.write(PGPCompressedData.ZIP);
-            dOut = new DeflaterOutputStream(pkOut, new Deflater(compression, true));
-            break;
-        case PGPCompressedData.ZLIB:
-            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA, buffer);
-            pkOut.write(PGPCompressedData.ZLIB);
-            dOut = new DeflaterOutputStream(pkOut, new Deflater(compression));
-            break;
-        case PGPCompressedData.BZIP2:
-            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA, buffer);
-            pkOut.write(PGPCompressedData.BZIP2);
-            dOut = new CBZip2OutputStream(pkOut);
-            break;
-        case PGPCompressedData.UNCOMPRESSED:
-            pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA, buffer);
-            pkOut.write(PGPCompressedData.UNCOMPRESSED);
-            dOut = pkOut;
-            break;
-        default:
-            throw new IllegalStateException("generator not initialised");
-        }
+        this.pkOut = new BCPGOutputStream(out, PacketTags.COMPRESSED_DATA, buffer);
+
+        doOpen();
 
         return new WrappedGeneratorStream(dOut, this);
     }
-    
+
+    private void doOpen() throws IOException
+    {
+        pkOut.write(algorithm);
+
+        switch (algorithm)
+        {
+            case CompressionAlgorithmTags.UNCOMPRESSED:
+                dOut = pkOut;
+                break;
+            case CompressionAlgorithmTags.ZIP:
+                dOut = new SafeDeflaterOutputStream(pkOut, compression, true);
+                break;
+            case CompressionAlgorithmTags.ZLIB:
+                dOut = new SafeDeflaterOutputStream(pkOut, compression, false);
+                break;
+            case CompressionAlgorithmTags.BZIP2:
+                dOut = new SafeCBZip2OutputStream(pkOut);
+                break;
+            default:
+                // Constructor should guard against this possibility
+                throw new IllegalStateException();
+        }
+    }
+
     /**
      * Close the compressed object - this is equivalent to calling close on the stream
      * returned by the open() method.
@@ -180,28 +158,44 @@ public class PGPCompressedDataGenerator
     {
         if (dOut != null)
         {
-            if (dOut instanceof DeflaterOutputStream)
+            if (dOut != pkOut)
             {
-                DeflaterOutputStream dfOut = (DeflaterOutputStream)dOut;
-    
-                dfOut.finish();
+                dOut.close();
+                dOut.flush();
             }
-            else if (dOut instanceof CBZip2OutputStream)
-            {
-                CBZip2OutputStream cbOut = (CBZip2OutputStream)dOut;
-    
-                cbOut.finish();
-            }
-    
-            dOut.flush();
-    
+
+            dOut = null;
+
             pkOut.finish();
             pkOut.flush();
-            out.flush();
-    
-            dOut = null;
             pkOut = null;
-            out = null;
+        }
+    }
+
+    private static class SafeCBZip2OutputStream extends CBZip2OutputStream
+    {
+        public SafeCBZip2OutputStream(OutputStream output) throws IOException
+        {
+            super(output);
+        }
+
+        public void close() throws IOException
+        {
+            finish();
+        }
+    }
+
+    private class SafeDeflaterOutputStream extends DeflaterOutputStream
+    {
+        public SafeDeflaterOutputStream(OutputStream output, int compression, boolean nowrap)
+        {
+            super(output, new Deflater(compression, nowrap));
+        }
+
+        public void close() throws IOException
+        {
+            finish();
+            def.end();
         }
     }
 }
