@@ -17,6 +17,7 @@ public class SignerInfoGeneratorBuilder
     private boolean directSignature;
     private CMSAttributeTableGenerator signedGen;
     private CMSAttributeTableGenerator unsignedGen;
+    private CMSSignatureEncryptionAlgorithmFinder sigEncAlgFinder;
 
     /**
      *  Base constructor.
@@ -25,7 +26,18 @@ public class SignerInfoGeneratorBuilder
      */
     public SignerInfoGeneratorBuilder(DigestCalculatorProvider digestProvider)
     {
+        this(digestProvider, new DefaultCMSSignatureEncryptionAlgorithmFinder());
+    }
+
+        /**
+     *  Base constructor.
+     *
+     * @param digestProvider  a provider of digest calculators for the algorithms required in the signature and attribute calculations.
+     */
+    public SignerInfoGeneratorBuilder(DigestCalculatorProvider digestProvider, CMSSignatureEncryptionAlgorithmFinder sigEncAlgFinder)
+    {
         this.digestProvider = digestProvider;
+        this.sigEncAlgFinder = sigEncAlgFinder;
     }
 
     /**
@@ -109,7 +121,7 @@ public class SignerInfoGeneratorBuilder
     {
         if (directSignature)
         {
-            return new SignerInfoGenerator(sigId, contentSigner, digestProvider, true);
+            return new SignerInfoGenerator(sigId, contentSigner, digestProvider, sigEncAlgFinder, true);
         }
 
         if (signedGen != null || unsignedGen != null)
@@ -119,9 +131,9 @@ public class SignerInfoGeneratorBuilder
                 signedGen = new DefaultSignedAttributeTableGenerator();
             }
 
-            return new SignerInfoGenerator(sigId, contentSigner, digestProvider, signedGen, unsignedGen);
+            return new SignerInfoGenerator(sigId, contentSigner, digestProvider, sigEncAlgFinder, signedGen, unsignedGen);
         }
         
-        return new SignerInfoGenerator(sigId, contentSigner, digestProvider);
+        return new SignerInfoGenerator(sigId, contentSigner, digestProvider, sigEncAlgFinder);
     }
 }
