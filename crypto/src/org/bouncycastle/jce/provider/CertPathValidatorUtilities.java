@@ -992,7 +992,7 @@ public class CertPathValidatorUtilities
             throw new AnnotatedException("Failed check for indirect CRL.", exception);
         }
 
-        if (isIndirect)
+        if (isIndirect && !(crl instanceof X509CRLObject))
         {
             // use BC X509CRLObject so that indirect CRLs are supported
             try
