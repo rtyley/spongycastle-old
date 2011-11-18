@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
+import java.security.cert.CRLException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertStore;
@@ -16,6 +17,7 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.PolicyQualifierInfo;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
+import java.security.cert.X509CRLEntry;
 import java.security.cert.X509CRLSelector;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
@@ -978,22 +980,41 @@ public class CertPathValidatorUtilities
             CertStatus certStatus)
         throws AnnotatedException
     {
-        // use BC X509CRLObject so that indirect CRLs are supported
-        X509CRLObject bcCRL = null;
+        // TODO From 1.5 onwards, X509CRL has getCertificateIssuer(), and this copy is unnecessary
+
+        boolean isIndirect;
         try
         {
-            bcCRL = new X509CRLObject(new CertificateList((ASN1Sequence) ASN1Sequence.fromByteArray(crl.getEncoded())));
+            isIndirect = X509CRLObject.isIndirectCRL(crl);
         }
-        catch (Exception exception)
+        catch (CRLException exception)
         {
-            throw new AnnotatedException("Bouncy Castle X509CRLObject could not be created.", exception);
+            throw new AnnotatedException("Failed check for indirect CRL.", exception);
         }
-        // use BC X509CRLEntryObject, so that getCertificateIssuer() is
-        // supported.
-        X509CRLEntryObject crl_entry = (X509CRLEntryObject) bcCRL.getRevokedCertificate(getSerialNumber(cert));
+
+        if (isIndirect)
+        {
+            // use BC X509CRLObject so that indirect CRLs are supported
+            try
+            {
+                byte[] encoded = crl.getEncoded();
+                ASN1InputStream aIn = new ASN1InputStream(encoded, true); // Lazy
+                ASN1Sequence seq = ASN1Sequence.getInstance(aIn.readObject());
+                crl = new X509CRLObject(new CertificateList(seq));
+            }
+            catch (Exception exception)
+            {
+                throw new AnnotatedException("Bouncy Castle X509CRLObject could not be created.", exception);
+            }
+        }
+
+        // Note: will be an X509CRLEntryObject if it's an indirect CRL
+        X509CRLEntry crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
+
+        // Note: Make sure we only call getCertificateIssuer through a BC X509CRLEntryObject 
         if (crl_entry != null
-                && (getEncodedIssuerPrincipal(cert).equals(crl_entry.getCertificateIssuer()) || getEncodedIssuerPrincipal(cert)
-                        .equals(getIssuerPrincipal(crl))))
+            && ((isIndirect && getEncodedIssuerPrincipal(cert).equals(((X509CRLEntryObject)crl_entry).getCertificateIssuer()))
+                || getEncodedIssuerPrincipal(cert).equals(getIssuerPrincipal(crl))))
         {
             DEREnumerated reasonCode = null;
             if (crl_entry.hasExtensions())
