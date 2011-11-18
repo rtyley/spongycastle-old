@@ -59,6 +59,22 @@ public class X509CRLObject
     private byte[] sigAlgParams;
     private boolean isIndirect;
 
+    static boolean isIndirectCRL(X509CRL crl)
+        throws CRLException
+    {
+        try
+        {
+            byte[] idp = crl.getExtensionValue(X509Extensions.IssuingDistributionPoint.getId());
+            return idp != null
+                && IssuingDistributionPoint.getInstance(X509ExtensionUtil.fromExtensionValue(idp)).isIndirectCRL();
+        }
+        catch (Exception e)
+        {
+            throw new ExtCRLException(
+                    "Exception reading IssuingDistributionPoint", e);
+        }
+    }
+
     public X509CRLObject(
         CertificateList c)
         throws CRLException
@@ -78,7 +94,7 @@ public class X509CRLObject
                 this.sigAlgParams = null;
             }
 
-            this.isIndirect = isIndirectCRL();
+            this.isIndirect = isIndirectCRL(this);
         }
         catch (Exception e)
         {
@@ -497,29 +513,6 @@ public class X509CRLObject
         }
 
         return false;
-    }
-
-    private boolean isIndirectCRL()
-        throws CRLException
-    {
-        byte[] idp = getExtensionValue(X509Extensions.IssuingDistributionPoint.getId());
-        boolean isIndirect = false;
-        try
-        {
-            if (idp != null)
-            {
-                isIndirect = IssuingDistributionPoint.getInstance(
-                        X509ExtensionUtil.fromExtensionValue(idp))
-                        .isIndirectCRL();
-            }
-        }
-        catch (Exception e)
-        {
-            throw new ExtCRLException(
-                    "Exception reading IssuingDistributionPoint", e);
-        }
-
-        return isIndirect;
     }
 }
 
