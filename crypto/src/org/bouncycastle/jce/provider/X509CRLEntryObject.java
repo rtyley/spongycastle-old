@@ -35,9 +35,6 @@ public class X509CRLEntryObject extends X509CRLEntry
 {
     private TBSCertList.CRLEntry c;
 
-    private boolean isIndirect;
-
-    private X500Principal previousCertificateIssuer;
     private X500Principal certificateIssuer;
     private int           hashValue;
     private boolean       isHashValueSet;
@@ -45,7 +42,7 @@ public class X509CRLEntryObject extends X509CRLEntry
     public X509CRLEntryObject(TBSCertList.CRLEntry c)
     {
         this.c = c;
-        this.certificateIssuer = loadCertificateIssuer();
+        this.certificateIssuer = null;
     }
 
     /**
@@ -71,14 +68,12 @@ public class X509CRLEntryObject extends X509CRLEntry
         X500Principal previousCertificateIssuer)
     {
         this.c = c;
-        this.isIndirect = isIndirect;
-        this.previousCertificateIssuer = previousCertificateIssuer;
-        this.certificateIssuer = loadCertificateIssuer();
+        this.certificateIssuer = loadCertificateIssuer(isIndirect, previousCertificateIssuer);
     }
 
     /**
      * Will return true if any extensions are present and marked as critical as
-     * we currently dont handle any extensions!
+     * we currently don't handle any extensions!
      */
     public boolean hasUnsupportedCriticalExtension()
     {
@@ -87,7 +82,7 @@ public class X509CRLEntryObject extends X509CRLEntry
         return extns != null && !extns.isEmpty();
     }
 
-    private X500Principal loadCertificateIssuer()
+    private X500Principal loadCertificateIssuer(boolean isIndirect, X500Principal previousCertificateIssuer)
     {
         if (!isIndirect)
         {
