@@ -3,10 +3,8 @@ package org.bouncycastle.cms;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
-import java.security.Signature;
 import java.security.cert.CRLException;
 import java.security.cert.CertStore;
 import java.security.cert.CertificateException;
@@ -138,19 +136,6 @@ class CMSSignedHelper
         return digestAlgOID;
     }
 
-    String[] getDigestAliases(
-        String algName)
-    {
-        String[] aliases = (String[])digestAliases.get(algName);
-
-        if (aliases != null)
-        {
-            return aliases;
-        }
-
-        return new String[0];
-    }
-
     /**
      * Return the digest encryption algorithm using one of the standard
      * JCA string representations rather the the algorithm identifier (if
@@ -168,67 +153,7 @@ class CMSSignedHelper
 
         return encryptionAlgOID;
     }
-    
-    MessageDigest getDigestInstance(
-        String algorithm, 
-        Provider provider)
-        throws NoSuchAlgorithmException
-    {
-        try
-        {
-            return createDigestInstance(algorithm, provider);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            String[] aliases = getDigestAliases(algorithm);
-            for (int i = 0; i != aliases.length; i++)
-            {
-                try
-                {
-                    return createDigestInstance(aliases[i], provider);
-                }
-                catch (NoSuchAlgorithmException ex)
-                {
-                    // continue
-                }
-            }
-            if (provider != null)
-            {
-                return getDigestInstance(algorithm, null); // try rolling back
-            }
-            throw e;
-        }
-    }
 
-    private MessageDigest createDigestInstance(
-        String algorithm,
-        Provider provider)
-        throws NoSuchAlgorithmException
-    {
-        if (provider != null)
-        {
-            return MessageDigest.getInstance(algorithm, provider);
-        }
-        else
-        {
-            return MessageDigest.getInstance(algorithm);
-        }
-    }
-
-    Signature getSignatureInstance(
-        String algorithm, 
-        Provider provider)
-        throws NoSuchAlgorithmException
-    {
-        if (provider != null)
-        {
-            return Signature.getInstance(algorithm, provider);
-        }
-        else
-        {
-            return Signature.getInstance(algorithm);
-        }
-    }
 
     X509Store createAttributeStore(
         String type,
