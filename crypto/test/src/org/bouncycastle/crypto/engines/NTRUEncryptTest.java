@@ -31,12 +31,17 @@ public class NTRUEncryptTest
         params.dr2 = NTRUEncryptionParameters.APR2011_743_FAST.dr2;
         params.dr3 = NTRUEncryptionParameters.APR2011_743_FAST.dr3;
 
-        for (NTRUEncryptionParameters.TernaryPolynomialType polyType : NTRUEncryptionParameters.TernaryPolynomialType.values())
+        NTRUEncryptionParameters.TernaryPolynomialType[] values = NTRUEncryptionParameters.TernaryPolynomialType.values();
+
+        for (int i = 0; i != values.length; i++)
         {
-            for (boolean fastP : new boolean[]{true, false})
+            NTRUEncryptionParameters.TernaryPolynomialType polyType = values[i];
+
+            boolean[] booleans = {true, false};
+            for (int j = 0; j != booleans.length; j++)
             {
                 params.polyType = polyType;
-                params.fastFp = fastP;
+                params.fastFp = booleans[j];
 
                 NTRUEncryptionEngine ntru = new NTRUEncryptionEngine();
                 NTRUEncryptionKeyPairGenerator ntruGen = new NTRUEncryptionKeyPairGenerator();

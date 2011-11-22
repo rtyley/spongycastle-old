@@ -923,7 +923,7 @@ public class NewSMIMESignedTest
 
         gen.addCertificates(certs);
         
-        MimeBodyPart smm = gen.generateCertificateManagement(BC);
+        MimeBodyPart smm = gen.generateCertificateManagement();
         
         SMIMESigned s = new  SMIMESigned(smm);
 

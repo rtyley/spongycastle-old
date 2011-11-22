@@ -2,9 +2,6 @@ package org.bouncycastle.math.ntru.polynomial;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
-
-import static java.math.BigDecimal.ZERO;
 
 /**
  * A polynomial with {@link BigDecimal} coefficients.
@@ -13,6 +10,7 @@ import static java.math.BigDecimal.ZERO;
  */
 public class BigDecimalPolynomial
 {
+    private static final BigDecimal ZERO = new BigDecimal("0");
     private static final BigDecimal ONE_HALF = new BigDecimal("0.5");
 
     BigDecimal[] coeffs;
@@ -102,7 +100,7 @@ public class BigDecimalPolynomial
             {
                 c.coeffs[k - N] = c.coeffs[k - N].add(c.coeffs[k]);
             }
-            c.coeffs = Arrays.copyOf(c.coeffs, N);
+            c.coeffs = copyOf(c.coeffs, N);
         }
         return c;
     }
@@ -129,10 +127,10 @@ public class BigDecimalPolynomial
         {
             int n1 = n / 2;
 
-            BigDecimalPolynomial a1 = new BigDecimalPolynomial(Arrays.copyOf(a, n1));
-            BigDecimalPolynomial a2 = new BigDecimalPolynomial(Arrays.copyOfRange(a, n1, n));
-            BigDecimalPolynomial b1 = new BigDecimalPolynomial(Arrays.copyOf(b, n1));
-            BigDecimalPolynomial b2 = new BigDecimalPolynomial(Arrays.copyOfRange(b, n1, n));
+            BigDecimalPolynomial a1 = new BigDecimalPolynomial(copyOf(a, n1));
+            BigDecimalPolynomial a2 = new BigDecimalPolynomial(copyOfRange(a, n1, n));
+            BigDecimalPolynomial b1 = new BigDecimalPolynomial(copyOf(b, n1));
+            BigDecimalPolynomial b2 = new BigDecimalPolynomial(copyOfRange(b, n1, n));
 
             BigDecimalPolynomial A = a1.clone();
             A.add(a2);
@@ -172,7 +170,7 @@ public class BigDecimalPolynomial
         if (b.coeffs.length > coeffs.length)
         {
             int N = coeffs.length;
-            coeffs = Arrays.copyOf(coeffs, b.coeffs.length);
+            coeffs = copyOf(coeffs, b.coeffs.length);
             for (int i = N; i < coeffs.length; i++)
             {
                 coeffs[i] = ZERO;
@@ -194,7 +192,7 @@ public class BigDecimalPolynomial
         if (b.coeffs.length > coeffs.length)
         {
             int N = coeffs.length;
-            coeffs = Arrays.copyOf(coeffs, b.coeffs.length);
+            coeffs = copyOf(coeffs, b.coeffs.length);
             for (int i = N; i < coeffs.length; i++)
             {
                 coeffs[i] = ZERO;
@@ -228,5 +226,24 @@ public class BigDecimalPolynomial
     public BigDecimalPolynomial clone()
     {
         return new BigDecimalPolynomial(coeffs.clone());
+    }
+
+    private BigDecimal[] copyOf(BigDecimal[] a, int length)
+    {
+        BigDecimal[] tmp = new BigDecimal[length];
+
+        System.arraycopy(a, 0, tmp, 0, a.length < length ? a.length : length);
+
+        return tmp;
+    }
+
+    private BigDecimal[] copyOfRange(BigDecimal[] a, int from, int to)
+    {
+        int          newLength = to - from;
+        BigDecimal[] tmp = new BigDecimal[to - from];
+
+        System.arraycopy(a, 0, tmp, 0, a.length < newLength ? a.length : newLength);
+
+        return tmp;
     }
 }

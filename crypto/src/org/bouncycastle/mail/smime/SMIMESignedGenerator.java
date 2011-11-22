@@ -736,6 +736,7 @@ public class SMIMESignedGenerator
      * or signers but that still carries certificates and CRLs.
      *
      * @return a MimeBodyPart containing the certs and CRLs.
+     * @deprecated use generateCertificateManagement()
      */
     public MimeBodyPart generateCertificateManagement(
        String provider)
@@ -749,6 +750,7 @@ public class SMIMESignedGenerator
      * or signers but that still carries certificates and CRLs.
      * 
      * @return a MimeBodyPart containing the certs and CRLs.
+     * @deprecated use generateCertificateManagement()
      */
     public MimeBodyPart generateCertificateManagement(
        Provider provider)
@@ -771,7 +773,34 @@ public class SMIMESignedGenerator
             throw new SMIMEException("exception putting body part together.", e);
         }
     }
-    
+
+   /**
+     * Creates a certificate management message which is like a signed message with no content
+     * or signers but that still carries certificates and CRLs.
+     *
+     * @return a MimeBodyPart containing the certs and CRLs.
+     */
+    public MimeBodyPart generateCertificateManagement()
+       throws SMIMEException
+    {
+        try
+        {
+            MimeBodyPart sig = new MimeBodyPart();
+
+            sig.setContent(new ContentSigner(null, true), CERTIFICATE_MANAGEMENT_CONTENT);
+            sig.addHeader("Content-Type", CERTIFICATE_MANAGEMENT_CONTENT);
+            sig.addHeader("Content-Disposition", "attachment; filename=\"smime.p7c\"");
+            sig.addHeader("Content-Description", "S/MIME Certificate Management Message");
+            sig.addHeader("Content-Transfer-Encoding", encoding);
+
+            return sig;
+        }
+        catch (MessagingException e)
+        {
+            throw new SMIMEException("exception putting body part together.", e);
+        }
+    }
+
     private class Signer
     {
         final PrivateKey      key;

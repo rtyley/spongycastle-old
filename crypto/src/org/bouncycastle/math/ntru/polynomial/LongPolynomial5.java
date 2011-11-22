@@ -50,8 +50,10 @@ class LongPolynomial5
         long[][] prod = new long[5][coeffs.length + (poly2.size() + 4) / 5 - 1];   // intermediate results, the subarrays are shifted by 0,...,4 coefficients
 
         // multiply ones
-        for (int pIdx : poly2.getOnes())
+        int[] ones = poly2.getOnes();
+        for (int idx = 0; idx != ones.length; idx++)
         {
+            int pIdx = ones[idx];
             int cIdx = pIdx / 5;
             int m = pIdx - cIdx * 5;   // m = pIdx % 5
             for (int i = 0; i < coeffs.length; i++)
@@ -62,8 +64,10 @@ class LongPolynomial5
         }
 
         // multiply negative ones
-        for (int pIdx : poly2.getNegOnes())
+        int[] negOnes = poly2.getNegOnes();
+        for (int idx = 0; idx != negOnes.length; idx++)
         {
+            int pIdx = negOnes[idx];
             int cIdx = pIdx / 5;
             int m = pIdx - cIdx * 5;   // m = pIdx % 5
             for (int i = 0; i < coeffs.length; i++)
