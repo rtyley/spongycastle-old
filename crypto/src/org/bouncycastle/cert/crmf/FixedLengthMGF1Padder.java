@@ -66,11 +66,9 @@ public class FixedLengthMGF1Padder
 
         for (int i = seed.length + data.length + 1; i != bytes.length; i++)
         {
-            byte b = (byte)random.nextInt();
-
-            bytes[i] = (b == 0) ? 1 : b;
+            bytes[i] = (byte)(1 + random.nextInt(255));
         }
-        
+
         for (int i = 0; i != mask.length; i++)
         {
             bytes[i + seed.length] ^= mask[i];
