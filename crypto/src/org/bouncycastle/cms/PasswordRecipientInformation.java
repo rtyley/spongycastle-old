@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -68,7 +66,7 @@ public class PasswordRecipientInformation
     {
         if (info.getKeyDerivationAlgorithm() != null)
         {
-            return info.getKeyDerivationAlgorithm().getObjectId().getId();
+            return info.getKeyDerivationAlgorithm().getAlgorithm().getId();
         }
 
         return null;
@@ -127,7 +125,8 @@ public class PasswordRecipientInformation
                 ASN1Encodable params = info.getKeyDerivationAlgorithm().getParameters();
                 if (params != null)
                 {
-                    AlgorithmParameters algP = AlgorithmParameters.getInstance(info.getKeyDerivationAlgorithm().getObjectId().toString(), provider);
+                    AlgorithmParameters algP = AlgorithmParameters.getInstance(
+                        info.getKeyDerivationAlgorithm().getAlgorithm().toString(), provider);
 
                     algP.init(params.toASN1Primitive().getEncoded());
 
@@ -198,30 +197,29 @@ public class PasswordRecipientInformation
     {
         PasswordRecipient pbeRecipient = (PasswordRecipient)recipient;
         AlgorithmIdentifier kekAlg = AlgorithmIdentifier.getInstance(info.getKeyEncryptionAlgorithm());
-        ASN1Sequence        kekAlgParams = (ASN1Sequence)kekAlg.getParameters();
-        DERObjectIdentifier kekAlgName = DERObjectIdentifier.getInstance(kekAlgParams.getObjectAt(0));
-        PBKDF2Params        params = PBKDF2Params.getInstance(info.getKeyDerivationAlgorithm().getParameters());
+        AlgorithmIdentifier kekAlgParams = AlgorithmIdentifier.getInstance(kekAlg.getParameters());
 
-        byte[]              derivedKey;
-        int keySize = ((Integer)KEYSIZES.get(kekAlgName)).intValue();
+        byte[] passwordBytes = getPasswordBytes(pbeRecipient.getPasswordConversionScheme(),
+            pbeRecipient.getPassword());
+        PBKDF2Params params = PBKDF2Params.getInstance(info.getKeyDerivationAlgorithm().getParameters());
 
-        if (pbeRecipient.getPasswordConversionScheme() == PasswordRecipient.PKCS5_SCHEME2)
+        PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator();
+        gen.init(passwordBytes, params.getSalt(), params.getIterationCount().intValue());
+
+        int keySize = ((Integer)KEYSIZES.get(kekAlgParams.getAlgorithm())).intValue();
+
+        byte[] derivedKey = ((KeyParameter)gen.generateDerivedParameters(keySize)).getKey();
+
+        return pbeRecipient.getRecipientOperator(kekAlgParams, messageAlgorithm, derivedKey, info.getEncryptedKey().getOctets());
+    }
+    
+    protected byte[] getPasswordBytes(int scheme, char[] password)
+    {
+        if (scheme == PasswordRecipient.PKCS5_SCHEME2)
         {
-            PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator();
-
-            gen.init(PBEParametersGenerator.PKCS5PasswordToBytes(pbeRecipient.getPassword()), params.getSalt(), params.getIterationCount().intValue());
-
-            derivedKey = ((KeyParameter)gen.generateDerivedParameters(keySize)).getKey();
+            return PBEParametersGenerator.PKCS5PasswordToBytes(password);
         }
-        else
-        {
-            PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator();
 
-            gen.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(pbeRecipient.getPassword()), params.getSalt(), params.getIterationCount().intValue());
-
-            derivedKey = ((KeyParameter)gen.generateDerivedParameters(keySize)).getKey();
-        }
-        
-        return pbeRecipient.getRecipientOperator(AlgorithmIdentifier.getInstance(kekAlg.getParameters()), messageAlgorithm, derivedKey, info.getEncryptedKey().getOctets());
+        return PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(password);
     }
 }
