@@ -51,13 +51,11 @@ public class PGPLiteralDataGenerator implements StreamGenerator
     private void writeHeader(
         OutputStream    out,
         char            format,
-        String          name,
+        byte[]          encName,
         long            modificationTime) 
         throws IOException
     {
         out.write(format);
-
-        byte[] encName = Strings.toUTF8ByteArray(name);
 
         out.write((byte)encName.length);
 
@@ -101,9 +99,11 @@ public class PGPLiteralDataGenerator implements StreamGenerator
             throw new IllegalStateException("generator already in open state");
         }
 
-        pkOut = new BCPGOutputStream(out, PacketTags.LITERAL_DATA, length + 2 + name.length() + 4, oldFormat);
+        byte[] encName = Strings.toUTF8ByteArray(name);
+
+        pkOut = new BCPGOutputStream(out, PacketTags.LITERAL_DATA, length + 2 + encName.length + 4, oldFormat);
         
-        writeHeader(pkOut, format, name, modificationTime.getTime());
+        writeHeader(pkOut, format, encName, modificationTime.getTime());
 
         return new WrappedGeneratorStream(pkOut, this);
     }
@@ -141,8 +141,10 @@ public class PGPLiteralDataGenerator implements StreamGenerator
         }
 
         pkOut = new BCPGOutputStream(out, PacketTags.LITERAL_DATA, buffer);
-        
-        writeHeader(pkOut, format, name, modificationTime.getTime());
+
+        byte[] encName = Strings.toUTF8ByteArray(name);
+
+        writeHeader(pkOut, format, encName, modificationTime.getTime());
 
         return new WrappedGeneratorStream(pkOut, this);
     }
@@ -172,9 +174,11 @@ public class PGPLiteralDataGenerator implements StreamGenerator
             throw new IllegalStateException("generator already in open state");
         }
 
-        pkOut = new BCPGOutputStream(out, PacketTags.LITERAL_DATA, file.length() + 2 + file.getName().length() + 4, oldFormat);
+        byte[] encName = Strings.toUTF8ByteArray(file.getName());
+
+        pkOut = new BCPGOutputStream(out, PacketTags.LITERAL_DATA, file.length() + 2 + encName.length + 4, oldFormat);
         
-        writeHeader(pkOut, format, file.getName(), file.lastModified());
+        writeHeader(pkOut, format, encName, file.lastModified());
 
         return new WrappedGeneratorStream(pkOut, this);
     }
