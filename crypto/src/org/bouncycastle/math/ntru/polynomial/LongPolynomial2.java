@@ -1,6 +1,6 @@
 package org.bouncycastle.math.ntru.polynomial;
 
-import java.util.Arrays;
+import org.bouncycastle.util.Arrays;
 
 /**
  * A polynomial class that combines two coefficients into one <code>long</code> value for
@@ -245,7 +245,7 @@ class LongPolynomial2
     {
         if (obj instanceof LongPolynomial2)
         {
-            return Arrays.equals(coeffs, ((LongPolynomial2)obj).coeffs);
+            return Arrays.areEqual(coeffs, ((LongPolynomial2)obj).coeffs);
         }
         else
         {

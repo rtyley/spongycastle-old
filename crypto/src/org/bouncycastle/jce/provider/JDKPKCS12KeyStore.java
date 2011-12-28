@@ -906,8 +906,8 @@ public class JDKPKCS12KeyStore
                         }
                         else if (b.getBagId().equals(keyBag))
                         {
-                            org.bouncycastle.asn1.pkcs.PrivateKeyInfo pIn = new org.bouncycastle.asn1.pkcs.PrivateKeyInfo((ASN1Sequence)b.getBagValue());
-                            PrivateKey              privKey = JDKKeyFactory.createPrivateKeyFromPrivateKeyInfo(pIn);
+                            org.bouncycastle.asn1.pkcs.PrivateKeyInfo kInfo = new org.bouncycastle.asn1.pkcs.PrivateKeyInfo((ASN1Sequence)b.getBagValue());
+                            PrivateKey     privKey = BouncyCastleProvider.getPrivateKey(kInfo);
 
                             //
                             // set the attributes on the key

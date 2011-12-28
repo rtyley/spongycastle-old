@@ -10,8 +10,6 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.spec.ECParameterSpec;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +37,8 @@ import org.bouncycastle.cms.KeyAgreeRecipientInfoGenerator;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
 import org.bouncycastle.jce.spec.MQVPublicKeySpec;
 import org.bouncycastle.operator.GenericKey;
@@ -56,7 +56,6 @@ public class JceKeyAgreeRecipientInfoGenerator
     private KeyPair ephemeralKP;
 
     public JceKeyAgreeRecipientInfoGenerator(ASN1ObjectIdentifier keyAgreementOID, PrivateKey senderPrivateKey, PublicKey senderPublicKey, ASN1ObjectIdentifier keyEncryptionOID)
-        throws CMSException
     {
         super(keyAgreementOID, SubjectPublicKeyInfo.getInstance(senderPublicKey.getEncoded()), keyEncryptionOID);
 
@@ -157,7 +156,7 @@ public class JceKeyAgreeRecipientInfoGenerator
 
                 keyEncryptionCipher.init(Cipher.WRAP_MODE, keyEncryptionKey, random);
 
-                byte[] encryptedKeyBytes = keyEncryptionCipher.wrap(CMSUtils.getJceKey(contentEncryptionKey));
+                byte[] encryptedKeyBytes = keyEncryptionCipher.wrap(helper.getJceKey(contentEncryptionKey));
 
                 ASN1OctetString encryptedKey = new DEROctetString(encryptedKeyBytes);
 

@@ -26,8 +26,12 @@
                 <exclude name="**/ECNamedCurveSpec.java" />
                 <exclude name="**/BCEC*.java" />
                 <exclude name="**/JCEEC5*.java" />
+                <exclude name="**/provider/JCEEC*.java" />
                 <exclude name="**/EC5*.java" />
                 <exclude name="**/JDKPKCS12StoreParameter.java" />
+                <exclude name="**/NTRU*.java" />
+                <exclude name="**/IndexGenerator.java" />
+                <exclude name="**/ntru/**/*.java" />
             </fileset>
             <fileset dir="test/src">
                 <exclude name="**/ECDSA5Test.java" />
@@ -37,6 +41,10 @@
                 <exclude name="**/X509StoreTest.java" />
                 <exclude name="**/MQVTest.java" />
                 <exclude name="**/pem/AllTests.java" />
+                <exclude name="**/ntru/**/*.java" />
+                <exclude name="**/NTRU*.java" />
+                <exclude name="**/crypto/engines/BitStringTest.java" />
+                <exclude name="**/crypto/engines/AllTests.java" />
             </fileset>
             <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.html" />

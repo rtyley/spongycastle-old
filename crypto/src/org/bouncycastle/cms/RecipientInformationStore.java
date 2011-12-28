@@ -1,6 +1,5 @@
 package org.bouncycastle.cms;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,15 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.x500.X500Name;
 
 public class RecipientInformationStore
 {
-    private final List      all; //ArrayList[RecipientInformation]
-    private final Map       table = new HashMap(); // HashMap[RecipientID, ArrayList[RecipientInformation]]
+    private final List all; //ArrayList[RecipientInformation]
+    private final Map table = new HashMap(); // HashMap[RecipientID, ArrayList[RecipientInformation]]
 
     public RecipientInformationStore(
-        Collection  recipientInfos)
+        Collection recipientInfos)
     {
         Iterator it = recipientInfos.iterator();
 
@@ -51,7 +49,7 @@ public class RecipientInformationStore
     {
         Collection list = getRecipients(selector);
 
-        return list.size() == 0 ? null : (RecipientInformation) list.iterator().next();
+        return list.size() == 0 ? null : (RecipientInformation)list.iterator().next();
     }
 
     /**
@@ -83,31 +81,36 @@ public class RecipientInformationStore
     public Collection getRecipients(
         RecipientId selector)
     {
-        if (selector.getIssuer() != null && selector.getSubjectKeyIdentifier() != null)
+        if (selector instanceof KeyTransRecipientId)
         {
-            List results = new ArrayList();
-            try
+            KeyTransRecipientId keyTrans = (KeyTransRecipientId)selector;
+
+            if (keyTrans.getIssuerName() != null && keyTrans.getSubjectKeyIdentifier() != null)
             {
-                Collection match1 = getRecipients(new KeyTransRecipientId(X500Name.getInstance(selector.getIssuerAsBytes()), selector.getSerialNumber()));
+                List results = new ArrayList();
+
+                Collection match1 = getRecipients(new KeyTransRecipientId(keyTrans.getIssuerName(), keyTrans.getSerialNumber()));
 
                 if (match1 != null)
                 {
                     results.addAll(match1);
                 }
+
+                Collection match2 = getRecipients(new KeyTransRecipientId(ASN1OctetString.getInstance(selector.getSubjectKeyIdentifier()).getOctets()));
+
+                if (match2 != null)
+                {
+                    results.addAll(match2);
+                }
+
+                return results;
             }
-            catch (IOException e)
+            else
             {
-                // ignore...
+                List list = (ArrayList)table.get(selector);
+
+                return list == null ? new ArrayList() : new ArrayList(list);
             }
-
-            Collection match2 = getRecipients(new KeyTransRecipientId(ASN1OctetString.getInstance(selector.getSubjectKeyIdentifier()).getOctets()));
-
-            if (match2 != null)
-            {
-                results.addAll(match2);
-            }
-
-            return results;
         }
         else
         {

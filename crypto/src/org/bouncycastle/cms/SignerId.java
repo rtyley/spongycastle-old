@@ -99,6 +99,12 @@ public class SignerId
         setSubjectKeyID(subjectKeyId);
     }
 
+        // TODO: change to getIssuer() when dependency on X509CertSelector removed.
+    X500Name getIssuerName()
+    {
+        return issuer;
+    }
+
     public int hashCode()
     {
         int code = Arrays.hashCode(subjectKeyId);

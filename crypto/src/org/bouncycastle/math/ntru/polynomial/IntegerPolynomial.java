@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.bouncycastle.math.ntru.euclid.BigIntEuclidean;
 import org.bouncycastle.math.ntru.util.ArrayEncoder;
 import org.bouncycastle.math.ntru.util.Util;
+import org.bouncycastle.util.Arrays;
 
 /**
  * A polynomial with <code>int</code> coefficients.<br/>
@@ -1116,7 +1116,9 @@ public class IntegerPolynomial
         modCenter(q);
 
         int[] sorted = coeffs.clone();
-        Arrays.sort(sorted);
+
+        sort(sorted);
+
         int maxrange = 0;
         int maxrangeStart = 0;
         for (int i = 0; i < sorted.length - 1; i++)
@@ -1144,6 +1146,26 @@ public class IntegerPolynomial
         }
 
         sub(shift);
+    }
+
+    private void sort(int[] ints)
+    {
+        boolean swap = true;
+
+        while (swap)
+        {
+            swap = false;
+            for (int i = 0; i != ints.length - 1; i++)
+            {
+                if (ints[i] > ints[i+1])
+                {
+                    int tmp = ints[i];
+                    ints[i] = ints[i+1];
+                    ints[i+1] = tmp;
+                    swap = true;
+                }
+            }
+        }
     }
 
     /**
@@ -1286,7 +1308,7 @@ public class IntegerPolynomial
     {
         if (obj instanceof IntegerPolynomial)
         {
-            return Arrays.equals(coeffs, ((IntegerPolynomial)obj).coeffs);
+            return Arrays.areEqual(coeffs, ((IntegerPolynomial)obj).coeffs);
         }
         else
         {

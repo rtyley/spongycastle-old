@@ -4,7 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureRandom;
-import java.util.Arrays;
+
+import org.bouncycastle.util.Arrays;
 
 /**
  * A polynomial of the form <code>f1*f2+f3</code>, where

@@ -1,9 +1,10 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.asymmetric.rsa;
 
 import java.io.ByteArrayOutputStream;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -12,51 +13,47 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA224Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA384Digest;
-import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.encodings.ISO9796d1Encoding;
 import org.bouncycastle.crypto.encodings.OAEPEncoding;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
-import org.bouncycastle.crypto.engines.RSAEngine;
+import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.jcajce.provider.asymmetric.util.BaseCipherSpi;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.Strings;
 
-public class JCERSACipher extends WrapCipherSpi
+public class CipherSpi
+    extends BaseCipherSpi
 {
-    private AsymmetricBlockCipher   cipher;
-    private AlgorithmParameterSpec  paramSpec;
-    private AlgorithmParameters     engineParams;
+    private AsymmetricBlockCipher cipher;
+    private AlgorithmParameterSpec paramSpec;
+    private AlgorithmParameters engineParams;
     private boolean                 publicKeyOnly = false;
     private boolean                 privateKeyOnly = false;
-    private ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+    private ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 
-    public JCERSACipher(
-        AsymmetricBlockCipher   engine)
+    public CipherSpi(
+        AsymmetricBlockCipher engine)
     {
         cipher = engine;
     }
 
-    public JCERSACipher(
-        boolean                 publicKeyOnly,
-        boolean                 privateKeyOnly,
-        AsymmetricBlockCipher   engine)
+    public CipherSpi(
+        boolean publicKeyOnly,
+        boolean privateKeyOnly,
+        AsymmetricBlockCipher engine)
     {
         this.publicKeyOnly = publicKeyOnly;
         this.privateKeyOnly = privateKeyOnly;
         cipher = engine;
     }
-        
+     
     protected int engineGetBlockSize() 
     {
         try
@@ -69,23 +66,18 @@ public class JCERSACipher extends WrapCipherSpi
         }
     }
 
-    protected byte[] engineGetIV() 
-    {
-        return null;
-    }
-
     protected int engineGetKeySize(
-        Key     key) 
+        Key key)
     {
         if (key instanceof RSAPrivateKey)
         {
-            RSAPrivateKey   k = (RSAPrivateKey)key;
+            RSAPrivateKey k = (RSAPrivateKey)key;
 
             return k.getModulus().bitLength();
         }
         else if (key instanceof RSAPublicKey)
         {
-            RSAPublicKey   k = (RSAPublicKey)key;
+            RSAPublicKey k = (RSAPublicKey)key;
 
             return k.getModulus().bitLength();
         }
@@ -106,7 +98,7 @@ public class JCERSACipher extends WrapCipherSpi
         }
     }
 
-    protected AlgorithmParameters engineGetParameters() 
+    protected AlgorithmParameters engineGetParameters()
     {
         if (engineParams == null)
         {
@@ -114,7 +106,7 @@ public class JCERSACipher extends WrapCipherSpi
             {
                 try
                 {
-                    engineParams = AlgorithmParameters.getInstance("OAEP", "BC");
+                    engineParams = AlgorithmParameters.getInstance("OAEP", BouncyCastleProvider.PROVIDER_NAME);
                     engineParams.init(paramSpec);
                 }
                 catch (Exception e)
@@ -128,7 +120,7 @@ public class JCERSACipher extends WrapCipherSpi
     }
 
     protected void engineSetMode(
-        String  mode)
+        String mode)
         throws NoSuchAlgorithmException
     {
         String md = Strings.toUpperCase(mode);
@@ -155,50 +147,30 @@ public class JCERSACipher extends WrapCipherSpi
     }
 
     protected void engineSetPadding(
-        String  padding) 
+        String padding)
         throws NoSuchPaddingException
     {
         String pad = Strings.toUpperCase(padding);
 
         if (pad.equals("NOPADDING"))
         {
-            cipher = new RSAEngine();
+            cipher = new RSABlindedEngine();
         }
         else if (pad.equals("PKCS1PADDING"))
         {
-            cipher = new PKCS1Encoding(new RSAEngine());
-        }
-        else if (pad.equals("OAEPPADDING"))
-        {
-            cipher = new OAEPEncoding(new RSAEngine());
+            cipher = new PKCS1Encoding(new RSABlindedEngine());
         }
         else if (pad.equals("ISO9796-1PADDING"))
         {
-            cipher = new ISO9796d1Encoding(new RSAEngine());
+            cipher = new ISO9796d1Encoding(new RSABlindedEngine());
         }
-        else if (pad.equals("OAEPWITHMD5ANDMGF1PADDING"))
+        else if (pad.equals("OAEPPADDING"))
         {
-            cipher = new OAEPEncoding(new RSAEngine(), new MD5Digest());
+            cipher = new OAEPEncoding(new RSABlindedEngine());
         }
         else if (pad.equals("OAEPWITHSHA1ANDMGF1PADDING"))
         {
-            cipher = new OAEPEncoding(new RSAEngine(), new SHA1Digest());
-        }
-        else if (pad.equals("OAEPWITHSHA224ANDMGF1PADDING"))
-        {
-            cipher = new OAEPEncoding(new RSAEngine(), new SHA224Digest());
-        }
-        else if (pad.equals("OAEPWITHSHA256ANDMGF1PADDING"))
-        {
-            cipher = new OAEPEncoding(new RSAEngine(), new SHA256Digest());
-        }
-        else if (pad.equals("OAEPWITHSHA384ANDMGF1PADDING"))
-        {
-            cipher = new OAEPEncoding(new RSAEngine(), new SHA384Digest());
-        }
-        else if (pad.equals("OAEPWITHSHA512ANDMGF1PADDING"))
-        {
-            cipher = new OAEPEncoding(new RSAEngine(), new SHA512Digest());
+            cipher = new OAEPEncoding(new RSABlindedEngine());
         }
         else
         {
@@ -208,12 +180,12 @@ public class JCERSACipher extends WrapCipherSpi
 
     protected void engineInit(
         int                     opmode,
-        Key                     key,
-        AlgorithmParameterSpec  params,
-        SecureRandom            random) 
-    throws InvalidKeyException
+        Key key,
+        AlgorithmParameterSpec params,
+        SecureRandom random)
+    throws InvalidKeyException, InvalidAlgorithmParameterException
     {
-        CipherParameters        param;
+        CipherParameters param;
 
         if (params == null)
         {
@@ -247,7 +219,7 @@ public class JCERSACipher extends WrapCipherSpi
             throw new IllegalArgumentException("unknown parameter type.");
         }
 
-        if (!(cipher instanceof RSAEngine))
+        if (!(cipher instanceof RSABlindedEngine))
         {
             if (random != null)
             {
@@ -261,36 +233,52 @@ public class JCERSACipher extends WrapCipherSpi
 
         switch (opmode)
         {
-        case Cipher.ENCRYPT_MODE:
-        case Cipher.WRAP_MODE:
+        case javax.crypto.Cipher.ENCRYPT_MODE:
+        case javax.crypto.Cipher.WRAP_MODE:
             cipher.init(true, param);
             break;
-        case Cipher.DECRYPT_MODE:
-        case Cipher.UNWRAP_MODE:
+        case javax.crypto.Cipher.DECRYPT_MODE:
+        case javax.crypto.Cipher.UNWRAP_MODE:
             cipher.init(false, param);
             break;
         default:
-            System.out.println("eeek!");
+            throw new InvalidParameterException("unknown opmode " + opmode + " passed to RSA");
         }
     }
 
     protected void engineInit(
         int                 opmode,
-        Key                 key,
+        Key key,
         AlgorithmParameters params,
-        SecureRandom        random) 
+        SecureRandom random)
     throws InvalidKeyException, InvalidAlgorithmParameterException
     {
-        throw new InvalidAlgorithmParameterException("can't handle parameters in RSA");
+        AlgorithmParameterSpec paramSpec = null;
+
+        if (params != null)
+        {
+            throw new InvalidAlgorithmParameterException("cannot recognise parameters.");
+        }
+
+        engineParams = params;
+        engineInit(opmode, key, paramSpec, random);
     }
 
     protected void engineInit(
         int                 opmode,
-        Key                 key,
-        SecureRandom        random) 
+        Key key,
+        SecureRandom random)
     throws InvalidKeyException
     {
-        engineInit(opmode, key, (AlgorithmParameterSpec)null, random);
+        try
+        {
+            engineInit(opmode, key, (AlgorithmParameterSpec)null, random);
+        }
+        catch (InvalidAlgorithmParameterException e)
+        {
+            // this shouldn't happen
+            throw new RuntimeException("Eeeek! " + e.toString(), e);
+        }
     }
 
     protected byte[] engineUpdate(
@@ -300,7 +288,7 @@ public class JCERSACipher extends WrapCipherSpi
     {
         bOut.write(input, inputOffset, inputLen);
 
-        if (cipher instanceof RSAEngine)
+        if (cipher instanceof RSABlindedEngine)
         {
             if (bOut.size() > cipher.getInputBlockSize() + 1)
             {
@@ -327,7 +315,7 @@ public class JCERSACipher extends WrapCipherSpi
     {
         bOut.write(input, inputOffset, inputLen);
 
-        if (cipher instanceof RSAEngine)
+        if (cipher instanceof RSABlindedEngine)
         {
             if (bOut.size() > cipher.getInputBlockSize() + 1)
             {
@@ -356,7 +344,7 @@ public class JCERSACipher extends WrapCipherSpi
             bOut.write(input, inputOffset, inputLen);
         }
 
-        if (cipher instanceof RSAEngine)
+        if (cipher instanceof RSABlindedEngine)
         {
             if (bOut.size() > cipher.getInputBlockSize() + 1)
             {
@@ -398,7 +386,7 @@ public class JCERSACipher extends WrapCipherSpi
             bOut.write(input, inputOffset, inputLen);
         }
 
-        if (cipher instanceof RSAEngine)
+        if (cipher instanceof RSABlindedEngine)
         {
             if (bOut.size() > cipher.getInputBlockSize() + 1)
             {
@@ -440,56 +428,56 @@ public class JCERSACipher extends WrapCipherSpi
      */
 
     static public class NoPadding
-        extends JCERSACipher
+        extends CipherSpi
     {
         public NoPadding()
         {
-            super(new RSAEngine());
+            super(new RSABlindedEngine());
         }
     }
 
     static public class PKCS1v1_5Padding
-        extends JCERSACipher
+        extends CipherSpi
     {
         public PKCS1v1_5Padding()
         {
-            super(new PKCS1Encoding(new RSAEngine()));
+            super(new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
     static public class PKCS1v1_5Padding_PrivateOnly
-        extends JCERSACipher
+        extends CipherSpi
     {
         public PKCS1v1_5Padding_PrivateOnly()
         {
-            super(false, true, new PKCS1Encoding(new RSAEngine()));
+            super(false, true, new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
     static public class PKCS1v1_5Padding_PublicOnly
-        extends JCERSACipher
+        extends CipherSpi
     {
         public PKCS1v1_5Padding_PublicOnly()
         {
-            super(true, false, new PKCS1Encoding(new RSAEngine()));
+            super(true, false, new PKCS1Encoding(new RSABlindedEngine()));
         }
     }
 
     static public class OAEPPadding
-        extends JCERSACipher
+        extends CipherSpi
     {
         public OAEPPadding()
         {
-            super(new OAEPEncoding(new RSAEngine()));
+            super(new OAEPEncoding(new RSABlindedEngine()));
         }
     }
     
     static public class ISO9796d1Padding
-        extends JCERSACipher
+        extends CipherSpi
     {
         public ISO9796d1Padding()
         {
-            super(new ISO9796d1Encoding(new RSAEngine()));
+            super(new ISO9796d1Encoding(new RSABlindedEngine()));
         }
     }
 }

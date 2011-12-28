@@ -1,6 +1,5 @@
 package org.bouncycastle.cms;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.x500.X500Name;
 
 public class SignerInformationStore
 {
@@ -83,21 +81,15 @@ public class SignerInformationStore
     public Collection getSigners(
         SignerId selector)
     {
-        if (selector.getIssuer() != null && selector.getSubjectKeyIdentifier() != null)
+        if (selector.getIssuerName() != null && selector.getSubjectKeyIdentifier() != null)
         {
             List results = new ArrayList();
-            try
-            {
-                Collection match1 = getSigners(new SignerId(X500Name.getInstance(selector.getIssuerAsBytes()), selector.getSerialNumber()));
 
-                if (match1 != null)
-                {
-                    results.addAll(match1);
-                }
-            }
-            catch (IOException e)
+            Collection match1 = getSigners(new SignerId(selector.getIssuerName(), selector.getSerialNumber()));
+
+            if (match1 != null)
             {
-                // ignore...
+                results.addAll(match1);
             }
 
             Collection match2 = getSigners(new SignerId(ASN1OctetString.getInstance(selector.getSubjectKeyIdentifier()).getOctets()));

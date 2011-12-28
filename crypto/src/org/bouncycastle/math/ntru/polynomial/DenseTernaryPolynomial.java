@@ -1,9 +1,9 @@
 package org.bouncycastle.math.ntru.polynomial;
 
 import java.security.SecureRandom;
-import java.util.Arrays;
 
 import org.bouncycastle.math.ntru.util.Util;
+import org.bouncycastle.util.Arrays;
 
 /**
  * A <code>TernaryPolynomial</code> with a "high" number of nonzero coefficients.

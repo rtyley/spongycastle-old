@@ -155,7 +155,7 @@ public final class Camellia
     public static class Mappings
         extends AlgorithmProvider
     {
-        private static final String PREFIX = Camellia.class.getCanonicalName();
+        private static final String PREFIX = Camellia.class.getName();
 
         public Mappings()
         {

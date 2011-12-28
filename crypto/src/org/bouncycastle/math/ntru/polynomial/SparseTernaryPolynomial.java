@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Arrays;
 
 import org.bouncycastle.math.ntru.util.ArrayEncoder;
 import org.bouncycastle.math.ntru.util.Util;
+import org.bouncycastle.util.Arrays;
 
 /**
  * A <code>TernaryPolynomial</code> with a "low" number of nonzero coefficients.
@@ -307,11 +307,11 @@ public class SparseTernaryPolynomial
         {
             return false;
         }
-        if (!Arrays.equals(negOnes, other.negOnes))
+        if (!Arrays.areEqual(negOnes, other.negOnes))
         {
             return false;
         }
-        if (!Arrays.equals(ones, other.ones))
+        if (!Arrays.areEqual(ones, other.ones))
         {
             return false;
         }

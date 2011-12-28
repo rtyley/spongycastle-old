@@ -3,7 +3,8 @@ package org.bouncycastle.math.ntru.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.util.Arrays;
+
+import org.bouncycastle.util.Arrays;
 
 /**
  * Converts a coefficient array to a compact byte array and vice versa.

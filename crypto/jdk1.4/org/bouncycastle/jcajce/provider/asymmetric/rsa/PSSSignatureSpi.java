@@ -1,5 +1,6 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.asymmetric.rsa;
 
+import java.io.ByteArrayOutputStream;
 import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -23,18 +24,47 @@ import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.crypto.signers.PSSSigner;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-public class JDKPSSSigner
+public class PSSSignatureSpi
     extends Signature
 {
-    private AsymmetricBlockCipher signer;
-    private Digest digest;
-    private int saltLength;
     private AlgorithmParameters engineParams;
-    private PSSSigner pss;
+    private PSSParameterSpec paramSpec;
+    private PSSParameterSpec originalSpec;
+    private AsymmetricBlockCipher signer;
+    private Digest contentDigest;
+    private Digest mgfDigest;
+    private int saltLength;
+    private byte trailer;
+    private boolean isRaw;
 
-    protected JDKPSSSigner(
+    private org.bouncycastle.crypto.signers.PSSSigner pss;
+
+    private byte getTrailer(
+        int trailerField)
+    {
+        if (trailerField == 1)
+        {
+            return org.bouncycastle.crypto.signers.PSSSigner.TRAILER_IMPLICIT;
+        }
+        
+        throw new IllegalArgumentException("unknown trailer field");
+    }
+
+    private void setupContentDigest()
+    {
+        if (isRaw)
+        {
+            this.contentDigest = new NullPssDigest(mgfDigest);
+        }
+        else
+        {
+            this.contentDigest = mgfDigest;
+        }
+    }
+
+    protected PSSSignatureSpi(
         String name,
         AsymmetricBlockCipher signer,
         Digest digest)
@@ -42,7 +72,8 @@ public class JDKPSSSigner
         super(name);
 
         this.signer = signer;
-        this.digest = digest;
+        this.mgfDigest = digest;
+
         if (digest != null)
         {
             this.saltLength = digest.getDigestSize();
@@ -51,10 +82,40 @@ public class JDKPSSSigner
         {
             this.saltLength = 20;
         }
+        this.saltLength = paramSpec.getSaltLength();
+        this.isRaw = false;
+
+        setupContentDigest();
     }
 
+    // care - this constructor is actually used by outside organisations
+    protected PSSSignatureSpi(
+        String name,
+        AsymmetricBlockCipher signer,
+        Digest digest,
+        boolean isRaw)
+    {
+        super(name);
+
+        this.signer = signer;
+        this.mgfDigest = digest;
+        
+        if (digest != null)
+        {
+            this.saltLength = digest.getDigestSize();
+        }
+        else
+        {
+            this.saltLength = 20;
+        }
+        this.saltLength = paramSpec.getSaltLength();
+        this.isRaw = isRaw;
+
+        setupContentDigest();
+    }
+    
     protected void engineInitVerify(
-        PublicKey   publicKey)
+        PublicKey publicKey)
         throws InvalidKeyException
     {
         if (!(publicKey instanceof RSAPublicKey))
@@ -62,14 +123,14 @@ public class JDKPSSSigner
             throw new InvalidKeyException("Supplied key is not a RSAPublicKey instance");
         }
 
-        pss = new PSSSigner(signer, digest, saltLength);
+        pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, saltLength);
         pss.init(false,
             RSAUtil.generatePublicKeyParameter((RSAPublicKey)publicKey));
     }
 
     protected void engineInitSign(
-        PrivateKey      privateKey,
-        SecureRandom    random)
+        PrivateKey privateKey,
+        SecureRandom random)
         throws InvalidKeyException
     {
         if (!(privateKey instanceof RSAPrivateKey))
@@ -77,12 +138,12 @@ public class JDKPSSSigner
             throw new InvalidKeyException("Supplied key is not a RSAPrivateKey instance");
         }
 
-        pss = new PSSSigner(signer, digest, saltLength);
+        pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, saltLength);
         pss.init(true, new ParametersWithRandom(RSAUtil.generatePrivateKeyParameter((RSAPrivateKey)privateKey), random));
     }
 
     protected void engineInitSign(
-        PrivateKey  privateKey)
+        PrivateKey privateKey)
         throws InvalidKeyException
     {
         if (!(privateKey instanceof RSAPrivateKey))
@@ -90,7 +151,7 @@ public class JDKPSSSigner
             throw new InvalidKeyException("Supplied key is not a RSAPrivateKey instance");
         }
 
-        pss = new PSSSigner(signer, digest, saltLength);
+        pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, saltLength);
         pss.init(true, RSAUtil.generatePrivateKeyParameter((RSAPrivateKey)privateKey));
     }
 
@@ -136,38 +197,45 @@ public class JDKPSSSigner
     {
         if (params instanceof PSSParameterSpec)
         {
-            saltLength = ((PSSParameterSpec)params).getSaltLength();
+            PSSParameterSpec newParamSpec = (PSSParameterSpec)params;
+            
+            this.saltLength = paramSpec.getSaltLength();
+
+            setupContentDigest();
         }
         else
         {
             throw new InvalidParameterException("Only PSSParameterSpec supported");
         }
     }
-    
-    protected AlgorithmParameters engineGetParameters() 
+
+    protected AlgorithmParameters engineGetParameters()
     {
         if (engineParams == null)
         {
-            try
+            if (paramSpec != null)
             {
-                engineParams = AlgorithmParameters.getInstance("PSS", "BC");
-                engineParams.init(new PSSParameterSpec(saltLength));
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e.toString());
+                try
+                {
+                    engineParams = AlgorithmParameters.getInstance("PSS", BouncyCastleProvider.PROVIDER_NAME);
+                    engineParams.init(paramSpec);
+                }
+                catch (Exception e)
+                {
+                    throw new RuntimeException(e.toString());
+                }
             }
         }
 
         return engineParams;
     }
-
+    
     /**
      * @deprecated replaced with <a href = "#engineSetParameter(java.security.spec.AlgorithmParameterSpec)">
      */
     protected void engineSetParameter(
-        String  param,
-        Object  value)
+        String param,
+        Object value)
     {
         throw new UnsupportedOperationException("engineSetParameter unsupported");
     }
@@ -178,8 +246,17 @@ public class JDKPSSSigner
         throw new UnsupportedOperationException("engineGetParameter unsupported");
     }
 
+    static public class nonePSS
+        extends PSSSignatureSpi
+    {
+        public nonePSS()
+        {
+            super("NONEwithRSAandMGF1", new RSABlindedEngine(), null, true);
+        }
+    }
+
     static public class PSSwithRSA
-        extends JDKPSSSigner
+        extends PSSSignatureSpi
     {
         public PSSwithRSA()
         {
@@ -188,7 +265,7 @@ public class JDKPSSSigner
     }
 
     static public class SHA1withRSA
-        extends JDKPSSSigner
+        extends PSSSignatureSpi
     {
         public SHA1withRSA()
         {
@@ -197,7 +274,7 @@ public class JDKPSSSigner
     }
 
     static public class SHA224withRSA
-        extends JDKPSSSigner
+        extends PSSSignatureSpi
     {
         public SHA224withRSA()
         {
@@ -206,7 +283,7 @@ public class JDKPSSSigner
     }
 
     static public class SHA256withRSA
-        extends JDKPSSSigner
+        extends PSSSignatureSpi
     {
         public SHA256withRSA()
         {
@@ -215,7 +292,7 @@ public class JDKPSSSigner
     }
 
     static public class SHA384withRSA
-        extends JDKPSSSigner
+        extends PSSSignatureSpi
     {
         public SHA384withRSA()
         {
@@ -224,11 +301,77 @@ public class JDKPSSSigner
     }
 
     static public class SHA512withRSA
-        extends JDKPSSSigner
+        extends PSSSignatureSpi
     {
         public SHA512withRSA()
         {
             super("SHA512withRSAandMGF1", new RSABlindedEngine(), new SHA512Digest());
+        }
+    }
+
+    private class NullPssDigest
+        implements Digest
+    {
+        private ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        private Digest baseDigest;
+        private boolean oddTime = true;
+
+        public NullPssDigest(Digest mgfDigest)
+        {
+            this.baseDigest = mgfDigest;
+        }
+
+        public String getAlgorithmName()
+        {
+            return "NULL";
+        }
+
+        public int getDigestSize()
+        {
+            return baseDigest.getDigestSize();
+        }
+
+        public void update(byte in)
+        {
+            bOut.write(in);
+        }
+
+        public void update(byte[] in, int inOff, int len)
+        {
+            bOut.write(in, inOff, len);
+        }
+
+        public int doFinal(byte[] out, int outOff)
+        {
+            byte[] res = bOut.toByteArray();
+
+            if (oddTime)
+            {
+                System.arraycopy(res, 0, out, outOff, res.length);
+            }
+            else
+            {
+                baseDigest.update(res, 0, res.length);
+
+                baseDigest.doFinal(out, outOff);
+            }
+
+            reset();
+
+            oddTime = !oddTime;
+
+            return res.length;
+        }
+
+        public void reset()
+        {
+            bOut.reset();
+            baseDigest.reset();
+        }
+
+        public int getByteLength()
+        {
+            return 0;
         }
     }
 }

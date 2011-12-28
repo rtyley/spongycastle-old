@@ -32,11 +32,17 @@ public class SCryptTest extends SimpleTest
         {
             ++count;
             String header = line;
-            StringBuilder data = new StringBuilder();
+            StringBuffer data = new StringBuffer();
 
             while (!isEndData(line = br.readLine()))
             {
-                data.append(line.replace(" ", ""));
+                for (int i = 0; i != line.length(); i++)
+                {
+                    if (line.charAt(i) != ' ')
+                    {
+                        data.append(line.charAt(i));
+                    }
+                }
             }
 
             int start = header.indexOf('(') + 1;

@@ -222,7 +222,7 @@ public class CertificateFactory
         }
         catch (Exception e)
         {
-            throw new CertificateException(e);
+            throw new ExCertificateException(e);
         }
     }
 
@@ -375,5 +375,28 @@ public class CertificateFactory
             }
         }
         return new PKIXCertPath(certificates);
+    }
+
+    private class ExCertificateException
+        extends CertificateException
+    {
+        private Throwable cause;
+
+        public ExCertificateException(Throwable cause)
+        {
+            this.cause = cause;
+        }
+
+        public ExCertificateException(String msg, Throwable cause)
+        {
+            super(msg);
+
+            this.cause = cause;
+        }
+
+        public Throwable getCause()
+        {
+            return cause;
+        }
     }
 }

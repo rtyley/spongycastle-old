@@ -1744,6 +1744,27 @@ public class NewSignedDataTest
         verifySignatures(sig);
     }
 
+    public void testCertificateManagement()
+        throws Exception
+    {
+        CMSSignedDataGenerator sGen = new CMSSignedDataGenerator();
+
+        List                  certList = new ArrayList();
+
+        certList.add(_origCert);
+        certList.add(_signCert);
+
+        Store           certs = new JcaCertStore(certList);
+
+        sGen.addCertificates(certs);
+
+        CMSSignedData sData = sGen.generate(new CMSAbsentContent(), true);
+
+        CMSSignedData rsData = new CMSSignedData(sData.getEncoded());
+
+        assertEquals(2, rsData.getCertificates().getMatches(null).size());
+    }
+
     private void testSample(String sigName)
         throws Exception
     {

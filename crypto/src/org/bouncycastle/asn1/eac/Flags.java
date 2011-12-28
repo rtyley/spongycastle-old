@@ -65,6 +65,10 @@ public class Flags
     private class StringJoiner
     {
 
+        String mSeparator;
+        boolean First = true;
+        StringBuffer b = new StringBuffer();
+
         public StringJoiner(String separator)
         {
             mSeparator = separator;
@@ -88,9 +92,5 @@ public class Flags
         {
             return b.toString();
         }
-
-        String mSeparator;
-        boolean First = true;
-        StringBuilder b = new StringBuilder();
     }
 }

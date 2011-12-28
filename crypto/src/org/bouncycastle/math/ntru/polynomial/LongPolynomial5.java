@@ -1,6 +1,6 @@
 package org.bouncycastle.math.ntru.polynomial;
 
-import java.util.Arrays;
+import org.bouncycastle.util.Arrays;
 
 /**
  * A polynomial class that combines five coefficients into one <code>long</code> value for

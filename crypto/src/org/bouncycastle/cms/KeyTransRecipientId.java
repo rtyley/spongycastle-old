@@ -95,6 +95,12 @@ public class KeyTransRecipientId
         setSubjectKeyId(subjectKeyId);
     }
 
+    // TODO: change to getIssuer() when dependency on X509CertSelector removed.
+    X500Name getIssuerName()
+    {
+        return issuer;
+    }
+
     public int hashCode()
     {
         int code = Arrays.hashCode(subjectKeyId);
@@ -145,7 +151,7 @@ public class KeyTransRecipientId
                 return iAndS.getName().equals(this.issuer)
                     && iAndS.getSerialNumber().getValue().equals(this.getSerialNumber());
             }
-            else if (this.getSubjectKeyIdentifier() != null)
+            if (this.getSubjectKeyIdentifier() != null)
             {
                 X509Extension ext = certHldr.getExtension(X509Extension.subjectKeyIdentifier);
 

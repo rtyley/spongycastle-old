@@ -129,7 +129,7 @@ public class BERConstructedOctetString
          return vec; 
     }
 
-    public static BERConstructedOctetString fromSequence(ASN1Sequence seq)
+    public static BEROctetString fromSequence(ASN1Sequence seq)
     {
         Vector      v = new Vector();
         Enumeration e = seq.getObjects();

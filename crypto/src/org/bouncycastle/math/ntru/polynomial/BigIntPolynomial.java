@@ -5,9 +5,10 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import org.bouncycastle.util.Arrays;
 
 /**
  * A polynomial with {@link BigInteger} coefficients.<br/>
@@ -380,7 +381,7 @@ public class BigIntPolynomial
             return false;
         }
         BigIntPolynomial other = (BigIntPolynomial)obj;
-        if (!Arrays.equals(coeffs, other.coeffs))
+        if (!Arrays.areEqual(coeffs, other.coeffs))
         {
             return false;
         }

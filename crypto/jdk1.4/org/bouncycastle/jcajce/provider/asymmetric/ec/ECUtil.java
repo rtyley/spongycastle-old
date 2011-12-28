@@ -1,6 +1,10 @@
-package org.bouncycastle.jce.provider.asymmetric.ec;
+package org.bouncycastle.jcajce.provider.asymmetric.ec;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
@@ -13,13 +17,8 @@ import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.provider.ProviderUtil;
-import org.bouncycastle.jce.provider.JCEECPublicKey;
-
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import org.bouncycastle.jce.spec.ECParameterSpec;
 
 /**
  * utility class for converting jce/jca ECDSA, ECDH, and ECDHC
@@ -111,7 +110,7 @@ public class ECUtil
                 s = ProviderUtil.getEcImplicitlyCa();
 
                 return new ECPublicKeyParameters(
-                            ((JCEECPublicKey)k).engineGetQ(),
+                            ((BCECPublicKey)k).engineGetQ(),
                             new ECDomainParameters(s.getCurve(), s.getG(), s.getN(), s.getH(), s.getSeed()));
             }
             else
@@ -147,10 +146,10 @@ public class ECUtil
         throw new InvalidKeyException("can't identify EC private key.");
     }
 
-    public static DERObjectIdentifier getNamedCurveOid(
+    public static ASN1ObjectIdentifier getNamedCurveOid(
         String name)
     {
-        DERObjectIdentifier oid = X962NamedCurves.getOID(name);
+        ASN1ObjectIdentifier oid = X962NamedCurves.getOID(name);
         
         if (oid == null)
         {
@@ -173,7 +172,7 @@ public class ECUtil
     }
     
     public static X9ECParameters getNamedCurveByOid(
-        DERObjectIdentifier oid)
+        ASN1ObjectIdentifier oid)
     {
         X9ECParameters params = X962NamedCurves.getByOID(oid);
         
@@ -194,7 +193,7 @@ public class ECUtil
     }
 
     public static String getCurveName(
-        DERObjectIdentifier oid)
+        ASN1ObjectIdentifier oid)
     {
         String name = X962NamedCurves.getName(oid);
         
@@ -208,6 +207,10 @@ public class ECUtil
             if (name == null)
             {
                 name = TeleTrusTNamedCurves.getName(oid);
+            }
+            if (name == null)
+            {
+                name = ECGOST3410NamedCurves.getName(oid);
             }
         }
 

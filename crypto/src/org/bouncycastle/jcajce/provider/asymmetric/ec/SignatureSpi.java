@@ -14,6 +14,7 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DSA;
 import org.bouncycastle.crypto.Digest;
@@ -28,9 +29,9 @@ import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.ECDSASigner;
 import org.bouncycastle.crypto.signers.ECNRSigner;
 import org.bouncycastle.jce.interfaces.ECKey;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.DSABase;
 import org.bouncycastle.jce.provider.DSAEncoder;
-import org.bouncycastle.jce.provider.JDKKeyFactory;
 
 public class SignatureSpi
     extends DSABase
@@ -55,7 +56,7 @@ public class SignatureSpi
             {
                 byte[] bytes = publicKey.getEncoded();
 
-                publicKey = JDKKeyFactory.createPublicKeyFromDERStream(bytes);
+                publicKey = BouncyCastleProvider.getPublicKey(SubjectPublicKeyInfo.getInstance(bytes));
 
                 if (publicKey instanceof ECPublicKey)
                 {

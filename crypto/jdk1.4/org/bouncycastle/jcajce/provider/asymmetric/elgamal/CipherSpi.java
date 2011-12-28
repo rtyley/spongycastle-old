@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.asymmetric.elgamal;
 
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -12,7 +12,6 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.interfaces.DHKey;
@@ -20,45 +19,36 @@ import javax.crypto.interfaces.DHKey;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.BufferedAsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.digests.SHA224Digest;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.digests.SHA384Digest;
-import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.encodings.ISO9796d1Encoding;
 import org.bouncycastle.crypto.encodings.OAEPEncoding;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.ElGamalEngine;
-import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.jcajce.provider.asymmetric.util.BaseCipherSpi;
 import org.bouncycastle.jce.interfaces.ElGamalKey;
 import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
 import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.provider.ElGamalUtil;
 import org.bouncycastle.util.Strings;
 
-public class JCEElGamalCipher extends WrapCipherSpi
+public class CipherSpi
+    extends BaseCipherSpi
 {
     private BufferedAsymmetricBlockCipher   cipher;
     private AlgorithmParameterSpec          paramSpec;
     private AlgorithmParameters             engineParams;
 
-    public JCEElGamalCipher(
-        AsymmetricBlockCipher   engine)
+    public CipherSpi(
+        AsymmetricBlockCipher engine)
     {
         cipher = new BufferedAsymmetricBlockCipher(engine);
     }
-    
+   
     protected int engineGetBlockSize() 
     {
         return cipher.getInputBlockSize();
-    }
-
-    protected byte[] engineGetIV() 
-    {
-        return null;
     }
 
     protected int engineGetKeySize(
@@ -94,7 +84,7 @@ public class JCEElGamalCipher extends WrapCipherSpi
             {
                 try
                 {
-                    engineParams = AlgorithmParameters.getInstance("OAEP", "BC");
+                    engineParams = AlgorithmParameters.getInstance("OAEP", BouncyCastleProvider.PROVIDER_NAME);
                     engineParams.init(paramSpec);
                 }
                 catch (Exception e)
@@ -135,37 +125,17 @@ public class JCEElGamalCipher extends WrapCipherSpi
         {
             cipher = new BufferedAsymmetricBlockCipher(new PKCS1Encoding(new ElGamalEngine()));
         }
-        else if (pad.equals("OAEPPADDING"))
-        {
-            cipher = new BufferedAsymmetricBlockCipher(new OAEPEncoding(new ElGamalEngine()));
-        }
         else if (pad.equals("ISO9796-1PADDING"))
         {
             cipher = new BufferedAsymmetricBlockCipher(new ISO9796d1Encoding(new ElGamalEngine()));
         }
-        else if (pad.equals("OAEPWITHMD5ANDMGF1PADDING"))
+        else if (pad.equals("OAEPPADDING"))
         {
-            cipher = new BufferedAsymmetricBlockCipher(new OAEPEncoding(new ElGamalEngine(), new MD5Digest()));
+            cipher = new BufferedAsymmetricBlockCipher(new OAEPEncoding(new ElGamalEngine()));
         }
         else if (pad.equals("OAEPWITHSHA1ANDMGF1PADDING"))
         {
-            cipher = new BufferedAsymmetricBlockCipher(new OAEPEncoding(new ElGamalEngine(), new SHA1Digest()));
-        }
-        else if (pad.equals("OAEPWITHSHA224ANDMGF1PADDING"))
-        {
-            cipher = new BufferedAsymmetricBlockCipher(new OAEPEncoding(new ElGamalEngine(), new SHA224Digest()));
-        }
-        else if (pad.equals("OAEPWITHSHA256ANDMGF1PADDING"))
-        {
-            cipher = new BufferedAsymmetricBlockCipher(new OAEPEncoding(new ElGamalEngine(), new SHA256Digest()));
-        }
-        else if (pad.equals("OAEPWITHSHA384ANDMGF1PADDING"))
-        {
-            cipher = new BufferedAsymmetricBlockCipher(new OAEPEncoding(new ElGamalEngine(), new SHA384Digest()));
-        }
-        else if (pad.equals("OAEPWITHSHA512ANDMGF1PADDING"))
-        {
-            cipher = new BufferedAsymmetricBlockCipher(new OAEPEncoding(new ElGamalEngine(), new SHA512Digest()));
+            cipher = new BufferedAsymmetricBlockCipher(new OAEPEncoding(new ElGamalEngine()));
         }
         else
         {
@@ -209,12 +179,12 @@ public class JCEElGamalCipher extends WrapCipherSpi
 
         switch (opmode)
         {
-        case Cipher.ENCRYPT_MODE:
-        case Cipher.WRAP_MODE:
+        case javax.crypto.Cipher.ENCRYPT_MODE:
+        case javax.crypto.Cipher.WRAP_MODE:
             cipher.init(true, param);
             break;
-        case Cipher.DECRYPT_MODE:
-        case Cipher.UNWRAP_MODE:
+        case javax.crypto.Cipher.DECRYPT_MODE:
+        case javax.crypto.Cipher.UNWRAP_MODE:
             cipher.init(false, param);
             break;
         default:
@@ -311,7 +281,7 @@ public class JCEElGamalCipher extends WrapCipherSpi
      * classes that inherit from us.
      */
     static public class NoPadding
-        extends JCEElGamalCipher
+        extends CipherSpi
     {
         public NoPadding()
         {
@@ -320,7 +290,7 @@ public class JCEElGamalCipher extends WrapCipherSpi
     }
     
     static public class PKCS1v1_5Padding
-        extends JCEElGamalCipher
+        extends CipherSpi
     {
         public PKCS1v1_5Padding()
         {

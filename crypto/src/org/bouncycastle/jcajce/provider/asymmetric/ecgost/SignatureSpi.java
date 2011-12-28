@@ -9,6 +9,7 @@ import java.security.SignatureException;
 import java.security.spec.AlgorithmParameterSpec;
 
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DSA;
@@ -20,8 +21,8 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.jce.interfaces.ECKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.GOST3410Key;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.GOST3410Util;
-import org.bouncycastle.jce.provider.JDKKeyFactory;
 
 public class SignatureSpi
     extends java.security.SignatureSpi
@@ -57,7 +58,7 @@ public class SignatureSpi
             {
                 byte[]  bytes = publicKey.getEncoded();
 
-                publicKey = JDKKeyFactory.createPublicKeyFromDERStream(bytes);
+                publicKey = BouncyCastleProvider.getPublicKey(SubjectPublicKeyInfo.getInstance(bytes));
 
                 if (publicKey instanceof ECPublicKey)
                 {

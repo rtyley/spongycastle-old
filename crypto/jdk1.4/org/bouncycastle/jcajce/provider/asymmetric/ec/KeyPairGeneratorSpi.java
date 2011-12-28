@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider.asymmetric.ec;
+package org.bouncycastle.jcajce.provider.asymmetric.ec;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidParameterException;
@@ -13,23 +13,20 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.jcajce.provider.ProviderUtil;
 import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.provider.JCEECPrivateKey;
-import org.bouncycastle.jce.provider.JCEECPublicKey;
-import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
-import org.bouncycastle.jce.provider.ProviderUtil;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 
-public abstract class KeyPairGenerator
-    extends JDKKeyPairGenerator
+public abstract class KeyPairGeneratorSpi
+    extends java.security.KeyPairGenerator
 {
-    public KeyPairGenerator(String algorithmName)
+    public KeyPairGeneratorSpi(String algorithmName)
     {
         super(algorithmName);
     }
 
     public static class EC
-        extends KeyPairGenerator
+        extends KeyPairGeneratorSpi
     {
         ECKeyGenerationParameters   param;
         ECKeyPairGenerator          engine = new ECKeyPairGenerator();
@@ -135,15 +132,15 @@ public abstract class KeyPairGenerator
 
             if (ecParams == null)
             {
-               return new KeyPair(new JCEECPublicKey(algorithm, pub),
-                                   new JCEECPrivateKey(algorithm, priv));
+               return new KeyPair(new BCECPublicKey(algorithm, pub),
+                                   new BCECPrivateKey(algorithm, priv));
             }
             else
             {
                 ECParameterSpec p = (ECParameterSpec)ecParams;
-                JCEECPublicKey pubKey = new JCEECPublicKey(algorithm, pub, p);
+                BCECPublicKey pubKey = new BCECPublicKey(algorithm, pub, p);
                 
-                return new KeyPair(pubKey, new JCEECPrivateKey(algorithm, priv, pubKey, p));
+                return new KeyPair(pubKey, new BCECPrivateKey(algorithm, priv, pubKey, p));
             }
         }
     }
