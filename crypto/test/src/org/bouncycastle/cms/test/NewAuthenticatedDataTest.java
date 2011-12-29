@@ -18,11 +18,13 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSAuthenticatedData;
 import org.bouncycastle.cms.CMSAuthenticatedDataGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.OriginatorInformationGenerator;
 import org.bouncycastle.cms.PasswordRecipient;
 import org.bouncycastle.cms.PasswordRecipientInformation;
 import org.bouncycastle.cms.RecipientInformation;
@@ -209,6 +211,49 @@ public class NewAuthenticatedDataTest
         RecipientInformationStore recipients = ad.getRecipientInfos();
 
         assertEquals(CMSAuthenticatedDataGenerator.DES_EDE3_CBC, ad.getMacAlgOID());
+
+        Collection c = recipients.getRecipients();
+
+        assertEquals(1, c.size());
+
+        Iterator it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+
+            byte[] recData = recipient.getContent(new JceKeyTransAuthenticatedRecipient(_reciKP.getPrivate()).setProvider(BC));
+
+            assertTrue(Arrays.equals(data, recData));
+            assertTrue(Arrays.equals(ad.getMac(), recipient.getMac()));
+        }
+    }
+
+    public void testOriginatorInfo()
+        throws Exception
+    {
+        byte[]               data = "Eric H. Echidna".getBytes();
+        ASN1ObjectIdentifier macAlg = CMSAlgorithm.DES_EDE3_CBC;
+
+        CMSAuthenticatedDataGenerator adGen = new CMSAuthenticatedDataGenerator();
+
+        X509CertificateHolder origCert = new X509CertificateHolder(_origCert.getEncoded());
+
+        adGen.setOriginatorInfo(new OriginatorInformationGenerator(origCert).generate());
+
+        adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+
+        CMSAuthenticatedData ad = adGen.generate(
+                                new CMSProcessableByteArray(data),
+                                new JceCMSMacCalculatorBuilder(macAlg).setProvider(BC).build());
+
+        assertTrue(ad.getOriginatorInfo().getCertificates().getMatches(null).contains(origCert));
+
+        RecipientInformationStore recipients = ad.getRecipientInfos();
+
+        assertEquals(ad.getMacAlgOID(), macAlg.getId());
 
         Collection c = recipients.getRecipients();
 

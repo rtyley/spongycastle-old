@@ -12,6 +12,7 @@ import java.util.Iterator;
 import javax.crypto.KeyGenerator;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequenceGenerator;
@@ -21,6 +22,7 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
+import org.bouncycastle.asn1.cms.EnvelopedData;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.operator.GenericKey;
@@ -48,8 +50,7 @@ import org.bouncycastle.operator.OutputEncryptor;
 public class CMSEnvelopedDataStreamGenerator
     extends CMSEnvelopedGenerator
 {
-    private Object              _originatorInfo = null;
-    private Object              _unprotectedAttributes = null;
+    private ASN1Set              _unprotectedAttributes = null;
     private int                 _bufferSize;
     private boolean             _berEncodeRecipientSet;
 
@@ -93,7 +94,7 @@ public class CMSEnvelopedDataStreamGenerator
 
     private DERInteger getVersion()
     {
-        if (_originatorInfo != null || _unprotectedAttributes != null)
+        if (originatorInfo != null || _unprotectedAttributes != null)
         {
             return new DERInteger(2);
         }
@@ -177,6 +178,11 @@ public class CMSEnvelopedDataStreamGenerator
 
         envGen.addObject(getVersion());
 
+        if (originatorInfo != null)
+        {
+            envGen.addObject(new DERTaggedObject(false, 0, originatorInfo));
+        }
+
         if (_berEncodeRecipientSet)
         {
             envGen.getRawOutputStream().write(new BERSet(recipientInfos).getEncoded());
@@ -222,16 +228,24 @@ public class CMSEnvelopedDataStreamGenerator
             //
             BERSequenceGenerator envGen = new BERSequenceGenerator(cGen.getRawOutputStream(), 0, true);
 
-            envGen.addObject(getVersion());
-
+            ASN1Set recipients;
             if (_berEncodeRecipientSet)
             {
-                envGen.getRawOutputStream().write(new BERSet(recipientInfos).getEncoded());
+                recipients = new BERSet(recipientInfos);
             }
             else
             {
-                envGen.getRawOutputStream().write(new DERSet(recipientInfos).getEncoded());
+                recipients = new DERSet(recipientInfos);
             }
+
+            envGen.addObject(new ASN1Integer(EnvelopedData.calculateVersion(originatorInfo, recipients, _unprotectedAttributes)));
+
+            if (originatorInfo != null)
+            {
+                envGen.addObject(new DERTaggedObject(false, 0, originatorInfo));
+            }
+
+            envGen.getRawOutputStream().write(recipients.getEncoded());
 
             BERSequenceGenerator eiGen = new BERSequenceGenerator(envGen.getRawOutputStream());
 

@@ -24,7 +24,7 @@ public class RevokedStatus
         Date        revocationDate,
         int         reason)
     {
-        this.info = new RevokedInfo(new DERGeneralizedTime(revocationDate), new CRLReason(reason));
+        this.info = new RevokedInfo(new DERGeneralizedTime(revocationDate), CRLReason.lookup(reason));
     }
 
     public Date getRevocationTime()

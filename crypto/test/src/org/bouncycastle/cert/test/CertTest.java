@@ -1864,7 +1864,7 @@ public class CertTest
         Vector extOids = new Vector();
         Vector extValues = new Vector();
 
-        CRLReason crlReason = new CRLReason(CRLReason.privilegeWithdrawn);
+        CRLReason crlReason = CRLReason.lookup(CRLReason.privilegeWithdrawn);
 
         try
         {
@@ -1947,7 +1947,7 @@ public class CertTest
         Vector extOids = new Vector();
         Vector extValues = new Vector();
 
-        CRLReason crlReason = new CRLReason(CRLReason.privilegeWithdrawn);
+        CRLReason crlReason = CRLReason.lookup(CRLReason.privilegeWithdrawn);
 
         try
         {

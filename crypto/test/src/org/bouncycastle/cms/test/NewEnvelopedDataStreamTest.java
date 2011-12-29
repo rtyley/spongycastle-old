@@ -27,12 +27,16 @@ import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSEnvelopedDataParser;
 import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
 import org.bouncycastle.cms.CMSTypedStream;
 import org.bouncycastle.cms.KEKRecipientId;
+import org.bouncycastle.cms.OriginatorInformation;
+import org.bouncycastle.cms.OriginatorInformationGenerator;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
@@ -469,6 +473,53 @@ public class NewEnvelopedDataStreamTest
         }
     }
 
+    public void testKeyTransAES128AndOriginatorInfo()
+        throws Exception
+    {
+        byte[]          data     = "WallaWallaWashington".getBytes();
+
+        CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
+
+        X509CertificateHolder origCert = new X509CertificateHolder(_origCert.getEncoded());
+
+        edGen.setOriginatorInfo(new OriginatorInformationGenerator(origCert).generate());
+
+        edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+
+        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
+
+        OutputStream out = edGen.open(
+                                bOut, new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC).setProvider(BC).build());
+
+        out.write(data);
+
+        out.close();
+
+        CMSEnvelopedDataParser     ep = new CMSEnvelopedDataParser(bOut.toByteArray());
+
+        assertTrue(ep.getOriginatorInfo().getCertificates().getMatches(null).contains(origCert));
+
+        RecipientInformationStore  recipients = ep.getRecipientInfos();
+
+        assertEquals(ep.getEncryptionAlgOID(), CMSEnvelopedDataGenerator.AES128_CBC);
+
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+
+            CMSTypedStream recData = recipient.getContentStream(new JceKeyTransEnvelopedRecipient(_reciKP.getPrivate()).setProvider(BC));
+
+            assertEquals(true, Arrays.equals(data, CMSTestUtil.streamToByteArray(recData.getContentStream())));
+        }
+
+        ep.close();
+    }
+
     public void testKeyTransAES128()
         throws Exception
     {
@@ -693,8 +744,11 @@ public class NewEnvelopedDataStreamTest
     {
         CMSEnvelopedDataParser env = new CMSEnvelopedDataParser(CMSSampleMessages.originatorMessage);
 
-        env.getRecipientInfos();
+        OriginatorInformation origInfo = env.getOriginatorInfo();
 
+        RecipientInformationStore  recipients = env.getRecipientInfos();
+
+        assertEquals(new X500Name("C=US,O=U.S. Government,OU=HSPD12Lab,OU=Agents,CN=user1"), ((X509CertificateHolder)origInfo.getCertificates().getMatches(null).iterator().next()).getSubject());
         assertEquals(CMSEnvelopedDataGenerator.DES_EDE3_CBC, env.getEncryptionAlgOID());
     }
 

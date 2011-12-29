@@ -15,9 +15,11 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSAuthenticatedDataParser;
 import org.bouncycastle.cms.CMSAuthenticatedDataStreamGenerator;
+import org.bouncycastle.cms.OriginatorInformationGenerator;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.jcajce.JceCMSMacCalculatorBuilder;
@@ -111,6 +113,54 @@ public class NewAuthenticatedDataStreamTest
         throws Exception
     {
         tryKeyTransWithDigest(CMSAlgorithm.DES_EDE3_CBC);
+    }
+
+    public void testOriginatorInfo()
+        throws Exception
+    {
+        ASN1ObjectIdentifier macAlg = CMSAlgorithm.DES_EDE3_CBC;
+        byte[]          data     = "Eric H. Echidna".getBytes();
+
+        CMSAuthenticatedDataStreamGenerator adGen = new CMSAuthenticatedDataStreamGenerator();
+        ByteArrayOutputStream               bOut = new ByteArrayOutputStream();
+
+        X509CertificateHolder origCert = new X509CertificateHolder(_origCert.getEncoded());
+
+        adGen.setOriginatorInfo(new OriginatorInformationGenerator(origCert).generate());
+
+        adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
+
+        OutputStream aOut = adGen.open(bOut, new JceCMSMacCalculatorBuilder(macAlg).setProvider(BC).build());
+
+        aOut.write(data);
+
+        aOut.close();
+
+        CMSAuthenticatedDataParser ad = new CMSAuthenticatedDataParser(bOut.toByteArray());
+
+        assertTrue(ad.getOriginatorInfo().getCertificates().getMatches(null).contains(origCert));
+
+        RecipientInformationStore recipients = ad.getRecipientInfos();
+
+        assertEquals(ad.getMacAlgOID(), macAlg.getId());
+
+        Collection c = recipients.getRecipients();
+
+        assertEquals(1, c.size());
+
+        Iterator it = c.iterator();
+
+        while (it.hasNext())
+        {
+            RecipientInformation recipient = (RecipientInformation)it.next();
+
+            assertEquals(recipient.getKeyEncryptionAlgOID(), PKCSObjectIdentifiers.rsaEncryption.getId());
+
+            byte[] recData = recipient.getContent(new JceKeyTransAuthenticatedRecipient(_reciKP.getPrivate()).setProvider(BC));
+
+            assertTrue(Arrays.equals(data, recData));
+            assertTrue(Arrays.equals(ad.getMac(), recipient.getMac()));
+        }
     }
 
     private void tryKeyTrans(ASN1ObjectIdentifier macAlg)

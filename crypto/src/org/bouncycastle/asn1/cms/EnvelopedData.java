@@ -27,27 +27,7 @@ public class EnvelopedData
         EncryptedContentInfo    encryptedContentInfo,
         ASN1Set                 unprotectedAttrs)
     {
-        if (originatorInfo != null || unprotectedAttrs != null)
-        {
-            version = new DERInteger(2);
-        }
-        else
-        {
-            version = new DERInteger(0);
-
-            Enumeration e = recipientInfos.getObjects();
-
-            while (e.hasMoreElements())
-            {
-                RecipientInfo   ri = RecipientInfo.getInstance(e.nextElement());
-
-                if (!ri.getVersion().equals(version))
-                {
-                    version = new DERInteger(2);
-                    break;
-                }
-            }
-        }
+        version = new DERInteger(calculateVersion(originatorInfo, recipientInfos, unprotectedAttrs));
 
         this.originatorInfo = originatorInfo;
         this.recipientInfos = recipientInfos;
@@ -175,5 +155,34 @@ public class EnvelopedData
         }
         
         return new BERSequence(v);
+    }
+
+    public static int calculateVersion(OriginatorInfo originatorInfo, ASN1Set recipientInfos, ASN1Set unprotectedAttrs)
+    {
+        int version;
+
+        if (originatorInfo != null || unprotectedAttrs != null)
+        {
+            version = 2;
+        }
+        else
+        {
+            version = 0;
+
+            Enumeration e = recipientInfos.getObjects();
+
+            while (e.hasMoreElements())
+            {
+                RecipientInfo   ri = RecipientInfo.getInstance(e.nextElement());
+
+                if (!ri.getVersion().equals(version))
+                {
+                    version = 2;
+                    break;
+                }
+            }
+        }
+
+        return version;
     }
 }

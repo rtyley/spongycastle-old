@@ -39,6 +39,7 @@ import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -51,7 +52,6 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.isismtt.ISISMTTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
-import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.DistributionPoint;
@@ -1094,7 +1094,7 @@ public class CertPathValidatorUtilities
                     CRL_NUMBER);
             if (derObject != null)
             {
-                completeCRLNumber = CRLNumber.getInstance(derObject).getPositiveValue();
+                completeCRLNumber = ASN1Integer.getInstance(derObject).getPositiveValue();
             }
         }
         catch (Exception e)

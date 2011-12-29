@@ -299,14 +299,14 @@ public class X509Extensions
 
         while (e.hasMoreElements())
         {
-            this.ordering.addElement(new ASN1ObjectIdentifier(((ASN1ObjectIdentifier)e.nextElement()).getId())); 
+            this.ordering.addElement(ASN1ObjectIdentifier.getInstance(e.nextElement()));
         }
 
         e = this.ordering.elements();
 
         while (e.hasMoreElements())
         {
-            ASN1ObjectIdentifier     oid = new ASN1ObjectIdentifier(((ASN1ObjectIdentifier)e.nextElement()).getId());
+            ASN1ObjectIdentifier     oid = ASN1ObjectIdentifier.getInstance(e.nextElement());
             X509Extension           ext = (X509Extension)extensions.get(oid);
 
             this.extensions.put(oid, ext);
@@ -392,7 +392,7 @@ public class X509Extensions
 
         while (e.hasMoreElements())
         {
-            ASN1ObjectIdentifier     oid = (ASN1ObjectIdentifier)e.nextElement();
+            ASN1ObjectIdentifier    oid = (ASN1ObjectIdentifier)e.nextElement();
             X509Extension           ext = (X509Extension)extensions.get(oid);
             ASN1EncodableVector     v = new ASN1EncodableVector();
 

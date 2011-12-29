@@ -251,11 +251,11 @@ public class X509CRLEntryObject extends X509CRLEntry
                         buf.append("                       critical(").append(ext.isCritical()).append(") ");
                         try
                         {
-                            if (oid.equals(X509Extensions.ReasonCode))
+                            if (oid.equals(X509Extension.reasonCode))
                             {
-                                buf.append(new CRLReason(DEREnumerated.getInstance(dIn.readObject()))).append(nl);
+                                buf.append(CRLReason.getInstance(DEREnumerated.getInstance(dIn.readObject()))).append(nl);
                             }
-                            else if (oid.equals(X509Extensions.CertificateIssuer))
+                            else if (oid.equals(X509Extension.certificateIssuer))
                             {
                                 buf.append("Certificate issuer: ").append(new GeneralNames((ASN1Sequence)dIn.readObject())).append(nl);
                             }

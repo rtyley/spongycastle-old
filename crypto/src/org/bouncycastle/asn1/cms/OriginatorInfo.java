@@ -23,7 +23,7 @@ public class OriginatorInfo
         this.crls = crls;
     }
     
-    public OriginatorInfo(
+    private OriginatorInfo(
         ASN1Sequence seq)
     {
         switch (seq.size())
@@ -78,17 +78,16 @@ public class OriginatorInfo
     public static OriginatorInfo getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof OriginatorInfo)
+        if (obj instanceof OriginatorInfo)
         {
             return (OriginatorInfo)obj;
         }
-        
-        if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new OriginatorInfo((ASN1Sequence)obj);
+            return new OriginatorInfo(ASN1Sequence.getInstance(obj));
         }
         
-        throw new IllegalArgumentException("Invalid OriginatorInfo: " + obj.getClass().getName());
+        return null;
     }
     
     public ASN1Set getCertificates()

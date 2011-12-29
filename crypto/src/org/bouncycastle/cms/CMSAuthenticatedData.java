@@ -30,6 +30,7 @@ public class CMSAuthenticatedData
     private ASN1Set authAttrs;
     private ASN1Set unauthAttrs;
     private byte[] mac;
+    private OriginatorInformation originatorInfo;
 
     public CMSAuthenticatedData(
         byte[]    authData)
@@ -76,6 +77,11 @@ public class CMSAuthenticatedData
         this.contentInfo = contentInfo;
 
         AuthenticatedData authData = AuthenticatedData.getInstance(contentInfo.getContent());
+
+        if (authData.getOriginatorInfo() != null)
+        {
+            this.originatorInfo = new OriginatorInformation(authData.getOriginatorInfo());
+        }
 
         //
         // read the recipients
@@ -129,6 +135,16 @@ public class CMSAuthenticatedData
 
             this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(recipientInfos, this.macAlg, secureReadable);
         }
+    }
+
+    /**
+     * Return the originator information associated with this message if present.
+     *
+     * @return OriginatorInformation, null if not present.
+     */
+    public OriginatorInformation getOriginatorInfo()
+    {
+        return originatorInfo;
     }
 
     public byte[] getMac()

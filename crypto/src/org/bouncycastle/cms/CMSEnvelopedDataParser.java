@@ -18,6 +18,7 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.EncryptedContentInfoParser;
 import org.bouncycastle.asn1.cms.EnvelopedDataParser;
+import org.bouncycastle.asn1.cms.OriginatorInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
@@ -61,6 +62,7 @@ public class CMSEnvelopedDataParser
     private AlgorithmIdentifier _encAlg;
     private AttributeTable      _unprotectedAttributes;
     private boolean             _attrNotRead;
+    private OriginatorInformation  originatorInfo;
 
     public CMSEnvelopedDataParser(
         byte[]    envelopedData) 
@@ -80,6 +82,13 @@ public class CMSEnvelopedDataParser
 
         // TODO Validate version?
         //DERInteger version = this._envelopedData.getVersion();
+
+        OriginatorInfo info = _envelopedData.getOriginatorInfo();
+
+        if (info != null)
+        {
+            this.originatorInfo = new OriginatorInformation(info);
+        }
 
         //
         // read the recipients
@@ -108,7 +117,7 @@ public class CMSEnvelopedDataParser
      */
     public String getEncryptionAlgOID()
     {
-        return _encAlg.getObjectId().toString();
+        return _encAlg.getAlgorithm().toString();
     }
 
     /**
@@ -156,6 +165,16 @@ public class CMSEnvelopedDataParser
         throws CMSException
     {
         return CMSEnvelopedHelper.INSTANCE.getEncryptionAlgorithmParameters(getEncryptionAlgOID(), getEncryptionAlgParams(), provider);
+    }
+
+    /**
+     * Return the originator information associated with this message if present.
+     *
+     * @return OriginatorInformation, null if not present.
+     */
+    public OriginatorInformation getOriginatorInfo()
+    {
+        return originatorInfo;
     }
 
     /**

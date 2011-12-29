@@ -1,6 +1,11 @@
 package org.bouncycastle.asn1.x509;
 
-import org.bouncycastle.asn1.DEREnumerated;
+import java.math.BigInteger;
+import java.util.Hashtable;
+
+import org.bouncycastle.asn1.ASN1Enumerated;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 
 /**
  * The CRLReason enumeration.
@@ -20,7 +25,7 @@ import org.bouncycastle.asn1.DEREnumerated;
  * </pre>
  */
 public class CRLReason
-    extends DEREnumerated
+    extends ASN1Object
 {
     /**
      * @deprecated use lower case version
@@ -82,16 +87,28 @@ public class CRLReason
         "removeFromCRL", "privilegeWithdrawn", "aACompromise"
     };
 
-    public CRLReason(
-        int reason)
+    private static final Hashtable table = new Hashtable();
+
+    private final ASN1Enumerated value;
+
+    public static CRLReason getInstance(Object o)
     {
-        super(reason);
+        if (o instanceof CRLReason)
+        {
+            return (CRLReason)o;
+        }
+        else if (o != null)
+        {
+            return lookup(ASN1Enumerated.getInstance(o).getValue().intValue());
+        }
+
+        return null;
     }
 
-    public CRLReason(
-        DEREnumerated reason)
+    private CRLReason(
+        int reason)
     {
-        super(reason.getValue().intValue());
+        value = new ASN1Enumerated(reason);
     }
 
     public String toString()
@@ -107,5 +124,27 @@ public class CRLReason
             str = reasonString[reason];
         }
         return "CRLReason: " + str;
-    }    
+    }
+
+    public BigInteger getValue()
+    {
+        return value.getValue();
+    }
+
+    public ASN1Primitive toASN1Primitive()
+    {
+        return value;
+    }
+
+    public static CRLReason lookup(int value)
+    {
+        Integer idx = new Integer(value);
+
+        if (!table.containsKey(idx))
+        {
+            table.put(idx, new CRLReason(value));
+        }
+
+        return (CRLReason)table.get(idx);
+    }
 }

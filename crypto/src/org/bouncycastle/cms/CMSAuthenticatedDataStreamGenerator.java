@@ -166,7 +166,12 @@ public class CMSAuthenticatedDataStreamGenerator
             //
             BERSequenceGenerator authGen = new BERSequenceGenerator(cGen.getRawOutputStream(), 0, true);
 
-            authGen.addObject(new DERInteger(AuthenticatedData.calculateVersion(null)));
+            authGen.addObject(new DERInteger(AuthenticatedData.calculateVersion(originatorInfo)));
+
+            if (originatorInfo != null)
+            {
+                authGen.addObject(new DERTaggedObject(false, 0, originatorInfo));
+            }
 
             if (berEncodeRecipientSet)
             {

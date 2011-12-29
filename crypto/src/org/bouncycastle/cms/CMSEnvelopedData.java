@@ -43,6 +43,7 @@ public class CMSEnvelopedData
 
     private AlgorithmIdentifier    encAlg;
     private ASN1Set                unprotectedAttributes;
+    private OriginatorInformation  originatorInfo;
 
     public CMSEnvelopedData(
         byte[]    envelopedData)
@@ -64,6 +65,11 @@ public class CMSEnvelopedData
         this.contentInfo = contentInfo;
 
         EnvelopedData  envData = EnvelopedData.getInstance(contentInfo.getContent());
+
+        if (envData.getOriginatorInfo() != null)
+        {
+            originatorInfo = new OriginatorInformation(envData.getOriginatorInfo());
+        }
 
         //
         // read the recipients
@@ -101,11 +107,21 @@ public class CMSEnvelopedData
     }
 
     /**
+     * Return the originator information associated with this message if present.
+     *
+     * @return OriginatorInformation, null if not present.
+     */
+    public OriginatorInformation getOriginatorInfo()
+    {
+        return originatorInfo;
+    }
+
+    /**
      * return the object identifier for the content encryption algorithm.
      */
     public String getEncryptionAlgOID()
     {
-        return encAlg.getObjectId().getId();
+        return encAlg.getAlgorithm().getId();
     }
 
     /**

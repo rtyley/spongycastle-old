@@ -20,6 +20,7 @@ import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.AuthenticatedDataParser;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.ContentInfoParser;
+import org.bouncycastle.asn1.cms.OriginatorInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -76,6 +77,7 @@ public class CMSAuthenticatedDataParser
 
     private boolean authAttrNotRead;
     private boolean unauthAttrNotRead;
+    private OriginatorInformation originatorInfo;
 
     public CMSAuthenticatedDataParser(
         byte[] envelopedData)
@@ -112,6 +114,12 @@ public class CMSAuthenticatedDataParser
         // TODO Validate version?
         //DERInteger version = this.authData.getVersion();
 
+        OriginatorInfo info = authData.getOriginatorInfo();
+
+        if (info != null)
+        {
+            this.originatorInfo = new OriginatorInformation(info);
+        }
         //
         // read the recipients
         //
@@ -181,11 +189,21 @@ public class CMSAuthenticatedDataParser
     }
 
     /**
+     * Return the originator information associated with this message if present.
+     *
+     * @return OriginatorInformation, null if not present.
+     */
+    public OriginatorInformation getOriginatorInfo()
+    {
+        return originatorInfo;
+    }
+
+    /**
      * return the object identifier for the mac algorithm.
      */
     public String getMacAlgOID()
     {
-        return macAlg.getObjectId().toString();
+        return macAlg.getAlgorithm().toString();
     }
 
     /**

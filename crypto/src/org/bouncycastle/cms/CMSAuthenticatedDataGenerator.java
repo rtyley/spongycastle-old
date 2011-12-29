@@ -18,7 +18,7 @@ import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.BEROctetString;
 import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
@@ -107,7 +107,7 @@ public class CMSAuthenticatedDataGenerator
 
                 out.close();
 
-                encContent = new BERConstructedOctetString(bOut.toByteArray());
+                encContent = new BEROctetString(bOut.toByteArray());
             }
             catch (IOException e)
             {
@@ -142,7 +142,7 @@ public class CMSAuthenticatedDataGenerator
                             CMSObjectIdentifiers.data,
                             encContent);
 
-            authData = new AuthenticatedData(null, new DERSet(recipientInfos), macCalculator.getAlgorithmIdentifier(), digestCalculator.getAlgorithmIdentifier(), eci, authed, macResult, unauthed);
+            authData = new AuthenticatedData(originatorInfo, new DERSet(recipientInfos), macCalculator.getAlgorithmIdentifier(), digestCalculator.getAlgorithmIdentifier(), eci, authed, macResult, unauthed);
         }
         else
         {
@@ -155,7 +155,7 @@ public class CMSAuthenticatedDataGenerator
 
                 mOut.close();
 
-                encContent = new BERConstructedOctetString(bOut.toByteArray());
+                encContent = new BEROctetString(bOut.toByteArray());
 
                 macResult = new DEROctetString(macCalculator.getMac());
             }
@@ -170,7 +170,7 @@ public class CMSAuthenticatedDataGenerator
                             CMSObjectIdentifiers.data,
                             encContent);
 
-            authData = new AuthenticatedData(null, new DERSet(recipientInfos), macCalculator.getAlgorithmIdentifier(), null, eci, null, macResult, unauthed);
+            authData = new AuthenticatedData(originatorInfo, new DERSet(recipientInfos), macCalculator.getAlgorithmIdentifier(), null, eci, null, macResult, unauthed);
         }
 
         ContentInfo contentInfo = new ContentInfo(

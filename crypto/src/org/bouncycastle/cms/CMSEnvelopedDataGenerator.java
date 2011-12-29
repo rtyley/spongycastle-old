@@ -16,7 +16,7 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.BEROctetString;
 import org.bouncycastle.asn1.BERSet;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -149,7 +149,7 @@ public class CMSEnvelopedDataGenerator
 
         encAlgId = contentEncryptor.getAlgorithmIdentifier();
 
-        encContent = new BERConstructedOctetString(encryptedContent);
+        encContent = new BEROctetString(encryptedContent);
 
         GenericKey encKey = contentEncryptor.getKey();
 
@@ -175,7 +175,7 @@ public class CMSEnvelopedDataGenerator
 
         ContentInfo contentInfo = new ContentInfo(
                 CMSObjectIdentifiers.envelopedData,
-                new EnvelopedData(null, new DERSet(recipientInfos), eci, unprotectedAttrSet));
+                new EnvelopedData(originatorInfo, new DERSet(recipientInfos), eci, unprotectedAttrSet));
 
         return new CMSEnvelopedData(contentInfo);
     }

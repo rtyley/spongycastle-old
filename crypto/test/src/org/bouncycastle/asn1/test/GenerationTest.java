@@ -10,6 +10,7 @@ import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERInteger;
@@ -19,14 +20,15 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
-import org.bouncycastle.asn1.x509.ReasonFlags;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertList;
@@ -68,13 +70,13 @@ public class GenerationTest
         + "VGVzdCAy");
 
     private byte[] v2CertList = Base64.decode(
-          "MIIBRQIBATANBgkqhkiG9w0BAQUFADAlMQswCQYDVQQDDAJBVTEWMBQGA1UECgwN"
-        + "Qm91bmN5IENhc3RsZRcNNzAwMTAxMDAwMDAwWhcNNzAwMTAxMDAwMDAyWjAkMCIC"
-        + "AQEXDTcwMDEwMTAwMDAwMVowDjAMBgNVHRUEBQoDAIAAoIHFMIHCMGEGA1UdIwEB"
-        + "/wRXMFWAFDZPdpHPzKi7o8EJokkQU2uqCHRRoTqkODA2MQswCQYDVQQDDAJBVTEW"
-        + "MBQGA1UECgwNQm91bmN5IENhc3RsZTEPMA0GA1UECwwGVGVzdCAyggECMEMGA1Ud"
-        + "EgQ8MDqkODA2MQswCQYDVQQDDAJBVTEWMBQGA1UECgwNQm91bmN5IENhc3RsZTEP"
-        + "MA0GA1UECwwGVGVzdCAzMAoGA1UdFAQDAgEBMAwGA1UdHAEB/wQCMAA=");
+          "MIIBQwIBATANBgkqhkiG9w0BAQUFADAlMQswCQYDVQQDDAJBVTEWMBQGA1UECgwN" +
+          "Qm91bmN5IENhc3RsZRcNNzAwMTAxMDAwMDAwWhcNNzAwMTAxMDAwMDAyWjAiMCAC" +
+          "AQEXDTcwMDEwMTAwMDAwMVowDDAKBgNVHRUEAwoBCqCBxTCBwjBhBgNVHSMBAf8E" +
+          "VzBVgBQ2T3aRz8you6PBCaJJEFNrqgh0UaE6pDgwNjELMAkGA1UEAwwCQVUxFjAU" +
+          "BgNVBAoMDUJvdW5jeSBDYXN0bGUxDzANBgNVBAsMBlRlc3QgMoIBAjBDBgNVHRIE" +
+          "PDA6pDgwNjELMAkGA1UEAwwCQVUxFjAUBgNVBAoMDUJvdW5jeSBDYXN0bGUxDzAN" +
+          "BgNVBAsMBlRlc3QgMzAKBgNVHRQEAwIBATAMBgNVHRwBAf8EAjAA");
     
     private void tbsV1CertGen()
         throws IOException
@@ -88,8 +90,8 @@ public class GenerationTest
         gen.setStartDate(new Time(startDate));
         gen.setEndDate(new Time(endDate));
 
-        gen.setIssuer(new X509Name("CN=AU,O=Bouncy Castle"));
-        gen.setSubject(new X509Name("CN=AU,O=Bouncy Castle,OU=Test 1"));
+        gen.setIssuer(new X500Name("CN=AU,O=Bouncy Castle"));
+        gen.setSubject(new X500Name("CN=AU,O=Bouncy Castle,OU=Test 1"));
 
         gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption, new DERNull()));
 
@@ -128,7 +130,7 @@ public class GenerationTest
     
     private AuthorityKeyIdentifier createAuthorityKeyId(
         SubjectPublicKeyInfo    info,
-        X509Name                name,
+        X500Name                name,
         int                     sNumber)
     {
         GeneralName             genName = new GeneralName(name);
@@ -152,8 +154,8 @@ public class GenerationTest
         gen.setStartDate(new Time(startDate));
         gen.setEndDate(new Time(endDate));
 
-        gen.setIssuer(new X509Name("CN=AU,O=Bouncy Castle"));
-        gen.setSubject(new X509Name("CN=AU,O=Bouncy Castle,OU=Test 2"));
+        gen.setIssuer(new X500Name("CN=AU,O=Bouncy Castle"));
+        gen.setSubject(new X500Name("CN=AU,O=Bouncy Castle,OU=Test 2"));
 
         gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption, new DERNull()));
 
@@ -167,13 +169,13 @@ public class GenerationTest
         Vector          order = new Vector();
         Hashtable       extensions = new Hashtable();
 
-        order.addElement(X509Extensions.AuthorityKeyIdentifier);
-        order.addElement(X509Extensions.SubjectKeyIdentifier);
-        order.addElement(X509Extensions.KeyUsage);
+        order.addElement(X509Extension.authorityKeyIdentifier);
+        order.addElement(X509Extension.subjectKeyIdentifier);
+        order.addElement(X509Extension.keyUsage);
 
-        extensions.put(X509Extensions.AuthorityKeyIdentifier, new X509Extension(true, new DEROctetString(createAuthorityKeyId(info, new X509Name("CN=AU,O=Bouncy Castle,OU=Test 2"), 2))));
-        extensions.put(X509Extensions.SubjectKeyIdentifier, new X509Extension(true, new DEROctetString(new SubjectKeyIdentifier(info))));
-        extensions.put(X509Extensions.KeyUsage, new X509Extension(false, new DEROctetString(new KeyUsage(KeyUsage.dataEncipherment))));
+        extensions.put(X509Extension.authorityKeyIdentifier, new X509Extension(true, new DEROctetString(createAuthorityKeyId(info, new X500Name("CN=AU,O=Bouncy Castle,OU=Test 2"), 2))));
+        extensions.put(X509Extension.subjectKeyIdentifier, new X509Extension(true, new DEROctetString(new SubjectKeyIdentifier(info))));
+        extensions.put(X509Extension.keyUsage, new X509Extension(false, new DEROctetString(new KeyUsage(KeyUsage.dataEncipherment))));
 
         X509Extensions  ex = new X509Extensions(order, extensions);
 
@@ -219,7 +221,7 @@ public class GenerationTest
         gen.setStartDate(new Time(startDate));
         gen.setEndDate(new Time(endDate));
 
-        gen.setIssuer(new X509Name("CN=AU,O=Bouncy Castle"));
+        gen.setIssuer(new X500Name("CN=AU,O=Bouncy Castle"));
 
         gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption, new DERNull()));
 
@@ -246,9 +248,9 @@ public class GenerationTest
         Vector          order = new Vector();
         Hashtable       extensions = new Hashtable();
 
-        order.addElement(X509Extensions.SubjectAlternativeName);
+        order.addElement(X509Extension.subjectAlternativeName);
 
-        extensions.put(X509Extensions.SubjectAlternativeName, new X509Extension(true, new DEROctetString(new GeneralNames(new GeneralName(new X509Name("CN=AU,O=Bouncy Castle,OU=Test 2"))))));
+        extensions.put(X509Extension.subjectAlternativeName, new X509Extension(true, new DEROctetString(new GeneralNames(new GeneralName(new X509Name("CN=AU,O=Bouncy Castle,OU=Test 2"))))));
 
         X509Extensions  ex = new X509Extensions(order, extensions);
 
@@ -287,9 +289,9 @@ public class GenerationTest
     {
         V2TBSCertListGenerator  gen = new V2TBSCertListGenerator();
 
-        gen.setIssuer(new X509Name("CN=AU,O=Bouncy Castle"));
+        gen.setIssuer(new X500Name("CN=AU,O=Bouncy Castle"));
 
-        gen.addCRLEntry(new DERInteger(1), new Time(new Date(1000)), ReasonFlags.aACompromise);
+        gen.addCRLEntry(new ASN1Integer(1), new Time(new Date(1000)), CRLReason.aACompromise);
 
         gen.setNextUpdate(new Time(new Date(2000)));
 
@@ -304,15 +306,15 @@ public class GenerationTest
         Hashtable               extensions = new Hashtable();
         SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(BigInteger.valueOf(1), BigInteger.valueOf(2))), new DERInteger(3));
 
-        order.addElement(X509Extensions.AuthorityKeyIdentifier);
-        order.addElement(X509Extensions.IssuerAlternativeName);
-        order.addElement(X509Extensions.CRLNumber);
-        order.addElement(X509Extensions.IssuingDistributionPoint);
+        order.addElement(X509Extension.authorityKeyIdentifier);
+        order.addElement(X509Extension.issuerAlternativeName);
+        order.addElement(X509Extension.cRLNumber);
+        order.addElement(X509Extension.issuingDistributionPoint);
 
-        extensions.put(X509Extensions.AuthorityKeyIdentifier, new X509Extension(true, new DEROctetString(createAuthorityKeyId(info, new X509Name("CN=AU,O=Bouncy Castle,OU=Test 2"), 2))));
-        extensions.put(X509Extensions.IssuerAlternativeName, new X509Extension(false, new DEROctetString(new GeneralNames(new DERSequence(new GeneralName(new X509Name("CN=AU,O=Bouncy Castle,OU=Test 3")))))));
-        extensions.put(X509Extensions.CRLNumber, new X509Extension(false, new DEROctetString(new DERInteger(1))));
-        extensions.put(X509Extensions.IssuingDistributionPoint, new X509Extension(true, new DEROctetString(new IssuingDistributionPoint(new DERSequence()))));
+        extensions.put(X509Extension.authorityKeyIdentifier, new X509Extension(true, new DEROctetString(createAuthorityKeyId(info, new X500Name("CN=AU,O=Bouncy Castle,OU=Test 2"), 2))));
+        extensions.put(X509Extension.issuerAlternativeName, new X509Extension(false, new DEROctetString(new GeneralNames(new DERSequence(new GeneralName(new X500Name("CN=AU,O=Bouncy Castle,OU=Test 3")))))));
+        extensions.put(X509Extension.cRLNumber, new X509Extension(false, new DEROctetString(new DERInteger(1))));
+        extensions.put(X509Extension.issuingDistributionPoint, new X509Extension(true, new DEROctetString(new IssuingDistributionPoint(new DERSequence()))));
 
         X509Extensions          ex = new X509Extensions(order, extensions);
 
@@ -326,6 +328,7 @@ public class GenerationTest
 
         if (!Arrays.areEqual(bOut.toByteArray(), v2CertList))
         {
+            System.out.println(new String(Base64.encode(bOut.toByteArray())));
             fail("failed v2 cert list generation");
         }
 

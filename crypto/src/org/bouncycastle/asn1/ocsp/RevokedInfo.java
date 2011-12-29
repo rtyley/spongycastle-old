@@ -32,7 +32,7 @@ public class RevokedInfo
 
         if (seq.size() > 1)
         {
-            this.revocationReason = new CRLReason(DEREnumerated.getInstance(
+            this.revocationReason = CRLReason.getInstance(DEREnumerated.getInstance(
                                 (ASN1TaggedObject)seq.getObjectAt(1), true));
         }
     }

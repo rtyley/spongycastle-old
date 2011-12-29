@@ -24,6 +24,7 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.cms.KEKIdentifier;
+import org.bouncycastle.asn1.cms.OriginatorInfo;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
@@ -70,6 +71,7 @@ public class CMSEnvelopedGenerator
     protected CMSAttributeTableGenerator unprotectedAttributeGenerator = null;
 
     final SecureRandom rand;
+    protected OriginatorInfo originatorInfo;
 
     /**
      * base constructor
@@ -92,6 +94,12 @@ public class CMSEnvelopedGenerator
     public void setUnprotectedAttributeGenerator(CMSAttributeTableGenerator unprotectedAttributeGenerator)
     {
         this.unprotectedAttributeGenerator = unprotectedAttributeGenerator;
+    }
+
+
+    public void setOriginatorInfo(OriginatorInformation originatorInfo)
+    {
+        this.originatorInfo = originatorInfo.toASN1Structure();
     }
 
     /**

@@ -74,7 +74,7 @@ public class BasicOCSPRespGenerator
                 if (rs.hasRevocationReason())
                 {
                     this.certStatus = new CertStatus(
-                                            new RevokedInfo(new DERGeneralizedTime(rs.getRevocationTime()), new CRLReason(rs.getRevocationReason())));
+                                            new RevokedInfo(new DERGeneralizedTime(rs.getRevocationTime()), CRLReason.lookup(rs.getRevocationReason())));
                 }
                 else
                 {

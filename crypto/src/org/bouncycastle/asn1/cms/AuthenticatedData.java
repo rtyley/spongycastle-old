@@ -271,18 +271,21 @@ public class AuthenticatedData
                 }
             }
 
-            for (Enumeration e = origInfo.getCRLs().getObjects(); e.hasMoreElements();)
+            if (origInfo.getCRLs() != null)
             {
-                Object obj = e.nextElement();
-
-                if (obj instanceof ASN1TaggedObject)
+                for (Enumeration e = origInfo.getCRLs().getObjects(); e.hasMoreElements();)
                 {
-                    ASN1TaggedObject tag = (ASN1TaggedObject)obj;
+                    Object obj = e.nextElement();
 
-                    if (tag.getTagNo() == 1)
+                    if (obj instanceof ASN1TaggedObject)
                     {
-                        ver = 3;
-                        break;
+                        ASN1TaggedObject tag = (ASN1TaggedObject)obj;
+
+                        if (tag.getTagNo() == 1)
+                        {
+                            ver = 3;
+                            break;
+                        }
                     }
                 }
             }
