@@ -175,7 +175,7 @@ public class EnvelopedData
             {
                 RecipientInfo   ri = RecipientInfo.getInstance(e.nextElement());
 
-                if (!ri.getVersion().equals(version))
+                if (ri.getVersion().getValue().intValue() != version)
                 {
                     version = 2;
                     break;
