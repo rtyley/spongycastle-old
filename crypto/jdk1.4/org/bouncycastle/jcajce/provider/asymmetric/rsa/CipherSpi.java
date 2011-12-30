@@ -19,6 +19,11 @@ import javax.crypto.NoSuchPaddingException;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.digests.MD5Digest;
+import org.bouncycastle.crypto.digests.SHA224Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.digests.SHA384Digest;
+import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.encodings.ISO9796d1Encoding;
 import org.bouncycastle.crypto.encodings.OAEPEncoding;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
@@ -171,6 +176,26 @@ public class CipherSpi
         else if (pad.equals("OAEPWITHSHA1ANDMGF1PADDING"))
         {
             cipher = new OAEPEncoding(new RSABlindedEngine());
+        }
+        else if (pad.equals("OAEPWITHSHA224ANDMGF1PADDING"))
+        {
+            cipher = new OAEPEncoding(new RSABlindedEngine(), new SHA224Digest());
+        }
+        else if (pad.equals("OAEPWITHSHA256ANDMGF1PADDING"))
+        {
+            cipher = new OAEPEncoding(new RSABlindedEngine(), new SHA256Digest());
+        }
+        else if (pad.equals("OAEPWITHSHA384ANDMGF1PADDING"))
+        {
+            cipher = new OAEPEncoding(new RSABlindedEngine(), new SHA384Digest());
+        }
+        else if (pad.equals("OAEPWITHSHA512ANDMGF1PADDING"))
+        {
+            cipher = new OAEPEncoding(new RSABlindedEngine(), new SHA512Digest());
+        }
+        else if (pad.equals("OAEPWITHMD5ANDMGF1PADDING"))
+        {
+            cipher = new OAEPEncoding(new RSABlindedEngine(), new MD5Digest());
         }
         else
         {

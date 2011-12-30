@@ -109,7 +109,7 @@ public class JcaPublicKeyConverter
 
 		BigInteger order = key.getOrderOfBasePointR();
 		BigInteger coFactor = key.getCofactorF();
-                   // TODO: update to use JDK 1.5 EC API
+
 		ECParameterSpec ecspec = new ECParameterSpec(curve, G, order, coFactor);
 
 		return ecspec;

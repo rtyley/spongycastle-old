@@ -207,6 +207,7 @@ public class PSSSignatureSpi
         {
             PSSParameterSpec newParamSpec = (PSSParameterSpec)params;
 
+            this.engineParams = null;
             this.paramSpec = newParamSpec;
             this.saltLength = paramSpec.getSaltLength();
 
@@ -243,17 +244,14 @@ public class PSSSignatureSpi
     {
         if (engineParams == null)
         {
-            if (paramSpec != null)
+            try
             {
-                try
-                {
-                    engineParams = AlgorithmParameters.getInstance("PSS", BouncyCastleProvider.PROVIDER_NAME);
-                    engineParams.init(paramSpec);
-                }
-                catch (Exception e)
-                {
-                    throw new RuntimeException(e.toString());
-                }
+                engineParams = AlgorithmParameters.getInstance("PSS", BouncyCastleProvider.PROVIDER_NAME);
+                engineParams.init(new PSSParameterSpec(saltLength));
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e.toString());
             }
         }
 

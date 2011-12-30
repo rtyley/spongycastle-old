@@ -28,6 +28,6 @@ public class ProviderUtil
 
     public static ECParameterSpec getEcImplicitlyCa()
     {
-        return null;
+        return org.bouncycastle.jce.provider.ProviderUtil.getEcImplicitlyCa();
     }
 }
