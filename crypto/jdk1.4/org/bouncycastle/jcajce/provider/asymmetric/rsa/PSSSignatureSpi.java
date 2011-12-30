@@ -31,7 +31,6 @@ public class PSSSignatureSpi
 {
     private AlgorithmParameters engineParams;
     private PSSParameterSpec paramSpec;
-    private PSSParameterSpec originalSpec;
     private AsymmetricBlockCipher signer;
     private Digest contentDigest;
     private Digest mgfDigest;
@@ -82,7 +81,11 @@ public class PSSSignatureSpi
         {
             this.saltLength = 20;
         }
-        this.saltLength = paramSpec.getSaltLength();
+
+        if (paramSpec != null)
+        {
+            this.saltLength = paramSpec.getSaltLength();
+        }
         this.isRaw = false;
 
         setupContentDigest();
@@ -108,7 +111,12 @@ public class PSSSignatureSpi
         {
             this.saltLength = 20;
         }
-        this.saltLength = paramSpec.getSaltLength();
+
+        if (paramSpec != null)
+        {
+            this.saltLength = paramSpec.getSaltLength();
+        }
+
         this.isRaw = isRaw;
 
         setupContentDigest();
@@ -123,7 +131,7 @@ public class PSSSignatureSpi
             throw new InvalidKeyException("Supplied key is not a RSAPublicKey instance");
         }
 
-        pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, saltLength);
+        pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, mgfDigest, saltLength);
         pss.init(false,
             RSAUtil.generatePublicKeyParameter((RSAPublicKey)publicKey));
     }
@@ -138,7 +146,7 @@ public class PSSSignatureSpi
             throw new InvalidKeyException("Supplied key is not a RSAPrivateKey instance");
         }
 
-        pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, saltLength);
+        pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, mgfDigest, saltLength);
         pss.init(true, new ParametersWithRandom(RSAUtil.generatePrivateKeyParameter((RSAPrivateKey)privateKey), random));
     }
 
@@ -151,7 +159,7 @@ public class PSSSignatureSpi
             throw new InvalidKeyException("Supplied key is not a RSAPrivateKey instance");
         }
 
-        pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, saltLength);
+        pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, mgfDigest, saltLength);
         pss.init(true, RSAUtil.generatePrivateKeyParameter((RSAPrivateKey)privateKey));
     }
 
@@ -198,10 +206,32 @@ public class PSSSignatureSpi
         if (params instanceof PSSParameterSpec)
         {
             PSSParameterSpec newParamSpec = (PSSParameterSpec)params;
-            
+
+            this.paramSpec = newParamSpec;
             this.saltLength = paramSpec.getSaltLength();
 
-            setupContentDigest();
+            if (mgfDigest == null)
+            {
+                switch (saltLength)
+                {
+                case 20:
+                    this.mgfDigest = new SHA1Digest();
+                    break;
+                case 28:
+                    this.mgfDigest = new SHA224Digest();
+                    break;
+                case 32:
+                    this.mgfDigest = new SHA256Digest();
+                    break;
+                case 48:
+                    this.mgfDigest = new SHA384Digest();
+                    break;
+                case 64:
+                    this.mgfDigest = new SHA512Digest();
+                    break;
+                }
+                setupContentDigest();
+            }
         }
         else
         {
