@@ -38,7 +38,7 @@ https://github.com/rtyley/spongycastle-eclipse#readme
 
 Spongy Castle artifacts have been published to Maven Central, you can use [scprov-jdk15](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.madgag%22%20AND%20a%3A%22scprov-jdk15%22) as a drop-in replacement for the official Bouncy Castle artifact [bcprov-jdk15](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.bouncycastle%22%20a%3A%22bcprov-jdk15%22).
 
-I suggest you use the [maven-android-plugin](http://code.google.com/p/maven-android-plugin/) to make the most of this :-)
+I suggest you use the [android-maven-plugin](http://code.google.com/p/maven-android-plugin/) to make the most of this :-)
 
 #### Licence
 
