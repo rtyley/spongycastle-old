@@ -19,25 +19,16 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 public class TSTInfo
     extends ASN1Object
 {
-    ASN1Integer version;
-
-    ASN1ObjectIdentifier tsaPolicyId;
-
-    MessageImprint messageImprint;
-
-    ASN1Integer serialNumber;
-
-    ASN1GeneralizedTime genTime;
-
-    Accuracy accuracy;
-
-    ASN1Boolean ordering;
-
-    ASN1Integer nonce;
-
-    GeneralName tsa;
-
-    X509Extensions extensions;
+    private ASN1Integer version;
+    private ASN1ObjectIdentifier tsaPolicyId;
+    private MessageImprint messageImprint;
+    private ASN1Integer serialNumber;
+    private ASN1GeneralizedTime genTime;
+    private Accuracy accuracy;
+    private ASN1Boolean ordering;
+    private ASN1Integer nonce;
+    private GeneralName tsa;
+    private X509Extensions extensions;
 
     public static TSTInfo getInstance(Object o)
     {
@@ -127,6 +118,11 @@ public class TSTInfo
         this.nonce = nonce;
         this.tsa = tsa;
         this.extensions = extensions;
+    }
+
+    public ASN1Integer getVersion()
+    {
+        return version;
     }
 
     public MessageImprint getMessageImprint()
