@@ -46,8 +46,8 @@ import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.KeyTransRecipientInformation;
+import org.bouncycastle.cms.OriginatorInfoGenerator;
 import org.bouncycastle.cms.OriginatorInformation;
-import org.bouncycastle.cms.OriginatorInformationGenerator;
 import org.bouncycastle.cms.PasswordRecipient;
 import org.bouncycastle.cms.PasswordRecipientInformation;
 import org.bouncycastle.cms.RecipientId;
@@ -337,7 +337,7 @@ public class NewEnvelopedDataTest
 
         X509CertificateHolder origCert = new X509CertificateHolder(_origCert.getEncoded());
 
-        edGen.setOriginatorInfo(new OriginatorInformationGenerator(origCert).generate());
+        edGen.setOriginatorInfo(new OriginatorInfoGenerator(origCert).generate());
 
         edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
         edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(ASN1OctetString.getInstance(ASN1OctetString.getInstance(_reciCert.getExtensionValue(X509Extension.subjectKeyIdentifier.getId())).getOctets()).getOctets(), _reciCert.getPublicKey()).setProvider(BC));

@@ -35,8 +35,8 @@ import org.bouncycastle.cms.CMSEnvelopedDataParser;
 import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
 import org.bouncycastle.cms.CMSTypedStream;
 import org.bouncycastle.cms.KEKRecipientId;
+import org.bouncycastle.cms.OriginatorInfoGenerator;
 import org.bouncycastle.cms.OriginatorInformation;
-import org.bouncycastle.cms.OriginatorInformationGenerator;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
@@ -482,7 +482,7 @@ public class NewEnvelopedDataStreamTest
 
         X509CertificateHolder origCert = new X509CertificateHolder(_origCert.getEncoded());
 
-        edGen.setOriginatorInfo(new OriginatorInformationGenerator(origCert).generate());
+        edGen.setOriginatorInfo(new OriginatorInfoGenerator(origCert).generate());
 
         edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 

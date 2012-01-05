@@ -19,7 +19,7 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSAuthenticatedDataParser;
 import org.bouncycastle.cms.CMSAuthenticatedDataStreamGenerator;
-import org.bouncycastle.cms.OriginatorInformationGenerator;
+import org.bouncycastle.cms.OriginatorInfoGenerator;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.jcajce.JceCMSMacCalculatorBuilder;
@@ -126,7 +126,7 @@ public class NewAuthenticatedDataStreamTest
 
         X509CertificateHolder origCert = new X509CertificateHolder(_origCert.getEncoded());
 
-        adGen.setOriginatorInfo(new OriginatorInformationGenerator(origCert).generate());
+        adGen.setOriginatorInfo(new OriginatorInfoGenerator(origCert).generate());
 
         adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 

@@ -24,7 +24,7 @@ import org.bouncycastle.cms.CMSAuthenticatedData;
 import org.bouncycastle.cms.CMSAuthenticatedDataGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.OriginatorInformationGenerator;
+import org.bouncycastle.cms.OriginatorInfoGenerator;
 import org.bouncycastle.cms.PasswordRecipient;
 import org.bouncycastle.cms.PasswordRecipientInformation;
 import org.bouncycastle.cms.RecipientInformation;
@@ -241,7 +241,7 @@ public class NewAuthenticatedDataTest
 
         X509CertificateHolder origCert = new X509CertificateHolder(_origCert.getEncoded());
 
-        adGen.setOriginatorInfo(new OriginatorInformationGenerator(origCert).generate());
+        adGen.setOriginatorInfo(new OriginatorInfoGenerator(origCert).generate());
 
         adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(_reciCert).setProvider(BC));
 
