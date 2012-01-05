@@ -335,7 +335,7 @@ public class GeneralName
 
         for (int i = 0; i != maskVal; i++)
         {
-            addr[(i / 8) + offset] |= 1 << (i % 8);
+            addr[(i / 8) + offset] |= 1 << (7 - (i % 8));
         }
     }
 
@@ -357,7 +357,7 @@ public class GeneralName
 
         for (int i = 0; i != maskVal; i++)
         {
-            res[i / 16] |= 1 << (i % 16);
+            res[i / 16] |= 1 << (15 - (i % 16));
         }
         return res;
     }
