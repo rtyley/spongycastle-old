@@ -143,20 +143,19 @@ public class ECDSASigner
     }
 
     private BigInteger calculateE(BigInteger n, byte[] message)
-    {  
-        if (n.bitLength() > message.length * 8)
+    {
+        int log2n = n.bitLength();
+        int messageBitLength = message.length * 8;
+
+        if (log2n >= messageBitLength)
         {
             return new BigInteger(1, message);
         }
         else
         {
-            int messageBitLength = message.length * 8;
             BigInteger trunc = new BigInteger(1, message);
 
-            if (messageBitLength - n.bitLength() > 0)
-            {
-                trunc = trunc.shiftRight(messageBitLength - n.bitLength());
-            }
+            trunc = trunc.shiftRight(messageBitLength - log2n);
 
             return trunc;
         }
