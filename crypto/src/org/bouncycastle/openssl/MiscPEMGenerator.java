@@ -28,11 +28,9 @@ import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.util.Strings;
-import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.bouncycastle.util.io.pem.PemHeader;
 import org.bouncycastle.util.io.pem.PemObject;
@@ -46,6 +44,12 @@ import org.bouncycastle.x509.X509V2AttributeCertificate;
 public class MiscPEMGenerator
     implements PemObjectGenerator
 {
+    private static final byte[] hexEncodingTable =
+    {
+        (byte)'0', (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5', (byte)'6', (byte)'7',
+        (byte)'8', (byte)'9', (byte)'A', (byte)'B', (byte)'C', (byte)'D', (byte)'E', (byte)'F'
+    };
+
     private Object obj;
     private String algorithm;
     private char[] password;
@@ -151,7 +155,7 @@ public class MiscPEMGenerator
             {
                 type = "DSA PRIVATE KEY";
 
-                DSAParameter p = DSAParameter.getInstance(info.getAlgorithmId().getParameters());
+                DSAParameter p = DSAParameter.getInstance(info.getPrivateKeyAlgorithm().getParameters());
                 ASN1EncodableVector v = new ASN1EncodableVector();
 
                 v.add(new DERInteger(0));
@@ -210,13 +214,14 @@ public class MiscPEMGenerator
     private String getHexEncoded(byte[] bytes)
         throws IOException
     {
-        bytes = Hex.encode(bytes);
-
-        char[] chars = new char[bytes.length];
+        char[] chars = new char[bytes.length * 2];
 
         for (int i = 0; i != bytes.length; i++)
         {
-            chars[i] = (char)bytes[i];
+            int    v = bytes[i] & 0xff;
+
+            chars[2 * i] = (char)(hexEncodingTable[(v >>> 4)]);
+            chars[2 * i + 1]  = (char)(hexEncodingTable[v & 0xf]);
         }
 
         return new String(chars);
@@ -243,7 +248,7 @@ public class MiscPEMGenerator
 
             RSAPrivateCrtKey k = (RSAPrivateCrtKey)obj;
 
-            RSAPrivateKeyStructure keyStruct = new RSAPrivateKeyStructure(
+            org.bouncycastle.asn1.pkcs.RSAPrivateKey keyStruct = new org.bouncycastle.asn1.pkcs.RSAPrivateKey(
                 k.getModulus(),
                 k.getPublicExponent(),
                 k.getPrivateExponent(),

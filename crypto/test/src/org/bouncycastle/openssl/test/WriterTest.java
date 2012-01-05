@@ -15,13 +15,16 @@ import java.security.Security;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
+import java.util.List;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.PasswordFinder;
 import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.io.pem.PemHeader;
 import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.bouncycastle.util.test.SimpleTest;
 
 public class WriterTest
@@ -189,6 +192,28 @@ public class WriterTest
         pw.close();
 
         String data = sw.toString();
+
+        PemReader pRaw = new PemReader(new StringReader(data));
+        PemObject pemObject = pRaw.readPemObject();
+
+        List headers = pemObject.getHeaders();
+
+        for (int i = 0; i != headers.size(); i++)
+        {
+            PemHeader pemH = (PemHeader)headers.get(i);
+
+            if (pemH.getName().equals("DEK-Info"))
+            {
+                String v = pemH.getValue();
+                for (int j = 0; j != v.length(); j++)
+                {
+                    if (v.charAt(j) >= 'a' && v.charAt(j) <= 'f')
+                    {
+                        fail("lower case detected in DEK-Info: " + v);
+                    }
+                }
+            }
+        }
 
         PEMReader pr = new PEMReader(new StringReader(data), new Password(testPassword), provider);
 
