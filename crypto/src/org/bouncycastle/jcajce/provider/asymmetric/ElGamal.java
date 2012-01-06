@@ -2,9 +2,9 @@ package org.bouncycastle.jcajce.provider.asymmetric;
 
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.jcajce.provider.asymmetric.elgamal.KeyFactorySpi;
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricAlgorithmProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public class ElGamal
 {

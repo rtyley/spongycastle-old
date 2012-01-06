@@ -26,12 +26,12 @@ import org.bouncycastle.asn1.x9.X9IntegerConverter;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle.jcajce.provider.ProviderUtil;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
@@ -71,7 +71,7 @@ public class BCECGOST3410PublicKey
         {
             if (q.getCurve() == null)
             {
-                org.bouncycastle.jce.spec.ECParameterSpec s = ProviderUtil.getEcImplicitlyCa();
+                org.bouncycastle.jce.spec.ECParameterSpec s = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
 
                 q = s.getCurve().createPoint(q.getX().toBigInteger(), q.getY().toBigInteger(), false);
             }
@@ -198,7 +198,7 @@ public class BCECGOST3410PublicKey
             else if (params.isImplicitlyCA())
             {
                 ecSpec = null;
-                curve = ProviderUtil.getEcImplicitlyCa().getCurve();
+                curve = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa().getCurve();
             }
             else
             {
@@ -404,7 +404,7 @@ public class BCECGOST3410PublicKey
             return (ECParameterSpec)ecSpec;
         }
 
-        return ProviderUtil.getEcImplicitlyCa();
+        return BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
     }
 
     public boolean equals(Object o)

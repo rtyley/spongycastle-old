@@ -17,7 +17,7 @@ import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.provider.ProviderUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 
 /**
@@ -107,7 +107,7 @@ public class ECUtil
 
             if (s == null)
             {
-                s = ProviderUtil.getEcImplicitlyCa();
+                s = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
 
                 return new ECPublicKeyParameters(
                             ((BCECPublicKey)k).engineGetQ(),
@@ -135,7 +135,7 @@ public class ECUtil
 
             if (s == null)
             {
-                s = ProviderUtil.getEcImplicitlyCa();
+                s = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
             }
 
             return new ECPrivateKeyParameters(

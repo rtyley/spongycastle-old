@@ -31,9 +31,9 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
+import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
-import org.bouncycastle.jce.provider.ProviderUtil;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
@@ -46,6 +46,7 @@ public class BCECPublicKey
     private ECParameterSpec         ecSpec;
     private boolean                 withCompression;
     private GOST3410PublicKeyAlgParameters       gostParams;
+    private ProviderConfiguration   configuration;
 
     public BCECPublicKey(
         String algorithm,
@@ -56,20 +57,24 @@ public class BCECPublicKey
         this.ecSpec = key.ecSpec;
         this.withCompression = key.withCompression;
         this.gostParams = key.gostParams;
+        this.configuration = key.configuration;
     }
     
     public BCECPublicKey(
         String algorithm,
-        ECPublicKeySpec spec)
+        ECPublicKeySpec spec,
+        ProviderConfiguration configuration)
     {
         this.algorithm = algorithm;
         this.ecSpec = spec.getParams();
         this.q = EC5Util.convertPoint(ecSpec, spec.getW(), false);
+        this.configuration = configuration;
     }
 
     public BCECPublicKey(
         String algorithm,
-        org.bouncycastle.jce.spec.ECPublicKeySpec spec)
+        org.bouncycastle.jce.spec.ECPublicKeySpec spec,
+        ProviderConfiguration configuration)
     {
         this.algorithm = algorithm;
         this.q = spec.getQ();
@@ -85,18 +90,21 @@ public class BCECPublicKey
         {
             if (q.getCurve() == null)
             {
-                org.bouncycastle.jce.spec.ECParameterSpec s = ProviderUtil.getEcImplicitlyCa();
+                org.bouncycastle.jce.spec.ECParameterSpec s = configuration.getEcImplicitlyCa();
 
                 q = s.getCurve().createPoint(q.getX().toBigInteger(), q.getY().toBigInteger(), false);
             }               
             this.ecSpec = null;
         }
+
+        this.configuration = configuration;
     }
     
     public BCECPublicKey(
         String algorithm,
         ECPublicKeyParameters params,
-        ECParameterSpec spec)
+        ECParameterSpec spec,
+        ProviderConfiguration configuration)
     {
         ECDomainParameters      dp = params.getParameters();
 
@@ -113,12 +121,15 @@ public class BCECPublicKey
         {
             this.ecSpec = spec;
         }
+
+        this.configuration = configuration;
     }
 
     public BCECPublicKey(
         String algorithm,
         ECPublicKeyParameters params,
-        org.bouncycastle.jce.spec.ECParameterSpec spec)
+        org.bouncycastle.jce.spec.ECParameterSpec spec,
+        ProviderConfiguration configuration)
     {
         ECDomainParameters      dp = params.getParameters();
 
@@ -137,6 +148,8 @@ public class BCECPublicKey
 
             this.ecSpec = EC5Util.convertSpec(ellipticCurve, spec);
         }
+
+        this.configuration = configuration;
     }
 
     /*
@@ -144,11 +157,32 @@ public class BCECPublicKey
      */
     public BCECPublicKey(
         String algorithm,
-        ECPublicKeyParameters params)
+        ECPublicKeyParameters params,
+        ProviderConfiguration configuration)
     {
         this.algorithm = algorithm;
         this.q = params.getQ();
         this.ecSpec = null;
+        this.configuration = configuration;
+    }
+
+    public BCECPublicKey(
+        ECPublicKey key,
+        ProviderConfiguration configuration)
+    {
+        this.algorithm = key.getAlgorithm();
+        this.ecSpec = key.getParams();
+        this.q = EC5Util.convertPoint(this.ecSpec, key.getW(), false);
+    }
+
+    BCECPublicKey(
+        String algorithm,
+        SubjectPublicKeyInfo info,
+        ProviderConfiguration configuration)
+    {
+        this.algorithm = algorithm;
+        this.configuration = configuration;
+        populateFromPubKeyInfo(info);
     }
 
     private ECParameterSpec createSpec(EllipticCurve ellipticCurve, ECDomainParameters dp)
@@ -160,22 +194,6 @@ public class BCECPublicKey
                         dp.getG().getY().toBigInteger()),
                         dp.getN(),
                         dp.getH().intValue());
-    }
-    
-    public BCECPublicKey(
-        ECPublicKey key)
-    {
-        this.algorithm = key.getAlgorithm();
-        this.ecSpec = key.getParams();
-        this.q = EC5Util.convertPoint(this.ecSpec, key.getW(), false);
-    }
-
-    BCECPublicKey(
-        String algorithm,
-        SubjectPublicKeyInfo info)
-    {
-        this.algorithm = algorithm;
-        populateFromPubKeyInfo(info);
     }
 
     private void populateFromPubKeyInfo(SubjectPublicKeyInfo info)
@@ -209,7 +227,7 @@ public class BCECPublicKey
                 y[i] = keyEnc[64 - 1 - i];
             }
 
-            gostParams = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithmId().getParameters());
+            gostParams = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithm().getParameters());
 
             ECNamedCurveParameterSpec spec = ECGOST3410NamedCurveTable.getParameterSpec(ECGOST3410NamedCurves.getName(gostParams.getPublicKeyParamSet()));
 
@@ -229,7 +247,7 @@ public class BCECPublicKey
         }
         else
         {
-            X962Parameters params = new X962Parameters((ASN1Primitive)info.getAlgorithmId().getParameters());
+            X962Parameters params = new X962Parameters((ASN1Primitive)info.getAlgorithm().getParameters());
             ECCurve                 curve;
             EllipticCurve           ellipticCurve;
 
@@ -253,7 +271,7 @@ public class BCECPublicKey
             else if (params.isImplicitlyCA())
             {
                 ecSpec = null;
-                curve = ProviderUtil.getEcImplicitlyCa().getCurve();
+                curve = configuration.getEcImplicitlyCa().getCurve();
             }
             else
             {
@@ -458,7 +476,7 @@ public class BCECPublicKey
             return EC5Util.convertSpec(ecSpec, withCompression);
         }
 
-        return ProviderUtil.getEcImplicitlyCa();
+        return configuration.getEcImplicitlyCa();
     }
 
     public String toString()

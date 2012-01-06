@@ -3,7 +3,7 @@ package org.bouncycastle.jcajce.provider.digest;
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.digests.RIPEMD320Digest;
 import org.bouncycastle.crypto.macs.HMac;
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jce.provider.JCEKeyGenerator;
 import org.bouncycastle.jce.provider.JCEMac;
 

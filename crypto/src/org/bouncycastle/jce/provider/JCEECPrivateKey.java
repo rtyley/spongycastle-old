@@ -196,7 +196,7 @@ public class JCEECPrivateKey
     private void populateFromPrivKeyInfo(PrivateKeyInfo info)
         throws IOException
     {
-        X962Parameters params = new X962Parameters((ASN1Primitive)info.getAlgorithmId().getParameters());
+        X962Parameters params = new X962Parameters((ASN1Primitive)info.getPrivateKeyAlgorithm().getParameters());
 
         if (params.isNamedCurve())
         {
@@ -371,7 +371,7 @@ public class JCEECPrivateKey
             return EC5Util.convertSpec(ecSpec, withCompression);
         }
 
-        return ProviderUtil.getEcImplicitlyCa();
+        return BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
     }
 
     public BigInteger getS()

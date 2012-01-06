@@ -32,9 +32,10 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
+import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
-import org.bouncycastle.jce.provider.ProviderUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
 
@@ -45,6 +46,7 @@ public class BCECPrivateKey
     private BigInteger      d;
     private ECParameterSpec ecSpec;
     private boolean         withCompression;
+    private ProviderConfiguration configuration;
 
     private DERBitString publicKey;
 
@@ -55,16 +57,19 @@ public class BCECPrivateKey
     }
 
     public BCECPrivateKey(
-        ECPrivateKey key)
+        ECPrivateKey key,
+        ProviderConfiguration configuration)
     {
         this.d = key.getS();
         this.algorithm = key.getAlgorithm();
         this.ecSpec = key.getParams();
+        this.configuration = configuration;
     }
 
     public BCECPrivateKey(
         String algorithm,
-        org.bouncycastle.jce.spec.ECPrivateKeySpec spec)
+        org.bouncycastle.jce.spec.ECPrivateKeySpec spec,
+        ProviderConfiguration configuration)
     {
         this.algorithm = algorithm;
         this.d = spec.getD();
@@ -82,16 +87,20 @@ public class BCECPrivateKey
         {
             this.ecSpec = null;
         }
+
+        this.configuration = configuration;
     }
 
 
     public BCECPrivateKey(
         String algorithm,
-        ECPrivateKeySpec spec)
+        ECPrivateKeySpec spec,
+        ProviderConfiguration configuration)
     {
         this.algorithm = algorithm;
         this.d = spec.getS();
         this.ecSpec = spec.getParams();
+        this.configuration = configuration;
     }
 
     public BCECPrivateKey(
@@ -104,18 +113,21 @@ public class BCECPrivateKey
         this.withCompression = key.withCompression;
         this.attrCarrier = key.attrCarrier;
         this.publicKey = key.publicKey;
+        this.configuration = key.configuration;
     }
 
     public BCECPrivateKey(
         String algorithm,
         ECPrivateKeyParameters params,
         BCECPublicKey pubKey,
-        ECParameterSpec spec)
+        ECParameterSpec spec,
+        ProviderConfiguration configuration)
     {
         ECDomainParameters      dp = params.getParameters();
 
         this.algorithm = algorithm;
         this.d = params.getD();
+        this.configuration = configuration;
 
         if (spec == null)
         {
@@ -141,12 +153,14 @@ public class BCECPrivateKey
         String algorithm,
         ECPrivateKeyParameters params,
         BCECPublicKey pubKey,
-        org.bouncycastle.jce.spec.ECParameterSpec spec)
+        org.bouncycastle.jce.spec.ECParameterSpec spec,
+        ProviderConfiguration configuration)
     {
         ECDomainParameters      dp = params.getParameters();
 
         this.algorithm = algorithm;
         this.d = params.getD();
+        this.configuration = configuration;
 
         if (spec == null)
         {
@@ -178,19 +192,23 @@ public class BCECPrivateKey
 
     public BCECPrivateKey(
         String algorithm,
-        ECPrivateKeyParameters params)
+        ECPrivateKeyParameters params,
+        ProviderConfiguration configuration)
     {
         this.algorithm = algorithm;
         this.d = params.getD();
         this.ecSpec = null;
+        this.configuration = configuration;
     }
 
     BCECPrivateKey(
         String         algorithm,
-        PrivateKeyInfo info)
+        PrivateKeyInfo info,
+        ProviderConfiguration configuration)
         throws IOException
     {
         this.algorithm = algorithm;
+        this.configuration = configuration;
         populateFromPrivKeyInfo(info);
     }
 
@@ -372,7 +390,7 @@ public class BCECPrivateKey
             return EC5Util.convertSpec(ecSpec, withCompression);
         }
 
-        return ProviderUtil.getEcImplicitlyCa();
+        return configuration.getEcImplicitlyCa();
     }
 
     public BigInteger getS()
@@ -456,6 +474,8 @@ public class BCECPrivateKey
         throws IOException, ClassNotFoundException
     {
         byte[] enc = (byte[])in.readObject();
+
+        this.configuration = BouncyCastleProvider.CONFIGURATION;
 
         populateFromPrivKeyInfo(PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(enc)));
 

@@ -1,10 +1,10 @@
-package org.bouncycastle.jce;
-
-import org.bouncycastle.util.Strings;
+package org.bouncycastle.jcajce.provider.config;
 
 import java.security.BasicPermission;
 import java.security.Permission;
 import java.util.StringTokenizer;
+
+import org.bouncycastle.util.Strings;
 
 /**
  * A permission class to define what can be done with the ConfigurableProvider interface.
@@ -28,12 +28,17 @@ public class ProviderConfigurationPermission
     extends BasicPermission
 {
     private static final int  THREAD_LOCAL_EC_IMPLICITLY_CA = 0x01;
-
     private static final int  EC_IMPLICITLY_CA = 0x02;
-    private static final int  ALL = THREAD_LOCAL_EC_IMPLICITLY_CA | EC_IMPLICITLY_CA;
+    private static final int  THREAD_LOCAL_DH_DEFAULT_PARAMS = 0x04;
+    private static final int  DH_DEFAULT_PARAMS = 0x08;
+
+    private static final int  ALL = THREAD_LOCAL_EC_IMPLICITLY_CA | EC_IMPLICITLY_CA | THREAD_LOCAL_DH_DEFAULT_PARAMS | DH_DEFAULT_PARAMS;
 
     private static final String THREAD_LOCAL_EC_IMPLICITLY_CA_STR = "threadlocalecimplicitlyca";
     private static final String EC_IMPLICITLY_CA_STR = "ecimplicitlyca";
+    private static final String THREAD_LOCAL_DH_DEFAULT_PARAMS_STR = "threadlocaldhdefaultparams";
+    private static final String DH_DEFAULT_PARAMS_STR = "dhdefaultparams";
+
     private static final String ALL_STR = "all";
 
     private final String actions;
@@ -70,6 +75,14 @@ public class ProviderConfigurationPermission
             else if (s.equals(EC_IMPLICITLY_CA_STR))
             {
                 mask |= EC_IMPLICITLY_CA;
+            }
+            else if (s.equals(THREAD_LOCAL_DH_DEFAULT_PARAMS_STR))
+            {
+                mask |= THREAD_LOCAL_DH_DEFAULT_PARAMS;
+            }
+            else if (s.equals(DH_DEFAULT_PARAMS_STR))
+            {
+                mask |= DH_DEFAULT_PARAMS;
             }
             else if (s.equals(ALL_STR))
             {

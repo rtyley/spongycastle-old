@@ -4,8 +4,8 @@ import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi;
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricAlgorithmProvider;
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public class EC
 {

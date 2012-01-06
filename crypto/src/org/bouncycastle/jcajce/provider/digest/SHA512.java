@@ -5,8 +5,8 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.macs.HMac;
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.provider.JCEMac;
 
 public class SHA512

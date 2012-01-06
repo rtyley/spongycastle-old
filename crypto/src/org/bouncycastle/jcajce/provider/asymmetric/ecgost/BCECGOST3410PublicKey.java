@@ -35,7 +35,7 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
-import org.bouncycastle.jce.provider.ProviderUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
@@ -81,7 +81,7 @@ public class BCECGOST3410PublicKey
         {
             if (q.getCurve() == null)
             {
-                org.bouncycastle.jce.spec.ECParameterSpec s = ProviderUtil.getEcImplicitlyCa();
+                org.bouncycastle.jce.spec.ECParameterSpec s = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
 
                 q = s.getCurve().createPoint(q.getX().toBigInteger(), q.getY().toBigInteger(), false);
             }               
@@ -203,7 +203,7 @@ public class BCECGOST3410PublicKey
                 y[i] = keyEnc[64 - 1 - i];
             }
 
-            gostParams = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithmId().getParameters());
+            gostParams = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithm().getParameters());
 
             ECNamedCurveParameterSpec spec = ECGOST3410NamedCurveTable.getParameterSpec(ECGOST3410NamedCurves.getName(gostParams.getPublicKeyParamSet()));
 
@@ -223,7 +223,7 @@ public class BCECGOST3410PublicKey
         }
         else
         {
-            X962Parameters params = new X962Parameters((ASN1Primitive)info.getAlgorithmId().getParameters());
+            X962Parameters params = new X962Parameters((ASN1Primitive)info.getAlgorithm().getParameters());
             ECCurve                 curve;
             EllipticCurve           ellipticCurve;
 
@@ -247,7 +247,7 @@ public class BCECGOST3410PublicKey
             else if (params.isImplicitlyCA())
             {
                 ecSpec = null;
-                curve = ProviderUtil.getEcImplicitlyCa().getCurve();
+                curve = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa().getCurve();
             }
             else
             {
@@ -452,7 +452,7 @@ public class BCECGOST3410PublicKey
             return EC5Util.convertSpec(ecSpec, withCompression);
         }
 
-        return ProviderUtil.getEcImplicitlyCa();
+        return BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
     }
 
     public String toString()

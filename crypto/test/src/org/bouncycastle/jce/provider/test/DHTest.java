@@ -30,6 +30,7 @@ import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.DHParameterSpec;
 
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jce.ECPointUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.Arrays;
@@ -378,6 +379,164 @@ public class DHTest
         testGP("DH", size, 0, dhP.getG(), dhP.getP());
     }
 
+    private void testDefault(
+        int         privateValueSize,
+        BigInteger  g,
+        BigInteger  p)
+        throws Exception
+    {
+        DHParameterSpec             dhParams = new DHParameterSpec(p, g, privateValueSize);
+        String                      algName = "DH";
+        int                         size = p.bitLength();
+
+        new BouncyCastleProvider().setParameter(ConfigurableProvider.DH_DEFAULT_PARAMS, dhParams);
+
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algName, "BC");
+
+        keyGen.initialize(dhParams.getP().bitLength());
+
+        testTwoParty("DH", size, privateValueSize, keyGen);
+
+        KeyPair aKeyPair = keyGen.generateKeyPair();
+
+        new BouncyCastleProvider().setParameter(ConfigurableProvider.DH_DEFAULT_PARAMS, null);
+
+        //
+        // public key encoding test
+        //
+        byte[]              pubEnc = aKeyPair.getPublic().getEncoded();
+        KeyFactory          keyFac = KeyFactory.getInstance(algName, "BC");
+        X509EncodedKeySpec  pubX509 = new X509EncodedKeySpec(pubEnc);
+        DHPublicKey         pubKey = (DHPublicKey)keyFac.generatePublic(pubX509);
+        DHParameterSpec     spec = pubKey.getParams();
+
+        if (!spec.getG().equals(dhParams.getG()) || !spec.getP().equals(dhParams.getP()))
+        {
+            fail(size + " bit public key encoding/decoding test failed on parameters");
+        }
+
+        if (!((DHPublicKey)aKeyPair.getPublic()).getY().equals(pubKey.getY()))
+        {
+            fail(size + " bit public key encoding/decoding test failed on y value");
+        }
+
+        //
+        // public key serialisation test
+        //
+        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+        ObjectOutputStream      oOut = new ObjectOutputStream(bOut);
+
+        oOut.writeObject(aKeyPair.getPublic());
+
+        ByteArrayInputStream   bIn = new ByteArrayInputStream(bOut.toByteArray());
+        ObjectInputStream      oIn = new ObjectInputStream(bIn);
+
+        pubKey = (DHPublicKey)oIn.readObject();
+        spec = pubKey.getParams();
+
+        if (!spec.getG().equals(dhParams.getG()) || !spec.getP().equals(dhParams.getP()))
+        {
+            fail(size + " bit public key serialisation test failed on parameters");
+        }
+
+        if (!((DHPublicKey)aKeyPair.getPublic()).getY().equals(pubKey.getY()))
+        {
+            fail(size + " bit public key serialisation test failed on y value");
+        }
+
+        //
+        // private key encoding test
+        //
+        byte[]              privEnc = aKeyPair.getPrivate().getEncoded();
+        PKCS8EncodedKeySpec privPKCS8 = new PKCS8EncodedKeySpec(privEnc);
+        DHPrivateKey        privKey = (DHPrivateKey)keyFac.generatePrivate(privPKCS8);
+
+        spec = privKey.getParams();
+
+        if (!spec.getG().equals(dhParams.getG()) || !spec.getP().equals(dhParams.getP()))
+        {
+            fail(size + " bit private key encoding/decoding test failed on parameters");
+        }
+
+        if (!((DHPrivateKey)aKeyPair.getPrivate()).getX().equals(privKey.getX()))
+        {
+            fail(size + " bit private key encoding/decoding test failed on y value");
+        }
+
+        //
+        // private key serialisation test
+        //
+        bOut = new ByteArrayOutputStream();
+        oOut = new ObjectOutputStream(bOut);
+
+        oOut.writeObject(aKeyPair.getPrivate());
+
+        bIn = new ByteArrayInputStream(bOut.toByteArray());
+        oIn = new ObjectInputStream(bIn);
+
+        privKey = (DHPrivateKey)oIn.readObject();
+        spec = privKey.getParams();
+
+        if (!spec.getG().equals(dhParams.getG()) || !spec.getP().equals(dhParams.getP()))
+        {
+            fail(size + " bit private key serialisation test failed on parameters");
+        }
+
+        if (!((DHPrivateKey)aKeyPair.getPrivate()).getX().equals(privKey.getX()))
+        {
+            fail(size + " bit private key serialisation test failed on y value");
+        }
+
+        //
+        // three party test
+        //
+        KeyPairGenerator aPairGen = KeyPairGenerator.getInstance(algName, "BC");
+        aPairGen.initialize(spec);
+        KeyPair aPair = aPairGen.generateKeyPair();
+
+        KeyPairGenerator bPairGen = KeyPairGenerator.getInstance(algName, "BC");
+        bPairGen.initialize(spec);
+        KeyPair bPair = bPairGen.generateKeyPair();
+
+        KeyPairGenerator cPairGen = KeyPairGenerator.getInstance(algName, "BC");
+        cPairGen.initialize(spec);
+        KeyPair cPair = cPairGen.generateKeyPair();
+
+        KeyAgreement aKeyAgree = KeyAgreement.getInstance(algName, "BC");
+        aKeyAgree.init(aPair.getPrivate());
+
+        KeyAgreement bKeyAgree = KeyAgreement.getInstance(algName, "BC");
+        bKeyAgree.init(bPair.getPrivate());
+
+        KeyAgreement cKeyAgree = KeyAgreement.getInstance(algName, "BC");
+        cKeyAgree.init(cPair.getPrivate());
+
+        Key ac = aKeyAgree.doPhase(cPair.getPublic(), false);
+
+        Key ba = bKeyAgree.doPhase(aPair.getPublic(), false);
+
+        Key cb = cKeyAgree.doPhase(bPair.getPublic(), false);
+
+        aKeyAgree.doPhase(cb, true);
+
+        bKeyAgree.doPhase(ac, true);
+
+        cKeyAgree.doPhase(ba, true);
+
+        BigInteger aShared = new BigInteger(aKeyAgree.generateSecret());
+        BigInteger bShared = new BigInteger(bKeyAgree.generateSecret());
+        BigInteger cShared = new BigInteger(cKeyAgree.generateSecret());
+
+        if (!aShared.equals(bShared))
+        {
+            fail(size + " bit 3-way test failed (a and b differ)");
+        }
+
+        if (!cShared.equals(bShared))
+        {
+            fail(size + " bit 3-way test failed (c and b differ)");
+        }
+    }
     private void testECDH(String algorithm)
         throws Exception
     {
@@ -581,6 +740,8 @@ public class DHTest
     public void performTest()
         throws Exception
     {
+        testDefault(64, g512, p512);
+
         testEnc();
         testGP("DH", 512, 0, g512, p512);
         testGP("DiffieHellman", 768, 0, g768, p768);

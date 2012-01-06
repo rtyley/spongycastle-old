@@ -21,24 +21,10 @@ public class ASN1InputStream
     private final int limit;
     private final boolean lazyEvaluate;
 
-    static int findLimit(InputStream in)
-    {
-        if (in instanceof LimitedInputStream)
-        {
-            return ((LimitedInputStream)in).getRemaining();
-        }
-        else if (in instanceof ByteArrayInputStream)
-        {
-            return ((ByteArrayInputStream)in).available();
-        }
-
-        return Integer.MAX_VALUE;
-    }
-
     public ASN1InputStream(
         InputStream is)
     {
-        this(is, findLimit(is));
+        this(is, StreamUtil.findLimit(is));
     }
 
     /**
@@ -85,6 +71,20 @@ public class ASN1InputStream
      * objects such as sequences will be parsed lazily.
      *
      * @param input stream containing ASN.1 encoded data.
+     * @param lazyEvaluate true if parsing inside constructed objects can be delayed.
+     */
+    public ASN1InputStream(
+        InputStream input,
+        boolean     lazyEvaluate)
+    {
+        this(input, StreamUtil.findLimit(input), lazyEvaluate);
+    }
+
+    /**
+     * Create an ASN1InputStream where no DER object will be longer than limit, and constructed
+     * objects such as sequences will be parsed lazily.
+     *
+     * @param input stream containing ASN.1 encoded data.
      * @param limit maximum size of a DER encoded object.
      * @param lazyEvaluate true if parsing inside constructed objects can be delayed.
      */
@@ -96,6 +96,11 @@ public class ASN1InputStream
         super(input);
         this.limit = limit;
         this.lazyEvaluate = lazyEvaluate;
+    }
+
+    int getLimit()
+    {
+        return limit;
     }
 
     protected int readLength()

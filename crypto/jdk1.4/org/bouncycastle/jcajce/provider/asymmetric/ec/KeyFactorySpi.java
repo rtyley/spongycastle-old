@@ -13,10 +13,11 @@ import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jcajce.provider.asymmetric.util.BaseKeyFactorySpi;
+import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
 import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.provider.ProviderUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
@@ -26,11 +27,14 @@ public class KeyFactorySpi
     implements AsymmetricKeyInfoConverter
 {
     String algorithm;
+    ProviderConfiguration configuration;
 
     KeyFactorySpi(
-        String algorithm)
+        String algorithm,
+        ProviderConfiguration configuration)
     {
         this.algorithm = algorithm;
+        this.configuration = configuration;
     }
 
     protected Key engineTranslateKey(
@@ -39,11 +43,11 @@ public class KeyFactorySpi
     {
         if (key instanceof ECPublicKey)
         {
-            return new BCECPublicKey((ECPublicKey)key);
+            return new BCECPublicKey((ECPublicKey)key, configuration);
         }
         else if (key instanceof ECPrivateKey)
         {
-            return new BCECPrivateKey((ECPrivateKey)key);
+            return new BCECPrivateKey((ECPrivateKey)key, configuration);
         }
 
         throw new InvalidKeyException("key type unknown");
@@ -63,7 +67,7 @@ public class KeyFactorySpi
            }
            else
            {
-               ECParameterSpec implicitSpec = ProviderUtil.getEcImplicitlyCa();
+               ECParameterSpec implicitSpec = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
 
                return new org.bouncycastle.jce.spec.ECPublicKeySpec(k.getQ(), implicitSpec);
            }
@@ -78,7 +82,7 @@ public class KeyFactorySpi
            }
            else
            {
-               ECParameterSpec implicitSpec = ProviderUtil.getEcImplicitlyCa();
+               ECParameterSpec implicitSpec = configuration.getEcImplicitlyCa();
 
                return new org.bouncycastle.jce.spec.ECPrivateKeySpec(k.getD(), implicitSpec);
            }
@@ -92,7 +96,7 @@ public class KeyFactorySpi
     {
         if (keySpec instanceof ECPrivateKeySpec)
         {
-            return new BCECPrivateKey(algorithm, (ECPrivateKeySpec)keySpec);
+            return new BCECPrivateKey(algorithm, (ECPrivateKeySpec)keySpec, configuration);
         }
 
         return super.engineGeneratePrivate(keySpec);
@@ -104,7 +108,7 @@ public class KeyFactorySpi
     {
         if (keySpec instanceof ECPublicKeySpec)
         {
-            return new BCECPublicKey(algorithm, (ECPublicKeySpec)keySpec);
+            return new BCECPublicKey(algorithm, (ECPublicKeySpec)keySpec, configuration);
         }
 
         return super.engineGeneratePublic(keySpec);
@@ -117,7 +121,7 @@ public class KeyFactorySpi
 
         if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
-            return new BCECPrivateKey(algorithm, keyInfo);
+            return new BCECPrivateKey(algorithm, keyInfo, configuration);
         }
         else
         {
@@ -132,7 +136,7 @@ public class KeyFactorySpi
 
         if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey))
         {
-            return new BCECPublicKey(algorithm, keyInfo);
+            return new BCECPublicKey(algorithm, keyInfo, configuration);
         }
         else
         {
@@ -145,7 +149,7 @@ public class KeyFactorySpi
     {
         public EC()
         {
-            super("EC");
+            super("EC", BouncyCastleProvider.CONFIGURATION);
         }
     }
 
@@ -154,7 +158,7 @@ public class KeyFactorySpi
     {
         public ECDSA()
         {
-            super("ECDSA");
+            super("ECDSA", BouncyCastleProvider.CONFIGURATION);
         }
     }
 
@@ -163,7 +167,7 @@ public class KeyFactorySpi
     {
         public ECGOST3410()
         {
-            super("ECGOST3410");
+            super("ECGOST3410", BouncyCastleProvider.CONFIGURATION);
         }
     }
 
@@ -172,7 +176,7 @@ public class KeyFactorySpi
     {
         public ECDH()
         {
-            super("ECDH");
+            super("ECDH", BouncyCastleProvider.CONFIGURATION);
         }
     }
 
@@ -181,7 +185,7 @@ public class KeyFactorySpi
     {
         public ECDHC()
         {
-            super("ECDHC");
+            super("ECDHC", BouncyCastleProvider.CONFIGURATION);
         }
     }
 
@@ -190,7 +194,7 @@ public class KeyFactorySpi
     {
         public ECMQV()
         {
-            super("ECMQV");
+            super("ECMQV", BouncyCastleProvider.CONFIGURATION);
         }
     }
 }

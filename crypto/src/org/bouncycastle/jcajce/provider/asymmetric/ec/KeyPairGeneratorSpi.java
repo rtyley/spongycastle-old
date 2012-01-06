@@ -22,7 +22,8 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle.jce.provider.ProviderUtil;
+import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
@@ -47,6 +48,7 @@ public abstract class KeyPairGeneratorSpi
         SecureRandom                random = new SecureRandom();
         boolean                     initialised = false;
         String                      algorithm;
+        ProviderConfiguration       configuration;
 
         static private Hashtable    ecParameters;
 
@@ -66,13 +68,16 @@ public abstract class KeyPairGeneratorSpi
         {
             super("EC");
             this.algorithm = "EC";
+            this.configuration = BouncyCastleProvider.CONFIGURATION;
         }
 
         public EC(
-            String  algorithm)
+            String  algorithm,
+            ProviderConfiguration configuration)
         {
             super(algorithm);
             this.algorithm = algorithm;
+            this.configuration = configuration;
         }
 
         public void initialize(
@@ -212,9 +217,9 @@ public abstract class KeyPairGeneratorSpi
                 engine.init(param);
                 initialised = true;
             }
-            else if (params == null && ProviderUtil.getEcImplicitlyCa() != null)
+            else if (params == null && configuration.getEcImplicitlyCa() != null)
             {
-                ECParameterSpec p = ProviderUtil.getEcImplicitlyCa();
+                ECParameterSpec p = configuration.getEcImplicitlyCa();
                 this.ecParams = params;
 
                 param = new ECKeyGenerationParameters(new ECDomainParameters(p.getCurve(), p.getG(), p.getN()), random);
@@ -222,7 +227,7 @@ public abstract class KeyPairGeneratorSpi
                 engine.init(param);
                 initialised = true;
             }
-            else if (params == null && ProviderUtil.getEcImplicitlyCa() == null)
+            else if (params == null && configuration.getEcImplicitlyCa() == null)
             {
                 throw new InvalidAlgorithmParameterException("null parameter passed but no implicitCA set");
             }
@@ -247,22 +252,22 @@ public abstract class KeyPairGeneratorSpi
             {
                 ECParameterSpec p = (ECParameterSpec)ecParams;
 
-                BCECPublicKey pubKey = new BCECPublicKey(algorithm, pub, p);
+                BCECPublicKey pubKey = new BCECPublicKey(algorithm, pub, p, configuration);
                 return new KeyPair(pubKey,
-                                   new BCECPrivateKey(algorithm, priv, pubKey, p));
+                                   new BCECPrivateKey(algorithm, priv, pubKey, p, configuration));
             }
             else if (ecParams == null)
             {
-               return new KeyPair(new BCECPublicKey(algorithm, pub),
-                                   new BCECPrivateKey(algorithm, priv));
+               return new KeyPair(new BCECPublicKey(algorithm, pub, configuration),
+                                   new BCECPrivateKey(algorithm, priv, configuration));
             }
             else
             {
                 java.security.spec.ECParameterSpec p = (java.security.spec.ECParameterSpec)ecParams;
 
-                BCECPublicKey pubKey = new BCECPublicKey(algorithm, pub, p);
+                BCECPublicKey pubKey = new BCECPublicKey(algorithm, pub, p, configuration);
                 
-                return new KeyPair(pubKey, new BCECPrivateKey(algorithm, priv, pubKey, p));
+                return new KeyPair(pubKey, new BCECPrivateKey(algorithm, priv, pubKey, p, configuration));
             }
         }
     }
@@ -272,7 +277,7 @@ public abstract class KeyPairGeneratorSpi
     {
         public ECDSA()
         {
-            super("ECDSA");
+            super("ECDSA", BouncyCastleProvider.CONFIGURATION);
         }
     }
 
@@ -281,7 +286,7 @@ public abstract class KeyPairGeneratorSpi
     {
         public ECDH()
         {
-            super("ECDH");
+            super("ECDH", BouncyCastleProvider.CONFIGURATION);
         }
     }
 
@@ -290,7 +295,7 @@ public abstract class KeyPairGeneratorSpi
     {
         public ECDHC()
         {
-            super("ECDHC");
+            super("ECDHC", BouncyCastleProvider.CONFIGURATION);
         }
     }
 
@@ -299,7 +304,7 @@ public abstract class KeyPairGeneratorSpi
     {
         public ECMQV()
         {
-            super("ECMQV");
+            super("ECMQV", BouncyCastleProvider.CONFIGURATION);
         }
     }
 }

@@ -26,12 +26,13 @@ import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
-import org.bouncycastle.jcajce.provider.ProviderUtil;
 import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
+import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
@@ -45,6 +46,7 @@ public class BCECPrivateKey
     private BigInteger      d;
     private ECParameterSpec ecSpec;
     private boolean         withCompression;
+    private ProviderConfiguration configuration;
 
     private DERBitString publicKey;
 
@@ -55,32 +57,38 @@ public class BCECPrivateKey
     }
 
     BCECPrivateKey(
-        ECPrivateKey    key)
+        ECPrivateKey    key,
+        ProviderConfiguration configuration)
     {
         this.d = key.getD();
         this.algorithm = key.getAlgorithm();
         this.ecSpec = key.getParameters();
+        this.configuration = configuration;
     }
 
     public BCECPrivateKey(
         String              algorithm,
-        ECPrivateKeySpec    spec)
+        ECPrivateKeySpec    spec,
+        ProviderConfiguration configuration)
     {
         this.algorithm = algorithm;
         this.d = spec.getD();
         this.ecSpec = spec.getParams();
+        this.configuration = configuration;
     }
 
     public BCECPrivateKey(
         String                  algorithm,
         ECPrivateKeyParameters  params,
         BCECPublicKey          pubKey,
-        ECParameterSpec         spec)
+        ECParameterSpec         spec,
+        ProviderConfiguration configuration)
     {
         ECDomainParameters      dp = params.getParameters();
 
         this.algorithm = algorithm;
         this.d = params.getD();
+        this.configuration = configuration;
 
         if (spec == null)
         {
@@ -101,11 +109,13 @@ public class BCECPrivateKey
 
     public BCECPrivateKey(
         String                  algorithm,
-        ECPrivateKeyParameters  params)
+        ECPrivateKeyParameters  params,
+        ProviderConfiguration   configuration)
     {
         this.algorithm = algorithm;
         this.d = params.getD();
         this.ecSpec = null;
+        this.configuration = configuration;
     }
 
     public BCECPrivateKey(
@@ -118,18 +128,24 @@ public class BCECPrivateKey
         this.withCompression = key.withCompression;
         this.publicKey = key.publicKey;
         this.attrCarrier = key.attrCarrier;
+        this.configuration = key.configuration;
     }
 
     BCECPrivateKey(
-        PrivateKeyInfo      info)
+        PrivateKeyInfo      info,
+        ProviderConfiguration configuration)
     {
+        this.configuration = configuration;
+
         populateFromPrivKeyInfo(info);
     }
 
     BCECPrivateKey(
         String              algorithm,
-        PrivateKeyInfo      info)
+        PrivateKeyInfo      info,
+        ProviderConfiguration configuration)
     {
+        this.configuration = configuration;
         populateFromPrivKeyInfo(info);
         this.algorithm = algorithm;
     }
@@ -322,7 +338,7 @@ public class BCECPrivateKey
             return ecSpec;
         }
 
-        return ProviderUtil.getEcImplicitlyCa();
+        return BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
     }
 
     public boolean equals(Object o)
@@ -361,6 +377,8 @@ public class BCECPrivateKey
         throws IOException, ClassNotFoundException
     {
         byte[] enc = (byte[])in.readObject();
+
+        this.configuration = BouncyCastleProvider.CONFIGURATION;
 
         populateFromPrivKeyInfo(PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(enc)));
 

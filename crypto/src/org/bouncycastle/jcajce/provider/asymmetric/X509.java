@@ -1,7 +1,7 @@
 package org.bouncycastle.jcajce.provider.asymmetric;
 
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricAlgorithmProvider;
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 /**
  * For some reason the class path project thinks that such a KeyFactory will exist.

@@ -36,7 +36,7 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
-import org.bouncycastle.jce.provider.ProviderUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
 
@@ -191,7 +191,7 @@ public class BCECGOST3410PrivateKey
     private void populateFromPrivKeyInfo(PrivateKeyInfo info)
         throws IOException
     {
-        X962Parameters params = new X962Parameters((ASN1Primitive)info.getAlgorithmId().getParameters());
+        X962Parameters params = new X962Parameters((ASN1Primitive)info.getPrivateKeyAlgorithm().getParameters());
 
         if (params.isNamedCurve())
         {
@@ -366,7 +366,7 @@ public class BCECGOST3410PrivateKey
             return EC5Util.convertSpec(ecSpec, withCompression);
         }
 
-        return ProviderUtil.getEcImplicitlyCa();
+        return BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
     }
 
     public BigInteger getS()

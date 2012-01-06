@@ -26,11 +26,12 @@ import org.bouncycastle.asn1.x9.X9IntegerConverter;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle.jcajce.provider.ProviderUtil;
 import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
+import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
@@ -45,24 +46,29 @@ public class BCECPublicKey
     private ECParameterSpec ecSpec;
     private boolean         withCompression;
     private GOST3410PublicKeyAlgParameters       gostParams;
+    private ProviderConfiguration configuration;
 
     public BCECPublicKey(
         String              algorithm,
-        BCECPublicKey      key)
+        BCECPublicKey      key
+        )
     {
         this.algorithm = algorithm;
         this.q = key.q;
         this.ecSpec = key.ecSpec;
         this.withCompression = key.withCompression;
         this.gostParams = key.gostParams;
+        this.configuration = key.configuration;
     }
 
     public BCECPublicKey(
         String              algorithm,
-        ECPublicKeySpec     spec)
+        ECPublicKeySpec     spec,
+        ProviderConfiguration configuration)
     {
         this.algorithm = algorithm;
         this.q = spec.getQ();
+        this.configuration = configuration;
 
         if (spec.getParams() != null)
         {
@@ -72,7 +78,7 @@ public class BCECPublicKey
         {
             if (q.getCurve() == null)
             {
-                org.bouncycastle.jce.spec.ECParameterSpec s = ProviderUtil.getEcImplicitlyCa();
+                org.bouncycastle.jce.spec.ECParameterSpec s = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
 
                 q = s.getCurve().createPoint(q.getX().toBigInteger(), q.getY().toBigInteger(), false);
             }
@@ -83,12 +89,14 @@ public class BCECPublicKey
     public BCECPublicKey(
         String                  algorithm,
         ECPublicKeyParameters   params,
-        ECParameterSpec         spec)
+        ECParameterSpec         spec,
+        ProviderConfiguration   configuration)
     {
         ECDomainParameters      dp = params.getParameters();
 
         this.algorithm = algorithm;
         this.q = params.getQ();
+        this.configuration = configuration;
 
         if (spec == null)
         {
@@ -107,41 +115,52 @@ public class BCECPublicKey
 
     public BCECPublicKey(
         String                  algorithm,
-        ECPublicKeyParameters   params)
+        ECPublicKeyParameters   params,
+        ProviderConfiguration   configuration)
     {
         this.algorithm = algorithm;
         this.q = params.getQ();
         this.ecSpec = null;
+        this.configuration = configuration;
     }
 
     BCECPublicKey(
-        ECPublicKey     key)
+        ECPublicKey     key,
+        ProviderConfiguration configuration)
     {
         this.q = key.getQ();
         this.algorithm = key.getAlgorithm();
         this.ecSpec = key.getParameters();
+        this.configuration = configuration;
     }
 
     BCECPublicKey(
         String            algorithm,
         ECPoint           q,
-        ECParameterSpec   ecSpec)
+        ECParameterSpec   ecSpec,
+        ProviderConfiguration configuration)
     {
         this.algorithm = algorithm;
         this.q = q;
         this.ecSpec = ecSpec;
+        this.configuration = configuration;
     }
 
     BCECPublicKey(
-        SubjectPublicKeyInfo    info)
+        SubjectPublicKeyInfo    info,
+        ProviderConfiguration   configuration)
     {
+        this.configuration = configuration;
+
         populateFromPubKeyInfo(info);
     }
 
     BCECPublicKey(
         String                  algorithm,
-        SubjectPublicKeyInfo    info)
+        SubjectPublicKeyInfo    info,
+        ProviderConfiguration   configuration)
     {
+        this.configuration = configuration;
         populateFromPubKeyInfo(info);
         this.algorithm = algorithm;
     }
@@ -207,7 +226,7 @@ public class BCECPublicKey
             else if (params.isImplicitlyCA())
             {
                 ecSpec = null;
-                curve = ProviderUtil.getEcImplicitlyCa().getCurve();
+                curve = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa().getCurve();
             }
             else
             {
@@ -413,7 +432,7 @@ public class BCECPublicKey
             return (ECParameterSpec)ecSpec;
         }
 
-        return ProviderUtil.getEcImplicitlyCa();
+        return BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
     }
 
     public boolean equals(Object o)
@@ -438,6 +457,8 @@ public class BCECPublicKey
         throws IOException, ClassNotFoundException
     {
         byte[] enc = (byte[])in.readObject();
+
+        this.configuration = BouncyCastleProvider.CONFIGURATION;
 
         populateFromPubKeyInfo(SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(enc)));
 

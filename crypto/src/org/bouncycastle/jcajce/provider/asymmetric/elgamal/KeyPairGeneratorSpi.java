@@ -14,6 +14,7 @@ import org.bouncycastle.crypto.params.ElGamalKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ElGamalParameters;
 import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ElGamalPublicKeyParameters;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ElGamalParameterSpec;
 
 public class KeyPairGeneratorSpi
@@ -70,10 +71,20 @@ public class KeyPairGeneratorSpi
     {
         if (!initialised)
         {
-            ElGamalParametersGenerator pGen = new ElGamalParametersGenerator();
+            DHParameterSpec dhParams = BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters();
 
-            pGen.init(strength, certainty, random);
-            param = new ElGamalKeyGenerationParameters(random, pGen.generateParameters());
+            if (dhParams != null && dhParams.getP().bitLength() == strength)
+            {
+                param = new ElGamalKeyGenerationParameters(random, new ElGamalParameters(dhParams.getP(), dhParams.getG(), dhParams.getL()));
+            }
+            else
+            {
+                ElGamalParametersGenerator pGen = new ElGamalParametersGenerator();
+
+                pGen.init(strength, certainty, random);
+                param = new ElGamalKeyGenerationParameters(random, pGen.generateParameters());
+            }
+
             engine.init(param);
             initialised = true;
         }

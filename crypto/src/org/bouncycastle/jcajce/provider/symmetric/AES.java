@@ -17,6 +17,7 @@ import org.bouncycastle.crypto.macs.CMac;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.modes.OFBBlockCipher;
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameterGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
@@ -24,7 +25,6 @@ import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.IvAlgorithmParameters;
 import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class AES

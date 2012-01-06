@@ -1,6 +1,6 @@
 package org.bouncycastle.jcajce.provider.util;
 
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 
 public abstract class AlgorithmProvider
 {

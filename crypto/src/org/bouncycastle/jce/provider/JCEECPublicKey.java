@@ -86,7 +86,7 @@ public class JCEECPublicKey
         {
             if (q.getCurve() == null)
             {
-                org.bouncycastle.jce.spec.ECParameterSpec s = ProviderUtil.getEcImplicitlyCa();
+                org.bouncycastle.jce.spec.ECParameterSpec s = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
 
                 q = s.getCurve().createPoint(q.getX().toBigInteger(), q.getY().toBigInteger(), false);
             }               
@@ -252,7 +252,7 @@ public class JCEECPublicKey
             else if (params.isImplicitlyCA())
             {
                 ecSpec = null;
-                curve = ProviderUtil.getEcImplicitlyCa().getCurve();
+                curve = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa().getCurve();
             }
             else
             {
@@ -457,7 +457,7 @@ public class JCEECPublicKey
             return EC5Util.convertSpec(ecSpec, withCompression);
         }
 
-        return ProviderUtil.getEcImplicitlyCa();
+        return BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
     }
 
     public String toString()

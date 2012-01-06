@@ -3,11 +3,11 @@ package org.bouncycastle.jcajce.provider.symmetric;
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.VMPCEngine;
 import org.bouncycastle.crypto.macs.VMPCMac;
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseStreamCipher;
 import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 public final class VMPC
 {

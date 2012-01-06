@@ -33,7 +33,7 @@ public class X509CRLParser
         InputStream in)
         throws IOException, CRLException
     {
-        ASN1InputStream dIn = new ASN1InputStream(in, ProviderUtil.getReadLimit(in));
+        ASN1InputStream dIn = new ASN1InputStream(in);
         ASN1Sequence seq = (ASN1Sequence)dIn.readObject();
 
         if (seq.size() > 1

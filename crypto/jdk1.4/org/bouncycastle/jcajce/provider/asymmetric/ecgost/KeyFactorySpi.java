@@ -15,7 +15,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jcajce.provider.asymmetric.util.BaseKeyFactorySpi;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
-import org.bouncycastle.jce.provider.ProviderUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
@@ -41,7 +41,7 @@ public class KeyFactorySpi
            }
            else
            {
-               ECParameterSpec implicitSpec = ProviderUtil.getEcImplicitlyCa();
+               ECParameterSpec implicitSpec = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
 
                return new org.bouncycastle.jce.spec.ECPublicKeySpec(k.getQ(), implicitSpec);
            }
@@ -56,7 +56,7 @@ public class KeyFactorySpi
            }
            else
            {
-               ECParameterSpec implicitSpec = ProviderUtil.getEcImplicitlyCa();
+               ECParameterSpec implicitSpec = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
 
                return new org.bouncycastle.jce.spec.ECPrivateKeySpec(k.getD(), implicitSpec);
            }

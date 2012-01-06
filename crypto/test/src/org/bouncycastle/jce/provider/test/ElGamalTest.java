@@ -1,13 +1,5 @@
 package org.bouncycastle.jce.provider.test;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.util.test.SimpleTest;
-
-import javax.crypto.Cipher;
-import javax.crypto.interfaces.DHPrivateKey;
-import javax.crypto.interfaces.DHPublicKey;
-import javax.crypto.spec.DHParameterSpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -22,6 +14,16 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+
+import javax.crypto.Cipher;
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DHParameterSpec;
+
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.test.SimpleTest;
 
 public class ElGamalTest
     extends SimpleTest
@@ -259,9 +261,197 @@ public class ElGamalTest
         testGP(size, 0, elP.getG(), elP.getP());
     }
 
+    private void testDefault(
+        int         privateValueSize,
+        BigInteger  g,
+        BigInteger  p)
+        throws Exception
+    {
+        DHParameterSpec  elParams = new DHParameterSpec(p, g, privateValueSize);
+        int              size = p.bitLength();
+
+        new BouncyCastleProvider().setParameter(ConfigurableProvider.DH_DEFAULT_PARAMS, elParams);
+
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ElGamal", "BC");
+        byte[]           in = "This is a test".getBytes();
+
+        keyGen.initialize(p.bitLength());
+
+        KeyPair         keyPair = keyGen.generateKeyPair();
+
+        new BouncyCastleProvider().setParameter(ConfigurableProvider.DH_DEFAULT_PARAMS, elParams);
+
+        SecureRandom    rand = new SecureRandom();
+
+        checkKeySize(privateValueSize, keyPair);
+
+        Cipher  cipher = Cipher.getInstance("ElGamal", "BC");
+
+        cipher.init(Cipher.ENCRYPT_MODE, keyPair.getPublic(), rand);
+
+        if (cipher.getOutputSize(in.length) != (size / 8) * 2)
+        {
+            fail("getOutputSize wrong on encryption");
+        }
+
+        byte[]  out = cipher.doFinal(in);
+
+        cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
+
+        if (cipher.getOutputSize(out.length) != (size / 8) - 1)
+        {
+            fail("getOutputSize wrong on decryption");
+        }
+
+        //
+        // No Padding - maximum length
+        //
+        byte[]  modBytes = ((DHPublicKey)keyPair.getPublic()).getParams().getP().toByteArray();
+        byte[]  maxInput = new byte[modBytes.length - 1];
+
+        maxInput[0] |= 0x7f;
+
+        cipher.init(Cipher.ENCRYPT_MODE, keyPair.getPublic(), rand);
+
+        out = cipher.doFinal(maxInput);
+
+        cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
+
+        out = cipher.doFinal(out);
+
+        if (!areEqual(out, maxInput))
+        {
+            fail("NoPadding test failed on decrypt expected " + new String(Hex.encode(maxInput)) + " got " + new String(Hex.encode(out)));
+        }
+
+        //
+        // encrypt/decrypt
+        //
+
+        Cipher  c1 = Cipher.getInstance("ElGamal", "BC");
+        Cipher  c2 = Cipher.getInstance("ElGamal", "BC");
+
+        c1.init(Cipher.ENCRYPT_MODE, keyPair.getPublic(), rand);
+
+        byte[]  out1 = c1.doFinal(in);
+
+        c2.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
+
+        byte[]  out2 = c2.doFinal(out1);
+
+        if (!areEqual(in, out2))
+        {
+            fail(size + " encrypt test failed");
+        }
+
+        //
+        // encrypt/decrypt with update
+        //
+        int outLen = c1.update(in, 0, 2, out1, 0);
+
+        outLen += c1.doFinal(in, 2, in.length - 2, out1, outLen);
+
+        outLen = c2.update(out1, 0, 2, out2, 0);
+
+        outLen += c2.doFinal(out1, 2, out1.length - 2, out2, outLen);
+
+        if (!areEqual(in, out2))
+        {
+            fail(size + " encrypt with update test failed");
+        }
+
+        //
+        // public key encoding test
+        //
+        byte[]                  pubEnc = keyPair.getPublic().getEncoded();
+        KeyFactory              keyFac = KeyFactory.getInstance("ElGamal", "BC");
+        X509EncodedKeySpec      pubX509 = new X509EncodedKeySpec(pubEnc);
+        DHPublicKey             pubKey = (DHPublicKey)keyFac.generatePublic(pubX509);
+        DHParameterSpec         spec = pubKey.getParams();
+
+        if (!spec.getG().equals(elParams.getG()) || !spec.getP().equals(elParams.getP()))
+        {
+            fail(size + " bit public key encoding/decoding test failed on parameters");
+        }
+
+        if (!((DHPublicKey)keyPair.getPublic()).getY().equals(pubKey.getY()))
+        {
+            fail(size + " bit public key encoding/decoding test failed on y value");
+        }
+
+        //
+        // public key serialisation test
+        //
+        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
+        ObjectOutputStream      oOut = new ObjectOutputStream(bOut);
+
+        oOut.writeObject(keyPair.getPublic());
+
+        ByteArrayInputStream   bIn = new ByteArrayInputStream(bOut.toByteArray());
+        ObjectInputStream      oIn = new ObjectInputStream(bIn);
+
+        pubKey = (DHPublicKey)oIn.readObject();
+        spec = pubKey.getParams();
+
+        if (!spec.getG().equals(elParams.getG()) || !spec.getP().equals(elParams.getP()))
+        {
+            fail(size + " bit public key serialisation test failed on parameters");
+        }
+
+        if (!((DHPublicKey)keyPair.getPublic()).getY().equals(pubKey.getY()))
+        {
+            fail(size + " bit public key serialisation test failed on y value");
+        }
+
+        //
+        // private key encoding test
+        //
+        byte[]              privEnc = keyPair.getPrivate().getEncoded();
+        PKCS8EncodedKeySpec privPKCS8 = new PKCS8EncodedKeySpec(privEnc);
+        DHPrivateKey        privKey = (DHPrivateKey)keyFac.generatePrivate(privPKCS8);
+
+        spec = privKey.getParams();
+
+        if (!spec.getG().equals(elParams.getG()) || !spec.getP().equals(elParams.getP()))
+        {
+            fail(size + " bit private key encoding/decoding test failed on parameters");
+        }
+
+        if (!((DHPrivateKey)keyPair.getPrivate()).getX().equals(privKey.getX()))
+        {
+            fail(size + " bit private key encoding/decoding test failed on y value");
+        }
+
+        //
+        // private key serialisation test
+        //
+        bOut = new ByteArrayOutputStream();
+        oOut = new ObjectOutputStream(bOut);
+
+        oOut.writeObject(keyPair.getPrivate());
+
+        bIn = new ByteArrayInputStream(bOut.toByteArray());
+        oIn = new ObjectInputStream(bIn);
+
+        privKey = (DHPrivateKey)oIn.readObject();
+        spec = privKey.getParams();
+
+        if (!spec.getG().equals(elParams.getG()) || !spec.getP().equals(elParams.getP()))
+        {
+            fail(size + " bit private key serialisation test failed on parameters");
+        }
+
+        if (!((DHPrivateKey)keyPair.getPrivate()).getX().equals(privKey.getX()))
+        {
+            fail(size + " bit private key serialisation test failed on y value");
+        }
+    }
+
     public void performTest()
         throws Exception
     {
+        testDefault(64, g512, p512);
+
         testGP(512, 0, g512, p512);
         testGP(768, 0, g768, p768);
         testGP(1024, 0, g1024, p1024);
@@ -269,7 +459,7 @@ public class ElGamalTest
         testGP(512, 64, g512, p512);
         testGP(768, 128, g768, p768);
         testGP(1024, 256, g1024, p1024);
-        
+
         testRandom(256);
     }
 

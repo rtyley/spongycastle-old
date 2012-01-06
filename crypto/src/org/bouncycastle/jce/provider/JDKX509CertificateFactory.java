@@ -197,8 +197,6 @@ public class JDKX509CertificateFactory
                 }
             }
 
-            int limit = ProviderUtil.getReadLimit(in);
-
             PushbackInputStream pis = new PushbackInputStream(in);
             int tag = pis.read();
 
@@ -215,7 +213,7 @@ public class JDKX509CertificateFactory
             }
             else
             {
-                return readDERCertificate(new ASN1InputStream(pis, limit));
+                return readDERCertificate(new ASN1InputStream(pis));
             }
         }
         catch (Exception e)
@@ -280,8 +278,6 @@ public class JDKX509CertificateFactory
                 }
             }
 
-            int limit = ProviderUtil.getReadLimit(inStream);
-
             PushbackInputStream pis = new PushbackInputStream(inStream);
             int tag = pis.read();
 
@@ -298,7 +294,7 @@ public class JDKX509CertificateFactory
             }
             else
             {       // lazy evaluate to help processing of large CRLs
-                return readDERCRL(new ASN1InputStream(pis, limit, true));
+                return readDERCRL(new ASN1InputStream(pis, true));
             }
         }
         catch (CRLException e)

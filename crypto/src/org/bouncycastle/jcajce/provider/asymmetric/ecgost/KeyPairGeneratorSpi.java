@@ -16,7 +16,7 @@ import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.EC5Util;
-import org.bouncycastle.jce.provider.ProviderUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
@@ -119,9 +119,9 @@ public class KeyPairGeneratorSpi
             engine.init(param);
             initialised = true;
         }
-        else if (params == null && ProviderUtil.getEcImplicitlyCa() != null)
+        else if (params == null && BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa() != null)
         {
-            ECParameterSpec p = ProviderUtil.getEcImplicitlyCa();
+            ECParameterSpec p = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
             this.ecParams = params;
 
             param = new ECKeyGenerationParameters(new ECDomainParameters(p.getCurve(), p.getG(), p.getN()), random);
@@ -129,7 +129,7 @@ public class KeyPairGeneratorSpi
             engine.init(param);
             initialised = true;
         }
-        else if (params == null && ProviderUtil.getEcImplicitlyCa() == null)
+        else if (params == null && BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa() == null)
         {
             throw new InvalidAlgorithmParameterException("null parameter passed but no implicitCA set");
         }

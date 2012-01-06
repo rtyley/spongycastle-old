@@ -24,7 +24,6 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.SignedData;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.jcajce.provider.ProviderUtil;
 import org.bouncycastle.jce.provider.X509CRLObject;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 
@@ -199,8 +198,6 @@ public class CertificateFactory
                 }
             }
 
-            int limit = ProviderUtil.getReadLimit(in);
-
             PushbackInputStream pis = new PushbackInputStream(in);
             int tag = pis.read();
 
@@ -217,7 +214,7 @@ public class CertificateFactory
             }
             else
             {
-                return readDERCertificate(new ASN1InputStream(pis, limit));
+                return readDERCertificate(new ASN1InputStream(pis));
             }
         }
         catch (Exception e)
@@ -282,8 +279,6 @@ public class CertificateFactory
                 }
             }
 
-            int limit = ProviderUtil.getReadLimit(inStream);
-
             PushbackInputStream pis = new PushbackInputStream(inStream);
             int tag = pis.read();
 
@@ -300,7 +295,7 @@ public class CertificateFactory
             }
             else
             {       // lazy evaluate to help processing of large CRLs
-                return readDERCRL(new ASN1InputStream(pis, limit, true));
+                return readDERCRL(new ASN1InputStream(pis, true));
             }
         }
         catch (CRLException e)

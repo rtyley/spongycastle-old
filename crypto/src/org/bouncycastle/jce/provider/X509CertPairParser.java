@@ -24,7 +24,7 @@ public class X509CertPairParser
         InputStream in)
         throws IOException, CertificateParsingException
     {
-        ASN1InputStream dIn = new ASN1InputStream(in, ProviderUtil.getReadLimit(in));
+        ASN1InputStream dIn = new ASN1InputStream(in);
         ASN1Sequence seq = (ASN1Sequence)dIn.readObject();
         CertificatePair pair = CertificatePair.getInstance(seq);
         return new X509CertificatePair(pair);

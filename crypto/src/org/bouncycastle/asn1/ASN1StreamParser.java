@@ -12,7 +12,7 @@ public class ASN1StreamParser
     public ASN1StreamParser(
         InputStream in)
     {
-        this(in, ASN1InputStream.findLimit(in));
+        this(in, StreamUtil.findLimit(in));
     }
 
     public ASN1StreamParser(

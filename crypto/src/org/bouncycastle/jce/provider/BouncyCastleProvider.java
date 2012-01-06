@@ -15,9 +15,10 @@ import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
+import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
 import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
 
 /**
  * To add the provider at runtime use:
@@ -49,6 +50,9 @@ public final class BouncyCastleProvider extends Provider
     private static String info = "BouncyCastle Security Provider v1.47b";
 
     public static String PROVIDER_NAME = "BC";
+
+    public static final ProviderConfiguration CONFIGURATION = new BouncyCastleProviderConfiguration();
+
 
     private static final Map keyInfoConverters = new HashMap();
 
@@ -525,7 +529,10 @@ public final class BouncyCastleProvider extends Provider
 
     public void setParameter(String parameterName, Object parameter)
     {
-        ProviderUtil.setParameter(parameterName, parameter);
+        synchronized (CONFIGURATION)
+        {
+            ((BouncyCastleProviderConfiguration)CONFIGURATION).setParameter(parameterName, parameter);
+        }
     }
 
     public boolean hasAlgorithm(String type, String name)

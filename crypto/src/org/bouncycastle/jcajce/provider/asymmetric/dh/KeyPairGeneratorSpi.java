@@ -15,6 +15,7 @@ import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class KeyPairGeneratorSpi
     extends java.security.KeyPairGenerator
@@ -70,13 +71,22 @@ public class KeyPairGeneratorSpi
             }
             else
             {
-                DHParametersGenerator pGen = new DHParametersGenerator();
+                DHParameterSpec dhParams = BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters();
 
-                pGen.init(strength, certainty, random);
+                if (dhParams != null && dhParams.getP().bitLength() == strength)
+                {
+                    param = new DHKeyGenerationParameters(random, new DHParameters(dhParams.getP(), dhParams.getG(), null, dhParams.getL()));
+                }
+                else
+                {
+                    DHParametersGenerator pGen = new DHParametersGenerator();
 
-                param = new DHKeyGenerationParameters(random, pGen.generateParameters());
+                    pGen.init(strength, certainty, random);
 
-                params.put(paramStrength, param);
+                    param = new DHKeyGenerationParameters(random, pGen.generateParameters());
+
+                    params.put(paramStrength, param);
+                }
             }
 
             engine.init(param);
