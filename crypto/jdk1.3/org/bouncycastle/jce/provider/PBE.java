@@ -2,7 +2,6 @@ package org.bouncycastle.jce.provider;
 
 import java.security.spec.AlgorithmParameterSpec;
 
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
 import org.bouncycastle.crypto.CipherParameters;
@@ -19,6 +18,7 @@ import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.params.DESParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
 
 public interface PBE
 {
@@ -101,7 +101,7 @@ public interface PBE
          * Cipher.
          */
         static CipherParameters makePBEParameters(
-            JCEPBEKey               pbeKey,
+            BCPBEKey pbeKey,
             AlgorithmParameterSpec  spec,
             String                  targetAlgorithm)
         {
@@ -161,7 +161,7 @@ public interface PBE
          * whichever is greater.
          */
         static CipherParameters makePBEMacParameters(
-            JCEPBEKey               pbeKey,
+            BCPBEKey pbeKey,
             AlgorithmParameterSpec  spec)
         {
             if ((spec == null) || !(spec instanceof PBEParameterSpec))

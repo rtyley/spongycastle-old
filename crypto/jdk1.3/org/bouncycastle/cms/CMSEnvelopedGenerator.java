@@ -22,8 +22,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.RC2ParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -310,7 +309,7 @@ public class CMSEnvelopedGenerator
         DEREncodable asn1Params;
         if (params != null)
         {
-            asn1Params = ASN1Object.fromByteArray(params.getEncoded("ASN.1"));
+            asn1Params = ASN1Primitive.fromByteArray(params.getEncoded("ASN.1"));
         }
         else
         {

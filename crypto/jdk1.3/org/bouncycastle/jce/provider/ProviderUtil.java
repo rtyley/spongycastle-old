@@ -1,14 +1,13 @@
 package org.bouncycastle.jce.provider;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
-
-import org.bouncycastle.jce.interfaces.ConfigurableProvider;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.ProviderConfigurationPermission;
-
 import java.security.Permission;
+
+import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
+import org.bouncycastle.jcajce.provider.config.ProviderConfigurationPermission;
+import org.bouncycastle.jce.spec.ECParameterSpec;
 
 public class ProviderUtil
 {

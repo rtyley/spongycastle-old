@@ -19,8 +19,8 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
-import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.cms.KeyAgreeRecipientIdentifier;
@@ -173,7 +173,7 @@ public class KeyAgreeRecipientInformation
         {
             byte[] ukmEncoding = info.getUserKeyingMaterial().getOctets();
             MQVuserKeyingMaterial ukm = MQVuserKeyingMaterial.getInstance(
-                ASN1Object.fromByteArray(ukmEncoding));
+                ASN1Primitive.fromByteArray(ukmEncoding));
 
             PublicKey ephemeralKey = getPublicKeyFromOriginatorPublicKey(receiverPrivateKey,
                 ukm.getEphemeralPublicKey(), prov);

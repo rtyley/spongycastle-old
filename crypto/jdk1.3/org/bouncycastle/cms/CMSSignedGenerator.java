@@ -1,12 +1,9 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
-import java.security.AlgorithmParameters;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
@@ -18,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -36,6 +33,8 @@ import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreException;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Hex;
@@ -98,23 +97,23 @@ public class CMSSignedGenerator
          {
          PSS_PARAMS.put("SHA1withRSAandMGF1", new AlgorithmIdentifier(
                  PKCSObjectIdentifiers.id_RSASSA_PSS,
-                 ASN1Object.fromByteArray(Hex.decode("3000"))));
+                 ASN1Primitive.fromByteArray(Hex.decode("3000"))));
          PSS_PARAMS.put("SHA224withRSAandMGF1", new AlgorithmIdentifier(
                  PKCSObjectIdentifiers.id_RSASSA_PSS,
-                 ASN1Object.fromByteArray(Hex.decode(
-                    "3034a00f300d06096086480165030402040500a11c301a06092a864886f70d010108300d06096086480165030402040500a20302011c"))));
+                 ASN1Primitive.fromByteArray(Hex.decode(
+                     "3034a00f300d06096086480165030402040500a11c301a06092a864886f70d010108300d06096086480165030402040500a20302011c"))));
          PSS_PARAMS.put("SHA256withRSAandMGF1", new AlgorithmIdentifier(
                  PKCSObjectIdentifiers.id_RSASSA_PSS,
-                 ASN1Object.fromByteArray(Hex.decode(
-                    "3034a00f300d06096086480165030402010500a11c301a06092a864886f70d010108300d06096086480165030402010500a203020120"))));
+                 ASN1Primitive.fromByteArray(Hex.decode(
+                     "3034a00f300d06096086480165030402010500a11c301a06092a864886f70d010108300d06096086480165030402010500a203020120"))));
          PSS_PARAMS.put("SHA384withRSAandMGF1", new AlgorithmIdentifier(
                  PKCSObjectIdentifiers.id_RSASSA_PSS,
-                 ASN1Object.fromByteArray(Hex.decode(
-                    "3034a00f300d06096086480165030402020500a11c301a06092a864886f70d010108300d06096086480165030402020500a203020130"))));
+                 ASN1Primitive.fromByteArray(Hex.decode(
+                     "3034a00f300d06096086480165030402020500a11c301a06092a864886f70d010108300d06096086480165030402020500a203020130"))));
          PSS_PARAMS.put("SHA512withRSAandMGF1", new AlgorithmIdentifier(
                  PKCSObjectIdentifiers.id_RSASSA_PSS,
-                 ASN1Object.fromByteArray(Hex.decode(
-                    "3034a00f300d06096086480165030402030500a11c301a06092a864886f70d010108300d06096086480165030402030500a203020140"))));
+                 ASN1Primitive.fromByteArray(Hex.decode(
+                     "3034a00f300d06096086480165030402030500a11c301a06092a864886f70d010108300d06096086480165030402030500a203020140"))));
          }
          catch (IOException e)
          {
@@ -292,7 +291,7 @@ public class CMSSignedGenerator
                 X509AttributeCertificate attrCert = (X509AttributeCertificate)it.next();
 
                 certs.add(new DERTaggedObject(false, 2,
-                             AttributeCertificate.getInstance(ASN1Object.fromByteArray(attrCert.getEncoded()))));
+                             AttributeCertificate.getInstance(ASN1Primitive.fromByteArray(attrCert.getEncoded()))));
             }
         }
         catch (IllegalArgumentException e)

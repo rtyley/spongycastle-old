@@ -8,8 +8,6 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.Security;
 import java.security.cert.CRLException;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
@@ -20,11 +18,10 @@ import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BEROctetStringGenerator;
 import org.bouncycastle.asn1.BERSet;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.ContentInfo;
@@ -35,6 +32,8 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreException;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.util.io.TeeInputStream;
@@ -77,7 +76,7 @@ class CMSUtils
                 X509Certificate c = (X509Certificate)it.next();
 
                 certs.add(X509CertificateStructure.getInstance(
-                                                       ASN1Object.fromByteArray(c.getEncoded())));
+                                                       ASN1Primitive.fromByteArray(c.getEncoded())));
             }
 
             return certs;
@@ -151,7 +150,7 @@ class CMSUtils
             {
                 X509CRL c = (X509CRL)it.next();
 
-                crls.add(CertificateList.getInstance(ASN1Object.fromByteArray(c.getEncoded())));
+                crls.add(CertificateList.getInstance(ASN1Primitive.fromByteArray(c.getEncoded())));
             }
 
             return crls;
@@ -235,7 +234,7 @@ class CMSUtils
         try
         {
             return TBSCertificateStructure.getInstance(
-                ASN1Object.fromByteArray(cert.getTBSCertificate()));
+                ASN1Primitive.fromByteArray(cert.getTBSCertificate()));
         }
         catch (Exception e)
         {

@@ -18,11 +18,10 @@ import org.bouncycastle.crypto.digests.GOST3411Digest;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.ECGOST3410Signer;
 import org.bouncycastle.crypto.signers.GOST3410Signer;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.ECUtil;
 import org.bouncycastle.jce.interfaces.ECKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.GOST3410Key;
-
-import org.bouncycastle.jce.provider.asymmetric.ec.ECUtil;
 
 public class JDKGOST3410Signer
     extends Signature implements PKCSObjectIdentifiers, X509ObjectIdentifiers

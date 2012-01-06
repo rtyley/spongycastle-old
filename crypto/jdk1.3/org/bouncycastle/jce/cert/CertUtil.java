@@ -7,9 +7,9 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.Security;
 
-import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.OIDTokenizer;
 import org.bouncycastle.asn1.x509.X509Name;

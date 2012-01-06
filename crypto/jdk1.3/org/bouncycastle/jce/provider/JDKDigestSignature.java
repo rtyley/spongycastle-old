@@ -1,6 +1,15 @@
 package org.bouncycastle.jce.provider;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.AlgorithmParameterSpec;
+
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -24,16 +33,6 @@ import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
-
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.AlgorithmParameterSpec;
 
 public class JDKDigestSignature
     extends Signature implements PKCSObjectIdentifiers, X509ObjectIdentifiers
@@ -231,7 +230,7 @@ public class JDKDigestSignature
     {
         DigestInfo              dInfo = new DigestInfo(algId, hash);
 
-        return dInfo.getEncoded(ASN1Encodable.DER);
+        return dInfo.getEncoded(ASN1Encoding.DER);
     }
 
     static public class SHA1WithRSAEncryption

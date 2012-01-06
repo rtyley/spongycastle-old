@@ -8,8 +8,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -30,11 +28,9 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.BERSetParser;
 import org.bouncycastle.asn1.BERTaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERTags;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfoParser;
 import org.bouncycastle.asn1.cms.SignedDataParser;
@@ -46,6 +42,8 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreException;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.util.CollectionStore;
@@ -157,7 +155,7 @@ public class CMSSignedDataParser
         try
         {
             _signedContent = signedContent;
-            _signedData = SignedDataParser.getInstance(_contentInfo.getContent(DERTags.SEQUENCE));
+            _signedData = SignedDataParser.getInstance(_contentInfo.getContent(BERTags.SEQUENCE));
             _digests = new HashMap();
             
             ASN1SetParser digAlgs = _signedData.getDigestAlgorithms();
@@ -184,7 +182,7 @@ public class CMSSignedDataParser
             //
             ContentInfoParser     cont = _signedData.getEncapContentInfo();
             ASN1OctetStringParser octs = (ASN1OctetStringParser)
-                cont.getContent(DERTags.OCTET_STRING);
+                cont.getContent(BERTags.OCTET_STRING);
 
             if (octs != null)
             {
@@ -609,7 +607,7 @@ public class CMSSignedDataParser
     {
         ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
         ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
-        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(DERTags.SEQUENCE));
+        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
 
         BERSequenceGenerator sGen = new BERSequenceGenerator(out);
 
@@ -687,7 +685,7 @@ public class CMSSignedDataParser
     {
         ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
         ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
-        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(DERTags.SEQUENCE));
+        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
 
         BERSequenceGenerator sGen = new BERSequenceGenerator(out);
 
@@ -786,7 +784,7 @@ public class CMSSignedDataParser
     {
         ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
         ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
-        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(DERTags.SEQUENCE));
+        SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
 
         BERSequenceGenerator sGen = new BERSequenceGenerator(out);
 
@@ -890,7 +888,7 @@ public class CMSSignedDataParser
         OutputStream rawOutputStream) throws IOException
     {
         ASN1OctetStringParser octs = (ASN1OctetStringParser)
-            encapContentInfo.getContent(DERTags.OCTET_STRING);
+            encapContentInfo.getContent(BERTags.OCTET_STRING);
 
         if (octs != null)
         {

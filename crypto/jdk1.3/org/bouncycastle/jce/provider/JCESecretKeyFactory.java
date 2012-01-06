@@ -15,9 +15,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.params.DESParameters;
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.params.ParametersWithIV;
+import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
+import org.bouncycastle.jcajce.provider.symmetric.util.PBE;
 
 public class JCESecretKeyFactory
     extends SecretKeyFactorySpi
@@ -139,7 +138,7 @@ public class JCESecretKeyFactory
                 PBEKeySpec          pbeSpec = (PBEKeySpec)keySpec;
                 CipherParameters    param;
                 
-                return new JCEPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, null);
+                return new BCPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, null);
             }
             
             throw new InvalidKeySpecException("Invalid KeySpec");
@@ -182,7 +181,7 @@ public class JCESecretKeyFactory
                 PBEKeySpec pbeSpec = (PBEKeySpec)keySpec;
                 CipherParameters    param;
                 
-                return new JCEPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, null);
+                return new BCPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, null);
             }
             
             throw new InvalidKeySpecException("Invalid KeySpec");
