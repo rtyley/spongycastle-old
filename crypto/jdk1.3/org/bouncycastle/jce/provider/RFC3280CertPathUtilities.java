@@ -30,10 +30,10 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
@@ -136,7 +136,7 @@ public class RFC3280CertPathUtilities
                                 .getEncoded())).getObjects();
                         while (e.hasMoreElements())
                         {
-                            vec.add((DEREncodable)e.nextElement());
+                            vec.add((ASN1Encodable)e.nextElement());
                         }
                     }
                     catch (IOException e)
@@ -179,11 +179,11 @@ public class RFC3280CertPathUtilities
                         }
                         for (int j = 0; j < genNames.length; j++)
                         {
-                            Enumeration e = ASN1Sequence.getInstance(genNames[j].getName().getDERObject()).getObjects();
+                            Enumeration e = ASN1Sequence.getInstance(genNames[j].getName().getASN1Object()).getObjects();
                             ASN1EncodableVector vec = new ASN1EncodableVector();
                             while (e.hasMoreElements())
                             {
-                                vec.add((DEREncodable)e.nextElement());
+                                vec.add((ASN1Encodable)e.nextElement());
                             }
                             vec.add(dpName.getName());
                             genNames[j] = new GeneralName(new X509Name(new DERSequence(vec)));
@@ -285,7 +285,7 @@ public class RFC3280CertPathUtilities
         X509CRL crl)
         throws AnnotatedException
     {
-        DERObject idp = CertPathValidatorUtilities.getExtensionValue(crl, ISSUING_DISTRIBUTION_POINT);
+        ASN1Object idp = CertPathValidatorUtilities.getExtensionValue(crl, ISSUING_DISTRIBUTION_POINT);
         boolean isIndirect = false;
         if (idp != null)
         {
@@ -306,7 +306,7 @@ public class RFC3280CertPathUtilities
                 {
                     try
                     {
-                        if (Arrays.areEqual(genNames[j].getName().getDERObject().getEncoded(), issuerBytes))
+                        if (Arrays.areEqual(genNames[j].getName().getASN1Object().getEncoded(), issuerBytes))
                         {
                             matchIssuer = true;
                         }
@@ -795,7 +795,7 @@ public class RFC3280CertPathUtilities
             }
 
             // (c) (3)
-            DERObject completeKeyIdentifier = null;
+            ASN1Object completeKeyIdentifier = null;
             try
             {
                 completeKeyIdentifier = CertPathValidatorUtilities.getExtensionValue(
@@ -807,7 +807,7 @@ public class RFC3280CertPathUtilities
                     "Authority key identifier extension could not be extracted from complete CRL.", e);
             }
 
-            DERObject deltaKeyIdentifier = null;
+            ASN1Object deltaKeyIdentifier = null;
             try
             {
                 deltaKeyIdentifier = CertPathValidatorUtilities.getExtensionValue(
@@ -900,8 +900,8 @@ public class RFC3280CertPathUtilities
             for (int j = 0; j < mappings.size(); j++)
             {
                 ASN1Sequence mapping = (ASN1Sequence)mappings.getObjectAt(j);
-                String id_p = ((DERObjectIdentifier)mapping.getObjectAt(0)).getId();
-                String sd_p = ((DERObjectIdentifier)mapping.getObjectAt(1)).getId();
+                String id_p = ((ASN1ObjectIdentifier)mapping.getObjectAt(0)).getId();
+                String sd_p = ((ASN1ObjectIdentifier)mapping.getObjectAt(1)).getId();
                 Set tmp;
 
                 if (!m_idp.containsKey(id_p))
@@ -1079,14 +1079,14 @@ public class RFC3280CertPathUtilities
 
             for (int j = 0; j < mappings.size(); j++)
             {
-                DERObjectIdentifier issuerDomainPolicy = null;
-                DERObjectIdentifier subjectDomainPolicy = null;
+                ASN1ObjectIdentifier issuerDomainPolicy = null;
+                ASN1ObjectIdentifier subjectDomainPolicy = null;
                 try
                 {
                     ASN1Sequence mapping = DERSequence.getInstance(mappings.getObjectAt(j));
 
-                    issuerDomainPolicy = DERObjectIdentifier.getInstance(mapping.getObjectAt(0));
-                    subjectDomainPolicy = DERObjectIdentifier.getInstance(mapping.getObjectAt(1));
+                    issuerDomainPolicy = ASN1ObjectIdentifier.getInstance(mapping.getObjectAt(0));
+                    subjectDomainPolicy = ASN1ObjectIdentifier.getInstance(mapping.getObjectAt(1));
                 }
                 catch (Exception e)
                 {
@@ -1293,7 +1293,7 @@ public class RFC3280CertPathUtilities
             while (e.hasMoreElements())
             {
                 PolicyInformation pInfo = PolicyInformation.getInstance(e.nextElement());
-                DERObjectIdentifier pOid = pInfo.getPolicyIdentifier();
+                ASN1ObjectIdentifier pOid = pInfo.getPolicyIdentifier();
 
                 pols.add(pOid.getId());
 
@@ -1372,9 +1372,9 @@ public class RFC3280CertPathUtilities
                                 {
                                     _policy = (String)_tmp;
                                 }
-                                else if (_tmp instanceof DERObjectIdentifier)
+                                else if (_tmp instanceof ASN1ObjectIdentifier)
                                 {
-                                    _policy = ((DERObjectIdentifier)_tmp).getId();
+                                    _policy = ((ASN1ObjectIdentifier)_tmp).getId();
                                 }
                                 else
                                 {
@@ -1983,7 +1983,7 @@ public class RFC3280CertPathUtilities
                  * omitted and a distribution point name of the certificate
                  * issuer.
                  */
-                DERObject issuer = null;
+                ASN1Object issuer = null;
                 try
                 {
                     issuer = new ASN1InputStream(CertPathValidatorUtilities.getEncodedIssuerPrincipal(cert).getEncoded())

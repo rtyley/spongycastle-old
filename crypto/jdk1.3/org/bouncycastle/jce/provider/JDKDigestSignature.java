@@ -1,7 +1,7 @@
 package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
@@ -44,7 +44,7 @@ public class JDKDigestSignature
     
     protected JDKDigestSignature(
         String                  name,
-        DERObjectIdentifier     objId,
+        ASN1ObjectIdentifier     objId,
         Digest                  digest,
         AsymmetricBlockCipher   cipher)
     {

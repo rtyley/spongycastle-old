@@ -3,17 +3,9 @@ package org.bouncycastle.openpgp;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.PublicKey;
-import java.security.interfaces.DSAParams;
-import java.security.interfaces.DSAPublicKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.DSAPublicKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -25,16 +17,14 @@ import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.ContainedPacket;
 import org.bouncycastle.bcpg.DSAPublicBCPGKey;
 import org.bouncycastle.bcpg.ElGamalPublicBCPGKey;
-import org.bouncycastle.bcpg.MPInteger;
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.bcpg.PublicKeyPacket;
 import org.bouncycastle.bcpg.RSAPublicBCPGKey;
 import org.bouncycastle.bcpg.TrustPacket;
 import org.bouncycastle.bcpg.UserAttributePacket;
 import org.bouncycastle.bcpg.UserIDPacket;
-import org.bouncycastle.jce.interfaces.ElGamalPublicKey;
-import org.bouncycastle.jce.spec.ElGamalParameterSpec;
-import org.bouncycastle.jce.spec.ElGamalPublicKeySpec;
+import org.bouncycastle.openpgp.operator.KeyFingerPrintCalculator;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPKeyConverter;
 import org.bouncycastle.util.Arrays;
 
 /**
@@ -57,57 +47,23 @@ public class PGPPublicKey
     private long    keyID;
     private byte[]  fingerprint;
     private int     keyStrength;
-    
-    private void init()
-        throws IOException
+
+    private void init(KeyFingerPrintCalculator fingerPrintCalculator)
+        throws PGPException
     {
         BCPGKey                key = publicPk.getKey();
-        
+
+        this.fingerprint = fingerPrintCalculator.calculateFingerprint(publicPk);
+
         if (publicPk.getVersion() <= 3)
         {
             RSAPublicBCPGKey    rK = (RSAPublicBCPGKey)key;
             
             this.keyID = rK.getModulus().longValue();
-            
-            try
-            {
-                MessageDigest   digest = MessageDigest.getInstance("MD5");
-            
-                byte[]  bytes = new MPInteger(rK.getModulus()).getEncoded();
-                digest.update(bytes, 2, bytes.length - 2);
-            
-                bytes = new MPInteger(rK.getPublicExponent()).getEncoded();
-                digest.update(bytes, 2, bytes.length - 2);
-            
-                this.fingerprint = digest.digest();
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                throw new IOException("can't find MD5");
-            }
-
             this.keyStrength = rK.getModulus().bitLength();
         }
         else
         {
-            byte[]             kBytes = publicPk.getEncodedContents();
-
-            try
-            {
-                MessageDigest   digest = MessageDigest.getInstance("SHA1");
-            
-                digest.update((byte)0x99);
-                digest.update((byte)(kBytes.length >> 8));
-                digest.update((byte)kBytes.length);
-                digest.update(kBytes);
-                
-                this.fingerprint = digest.digest();
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                throw new IOException("can't find SHA1");
-            }
-            
             this.keyID = ((long)(fingerprint[fingerprint.length - 8] & 0xff) << 56)
                             | ((long)(fingerprint[fingerprint.length - 7] & 0xff) << 48)
                             | ((long)(fingerprint[fingerprint.length - 6] & 0xff) << 40)
@@ -144,6 +100,7 @@ public class PGPPublicKey
      * @param provider provider to use for underlying digest calculations.
      * @throws PGPException on key creation problem.
      * @throws NoSuchProviderException if the specified provider is required and cannot be found.
+     * @deprecated use JcaPGPKeyConverter.getPGPPublicKey()
      */
     public PGPPublicKey(
         int            algorithm,
@@ -152,54 +109,37 @@ public class PGPPublicKey
         String         provider) 
         throws PGPException, NoSuchProviderException
     {
-        this(algorithm, pubKey, time);
+        this(new JcaPGPKeyConverter().setProvider(provider).getPGPPublicKey(algorithm, pubKey, time));
     }
 
+    /**
+         * @deprecated use JcaPGPKeyConverter.getPGPPublicKey()
+     */
     public PGPPublicKey(
         int            algorithm,
         PublicKey      pubKey,
         Date           time)
         throws PGPException
     {
-        BCPGKey bcpgKey;
+        this(new JcaPGPKeyConverter().getPGPPublicKey(algorithm, pubKey, time));
+    }
 
-        if (pubKey instanceof RSAPublicKey)
-        {
-            RSAPublicKey    rK = (RSAPublicKey)pubKey;
-
-            bcpgKey = new RSAPublicBCPGKey(rK.getModulus(), rK.getPublicExponent());
-        }
-        else if (pubKey instanceof DSAPublicKey)
-        {
-            DSAPublicKey    dK = (DSAPublicKey)pubKey;
-            DSAParams       dP = dK.getParams();
-
-            bcpgKey = new DSAPublicBCPGKey(dP.getP(), dP.getQ(), dP.getG(), dK.getY());
-        }
-        else if (pubKey instanceof ElGamalPublicKey)
-        {
-            ElGamalPublicKey        eK = (ElGamalPublicKey)pubKey;
-            ElGamalParameterSpec    eS = eK.getParameters();
-
-            bcpgKey = new ElGamalPublicBCPGKey(eS.getP(), eS.getG(), eK.getY());
-        }
-        else
-        {
-            throw new PGPException("unknown key class");
-        }
-
-        this.publicPk = new PublicKeyPacket(algorithm, time, bcpgKey);
+    /**
+     * Create a PGP public key from a packet descriptor using the passed in fingerPrintCalculator to do calculate
+     * the fingerprint and keyID.
+     *
+     * @param publicKeyPacket  packet describing the public key.
+     * @param fingerPrintCalculator calculator providing the digest support ot create the key fingerprint.
+     * @throws PGPException  if the packet is faulty, or the required calculations fail.
+     */
+    public PGPPublicKey(PublicKeyPacket publicKeyPacket, KeyFingerPrintCalculator fingerPrintCalculator)
+        throws PGPException
+    {
+        this.publicPk = publicKeyPacket;
         this.ids = new ArrayList();
         this.idSigs = new ArrayList();
 
-        try
-        {
-            init();
-        }
-        catch (IOException e)
-        {
-            throw new PGPException("exception calculating keyID", e);
-        }
+        init(fingerPrintCalculator);
     }
 
     /*
@@ -208,14 +148,15 @@ public class PGPPublicKey
     PGPPublicKey(
         PublicKeyPacket publicPk, 
         TrustPacket     trustPk, 
-        List            sigs)
-        throws IOException
+        List            sigs,
+        KeyFingerPrintCalculator fingerPrintCalculator)
+        throws PGPException
      {
         this.publicPk = publicPk;
         this.trustPk = trustPk;
         this.subSigs = sigs;
         
-        init();
+        init(fingerPrintCalculator);
      }
 
     PGPPublicKey(
@@ -270,8 +211,9 @@ public class PGPPublicKey
         List            keySigs,
         List            ids,
         List            idTrusts,
-        List            idSigs)
-        throws IOException
+        List            idSigs,
+        KeyFingerPrintCalculator fingerPrintCalculator)
+        throws PGPException
     {
         this.publicPk = publicPk;
         this.trustPk = trustPk;
@@ -280,20 +222,7 @@ public class PGPPublicKey
         this.idTrusts = idTrusts;
         this.idSigs = idSigs;
     
-        init();
-    }
-    
-    PGPPublicKey(
-        PublicKeyPacket  publicPk,
-        List             ids,
-        List             idSigs)
-        throws IOException
-    {
-        this.publicPk = publicPk;
-        this.ids = ids;
-        this.idSigs = idSigs;
-
-        init();
+        init(fingerPrintCalculator);
     }
     
     /**
@@ -482,62 +411,31 @@ public class PGPPublicKey
      * @return a JCE/JCA public key.
      * @throws PGPException if the key algorithm is not recognised.
      * @throws NoSuchProviderException if the provider cannot be found.
+     * @deprecated use a JcaPGPKeyConverter
      */
     public PublicKey getKey(
         String provider)
         throws PGPException, NoSuchProviderException
     {
-        return getKey(PGPUtil.getProvider(provider));
+        return new JcaPGPKeyConverter().setProvider(provider).getPublicKey(this);
     }
 
+    /**
+     * Return the public key contained in the object.
+     *
+     * @param provider provider to construct the key for.
+     * @return a JCE/JCA public key.
+     * @throws PGPException if the key algorithm is not recognised.
+     * @throws NoSuchProviderException if the provider cannot be found.
+     * @deprecated use a JcaPGPKeyConverter
+     */
     public PublicKey getKey(
         Provider provider)
         throws PGPException
     {
-        KeyFactory                        fact;
-        
-        try
-        {
-            switch (publicPk.getAlgorithm())
-            {
-            case RSA_ENCRYPT:
-            case RSA_GENERAL:
-            case RSA_SIGN:
-                RSAPublicBCPGKey    rsaK = (RSAPublicBCPGKey)publicPk.getKey();
-                RSAPublicKeySpec    rsaSpec = new RSAPublicKeySpec(rsaK.getModulus(), rsaK.getPublicExponent());
-    
-                fact = KeyFactory.getInstance("RSA", provider.getName());
-                
-                return fact.generatePublic(rsaSpec);
-            case DSA:
-                DSAPublicBCPGKey    dsaK = (DSAPublicBCPGKey)publicPk.getKey();
-                DSAPublicKeySpec    dsaSpec = new DSAPublicKeySpec(dsaK.getY(), dsaK.getP(), dsaK.getQ(), dsaK.getG());
-            
-                fact = KeyFactory.getInstance("DSA", provider.getName());
-                
-                return fact.generatePublic(dsaSpec);
-            case ELGAMAL_ENCRYPT:
-            case ELGAMAL_GENERAL:
-                ElGamalPublicBCPGKey    elK = (ElGamalPublicBCPGKey)publicPk.getKey();
-                ElGamalPublicKeySpec    elSpec = new ElGamalPublicKeySpec(elK.getY(), new ElGamalParameterSpec(elK.getP(), elK.getG()));
-                
-                fact = KeyFactory.getInstance("ElGamal", provider.getName());
-                
-                return fact.generatePublic(elSpec);
-            default:
-                throw new PGPException("unknown public key algorithm encountered");
-            }
-        }
-        catch (PGPException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new PGPException("exception constructing public key", e);
-        }
+        return new JcaPGPKeyConverter().setProvider(provider).getPublicKey(this);
     }
-    
+
     /**
      * Return any userIDs associated with the key.
      * 
@@ -668,7 +566,12 @@ public class PGPPublicKey
             return subSigs.iterator();
         }
     }
-    
+
+    public PublicKeyPacket getPublicKeyPacket()
+    {
+        return publicPk;
+    }
+
     public byte[] getEncoded() 
         throws IOException
     {

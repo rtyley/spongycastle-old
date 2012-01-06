@@ -1,21 +1,29 @@
 package org.bouncycastle.openpgp;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.bcpg.*;
-import org.bouncycastle.util.BigIntegers;
-import org.bouncycastle.util.Strings;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.InvalidKeyException;
 import java.security.NoSuchProviderException;
-import java.security.Signature;
-import java.security.SignatureException;
 import java.security.Provider;
+import java.security.SignatureException;
 import java.util.Date;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.bcpg.BCPGInputStream;
+import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.bcpg.MPInteger;
+import org.bouncycastle.bcpg.SignaturePacket;
+import org.bouncycastle.bcpg.SignatureSubpacket;
+import org.bouncycastle.bcpg.TrustPacket;
+import org.bouncycastle.bcpg.UserAttributeSubpacket;
+import org.bouncycastle.openpgp.operator.PGPContentVerifier;
+import org.bouncycastle.openpgp.operator.PGPContentVerifierBuilder;
+import org.bouncycastle.openpgp.operator.PGPContentVerifierBuilderProvider;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
+import org.bouncycastle.util.BigIntegers;
+import org.bouncycastle.util.Strings;
 
 /**
  *A PGP signature object.
@@ -40,12 +48,12 @@ public class PGPSignature
     public static final int    TIMESTAMP = 0x40;
     
     private SignaturePacket    sigPck;
-    private Signature          sig;
     private int                signatureType;
     private TrustPacket        trustPck;
-    
+    private PGPContentVerifier verifier;
     private byte               lastb;
-    
+    private OutputStream       sigOut;
+
     PGPSignature(
         BCPGInputStream    pIn)
         throws IOException, PGPException
@@ -70,20 +78,6 @@ public class PGPSignature
         this(sigPacket);
         
         this.trustPck = trustPacket;
-    }
-    
-    private void getSig(
-        Provider provider)
-        throws PGPException
-    {
-        try
-        {
-            this.sig = Signature.getInstance(PGPUtil.getSignatureName(sigPck.getKeyAlgorithm(), sigPck.getHashAlgorithm()), provider.getName());
-        }
-        catch (Exception e)
-        {    
-            throw new PGPException("can't set up signature object.", e);
-        }
     }
 
     /**
@@ -114,6 +108,9 @@ public class PGPSignature
         return sigPck.getHashAlgorithm();
     }
 
+    /**
+     * @deprecated use init(PGPContentVerifierBuilderProvider, PGPPublicKey)
+     */
     public void initVerify(
         PGPPublicKey    pubKey,
         String          provider)
@@ -122,28 +119,28 @@ public class PGPSignature
         initVerify(pubKey, PGPUtil.getProvider(provider));
     }
 
+        /**
+     * @deprecated use init(PGPContentVerifierBuilderProvider, PGPPublicKey)
+     */
     public void initVerify(
         PGPPublicKey    pubKey,
         Provider        provider)
         throws PGPException
     {    
-        if (sig == null)
-        {
-            getSig(provider);
-        }
-
-        try
-        {
-            sig.initVerify(pubKey.getKey(provider));
-        }
-        catch (InvalidKeyException e)
-        {
-            throw new PGPException("invalid key.", e);
-        }
-        
-        lastb = 0;
+        init(new JcaPGPContentVerifierBuilderProvider().setProvider(provider), pubKey);
     }
-        
+
+    public void init(PGPContentVerifierBuilderProvider verifierBuilderProvider, PGPPublicKey pubKey)
+        throws PGPException
+    {
+        PGPContentVerifierBuilder verifierBuilder = verifierBuilderProvider.get(sigPck.getKeyAlgorithm(), sigPck.getHashAlgorithm());
+
+        verifier = verifierBuilder.build(pubKey);
+
+        lastb = 0;
+        sigOut = verifier.getOutputStream();
+    }
+
     public void update(
         byte    b)
         throws SignatureException
@@ -152,27 +149,27 @@ public class PGPSignature
         {
             if (b == '\r')
             {
-                sig.update((byte)'\r');
-                sig.update((byte)'\n');
+                byteUpdate((byte)'\r');
+                byteUpdate((byte)'\n');
             }
             else if (b == '\n')
             {
                 if (lastb != '\r')
                 {
-                    sig.update((byte)'\r');
-                    sig.update((byte)'\n');
+                    byteUpdate((byte)'\r');
+                    byteUpdate((byte)'\n');
                 }
             }
             else
             {
-                sig.update(b);
+                byteUpdate(b);
             }
 
             lastb = b;
         }
         else
         {
-            sig.update(b);
+            byteUpdate(b);
         }
     }
         
@@ -200,16 +197,51 @@ public class PGPSignature
         }
         else
         {
-            sig.update(bytes, off, length);
+            blockUpdate(bytes, off, length);
         }
     }
-    
+
+    private void byteUpdate(byte b)
+        throws SignatureException
+    {
+        try
+        {
+            sigOut.write(b);
+        }
+        catch (IOException e)
+        {             // TODO: we really should get rid of signature exception next....
+            throw new SignatureException(e.getMessage());
+        }
+    }
+
+    private void blockUpdate(byte[] block, int off, int len)
+        throws SignatureException
+    {
+        try
+        {
+            sigOut.write(block, off, len);
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException(e.getMessage());
+        }
+    }
+
     public boolean verify()
         throws PGPException, SignatureException
     {
-        sig.update(this.getSignatureTrailer());
-            
-        return sig.verify(this.getSignature());
+        try
+        {
+            sigOut.write(this.getSignatureTrailer());
+
+            sigOut.close();
+        }
+        catch (IOException e)
+        {
+            throw new SignatureException(e.getMessage());
+        }
+
+        return verifier.verify(this.getSignature());
     }
 
 
@@ -250,6 +282,11 @@ public class PGPSignature
         PGPPublicKey    key)
         throws PGPException, SignatureException
     {
+        if (verifier == null)
+        {
+            throw new PGPException("PGPSignature not initialised - call init().");
+        }
+
         updateWithPublicKey(key);
 
         //
@@ -270,9 +307,9 @@ public class PGPSignature
             throw new PGPException("cannot encode subpacket array", e);
         }
 
-        this.update(sigPck.getSignatureTrailer());
+        addTrailer();
 
-        return sig.verify(this.getSignature());
+        return verifier.verify(this.getSignature());
     }
 
     /**
@@ -290,16 +327,21 @@ public class PGPSignature
         PGPPublicKey    key)
         throws PGPException, SignatureException
     {
+        if (verifier == null)
+        {
+            throw new PGPException("PGPSignature not initialised - call init().");
+        }
+
         updateWithPublicKey(key);
             
         //
         // hash in the id
         //
-        updateWithIdData(0xb4, Strings.toByteArray(id));
+        updateWithIdData(0xb4, Strings.toUTF8ByteArray(id));
 
-        this.update(sigPck.getSignatureTrailer());
-        
-        return sig.verify(this.getSignature());
+        addTrailer();
+
+        return verifier.verify(this.getSignature());
     }
 
     /**
@@ -317,14 +359,34 @@ public class PGPSignature
         PGPPublicKey    pubKey) 
         throws SignatureException, PGPException
     {
+        if (verifier == null)
+        {
+            throw new PGPException("PGPSignature not initialised - call init().");
+        }
+
         updateWithPublicKey(masterKey);
         updateWithPublicKey(pubKey);
-        
-        this.update(sigPck.getSignatureTrailer());
-        
-        return sig.verify(this.getSignature());
+
+        addTrailer();
+
+        return verifier.verify(this.getSignature());
     }
-    
+
+    private void addTrailer()
+        throws SignatureException
+    {
+        try
+        {
+            sigOut.write(sigPck.getSignatureTrailer());
+
+            sigOut.close();
+        }
+        catch (IOException e)
+        {
+            throw new SignatureException(e.getMessage());
+        }
+    }
+
     /**
      * Verify a key certification, such as a revocation, for the passed in key.
      * 
@@ -337,17 +399,22 @@ public class PGPSignature
         PGPPublicKey    pubKey) 
         throws SignatureException, PGPException
     {
+        if (verifier == null)
+        {
+            throw new PGPException("PGPSignature not initialised - call init().");
+        }
+
         if (this.getSignatureType() != KEY_REVOCATION
             && this.getSignatureType() != SUBKEY_REVOCATION)
         {
-            throw new IllegalStateException("signature is not a key signature");
+            throw new PGPException("signature is not a key signature");
         }
 
         updateWithPublicKey(pubKey);
-        
-        this.update(sigPck.getSignatureTrailer());
-        
-        return sig.verify(this.getSignature());
+
+        addTrailer();
+
+        return verifier.verify(this.getSignature());
     }
 
     public int getSignatureType()

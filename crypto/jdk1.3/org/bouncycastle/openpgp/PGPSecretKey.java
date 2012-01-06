@@ -4,38 +4,24 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.interfaces.DSAPrivateKey;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.spec.DSAPrivateKeySpec;
-import java.security.spec.RSAPrivateCrtKeySpec;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-
 import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.BCPGObject;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.ContainedPacket;
-import org.bouncycastle.bcpg.DSAPublicBCPGKey;
 import org.bouncycastle.bcpg.DSASecretBCPGKey;
-import org.bouncycastle.bcpg.ElGamalPublicBCPGKey;
 import org.bouncycastle.bcpg.ElGamalSecretBCPGKey;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.PublicKeyPacket;
-import org.bouncycastle.bcpg.RSAPublicBCPGKey;
 import org.bouncycastle.bcpg.RSASecretBCPGKey;
 import org.bouncycastle.bcpg.S2K;
 import org.bouncycastle.bcpg.SecretKeyPacket;
@@ -43,17 +29,22 @@ import org.bouncycastle.bcpg.SecretSubkeyPacket;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.bcpg.UserAttributePacket;
 import org.bouncycastle.bcpg.UserIDPacket;
-import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
-import org.bouncycastle.jce.spec.ElGamalParameterSpec;
-import org.bouncycastle.jce.spec.ElGamalPrivateKeySpec;
+import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
+import org.bouncycastle.openpgp.operator.PBESecretKeyEncryptor;
+import org.bouncycastle.openpgp.operator.PGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
 
 /**
  * general class to handle a PGP secret key object.
  */
 public class PGPSecretKey
 {    
-    SecretKeyPacket secret;
-    PGPPublicKey    pub;
+    final SecretKeyPacket secret;
+    final PGPPublicKey    pub;
 
     PGPSecretKey(
         SecretKeyPacket secret,
@@ -66,70 +57,25 @@ public class PGPSecretKey
     PGPSecretKey(
         PGPPrivateKey   privKey,
         PGPPublicKey    pubKey,
-        int             encAlgorithm,
-        char[]          passPhrase,
-        boolean         useSHA1,
-        SecureRandom    rand,
-        Provider        provider)
+        PGPDigestCalculator checksumCalculator,
+        PBESecretKeyEncryptor keyEncryptor)
         throws PGPException
     {
-        this(privKey, pubKey, encAlgorithm, passPhrase, useSHA1, rand, false, provider);
+        this(privKey, pubKey, checksumCalculator, false, keyEncryptor);
     }
     
     PGPSecretKey(
         PGPPrivateKey   privKey,
         PGPPublicKey    pubKey,
-        int             encAlgorithm,
-        char[]          passPhrase,
-        boolean         useSHA1,
-        SecureRandom    rand,
+        PGPDigestCalculator checksumCalculator,
         boolean         isMasterKey,
-        Provider        provider) 
+        PBESecretKeyEncryptor keyEncryptor)
         throws PGPException
     {
-        BCPGObject      secKey;
-
         this.pub = pubKey;
-        
-        switch (pubKey.getAlgorithm())
-        {
-        case PGPPublicKey.RSA_ENCRYPT:
-        case PGPPublicKey.RSA_SIGN:
-        case PGPPublicKey.RSA_GENERAL:
-            RSAPrivateCrtKey    rsK = (RSAPrivateCrtKey)privKey.getKey();
-            
-            secKey = new RSASecretBCPGKey(rsK.getPrivateExponent(), rsK.getPrimeP(), rsK.getPrimeQ());
-            break;
-        case PGPPublicKey.DSA:
-            DSAPrivateKey       dsK = (DSAPrivateKey)privKey.getKey();
-            
-            secKey = new DSASecretBCPGKey(dsK.getX());
-            break;
-        case PGPPublicKey.ELGAMAL_ENCRYPT:
-        case PGPPublicKey.ELGAMAL_GENERAL:
-            ElGamalPrivateKey   esK = (ElGamalPrivateKey)privKey.getKey();
-            
-            secKey = new ElGamalSecretBCPGKey(esK.getX());
-            break;
-        default:
-            throw new PGPException("unknown key class");
-        }
 
-        String    cName = PGPUtil.getSymmetricCipherName(encAlgorithm);
-        Cipher    c = null;
-        
-        if (cName != null)
-        {
-            try
-            {
-                c = Cipher.getInstance(cName + "/CFB/NoPadding", provider);
-            }
-            catch (Exception e)
-            {
-                throw new PGPException("Exception creating cipher", e);
-            }
-        }
-        
+        BCPGObject      secKey = (BCPGObject)privKey.getPrivateKeyDataPacket();
+
         try
         {
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
@@ -139,27 +85,27 @@ public class PGPSecretKey
             
             byte[]    keyData = bOut.toByteArray();
 
-            pOut.write(checksum(useSHA1, keyData, keyData.length));
-            
-            if (c != null)
+            pOut.write(checksum(checksumCalculator, keyData, keyData.length));
+
+            int encAlgorithm = keyEncryptor.getAlgorithm();
+
+            if (encAlgorithm != SymmetricKeyAlgorithmTags.NULL)
             {
-                byte[]       iv = new byte[8];
-                
-                rand.nextBytes(iv);
-                
-                S2K          s2k = new S2K(HashAlgorithmTags.SHA1, iv, 0x60);
-                SecretKey    key = PGPUtil.makeKeyFromPassPhrase(encAlgorithm, s2k, passPhrase, provider);
-    
-                c.init(Cipher.ENCRYPT_MODE, key, rand);
-            
-                iv = c.getIV();
-    
-                byte[]    encData = c.doFinal(bOut.toByteArray());
+                keyData = bOut.toByteArray(); // include checksum
+
+                byte[] encData = keyEncryptor.encryptKeyData(keyData, 0, keyData.length);
+                byte[] iv = keyEncryptor.getCipherIV();
+
+                S2K    s2k = keyEncryptor.getS2K();
 
                 int s2kUsage;
 
-                if (useSHA1)
+                if (checksumCalculator != null)
                 {
+                    if (checksumCalculator.getAlgorithm() != HashAlgorithmTags.SHA1)
+                    {
+                        throw new PGPException("only SHA1 supported for key checksum calculations.");
+                    }
                     s2kUsage = SecretKeyPacket.USAGE_SHA1;
                 }
                 else
@@ -197,7 +143,10 @@ public class PGPSecretKey
             throw new PGPException("Exception encrypting key", e);
         }
     }
-    
+
+  /**
+        * @deprecated use method taking PBESecretKeyEncryptor
+     */
     public PGPSecretKey(
         int                         certificationLevel,
         PGPKeyPair                  keyPair,
@@ -213,6 +162,9 @@ public class PGPSecretKey
         this(certificationLevel, keyPair, id, encAlgorithm, passPhrase, false, hashedPcks, unhashedPcks, rand, provider);
     }
 
+   /**
+        * @deprecated use method taking PBESecretKeyEncryptor
+     */
     public PGPSecretKey(
         int                         certificationLevel,
         PGPKeyPair                  keyPair,
@@ -228,7 +180,23 @@ public class PGPSecretKey
     {
         this(certificationLevel, keyPair, id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, PGPUtil.getProvider(provider));
     }
-    
+
+    public PGPSecretKey(
+        int                         certificationLevel,
+        PGPKeyPair                  keyPair,
+        String                      id,
+        PGPSignatureSubpacketVector hashedPcks,
+        PGPSignatureSubpacketVector unhashedPcks,
+        PGPContentSignerBuilder     certificationSignerBuilder,
+        PBESecretKeyEncryptor       keyEncryptor)
+        throws PGPException, NoSuchProviderException
+    {
+        this(certificationLevel, keyPair, id, null, hashedPcks, unhashedPcks, certificationSignerBuilder, keyEncryptor);
+    }
+
+    /**
+        * @deprecated use method taking PBESecretKeyEncryptor
+     */
     public PGPSecretKey(
         int                         certificationLevel,
         PGPKeyPair                  keyPair,
@@ -242,7 +210,27 @@ public class PGPSecretKey
         Provider                    provider)
         throws PGPException
     {
-        this(keyPair.getPrivateKey(), certifiedPublicKey(certificationLevel, keyPair, id, hashedPcks, unhashedPcks, provider), encAlgorithm, passPhrase, useSHA1, rand, true, provider);
+        this(keyPair.getPrivateKey(), certifiedPublicKey(certificationLevel, keyPair, id, hashedPcks, unhashedPcks, new JcaPGPContentSignerBuilder(keyPair.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1).setProvider(provider)), convertSHA1Flag(useSHA1), true, new JcePBESecretKeyEncryptorBuilder(encAlgorithm, new JcaPGPDigestCalculatorProviderBuilder().build().get(HashAlgorithmTags.SHA1)).setProvider(provider).setSecureRandom(rand).build(passPhrase));
+    }
+
+    private static PGPDigestCalculator convertSHA1Flag(boolean useSHA1)
+        throws PGPException
+    {
+        return useSHA1 ? new JcaPGPDigestCalculatorProviderBuilder().build().get(HashAlgorithmTags.SHA1) : null;
+    }
+
+    public PGPSecretKey(
+        int                         certificationLevel,
+        PGPKeyPair                  keyPair,
+        String                      id,
+        PGPDigestCalculator         checksumCalculator,
+        PGPSignatureSubpacketVector hashedPcks,
+        PGPSignatureSubpacketVector unhashedPcks,
+        PGPContentSignerBuilder     certificationSignerBuilder,
+        PBESecretKeyEncryptor       keyEncryptor)
+        throws PGPException
+    {
+        this(keyPair.getPrivateKey(), certifiedPublicKey(certificationLevel, keyPair, id, hashedPcks, unhashedPcks, certificationSignerBuilder), checksumCalculator, true, keyEncryptor);
     }
 
     private static PGPPublicKey certifiedPublicKey(
@@ -251,14 +239,14 @@ public class PGPSecretKey
         String id,
         PGPSignatureSubpacketVector hashedPcks,
         PGPSignatureSubpacketVector unhashedPcks,
-        Provider provider)
+        PGPContentSignerBuilder     certificationSignerBuilder)
         throws PGPException
     {
         PGPSignatureGenerator    sGen;
 
         try
         {
-            sGen = new PGPSignatureGenerator(keyPair.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1, provider);
+            sGen = new PGPSignatureGenerator(certificationSignerBuilder);
         }
         catch (Exception e)
         {
@@ -285,6 +273,9 @@ public class PGPSecretKey
         }
     }
 
+      /**
+        * @deprecated use method taking PBESecretKeyEncryptor
+     */
     public PGPSecretKey(
         int                         certificationLevel,
         int                         algorithm,
@@ -303,6 +294,9 @@ public class PGPSecretKey
         this(certificationLevel, new PGPKeyPair(algorithm,pubKey, privKey, time), id, encAlgorithm, passPhrase, hashedPcks, unhashedPcks, rand, provider);
     }
 
+      /**
+        * @deprecated use method taking PBESecretKeyEncryptor
+     */
     public PGPSecretKey(
         int                         certificationLevel,
         int                         algorithm,
@@ -319,7 +313,40 @@ public class PGPSecretKey
         String                      provider)
         throws PGPException, NoSuchProviderException
     {
-        this(certificationLevel, new PGPKeyPair(algorithm,pubKey, privKey, time), id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, provider);
+        this(certificationLevel, new PGPKeyPair(algorithm, pubKey, privKey, time), id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, provider);
+    }
+
+    public PGPSecretKey(
+        int                         certificationLevel,
+        int                         algorithm,
+        PublicKey                   pubKey,
+        PrivateKey                  privKey,
+        Date                        time,
+        String                      id,
+        PGPDigestCalculator         checksumCalculator,
+        PGPSignatureSubpacketVector hashedPcks,
+        PGPSignatureSubpacketVector unhashedPcks,
+        PGPContentSignerBuilder     certificationSignerBuilder,
+        PBESecretKeyEncryptor       keyEncryptor)
+        throws PGPException, NoSuchProviderException
+    {
+        this(certificationLevel, new PGPKeyPair(algorithm, pubKey, privKey, time), id, checksumCalculator, hashedPcks, unhashedPcks, certificationSignerBuilder, keyEncryptor);
+    }
+
+    public PGPSecretKey(
+        int                         certificationLevel,
+        int                         algorithm,
+        PublicKey                   pubKey,
+        PrivateKey                  privKey,
+        Date                        time,
+        String                      id,
+        PGPSignatureSubpacketVector hashedPcks,
+        PGPSignatureSubpacketVector unhashedPcks,
+        PGPContentSignerBuilder     certificationSignerBuilder,
+        PBESecretKeyEncryptor       keyEncryptor)
+        throws PGPException, NoSuchProviderException
+    {
+        this(certificationLevel, new PGPKeyPair(algorithm, pubKey, privKey, time), id, null, hashedPcks, unhashedPcks, certificationSignerBuilder, keyEncryptor);
     }
 
     /**
@@ -396,134 +423,102 @@ public class PGPSecretKey
     {
         return pub.getUserAttributes();
     }
-    
+
     private byte[] extractKeyData(
-        char[]   passPhrase,
-        Provider provider)
+        PBESecretKeyDecryptor decryptorFactory)
         throws PGPException
     {
-        String          cName = PGPUtil.getSymmetricCipherName(secret.getEncAlgorithm());
-        Cipher          c = null;
-        
-        if (cName != null)
+        byte[] encData = secret.getSecretKeyData();
+        byte[] data = null;
+
+        if (secret.getEncAlgorithm() != SymmetricKeyAlgorithmTags.NULL)
         {
             try
             {
-                c = Cipher.getInstance(cName + "/CFB/NoPadding", provider.getName());
+                if (secret.getPublicKeyPacket().getVersion() == 4)
+                {
+                    byte[] key = decryptorFactory.makeKeyFromPassPhrase(secret.getEncAlgorithm(), secret.getS2K());
+
+                    data = decryptorFactory.recoverKeyData(secret.getEncAlgorithm(), key, secret.getIV(), encData, 0, encData.length);
+
+                    boolean useSHA1 = secret.getS2KUsage() == SecretKeyPacket.USAGE_SHA1;
+                    byte[] check = checksum(useSHA1 ? decryptorFactory.getChecksumCalculator(HashAlgorithmTags.SHA1) : null, data, (useSHA1) ? data.length - 20 : data.length - 2);
+
+                    for (int i = 0; i != check.length; i++)
+                    {
+                        if (check[i] != data[data.length - check.length + i])
+                        {
+                            throw new PGPException("checksum mismatch at " + i + " of " + check.length);
+                        }
+                    }
+                }
+                else // version 2 or 3, RSA only.
+                {
+                    byte[] key = decryptorFactory.makeKeyFromPassPhrase(secret.getEncAlgorithm(), secret.getS2K());
+
+                    data = new byte[encData.length];
+
+                    byte[] iv = new byte[secret.getIV().length];
+
+                    System.arraycopy(secret.getIV(), 0, iv, 0, iv.length);
+
+                    //
+                    // read in the four numbers
+                    //
+                    int pos = 0;
+
+                    for (int i = 0; i != 4; i++)
+                    {
+                        int encLen = (((encData[pos] << 8) | (encData[pos + 1] & 0xff)) + 7) / 8;
+
+                        data[pos] = encData[pos];
+                        data[pos + 1] = encData[pos + 1];
+
+                        byte[] tmp = decryptorFactory.recoverKeyData(secret.getEncAlgorithm(), key, iv, encData, pos + 2, encLen);
+                        System.arraycopy(tmp, 0, data, pos + 2, tmp.length);
+                        pos += 2 + encLen;
+
+                        if (i != 3)
+                        {
+                            System.arraycopy(encData, pos - iv.length, iv, 0, iv.length);
+                        }
+                    }
+
+                    //
+                    // verify checksum
+                    //
+
+                    int cs = ((encData[pos] << 8) & 0xff00) | (encData[pos + 1] & 0xff);
+                    int calcCs = 0;
+                    for (int j = 0; j < data.length - 2; j++)
+                    {
+                        calcCs += data[j] & 0xff;
+                    }
+
+                    calcCs &= 0xffff;
+                    if (calcCs != cs)
+                    {
+                        throw new PGPException("checksum mismatch: passphrase wrong, expected "
+                            + Integer.toHexString(cs)
+                            + " found " + Integer.toHexString(calcCs));
+                    }
+                }
+            }
+            catch (PGPException e)
+            {
+                throw e;
             }
             catch (Exception e)
             {
-                throw new PGPException("Exception creating cipher", e);
+                throw new PGPException("Exception decrypting key", e);
             }
         }
-    
-        byte[]    encData = secret.getSecretKeyData();
-        byte[]    data = null;
-    
-        try
+        else
         {
-            if (c != null)
-            {
-                try
-                {
-                    if (secret.getPublicKeyPacket().getVersion() == 4)
-                    {
-                        IvParameterSpec ivSpec = new IvParameterSpec(secret.getIV());
-        
-                        SecretKey    key = PGPUtil.makeKeyFromPassPhrase(secret.getEncAlgorithm(), secret.getS2K(), passPhrase, provider);
-        
-                        c.init(Cipher.DECRYPT_MODE, key, ivSpec);
-                    
-                        data = c.doFinal(encData, 0, encData.length);
-                        
-                        boolean useSHA1 = secret.getS2KUsage() == SecretKeyPacket.USAGE_SHA1;
-                        byte[] check = checksum(useSHA1, data, (useSHA1) ? data.length - 20 : data.length - 2);
-                        
-                        for (int i = 0; i != check.length; i++)
-                        {
-                            if (check[i] != data[data.length - check.length + i])
-                            {
-                                throw new PGPException("checksum mismatch at " + i + " of " + check.length);
-                            }
-                        }
-                    }
-                    else // version 2 or 3, RSA only.
-                    {
-                        SecretKey    key = PGPUtil.makeKeyFromPassPhrase(secret.getEncAlgorithm(), secret.getS2K(), passPhrase, provider);
-    
-                        data = new byte[encData.length];
-                
-                        byte[]    iv = new byte[secret.getIV().length];
-                
-                        System.arraycopy(secret.getIV(), 0, iv, 0, iv.length);
-                
-                        //
-                        // read in the four numbers
-                        //
-                        int    pos = 0;
-                        
-                        for (int i = 0; i != 4; i++)
-                        {
-                            c.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
-                    
-                            int encLen = (((encData[pos] << 8) | (encData[pos + 1] & 0xff)) + 7) / 8;
-
-                            data[pos] = encData[pos];
-                            data[pos + 1] = encData[pos + 1];
-
-                            c.doFinal(encData, pos + 2, encLen, data, pos + 2);
-                            pos += 2 + encLen;
-                
-                            if (i != 3)
-                            {
-                                System.arraycopy(encData, pos - iv.length, iv, 0, iv.length);
-                            }
-                        }
-
-                        //
-                        // verify checksum
-                        //
-                        
-                        int cs = ((encData[pos] << 8) & 0xff00) | (encData[pos + 1] & 0xff);
-                        int calcCs = 0;
-                        for (int j=0; j < data.length-2; j++) 
-                        {
-                            calcCs += data[j] & 0xff;
-                        }
-            
-                        calcCs &= 0xffff;
-                        if (calcCs != cs) 
-                        {
-                            throw new PGPException("checksum mismatch: passphrase wrong, expected "
-                                                + Integer.toHexString(cs)
-                                                + " found " + Integer.toHexString(calcCs));
-                        }
-                    }
-                }
-                catch (PGPException e)
-                {
-                    throw e;
-                }
-                catch (Exception e)
-                {
-                    throw new PGPException("Exception decrypting key", e);
-                }
-            }
-            else
-            {
-                data = encData;
-            }
-
-            return data;
+            data = encData;
         }
-        catch (PGPException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            throw new PGPException("Exception constructing key", e);
-        }
+
+        return data;
     }
 
     /**
@@ -534,6 +529,7 @@ public class PGPSecretKey
      * @return PGPPrivateKey
      * @throws PGPException
      * @throws NoSuchProviderException
+     * @deprecated use method that takes a PBESecretKeyDecryptor
      */
     public  PGPPrivateKey extractPrivateKey(
         char[]                passPhrase,
@@ -550,10 +546,25 @@ public class PGPSecretKey
      * @param provider
      * @return PGPPrivateKey
      * @throws PGPException
+     * @deprecated use method that takes a PBESecretKeyDecryptor
      */
     public  PGPPrivateKey extractPrivateKey(
         char[]   passPhrase,
         Provider provider)
+        throws PGPException
+    {
+        return extractPrivateKey(new JcePBESecretKeyDecryptorBuilder(new JcaPGPDigestCalculatorProviderBuilder().setProvider(provider).build()).setProvider(provider).build(passPhrase));
+    }
+
+    /**
+     * Extract a PGPPrivate key from the SecretKey's encrypted contents.
+     *
+     * @param decryptorFactory  factory to use to generate a decryptor for the passed in secretKey.
+     * @return PGPPrivateKey  the unencrypted private key.
+     * @throws PGPException on failure.
+     */
+    public  PGPPrivateKey extractPrivateKey(
+        PBESecretKeyDecryptor decryptorFactory)
         throws PGPException
     {
         byte[] secKeyData = secret.getSecretKeyData();
@@ -566,48 +577,27 @@ public class PGPSecretKey
 
         try
         {
-            KeyFactory         fact;
-            byte[]             data = extractKeyData(passPhrase, provider);
+            byte[]             data = extractKeyData(decryptorFactory);
             BCPGInputStream    in = new BCPGInputStream(new ByteArrayInputStream(data));
-        
+
+
             switch (pubPk.getAlgorithm())
             {
             case PGPPublicKey.RSA_ENCRYPT:
             case PGPPublicKey.RSA_GENERAL:
             case PGPPublicKey.RSA_SIGN:
-                RSAPublicBCPGKey        rsaPub = (RSAPublicBCPGKey)pubPk.getKey();
                 RSASecretBCPGKey        rsaPriv = new RSASecretBCPGKey(in);
-                RSAPrivateCrtKeySpec    rsaPrivSpec = new RSAPrivateCrtKeySpec(
-                                                    rsaPriv.getModulus(), 
-                                                    rsaPub.getPublicExponent(),
-                                                    rsaPriv.getPrivateExponent(),
-                                                    rsaPriv.getPrimeP(),
-                                                    rsaPriv.getPrimeQ(),
-                                                    rsaPriv.getPrimeExponentP(),
-                                                    rsaPriv.getPrimeExponentQ(),
-                                                    rsaPriv.getCrtCoefficient());
-                                    
-                fact = KeyFactory.getInstance("RSA", provider.getName());
 
-                return new PGPPrivateKey(fact.generatePrivate(rsaPrivSpec), this.getKeyID());    
+                return new PGPPrivateKey(this.getKeyID(), pubPk, rsaPriv);
             case PGPPublicKey.DSA:
-                DSAPublicBCPGKey    dsaPub = (DSAPublicBCPGKey)pubPk.getKey();
                 DSASecretBCPGKey    dsaPriv = new DSASecretBCPGKey(in);
-                DSAPrivateKeySpec   dsaPrivSpec =
-                                            new DSAPrivateKeySpec(dsaPriv.getX(), dsaPub.getP(), dsaPub.getQ(), dsaPub.getG());
 
-                fact = KeyFactory.getInstance("DSA", provider.getName());
-
-                return new PGPPrivateKey(fact.generatePrivate(dsaPrivSpec), this.getKeyID());
+                return new PGPPrivateKey(this.getKeyID(), pubPk, dsaPriv);
             case PGPPublicKey.ELGAMAL_ENCRYPT:
             case PGPPublicKey.ELGAMAL_GENERAL:
-                ElGamalPublicBCPGKey    elPub = (ElGamalPublicBCPGKey)pubPk.getKey();
                 ElGamalSecretBCPGKey    elPriv = new ElGamalSecretBCPGKey(in);
-                ElGamalPrivateKeySpec   elSpec = new ElGamalPrivateKeySpec(elPriv.getX(), new ElGamalParameterSpec(elPub.getP(), elPub.getG()));
-            
-                fact = KeyFactory.getInstance("ElGamal", provider.getName());
-            
-                return new PGPPrivateKey(fact.generatePrivate(elSpec), this.getKeyID());
+
+                return new PGPPrivateKey(this.getKeyID(), pubPk, elPriv);
             default:
                 throw new PGPException("unknown public key algorithm encountered");
             }
@@ -622,23 +612,24 @@ public class PGPSecretKey
         }
     }
     
-    private static byte[] checksum(boolean useSHA1, byte[] bytes, int length) 
+    private static byte[] checksum(PGPDigestCalculator digCalc, byte[] bytes, int length)
         throws PGPException
     {
-        if (useSHA1)
+        if (digCalc != null)
         {
+            OutputStream dOut = digCalc.getOutputStream();
+
             try
             {
-                MessageDigest dig = MessageDigest.getInstance("SHA1");
+            dOut.write(bytes, 0, length);
 
-                dig.update(bytes, 0, length);
-
-                return dig.digest();
+            dOut.close();
             }
-            catch (NoSuchAlgorithmException e)
+            catch (Exception e)
             {
-                throw new PGPException("Can't find SHA-1", e);
+               throw new PGPException("checksum digest calculation failed: " + e.getMessage(), e);
             }
+            return digCalc.getDigest();
         }
         else
         {
@@ -743,6 +734,7 @@ public class PGPSecretKey
      * @param newEncAlgorithm the algorithm to be used for the encryption.
      * @param rand source of randomness.
      * @param provider name of the provider to use
+     *  @deprecated use method taking PBESecretKeyDecryptor and PBESecretKeyEncryptor
      */
     public static PGPSecretKey copyWithNewPassword(
         PGPSecretKey    key,
@@ -761,28 +753,23 @@ public class PGPSecretKey
      * password and the passed in algorithm.
      *
      * @param key the PGPSecretKey to be copied.
-     * @param oldPassPhrase the current password for key.
-     * @param newPassPhrase the new password for the key.
-     * @param newEncAlgorithm the algorithm to be used for the encryption.
-     * @param rand source of randomness.
-     * @param provider the provider to use
+     * @param oldKeyDecryptor the current password for key.
+     * @param newKeyEncryptor the encryptor for encrypting the secret key material.
      */
     public static PGPSecretKey copyWithNewPassword(
-        PGPSecretKey    key,
-        char[]          oldPassPhrase,
-        char[]          newPassPhrase,
-        int             newEncAlgorithm,
-        SecureRandom    rand,
-        Provider        provider)
+        PGPSecretKey           key,
+        PBESecretKeyDecryptor  oldKeyDecryptor,
+        PBESecretKeyEncryptor  newKeyEncryptor)
         throws PGPException
     {
-        byte[]   rawKeyData = key.extractKeyData(oldPassPhrase, provider);
+        byte[]   rawKeyData = key.extractKeyData(oldKeyDecryptor);
         int        s2kUsage = key.secret.getS2KUsage();
-        byte[]           iv = null;
-        S2K             s2k = null;
+        byte[]      iv = null;
+        S2K         s2k = null;
         byte[]      keyData;
+        int         newEncAlgorithm = SymmetricKeyAlgorithmTags.NULL;
 
-        if (newEncAlgorithm == SymmetricKeyAlgorithmTags.NULL)
+        if (newKeyEncryptor == null || newKeyEncryptor.getAlgorithm() == SymmetricKeyAlgorithmTags.NULL)
         {
             s2kUsage = SecretKeyPacket.USAGE_NONE;
             if (key.secret.getS2KUsage() == SecretKeyPacket.USAGE_SHA1)   // SHA-1 hash, need to rewrite checksum
@@ -791,8 +778,8 @@ public class PGPSecretKey
 
                 System.arraycopy(rawKeyData, 0, keyData, 0, keyData.length - 2);
 
-                byte[] check = checksum(false, keyData, keyData.length - 2);
-                
+                byte[] check = checksum(null, keyData, keyData.length - 2);
+
                 keyData[keyData.length - 2] = check[0];
                 keyData[keyData.length - 1] = check[1];
             }
@@ -803,45 +790,16 @@ public class PGPSecretKey
         }
         else
         {
-            Cipher      c = null;
-            String      cName = PGPUtil.getSymmetricCipherName(newEncAlgorithm);
-            
-            try
-            {
-                c = Cipher.getInstance(cName + "/CFB/NoPadding", provider);
-            }
-            catch (Exception e)
-            {
-                throw new PGPException("Exception creating cipher", e);
-            }
-            
-            iv = new byte[8];
-            
-            rand.nextBytes(iv);
-            
-            s2k = new S2K(HashAlgorithmTags.SHA1, iv, 0x60);
-            
-            try
-            {                
-                SecretKey    sKey = PGPUtil.makeKeyFromPassPhrase(newEncAlgorithm, s2k, newPassPhrase, provider);
+            keyData = newKeyEncryptor.encryptKeyData(rawKeyData, 0, rawKeyData.length);
 
-                c.init(Cipher.ENCRYPT_MODE, sKey, rand);
-            
-                iv = c.getIV();
-                
-                keyData = c.doFinal(rawKeyData);
-            }
-            catch (PGPException e)
-            {
-                throw e;
-            }
-            catch (Exception e)
-            {
-                throw new PGPException("Exception encrypting key", e);
-            }
+            iv = newKeyEncryptor.getCipherIV();
+
+            s2k = newKeyEncryptor.getS2K();
+
+            newEncAlgorithm = newKeyEncryptor.getAlgorithm();
         }
 
-        SecretKeyPacket             secret = null;
+        SecretKeyPacket             secret;
         if (key.secret instanceof SecretSubkeyPacket)
         {
             secret = new SecretSubkeyPacket(key.secret.getPublicKeyPacket(),
@@ -854,6 +812,29 @@ public class PGPSecretKey
         }
 
         return new PGPSecretKey(secret, key.pub);
+    }
+    /**
+     * Return a copy of the passed in secret key, encrypted using a new
+     * password and the passed in algorithm.
+     *
+     * @param key the PGPSecretKey to be copied.
+     * @param oldPassPhrase the current password for key.
+     * @param newPassPhrase the new password for the key.
+     * @param newEncAlgorithm the algorithm to be used for the encryption.
+     * @param rand source of randomness.
+     * @param provider the provider to use
+     * @deprecated use method taking PBESecretKeyDecryptor and PBESecretKeyEncryptor
+     */
+    public static PGPSecretKey copyWithNewPassword(
+        PGPSecretKey    key,
+        char[]          oldPassPhrase,
+        char[]          newPassPhrase,
+        int             newEncAlgorithm,
+        SecureRandom    rand,
+        Provider        provider)
+        throws PGPException
+    {
+        return copyWithNewPassword(key, new JcePBESecretKeyDecryptorBuilder(new JcaPGPDigestCalculatorProviderBuilder().setProvider(provider).build()).setProvider(provider).build(oldPassPhrase), new JcePBESecretKeyEncryptorBuilder(newEncAlgorithm).setProvider(provider).setSecureRandom(rand).build(newPassPhrase));
     }
 
     /**

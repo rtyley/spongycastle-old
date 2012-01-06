@@ -10,8 +10,8 @@ import org.bouncycastle.asn1.BERConstructedOctetString;
 import org.bouncycastle.asn1.BEROutputStream;
 import org.bouncycastle.asn1.DERBMPString;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
@@ -102,8 +102,8 @@ public class JDKPKCS12KeyStore
 
     // use of final causes problems with JDK 1.2 compiler
     private CertificateFactory  certFact;
-    private DERObjectIdentifier keyAlgorithm;
-    private DERObjectIdentifier certAlgorithm;
+    private ASN1ObjectIdentifier keyAlgorithm;
+    private ASN1ObjectIdentifier certAlgorithm;
 
     private class CertId
     {
@@ -147,8 +147,8 @@ public class JDKPKCS12KeyStore
 
     public JDKPKCS12KeyStore(
         String provider,
-        DERObjectIdentifier keyAlgorithm,
-        DERObjectIdentifier certAlgorithm)
+        ASN1ObjectIdentifier keyAlgorithm,
+        ASN1ObjectIdentifier certAlgorithm)
     {
         this.keyAlgorithm = keyAlgorithm;
         this.certAlgorithm = certAlgorithm;
@@ -751,13 +751,13 @@ public class JDKPKCS12KeyStore
                                 while (e.hasMoreElements())
                                 {
                                     ASN1Sequence  sq = (ASN1Sequence)e.nextElement();
-                                    DERObjectIdentifier     aOid = (DERObjectIdentifier)sq.getObjectAt(0);
+                                    ASN1ObjectIdentifier     aOid = (ASN1ObjectIdentifier)sq.getObjectAt(0);
                                     ASN1Set                 attrSet = (ASN1Set)sq.getObjectAt(1);
-                                    DERObject               attr = null;
+                                    ASN1Object               attr = null;
     
                                     if (attrSet.size() > 0)
                                     {
-                                        attr = (DERObject)attrSet.getObjectAt(0);
+                                        attr = (ASN1Object)attrSet.getObjectAt(0);
     
                                         bagAttr.setBagAttribute(aOid, attr);
                                     }
@@ -835,13 +835,13 @@ public class JDKPKCS12KeyStore
                             while (e.hasMoreElements())
                             {
                                 ASN1Sequence  sq = (ASN1Sequence)e.nextElement();
-                                DERObjectIdentifier     aOid = (DERObjectIdentifier)sq.getObjectAt(0);
+                                ASN1ObjectIdentifier     aOid = (ASN1ObjectIdentifier)sq.getObjectAt(0);
                                 ASN1Set                 attrSet= (ASN1Set)sq.getObjectAt(1);
-                                DERObject               attr = null;
+                                ASN1Object               attr = null;
 
                                 if (attrSet.size() > 0)
                                 {
-                                    attr = (DERObject)attrSet.getObjectAt(0);
+                                    attr = (ASN1Object)attrSet.getObjectAt(0);
 
                                     bagAttr.setBagAttribute(aOid, attr);
                                 }
@@ -884,13 +884,13 @@ public class JDKPKCS12KeyStore
                             while (e.hasMoreElements())
                             {
                                 ASN1Sequence  sq = (ASN1Sequence)e.nextElement();
-                                DERObjectIdentifier     aOid = (DERObjectIdentifier)sq.getObjectAt(0);
+                                ASN1ObjectIdentifier     aOid = (ASN1ObjectIdentifier)sq.getObjectAt(0);
                                 ASN1Set                 attrSet = (ASN1Set)sq.getObjectAt(1);
-                                DERObject   attr = null;
+                                ASN1Object   attr = null;
 
                                 if (attrSet.size() > 0)
                                 {
-                                    attr = (DERObject)attrSet.getObjectAt(0);
+                                    attr = (ASN1Object)attrSet.getObjectAt(0);
 
                                     bagAttr.setBagAttribute(aOid, attr);
                                 }
@@ -971,8 +971,8 @@ public class JDKPKCS12KeyStore
                 while (e.hasMoreElements())
                 {
                     ASN1Sequence  sq = (ASN1Sequence)e.nextElement();
-                    DERObjectIdentifier     oid = (DERObjectIdentifier)sq.getObjectAt(0);
-                    DERObject               attr = (DERObject)((ASN1Set)sq.getObjectAt(1)).getObjectAt(0);
+                    ASN1ObjectIdentifier     oid = (ASN1ObjectIdentifier)sq.getObjectAt(0);
+                    ASN1Object               attr = (ASN1Object)((ASN1Set)sq.getObjectAt(1)).getObjectAt(0);
                     PKCS12BagAttributeCarrier   bagAttr = null;
 
                     if (cert instanceof PKCS12BagAttributeCarrier)
@@ -1049,7 +1049,7 @@ public class JDKPKCS12KeyStore
             PrivateKey              privKey = (PrivateKey)keys.get(name);
             PKCS12PBEParams         kParams = new PKCS12PBEParams(kSalt, MIN_ITERATIONS);
             byte[]                  kBytes = wrapKey(keyAlgorithm.getId(), privKey, kParams, password);
-            AlgorithmIdentifier     kAlgId = new AlgorithmIdentifier(keyAlgorithm, kParams.getDERObject());
+            AlgorithmIdentifier     kAlgId = new AlgorithmIdentifier(keyAlgorithm, kParams.getASN1Object());
             org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo kInfo = new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo(kAlgId, kBytes);
             boolean                 attrSet = false;
             ASN1EncodableVector     kName = new ASN1EncodableVector();
@@ -1080,7 +1080,7 @@ public class JDKPKCS12KeyStore
 
                 while (e.hasMoreElements())
                 {
-                    DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
+                    ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
                     ASN1EncodableVector  kSeq = new ASN1EncodableVector();
 
                     kSeq.add(oid);
@@ -1113,7 +1113,7 @@ public class JDKPKCS12KeyStore
                 kName.add(new DERSequence(kSeq));
             }
 
-            SafeBag                 kBag = new SafeBag(pkcs8ShroudedKeyBag, kInfo.getDERObject(), new DERSet(kName));
+            SafeBag                 kBag = new SafeBag(pkcs8ShroudedKeyBag, kInfo.getASN1Object(), new DERSet(kName));
             keyS.add(kBag);
         }
 
@@ -1129,7 +1129,7 @@ public class JDKPKCS12KeyStore
 
         ASN1EncodableVector  certSeq = new ASN1EncodableVector();
         PKCS12PBEParams         cParams = new PKCS12PBEParams(cSalt, MIN_ITERATIONS);
-        AlgorithmIdentifier     cAlgId = new AlgorithmIdentifier(certAlgorithm, cParams.getDERObject());
+        AlgorithmIdentifier     cAlgId = new AlgorithmIdentifier(certAlgorithm, cParams.getASN1Object());
         Hashtable               doneCerts = new Hashtable();
 
         Enumeration cs = keys.keys();
@@ -1169,7 +1169,7 @@ public class JDKPKCS12KeyStore
 
                     while (e.hasMoreElements())
                     {
-                        DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
+                        ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
                         ASN1EncodableVector fSeq = new ASN1EncodableVector();
 
                         fSeq.add(oid);
@@ -1196,7 +1196,7 @@ public class JDKPKCS12KeyStore
                     fName.add(new DERSequence(fSeq));
                 }
 
-                SafeBag sBag = new SafeBag(certBag, cBag.getDERObject(), new DERSet(fName));
+                SafeBag sBag = new SafeBag(certBag, cBag.getASN1Object(), new DERSet(fName));
 
                 certSeq.add(sBag);
 
@@ -1243,7 +1243,7 @@ public class JDKPKCS12KeyStore
 
                     while (e.hasMoreElements())
                     {
-                        DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
+                        ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
 
                         // a certificate not immediately linked to a key doesn't require
                         // a localKeyID and will confuse some PKCS12 implementations.
@@ -1274,7 +1274,7 @@ public class JDKPKCS12KeyStore
                     fName.add(new DERSequence(fSeq));
                 }
 
-                SafeBag sBag = new SafeBag(certBag, cBag.getDERObject(), new DERSet(fName));
+                SafeBag sBag = new SafeBag(certBag, cBag.getASN1Object(), new DERSet(fName));
 
                 certSeq.add(sBag);
 
@@ -1311,7 +1311,7 @@ public class JDKPKCS12KeyStore
 
                     while (e.hasMoreElements())
                     {
-                        DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
+                        ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
 
                         // a certificate not immediately linked to a key doesn't require
                         // a localKeyID and will confuse some PKCS12 implementations.
@@ -1330,7 +1330,7 @@ public class JDKPKCS12KeyStore
                     }
                 }
 
-                SafeBag sBag = new SafeBag(certBag, cBag.getDERObject(), new DERSet(fName));
+                SafeBag sBag = new SafeBag(certBag, cBag.getASN1Object(), new DERSet(fName));
 
                 certSeq.add(sBag);
             }
@@ -1347,7 +1347,7 @@ public class JDKPKCS12KeyStore
         ContentInfo[] info = new ContentInfo[]
         {
             new ContentInfo(data, keyString),
-            new ContentInfo(encryptedData, cInfo.getDERObject())
+            new ContentInfo(encryptedData, cInfo.getASN1Object())
         };
 
         AuthenticatedSafe   auth = new AuthenticatedSafe(info);
@@ -1398,7 +1398,7 @@ public class JDKPKCS12KeyStore
     }
 
     private static byte[] calculatePbeMac(
-        DERObjectIdentifier oid,
+        ASN1ObjectIdentifier oid,
         byte[]              salt,
         int                 itCount,
         char[]              password,

@@ -16,7 +16,7 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.PrincipalUtil;
@@ -49,9 +49,9 @@ import org.bouncycastle.jce.PrincipalUtil;
  * <br />
  * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
  * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
- * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
+ * {@link org.bouncycastle.asn1.ASN1ObjectIdentifier ASN1ObjectIdentifier},
  * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream},
- * {@link org.bouncycastle.asn1.DERObject DERObject},
+ * {@link org.bouncycastle.asn1.ASN1Object ASN1Object},
  * {@link org.bouncycastle.asn1.x509.X509Name X509Name}
  * 
  * @see CRLSelector
@@ -235,7 +235,7 @@ public class X509CRLSelector implements CRLSelector
      * <br />
      * Uses {@link org.bouncycastle.asn1.x509.X509Name X509Name} for parsing the
      * name, {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
-     * {@link org.bouncycastle.asn1.DERObject DERObject} and
+     * {@link org.bouncycastle.asn1.ASN1Object ASN1Object} and
      * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence}
      * 
      * @param name
@@ -254,7 +254,7 @@ public class X509CRLSelector implements CRLSelector
 
         ByteArrayInputStream inStream = new ByteArrayInputStream(name);
         ASN1InputStream derInStream = new ASN1InputStream(inStream);
-        DERObject obj = derInStream.readObject();
+        ASN1Object obj = derInStream.readObject();
         if (obj instanceof ASN1Sequence)
         {
             issuerNamesX509.add(new X509Name((ASN1Sequence)obj));

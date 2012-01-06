@@ -27,7 +27,7 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
@@ -191,7 +191,7 @@ public  class PKIXCertPath
             if (encoding.equalsIgnoreCase("PkiPath"))
             {
                 ASN1InputStream derInStream = new ASN1InputStream(inStream);
-                DERObject derObject = derInStream.readObject();
+                ASN1Object derObject = derInStream.readObject();
                 if (!(derObject instanceof ASN1Sequence))
                 {
                     throw new CertificateException(
@@ -373,13 +373,13 @@ public  class PKIXCertPath
     }
     
     /**
-     * Return a DERObject containing the encoded certificate.
+     * Return a ASN1Object containing the encoded certificate.
      *
      * @param cert the X509Certificate object to be encoded
      *
-     * @return the DERObject
+     * @return the ASN1Object
      **/
-    private DERObject toASN1Object(
+    private ASN1Object toASN1Object(
         X509Certificate cert)
         throws CertificateEncodingException
     {

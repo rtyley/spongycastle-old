@@ -6,8 +6,8 @@ import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.util.ASN1Dump;
 
@@ -65,9 +65,9 @@ import org.bouncycastle.asn1.util.ASN1Dump;
  * <br />
  * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
  * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
- * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
+ * {@link org.bouncycastle.asn1.ASN1ObjectIdentifier ASN1ObjectIdentifier},
  * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream},
- * {@link org.bouncycastle.asn1.DERObject DERObject}
+ * {@link org.bouncycastle.asn1.ASN1Object ASN1Object}
  */
 public final class PolicyQualifierInfo
 {
@@ -83,7 +83,7 @@ public final class PolicyQualifierInfo
      * <br />
      * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
      * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
-     * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier} and
+     * {@link org.bouncycastle.asn1.ASN1ObjectIdentifier ASN1ObjectIdentifier} and
      * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream}
      * 
      * @param encoded
@@ -102,7 +102,7 @@ public final class PolicyQualifierInfo
                     this.encoded);
             ASN1InputStream derInStream = new ASN1InputStream(inStream);
             ASN1Sequence obj = (ASN1Sequence)derInStream.readObject();
-            id = ((DERObjectIdentifier)obj.getObjectAt(0)).getId();
+            id = ((ASN1ObjectIdentifier)obj.getObjectAt(0)).getId();
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             DEROutputStream derOutStream = new DEROutputStream(outStream);
 
@@ -166,7 +166,7 @@ public final class PolicyQualifierInfo
      * <code>PolicyQualifierInfo</code>.<br />
      * <br />
      * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
-     * {@link org.bouncycastle.asn1.DERObject DERObject}
+     * {@link org.bouncycastle.asn1.ASN1Object ASN1Object}
      * 
      * @return a <code>String</code> describing the contents of this
      *         <code>PolicyQualifierInfo</code>
@@ -180,7 +180,7 @@ public final class PolicyQualifierInfo
         {
             ByteArrayInputStream inStream = new ByteArrayInputStream(qualifier);
             ASN1InputStream derInStream = new ASN1InputStream(inStream);
-            DERObject derObject = derInStream.readObject();
+            ASN1Object derObject = derInStream.readObject();
             s
                     .append("  qualifier:\n").append(ASN1Dump.dumpAsString(derObject))
                     .append('\n');

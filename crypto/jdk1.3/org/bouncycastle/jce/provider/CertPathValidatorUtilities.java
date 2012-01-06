@@ -7,8 +7,8 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.isismtt.ISISMTTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -297,7 +297,7 @@ public class CertPathValidatorUtilities
      * @throws AnnotatedException
      *             if the extension cannot be read.
      */
-    protected static DERObject getExtensionValue(
+    protected static ASN1Object getExtensionValue(
         java.security.cert.X509Extension    ext,
         String                              oid)
         throws AnnotatedException
@@ -311,7 +311,7 @@ public class CertPathValidatorUtilities
         return getObject(oid, bytes);
     }
     
-    private static DERObject getObject(
+    private static ASN1Object getObject(
             String oid,
             byte[] ext)
             throws AnnotatedException
@@ -515,7 +515,7 @@ public class CertPathValidatorUtilities
     protected static boolean processCertD1i(
         int                 index,
         List     []            policyNodes,
-        DERObjectIdentifier pOid,
+        ASN1ObjectIdentifier pOid,
         Set                 pq)
     {
         List       policyNodeVec = policyNodes[index - 1];
@@ -550,7 +550,7 @@ public class CertPathValidatorUtilities
     protected static void processCertD1ii(
         int                 index,
         List     []            policyNodes,
-        DERObjectIdentifier _poid,
+        ASN1ObjectIdentifier _poid,
         Set _pq)
     {
         List       policyNodeVec = policyNodes[index - 1];
@@ -931,7 +931,7 @@ public class CertPathValidatorUtilities
                     try
                     {
                         issuers.add(new X509Principal(genNames[j].getName()
-                            .getDERObject().getEncoded()));
+                            .getASN1Object().getEncoded()));
                     }
                     catch (IOException e)
                     {
@@ -973,7 +973,7 @@ public class CertPathValidatorUtilities
 //                    throw new AnnotatedException(
 //                        "nameRelativeToCRLIssuer field is given but more than one CRL issuer is given.");
 //                }
-//                DEREncodable relName = dp.getDistributionPoint().getName();
+//                ASN1Encodable relName = dp.getDistributionPoint().getName();
 //                Iterator it = issuers.iterator();
 //                List issuersTemp = new ArrayList(issuers.size());
 //                while (it.hasNext())
@@ -993,7 +993,7 @@ public class CertPathValidatorUtilities
 //                    ASN1EncodableVector v = new ASN1EncodableVector();
 //                    while (e.hasMoreElements())
 //                    {
-//                        v.add((DEREncodable) e.nextElement());
+//                        v.add((ASN1Encodable) e.nextElement());
 //                    }
 //                    v.add(relName);
 //                    issuersTemp.add(new X500Principal(new DERSequence(v)
@@ -1138,7 +1138,7 @@ public class CertPathValidatorUtilities
         BigInteger completeCRLNumber = null;
         try
         {
-            DERObject derObect = CertPathValidatorUtilities.getExtensionValue(completeCRL,
+            ASN1Object derObect = CertPathValidatorUtilities.getExtensionValue(completeCRL,
                     CRL_NUMBER);
             if (derObect != null) {
             completeCRLNumber = CRLNumber.getInstance(derObect

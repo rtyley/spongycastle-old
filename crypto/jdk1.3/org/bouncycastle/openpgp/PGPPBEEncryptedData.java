@@ -1,25 +1,19 @@
 package org.bouncycastle.openpgp;
 
-import org.bouncycastle.bcpg.BCPGInputStream;
-import org.bouncycastle.bcpg.HashAlgorithmTags;
-import org.bouncycastle.bcpg.InputStreamPacket;
-import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
-import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
-
 import java.io.EOFException;
 import java.io.InputStream;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
+import org.bouncycastle.bcpg.BCPGInputStream;
+import org.bouncycastle.bcpg.InputStreamPacket;
+import org.bouncycastle.bcpg.SymmetricEncIntegrityPacket;
+import org.bouncycastle.bcpg.SymmetricKeyEncSessionPacket;
+import org.bouncycastle.openpgp.operator.PBEDataDecryptorFactory;
+import org.bouncycastle.openpgp.operator.PGPDataDecryptor;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBEDataDecryptorFactoryBuilder;
+import org.bouncycastle.util.io.TeeInputStream;
 
 /**
  * A password based encryption object.
@@ -56,6 +50,7 @@ public class PGPPBEEncryptedData
      * @return InputStream
      * @throws PGPException
      * @throws NoSuchProviderException
+     *  @deprecated use PBEDataDecryptorFactory method
      */
     public InputStream getDataStream(
         char[]                passPhrase,
@@ -72,50 +67,69 @@ public class PGPPBEEncryptedData
      * @param provider
      * @return InputStream
      * @throws PGPException
+     * @deprecated use PBEDataDecryptorFactory method
      */
     public InputStream getDataStream(
         char[]                passPhrase,
         Provider              provider)
         throws PGPException
     {
+        return getDataStream(new JcePBEDataDecryptorFactoryBuilder(new JcaPGPDigestCalculatorProviderBuilder().setProvider(provider).build()).setProvider(provider).build(passPhrase));
+    }
+
+   /**
+     * Return the symmetric key algorithm required to decrypt the data protected by this object.
+     *
+     * @param dataDecryptorFactory   decryptor factory to use to recover the session data.
+     * @return  the integer encryption algorithm code.
+     * @throws PGPException if the session data cannot be recovered.
+     */
+    public int getSymmetricAlgorithm(
+        PBEDataDecryptorFactory dataDecryptorFactory)
+        throws PGPException
+    {
+        byte[]       key = dataDecryptorFactory.makeKeyFromPassPhrase(keyData.getEncAlgorithm(), keyData.getS2K());
+        byte[]       sessionData = dataDecryptorFactory.recoverSessionData(keyData.getEncAlgorithm(), key, keyData.getSecKeyData());
+
+        return sessionData[0];
+    }
+
+   /**
+     * Open an input stream which will provide the decrypted data protected by this object.
+     *
+     * @param dataDecryptorFactory  decryptor factory to use to recover the session data and provide the stream.
+     * @return  the resulting input stream
+     * @throws PGPException  if the session data cannot be recovered or the stream cannot be created.
+     */
+    public InputStream getDataStream(
+        PBEDataDecryptorFactory dataDecryptorFactory)
+        throws PGPException
+    {
         try
         {
             int          keyAlgorithm = keyData.getEncAlgorithm();
-            SecretKey    key = PGPUtil.makeKeyFromPassPhrase(keyAlgorithm, keyData.getS2K(), passPhrase, provider);
+            byte[]       key = dataDecryptorFactory.makeKeyFromPassPhrase(keyAlgorithm, keyData.getS2K());
+            boolean      withIntegrityPacket = encData instanceof SymmetricEncIntegrityPacket;
 
-            byte[] secKeyData = keyData.getSecKeyData();
-            if (secKeyData != null && secKeyData.length > 0)
-            {
-                Cipher keyCipher = Cipher.getInstance(
-                    PGPUtil.getSymmetricCipherName(keyAlgorithm) + "/CFB/NoPadding",
-                    provider);
+            byte[]       sessionData = dataDecryptorFactory.recoverSessionData(keyData.getEncAlgorithm(), key, keyData.getSecKeyData());
+            byte[]       sessionKey = new byte[sessionData.length - 1];
 
-                keyCipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(new byte[keyCipher.getBlockSize()]));
+            System.arraycopy(sessionData, 1, sessionKey, 0, sessionKey.length);
 
-                byte[] keyBytes = keyCipher.doFinal(secKeyData);
+            PGPDataDecryptor dataDecryptor = dataDecryptorFactory.createDataDecryptor(withIntegrityPacket, sessionData[0] & 0xff, sessionKey);
 
-                keyAlgorithm = keyBytes[0];
-                key = new SecretKeySpec(keyBytes, 1, keyBytes.length - 1, PGPUtil.getSymmetricCipherName(keyAlgorithm));
-            }
+            encStream = new BCPGInputStream(dataDecryptor.getInputStream(encData.getInputStream()));
 
-            Cipher c = createStreamCipher(keyAlgorithm, provider);
-
-            byte[] iv = new byte[c.getBlockSize()];
-
-            c.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
-
-            encStream = new BCPGInputStream(new CipherInputStream(encData.getInputStream(), c));
-
-            if (encData instanceof SymmetricEncIntegrityPacket)
+            if (withIntegrityPacket)
             {
                 truncStream = new TruncatedStream(encStream);
 
-                String digestName = PGPUtil.getDigestName(HashAlgorithmTags.SHA1);
-                MessageDigest digest = MessageDigest.getInstance(digestName, provider.getName());
+                integrityCalculator = dataDecryptor.getIntegrityCalculator();
 
-                encStream = new DigestInputStream(truncStream, digest);
+                encStream = new TeeInputStream(truncStream, integrityCalculator.getOutputStream());
             }
 
+            byte[] iv = new byte[dataDecryptor.getBlockSize()];
             for (int i = 0; i != iv.length; i++)
             {
                 int    ch = encStream.read();
@@ -162,19 +176,5 @@ public class PGPPBEEncryptedData
         {
             throw new PGPException("Exception creating cipher", e);
         }
-    }
-
-    private Cipher createStreamCipher(int keyAlgorithm, Provider provider)
-        throws NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException,
-            PGPException
-    {
-        String mode = (encData instanceof SymmetricEncIntegrityPacket)
-            ?   "CFB"
-            :   "OpenPGPCFB";
-
-        String cName = PGPUtil.getSymmetricCipherName(keyAlgorithm)
-            + "/" + mode + "/NoPadding";
-
-        return Cipher.getInstance(cName, provider);
     }
 }

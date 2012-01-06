@@ -25,8 +25,8 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -76,9 +76,9 @@ import org.bouncycastle.jce.PrincipalUtil;
  * <br />
  * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
  * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
- * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
+ * {@link org.bouncycastle.asn1.ASN1ObjectIdentifier ASN1ObjectIdentifier},
  * {@link org.bouncycastle.asn1.DEROutputStream DEROutputStream},
- * {@link org.bouncycastle.asn1.DERObject DERObject},
+ * {@link org.bouncycastle.asn1.ASN1Object ASN1Object},
  * {@link org.bouncycastle.asn1.OIDTokenizer OIDTokenizer},
  * {@link org.bouncycastle.asn1.x509.X509Name X509Name},
  * {@link org.bouncycastle.asn1.x509.X509Extensions X509Extensions},
@@ -130,7 +130,7 @@ public class X509CertSelector implements CertSelector
 
     private Date privateKeyValid = null;
 
-    private DERObjectIdentifier subjectKeyAlgID = null;
+    private ASN1ObjectIdentifier subjectKeyAlgID = null;
 
     private PublicKey subjectPublicKey = null;
 
@@ -282,7 +282,7 @@ public class X509CertSelector implements CertSelector
      * subsequent modifications.<br />
      * <br />
      * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
-     * {@link org.bouncycastle.asn1.DERObject DERObject},
+     * {@link org.bouncycastle.asn1.ASN1Object ASN1Object},
      * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
      * {@link org.bouncycastle.asn1.x509.X509Name X509Name}
      * 
@@ -304,7 +304,7 @@ public class X509CertSelector implements CertSelector
         {
             ByteArrayInputStream inStream = new ByteArrayInputStream(issuerDN);
             ASN1InputStream derInStream = new ASN1InputStream(inStream);
-            DERObject obj = derInStream.readObject();
+            ASN1Object obj = derInStream.readObject();
             if (obj instanceof ASN1Sequence)
             {
                 this.issuerDNX509 = new X509Name((ASN1Sequence)obj);
@@ -369,7 +369,7 @@ public class X509CertSelector implements CertSelector
      * {@link #setIssuer(byte []) setIssuer(byte [] issuerDN)}.<br />
      * <br />
      * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
-     * {@link org.bouncycastle.asn1.DERObject DERObject},
+     * {@link org.bouncycastle.asn1.ASN1Object ASN1Object},
      * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
      * {@link org.bouncycastle.asn1.x509.X509Name X509Name}
      * 
@@ -391,7 +391,7 @@ public class X509CertSelector implements CertSelector
         {
             ByteArrayInputStream inStream = new ByteArrayInputStream(subjectDN);
             ASN1InputStream derInStream = new ASN1InputStream(inStream);
-            DERObject obj = derInStream.readObject();
+            ASN1Object obj = derInStream.readObject();
 
             if (obj instanceof ASN1Sequence)
             {
@@ -585,7 +585,7 @@ public class X509CertSelector implements CertSelector
     public void setSubjectPublicKeyAlgID(String oid) throws IOException
     {
         CertUtil.parseOID(oid);
-        subjectKeyAlgID = new DERObjectIdentifier(oid);
+        subjectKeyAlgID = new ASN1ObjectIdentifier(oid);
     }
 
     /**
@@ -1093,7 +1093,7 @@ public class X509CertSelector implements CertSelector
                 if (item instanceof String)
                 {
                     CertUtil.parseOID((String)item);
-                    policyOID.add(new DERObjectIdentifier((String)item));
+                    policyOID.add(new ASN1ObjectIdentifier((String)item));
                 }
                 else
                 {
@@ -1375,7 +1375,7 @@ public class X509CertSelector implements CertSelector
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             DEROutputStream derOutStream = new DEROutputStream(outStream);
 
-            derOutStream.writeObject(issuerDNX509.getDERObject());
+            derOutStream.writeObject(issuerDNX509.getASN1Object());
             derOutStream.close();
 
             return outStream.toByteArray();
@@ -1448,7 +1448,7 @@ public class X509CertSelector implements CertSelector
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             DEROutputStream derOutStream = new DEROutputStream(outStream);
 
-            derOutStream.writeObject(subjectDNX509.getDERObject());
+            derOutStream.writeObject(subjectDNX509.getASN1Object());
             derOutStream.close();
 
             return outStream.toByteArray();
@@ -1860,7 +1860,7 @@ public class X509CertSelector implements CertSelector
      * constraints)</b><br />
      * <br />
      * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
-     * {@link org.bouncycastle.asn1.DERObject DERObject},
+     * {@link org.bouncycastle.asn1.ASN1Object ASN1Object},
      * {@link org.bouncycastle.asn1.x509.KeyPurposeId KeyPurposeId}
      * 
      * @return a <code>String</code> describing the contents of the
@@ -1893,7 +1893,7 @@ public class X509CertSelector implements CertSelector
                 ByteArrayInputStream inStream = new ByteArrayInputStream(
                         subjectKeyID);
                 ASN1InputStream derInStream = new ASN1InputStream(inStream);
-                DERObject derObject = derInStream.readObject();
+                ASN1Object derObject = derInStream.readObject();
                 sb.append("  Subject Key Identifier: ")
                        .append(ASN1Dump.dumpAsString(derObject)).append('\n');
             }
@@ -1902,7 +1902,7 @@ public class X509CertSelector implements CertSelector
                 ByteArrayInputStream inStream = new ByteArrayInputStream(
                         authorityKeyID);
                 ASN1InputStream derInStream = new ASN1InputStream(inStream);
-                DERObject derObject = derInStream.readObject();
+                ASN1Object derObject = derInStream.readObject();
                 sb.append("  Authority Key Identifier: ")
                        .append(ASN1Dump.dumpAsString(derObject)).append('\n');
             }
@@ -1958,7 +1958,7 @@ public class X509CertSelector implements CertSelector
                     ByteArrayInputStream inStream = new ByteArrayInputStream(
                             (byte[])obj.get(1));
                     ASN1InputStream derInStream = new ASN1InputStream(inStream);
-                    DERObject derObject = derInStream.readObject();
+                    ASN1Object derObject = derInStream.readObject();
                     sb.append("  Type: ").append(obj.get(0)).append(" Data: ")
                            .append(ASN1Dump.dumpAsString(derObject)).append('\n');
                 }
@@ -1982,7 +1982,7 @@ public class X509CertSelector implements CertSelector
                     ByteArrayInputStream inStream = new ByteArrayInputStream(
                             (byte[])obj.get(1));
                     ASN1InputStream derInStream = new ASN1InputStream(inStream);
-                    DERObject derObject = derInStream.readObject();
+                    ASN1Object derObject = derInStream.readObject();
                     sb.append("  Type: ").append(obj.get(0)).append(" Data: ")
                            .append(ASN1Dump.dumpAsString(derObject)).append('\n');
                 }
@@ -2004,8 +2004,8 @@ public class X509CertSelector implements CertSelector
      * <br />
      * Uses {@link org.bouncycastle.asn1.ASN1InputStream ASN1InputStream},
      * {@link org.bouncycastle.asn1.ASN1Sequence ASN1Sequence},
-     * {@link org.bouncycastle.asn1.DERObjectIdentifier DERObjectIdentifier},
-     * {@link org.bouncycastle.asn1.DERObject DERObject},
+     * {@link org.bouncycastle.asn1.ASN1ObjectIdentifier ASN1ObjectIdentifier},
+     * {@link org.bouncycastle.asn1.ASN1Object ASN1Object},
      * {@link org.bouncycastle.asn1.DERGeneralizedTime DERGeneralizedTime},
      * {@link org.bouncycastle.asn1.x509.X509Name X509Name},
      * {@link org.bouncycastle.asn1.x509.X509Extensions X509Extensions},
@@ -2328,7 +2328,7 @@ public class X509CertSelector implements CertSelector
                 boolean test = false;
                 Set testSet = new HashSet(subjectAltNamesByte);
                 List testList;
-                DERObject derData;
+                ASN1Object derData;
                 ByteArrayOutputStream outStream;
                 DEROutputStream derOutStream;
                 while (altNamesSequence.hasMoreElements() && !test)
@@ -2415,8 +2415,8 @@ public class X509CertSelector implements CertSelector
                 Iterator iter = policyOID.iterator();
                 while (iter.hasNext())
                 {
-                    copy.policyOID.add(new DERObjectIdentifier(
-                            ((DERObjectIdentifier)iter.next()).getId()));
+                    copy.policyOID.add(new ASN1ObjectIdentifier(
+                            ((ASN1ObjectIdentifier)iter.next()).getId()));
                 }
             }
             if (subjectAltNames != null)

@@ -7,7 +7,7 @@ import java.security.cert.X509Certificate;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Object;
 
 /**
  * A trust anchor or most-trusted Certification Authority (CA). <br />
@@ -276,7 +276,7 @@ public class TrustAnchor
             {
                 ByteArrayInputStream inStream = new ByteArrayInputStream(data);
                 ASN1InputStream derInStream = new ASN1InputStream(inStream);
-                DERObject derObject = derInStream.readObject();
+                ASN1Object derObject = derInStream.readObject();
                 if (!(derObject instanceof ASN1Sequence))
                 {
                     throw new IllegalArgumentException(

@@ -8,8 +8,8 @@ import java.security.Provider;
 import java.security.Security;
 
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.OIDTokenizer;
 import org.bouncycastle.asn1.x509.X509Name;
@@ -335,7 +335,7 @@ class CertUtil
         {
             throw new IOException("token: " + token + ": " + ex.toString());
         }
-        DERObject derData = new DERObjectIdentifier(oid);
+        ASN1Object derData = new ASN1ObjectIdentifier(oid);
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         DEROutputStream derOutStream = new DEROutputStream(outStream);
         derOutStream.writeObject(derData);
@@ -451,7 +451,7 @@ class CertUtil
     private static byte[] parseURI(String data) throws IOException
     {
         // TODO do parsing test
-        DERObject derData = new DERIA5String(data);
+        ASN1Object derData = new DERIA5String(data);
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         DEROutputStream derOutStream = new DEROutputStream(outStream);
         derOutStream.writeObject(derData);
@@ -479,7 +479,7 @@ class CertUtil
             throw new IOException("wrong format of rfc822Name:" + data);
         }
         // TODO more test for illegal charateers
-        DERObject derData = new DERIA5String(data);
+        ASN1Object derData = new DERIA5String(data);
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         DEROutputStream derOutStream = new DEROutputStream(outStream);
         derOutStream.writeObject(derData);
@@ -502,7 +502,7 @@ class CertUtil
     private static byte[] parseDNSName(String data) throws IOException
     {
         // TODO more test for illegal charateers
-        DERObject derData = new DERIA5String(data);
+        ASN1Object derData = new DERIA5String(data);
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         DEROutputStream derOutStream = new DEROutputStream(outStream);
         derOutStream.writeObject(derData);

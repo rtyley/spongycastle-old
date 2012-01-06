@@ -3,7 +3,7 @@ package org.bouncycastle.jce.provider;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.PBEKeySpec;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.PBEParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
@@ -13,7 +13,7 @@ public class JCEPBEKey
     implements SecretKey
 {
     String              algorithm;
-    DERObjectIdentifier oid;
+    ASN1ObjectIdentifier oid;
     int                 type;
     int                 digest;
     int                 keySize;
@@ -27,7 +27,7 @@ public class JCEPBEKey
      */
     public JCEPBEKey(
         String              algorithm,
-        DERObjectIdentifier oid,
+        ASN1ObjectIdentifier oid,
         int                 type,
         int                 digest,
         int                 keySize,
@@ -128,7 +128,7 @@ public class JCEPBEKey
      * 
      * @return the oid for this PBE key
      */
-    public DERObjectIdentifier getOID()
+    public ASN1ObjectIdentifier getOID()
     {
         return oid;
     }

@@ -33,10 +33,10 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
 import org.bouncycastle.asn1.misc.NetscapeCertType;
 import org.bouncycastle.asn1.misc.NetscapeRevocationURL;
@@ -232,7 +232,7 @@ public class X509CertificateObject
     {
         if (c.getSignatureAlgorithm().getParameters() != null)
         {
-            return c.getSignatureAlgorithm().getParameters().getDERObject().getDEREncoded();
+            return c.getSignatureAlgorithm().getParameters().getASN1Object().getDEREncoded();
         }
         else
         {
@@ -300,7 +300,7 @@ public class X509CertificateObject
 
                 for (int i = 0; i != seq.size(); i++)
                 {
-                    list.add(((DERObjectIdentifier)seq.getObjectAt(i)).getId());
+                    list.add(((ASN1ObjectIdentifier)seq.getObjectAt(i)).getId());
                 }
                 
                 return Collections.unmodifiableList(list);
@@ -351,7 +351,7 @@ public class X509CertificateObject
 
                 while (e.hasMoreElements())
                 {
-                    DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
+                    ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
                     X509Extension       ext = extensions.getExtension(oid);
 
                     if (ext.isCritical())
@@ -373,7 +373,7 @@ public class X509CertificateObject
 
         if (exts != null)
         {
-            X509Extension   ext = exts.getExtension(new DERObjectIdentifier(oid));
+            X509Extension   ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
             if (ext != null)
             {
                 return ext.getValue().getOctets();
@@ -389,7 +389,7 @@ public class X509CertificateObject
 
         if (exts != null)
         {
-            X509Extension   ext = exts.getExtension(new DERObjectIdentifier(oid));
+            X509Extension   ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
 
             if (ext != null)
             {
@@ -420,7 +420,7 @@ public class X509CertificateObject
 
                 while (e.hasMoreElements())
                 {
-                    DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
+                    ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
                     X509Extension       ext = extensions.getExtension(oid);
 
                     if (!ext.isCritical())
@@ -448,7 +448,7 @@ public class X509CertificateObject
 
                 while (e.hasMoreElements())
                 {
-                    DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
+                    ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
                     String              oidId = oid.getId();
 
                     if (oidId.equals(RFC3280CertPathUtilities.KEY_USAGE)
@@ -555,14 +555,14 @@ public class X509CertificateObject
     }
 
     public void setBagAttribute(
-        DERObjectIdentifier oid,
-        DEREncodable        attribute)
+        ASN1ObjectIdentifier oid,
+        ASN1Encodable        attribute)
     {
         attrCarrier.setBagAttribute(oid, attribute);
     }
 
-    public DEREncodable getBagAttribute(
-        DERObjectIdentifier oid)
+    public ASN1Encodable getBagAttribute(
+        ASN1ObjectIdentifier oid)
     {
         return attrCarrier.getBagAttribute(oid);
     }
@@ -614,7 +614,7 @@ public class X509CertificateObject
 
             while (e.hasMoreElements())
             {
-                DERObjectIdentifier     oid = (DERObjectIdentifier)e.nextElement();
+                ASN1ObjectIdentifier     oid = (ASN1ObjectIdentifier)e.nextElement();
                 X509Extension           ext = extensions.getExtension(oid);
 
                 if (ext.getValue() != null)
@@ -711,7 +711,7 @@ public class X509CertificateObject
             throw new CertificateException("signature algorithm in TBS cert not same as outer cert");
         }
 
-        DEREncodable params = c.getSignatureAlgorithm().getParameters();
+        ASN1Encodable params = c.getSignatureAlgorithm().getParameters();
 
         // TODO This should go after the initVerify?
         X509SignatureUtil.setSignatureParameters(signature, params);

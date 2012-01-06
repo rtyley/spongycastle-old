@@ -6,7 +6,7 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
@@ -791,7 +791,7 @@ public abstract class JDKAlgorithmParameters
         {
             ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
             DEROutputStream         dOut = new DEROutputStream(bOut);
-            GOST3410PublicKeyAlgParameters       gost3410P = new GOST3410PublicKeyAlgParameters(new DERObjectIdentifier(currentSpec.getPublicKeyParamSetOID()), new DERObjectIdentifier(currentSpec.getDigestParamSetOID()), new DERObjectIdentifier(currentSpec.getEncryptionParamSetOID()));
+            GOST3410PublicKeyAlgParameters       gost3410P = new GOST3410PublicKeyAlgParameters(new ASN1ObjectIdentifier(currentSpec.getPublicKeyParamSetOID()), new ASN1ObjectIdentifier(currentSpec.getDigestParamSetOID()), new ASN1ObjectIdentifier(currentSpec.getEncryptionParamSetOID()));
             
             try
             {
