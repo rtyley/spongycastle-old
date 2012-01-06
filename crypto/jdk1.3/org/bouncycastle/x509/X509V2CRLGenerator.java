@@ -12,14 +12,14 @@ import java.security.SignatureException;
 import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.SimpleTimeZone;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERGeneralizedTime;
@@ -38,11 +38,10 @@ import org.bouncycastle.jce.provider.X509CRLObject;
 
 /**
  * class to produce an X.509 Version 2 CRL.
+ *  @deprecated use org.bouncycastle.cert.X509v2CRLBuilder.
  */
 public class X509V2CRLGenerator
 {
-    private SimpleDateFormat            dateF = new SimpleDateFormat("yyMMddHHmmss");
-    private SimpleTimeZone              tz = new SimpleTimeZone(0, "Z");
     private V2TBSCertListGenerator      tbsGen;
     private DERObjectIdentifier         sigOID;
     private AlgorithmIdentifier         sigAlgId;
@@ -51,8 +50,6 @@ public class X509V2CRLGenerator
 
     public X509V2CRLGenerator()
     {
-        dateF.setTimeZone(tz);
-
         tbsGen = new V2TBSCertListGenerator();
         extGenerator = new X509ExtensionsGenerator();
     }
@@ -91,7 +88,7 @@ public class X509V2CRLGenerator
     /**
      * Reason being as indicated by CRLReason, i.e. CRLReason.keyCompromise
      * or 0 if CRLReason is not to be used
-     */
+     **/
     public void addCRLEntry(BigInteger userCertificate, Date revocationDate, int reason)
     {
         tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), reason);
@@ -101,12 +98,12 @@ public class X509V2CRLGenerator
      * Add a CRL entry with an Invalidity Date extension as well as a CRLReason extension.
      * Reason being as indicated by CRLReason, i.e. CRLReason.keyCompromise
      * or 0 if CRLReason is not to be used
-     */
+     **/
     public void addCRLEntry(BigInteger userCertificate, Date revocationDate, int reason, Date invalidityDate)
     {
         tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), reason, new DERGeneralizedTime(invalidityDate));
     }
-
+   
     /**
      * Add a CRL entry with extensions.
      **/
@@ -177,7 +174,7 @@ public class X509V2CRLGenerator
     public void addExtension(
         String          oid,
         boolean         critical,
-        DEREncodable    value)
+        ASN1Encodable    value)
     {
         this.addExtension(new DERObjectIdentifier(oid), critical, value);
     }
@@ -188,9 +185,9 @@ public class X509V2CRLGenerator
     public void addExtension(
         DERObjectIdentifier oid,
         boolean             critical,
-        DEREncodable        value)
+        ASN1Encodable value)
     {
-        extGenerator.addExtension(oid, critical, value);
+        extGenerator.addExtension(new ASN1ObjectIdentifier(oid.getId()), critical, value);
     }
 
     /**
@@ -212,7 +209,7 @@ public class X509V2CRLGenerator
         boolean             critical,
         byte[]              value)
     {
-        extGenerator.addExtension(oid, critical, value);
+        extGenerator.addExtension(new ASN1ObjectIdentifier(oid.getId()), critical, value);
     }
 
     /**
@@ -422,6 +419,7 @@ public class X509V2CRLGenerator
         ExtCRLException(String message, Throwable cause)
         {
             super(message);
+            this.cause = cause;
         }
 
         public Throwable getCause()
