@@ -302,7 +302,7 @@ public class CipherSpi
         catch (InvalidAlgorithmParameterException e)
         {
             // this shouldn't happen
-            throw new RuntimeException("Eeeek! " + e.toString(), e);
+            throw new InvalidKeyException("Eeeek! " + e.toString());
         }
     }
 
