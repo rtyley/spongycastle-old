@@ -1,11 +1,15 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.DESKeySpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -20,12 +24,14 @@ import org.bouncycastle.crypto.macs.CMac;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
+import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameterGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseSecretKeyFactory;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher;
 import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class DES
 {
@@ -111,6 +117,44 @@ public final class DES
         public RFC3211()
         {
             super(new RFC3211WrapEngine(new DESEngine()), 8);
+        }
+    }
+
+    public static class AlgParamGen
+        extends BaseAlgorithmParameterGenerator
+    {
+        protected void engineInit(
+            AlgorithmParameterSpec genParamSpec,
+            SecureRandom            random)
+            throws InvalidAlgorithmParameterException
+        {
+            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for DES parameter generation.");
+        }
+
+        protected AlgorithmParameters engineGenerateParameters()
+        {
+            byte[]  iv = new byte[8];
+
+            if (random == null)
+            {
+                random = new SecureRandom();
+            }
+
+            random.nextBytes(iv);
+
+            AlgorithmParameters params;
+
+            try
+            {
+                params = AlgorithmParameters.getInstance("DES", BouncyCastleProvider.PROVIDER_NAME);
+                params.init(new IvParameterSpec(iv));
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e.getMessage());
+            }
+
+            return params;
         }
     }
 
@@ -244,7 +288,10 @@ public final class DES
             provider.addAlgorithm("Alg.Alias.Mac.DESISO9797ALG1WITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
 
             provider.addAlgorithm("AlgorithmParameters.DES", DES.class.getPackage().getName() + ".util.IvAlgorithmParameters");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + OIWObjectIdentifiers.desCBC, "DES");
 
+            provider.addAlgorithm("AlgorithmParameterGenerator.DES",  PREFIX + "$AlgParamGen");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + OIWObjectIdentifiers.desCBC, "DES");
         }
 
         private void addAlias(ConfigurableProvider provider, ASN1ObjectIdentifier oid, String name)

@@ -1,11 +1,15 @@
 package org.bouncycastle.jcajce.provider.symmetric;
 
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
+import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.DESedeKeySpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -20,12 +24,14 @@ import org.bouncycastle.crypto.macs.CMac;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.ISO7816d4Padding;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
+import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameterGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseSecretKeyFactory;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher;
 import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class DESede
 {
@@ -211,6 +217,44 @@ public final class DESede
         }
     }
 
+    public static class AlgParamGen
+        extends BaseAlgorithmParameterGenerator
+    {
+        protected void engineInit(
+            AlgorithmParameterSpec genParamSpec,
+            SecureRandom            random)
+            throws InvalidAlgorithmParameterException
+        {
+            throw new InvalidAlgorithmParameterException("No supported AlgorithmParameterSpec for DES parameter generation.");
+        }
+
+        protected AlgorithmParameters engineGenerateParameters()
+        {
+            byte[]  iv = new byte[8];
+
+            if (random == null)
+            {
+                random = new SecureRandom();
+            }
+
+            random.nextBytes(iv);
+
+            AlgorithmParameters params;
+
+            try
+            {
+                params = AlgorithmParameters.getInstance("DES", BouncyCastleProvider.PROVIDER_NAME);
+                params.init(new IvParameterSpec(iv));
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e.getMessage());
+            }
+
+            return params;
+        }
+    }
+
     static public class KeyFactory
         extends BaseSecretKeyFactory
     {
@@ -334,8 +378,9 @@ public final class DESede
 
             provider.addAlgorithm("AlgorithmParameters.DESEDE", DESede.class.getPackage().getName() + ".util.IvAlgorithmParameters");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + PKCSObjectIdentifiers.des_EDE3_CBC, "DESEDE");
-            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, "DESEDE");
 
+            provider.addAlgorithm("AlgorithmParameterGenerator.DESEDE",  PREFIX + "$AlgParamGen");
+            provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator." + PKCSObjectIdentifiers.des_EDE3_CBC, "DESEDE");
         }
     }
 }

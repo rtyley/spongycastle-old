@@ -617,6 +617,7 @@ class EnvelopedDataHelper
         {
             return new AlgorithmIdentifier(macOID, new DEROctetString(((IvParameterSpec)paramSpec).getIV()));
         }
+
         if (paramSpec instanceof RC2ParameterSpec)
         {
             RC2ParameterSpec rc2Spec = (RC2ParameterSpec)paramSpec;
@@ -642,7 +643,7 @@ class EnvelopedDataHelper
             return new AlgorithmIdentifier(macOID, new RC2CBCParameter(rc2Spec.getIV()));
         }
 
-        throw new IllegalStateException("unknown parameter spec");
+        throw new IllegalStateException("unknown parameter spec: " + paramSpec);
     }
 
     static interface JCECallback
