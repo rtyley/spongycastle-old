@@ -67,6 +67,16 @@ public class RDN
         return this.values.size() > 1;
     }
 
+    /**
+     * Return the number of AttributeTypeAndValue objects in this RDN,
+     *
+     * @return size of RDN, greater than 1 if multi-valued.
+     */
+    public int size()
+    {
+        return this.values.size();
+    }
+
     public AttributeTypeAndValue getFirst()
     {
         if (this.values.size() == 0)

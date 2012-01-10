@@ -144,12 +144,53 @@ public class X500Name
     }
 
     /**
+     * return an array of OIDs contained in the attribute type of each RDN in structure order.
+     *
+     * @return an array, possibly zero length, of ASN1ObjectIdentifiers objects.
+     */
+    public ASN1ObjectIdentifier[] getAttributeTypes()
+    {
+        int   count = 0;
+
+        for (int i = 0; i != rdns.length; i++)
+        {
+            RDN rdn = rdns[i];
+
+            count += rdn.size();
+        }
+
+        ASN1ObjectIdentifier[] res = new ASN1ObjectIdentifier[count];
+
+        count = 0;
+
+        for (int i = 0; i != rdns.length; i++)
+        {
+            RDN rdn = rdns[i];
+
+            if (rdn.isMultiValued())
+            {
+                AttributeTypeAndValue[] attr = rdn.getTypesAndValues();
+                for (int j = 0; j != attr.length; j++)
+                {
+                    res[count++] = attr[j].getType();
+                }
+            }
+            else if (rdn.size() != 0)
+            {
+                res[count++] = rdn.getFirst().getType();
+            }
+        }
+
+        return res;
+    }
+
+    /**
      * return an array of RDNs containing the attribute type given by OID in structure order.
      *
-     * @param oid the type OID we are looking for.
+     * @param attributeType the type OID we are looking for.
      * @return an array, possibly zero length, of RDN objects.
      */
-    public RDN[] getRDNs(ASN1ObjectIdentifier oid)
+    public RDN[] getRDNs(ASN1ObjectIdentifier attributeType)
     {
         RDN[] res = new RDN[rdns.length];
         int   count = 0;
@@ -163,7 +204,7 @@ public class X500Name
                 AttributeTypeAndValue[] attr = rdn.getTypesAndValues();
                 for (int j = 0; j != attr.length; j++)
                 {
-                    if (attr[j].getType().equals(oid))
+                    if (attr[j].getType().equals(attributeType))
                     {
                         res[count++] = rdn;
                         break;
@@ -172,7 +213,7 @@ public class X500Name
             }
             else
             {
-                if (rdn.getFirst().getType().equals(oid))
+                if (rdn.getFirst().getType().equals(attributeType))
                 {
                     res[count++] = rdn;
                 }

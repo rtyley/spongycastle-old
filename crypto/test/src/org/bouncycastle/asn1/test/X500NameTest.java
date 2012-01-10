@@ -453,6 +453,20 @@ public class X500NameTest
         //
         unsorted = new X500Name("CN=AA + CN=AA + CN=AA");
 
+        ASN1ObjectIdentifier[] types = unsorted.getAttributeTypes();
+        if (types.length != 3 || !types[0].equals(BCStyle.CN) || !types[1].equals(BCStyle.CN) || !types[2].equals(BCStyle.CN))
+        {
+            fail("types not matched correctly");
+        }
+
+        // general type test
+        X500Name nested = new X500Name("CN=AA + CN=AA, C=AU");
+
+        types = nested.getAttributeTypes();
+        if (types.length != 3 || !types[0].equals(BCStyle.CN) || !types[1].equals(BCStyle.CN) || !types[2].equals(BCStyle.C))
+        {
+            fail("nested types not matched correctly");
+        }
         //
         // tagging test - only works if CHOICE implemented
         //
@@ -510,6 +524,12 @@ public class X500NameTest
         if (vls.length != 1 || !getValue(vls[0]).equals("#nothex#string"))
         {
             fail("escaped # not reduced properly");
+        }
+
+        types = n.getAttributeTypes();
+        if (types.length != 1 || !types[0].equals(BCStyle.CN))
+        {
+            fail("type not matched correctly");
         }
 
         n = new X500Name("CN=\"a+b\"");
