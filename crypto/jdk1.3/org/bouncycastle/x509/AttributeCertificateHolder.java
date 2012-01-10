@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.Principal;
-import java.security.cert.CertSelector;
+import org.bouncycastle.jce.cert.CertSelector;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateParsingException;
