@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
@@ -272,7 +273,7 @@ public class PKCS10CertificationRequest
         }
         else if (params.containsKey(algorithmName))
         {
-            this.sigAlgId = new AlgorithmIdentifier(sigOID, (DEREncodable)params.get(algorithmName));
+            this.sigAlgId = new AlgorithmIdentifier(sigOID, (ASN1Encodable)params.get(algorithmName));
         }
         else
         {
@@ -456,7 +457,7 @@ public class PKCS10CertificationRequest
     static String getSignatureName(
         AlgorithmIdentifier sigAlgId)
     {
-        DEREncodable params = sigAlgId.getParameters();
+        ASN1Encodable params = sigAlgId.getParameters();
 
         if (params != null && !DERNull.INSTANCE.equals(params))
         {
