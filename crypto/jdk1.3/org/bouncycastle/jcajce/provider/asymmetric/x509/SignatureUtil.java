@@ -34,7 +34,9 @@ class SignatureUtil
     {
         if (params != null && !derNull.equals(params.toASN1Primitive()))
         {
-            AlgorithmParameters sigParams = AlgorithmParameters.getInstance(signature.getAlgorithm(), signature.getProvider());
+            try
+            {
+            AlgorithmParameters sigParams = AlgorithmParameters.getInstance(signature.getAlgorithm(), signature.getProvider().getName());
             
             try
             {
@@ -43,6 +45,11 @@ class SignatureUtil
             catch (IOException e)
             {
                 throw new SignatureException("IOException decoding parameters: " + e.getMessage());
+            }
+            }
+            catch (NoSuchProviderException e)
+            {
+                throw new SignatureException("cannot find provider: " + e.getMessage());
             }
         }
     }
