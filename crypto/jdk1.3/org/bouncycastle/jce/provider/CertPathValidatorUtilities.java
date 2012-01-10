@@ -447,7 +447,7 @@ public class CertPathValidatorUtilities
         {
             try
             {
-                aOut.writeObject(e.nextElement());
+                aOut.writeObject((ASN1Encodable)e.nextElement());
     
                 pq.add(new PolicyQualifierInfo(bOut.toByteArray()));
             }
@@ -929,7 +929,7 @@ public class CertPathValidatorUtilities
                     try
                     {
                         issuers.add(new X509Principal(genNames[j].getName()
-                            .getASN1Object().getEncoded()));
+                            .toASN1Primitive().getEncoded()));
                     }
                     catch (IOException e)
                     {
@@ -1139,8 +1139,7 @@ public class CertPathValidatorUtilities
             ASN1Object derObect = CertPathValidatorUtilities.getExtensionValue(completeCRL,
                     CRL_NUMBER);
             if (derObect != null) {
-            completeCRLNumber = CRLNumber.getInstance(derObect
-                ).getPositiveValue();
+            completeCRLNumber = ASN1Integer.getInstance(derObject).getPositiveValue();
             }
         }
         catch (Exception e)
