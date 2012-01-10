@@ -3,7 +3,6 @@ package org.bouncycastle.cms;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
@@ -57,7 +56,7 @@ class CMSEnvelopedHelper
     }
 
     KeyGenerator createSymmetricKeyGenerator(
-        String encryptionOID, 
+        String encryptionOID,
         Provider provider)
         throws NoSuchAlgorithmException
     {
@@ -117,36 +116,6 @@ class CMSEnvelopedHelper
         }
     }
 
-    AlgorithmParameterGenerator createAlgorithmParameterGenerator(
-        String encryptionOID,
-        Provider provider)
-        throws NoSuchAlgorithmException
-    {
-        try
-        {
-            return createAlgorithmParamsGenerator(encryptionOID, provider);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            try
-            {
-                String algName = (String)BASE_CIPHER_NAMES.get(encryptionOID);
-                if (algName != null)
-                {
-                    return createAlgorithmParamsGenerator(algName, provider);
-                }
-            }
-            catch (NoSuchAlgorithmException ex)
-            {
-                // ignore
-            }
-            //
-            // can't try with default provider here as parameters must be from the specified provider.
-            //
-            throw e;
-        }
-    }
-
     int getKeySize(String oid)
     {
         Integer keySize = (Integer)KEYSIZES.get(oid);
@@ -171,21 +140,6 @@ class CMSEnvelopedHelper
         else
         {
             return AlgorithmParameters.getInstance(algName);
-        }
-    }
-
-    private AlgorithmParameterGenerator createAlgorithmParamsGenerator(
-        String algName,
-        Provider provider)
-        throws NoSuchAlgorithmException
-    {
-        if (provider != null)
-        {
-            return AlgorithmParameterGenerator.getInstance(algName, provider);
-        }
-        else
-        {
-            return AlgorithmParameterGenerator.getInstance(algName);
         }
     }
 
