@@ -1081,42 +1081,7 @@ public class JDKPKCS12KeyStore
         }
     }
 
-    public void engineStore(LoadStoreParameter param) throws IOException,
-            NoSuchAlgorithmException, CertificateException
-    {
-        if (param == null)
-        {
-            throw new IllegalArgumentException("'param' arg cannot be null");
-        }
-
-        if (!(param instanceof JDKPKCS12StoreParameter))
-        {
-            throw new IllegalArgumentException(
-                "No support for 'param' of type " + param.getClass().getName());
-        }
-
-        JDKPKCS12StoreParameter bcParam = (JDKPKCS12StoreParameter)param;
-
-        char[] password;
-        ProtectionParameter protParam = param.getProtectionParameter();
-        if (protParam == null)
-        {
-            password = null;
-        }
-        else if (protParam instanceof KeyStore.PasswordProtection)
-        {
-            password = ((KeyStore.PasswordProtection)protParam).getPassword();
-        }
-        else
-        {
-            throw new IllegalArgumentException(
-                "No support for protection parameter of type " + protParam.getClass().getName());
-        }
-
-        doStore(bcParam.getOutputStream(), password, bcParam.isUseDEREncoding());
-    }
-
-    public void engineStore(OutputStream stream, char[] password) 
+    public void engineStore(OutputStream stream, char[] password)
         throws IOException
     {
         doStore(stream, password, false);

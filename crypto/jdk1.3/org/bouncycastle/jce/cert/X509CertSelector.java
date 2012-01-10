@@ -1375,7 +1375,7 @@ public class X509CertSelector implements CertSelector
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             DEROutputStream derOutStream = new DEROutputStream(outStream);
 
-            derOutStream.writeObject(issuerDNX509.getASN1Object());
+            derOutStream.writeObject(issuerDNX509.toASN1Primitive());
             derOutStream.close();
 
             return outStream.toByteArray();
@@ -1448,7 +1448,7 @@ public class X509CertSelector implements CertSelector
             ByteArrayOutputStream outStream = new ByteArrayOutputStream();
             DEROutputStream derOutStream = new DEROutputStream(outStream);
 
-            derOutStream.writeObject(subjectDNX509.getASN1Object());
+            derOutStream.writeObject(subjectDNX509.toASN1Primitive());
             derOutStream.close();
 
             return outStream.toByteArray();
