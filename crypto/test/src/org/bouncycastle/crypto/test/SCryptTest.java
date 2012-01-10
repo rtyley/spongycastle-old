@@ -48,7 +48,7 @@ public class SCryptTest extends SimpleTest
             int start = header.indexOf('(') + 1;
             int limit = header.lastIndexOf(')');
             String argStr = header.substring(start, limit);
-            String[] args = argStr.split(",");
+            String[] args = Strings.split(argStr, ',');
 
             byte[] P = extractQuotedString(args[0]);
             byte[] S = extractQuotedString(args[1]);
