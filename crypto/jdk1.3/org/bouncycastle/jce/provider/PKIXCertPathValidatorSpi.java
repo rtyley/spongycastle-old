@@ -546,7 +546,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         {
             try
             {
-                aOut.writeObject(e.nextElement());
+                aOut.writeObject((ASN1Encodable)e.nextElement());
 
                 pq.add(new PolicyQualifierInfo(bOut.toByteArray()));
             }
