@@ -42,20 +42,6 @@ import org.bouncycastle.util.io.TeeOutputStream;
 
 class CMSUtils
 {
-    private static final Runtime RUNTIME = Runtime.getRuntime();
-    
-    static int getMaximumMemory()
-    {
-        long maxMem = RUNTIME.maxMemory();
-        
-        if (maxMem > Integer.MAX_VALUE)
-        {
-            return Integer.MAX_VALUE;
-        }
-        
-        return (int)maxMem;
-    }
-    
     static ContentInfo readContentInfo(
         byte[] input)
         throws CMSException
@@ -69,7 +55,7 @@ class CMSUtils
         throws CMSException
     {
         // enforce some limit checking
-        return readContentInfo(new ASN1InputStream(input, getMaximumMemory()));
+        return readContentInfo(new ASN1InputStream(input));
     } 
 
     static List getCertificatesFromStore(CertStore certStore)

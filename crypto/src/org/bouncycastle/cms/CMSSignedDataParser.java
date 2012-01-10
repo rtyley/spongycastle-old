@@ -671,7 +671,7 @@ public class CMSSignedDataParser
         OutputStream            out)
         throws CMSException, IOException
     {
-        ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
+        ASN1StreamParser in = new ASN1StreamParser(original);
         ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
         SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
 
@@ -749,7 +749,7 @@ public class CMSSignedDataParser
         OutputStream  out)
         throws CMSException, IOException
     {
-        ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
+        ASN1StreamParser in = new ASN1StreamParser(original);
         ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
         SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
 
@@ -848,7 +848,7 @@ public class CMSSignedDataParser
         OutputStream  out)
         throws CMSException, IOException
     {
-        ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
+        ASN1StreamParser in = new ASN1StreamParser(original);
         ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
         SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
 
