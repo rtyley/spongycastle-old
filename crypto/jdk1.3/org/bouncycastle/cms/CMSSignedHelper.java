@@ -3,20 +3,22 @@ package org.bouncycastle.cms;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-import java.security.Signature;
 import java.security.cert.CRLException;
+import org.bouncycastle.jce.cert.CertStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -31,8 +33,6 @@ import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import org.bouncycastle.x509.NoSuchStoreException;
 import org.bouncycastle.x509.X509CollectionStoreParameters;
 import org.bouncycastle.x509.X509Store;
@@ -137,19 +137,6 @@ class CMSSignedHelper
         return digestAlgOID;
     }
 
-    String[] getDigestAliases(
-        String algName)
-    {
-        String[] aliases = (String[])digestAliases.get(algName);
-
-        if (aliases != null)
-        {
-            return aliases;
-        }
-
-        return new String[0];
-    }
-
     /**
      * Return the digest encryption algorithm using one of the standard
      * JCA string representations rather the the algorithm identifier (if
@@ -167,81 +154,7 @@ class CMSSignedHelper
 
         return encryptionAlgOID;
     }
-    
-    MessageDigest getDigestInstance(
-        String algorithm, 
-        Provider provider)
-        throws NoSuchAlgorithmException
-    {
-        try
-        {
-            return createDigestInstance(algorithm, provider);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            String[] aliases = getDigestAliases(algorithm);
-            for (int i = 0; i != aliases.length; i++)
-            {
-                try
-                {
-                    return createDigestInstance(aliases[i], provider);
-                }
-                catch (NoSuchAlgorithmException ex)
-                {
-                    // continue
-                }
-            }
-            if (provider != null)
-            {
-                return getDigestInstance(algorithm, null); // try rolling back
-            }
-            throw e;
-        }
-    }
 
-    private MessageDigest createDigestInstance(
-        String algorithm,
-        Provider provider)
-        throws NoSuchAlgorithmException
-    {
-        if (provider != null)
-        {
-            try
-            {
-            return MessageDigest.getInstance(algorithm, provider.getName());
-            }
-            catch (NoSuchProviderException e)
-            {
-                throw new NoSuchAlgorithmException(e.toString());
-            }
-        }
-        else
-        {
-            return MessageDigest.getInstance(algorithm);
-        }
-    }
-
-    Signature getSignatureInstance(
-        String algorithm, 
-        Provider provider)
-        throws NoSuchAlgorithmException
-    {
-        if (provider != null)
-        {
-            try
-            {
-            return Signature.getInstance(algorithm, provider.getName());
-            }
-            catch (NoSuchProviderException e)
-            {
-                throw new NoSuchAlgorithmException(e.toString());
-            }
-        }
-        else
-        {
-            return Signature.getInstance(algorithm);
-        }
-    }
 
     X509Store createAttributeStore(
         String type,
@@ -259,7 +172,7 @@ class CMSSignedHelper
             {
                 try
                 {
-                    DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                    ASN1Primitive obj = ((ASN1Encodable)e.nextElement()).toASN1Primitive();
 
                     if (obj instanceof ASN1TaggedObject)
                     {
@@ -365,7 +278,7 @@ class CMSSignedHelper
         {
             if (provider != null)
             {
-                return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider);
+                return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider.getName());
             }
             else
             {
@@ -373,6 +286,10 @@ class CMSSignedHelper
             }
         }
         catch (InvalidAlgorithmParameterException e)
+        {
+            throw new CMSException("can't setup the CertStore", e);
+        }
+        catch (NoSuchProviderException e)
         {
             throw new CMSException("can't setup the CertStore", e);
         }
@@ -394,11 +311,11 @@ class CMSSignedHelper
                 cf = CertificateFactory.getInstance("X.509");
             }
         }
-        catch (NoSuchProviderException ex)
+        catch (CertificateException ex)
         {
             throw new CMSException("can't get certificate factory.", ex);
         }
-        catch (CertificateException ex)
+        catch (NoSuchProviderException ex)
         {
             throw new CMSException("can't get certificate factory.", ex);
         }
@@ -408,7 +325,7 @@ class CMSSignedHelper
         {
             try
             {
-                DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)e.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1Sequence)
                 {
@@ -445,11 +362,11 @@ class CMSSignedHelper
                 cf = CertificateFactory.getInstance("X.509");
             }
         }
-        catch (NoSuchProviderException ex)
+        catch (CertificateException ex)
         {
             throw new CMSException("can't get certificate factory.", ex);
         }
-        catch (CertificateException ex)
+        catch (NoSuchProviderException ex)
         {
             throw new CMSException("can't get certificate factory.", ex);
         }
@@ -459,7 +376,7 @@ class CMSSignedHelper
         {
             try
             {
-                DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)e.nextElement()).toASN1Primitive();
 
                 crls.add(cf.generateCRL(
                     new ByteArrayInputStream(obj.getEncoded())));

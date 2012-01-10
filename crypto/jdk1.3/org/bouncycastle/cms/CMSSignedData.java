@@ -5,16 +5,20 @@ import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -27,9 +31,8 @@ import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
+import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.util.CollectionStore;
@@ -207,14 +210,14 @@ public class CMSSignedData
 
                 if (hashes == null)
                 {
-                    signerInfos.add(new SignerInformation(info, contentType, signedContent, null, sigAlgFinder));
+                    signerInfos.add(new SignerInformation(info, contentType, signedContent, null));
                 }
                 else
                 {
+                    Object obj = hashes.keySet().iterator().next();
+                    byte[] hash = (obj instanceof String) ? (byte[])hashes.get(info.getDigestAlgorithm().getAlgorithm().getId()) : (byte[])hashes.get(info.getDigestAlgorithm().getAlgorithm());
 
-                    byte[] hash = (byte[])hashes.get(info.getDigestAlgorithm().getAlgorithm().getId());
-
-                    signerInfos.add(new SignerInformation(info, contentType, null, new BaseDigestCalculator(hash), sigAlgFinder));
+                    signerInfos.add(new SignerInformation(info, contentType, null, hash));
                 }
             }
 
@@ -402,7 +405,7 @@ public class CMSSignedData
 
             for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
             {
-                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1Sequence)
                 {
@@ -426,11 +429,11 @@ public class CMSSignedData
 
             for (Enumeration en = crlSet.getObjects(); en.hasMoreElements();)
             {
-                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1Sequence)
                 {
-                    crlList.add(CertificateList.getInstance(obj));
+                    crlList.add(new X509CRLHolder(CertificateList.getInstance(obj)));
                 }
             }
 
@@ -450,7 +453,7 @@ public class CMSSignedData
 
             for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
             {
-                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1TaggedObject)
                 {
@@ -532,12 +535,12 @@ public class CMSSignedData
         {
             SignerInformation signer = (SignerInformation)it.next();
             digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
-            vec.add(signer.toSignerInfo());
+            vec.add(signer.toASN1Structure());
         }
 
         ASN1Set             digests = new DERSet(digestAlgs);
         ASN1Set             signers = new DERSet(vec);
-        ASN1Sequence        sD = (ASN1Sequence)signedData.signedData.getDERObject();
+        ASN1Sequence        sD = (ASN1Sequence)signedData.signedData.toASN1Primitive();
 
         vec = new ASN1EncodableVector();
         

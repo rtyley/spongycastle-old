@@ -4,10 +4,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -15,10 +16,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Generator;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1Set;
@@ -42,10 +45,10 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
-import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.SignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.DigestCalculatorProvider;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.util.CollectionStore;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.io.Streams;
@@ -68,11 +71,11 @@ import org.bouncycastle.x509.X509Store;
  * mode the order of the operations is important.
  * </p>
  * <pre>
- *      CMSSignedDataParser     sp = new CMSSignedDataParser(encapSigData);
+ *      CMSSignedDataParser     sp = new CMSSignedDataParser(new JcaDigestCalculatorProviderBuilder().setProvider("BC").build(), encapSigData);
  *
  *      sp.getSignedContent().drain();
  *
- *      CertStore               certs = sp.getCertificatesAndCRLs("Collection", "BC");
+ *      Store                   certStore = sp.getCertificates();
  *      SignerInformationStore  signers = sp.getSignerInfos();
  *      
  *      Collection              c = signers.getSigners();
@@ -104,9 +107,8 @@ public class CMSSignedDataParser
     private SignedDataParser        _signedData;
     private ASN1ObjectIdentifier    _signedContentType;
     private CMSTypedStream          _signedContent;
-    private Map                     _digests;
-    
-    private CertStore               _certStore;
+    private Map                     digests;
+
     private SignerInformationStore  _signerInfoStore;
     private X509Store               _attributeStore;
     private ASN1Set                 _certSet, _crlSet;
@@ -114,29 +116,75 @@ public class CMSSignedDataParser
     private X509Store               _certificateStore;
     private X509Store               _crlStore;
 
+    /**
+     * @deprecated use method taking a DigestCalculatorProvider
+     */
     public CMSSignedDataParser(
         byte[]      sigBlock)
         throws CMSException
     {
-        this(new ByteArrayInputStream(sigBlock));
+        this(createDefaultDigestProvider(), new ByteArrayInputStream(sigBlock));
     }
 
+
+    public CMSSignedDataParser(
+        DigestCalculatorProvider digestCalculatorProvider,
+        byte[]      sigBlock)
+        throws CMSException
+    {
+        this(digestCalculatorProvider, new ByteArrayInputStream(sigBlock));
+    }
+
+    /**
+     * @deprecated use method taking digest calculator provider.
+     * @param signedContent
+     * @param sigBlock
+     * @throws CMSException
+     */
     public CMSSignedDataParser(
         CMSTypedStream  signedContent,
         byte[]          sigBlock)
         throws CMSException
     {
-        this(signedContent, new ByteArrayInputStream(sigBlock));
+        this(createDefaultDigestProvider(), signedContent, new ByteArrayInputStream(sigBlock));
+    }
+
+    public CMSSignedDataParser(
+        DigestCalculatorProvider digestCalculatorProvider,
+        CMSTypedStream  signedContent,
+        byte[]          sigBlock)
+        throws CMSException
+    {
+        this(digestCalculatorProvider, signedContent, new ByteArrayInputStream(sigBlock));
+    }
+
+    private static DigestCalculatorProvider createDefaultDigestProvider()
+        throws CMSException
+    {
+        return new BcDigestCalculatorProvider();
     }
 
     /**
      * base constructor - with encapsulated content
+     *
+     * @deprecated use method taking a DigestCalculatorProvider
      */
     public CMSSignedDataParser(
         InputStream sigData)
         throws CMSException
     {
-        this(null, sigData);
+        this(createDefaultDigestProvider(), null, sigData);
+    }
+
+     /**
+     * base constructor - with encapsulated content
+     */
+    public CMSSignedDataParser(
+        DigestCalculatorProvider digestCalculatorProvider,
+        InputStream sigData)
+        throws CMSException
+    {
+        this(digestCalculatorProvider, null, sigData);
     }
 
     /**
@@ -144,10 +192,28 @@ public class CMSSignedDataParser
      *
      * @param signedContent the content that was signed.
      * @param sigData the signature object stream.
+     *      *
+     * @deprecated use method taking a DigestCalculatorProvider
      */
     public CMSSignedDataParser(
         CMSTypedStream  signedContent,
         InputStream     sigData) 
+        throws CMSException
+    {
+        this(createDefaultDigestProvider(), signedContent, sigData);
+    }
+
+    /**
+     * base constructor
+     *
+     * @param digestCalculatorProvider for generating accumulating digests
+     * @param signedContent the content that was signed.
+     * @param sigData the signature object stream.
+     */
+    public CMSSignedDataParser(
+        DigestCalculatorProvider digestCalculatorProvider,
+        CMSTypedStream  signedContent,
+        InputStream     sigData)
         throws CMSException
     {
         super(sigData);
@@ -156,22 +222,24 @@ public class CMSSignedDataParser
         {
             _signedContent = signedContent;
             _signedData = SignedDataParser.getInstance(_contentInfo.getContent(BERTags.SEQUENCE));
-            _digests = new HashMap();
+            digests = new HashMap();
             
             ASN1SetParser digAlgs = _signedData.getDigestAlgorithms();
-            DEREncodable  o;
+            ASN1Encodable  o;
             
             while ((o = digAlgs.readObject()) != null)
             {
-                AlgorithmIdentifier id = AlgorithmIdentifier.getInstance(o.getDERObject());
+                AlgorithmIdentifier algId = AlgorithmIdentifier.getInstance(o);
                 try
                 {
-                    String        digestName = HELPER.getDigestAlgName(id.getObjectId().toString());
-                    MessageDigest dig = HELPER.getDigestInstance(digestName, null);
+                    DigestCalculator calculator = digestCalculatorProvider.get(algId);
 
-                    this._digests.put(digestName, dig);
+                    if (calculator != null)
+                    {
+                        this.digests.put(algId.getAlgorithm(), calculator);
+                    }
                 }
-                catch (NoSuchAlgorithmException e)
+                catch (OperatorCreationException e)
                 {
                      //  ignore
                 }
@@ -216,7 +284,7 @@ public class CMSSignedDataParser
             throw new CMSException("io exception: " + e.getMessage(), e);
         }
         
-        if (_digests.isEmpty())
+        if (digests.isEmpty())
         {
             throw new CMSException("no digests could be created for message.");
         }
@@ -247,28 +315,26 @@ public class CMSSignedDataParser
             List      signerInfos = new ArrayList();
             Map       hashes = new HashMap();
             
-            Iterator  it = _digests.keySet().iterator();
+            Iterator  it = digests.keySet().iterator();
             while (it.hasNext())
             {
                 Object digestKey = it.next();
-                
-                hashes.put(digestKey, ((MessageDigest)_digests.get(digestKey)).digest());
+
+                hashes.put(digestKey, ((DigestCalculator)digests.get(digestKey)).getDigest());
             }
             
             try
             {
                 ASN1SetParser     s = _signedData.getSignerInfos();
-                DEREncodable      o;
-                SignatureAlgorithmIdentifierFinder sigAlgFinder = new DefaultSignatureAlgorithmIdentifierFinder();
-                
+                ASN1Encodable      o;
+
                 while ((o = s.readObject()) != null)
                 {
-                    SignerInfo info = SignerInfo.getInstance(o.getDERObject());
-                    String     digestName = HELPER.getDigestAlgName(info.getDigestAlgorithm().getAlgorithm().getId());
-                    
-                    byte[] hash = (byte[])hashes.get(digestName);
-                    
-                    signerInfos.add(new SignerInformation(info, _signedContentType, null, new BaseDigestCalculator(hash), sigAlgFinder));
+                    SignerInfo info = SignerInfo.getInstance(o.toASN1Primitive());
+
+                    byte[] hash = (byte[])hashes.get(info.getDigestAlgorithm().getAlgorithm());
+
+                    signerInfos.add(new SignerInformation(info, _signedContentType, null, hash));
                 }
             }
             catch (IOException e)
@@ -467,7 +533,7 @@ public class CMSSignedDataParser
 
             for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
             {
-                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1Sequence)
                 {
@@ -494,7 +560,7 @@ public class CMSSignedDataParser
 
             for (Enumeration en = crlSet.getObjects(); en.hasMoreElements();)
             {
-                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1Sequence)
                 {
@@ -521,7 +587,7 @@ public class CMSSignedDataParser
 
             for (Enumeration en = certSet.getObjects(); en.hasMoreElements();)
             {
-                DERObject obj = ((DEREncodable)en.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)en.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1TaggedObject)
                 {
@@ -581,7 +647,7 @@ public class CMSSignedDataParser
         }
 
         InputStream digStream = CMSUtils.attachDigestsToInputStream(
-            _digests.values(), _signedContent.getContentStream());
+            digests.values(), _signedContent.getContentStream());
 
         return new CMSTypedStream(_signedContent.getContentType(), digStream);
     }
@@ -605,7 +671,7 @@ public class CMSSignedDataParser
         OutputStream            out)
         throws CMSException, IOException
     {
-        ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
+        ASN1StreamParser in = new ASN1StreamParser(original);
         ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
         SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
 
@@ -619,7 +685,7 @@ public class CMSSignedDataParser
         sigGen.addObject(signedData.getVersion());
 
         // digests
-        signedData.getDigestAlgorithms().getDERObject();  // skip old ones
+        signedData.getDigestAlgorithms().toASN1Primitive();  // skip old ones
 
         ASN1EncodableVector digestAlgs = new ASN1EncodableVector();
 
@@ -652,7 +718,7 @@ public class CMSSignedDataParser
         {
             SignerInformation        signer = (SignerInformation)it.next();
 
-            signerInfos.add(signer.toSignerInfo());
+            signerInfos.add(signer.toASN1Structure());
         }
 
         sigGen.getRawOutputStream().write(new DERSet(signerInfos).getEncoded());
@@ -683,7 +749,7 @@ public class CMSSignedDataParser
         OutputStream  out)
         throws CMSException, IOException
     {
-        ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
+        ASN1StreamParser in = new ASN1StreamParser(original);
         ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
         SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
 
@@ -697,7 +763,7 @@ public class CMSSignedDataParser
         sigGen.addObject(signedData.getVersion());
 
         // digests
-        sigGen.getRawOutputStream().write(signedData.getDigestAlgorithms().getDERObject().getEncoded());
+        sigGen.getRawOutputStream().write(signedData.getDigestAlgorithms().toASN1Primitive().getEncoded());
 
         // encap content info
         ContentInfoParser encapContentInfo = signedData.getEncapContentInfo();
@@ -751,7 +817,7 @@ public class CMSSignedDataParser
             sigGen.getRawOutputStream().write(new DERTaggedObject(false, 1, crls).getEncoded());
         }
 
-        sigGen.getRawOutputStream().write(signedData.getSignerInfos().getDERObject().getEncoded());
+        sigGen.getRawOutputStream().write(signedData.getSignerInfos().toASN1Primitive().getEncoded());
 
         sigGen.close();
 
@@ -782,7 +848,7 @@ public class CMSSignedDataParser
         OutputStream  out)
         throws CMSException, IOException
     {
-        ASN1StreamParser in = new ASN1StreamParser(original, CMSUtils.getMaximumMemory());
+        ASN1StreamParser in = new ASN1StreamParser(original);
         ContentInfoParser contentInfo = new ContentInfoParser((ASN1SequenceParser)in.readObject());
         SignedDataParser signedData = SignedDataParser.getInstance(contentInfo.getContent(BERTags.SEQUENCE));
 
@@ -796,7 +862,7 @@ public class CMSSignedDataParser
         sigGen.addObject(signedData.getVersion());
 
         // digests
-        sigGen.getRawOutputStream().write(signedData.getDigestAlgorithms().getDERObject().getEncoded());
+        sigGen.getRawOutputStream().write(signedData.getDigestAlgorithms().toASN1Primitive().getEncoded());
 
         // encap content info
         ContentInfoParser encapContentInfo = signedData.getEncapContentInfo();
@@ -849,7 +915,7 @@ public class CMSSignedDataParser
             }
         }
 
-        sigGen.getRawOutputStream().write(signedData.getSignerInfos().getDERObject().getEncoded());
+        sigGen.getRawOutputStream().write(signedData.getSignerInfos().toASN1Primitive().getEncoded());
 
         sigGen.close();
 
@@ -881,7 +947,7 @@ public class CMSSignedDataParser
     {
         return asn1SetParser == null
             ?   null
-            :   ASN1Set.getInstance(asn1SetParser.getDERObject());
+            :   ASN1Set.getInstance(asn1SetParser.toASN1Primitive());
     }
 
     private static void pipeEncapsulatedOctetString(ContentInfoParser encapContentInfo,

@@ -1,39 +1,40 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
-import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.RC2ParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cms.KEKIdentifier;
+import org.bouncycastle.asn1.cms.OriginatorInfo;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.cms.jcajce.JceKEKRecipientInfoGenerator;
+import org.bouncycastle.cms.jcajce.JceKeyAgreeRecipientInfoGenerator;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.cms.jcajce.JcePasswordRecipientInfoGenerator;
 
 /**
  * General class for generating a CMS enveloped-data message.
@@ -70,6 +71,7 @@ public class CMSEnvelopedGenerator
     protected CMSAttributeTableGenerator unprotectedAttributeGenerator = null;
 
     final SecureRandom rand;
+    protected OriginatorInfo originatorInfo;
 
     /**
      * base constructor
@@ -94,6 +96,12 @@ public class CMSEnvelopedGenerator
         this.unprotectedAttributeGenerator = unprotectedAttributeGenerator;
     }
 
+
+    public void setOriginatorInfo(OriginatorInformation originatorInfo)
+    {
+        this.originatorInfo = originatorInfo.toASN1Structure();
+    }
+
     /**
      * add a recipient.
      *
@@ -105,10 +113,14 @@ public class CMSEnvelopedGenerator
         X509Certificate cert)
         throws IllegalArgumentException
     {
-        KeyTransIntRecipientInfoGenerator ktrig = new KeyTransIntRecipientInfoGenerator();
-        ktrig.setRecipientCert(cert);
-
-        oldRecipientInfoGenerators.add(ktrig);
+        try
+        {
+            oldRecipientInfoGenerators.add(new JceKeyTransRecipientInfoGenerator(cert));
+        }
+        catch (CertificateEncodingException e)
+        {
+            throw new IllegalArgumentException("unable to encode certificate: " + e.getMessage());
+        }
     }
 
     /**
@@ -124,11 +136,7 @@ public class CMSEnvelopedGenerator
         byte[]      subKeyId)
         throws IllegalArgumentException
     {
-        KeyTransIntRecipientInfoGenerator ktrig = new KeyTransIntRecipientInfoGenerator();
-        ktrig.setRecipientPublicKey(key);
-        ktrig.setSubjectKeyIdentifier(new DEROctetString(subKeyId));
-
-        oldRecipientInfoGenerators.add(ktrig);
+        oldRecipientInfoGenerators.add(new JceKeyTransRecipientInfoGenerator(subKeyId, key));
     }
 
     /**
@@ -156,11 +164,7 @@ public class CMSEnvelopedGenerator
         SecretKey       key,
         KEKIdentifier   kekIdentifier)
     {
-        KEKIntRecipientInfoGenerator kekrig = new KEKIntRecipientInfoGenerator();
-        kekrig.setKEKIdentifier(kekIdentifier);
-        kekrig.setKeyEncryptionKey(key);
-
-        oldRecipientInfoGenerators.add(kekrig);
+        oldRecipientInfoGenerators.add(new JceKEKRecipientInfoGenerator(kekIdentifier, key));
     }
 
     /**
@@ -172,13 +176,9 @@ public class CMSEnvelopedGenerator
         CMSPBEKey pbeKey,
         String    kekAlgorithmOid)
     {
-        PBKDF2Params params = new PBKDF2Params(pbeKey.getSalt(), pbeKey.getIterationCount());
-
-        PasswordIntRecipientInfoGenerator prig = new PasswordIntRecipientInfoGenerator();
-        prig.setKeyDerivationAlgorithm(new AlgorithmIdentifier(PKCSObjectIdentifiers.id_PBKDF2, params));
-        prig.setKeyEncryptionKey(new SecretKeySpec(pbeKey.getEncoded(kekAlgorithmOid), kekAlgorithmOid));
-
-        oldRecipientInfoGenerators.add(prig);
+        oldRecipientInfoGenerators.add(new JcePasswordRecipientInfoGenerator(new ASN1ObjectIdentifier(kekAlgorithmOid), pbeKey.getPassword())
+            .setSaltAndIterationCount(pbeKey.getSalt(), pbeKey.getIterationCount())
+            .setPasswordConversionScheme((pbeKey instanceof PKCS5Scheme2UTF8PBEKey) ? PasswordRecipient.PKCS5_SCHEME2_UTF8 : PasswordRecipient.PKCS5_SCHEME2));
     }
 
     /**
@@ -280,18 +280,21 @@ public class CMSEnvelopedGenerator
         Provider         provider)
         throws NoSuchAlgorithmException, InvalidKeyException
     {
-        /* TODO
-         * "a recipient X.509 version 3 certificate that contains a key usage extension MUST
-         * assert the keyAgreement bit."
-         */
+        JceKeyAgreeRecipientInfoGenerator recipientInfoGenerator = new JceKeyAgreeRecipientInfoGenerator(new ASN1ObjectIdentifier(agreementAlgorithm), senderPrivateKey, senderPublicKey, new ASN1ObjectIdentifier(cekWrapAlgorithm)).setProvider(provider);
 
-        KeyAgreeIntRecipientInfoGenerator karig = new KeyAgreeIntRecipientInfoGenerator();
-        karig.setKeyAgreementOID(new DERObjectIdentifier(agreementAlgorithm));
-        karig.setKeyEncryptionOID(new DERObjectIdentifier(cekWrapAlgorithm));
-        karig.setRecipientCerts(recipientCerts);
-        karig.setSenderKeyPair(new KeyPair(senderPublicKey, senderPrivateKey));
+        for (Iterator it = recipientCerts.iterator(); it.hasNext();)
+        {
+            try
+            {
+                recipientInfoGenerator.addRecipient((X509Certificate)it.next());
+            }
+            catch (CertificateEncodingException e)
+            {
+                throw new IllegalArgumentException("unable to encode certificate: " + e.getMessage());
+            }
+        }
 
-        oldRecipientInfoGenerators.add(karig);
+        oldRecipientInfoGenerators.add(recipientInfoGenerator);
     }
 
     /**
@@ -306,7 +309,7 @@ public class CMSEnvelopedGenerator
 
     protected AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameters params) throws IOException
     {
-        DEREncodable asn1Params;
+        ASN1Encodable asn1Params;
         if (params != null)
         {
             asn1Params = ASN1Primitive.fromByteArray(params.getEncoded("ASN.1"));
@@ -317,42 +320,68 @@ public class CMSEnvelopedGenerator
         }
 
         return new AlgorithmIdentifier(
-            new DERObjectIdentifier(encryptionOID),
+            new ASN1ObjectIdentifier(encryptionOID),
             asn1Params);
     }
 
-    protected AlgorithmParameters generateParameters(String encryptionOID, SecretKey encKey, Provider encProvider)
-        throws CMSException
+    protected void convertOldRecipients(SecureRandom rand, Provider provider)
     {
-        try
+        for (Iterator it = oldRecipientInfoGenerators.iterator(); it.hasNext();)
         {
-            AlgorithmParameterGenerator pGen = AlgorithmParameterGenerator.getInstance(encryptionOID, encProvider.getName());
+            Object recipient = it.next();
 
-            if (encryptionOID.equals(RC2_CBC))
+            if (recipient instanceof JceKeyTransRecipientInfoGenerator)
             {
-                byte[]  iv = new byte[8];
+                JceKeyTransRecipientInfoGenerator recip = (JceKeyTransRecipientInfoGenerator)recipient;
 
-                rand.nextBytes(iv);
+                if (provider != null)
+                {
+                    recip.setProvider(provider);
+                }
 
-                try
-                {
-                    pGen.init(new RC2ParameterSpec(encKey.getEncoded().length * 8, iv), rand);
-                }
-                catch (InvalidAlgorithmParameterException e)
-                {
-                    throw new CMSException("parameters generation error: " + e, e);
-                }
+                recipientInfoGenerators.add(recip);
             }
+            else if (recipient instanceof KEKRecipientInfoGenerator)
+            {
+                JceKEKRecipientInfoGenerator recip = (JceKEKRecipientInfoGenerator)recipient;
 
-            return pGen.generateParameters();
+                if (provider != null)
+                {
+                    recip.setProvider(provider);
+                }
+
+                recip.setSecureRandom(rand);
+
+                recipientInfoGenerators.add(recip);
+            }
+            else if (recipient instanceof JcePasswordRecipientInfoGenerator)
+            {
+                JcePasswordRecipientInfoGenerator recip = (JcePasswordRecipientInfoGenerator)recipient;
+
+                if (provider != null)
+                {
+                    recip.setProvider(provider);
+                }
+
+                recip.setSecureRandom(rand);
+
+                recipientInfoGenerators.add(recip);
+            }
+            else if (recipient instanceof JceKeyAgreeRecipientInfoGenerator)
+            {
+                JceKeyAgreeRecipientInfoGenerator recip = (JceKeyAgreeRecipientInfoGenerator)recipient;
+
+                if (provider != null)
+                {
+                    recip.setProvider(provider);
+                }
+
+                recip.setSecureRandom(rand);
+
+                recipientInfoGenerators.add(recip);
+            }
         }
-        catch (NoSuchProviderException e)
-        {
-            return null;
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            return null;
-        }
+
+        oldRecipientInfoGenerators.clear();
     }
 }

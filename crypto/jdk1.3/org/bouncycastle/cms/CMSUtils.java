@@ -3,11 +3,12 @@ package org.bouncycastle.cms;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.MessageDigest;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.Security;
 import java.security.cert.CRLException;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
@@ -16,6 +17,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -32,8 +34,7 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
+import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.util.Store;
 import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.util.io.TeeInputStream;
@@ -41,13 +42,6 @@ import org.bouncycastle.util.io.TeeOutputStream;
 
 class CMSUtils
 {
-    private static final Runtime RUNTIME = Runtime.getRuntime();
-    
-    static int getMaximumMemory()
-    {
-            return Integer.MAX_VALUE;
-    }
-    
     static ContentInfo readContentInfo(
         byte[] input)
         throws CMSException
@@ -61,7 +55,7 @@ class CMSUtils
         throws CMSException
     {
         // enforce some limit checking
-        return readContentInfo(new ASN1InputStream(input, getMaximumMemory()));
+        return readContentInfo(new ASN1InputStream(input));
     } 
 
     static List getCertificatesFromStore(CertStore certStore)
@@ -197,7 +191,7 @@ class CMSUtils
 
         for (Iterator it = derObjects.iterator(); it.hasNext();)
         {
-            v.add((DEREncodable)it.next());
+            v.add((ASN1Encodable)it.next());
         }
 
         return new BERSet(v);
@@ -209,7 +203,7 @@ class CMSUtils
 
         for (Iterator it = derObjects.iterator(); it.hasNext();)
         {
-            v.add((DEREncodable)it.next());
+            v.add((ASN1Encodable)it.next());
         }
 
         return new DERSet(v);
@@ -310,20 +304,8 @@ class CMSUtils
         Iterator it = digests.iterator();
         while (it.hasNext())
         {
-            MessageDigest digest = (MessageDigest)it.next();
-            result = new TeeInputStream(result, new DigOutputStream(digest));
-        }
-        return result;
-    }
-
-    static OutputStream attachDigestsToOutputStream(Collection digests, OutputStream s)
-    {
-        OutputStream result = s;
-        Iterator it = digests.iterator();
-        while (it.hasNext())
-        {
-            MessageDigest digest = (MessageDigest)it.next();
-            result = getSafeTeeOutputStream(result, new DigOutputStream(digest));
+            DigestCalculator digest = (DigestCalculator)it.next();
+            result = new TeeInputStream(result, digest.getOutputStream());
         }
         return result;
     }

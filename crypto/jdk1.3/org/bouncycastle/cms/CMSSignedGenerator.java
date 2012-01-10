@@ -1,10 +1,12 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
+import java.security.AlgorithmParameters;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
-import java.security.cert.X509Certificate;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.ArrayList;
@@ -15,16 +17,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
-import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -33,11 +34,8 @@ import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle.util.Store;
-import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509Store;
 
@@ -74,7 +72,6 @@ public class CMSSignedGenerator
 
     private static final Set NO_PARAMS = new HashSet();
     private static final Map EC_ALGORITHMS = new HashMap();
-    private static final Map PSS_PARAMS = new HashMap();
 
     static
     {
@@ -91,34 +88,6 @@ public class CMSSignedGenerator
         EC_ALGORITHMS.put(DIGEST_SHA256, ENCRYPTION_ECDSA_WITH_SHA256);
         EC_ALGORITHMS.put(DIGEST_SHA384, ENCRYPTION_ECDSA_WITH_SHA384);
         EC_ALGORITHMS.put(DIGEST_SHA512, ENCRYPTION_ECDSA_WITH_SHA512);
- 
-         // default parameters for each algorithm
-         try
-         {
-         PSS_PARAMS.put("SHA1withRSAandMGF1", new AlgorithmIdentifier(
-                 PKCSObjectIdentifiers.id_RSASSA_PSS,
-                 ASN1Primitive.fromByteArray(Hex.decode("3000"))));
-         PSS_PARAMS.put("SHA224withRSAandMGF1", new AlgorithmIdentifier(
-                 PKCSObjectIdentifiers.id_RSASSA_PSS,
-                 ASN1Primitive.fromByteArray(Hex.decode(
-                     "3034a00f300d06096086480165030402040500a11c301a06092a864886f70d010108300d06096086480165030402040500a20302011c"))));
-         PSS_PARAMS.put("SHA256withRSAandMGF1", new AlgorithmIdentifier(
-                 PKCSObjectIdentifiers.id_RSASSA_PSS,
-                 ASN1Primitive.fromByteArray(Hex.decode(
-                     "3034a00f300d06096086480165030402010500a11c301a06092a864886f70d010108300d06096086480165030402010500a203020120"))));
-         PSS_PARAMS.put("SHA384withRSAandMGF1", new AlgorithmIdentifier(
-                 PKCSObjectIdentifiers.id_RSASSA_PSS,
-                 ASN1Primitive.fromByteArray(Hex.decode(
-                     "3034a00f300d06096086480165030402020500a11c301a06092a864886f70d010108300d06096086480165030402020500a203020130"))));
-         PSS_PARAMS.put("SHA512withRSAandMGF1", new AlgorithmIdentifier(
-                 PKCSObjectIdentifiers.id_RSASSA_PSS,
-                 ASN1Primitive.fromByteArray(Hex.decode(
-                     "3034a00f300d06096086480165030402030500a11c301a06092a864886f70d010108300d06096086480165030402030500a203020140"))));
-         }
-         catch (IOException e)
-         {
-             // ignore - this can never happen
-         }
     }
 
     protected List certs = new ArrayList();
@@ -185,33 +154,6 @@ public class CMSSignedGenerator
         return encOID;
     }
 
-    protected AlgorithmIdentifier getEncAlgorithmIdentifier(String encOid, Signature sig)
-        throws IOException
-    {
-        if (NO_PARAMS.contains(encOid))
-        {
-            return new AlgorithmIdentifier(
-                  new DERObjectIdentifier(encOid));
-        }
-        else
-        {
-            if (encOid.equals(CMSSignedGenerator.ENCRYPTION_RSA_PSS))
-            {
-                //AlgorithmParameters sigParams = sig.getParameters();
-//
-                //return new AlgorithmIdentifier(
-                    //new DERObjectIdentifier(encOid), ASN1Object.fromByteArray(sigParams.getEncoded()));
-                return (AlgorithmIdentifier)PSS_PARAMS.get(sig.getAlgorithm());
-
-            }
-            else
-            {
-                return new AlgorithmIdentifier(
-                    new DERObjectIdentifier(encOid), new DERNull());
-            }
-        }
-    }
-
     protected Map getBaseParameters(DERObjectIdentifier contentType, AlgorithmIdentifier digAlgId, byte[] hash)
     {
         Map param = new HashMap();
@@ -239,7 +181,7 @@ public class CMSSignedGenerator
      * Note: this assumes the CertStore will support null in the get
      * methods.
      * @param certStore CertStore containing the public key certificates and CRLs
-     * @throws java.security.cert.CertStoreException  if an issue occurs processing the CertStore
+     * @throws org.bouncycastle.jce.cert.CertStoreException  if an issue occurs processing the CertStore
      * @throws CMSException  if an issue occurse transforming data from the CertStore into the message
      * @deprecated use addCertificates and addCRLs
      */
@@ -335,15 +277,5 @@ public class CMSSignedGenerator
     public Map getGeneratedDigests()
     {
         return new HashMap(digests);
-    }
-
-    static SignerIdentifier getSignerIdentifier(X509Certificate cert)
-    {
-        return new SignerIdentifier(CMSUtils.getIssuerAndSerialNumber(cert));
-    }
-
-    static SignerIdentifier getSignerIdentifier(byte[] subjectKeyIdentifier)
-    {
-        return new SignerIdentifier(new DEROctetString(subjectKeyIdentifier));    
     }
 }
