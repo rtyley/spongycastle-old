@@ -1140,7 +1140,7 @@ public class CertPathValidatorUtilities
         {
             ASN1Object derObject = CertPathValidatorUtilities.getExtensionValue(completeCRL,
                     CRL_NUMBER);
-            if (derObect != null) {
+            if (derObject != null) {
             completeCRLNumber = ASN1Integer.getInstance(derObject).getPositiveValue();
             }
         }
