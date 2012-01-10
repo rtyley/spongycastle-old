@@ -63,6 +63,8 @@ public  class PKIXCertPath
     private List sortCerts(
         List certs)
     {
+        try
+        {
         if (certs.size() < 2)
         {
             return certs;
@@ -148,6 +150,11 @@ public  class PKIXCertPath
         }
         
         return retList;
+        }
+        catch (Exception e)
+        {
+             return certs;
+	}
     }
 
     PKIXCertPath(List certificates)

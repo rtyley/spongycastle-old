@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
@@ -1137,7 +1138,7 @@ public class CertPathValidatorUtilities
         BigInteger completeCRLNumber = null;
         try
         {
-            ASN1Object derObect = CertPathValidatorUtilities.getExtensionValue(completeCRL,
+            ASN1Object derObject = CertPathValidatorUtilities.getExtensionValue(completeCRL,
                     CRL_NUMBER);
             if (derObect != null) {
             completeCRLNumber = ASN1Integer.getInstance(derObject).getPositiveValue();
