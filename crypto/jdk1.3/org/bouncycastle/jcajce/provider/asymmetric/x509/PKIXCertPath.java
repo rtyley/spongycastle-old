@@ -105,7 +105,7 @@ public  class PKIXCertPath
             for (int j = 0; j != certs.size(); j++)
             {
                 X509Certificate c = (X509Certificate)certs.get(j);
-                if (c.getIssuerX509Principal().equals(subject))
+                if (PrincipalUtil.getIssuerX509Principal(c).equals(subject))
                 {
                     found = true;
                     break;
