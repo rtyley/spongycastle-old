@@ -1,10 +1,8 @@
 package org.bouncycastle.cms;
 
 import java.io.IOException;
-import java.security.AlgorithmParameters;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
-import java.security.Signature;
 import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.security.interfaces.DSAPrivateKey;
@@ -17,10 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
@@ -152,31 +148,6 @@ public class CMSSignedGenerator
         }
         
         return encOID;
-    }
-
-    protected AlgorithmIdentifier getEncAlgorithmIdentifier(String encOid, Signature sig)
-        throws IOException
-    {
-        if (NO_PARAMS.contains(encOid))
-        {
-            return new AlgorithmIdentifier(
-                  new ASN1ObjectIdentifier(encOid));
-        }
-        else
-        {
-            if (encOid.equals(CMSSignedGenerator.ENCRYPTION_RSA_PSS))
-            {
-                AlgorithmParameters sigParams = sig.getParameters();
-
-                return new AlgorithmIdentifier(
-                    new ASN1ObjectIdentifier(encOid), ASN1Primitive.fromByteArray(sigParams.getEncoded()));
-            }
-            else
-            {
-                return new AlgorithmIdentifier(
-                    new ASN1ObjectIdentifier(encOid), new DERNull());
-            }
-        }
     }
 
     protected Map getBaseParameters(DERObjectIdentifier contentType, AlgorithmIdentifier digAlgId, byte[] hash)
