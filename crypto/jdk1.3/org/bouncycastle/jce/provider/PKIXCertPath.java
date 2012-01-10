@@ -208,7 +208,7 @@ public  class PKIXCertPath
                     outStream = new ByteArrayOutputStream();
                     derOutStream = new DEROutputStream(outStream);
 
-                    derOutStream.writeObject(e.nextElement());
+                    derOutStream.writeObject((ASN1Encodable)e.nextElement());
                     derOutStream.close();
 
                     certInStream = new ByteArrayInputStream(outStream

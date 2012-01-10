@@ -1,6 +1,7 @@
 package org.bouncycastle.jce.provider;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
@@ -62,7 +63,7 @@ public class X509CRLObject
             
             if (c.getSignatureAlgorithm().getParameters() != null)
             {
-                this.sigAlgParams = ((ASN1Encodable)c.getSignatureAlgorithm().getParameters()).getDEREncoded();
+                this.sigAlgParams = ((ASN1Encodable)c.getSignatureAlgorithm().getParameters()).getEncoded(ASN1Encoding.DER);
             }
             else
             {

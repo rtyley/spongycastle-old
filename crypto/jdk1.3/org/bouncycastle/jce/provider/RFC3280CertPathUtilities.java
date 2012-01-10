@@ -179,7 +179,7 @@ public class RFC3280CertPathUtilities
                         }
                         for (int j = 0; j < genNames.length; j++)
                         {
-                            Enumeration e = ASN1Sequence.getInstance(genNames[j].getName().getASN1Object()).getObjects();
+                            Enumeration e = ASN1Sequence.getInstance(genNames[j].getName().toASN1Primitive()).getObjects();
                             ASN1EncodableVector vec = new ASN1EncodableVector();
                             while (e.hasMoreElements())
                             {
@@ -306,7 +306,7 @@ public class RFC3280CertPathUtilities
                 {
                     try
                     {
-                        if (Arrays.areEqual(genNames[j].getName().getASN1Object().getEncoded(), issuerBytes))
+                        if (Arrays.areEqual(genNames[j].getName().toASN1Primitive().getEncoded(), issuerBytes))
                         {
                             matchIssuer = true;
                         }
@@ -359,8 +359,7 @@ public class RFC3280CertPathUtilities
         // (d) (1)
         if (idp != null && idp.getOnlySomeReasons() != null && dp.getReasons() != null)
         {
-            return new ReasonsMask(dp.getReasons().intValue()).intersect(new ReasonsMask(idp.getOnlySomeReasons()
-                .intValue()));
+            return new ReasonsMask(dp.getReasons()).intersect(new ReasonsMask(idp.getOnlySomeReasons()));
         }
         // (d) (4)
         if ((idp == null || idp.getOnlySomeReasons() == null) && dp.getReasons() == null)
@@ -370,9 +369,9 @@ public class RFC3280CertPathUtilities
         // (d) (2) and (d)(3)
         return (dp.getReasons() == null
             ? ReasonsMask.allReasons
-            : new ReasonsMask(dp.getReasons().intValue())).intersect(idp == null
+            : new ReasonsMask(dp.getReasons())).intersect(idp == null
             ? ReasonsMask.allReasons
-            : new ReasonsMask(idp.getOnlySomeReasons().intValue()));
+            : new ReasonsMask(idp.getOnlySomeReasons()));
 
     }
 
