@@ -101,6 +101,12 @@ public class KeyTransRecipientId
         return issuer;
     }
 
+    // TODO: change to getSubjectKeyIdentifier() when dependency on X509CertSelector removed.
+    byte[] getSubjectKeyId()
+    {
+        return Arrays.clone(subjectKeyId);
+    }
+
     public int hashCode()
     {
         int code = Arrays.hashCode(subjectKeyId);

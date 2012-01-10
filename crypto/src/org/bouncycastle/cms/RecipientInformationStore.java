@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.asn1.ASN1OctetString;
-
 public class RecipientInformationStore
 {
     private final List all; //ArrayList[RecipientInformation]
@@ -84,8 +82,9 @@ public class RecipientInformationStore
         if (selector instanceof KeyTransRecipientId)
         {
             KeyTransRecipientId keyTrans = (KeyTransRecipientId)selector;
+            byte[]              subjectKeyId = keyTrans.getSubjectKeyId();
 
-            if (keyTrans.getIssuerName() != null && keyTrans.getSubjectKeyIdentifier() != null)
+            if (keyTrans.getIssuerName() != null && subjectKeyId != null)
             {
                 List results = new ArrayList();
 
@@ -96,7 +95,7 @@ public class RecipientInformationStore
                     results.addAll(match1);
                 }
 
-                Collection match2 = getRecipients(new KeyTransRecipientId(ASN1OctetString.getInstance(selector.getSubjectKeyIdentifier()).getOctets()));
+                Collection match2 = getRecipients(new KeyTransRecipientId(subjectKeyId));
 
                 if (match2 != null)
                 {
