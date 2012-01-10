@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -34,17 +35,20 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
 import org.bouncycastle.asn1.misc.NetscapeCertType;
 import org.bouncycastle.asn1.misc.NetscapeRevocationURL;
 import org.bouncycastle.asn1.misc.VerisignCzagExtension;
 import org.bouncycastle.asn1.util.ASN1Dump;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.util.Arrays;
@@ -143,12 +147,19 @@ public class X509CertificateObject
 
     public Principal getIssuerDN()
     {
-        return new X509Principal(c.getIssuer());
+        try
+        {
+            return new X509Principal(X500Name.getInstance(c.getIssuer().getEncoded()));
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
     }
 
     public Principal getSubjectDN()
     {
-        return new X509Principal(c.getSubject());
+        return new X509Principal(X500Name.getInstance(c.getSubject().toASN1Primitive()));
     }
 
     public Date getNotBefore()
@@ -229,7 +240,14 @@ public class X509CertificateObject
     {
         if (c.getSignatureAlgorithm().getParameters() != null)
         {
-            return c.getSignatureAlgorithm().getParameters().getASN1Object().getDEREncoded();
+            try
+            {
+                return c.getSignatureAlgorithm().getParameters().toASN1Primitive().getEncoded(ASN1Encoding.DER);
+            }
+            catch (IOException e)
+            {
+                return null;
+            }
         }
         else
         {
@@ -297,7 +315,7 @@ public class X509CertificateObject
 
                 for (int i = 0; i != seq.size(); i++)
                 {
-                    list.add(((ASN1ObjectIdentifier)seq.getObjectAt(i)).getId());
+                    list.add(((DERObjectIdentifier)seq.getObjectAt(i)).getId());
                 }
                 
                 return Collections.unmodifiableList(list);
@@ -348,7 +366,7 @@ public class X509CertificateObject
 
                 while (e.hasMoreElements())
                 {
-                    ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
+                    DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
                     X509Extension       ext = extensions.getExtension(oid);
 
                     if (ext.isCritical())
@@ -370,7 +388,7 @@ public class X509CertificateObject
 
         if (exts != null)
         {
-            X509Extension   ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
+            X509Extension   ext = exts.getExtension(new DERObjectIdentifier(oid));
             if (ext != null)
             {
                 return ext.getValue().getOctets();
@@ -386,7 +404,7 @@ public class X509CertificateObject
 
         if (exts != null)
         {
-            X509Extension   ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
+            X509Extension   ext = exts.getExtension(new DERObjectIdentifier(oid));
 
             if (ext != null)
             {
@@ -417,7 +435,7 @@ public class X509CertificateObject
 
                 while (e.hasMoreElements())
                 {
-                    ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
+                    DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
                     X509Extension       ext = extensions.getExtension(oid);
 
                     if (!ext.isCritical())
@@ -445,7 +463,7 @@ public class X509CertificateObject
 
                 while (e.hasMoreElements())
                 {
-                    ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
+                    DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
                     String              oidId = oid.getId();
 
                     if (oidId.equals(RFC3280CertPathUtilities.KEY_USAGE)
@@ -478,7 +496,14 @@ public class X509CertificateObject
 
     public PublicKey getPublicKey()
     {
-        return JDKKeyFactory.createPublicKeyFromPublicKeyInfo(c.getSubjectPublicKeyInfo());
+        try
+        {
+            return BouncyCastleProvider.getPublicKey(c.getSubjectPublicKeyInfo());
+        }
+        catch (IOException e)
+        {
+            return null;   // should never happen...
+        }
     }
 
     public byte[] getEncoded()
@@ -559,7 +584,7 @@ public class X509CertificateObject
     }
 
     public ASN1Encodable getBagAttribute(
-        ASN1ObjectIdentifier oid)
+        DERObjectIdentifier oid)
     {
         return attrCarrier.getBagAttribute(oid);
     }
@@ -611,7 +636,7 @@ public class X509CertificateObject
 
             while (e.hasMoreElements())
             {
-                ASN1ObjectIdentifier     oid = (ASN1ObjectIdentifier)e.nextElement();
+                DERObjectIdentifier     oid = (DERObjectIdentifier)e.nextElement();
                 X509Extension           ext = extensions.getExtension(oid);
 
                 if (ext.getValue() != null)
@@ -621,11 +646,11 @@ public class X509CertificateObject
                     buf.append("                       critical(").append(ext.isCritical()).append(") ");
                     try
                     {
-                        if (oid.equals(X509Extensions.BasicConstraints))
+                        if (oid.equals(X509Extension.basicConstraints))
                         {
                             buf.append(new BasicConstraints((ASN1Sequence)dIn.readObject())).append(nl);
                         }
-                        else if (oid.equals(X509Extensions.KeyUsage))
+                        else if (oid.equals(X509Extension.keyUsage))
                         {
                             buf.append(new KeyUsage((DERBitString)dIn.readObject())).append(nl);
                         }
