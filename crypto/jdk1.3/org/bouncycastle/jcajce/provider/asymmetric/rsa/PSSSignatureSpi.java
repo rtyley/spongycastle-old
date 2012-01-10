@@ -110,11 +110,6 @@ public class PSSSignatureSpi
             this.saltLength = 20;
         }
 
-        if (paramSpec != null)
-        {
-            this.saltLength = paramSpec.getSaltLength();
-        }
-
         this.isRaw = isRaw;
 
         setupContentDigest();
