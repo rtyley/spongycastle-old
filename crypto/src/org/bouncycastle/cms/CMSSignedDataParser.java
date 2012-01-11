@@ -934,11 +934,14 @@ public class CMSSignedDataParser
 
         if (asn1Set != null)
         {
-            ASN1TaggedObject taggedObj = (asn1SetParser instanceof BERSetParser)
-                ?   new BERTaggedObject(false, tagNo, asn1Set)
-                :   new DERTaggedObject(false, tagNo, asn1Set);
-
-            asn1Gen.getRawOutputStream().write(taggedObj.getEncoded());                
+            if (asn1SetParser instanceof BERSetParser)
+            {
+                asn1Gen.getRawOutputStream().write(new BERTaggedObject(false, tagNo, asn1Set).getEncoded());
+            }
+            else
+            {
+                asn1Gen.getRawOutputStream().write(new DERTaggedObject(false, tagNo, asn1Set).getEncoded());
+            }
         }
     }
 
