@@ -7,6 +7,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.cert.CRLException;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
@@ -20,10 +22,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.bouncycastle.asn1.ASN1Boolean;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -49,8 +52,6 @@ import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
 import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.cms.SimpleAttributeTableGenerator;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreException;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -77,7 +78,6 @@ public class TimeStampTokenGenerator
     String          digestOID;
     AttributeTable  signedAttr;
     AttributeTable  unsignedAttr;
-    CertStore       certsAndCrls;
 
     private List certs = new ArrayList();
     private List crls = new ArrayList();
@@ -348,37 +348,37 @@ public class TimeStampTokenGenerator
         Accuracy accuracy = null;
         if (accuracySeconds > 0 || accuracyMillis > 0 || accuracyMicros > 0)
         {
-            DERInteger seconds = null;
+            ASN1Integer seconds = null;
             if (accuracySeconds > 0)
             {
-                seconds = new DERInteger(accuracySeconds);
+                seconds = new ASN1Integer(accuracySeconds);
             }
 
-            DERInteger millis = null;
+            ASN1Integer millis = null;
             if (accuracyMillis > 0)
             {
-                millis = new DERInteger(accuracyMillis);
+                millis = new ASN1Integer(accuracyMillis);
             }
 
-            DERInteger micros = null;
+            ASN1Integer micros = null;
             if (accuracyMicros > 0)
             {
-                micros = new DERInteger(accuracyMicros);
+                micros = new ASN1Integer(accuracyMicros);
             }
 
             accuracy = new Accuracy(seconds, millis, micros);
         }
 
-        DERBoolean derOrdering = null;
+        ASN1Boolean derOrdering = null;
         if (ordering)
         {
-            derOrdering = new DERBoolean(ordering);
+            derOrdering = new ASN1Boolean(ordering);
         }
 
-        DERInteger  nonce = null;
+        ASN1Integer  nonce = null;
         if (request.getNonce() != null)
         {
-            nonce = new DERInteger(request.getNonce());
+            nonce = new ASN1Integer(request.getNonce());
         }
 
         ASN1ObjectIdentifier tsaPolicy = new ASN1ObjectIdentifier(tsaPolicyOID);
@@ -388,8 +388,8 @@ public class TimeStampTokenGenerator
         }
 
         TSTInfo tstInfo = new TSTInfo(tsaPolicy,
-                messageImprint, new DERInteger(serialNumber),
-                new DERGeneralizedTime(genTime), accuracy, derOrdering,
+                messageImprint, new ASN1Integer(serialNumber),
+                new ASN1GeneralizedTime(genTime), accuracy, derOrdering,
                 nonce, tsa, request.getExtensions());
 
         try

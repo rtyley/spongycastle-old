@@ -297,7 +297,7 @@ public class TimeStampToken
 
             if (certID.getIssuerSerial() != null)
             {
-                IssuerAndSerialNumber issuerSerial = certHolder.getIssuerAndSerialNumber();
+                IssuerAndSerialNumber issuerSerial = new IssuerAndSerialNumber(certHolder.toASN1Structure());
 
                 if (!certID.getIssuerSerial().getSerial().equals(issuerSerial.getSerialNumber()))
                 {
@@ -309,7 +309,7 @@ public class TimeStampToken
 
                 for (int i = 0; i != names.length; i++)
                 {
-                    if (names[i].getTagNo() == 4 && X500Name.getInstance(names[i].getName()).equals(X500Name.getInstance(issuerSerial.getName().getDERObject())))
+                    if (names[i].getTagNo() == 4 && X500Name.getInstance(names[i].getName()).equals(X500Name.getInstance(issuerSerial.getName())))
                     {
                         found = true;
                         break;

@@ -1781,7 +1781,7 @@ public class CertTest
         Vector extOids = new Vector();
         Vector extValues = new Vector();
         
-        CRLReason crlReason = new CRLReason(CRLReason.privilegeWithdrawn);
+        CRLReason crlReason = CRLReason.lookup(CRLReason.privilegeWithdrawn);
         
         try
         {
@@ -1866,7 +1866,7 @@ public class CertTest
         Vector extOids = new Vector();
         Vector extValues = new Vector();
         
-        CRLReason crlReason = new CRLReason(CRLReason.privilegeWithdrawn);
+        CRLReason crlReason = CRLReason.lookup(CRLReason.privilegeWithdrawn);
         
         try
         {
@@ -2293,12 +2293,12 @@ public class CertTest
         CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
 
         X509Certificate cert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(info.getEncoded()));
-        if (cert == null || !areEqual(cert.getEncoded(), certs.get(0).getDERObject().getEncoded()))
+        if (cert == null || !areEqual(cert.getEncoded(), certs.get(0).toASN1Primitive().getEncoded()))
         {
             fail("PKCS7 cert not read");
         }
         X509CRL crl = (X509CRL)cf.generateCRL(new ByteArrayInputStream(info.getEncoded()));
-        if (crl == null || !areEqual(crl.getEncoded(), crls.get(0).getDERObject().getEncoded()))
+        if (crl == null || !areEqual(crl.getEncoded(), crls.get(0).toASN1Primitive().getEncoded()))
         {
             fail("PKCS7 crl not read");
         }

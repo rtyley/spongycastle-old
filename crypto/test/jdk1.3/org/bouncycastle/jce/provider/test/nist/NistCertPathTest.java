@@ -30,6 +30,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
@@ -619,7 +620,7 @@ public class NistCertPathTest
         {
             ASN1Encodable extValue = X509ExtensionUtil.fromExtensionValue(extBytes);
             
-            return new TrustAnchor(cert, extValue.getDEREncoded());
+            return new TrustAnchor(cert, extValue.toASN1Primitive().getEncoded(ASN1Encoding.DER));
         }
         
         return new TrustAnchor(cert, null);

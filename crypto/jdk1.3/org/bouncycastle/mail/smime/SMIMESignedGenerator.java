@@ -50,13 +50,22 @@ import org.bouncycastle.x509.X509Store;
  * A simple example of usage.
  *
  * <pre>
- *      CertStore           certs...
- *      SMIMESignedGenerator  fact = new SMIMESignedGenerator();
+ *      X509Certificate signCert = ...
+ *      KeyPair         signKP = ...
  *
- *      fact.addSigner(privKey, cert, SMIMESignedGenerator.DIGEST_SHA1);
- *      fact.addCertificatesAndCRLs(certs);
+ *      List certList = new ArrayList();
  *
- *      MimeMultipart       smime = fact.generate(content, "BC");
+ *      certList.add(signCert);
+ *
+ *      Store certs = new JcaCertStore(certList);
+ *
+ *      SMIMESignedGenerator gen = new SMIMESignedGenerator();
+ *
+ *      gen.addSignerInfoGenerator(new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").build("SHA1withRSA", signKP.getPrivate(), signCert));
+ *
+ *      gen.addCertificates(certs);
+ *
+ *      MimeMultipart       smime = fact.generate(content);
  * </pre>
  * <p>
  * Note: if you are using this class with AS2 or some other protocol
@@ -448,7 +457,7 @@ public class SMIMESignedGenerator
 
     private MimeMultipart make(
         MimeBodyPart    content)
-    throws NoSuchAlgorithmException, SMIMEException
+    throws SMIMEException
     {
         try
         {
@@ -518,7 +527,7 @@ public class SMIMESignedGenerator
      */
     private MimeBodyPart makeEncapsulated(
         MimeBodyPart    content)
-        throws NoSuchAlgorithmException, SMIMEException
+        throws SMIMEException
     {
         try
         {
@@ -628,7 +637,7 @@ public class SMIMESignedGenerator
 
     public MimeMultipart generate(
         MimeBodyPart    content)
-        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+        throws SMIMEException
     {
         return make(makeContentBodyPart(content));
     }
@@ -642,7 +651,7 @@ public class SMIMESignedGenerator
      */
     public MimeBodyPart generateEncapsulated(
         MimeBodyPart    content)
-        throws NoSuchAlgorithmException, NoSuchProviderException, SMIMEException
+        throws SMIMEException
     {
         return makeEncapsulated(makeContentBodyPart(content));
     }
@@ -727,6 +736,7 @@ public class SMIMESignedGenerator
      * or signers but that still carries certificates and CRLs.
      *
      * @return a MimeBodyPart containing the certs and CRLs.
+     * @deprecated use generateCertificateManagement()
      */
     public MimeBodyPart generateCertificateManagement(
        String provider)
@@ -740,6 +750,7 @@ public class SMIMESignedGenerator
      * or signers but that still carries certificates and CRLs.
      * 
      * @return a MimeBodyPart containing the certs and CRLs.
+     * @deprecated use generateCertificateManagement()
      */
     public MimeBodyPart generateCertificateManagement(
        Provider provider)
@@ -762,7 +773,34 @@ public class SMIMESignedGenerator
             throw new SMIMEException("exception putting body part together.", e);
         }
     }
-    
+
+   /**
+     * Creates a certificate management message which is like a signed message with no content
+     * or signers but that still carries certificates and CRLs.
+     *
+     * @return a MimeBodyPart containing the certs and CRLs.
+     */
+    public MimeBodyPart generateCertificateManagement()
+       throws SMIMEException
+    {
+        try
+        {
+            MimeBodyPart sig = new MimeBodyPart();
+
+            sig.setContent(new ContentSigner(null, true), CERTIFICATE_MANAGEMENT_CONTENT);
+            sig.addHeader("Content-Type", CERTIFICATE_MANAGEMENT_CONTENT);
+            sig.addHeader("Content-Disposition", "attachment; filename=\"smime.p7c\"");
+            sig.addHeader("Content-Description", "S/MIME Certificate Management Message");
+            sig.addHeader("Content-Transfer-Encoding", encoding);
+
+            return sig;
+        }
+        catch (MessagingException e)
+        {
+            throw new SMIMEException("exception putting body part together.", e);
+        }
+    }
+
     private class Signer
     {
         final PrivateKey      key;
