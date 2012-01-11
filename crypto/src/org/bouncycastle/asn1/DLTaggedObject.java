@@ -1,6 +1,5 @@
 package org.bouncycastle.asn1;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
@@ -26,24 +25,65 @@ public class DLTaggedObject
         super(explicit, tagNo, obj);
     }
 
+    boolean isConstructed()
+    {
+        if (!empty)
+        {
+            if (explicit)
+            {
+                return true;
+            }
+            else
+            {
+                ASN1Primitive primitive = obj.toASN1Primitive().toDLObject();
+
+                return primitive.isConstructed();
+            }
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    int encodedLength()
+        throws IOException
+    {
+        if (!empty)
+        {
+            int length = obj.toASN1Primitive().toDLObject().encodedLength();
+
+            if (explicit)
+            {
+                return  StreamUtil.calculateTagLength(tagNo) + StreamUtil.calculateBodyLength(length) + length;
+            }
+            else
+            {
+                // header length already in calculation
+                length = length - 1;
+
+                return StreamUtil.calculateTagLength(tagNo) + length;
+            }
+        }
+        else
+        {
+            return StreamUtil.calculateTagLength(tagNo) + 1;
+        }
+    }
+
     void encode(
         ASN1OutputStream out)
         throws IOException
     {
         if (!empty)
         {
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            ASN1OutputStream      sOut = new DLOutputStream(bOut);
-
-            sOut.writeObject(obj);
-
-            sOut.close();
-
-            byte[] bytes = bOut.toByteArray();
+            ASN1Primitive primitive = obj.toASN1Primitive().toDLObject();
 
             if (explicit)
             {
-                out.writeEncoded(BERTags.CONSTRUCTED | BERTags.TAGGED, tagNo, bytes);
+                out.writeTag(BERTags.CONSTRUCTED | BERTags.TAGGED, tagNo);
+                out.writeLength(primitive.encodedLength());
+                out.writeObject(primitive);
             }
             else
             {
@@ -51,7 +91,7 @@ public class DLTaggedObject
                 // need to mark constructed types...
                 //
                 int flags;
-                if ((bytes[0] & BERTags.CONSTRUCTED) != 0)
+                if (primitive.isConstructed())
                 {
                     flags = BERTags.CONSTRUCTED | BERTags.TAGGED;
                 }
@@ -61,7 +101,7 @@ public class DLTaggedObject
                 }
 
                 out.writeTag(flags, tagNo);
-                out.write(bytes, 1, bytes.length - 1);
+                out.writeImplicitObject(primitive);
             }
         }
         else

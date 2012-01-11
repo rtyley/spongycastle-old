@@ -2,12 +2,15 @@ package org.bouncycastle.asn1.x509;
 
 import java.util.Enumeration;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -41,11 +44,9 @@ public class TBSCertList
     {
         ASN1Sequence  seq;
 
-        DERInteger          userCertificate;
-        Time                revocationDate;
         X509Extensions      crlEntryExtensions;
 
-        public CRLEntry(
+        private CRLEntry(
             ASN1Sequence  seq)
         {
             if (seq.size() < 2 || seq.size() > 3)
@@ -54,19 +55,30 @@ public class TBSCertList
             }
             
             this.seq = seq;
+        }
 
-            userCertificate = DERInteger.getInstance(seq.getObjectAt(0));
-            revocationDate = Time.getInstance(seq.getObjectAt(1));
+        public static CRLEntry getInstance(Object o)
+        {
+            if (o instanceof CRLEntry)
+            {
+                return ((CRLEntry)o);
+            }
+            else if (o != null)
+            {
+                return new CRLEntry(ASN1Sequence.getInstance(o));
+            }
+
+            return null;
         }
 
         public DERInteger getUserCertificate()
         {
-            return userCertificate;
+            return ASN1Integer.getInstance(seq.getObjectAt(0));
         }
 
         public Time getRevocationDate()
         {
-            return revocationDate;
+            return Time.getInstance(seq.getObjectAt(1));
         }
 
         public X509Extensions getExtensions()
@@ -82,6 +94,11 @@ public class TBSCertList
         public ASN1Primitive toASN1Primitive()
         {
             return seq;
+        }
+
+        public boolean hasExtensions()
+        {
+            return seq.size() == 3;
         }
     }
 
@@ -102,7 +119,7 @@ public class TBSCertList
 
         public Object nextElement()
         {
-            return new CRLEntry(ASN1Sequence.getInstance(en.nextElement()));
+            return CRLEntry.getInstance(en.nextElement());
         }
     }
 
@@ -119,8 +136,6 @@ public class TBSCertList
             return null;   // TODO: check exception handling
         }
     }
-
-    ASN1Sequence     seq;
 
     DERInteger              version;
     AlgorithmIdentifier     signature;
@@ -162,15 +177,13 @@ public class TBSCertList
 
         int seqPos = 0;
 
-        this.seq = seq;
-
-        if (seq.getObjectAt(seqPos) instanceof DERInteger)
+        if (seq.getObjectAt(seqPos) instanceof ASN1Integer)
         {
-            version = DERInteger.getInstance(seq.getObjectAt(seqPos++));
+            version = ASN1Integer.getInstance(seq.getObjectAt(seqPos++));
         }
         else
         {
-            version = new DERInteger(0);
+            version = new ASN1Integer(0);
         }
 
         signature = AlgorithmIdentifier.getInstance(seq.getObjectAt(seqPos++));
@@ -239,7 +252,7 @@ public class TBSCertList
 
         for (int i = 0; i < entries.length; i++)
         {
-            entries[i] = new CRLEntry(ASN1Sequence.getInstance(revokedCertificates.getObjectAt(i)));
+            entries[i] = CRLEntry.getInstance(revokedCertificates.getObjectAt(i));
         }
         
         return entries;
@@ -262,6 +275,29 @@ public class TBSCertList
 
     public ASN1Primitive toASN1Primitive()
     {
-        return seq;
+        ASN1EncodableVector v = new ASN1EncodableVector();
+
+        v.add(version);
+        v.add(signature);
+        v.add(issuer);
+
+        v.add(thisUpdate);
+        if (nextUpdate != null)
+        {
+            v.add(nextUpdate);
+        }
+
+        // Add CRLEntries if they exist
+        if (revokedCertificates != null)
+        {
+            v.add(revokedCertificates);
+        }
+
+        if (crlExtensions != null)
+        {
+            v.add(new DERTaggedObject(0, crlExtensions));
+        }
+
+        return new DERSequence(v);
     }
 }

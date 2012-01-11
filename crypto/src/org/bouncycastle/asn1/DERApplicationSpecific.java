@@ -193,7 +193,13 @@ public class DERApplicationSpecific
 
         return new ASN1InputStream(tmp).readObject();
     }
-    
+
+    int encodedLength()
+        throws IOException
+    {
+        return StreamUtil.calculateTagLength(tag) + StreamUtil.calculateBodyLength(octets.length) + octets.length;
+    }
+
     /* (non-Javadoc)
      * @see org.bouncycastle.asn1.ASN1Primitive#encode(org.bouncycastle.asn1.DEROutputStream)
      */

@@ -194,7 +194,17 @@ public class DERBitString
         
         return value;
     }
-    
+
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
+    {
+        return 1 + StreamUtil.calculateBodyLength(data.length + 1) + data.length + 1;
+    }
+
     void encode(
         ASN1OutputStream  out)
         throws IOException

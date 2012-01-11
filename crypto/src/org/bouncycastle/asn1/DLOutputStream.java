@@ -28,9 +28,4 @@ public class DLOutputStream
             throw new IOException("null object detected");
         }
     }
-
-    ASN1OutputStream getBERSubStream(OutputStream out)
-    {
-        return new DLOutputStream(out);
-    }
 }

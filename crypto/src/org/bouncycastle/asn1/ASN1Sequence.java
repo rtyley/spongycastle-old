@@ -308,6 +308,11 @@ public abstract class ASN1Sequence
         return dlSeq;
     }
 
+    boolean isConstructed()
+    {
+        return true;
+    }
+
     abstract void encode(ASN1OutputStream out)
         throws IOException;
 

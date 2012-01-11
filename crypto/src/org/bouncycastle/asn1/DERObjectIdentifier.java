@@ -2,13 +2,14 @@ package org.bouncycastle.asn1;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigInteger;
 
 public class DERObjectIdentifier
     extends ASN1Primitive
 {
     String      identifier;
+
+    private     int bodyLength = -1;
 
     /**
      * return an OID from the passed in object
@@ -134,8 +135,8 @@ public class DERObjectIdentifier
     }
 
     private void writeField(
-        OutputStream    out,
-        long            fieldValue)
+        ASN1OutputStream    out,
+        long                fieldValue)
         throws IOException
     {
         byte[] result = new byte[9];
@@ -150,8 +151,8 @@ public class DERObjectIdentifier
     }
 
     private void writeField(
-        OutputStream    out,
-        BigInteger      fieldValue)
+        ASN1OutputStream    out,
+        BigInteger          fieldValue)
         throws IOException
     {
         int byteCount = (fieldValue.bitLength()+6)/7;
@@ -174,36 +175,68 @@ public class DERObjectIdentifier
 
     }
 
-    void encode(
-        ASN1OutputStream out)
+    private void doOutput(ASN1OutputStream aOut)
         throws IOException
     {
         OIDTokenizer            tok = new OIDTokenizer(identifier);
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
 
-        writeField(bOut, 
+        writeField(aOut,
                     Integer.parseInt(tok.nextToken()) * 40
                     + Integer.parseInt(tok.nextToken()));
 
         while (tok.hasMoreTokens())
         {
             String token = tok.nextToken();
-            if (token.length() < 18) 
+            if (token.length() < 18)
             {
-                writeField(bOut, Long.parseLong(token));
+                writeField(aOut, Long.parseLong(token));
             }
             else
             {
-                writeField(bOut, new BigInteger(token));
+                writeField(aOut, new BigInteger(token));
             }
         }
+    }
 
-        dOut.close();
+    private int getBodyLength()
+        throws IOException
+    {
+        if (bodyLength < 0)
+        {
+            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+            ASN1OutputStream      aOut = new ASN1OutputStream(bOut);
 
-        byte[]  bytes = bOut.toByteArray();
+            doOutput(aOut);
 
-        out.writeEncoded(BERTags.OBJECT_IDENTIFIER, bytes);
+            bodyLength = bOut.toByteArray().length;
+        }
+
+        return bodyLength;
+    }
+
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
+        throws IOException
+    {
+        int length = getBodyLength();
+
+        return 1 + StreamUtil.calculateBodyLength(length) + length;
+    }
+
+    void encode(
+        ASN1OutputStream out)
+        throws IOException
+    {
+        int                     length = getBodyLength();
+
+        out.write(BERTags.OBJECT_IDENTIFIER);
+        out.writeLength(length);
+
+        doOutput(out);
     }
 
     public int hashCode()

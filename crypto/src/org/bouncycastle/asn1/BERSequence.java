@@ -40,6 +40,18 @@ public class BERSequence
         super(array);
     }
 
+    int encodedLength()
+        throws IOException
+    {
+        int length = 0;
+        for (Enumeration e = getObjects(); e.hasMoreElements();)
+        {
+            length += ((ASN1Encodable)e.nextElement()).toASN1Primitive().encodedLength();
+        }
+
+        return 2 + length + 2;
+    }
+
     /*
      */
     void encode(

@@ -9,7 +9,7 @@ import java.util.Enumeration;
  * rules (as with sequences).
  */
 public class BERTaggedObject
-    extends DERTaggedObject
+    extends ASN1TaggedObject
 {
     /**
      * @param tagNo the tag number for this object.
@@ -19,7 +19,7 @@ public class BERTaggedObject
         int             tagNo,
         ASN1Encodable    obj)
     {
-        super(tagNo, obj);
+        super(true, tagNo, obj);
     }
 
     /**
@@ -43,6 +43,53 @@ public class BERTaggedObject
         int             tagNo)
     {
         super(false, tagNo, new BERSequence());
+    }
+
+    boolean isConstructed()
+    {
+        if (!empty)
+        {
+            if (explicit)
+            {
+                return true;
+            }
+            else
+            {
+                ASN1Primitive primitive = obj.toASN1Primitive().toDERObject();
+
+                return primitive.isConstructed();
+            }
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    int encodedLength()
+        throws IOException
+    {
+        if (!empty)
+        {
+            ASN1Primitive primitive = obj.toASN1Primitive();
+            int length = primitive.encodedLength();
+
+            if (explicit)
+            {
+                return StreamUtil.calculateTagLength(tagNo) + StreamUtil.calculateBodyLength(length) + length;
+            }
+            else
+            {
+                // header length already in calculation
+                length = length - 1;
+
+                return StreamUtil.calculateTagLength(tagNo) + length;
+            }
+        }
+        else
+        {
+            return StreamUtil.calculateTagLength(tagNo) + 1;
+        }
     }
 
     void encode(

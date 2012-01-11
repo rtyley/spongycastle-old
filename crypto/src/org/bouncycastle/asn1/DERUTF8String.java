@@ -11,7 +11,8 @@ public class DERUTF8String
     extends ASN1Primitive
     implements ASN1String
 {
-    String string;
+    private char[]  string;
+    private int     bodyLength = -1;
 
     /**
      * return an UTF8 string from the passed in object.
@@ -64,7 +65,7 @@ public class DERUTF8String
     {
         try
         {
-            this.string = Strings.fromUTF8ByteArray(string);
+            this.string = Strings.fromUTF8ByteArray(string).toCharArray();
         }
         catch (ArrayIndexOutOfBoundsException e)
         {
@@ -77,17 +78,17 @@ public class DERUTF8String
      */
     public DERUTF8String(String string)
     {
-        this.string = string;
+        this.string = string.toCharArray();
     }
 
     public String getString()
     {
-        return string;
+        return new String(string);
     }
 
     public String toString()
     {
-        return string;
+        return new String(string);
     }
 
     public int hashCode()
@@ -107,9 +108,38 @@ public class DERUTF8String
         return this.getString().equals(s.getString());
     }
 
+    private int getBodyLength()
+        throws IOException
+    {
+        if (bodyLength < 0)
+        {
+            bodyLength = Strings.toUTF8ByteArray(string).length;
+        }
+
+        return bodyLength;
+    }
+
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
+        throws IOException
+    {
+        int length = getBodyLength();
+
+        return 1 + StreamUtil.calculateBodyLength(length) + length;
+    }
+
     void encode(ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(BERTags.UTF8_STRING, Strings.toUTF8ByteArray(string));
+        int length = getBodyLength();
+
+        out.write(BERTags.UTF8_STRING);
+        out.writeLength(length);
+
+        Strings.toUTF8ByteArray(string, out.getRawSubStream());
     }
 }

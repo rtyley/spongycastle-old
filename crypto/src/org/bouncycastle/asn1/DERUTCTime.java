@@ -233,6 +233,18 @@ public class DERUTCTime
         return bs;
     }
 
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
+    {
+        int length = time.length();
+
+        return 1 + StreamUtil.calculateBodyLength(length) + length;
+    }
+
     void encode(
         ASN1OutputStream  out)
         throws IOException

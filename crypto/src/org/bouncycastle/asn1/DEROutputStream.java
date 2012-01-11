@@ -29,13 +29,13 @@ public class DEROutputStream
         }
     }
 
-    ASN1OutputStream getBERSubStream(OutputStream out)
+    ASN1OutputStream getDERSubStream()
     {
-        return new DEROutputStream(out);
+        return this;
     }
 
-    ASN1OutputStream getDLSubStream(OutputStream out)
+    ASN1OutputStream getDLSubStream()
     {
-        return new DEROutputStream(out);
+        return this;
     }
 }

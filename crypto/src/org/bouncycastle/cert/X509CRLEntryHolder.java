@@ -16,12 +16,10 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 public class X509CRLEntryHolder
 {
     private TBSCertList.CRLEntry entry;
-    private X509Extensions extensions;
 
     X509CRLEntryHolder(TBSCertList.CRLEntry entry)
     {
         this.entry = entry;
-        this.extensions = entry.getExtensions();
     }
 
     /**
@@ -51,7 +49,7 @@ public class X509CRLEntryHolder
      */
     public boolean hasExtensions()
     {
-        return extensions != null;
+        return entry.hasExtensions();
     }
 
     /**
@@ -63,6 +61,8 @@ public class X509CRLEntryHolder
      */
     public X509Extension getExtension(ASN1ObjectIdentifier oid)
     {
+        X509Extensions extensions = entry.getExtensions();
+
         if (extensions != null)
         {
             return extensions.getExtension(oid);
@@ -79,7 +79,7 @@ public class X509CRLEntryHolder
      */
     public List getExtensionOIDs()
     {
-        return CertUtils.getExtensionOIDs(extensions);
+        return CertUtils.getExtensionOIDs(entry.getExtensions());
     }
 
     /**
@@ -90,7 +90,7 @@ public class X509CRLEntryHolder
      */
     public Set getCriticalExtensionOIDs()
     {
-        return CertUtils.getCriticalExtensionOIDs(extensions);
+        return CertUtils.getCriticalExtensionOIDs(entry.getExtensions());
     }
 
     /**
@@ -101,6 +101,6 @@ public class X509CRLEntryHolder
      */
     public Set getNonCriticalExtensionOIDs()
     {
-        return CertUtils.getNonCriticalExtensionOIDs(extensions);
+        return CertUtils.getNonCriticalExtensionOIDs(entry.getExtensions());
     }
 }

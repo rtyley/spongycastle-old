@@ -59,6 +59,10 @@ public abstract class ASN1Primitive
 
     public abstract int hashCode();
 
+    abstract boolean isConstructed();
+
+    abstract int encodedLength() throws IOException;
+
     abstract void encode(ASN1OutputStream out) throws IOException;
 
     abstract boolean asn1Equals(ASN1Primitive o);

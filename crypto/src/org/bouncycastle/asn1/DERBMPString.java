@@ -107,6 +107,16 @@ public class DERBMPString
         return this.getString().equals(s.getString());
     }
 
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
+    {
+        return 1 + StreamUtil.calculateBodyLength(string.length() * 2) + (string.length() * 2);
+    }
+
     void encode(
         ASN1OutputStream out)
         throws IOException

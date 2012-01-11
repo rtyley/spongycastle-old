@@ -2,13 +2,19 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
+
 public class DERBoolean
     extends ASN1Primitive
 {
-    byte         value;
+    private static final byte[] TRUE_VALUE = new byte[] { (byte)0xff };
+    private static final byte[] FALSE_VALUE = new byte[] { 0 };
+
+    private byte[]         value;
 
     public static final ASN1Boolean FALSE = new ASN1Boolean(false);
     public static final ASN1Boolean TRUE  = new ASN1Boolean(true);
+
 
     /**
      * return a boolean from the passed in object.
@@ -65,37 +71,54 @@ public class DERBoolean
         }
     }
     
-    public DERBoolean(
+    DERBoolean(
         byte[]       value)
     {
         if (value.length != 1)
         {
             throw new IllegalArgumentException("byte value should have 1 byte in it");
         }
-        
-        this.value = value[0];
+
+        if (value[0] == 0)
+        {
+            this.value = FALSE_VALUE;
+        }
+        else if (value[0] == 0xff)
+        {
+            this.value = TRUE_VALUE;
+        }
+        else
+        {
+            this.value = Arrays.clone(value);
+        }
     }
 
     public DERBoolean(
         boolean     value)
     {
-        this.value = (value) ? (byte)0xff : (byte)0;
+        this.value = (value) ? TRUE_VALUE : FALSE_VALUE;
     }
 
     public boolean isTrue()
     {
-        return (value != 0);
+        return (value[0] != 0);
+    }
+
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
+    {
+        return 3;
     }
 
     void encode(
         ASN1OutputStream out)
         throws IOException
     {
-        byte[]  bytes = new byte[1];
-
-        bytes[0] = value;
-
-        out.writeEncoded(BERTags.BOOLEAN, bytes);
+        out.writeEncoded(BERTags.BOOLEAN, value);
     }
     
     protected boolean asn1Equals(
@@ -106,17 +129,17 @@ public class DERBoolean
             return false;
         }
 
-        return (value == ((DERBoolean)o).value);
+        return (value[0] == ((DERBoolean)o).value[0]);
     }
     
     public int hashCode()
     {
-        return value;
+        return value[0];
     }
 
 
     public String toString()
     {
-      return (value != 0) ? "TRUE" : "FALSE";
+      return (value[0] != 0) ? "TRUE" : "FALSE";
     }
 }

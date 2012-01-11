@@ -115,6 +115,17 @@ public class DERExternal
         return ret;
     }
 
+    boolean isConstructed()
+    {
+        return true;
+    }
+
+    int encodedLength()
+        throws IOException
+    {
+        return this.getEncoded().length;
+    }
+
     /* (non-Javadoc)
      * @see org.bouncycastle.asn1.ASN1Primitive#encode(org.bouncycastle.asn1.DEROutputStream)
      */

@@ -16,7 +16,7 @@ public abstract class ASN1Object
         throws IOException
     {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-        ASN1OutputStream        aOut = new ASN1OutputStream(bOut);
+        ASN1OutputStream      aOut = new ASN1OutputStream(bOut);
 
         aOut.writeObject(this);
 

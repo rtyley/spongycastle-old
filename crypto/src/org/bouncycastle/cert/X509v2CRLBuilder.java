@@ -117,7 +117,7 @@ public class X509v2CRLBuilder
         {
             for (Enumeration en = revocations.getRevokedCertificateEnumeration(); en.hasMoreElements();)
             {
-                    tbsGen.addCRLEntry(ASN1Sequence.getInstance(((ASN1Encodable)en.nextElement()).toASN1Primitive()));
+                tbsGen.addCRLEntry(ASN1Sequence.getInstance(((ASN1Encodable)en.nextElement()).toASN1Primitive()));
             }
         }
 

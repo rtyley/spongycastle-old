@@ -99,6 +99,16 @@ public class DERUniversalString
         return string;
     }
 
+    boolean isConstructed()
+    {
+        return false;
+    }
+
+    int encodedLength()
+    {
+        return 1 + StreamUtil.calculateBodyLength(string.length) + string.length;
+    }
+
     void encode(
         ASN1OutputStream out)
         throws IOException

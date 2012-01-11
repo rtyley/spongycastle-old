@@ -32,12 +32,12 @@ public class SignedData
         {
             return (SignedData)o;
         }
-        else if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new SignedData((ASN1Sequence)o);
+            return new SignedData(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + o);
+        return null;
     }
 
     public SignedData(

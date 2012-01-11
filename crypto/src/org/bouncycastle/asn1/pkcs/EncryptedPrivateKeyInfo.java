@@ -23,7 +23,7 @@ public class EncryptedPrivateKeyInfo
         Enumeration e = seq.getObjects();
 
         algId = AlgorithmIdentifier.getInstance(e.nextElement());
-        data = (ASN1OctetString)e.nextElement();
+        data = ASN1OctetString.getInstance(e.nextElement());
     }
 
     public EncryptedPrivateKeyInfo(

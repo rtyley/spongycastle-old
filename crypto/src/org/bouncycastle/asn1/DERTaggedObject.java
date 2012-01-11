@@ -30,17 +30,66 @@ public class DERTaggedObject
         super(true, tagNo, encodable);
     }
 
+    boolean isConstructed()
+    {
+        if (!empty)
+        {
+            if (explicit)
+            {
+                return true;
+            }
+            else
+            {
+                ASN1Primitive primitive = obj.toASN1Primitive().toDERObject();
+
+                return primitive.isConstructed();
+            }
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    int encodedLength()
+        throws IOException
+    {
+        if (!empty)
+        {
+            ASN1Primitive primitive = obj.toASN1Primitive().toDERObject();
+            int length = primitive.encodedLength();
+
+            if (explicit)
+            {
+                return StreamUtil.calculateTagLength(tagNo) + StreamUtil.calculateBodyLength(length) + length;
+            }
+            else
+            {
+                // header length already in calculation
+                length = length - 1;
+
+                return StreamUtil.calculateTagLength(tagNo) + length;
+            }
+        }
+        else
+        {
+            return StreamUtil.calculateTagLength(tagNo) + 1;
+        }
+    }
+
     void encode(
         ASN1OutputStream out)
         throws IOException
     {
         if (!empty)
         {
-            byte[] bytes = obj.toASN1Primitive().getEncoded(ASN1Encoding.DER);
+            ASN1Primitive primitive = obj.toASN1Primitive().toDERObject();
 
             if (explicit)
             {
-                out.writeEncoded(BERTags.CONSTRUCTED | BERTags.TAGGED, tagNo, bytes);
+                out.writeTag(BERTags.CONSTRUCTED | BERTags.TAGGED, tagNo);
+                out.writeLength(primitive.encodedLength());
+                out.writeObject(primitive);
             }
             else
             {
@@ -48,7 +97,7 @@ public class DERTaggedObject
                 // need to mark constructed types...
                 //
                 int flags;
-                if ((bytes[0] & BERTags.CONSTRUCTED) != 0)
+                if (primitive.isConstructed())
                 {
                     flags = BERTags.CONSTRUCTED | BERTags.TAGGED;
                 }
@@ -58,7 +107,7 @@ public class DERTaggedObject
                 }
 
                 out.writeTag(flags, tagNo);
-                out.write(bytes, 1, bytes.length - 1);
+                out.writeImplicitObject(primitive);
             }
         }
         else

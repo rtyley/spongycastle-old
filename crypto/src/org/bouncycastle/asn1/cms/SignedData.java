@@ -37,12 +37,12 @@ public class SignedData
         {
             return (SignedData)o;
         }
-        else if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new SignedData((ASN1Sequence)o);
+            return new SignedData(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + o.getClass().getName());
+        return null;
     }
 
     public SignedData(
@@ -99,7 +99,7 @@ public class SignedData
                 Object obj = en.nextElement();
                 if (obj instanceof ASN1TaggedObject)
                 {
-                    ASN1TaggedObject tagged = (ASN1TaggedObject)obj;
+                    ASN1TaggedObject tagged = ASN1TaggedObject.getInstance(obj);
 
                     if (tagged.getTagNo() == 1)
                     {

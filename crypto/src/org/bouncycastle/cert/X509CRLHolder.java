@@ -120,9 +120,7 @@ public class X509CRLHolder
         {
             TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)en.nextElement();
 
-
-                l.add(new X509CRLEntryHolder(entry));
-
+            l.add(new X509CRLEntryHolder(entry));
         }
 
         return l;

@@ -1,6 +1,5 @@
 package org.bouncycastle.asn1;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -10,6 +9,8 @@ import java.util.Enumeration;
 public class DERSet
     extends ASN1Set
 {
+    private int bodyLength = -1;
+
     /**
      * create an empty set
      */
@@ -51,6 +52,34 @@ public class DERSet
         super(v, doSort);
     }
 
+    private int getBodyLength()
+        throws IOException
+    {
+        if (bodyLength < 0)
+        {
+            int length = 0;
+
+            for (Enumeration e = this.getObjects(); e.hasMoreElements();)
+            {
+                Object    obj = e.nextElement();
+
+                length += ((ASN1Encodable)obj).toASN1Primitive().toDERObject().encodedLength();
+            }
+
+            bodyLength = length;
+        }
+
+        return bodyLength;
+    }
+
+    int encodedLength()
+        throws IOException
+    {
+        int length = getBodyLength();
+
+        return 1 + StreamUtil.calculateBodyLength(length) + length;
+    }
+
     /*
      * A note on the implementation:
      * <p>
@@ -63,22 +92,17 @@ public class DERSet
         ASN1OutputStream out)
         throws IOException
     {
-        // TODO Intermediate buffer could be avoided if we could calculate expected length
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        ASN1OutputStream        dOut = new DEROutputStream(bOut);
-        Enumeration             e = this.getObjects();
+        ASN1OutputStream        dOut = out.getDERSubStream();
+        int                     length = getBodyLength();
 
-        while (e.hasMoreElements())
+        out.write(BERTags.SET | BERTags.CONSTRUCTED);
+        out.writeLength(length);
+
+        for (Enumeration e = this.getObjects(); e.hasMoreElements();)
         {
             Object    obj = e.nextElement();
 
             dOut.writeObject((ASN1Encodable)obj);
         }
-
-        dOut.close();
-
-        byte[]  bytes = bOut.toByteArray();
-
-        out.writeEncoded(BERTags.SET | BERTags.CONSTRUCTED, bytes);
     }
 }

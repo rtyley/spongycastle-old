@@ -16,7 +16,7 @@ public class ASN1OutputStream
         this.os = os;
     }
 
-    private void writeLength(
+    void writeLength(
         int length)
         throws IOException
     {
@@ -133,6 +133,19 @@ public class ASN1OutputStream
         }
     }
 
+    void writeImplicitObject(ASN1Primitive obj)
+        throws IOException
+    {
+        if (obj != null)
+        {
+            obj.encode(new ImplicitOutputStream(os));
+        }
+        else
+        {
+            throw new IOException("null object detected");
+        }
+    }
+
     public void close()
         throws IOException
     {
@@ -143,5 +156,44 @@ public class ASN1OutputStream
         throws IOException
     {
         os.flush();
+    }
+
+    OutputStream getRawSubStream()
+    {
+        return os;
+    }
+
+    ASN1OutputStream getDERSubStream()
+    {
+        return new DEROutputStream(os);
+    }
+
+    ASN1OutputStream getDLSubStream()
+    {
+        return new DLOutputStream(os);
+    }
+
+    private class ImplicitOutputStream
+        extends ASN1OutputStream
+    {
+        private boolean first = true;
+
+        public ImplicitOutputStream(OutputStream os)
+        {
+            super(os);
+        }
+
+        public void write(int b)
+            throws IOException
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                super.write(b);
+            }
+        }
     }
 }

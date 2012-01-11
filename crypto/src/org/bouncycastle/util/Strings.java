@@ -1,6 +1,8 @@
 package org.bouncycastle.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Vector;
 
 public final class Strings
@@ -88,6 +90,22 @@ public final class Strings
     public static byte[] toUTF8ByteArray(char[] string)
     {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        try
+        {
+            toUTF8ByteArray(string, bOut);
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException("cannot encode string to byte array!");
+        }
+        
+        return bOut.toByteArray();
+    }
+
+    public static void toUTF8ByteArray(char[] string, OutputStream sOut)
+        throws IOException
+    {
         char[] c = string;
         int i = 0;
 
@@ -97,12 +115,12 @@ public final class Strings
 
             if (ch < 0x0080)
             {
-                bOut.write(ch);
+                sOut.write(ch);
             }
             else if (ch < 0x0800)
             {
-                bOut.write(0xc0 | (ch >> 6));
-                bOut.write(0x80 | (ch & 0x3f));
+                sOut.write(0xc0 | (ch >> 6));
+                sOut.write(0x80 | (ch & 0x3f));
             }
             // surrogate pair
             else if (ch >= 0xD800 && ch <= 0xDFFF)
@@ -123,24 +141,22 @@ public final class Strings
                     throw new IllegalStateException("invalid UTF-16 codepoint");
                 }
                 int codePoint = (((W1 & 0x03FF) << 10) | (W2 & 0x03FF)) + 0x10000;
-                bOut.write(0xf0 | (codePoint >> 18));
-                bOut.write(0x80 | ((codePoint >> 12) & 0x3F));
-                bOut.write(0x80 | ((codePoint >> 6) & 0x3F));
-                bOut.write(0x80 | (codePoint & 0x3F));
+                sOut.write(0xf0 | (codePoint >> 18));
+                sOut.write(0x80 | ((codePoint >> 12) & 0x3F));
+                sOut.write(0x80 | ((codePoint >> 6) & 0x3F));
+                sOut.write(0x80 | (codePoint & 0x3F));
             }
             else
             {
-                bOut.write(0xe0 | (ch >> 12));
-                bOut.write(0x80 | ((ch >> 6) & 0x3F));
-                bOut.write(0x80 | (ch & 0x3F));
+                sOut.write(0xe0 | (ch >> 12));
+                sOut.write(0x80 | ((ch >> 6) & 0x3F));
+                sOut.write(0x80 | (ch & 0x3F));
             }
 
             i++;
         }
-        
-        return bOut.toByteArray();
     }
-    
+
     /**
      * A locale independent version of toUpperCase.
      * 

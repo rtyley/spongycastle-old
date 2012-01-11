@@ -449,6 +449,11 @@ abstract public class ASN1Set
         }
     }
 
+    boolean isConstructed()
+    {
+        return true;
+    }
+
     abstract void encode(ASN1OutputStream out)
             throws IOException;
 

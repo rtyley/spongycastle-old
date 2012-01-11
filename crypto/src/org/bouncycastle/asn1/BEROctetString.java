@@ -115,6 +115,23 @@ public class BEROctetString
          return vec; 
     }
 
+    boolean isConstructed()
+    {
+        return true;
+    }
+
+    int encodedLength()
+        throws IOException
+    {
+        int length = 0;
+        for (Enumeration e = getObjects(); e.hasMoreElements();)
+        {
+            length += ((ASN1Encodable)e.nextElement()).toASN1Primitive().encodedLength();
+        }
+
+        return 2 + length + 2;
+    }
+
     public void encode(
         ASN1OutputStream out)
         throws IOException
@@ -126,8 +143,7 @@ public class BEROctetString
         //
         // write out the octet array
         //
-        Enumeration e = getObjects();
-        while (e.hasMoreElements())
+        for (Enumeration e = getObjects(); e.hasMoreElements();)
         {
             out.writeObject((ASN1Encodable)e.nextElement());
         }

@@ -1,12 +1,13 @@
 package org.bouncycastle.asn1;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 
 public class DLSequence
     extends ASN1Sequence
 {
+    private int bodyLength = -1;
+
     /**
      * create an empty sequence
      */
@@ -40,11 +41,39 @@ public class DLSequence
     {
         super(array);
     }
-    
+
+    private int getBodyLength()
+        throws IOException
+    {
+        if (bodyLength < 0)
+        {
+            int length = 0;
+
+            for (Enumeration e = this.getObjects(); e.hasMoreElements();)
+            {
+                Object    obj = e.nextElement();
+
+                length += ((ASN1Encodable)obj).toASN1Primitive().toDLObject().encodedLength();
+            }
+
+            bodyLength = length;
+        }
+
+        return bodyLength;
+    }
+
+    int encodedLength()
+        throws IOException
+    {
+        int    length = getBodyLength();
+
+        return 1 + StreamUtil.calculateBodyLength(length) + length;
+    }
+
     /*
      * A note on the implementation:
      * <p>
-     * As DER requires the constructed, definite-length model to
+     * As DL requires the constructed, definite-length model to
      * be used for structured types, this varies slightly from the
      * ASN.1 descriptions given. Rather than just outputting SEQUENCE,
      * we also have to specify CONSTRUCTED, and the objects length.
@@ -53,22 +82,17 @@ public class DLSequence
         ASN1OutputStream out)
         throws IOException
     {
-        // TODO Intermediate buffer could be avoided if we could calculate expected length
-        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-        DLOutputStream         dOut = new DLOutputStream(bOut);
-        Enumeration            e = this.getObjects();
+        ASN1OutputStream       dOut = out.getDLSubStream();
+        int                    length = getBodyLength();
 
-        while (e.hasMoreElements())
+        out.write(BERTags.SEQUENCE | BERTags.CONSTRUCTED);
+        out.writeLength(length);
+
+        for (Enumeration e = this.getObjects(); e.hasMoreElements();)
         {
             Object    obj = e.nextElement();
 
             dOut.writeObject((ASN1Encodable)obj);
         }
-
-        dOut.close();
-
-        byte[]  bytes = bOut.toByteArray();
-
-        out.writeEncoded(BERTags.SEQUENCE | BERTags.CONSTRUCTED, bytes);
     }
 }

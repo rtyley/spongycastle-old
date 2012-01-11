@@ -79,6 +79,11 @@ class LazyEncodedSequence
         return super.toDLObject();
     }
 
+    int encodedLength()
+    {
+        return 1 + StreamUtil.calculateBodyLength(encoded.length) + encoded.length;
+    }
+
     void encode(
         ASN1OutputStream out)
         throws IOException
