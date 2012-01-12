@@ -1,6 +1,8 @@
 package org.bouncycastle.cert;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -9,8 +11,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.CertificateList;
@@ -28,12 +30,12 @@ public class X509CRLHolder
     private CertificateList x509CRL;
     private X509Extensions extensions;
 
-    private static CertificateList parseBytes(byte[] crlEncoding)
+    private static CertificateList parseStream(InputStream stream)
         throws IOException
     {
         try
         {
-            return CertificateList.getInstance(ASN1Primitive.fromByteArray(crlEncoding));
+            return CertificateList.getInstance(new ASN1InputStream(stream, true).readObject());
         }
         catch (ClassCastException e)
         {
@@ -54,7 +56,19 @@ public class X509CRLHolder
     public X509CRLHolder(byte[] crlEncoding)
         throws IOException
     {
-        this(parseBytes(crlEncoding));
+        this(parseStream(new ByteArrayInputStream(crlEncoding)));
+    }
+
+    /**
+     * Create a X509CRLHolder from the passed in InputStream.
+     *
+     * @param crlStream BER/DER encoded InputStream of the CRL
+     * @throws IOException in the event of corrupted data, or an incorrect structure.
+     */
+    public X509CRLHolder(InputStream crlStream)
+        throws IOException
+    {
+        this(parseStream(crlStream));
     }
 
     /**
