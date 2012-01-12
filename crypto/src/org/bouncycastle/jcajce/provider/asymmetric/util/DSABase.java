@@ -1,8 +1,6 @@
 package org.bouncycastle.jcajce.provider.asymmetric.util;
 
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.SignatureSpi;
 import java.security.spec.AlgorithmParameterSpec;
@@ -28,13 +26,6 @@ public abstract class DSABase
         this.digest = digest;
         this.signer = signer;
         this.encoder = encoder;
-    }
-
-    protected void engineInitSign(
-        PrivateKey privateKey)
-    throws InvalidKeyException
-    {
-        engineInitSign(privateKey, null);
     }
 
     protected void engineUpdate(
