@@ -41,12 +41,12 @@ public class BcPBESecretKeyEncryptorBuilder
 
     public PBESecretKeyEncryptor build(char[] passPhrase)
     {
-        if (random == null)
+        if (this.random == null)
         {
-            random = new SecureRandom();
+            this.random = new SecureRandom();
         }
 
-        return new PBESecretKeyEncryptor(encAlgorithm, s2kDigestCalculator, random, passPhrase)
+        return new PBESecretKeyEncryptor(encAlgorithm, s2kDigestCalculator, this.random, passPhrase)
         {
             private byte[] iv;
 
@@ -55,16 +55,16 @@ public class BcPBESecretKeyEncryptorBuilder
             {
                 try
                 {
-                    if (random == null)
+                    if (this.random == null)
                     {
-                        random = new SecureRandom();
+                        this.random = new SecureRandom();
                     }
 
                     BlockCipher engine = BcImplProvider.createBlockCipher(encAlgorithm);
 
                     iv = new byte[engine.getBlockSize()];
 
-                    random.nextBytes(iv);
+                    this.random.nextBytes(iv);
 
                     BufferedBlockCipher c = BcUtil.createSymmetricKeyWrapper(true, engine, key, iv);
 

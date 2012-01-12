@@ -79,7 +79,7 @@ public class JcePBESecretKeyEncryptorBuilder
                 {
                     c = helper.createCipher(PGPUtil.getSymmetricCipherName(encAlgorithm) + "/CFB/NoPadding");
 
-                    c.init(Cipher.ENCRYPT_MODE, PGPUtil.makeSymmetricKey(encAlgorithm, key), random);
+                    c.init(Cipher.ENCRYPT_MODE, PGPUtil.makeSymmetricKey(encAlgorithm, key), this.random);
 
                     iv = c.getIV();
 
