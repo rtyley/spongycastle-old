@@ -74,7 +74,7 @@ public class SignatureSpi
 
         digest.reset();
 
-        signer.init(true, param);
+        signer.init(false, param);
     }
 
     protected void engineInitSign(
