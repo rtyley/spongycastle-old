@@ -30,7 +30,6 @@ public class SignatureSpi
 {
     private Digest                  digest;
     private DSA                     signer;
-    private SecureRandom            random;
 
     public SignatureSpi()
     {
@@ -84,14 +83,6 @@ public class SignatureSpi
         SecureRandom    random)
         throws InvalidKeyException
     {
-        this.random = random;
-        engineInitSign(privateKey);
-    }
-
-    protected void engineInitSign(
-        PrivateKey  privateKey)
-        throws InvalidKeyException
-    {
         CipherParameters    param;
 
         if (privateKey instanceof ECKey)
@@ -113,6 +104,26 @@ public class SignatureSpi
         {
             signer.init(true, param);
         }
+    }
+
+    protected void engineInitSign(
+        PrivateKey  privateKey)
+        throws InvalidKeyException
+    {
+        CipherParameters    param;
+
+        if (privateKey instanceof ECKey)
+        {
+            param = ECUtil.generatePrivateKeyParameter(privateKey);
+        }
+        else
+        {
+            param = GOST3410Util.generatePrivateKeyParameter(privateKey);
+        }
+
+        digest.reset();
+
+        signer.init(true, param);
     }
 
     protected void engineUpdate(
