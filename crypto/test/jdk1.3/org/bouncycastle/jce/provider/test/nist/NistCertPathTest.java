@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.GregorianCalendar;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -543,6 +544,7 @@ public class NistCertPathTest
         
         params.addCertStore(store);
         params.setRevocationEnabled(true);
+        params.setDate(new GregorianCalendar(2010, 1, 1).getTime());
         
         if (policies != null)
         {
