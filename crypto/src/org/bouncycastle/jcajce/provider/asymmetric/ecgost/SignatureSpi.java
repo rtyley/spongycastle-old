@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.spec.AlgorithmParameterSpec;
 
@@ -76,34 +75,6 @@ public class SignatureSpi
 
         digest.reset();
         signer.init(false, param);
-    }
-
-    protected void engineInitSign(
-        PrivateKey      privateKey,
-        SecureRandom    random)
-        throws InvalidKeyException
-    {
-        CipherParameters    param;
-
-        if (privateKey instanceof ECKey)
-        {
-            param = ECUtil.generatePrivateKeyParameter(privateKey);
-        }
-        else
-        {
-            param = GOST3410Util.generatePrivateKeyParameter(privateKey);
-        }
-
-        digest.reset();
-
-        if (random != null)
-        {
-            signer.init(true, new ParametersWithRandom(param, random));
-        }
-        else
-        {
-            signer.init(true, param);
-        }
     }
 
     protected void engineInitSign(
