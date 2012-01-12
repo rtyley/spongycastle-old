@@ -8,6 +8,7 @@ public class ASN1StreamParser
 {
     private final InputStream _in;
     private final int         _limit;
+    private final byte[][] tmpBuffers;
 
     public ASN1StreamParser(
         InputStream in)
@@ -21,6 +22,12 @@ public class ASN1StreamParser
     {
         this._in = in;
         this._limit = limit;
+
+        this.tmpBuffers = new byte[21][];
+        for (int i = 0; i != tmpBuffers.length; i++)
+        {
+            tmpBuffers[i] = new byte[i];
+        }
     }
 
     public ASN1StreamParser(
@@ -205,7 +212,7 @@ public class ASN1StreamParser
 
             try
             {
-                return ASN1InputStream.createPrimitiveDERObject(tagNo, defIn.toByteArray());
+                return ASN1InputStream.createPrimitiveDERObject(tagNo, defIn, tmpBuffers);
             }
             catch (IllegalArgumentException e)
             {

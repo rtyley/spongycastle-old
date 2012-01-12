@@ -304,7 +304,7 @@ public class DERObjectIdentifier
     {
         if (enc.length < 3)
         {
-            return null;
+            return new ASN1ObjectIdentifier(enc);
         }
 
         int idx1 = enc[enc.length - 2] & 0xff;

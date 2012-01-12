@@ -1,9 +1,12 @@
 package org.bouncycastle.asn1;
 
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.io.Streams;
 
 public class DERBitString
     extends ASN1Primitive
@@ -280,6 +283,28 @@ public class DERBitString
         if (data.length != 0)
         {
             System.arraycopy(bytes, 1, data, 0, bytes.length - 1);
+        }
+
+        return new DERBitString(data, padBits);
+    }
+
+    static DERBitString fromInputStream(int length, InputStream stream)
+        throws IOException
+    {
+        if (length < 1)
+        {
+            throw new IllegalArgumentException("truncated BIT STRING detected");
+        }
+
+        int padBits = stream.read();
+        byte[] data = new byte[length - 1];
+
+        if (data.length != 0)
+        {
+            if (Streams.readFully(stream, data) != data.length)
+            {
+                throw new EOFException("EOF encountered in middle of BIT STRING");
+            }
         }
 
         return new DERBitString(data, padBits);
