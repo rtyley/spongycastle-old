@@ -23,7 +23,6 @@ import org.bouncycastle.crypto.digests.SHA384Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class PSSSignatureSpi
     extends Signature
@@ -317,6 +316,29 @@ public class PSSSignatureSpi
 
             if (oddTime)
             {
+                // in JDK 1.3 we have to guess!
+                if (mgfDigest == null)
+                {
+                    switch (res.length)
+                    {
+                    case 20:
+                        this.baseDigest = new SHA1Digest();
+                        break;
+                    case 28:
+                        this.baseDigest = new SHA224Digest();
+                        break;
+                    case 32:
+                        this.baseDigest = new SHA256Digest();
+                        break;
+                    case 48:
+                        this.baseDigest = new SHA384Digest();
+                        break;
+                    case 64:
+                        this.baseDigest = new SHA512Digest();
+                        break;
+                    }
+                    mgfDigest = baseDigest;
+                }
                 System.arraycopy(res, 0, out, outOff, res.length);
             }
             else
