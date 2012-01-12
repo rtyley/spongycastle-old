@@ -28,10 +28,10 @@ import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.ECDSASigner;
 import org.bouncycastle.crypto.signers.ECNRSigner;
+import org.bouncycastle.jcajce.provider.asymmetric.util.DSABase;
+import org.bouncycastle.jcajce.provider.asymmetric.util.DSAEncoder;
 import org.bouncycastle.jce.interfaces.ECKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.provider.DSABase;
-import org.bouncycastle.jce.provider.DSAEncoder;
 
 public class SignatureSpi
     extends DSABase
