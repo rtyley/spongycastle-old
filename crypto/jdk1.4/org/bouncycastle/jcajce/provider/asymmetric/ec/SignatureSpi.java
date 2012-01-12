@@ -3,6 +3,7 @@ package org.bouncycastle.jcajce.provider.asymmetric.ec;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -27,6 +28,7 @@ import org.bouncycastle.crypto.signers.ECDSASigner;
 import org.bouncycastle.crypto.signers.ECNRSigner;
 import org.bouncycastle.jcajce.provider.asymmetric.util.DSABase;
 import org.bouncycastle.jcajce.provider.asymmetric.util.DSAEncoder;
+import org.bouncycastle.jce.interfaces.ECKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -71,6 +73,27 @@ public class SignatureSpi
         }
 
         digest.reset();
+
+        signer.init(true, param);
+    }
+
+    protected void engineInitSign(
+        PrivateKey privateKey)
+        throws InvalidKeyException
+    {
+        CipherParameters param;
+
+        if (privateKey instanceof ECKey)
+        {
+            param = ECUtil.generatePrivateKeyParameter(privateKey);
+        }
+        else
+        {
+            throw new InvalidKeyException("can't recognise key type in ECDSA based signer");
+        }
+
+        digest.reset();
+
         if (appRandom != null)
         {
             signer.init(true, new ParametersWithRandom(param, appRandom));
