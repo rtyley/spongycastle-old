@@ -220,7 +220,7 @@ public class PSSSignatureSpi
                 byte[] hash = bOut.toByteArray();
                 contentDigest = mgfDigest = guessDigest(hash.length);
                 saltLength = contentDigest.getDigestSize();
-                pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, mgfDigest, saltLength);
+                pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, new NullPssDigest(contentDigest), mgfDigest, saltLength);
 
                 pss.init(true, sigParams);
             }
@@ -241,7 +241,7 @@ public class PSSSignatureSpi
             byte[] hash = bOut.toByteArray();
             contentDigest = mgfDigest = guessDigest(hash.length);
             saltLength = contentDigest.getDigestSize();
-            pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, NullPssDigest(contentDigest), mgfDigest, saltLength);
+            pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, new NullPssDigest(contentDigest), mgfDigest, saltLength);
 
             pss.init(false, sigParams);
 
