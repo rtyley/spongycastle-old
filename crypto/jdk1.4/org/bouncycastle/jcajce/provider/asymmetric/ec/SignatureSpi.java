@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Encoding;
@@ -37,7 +38,7 @@ public class SignatureSpi
 {
     SignatureSpi(Digest digest, DSA signer, DSAEncoder encoder)
     {
-        super(digest, signer, encoder);
+        super("ECDSA", digest, signer, encoder);
     }
 
     protected void engineInitVerify(PublicKey publicKey)
@@ -77,8 +78,9 @@ public class SignatureSpi
         signer.init(false, param);
     }
 
-    protected void engineInitSign(
-        PrivateKey privateKey)
+    protected void doEngineInitSign(
+        PrivateKey privateKey,
+        SecureRandom random)
         throws InvalidKeyException
     {
         CipherParameters param;
@@ -94,9 +96,9 @@ public class SignatureSpi
 
         digest.reset();
 
-        if (appRandom != null)
+        if (random != null)
         {
-            signer.init(true, new ParametersWithRandom(param, appRandom));
+            signer.init(true, new ParametersWithRandom(param, random));
         }
         else
         {
