@@ -14,6 +14,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
+import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
@@ -34,8 +35,9 @@ public class PSSSignatureSpi
     private int saltLength;
     private byte trailer;
     private boolean isRaw;
-
+    private ByteArrayOutputStream bOut;
     private org.bouncycastle.crypto.signers.PSSSigner pss;
+    private CipherParameters sigParams;
 
     private byte getTrailer(
         int trailerField)
@@ -119,9 +121,18 @@ public class PSSSignatureSpi
             throw new InvalidKeyException("Supplied key is not a RSAPublicKey instance");
         }
 
-        pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, mgfDigest, saltLength);
-        pss.init(false,
-            RSAUtil.generatePublicKeyParameter((RSAPublicKey)publicKey));
+        sigParams = RSAUtil.generatePublicKeyParameter((RSAPublicKey)publicKey);
+
+        if (isRaw)
+        {
+            bOut = new ByteArrayOutputStream();
+        }
+        else
+        {
+            pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, mgfDigest, saltLength);
+            pss.init(false,
+                sigParams);
+        }
     }
 
     protected void engineInitSign(
@@ -134,8 +145,17 @@ public class PSSSignatureSpi
             throw new InvalidKeyException("Supplied key is not a RSAPrivateKey instance");
         }
 
-        pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, mgfDigest, saltLength);
-        pss.init(true, new ParametersWithRandom(RSAUtil.generatePrivateKeyParameter((RSAPrivateKey)privateKey), random));
+        sigParams = new ParametersWithRandom(RSAUtil.generatePrivateKeyParameter((RSAPrivateKey)privateKey), random);
+
+        if (isRaw)
+        {
+            bOut = new ByteArrayOutputStream();
+        }
+        else
+        {
+            pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, mgfDigest, saltLength);
+            pss.init(true, sigParams);
+        }
     }
 
     protected void engineInitSign(
@@ -147,15 +167,31 @@ public class PSSSignatureSpi
             throw new InvalidKeyException("Supplied key is not a RSAPrivateKey instance");
         }
 
-        pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, mgfDigest, saltLength);
-        pss.init(true, RSAUtil.generatePrivateKeyParameter((RSAPrivateKey)privateKey));
+        sigParams = RSAUtil.generatePrivateKeyParameter((RSAPrivateKey)privateKey);
+
+        if (isRaw)
+        {
+            bOut = new ByteArrayOutputStream();
+        }
+        else
+        {
+            pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, mgfDigest, saltLength);
+            pss.init(true, sigParams);
+        }
     }
 
     protected void engineUpdate(
         byte    b)
         throws SignatureException
     {
-        pss.update(b);
+        if (isRaw)
+        {
+            bOut.write(b);
+        }
+        else
+        {
+            pss.update(b);
+        }
     }
 
     protected void engineUpdate(
@@ -164,7 +200,14 @@ public class PSSSignatureSpi
         int     len) 
         throws SignatureException
     {
-        pss.update(b, off, len);
+        if (isRaw)
+        {
+            bOut.write(b, off, len);
+        }
+        else
+        {
+            pss.update(b, off, len);
+        }
     }
 
     protected byte[] engineSign()
@@ -172,6 +215,15 @@ public class PSSSignatureSpi
     {
         try
         {
+            if (isRaw)
+            {
+                byte[] hash = bOut.toByteArray();
+                contentDigest = mgfDigest = guessDigest(hash.length);
+                saltLength = contentDigest.getDigestSize();
+                pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, contentDigest, mgfDigest, saltLength);
+
+                pss.init(true, sigParams);
+            }
             return pss.generateSignature();
         }
         catch (CryptoException e)
@@ -184,6 +236,17 @@ public class PSSSignatureSpi
         byte[]  sigBytes) 
         throws SignatureException
     {
+        if (isRaw)
+        {
+            byte[] hash = bOut.toByteArray();
+            contentDigest = mgfDigest = guessDigest(hash.length);
+            saltLength = contentDigest.getDigestSize();
+            pss = new org.bouncycastle.crypto.signers.PSSSigner(signer, NullPssDigest(contentDigest), mgfDigest, saltLength);
+
+            pss.init(false, sigParams);
+
+            pss.update(hash, 0, hash.length);
+        }
         return pss.verifySignature(sigBytes);
     }
 
@@ -213,6 +276,25 @@ public class PSSSignatureSpi
         String param)
     {
         throw new UnsupportedOperationException("engineGetParameter unsupported");
+    }
+
+    private Digest guessDigest(int size)
+    {
+        switch (size)
+        {
+        case 20:
+            return new SHA1Digest();
+        case 28:
+            return new SHA224Digest();
+        case 32:
+            return new SHA256Digest();
+        case 48:
+            return new SHA384Digest();
+        case 64:
+            return new SHA512Digest();
+        }
+
+        return null;
     }
 
     static public class nonePSS
@@ -316,29 +398,6 @@ public class PSSSignatureSpi
 
             if (oddTime)
             {
-                // in JDK 1.3 we have to guess!
-                if (mgfDigest == null)
-                {
-                    switch (res.length)
-                    {
-                    case 20:
-                        this.baseDigest = new SHA1Digest();
-                        break;
-                    case 28:
-                        this.baseDigest = new SHA224Digest();
-                        break;
-                    case 32:
-                        this.baseDigest = new SHA256Digest();
-                        break;
-                    case 48:
-                        this.baseDigest = new SHA384Digest();
-                        break;
-                    case 64:
-                        this.baseDigest = new SHA512Digest();
-                        break;
-                    }
-                    mgfDigest = baseDigest;
-                }
                 System.arraycopy(res, 0, out, outOff, res.length);
             }
             else
