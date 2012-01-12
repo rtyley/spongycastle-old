@@ -393,7 +393,7 @@ public class ASN1InputStream
             case NUMERIC_STRING:
                 return new DERNumericString(bytes);
             case OBJECT_IDENTIFIER:
-                return new ASN1ObjectIdentifier(bytes);
+                return ASN1ObjectIdentifier.getInstance(bytes);
             case OCTET_STRING:
                 return new DEROctetString(bytes);
             case PRINTABLE_STRING:
