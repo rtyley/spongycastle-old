@@ -25,18 +25,7 @@ public class DERObjectIdentifier
         {
             return (ASN1ObjectIdentifier)obj;
         }
-        if (obj instanceof byte[])
-        {
-            byte[] enc = (byte[])obj;
 
-            ASN1ObjectIdentifier oid = lookup(enc);
-            if (oid != null)
-            {
-                return oid;
-            }
-
-            return new ASN1ObjectIdentifier(enc);
-        }
         if (obj instanceof DERObjectIdentifier)
         {
             return new ASN1ObjectIdentifier(((DERObjectIdentifier)obj).getId());
@@ -66,7 +55,7 @@ public class DERObjectIdentifier
         }
         else
         {
-            return ASN1ObjectIdentifier.getInstance(ASN1OctetString.getInstance(obj.getObject()).getOctets());
+            return ASN1ObjectIdentifier.fromOctetString(ASN1OctetString.getInstance(obj.getObject()).getOctets());
         }
     }
 
@@ -311,7 +300,7 @@ public class DERObjectIdentifier
 
     private static ASN1ObjectIdentifier[][] cache = new ASN1ObjectIdentifier[255][];
 
-    private static ASN1ObjectIdentifier lookup(byte[] enc)
+    static ASN1ObjectIdentifier fromOctetString(byte[] enc)
     {
         if (enc.length < 3)
         {
@@ -377,6 +366,6 @@ public class DERObjectIdentifier
             }
         }
 
-        return null;
+        return new ASN1ObjectIdentifier(enc);
     }
 }
