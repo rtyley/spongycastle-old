@@ -123,7 +123,14 @@ public class SignatureSpi
 
         digest.reset();
 
-        signer.init(true, param);
+        if (appRandom != null)
+        {
+            signer.init(true, new ParametersWithRandom(param, appRandom));
+        }
+        else
+        {
+            signer.init(true, param);
+        }
     }
 
     protected void engineUpdate(
