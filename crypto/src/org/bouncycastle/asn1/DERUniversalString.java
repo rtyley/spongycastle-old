@@ -3,6 +3,8 @@ package org.bouncycastle.asn1;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
+
 /**
  * DER UniversalString object.
  */
@@ -124,11 +126,11 @@ public class DERUniversalString
             return false;
         }
 
-        return this.getString().equals(((DERUniversalString)o).getString());
+        return Arrays.areEqual(string, ((DERUniversalString)o).string);
     }
     
     public int hashCode()
     {
-        return this.getString().hashCode();
+        return Arrays.hashCode(string);
     }
 }

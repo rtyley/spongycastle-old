@@ -2,6 +2,7 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Strings;
 
 /**
@@ -11,8 +12,7 @@ public class DERUTF8String
     extends ASN1Primitive
     implements ASN1String
 {
-    private char[]  string;
-    private int     bodyLength = -1;
+    private byte[]  string;
 
     /**
      * return an UTF8 string from the passed in object.
@@ -61,16 +61,9 @@ public class DERUTF8String
     /**
      * basic constructor - byte encoded string.
      */
-    public DERUTF8String(byte[] string)
+    DERUTF8String(byte[] string)
     {
-        try
-        {
-            this.string = Strings.fromUTF8ByteArray(string).toCharArray();
-        }
-        catch (ArrayIndexOutOfBoundsException e)
-        {
-            throw new IllegalArgumentException("UTF8 encoding invalid");
-        }
+        this.string = string;
     }
 
     /**
@@ -78,22 +71,22 @@ public class DERUTF8String
      */
     public DERUTF8String(String string)
     {
-        this.string = string.toCharArray();
+        this.string = Strings.toUTF8ByteArray(string);
     }
 
     public String getString()
     {
-        return new String(string);
+        return Strings.fromUTF8ByteArray(string);
     }
 
     public String toString()
     {
-        return new String(string);
+        return getString();
     }
 
     public int hashCode()
     {
-        return this.getString().hashCode();
+        return Arrays.hashCode(string);
     }
 
     boolean asn1Equals(ASN1Primitive o)
@@ -105,18 +98,7 @@ public class DERUTF8String
 
         DERUTF8String s = (DERUTF8String)o;
 
-        return this.getString().equals(s.getString());
-    }
-
-    private int getBodyLength()
-        throws IOException
-    {
-        if (bodyLength < 0)
-        {
-            bodyLength = Strings.toUTF8ByteArray(string).length;
-        }
-
-        return bodyLength;
+        return Arrays.areEqual(string, s.string);
     }
 
     boolean isConstructed()
@@ -127,19 +109,12 @@ public class DERUTF8String
     int encodedLength()
         throws IOException
     {
-        int length = getBodyLength();
-
-        return 1 + StreamUtil.calculateBodyLength(length) + length;
+        return 1 + StreamUtil.calculateBodyLength(string.length) + string.length;
     }
 
     void encode(ASN1OutputStream out)
         throws IOException
     {
-        int length = getBodyLength();
-
-        out.write(BERTags.UTF8_STRING);
-        out.writeLength(length);
-
-        Strings.toUTF8ByteArray(string, out.getRawSubStream());
+        out.writeEncoded(BERTags.UTF8_STRING, string);
     }
 }

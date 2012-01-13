@@ -2,6 +2,9 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
+
 /**
  * DER NumericString object - this is an ascii string of characters {0,1,2,3,4,5,6,7,8,9, }.
  */
@@ -9,7 +12,7 @@ public class DERNumericString
     extends ASN1Primitive
     implements ASN1String
 {
-    String  string;
+    private byte[]  string;
 
     /**
      * return a Numeric string from the passed in object
@@ -55,17 +58,10 @@ public class DERNumericString
     /**
      * basic constructor - with bytes.
      */
-    public DERNumericString(
+    DERNumericString(
         byte[]   string)
     {
-        char[]  cs = new char[string.length];
-
-        for (int i = 0; i != cs.length; i++)
-        {
-            cs[i] = (char)(string[i] & 0xff);
-        }
-
-        this.string = new String(cs);
+        this.string = string;
     }
 
     /**
@@ -94,30 +90,22 @@ public class DERNumericString
             throw new IllegalArgumentException("string contains illegal characters");
         }
 
-        this.string = string;
+        this.string = Strings.toByteArray(string);
     }
 
     public String getString()
     {
-        return string;
+        return Strings.fromByteArray(string);
     }
 
     public String toString()
     {
-        return string;
+        return getString();
     }
 
     public byte[] getOctets()
     {
-        char[]  cs = string.toCharArray();
-        byte[]  bs = new byte[cs.length];
-
-        for (int i = 0; i != cs.length; i++)
-        {
-            bs[i] = (byte)cs[i];
-        }
-
-        return bs; 
+        return Arrays.clone(string);
     }
 
     boolean isConstructed()
@@ -127,19 +115,19 @@ public class DERNumericString
 
     int encodedLength()
     {
-        return 1 + StreamUtil.calculateBodyLength(string.length()) + string.length();
+        return 1 + StreamUtil.calculateBodyLength(string.length) + string.length;
     }
 
     void encode(
         ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(BERTags.NUMERIC_STRING, this.getOctets());
+        out.writeEncoded(BERTags.NUMERIC_STRING, string);
     }
 
     public int hashCode()
     {
-        return this.getString().hashCode();
+        return Arrays.hashCode(string);
     }
 
     boolean asn1Equals(
@@ -152,7 +140,7 @@ public class DERNumericString
 
         DERNumericString  s = (DERNumericString)o;
 
-        return this.getString().equals(s.getString());
+        return Arrays.areEqual(string, s.string);
     }
 
     /**

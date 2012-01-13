@@ -67,7 +67,7 @@ public class DERBoolean
         }
         else
         {
-            return new ASN1Boolean(((ASN1OctetString)o).getOctets());
+            return ASN1Boolean.fromOctetString(((ASN1OctetString)o).getOctets());
         }
     }
     
@@ -141,5 +141,26 @@ public class DERBoolean
     public String toString()
     {
       return (value[0] != 0) ? "TRUE" : "FALSE";
+    }
+
+    static ASN1Boolean fromOctetString(byte[] value)
+    {
+        if (value.length != 1)
+        {
+            throw new IllegalArgumentException("byte value should have 1 byte in it");
+        }
+
+        if (value[0] == 0)
+        {
+            return FALSE;
+        }
+        else if (value[0] == 0xff)
+        {
+            return TRUE;
+        }
+        else
+        {
+            return new ASN1Boolean(value);
+        }
     }
 }

@@ -158,11 +158,6 @@ public class ASN1OutputStream
         os.flush();
     }
 
-    OutputStream getRawSubStream()
-    {
-        return os;
-    }
-
     ASN1OutputStream getDERSubStream()
     {
         return new DEROutputStream(os);

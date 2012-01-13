@@ -6,13 +6,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.SimpleTimeZone;
 
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
+
 /**
  * UTC time object.
  */
 public class DERUTCTime
     extends ASN1Primitive
 {
-    String      time;
+    private byte[]      time;
 
     /**
      * return an UTC Time from the passed in object.
@@ -73,7 +76,7 @@ public class DERUTCTime
     public DERUTCTime(
         String  time)
     {
-        this.time = time;
+        this.time = Strings.toByteArray(time);
         try
         {
             this.getDate();
@@ -94,23 +97,13 @@ public class DERUTCTime
 
         dateF.setTimeZone(new SimpleTimeZone(0,"Z"));
 
-        this.time = dateF.format(time);
+        this.time = Strings.toByteArray(dateF.format(time));
     }
 
     DERUTCTime(
-        byte[]  bytes)
+        byte[]  time)
     {
-        //
-        // explicitly convert to characters
-        //
-        char[]  dateC = new char[bytes.length];
-
-        for (int i = 0; i != dateC.length; i++)
-        {
-            dateC[i] = (char)(bytes[i] & 0xff);
-        }
-
-        this.time = new String(dateC);
+        this.time = time;
     }
 
     /**
@@ -163,30 +156,32 @@ public class DERUTCTime
      */
     public String getTime()
     {
+        String stime = Strings.fromByteArray(time);
+
         //
         // standardise the format.
         //
-        if (time.indexOf('-') < 0 && time.indexOf('+') < 0)
+        if (stime.indexOf('-') < 0 && stime.indexOf('+') < 0)
         {
-            if (time.length() == 11)
+            if (stime.length() == 11)
             {
-                return time.substring(0, 10) + "00GMT+00:00";
+                return stime.substring(0, 10) + "00GMT+00:00";
             }
             else
             {
-                return time.substring(0, 12) + "GMT+00:00";
+                return stime.substring(0, 12) + "GMT+00:00";
             }
         }
         else
         {
-            int index = time.indexOf('-');
+            int index = stime.indexOf('-');
             if (index < 0)
             {
-                index = time.indexOf('+');
+                index = stime.indexOf('+');
             }
-            String d = time;
+            String d = stime;
 
-            if (index == time.length() - 3)
+            if (index == stime.length() - 3)
             {
                 d += "00";
             }
@@ -220,19 +215,6 @@ public class DERUTCTime
         }
     }
 
-    private byte[] getOctets()
-    {
-        char[]  cs = time.toCharArray();
-        byte[]  bs = new byte[cs.length];
-
-        for (int i = 0; i != cs.length; i++)
-        {
-            bs[i] = (byte)cs[i];
-        }
-
-        return bs;
-    }
-
     boolean isConstructed()
     {
         return false;
@@ -240,7 +222,7 @@ public class DERUTCTime
 
     int encodedLength()
     {
-        int length = time.length();
+        int length = time.length;
 
         return 1 + StreamUtil.calculateBodyLength(length) + length;
     }
@@ -249,7 +231,16 @@ public class DERUTCTime
         ASN1OutputStream  out)
         throws IOException
     {
-        out.writeEncoded(BERTags.UTC_TIME, this.getOctets());
+        out.write(BERTags.UTC_TIME);
+
+        int length = time.length;
+
+        out.writeLength(length);
+
+        for (int i = 0; i != length; i++)
+        {
+            out.write((byte)time[i]);
+        }
     }
     
     boolean asn1Equals(
@@ -260,16 +251,16 @@ public class DERUTCTime
             return false;
         }
 
-        return time.equals(((DERUTCTime)o).time);
+        return Arrays.areEqual(time, ((DERUTCTime)o).time);
     }
     
     public int hashCode()
     {
-        return time.hashCode();
+        return Arrays.hashCode(time);
     }
 
     public String toString() 
     {
-      return time;
+      return Strings.fromByteArray(time);
     }
 }

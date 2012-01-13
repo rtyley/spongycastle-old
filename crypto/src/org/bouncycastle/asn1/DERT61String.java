@@ -2,6 +2,9 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
+
 /**
  * DER T61String (also the teletex string)
  */
@@ -9,7 +12,7 @@ public class DERT61String
     extends ASN1Primitive
     implements ASN1String
 {
-    String  string;
+    private byte[] string;
 
     /**
      * return a T61 string from the passed in object.
@@ -55,17 +58,10 @@ public class DERT61String
     /**
      * basic constructor - with bytes.
      */
-    public DERT61String(
+    DERT61String(
         byte[]   string)
     {
-        char[]  cs = new char[string.length];
-
-        for (int i = 0; i != cs.length; i++)
-        {
-            cs[i] = (char)(string[i] & 0xff);
-        }
-
-        this.string = new String(cs);
+        this.string = string;
     }
 
     /**
@@ -74,17 +70,17 @@ public class DERT61String
     public DERT61String(
         String   string)
     {
-        this.string = string;
+        this.string = Strings.toByteArray(string);
     }
 
     public String getString()
     {
-        return string;
+        return Strings.fromByteArray(string);
     }
 
     public String toString()
     {
-        return string;
+        return getString();
     }
 
     boolean isConstructed()
@@ -94,27 +90,19 @@ public class DERT61String
 
     int encodedLength()
     {
-        return 1 + StreamUtil.calculateBodyLength(string.length()) + string.length();
+        return 1 + StreamUtil.calculateBodyLength(string.length) + string.length;
     }
 
     void encode(
         ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(BERTags.T61_STRING, this.getOctets());
+        out.writeEncoded(BERTags.T61_STRING, string);
     }
     
     public byte[] getOctets()
     {
-        char[]  cs = string.toCharArray();
-        byte[]  bs = new byte[cs.length];
-
-        for (int i = 0; i != cs.length; i++)
-        {
-            bs[i] = (byte)cs[i];
-        }
-
-        return bs; 
+        return Arrays.clone(string);
     }
 
     boolean asn1Equals(
@@ -125,11 +113,11 @@ public class DERT61String
             return false;
         }
 
-        return this.getString().equals(((DERT61String)o).getString());
+        return Arrays.areEqual(string, ((DERT61String)o).string);
     }
     
     public int hashCode()
     {
-        return this.getString().hashCode();
+        return Arrays.hashCode(string);
     }
 }

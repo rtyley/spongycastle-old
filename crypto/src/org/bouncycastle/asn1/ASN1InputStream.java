@@ -99,10 +99,6 @@ public class ASN1InputStream
         this.limit = limit;
         this.lazyEvaluate = lazyEvaluate;
         this.tmpBuffers = new byte[21][];
-        for (int i = 0; i != tmpBuffers.length; i++)
-        {
-            tmpBuffers[i] = new byte[i];
-        }
     }
 
     int getLimit()
@@ -375,9 +371,15 @@ public class ASN1InputStream
     private static byte[] getBuffer(DefiniteLengthInputStream defIn, byte[][] tmpBuffers)
         throws IOException
     {
+        int len = defIn.getRemaining();
         if (defIn.getRemaining() < tmpBuffers.length)
         {
-            byte[] buf = tmpBuffers[defIn.getRemaining()];
+            byte[] buf = tmpBuffers[len];
+
+            if (buf == null)
+            {
+                buf = tmpBuffers[len] = new byte[len];
+            }
 
             Streams.readFully(defIn, buf);
 
@@ -387,6 +389,30 @@ public class ASN1InputStream
         {
             return defIn.toByteArray();
         }
+    }
+
+    private static char[] getBMPCharBuffer(DefiniteLengthInputStream defIn)
+        throws IOException
+    {
+        int len = defIn.getRemaining() / 2;
+        char[] buf = new char[len];
+        int totalRead = 0;
+        while (totalRead < len)
+        {
+            int ch1 = defIn.read();
+            if (ch1 < 0)
+            {
+                break;
+            }
+            int ch2 = defIn.read();
+            if (ch2 < 0)
+            {
+                break;
+            }
+            buf[totalRead++] = (char)((ch1 << 8) | (ch2 & 0xff));
+        }
+
+        return buf;
     }
 
     static ASN1Primitive createPrimitiveDERObject(
@@ -400,39 +426,39 @@ public class ASN1InputStream
             case BIT_STRING:
                 return DERBitString.fromInputStream(defIn.getRemaining(), defIn);
             case BMP_STRING:
-                return new DERBMPString(getBuffer(defIn, tmpBuffers));
+                return new DERBMPString(getBMPCharBuffer(defIn));
             case BOOLEAN:
-                return new ASN1Boolean(getBuffer(defIn, tmpBuffers));
+                return ASN1Boolean.fromOctetString(getBuffer(defIn, tmpBuffers));
             case ENUMERATED:
-                return new ASN1Enumerated(defIn.toByteArray());
+                return ASN1Enumerated.fromOctetString(defIn.toByteArray());
             case GENERALIZED_TIME:
-                return new ASN1GeneralizedTime(getBuffer(defIn, tmpBuffers));
+                return new ASN1GeneralizedTime(defIn.toByteArray());
             case GENERAL_STRING:
-                return new DERGeneralString(getBuffer(defIn, tmpBuffers));
+                return new DERGeneralString(defIn.toByteArray());
             case IA5_STRING:
-                return new DERIA5String(getBuffer(defIn, tmpBuffers));
+                return new DERIA5String(defIn.toByteArray());
             case INTEGER:
                 return new ASN1Integer(defIn.toByteArray());
             case NULL:
                 return DERNull.INSTANCE;   // actual content is ignored (enforce 0 length?)
             case NUMERIC_STRING:
-                return new DERNumericString(getBuffer(defIn, tmpBuffers));
+                return new DERNumericString(defIn.toByteArray());
             case OBJECT_IDENTIFIER:
                 return ASN1ObjectIdentifier.fromOctetString(getBuffer(defIn, tmpBuffers));
             case OCTET_STRING:
                 return new DEROctetString(defIn.toByteArray());
             case PRINTABLE_STRING:
-                return new DERPrintableString(getBuffer(defIn, tmpBuffers));
+                return new DERPrintableString(defIn.toByteArray());
             case T61_STRING:
-                return new DERT61String(getBuffer(defIn, tmpBuffers));
+                return new DERT61String(defIn.toByteArray());
             case UNIVERSAL_STRING:
                 return new DERUniversalString(defIn.toByteArray());
             case UTC_TIME:
-                return new ASN1UTCTime(getBuffer(defIn, tmpBuffers));
+                return new ASN1UTCTime(defIn.toByteArray());
             case UTF8_STRING:
-                return new DERUTF8String(getBuffer(defIn, tmpBuffers));
+                return new DERUTF8String(defIn.toByteArray());
             case VISIBLE_STRING:
-                return new DERVisibleString(getBuffer(defIn, tmpBuffers));
+                return new DERVisibleString(defIn.toByteArray());
             default:
                 throw new IOException("unknown tag " + tagNo + " encountered");
         }

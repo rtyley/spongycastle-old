@@ -249,6 +249,17 @@ public final class Strings
      */
     public static String fromByteArray(byte[] bytes)
     {
+        return new String(asCharArray(bytes));
+    }
+
+    /**
+     * Do a simple conversion of an array of 8 bit characters into a string.
+     *
+     * @param bytes 8 bit characters.
+     * @return resulting String.
+     */
+    public static char[] asCharArray(byte[] bytes)
+    {
         char[] chars = new char[bytes.length];
 
         for (int i = 0; i != chars.length; i++)
@@ -256,7 +267,7 @@ public final class Strings
             chars[i] = (char)(bytes[i] & 0xff);
         }
 
-        return new String(chars);
+        return chars;
     }
 
     public static String[] split(String input, char delimiter)

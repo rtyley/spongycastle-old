@@ -2,6 +2,9 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
+
 /**
  * DER PrintableString object.
  */
@@ -9,7 +12,7 @@ public class DERPrintableString
     extends ASN1Primitive
     implements ASN1String
 {
-    String  string;
+    private byte[]  string;
 
     /**
      * return a printable string from the passed in object.
@@ -55,17 +58,10 @@ public class DERPrintableString
     /**
      * basic constructor - byte encoded string.
      */
-    public DERPrintableString(
+    DERPrintableString(
         byte[]   string)
     {
-        char[]  cs = new char[string.length];
-
-        for (int i = 0; i != cs.length; i++)
-        {
-            cs[i] = (char)(string[i] & 0xff);
-        }
-
-        this.string = new String(cs);
+        this.string = string;
     }
 
     /**
@@ -94,25 +90,17 @@ public class DERPrintableString
             throw new IllegalArgumentException("string contains illegal characters");
         }
 
-        this.string = string;
+        this.string = Strings.toByteArray(string);
     }
 
     public String getString()
     {
-        return string;
+        return Strings.fromByteArray(string);
     }
 
     public byte[] getOctets()
     {
-        char[]  cs = string.toCharArray();
-        byte[]  bs = new byte[cs.length];
-
-        for (int i = 0; i != cs.length; i++)
-        {
-            bs[i] = (byte)cs[i];
-        }
-
-        return bs; 
+        return Arrays.clone(string);
     }
 
     boolean isConstructed()
@@ -122,19 +110,19 @@ public class DERPrintableString
 
     int encodedLength()
     {
-        return 1 + StreamUtil.calculateBodyLength(string.length()) + string.length();
+        return 1 + StreamUtil.calculateBodyLength(string.length) + string.length;
     }
 
     void encode(
         ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(BERTags.PRINTABLE_STRING, this.getOctets());
+        out.writeEncoded(BERTags.PRINTABLE_STRING, string);
     }
 
     public int hashCode()
     {
-        return this.getString().hashCode();
+        return Arrays.hashCode(string);
     }
 
     boolean asn1Equals(
@@ -147,12 +135,12 @@ public class DERPrintableString
 
         DERPrintableString  s = (DERPrintableString)o;
 
-        return this.getString().equals(s.getString());
+        return Arrays.areEqual(string, s.string);
     }
 
     public String toString()
     {
-        return string;
+        return getString();
     }
 
     /**

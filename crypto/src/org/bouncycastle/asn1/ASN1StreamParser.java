@@ -24,10 +24,6 @@ public class ASN1StreamParser
         this._limit = limit;
 
         this.tmpBuffers = new byte[21][];
-        for (int i = 0; i != tmpBuffers.length; i++)
-        {
-            tmpBuffers[i] = new byte[i];
-        }
     }
 
     public ASN1StreamParser(

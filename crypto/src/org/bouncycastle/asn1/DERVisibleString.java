@@ -2,6 +2,9 @@ package org.bouncycastle.asn1;
 
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
+
 /**
  * DER VisibleString object.
  */
@@ -9,7 +12,7 @@ public class DERVisibleString
     extends ASN1Primitive
     implements ASN1String
 {
-    String  string;
+    private byte[]  string;
 
     /**
      * return a Visible String from the passed in object.
@@ -56,17 +59,10 @@ public class DERVisibleString
     /**
      * basic constructor - byte encoded string.
      */
-    public DERVisibleString(
+    DERVisibleString(
         byte[]   string)
     {
-        char[]  cs = new char[string.length];
-
-        for (int i = 0; i != cs.length; i++)
-        {
-            cs[i] = (char)(string[i] & 0xff);
-        }
-
-        this.string = new String(cs);
+        this.string = string;
     }
 
     /**
@@ -75,30 +71,22 @@ public class DERVisibleString
     public DERVisibleString(
         String   string)
     {
-        this.string = string;
+        this.string = Strings.toByteArray(string);
     }
 
     public String getString()
     {
-        return string;
+        return Strings.fromByteArray(string);
     }
 
     public String toString()
     {
-        return string;
+        return getString();
     }
 
     public byte[] getOctets()
     {
-        char[]  cs = string.toCharArray();
-        byte[]  bs = new byte[cs.length];
-
-        for (int i = 0; i != cs.length; i++)
-        {
-            bs[i] = (byte)cs[i];
-        }
-
-        return bs;
+        return Arrays.clone(string);
     }
 
     boolean isConstructed()
@@ -108,14 +96,14 @@ public class DERVisibleString
 
     int encodedLength()
     {
-        return 1 + StreamUtil.calculateBodyLength(string.length()) + string.length();
+        return 1 + StreamUtil.calculateBodyLength(string.length) + string.length;
     }
 
     void encode(
         ASN1OutputStream out)
         throws IOException
     {
-        out.writeEncoded(BERTags.VISIBLE_STRING, this.getOctets());
+        out.writeEncoded(BERTags.VISIBLE_STRING, this.string);
     }
     
     boolean asn1Equals(
@@ -126,11 +114,11 @@ public class DERVisibleString
             return false;
         }
 
-        return this.getString().equals(((DERVisibleString)o).getString());
+        return Arrays.areEqual(string, ((DERVisibleString)o).string);
     }
     
     public int hashCode()
     {
-        return this.getString().hashCode();
+        return Arrays.hashCode(string);
     }
 }
