@@ -2,9 +2,19 @@ package org.bouncycastle.asn1.test;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1String;
+import org.bouncycastle.asn1.DERBMPString;
 import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERGeneralString;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERNumericString;
+import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERT61String;
+import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.DERUniversalString;
+import org.bouncycastle.asn1.DERVisibleString;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.test.SimpleTest;
 
 /**
@@ -75,7 +85,7 @@ public class StringTest
 
         byte[] t61Bytes = new byte[] { -1, -2, -3, -4, -5, -6, -7, -8 };
         String t61String = new String(t61Bytes, "iso-8859-1");
-        DERT61String t61 = new DERT61String(t61Bytes);
+        DERT61String t61 = new DERT61String(Strings.fromByteArray(t61Bytes));
 
         if (!t61.getString().equals(t61String))
         {
@@ -85,6 +95,61 @@ public class StringTest
         if (!t61.toString().equals(t61String))
         {
             fail("DERT61String.toString() result incorrect");
+        }
+
+        char[] shortChars = new char[] { 'a', 'b', 'c', 'd', 'e'};
+        char[] longChars = new char[1000];
+
+        for (int i = 0; i != longChars.length; i++)
+        {
+            longChars[i] = 'X';
+        }
+
+        checkString(new DERBMPString(new String(shortChars)), new DERBMPString(new String(longChars)));
+        checkString(new DERUTF8String(new String(shortChars)), new DERUTF8String(new String(longChars)));
+        checkString(new DERIA5String(new String(shortChars)), new DERIA5String(new String(longChars)));
+        checkString(new DERPrintableString(new String(shortChars)), new DERPrintableString(new String(longChars)));
+        checkString(new DERVisibleString(new String(shortChars)), new DERVisibleString(new String(longChars)));
+        checkString(new DERGeneralString(new String(shortChars)), new DERGeneralString(new String(longChars)));
+        checkString(new DERT61String(new String(shortChars)), new DERT61String(new String(longChars)));
+
+        shortChars = new char[] { '1', '2', '3', '4', '5'};
+        longChars = new char[1000];
+
+        for (int i = 0; i != longChars.length; i++)
+        {
+            longChars[i] = '1';
+        }
+
+        checkString(new DERNumericString(new String(shortChars)), new DERNumericString(new String(longChars)));
+
+        byte[] shortBytes = new byte[] { 'a', 'b', 'c', 'd', 'e'};
+        byte[] longBytes = new byte[1000];
+
+        for (int i = 0; i != longChars.length; i++)
+        {
+            longChars[i] = 'X';
+        }
+
+        checkString(new DERUniversalString(shortBytes), new DERUniversalString(longBytes));
+
+    }
+
+    private void checkString(ASN1String shortString, ASN1String longString)
+        throws IOException
+    {
+        ASN1String short2 = (ASN1String)ASN1Primitive.fromByteArray(((ASN1Primitive)shortString).getEncoded());
+
+        if (!shortString.toString().equals(short2.toString()))
+        {
+            fail(short2.getClass().getName() + " shortBytes result incorrect");
+        }
+
+        ASN1String long2 = (ASN1String)ASN1Primitive.fromByteArray(((ASN1Primitive)longString).getEncoded());
+
+        if (!longString.toString().equals(long2.toString()))
+        {
+            fail(long2.getClass().getName() + " longBytes result incorrect");
         }
     }
 

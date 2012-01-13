@@ -3,6 +3,7 @@ package org.bouncycastle.asn1.test;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.test.SimpleTestResult;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
@@ -66,7 +67,7 @@ public class DERUTF8StringTest
                 byte[] b1 = new DERUTF8String(s).getEncoded();
                 byte temp[] = new byte[b1.length - 2];
                 System.arraycopy(b1, 2, temp, 0, b1.length - 2);
-                byte[] b2 = new DERUTF8String(new DEROctetString(temp).getOctets()).getEncoded();
+                byte[] b2 = new DERUTF8String(Strings.fromUTF8ByteArray(new DEROctetString(temp).getOctets())).getEncoded();
                 if (!Arrays.areEqual(b1, b2))
                 {
                     return new SimpleTestResult(false, getName() + ": failed UTF-8 encoding and decoding");
