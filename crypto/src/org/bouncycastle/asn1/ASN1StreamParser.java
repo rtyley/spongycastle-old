@@ -23,7 +23,7 @@ public class ASN1StreamParser
         this._in = in;
         this._limit = limit;
 
-        this.tmpBuffers = new byte[21][];
+        this.tmpBuffers = new byte[11][];
     }
 
     public ASN1StreamParser(

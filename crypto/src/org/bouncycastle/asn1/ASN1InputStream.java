@@ -98,7 +98,7 @@ public class ASN1InputStream
         super(input);
         this.limit = limit;
         this.lazyEvaluate = lazyEvaluate;
-        this.tmpBuffers = new byte[21][];
+        this.tmpBuffers = new byte[11][];
     }
 
     int getLimit()
