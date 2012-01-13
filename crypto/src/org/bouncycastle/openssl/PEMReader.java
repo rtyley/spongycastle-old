@@ -234,7 +234,7 @@ public class PEMReader
 
             try
             {
-                return (ASN1Sequence)ASN1Primitive.fromByteArray(keyBytes);
+                return ASN1Sequence.getInstance(ASN1Primitive.fromByteArray(keyBytes));
             }
             catch (IOException e)
             {
@@ -247,7 +247,7 @@ public class PEMReader
                     throw new PEMException(e.getMessage(), e);
                 }
             }
-            catch (ClassCastException e)
+            catch (IllegalArgumentException e)
             {
                 if (isEncrypted)
                 {
