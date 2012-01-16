@@ -3,6 +3,7 @@ package org.bouncycastle.jce.provider.test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -26,6 +27,7 @@ import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
@@ -39,6 +41,29 @@ public class KeyStoreTest
     extends SimpleTest
 {
     static char[]   passwd = { 'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd' };
+
+    byte[] v1BKS = Base64.decode(
+          "AAAAAQAAABTqZbNMyPjsFazhFplWWDMBLPRdRAAABcYEAAdhbmRyb2lkAAAB"
+        + "NOifkPwAAAAAAAAAPAAAABTZOLhcyhB0gKyfoDvyQbpzftB7GgAABEYPrZP8"
+        + "q20AJLETjDv0K9C5rIl1erpyvpv20bqcbghK6wD0b8OP5/XzOz/8knhxmqJZ"
+        + "3yRJMw==");
+    byte[] v2BKS = Base64.decode(
+          "AAAAAgAAABSkmTXz4VIznO1SSUqsIHdxWcxsuQAABFMEAAdhbmRyb2lkAAABN" +
+          "OifkPwAAAAAAAAAPAAAABTZOLhcyhB0gKyfoDvyQbpzftB7GgAABEYPrZP8q2" +
+          "0AJLETjDv0K9C5rIl1erpyvpv20bqcbghK6wBO59KOGPvSrmJpd32P6ZAh9qLZJw==");
+
+    byte[] v1UBER = Base64.decode(
+          "AAAAAQAAABRP0F6p2p3FyQKqyJiJt3NbvdybiwAAB2znqrO779YIW5gMtbt+"
+        + "NUs96VPPcfZiKJPg7RKH7Yu3CQB0/g9nYsvgFB0fQ05mHcW3KjntN2/31A6G"
+        + "i00n4ZnUTjJL16puZnQrloeGXxFy58tjwkFuwJ7V7ELYgiZlls0beHSdDGQW"
+        + "iyYECwWs1la/");
+    byte[] v2UBER = Base64.decode(
+          "AAAAAgAAABQ/D9k3376OG/REg4Ams9Up332tLQAABujoVcsRcKWwhlo4mMg5"
+        + "lF2vJfK+okIYecJGWCvdykF5r8kDn68llt52IDXDkpRXVXcNJ0/aD7sa7iZ0"
+        + "SL0TAwcfp/9v4j/w8slj/qgO0i/76+zROrP0NGFIa5k/iOg5Z0Tj77muMaJf"
+        + "n3vLlIHa4IsX");
+
+    char[] oldStorePass = "fredfred".toCharArray();
 
     public void ecStoreTest(
         String  storeName)
@@ -289,6 +314,32 @@ public class KeyStoreTest
         cert.verify(pubKey);
     }
 
+    private void oldStoreTest()
+        throws Exception
+    {
+        checkStore(KeyStore.getInstance("BKS", "BC"), v1BKS);
+        checkStore(KeyStore.getInstance("BKS", "BC"), v2BKS);
+        checkStore(KeyStore.getInstance("UBER", "BC"), v1UBER);
+        checkStore(KeyStore.getInstance("UBER", "BC"), v2UBER);
+    }
+
+    private void checkStore(KeyStore ks, byte[] data)
+        throws Exception
+    {
+        ks.load(new ByteArrayInputStream(data), oldStorePass);
+
+        if (!ks.containsAlias("android"))
+        {
+            fail("cannot find alias");
+        }
+
+        Key key = ks.getKey("android", oldStorePass);
+        if (key == null)
+        {
+            fail("cannot find key");
+        }
+    }
+
     public String getName()
     {
         return "KeyStore";
@@ -300,6 +351,7 @@ public class KeyStoreTest
         keyStoreTest("BKS");
         keyStoreTest("UBER");
         ecStoreTest("BKS");
+        oldStoreTest();
     }
 
     public static void main(

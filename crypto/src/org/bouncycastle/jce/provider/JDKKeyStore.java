@@ -904,7 +904,7 @@ public class JDKKeyStore
 
     /**
      * the BouncyCastle store. This wont work with the key tool as the
-     * store is stored encrypteed on disk, so the password is mandatory,
+     * store is stored encrypted on disk, so the password is mandatory,
      * however if you hard drive is in a bad part of town and you absolutely,
      * positively, don't want nobody peeking at your things, this is the
      * one to use, no problem! After all in a Bouncy Castle nothing can
@@ -987,8 +987,7 @@ public class JDKKeyStore
                 throw new IOException("KeyStore integrity check failed.");
             }
         }
-    
-    
+
         public void engineStore(OutputStream stream, char[] password) 
             throws IOException
         {
