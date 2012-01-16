@@ -801,7 +801,13 @@ public class JDKKeyStore
             }
         }
 
-        byte[]      salt = new byte[dIn.readInt()];
+        int saltLength = dIn.readInt();
+        if (saltLength <= 0)
+        {
+            throw new IOException("Invalid salt detected");
+        }
+
+        byte[]      salt = new byte[saltLength];
 
         dIn.readFully(salt);
 

@@ -2,6 +2,7 @@ package org.bouncycastle.jce.provider.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -62,6 +63,12 @@ public class KeyStoreTest
         + "lF2vJfK+okIYecJGWCvdykF5r8kDn68llt52IDXDkpRXVXcNJ0/aD7sa7iZ0"
         + "SL0TAwcfp/9v4j/w8slj/qgO0i/76+zROrP0NGFIa5k/iOg5Z0Tj77muMaJf"
         + "n3vLlIHa4IsX");
+
+    byte[] negSaltBKS = Base64.decode(
+          "AAAAAv////+WnyglO06djy6JgCxGiIemnZdcOwAAB2AEAAdhbmRyb2lkAAAB" +
+          "NOifkPwAAAAAAAAAPAAAABTZOLhcyhB0gKyfoDvyQbpzftB7GgAABEYPrZP8" +
+          "q20AJLETjDv0K9C5rIl1erpyvpv20bqcbghK6wDrg6gUHsh27wNjUwkR+REe" +
+          "NeFYBg==");
 
     char[] oldStorePass = "fredfred".toCharArray();
 
@@ -338,6 +345,28 @@ public class KeyStoreTest
         {
             fail("cannot find key");
         }
+
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+        ks.store(bOut, oldStorePass);
+    }
+
+    private void checkException()
+        throws Exception
+    {
+        KeyStore ks = KeyStore.getInstance("BKS", "BC");
+
+        try
+        {
+            ks.load(new ByteArrayInputStream(negSaltBKS), oldStorePass);
+        }
+        catch (IOException e)
+        {
+            if (!e.getMessage().equals("Invalid salt detected"))
+            {
+                fail("negative salt length not detected");
+            }
+        }
     }
 
     public String getName()
@@ -352,6 +381,7 @@ public class KeyStoreTest
         keyStoreTest("UBER");
         ecStoreTest("BKS");
         oldStoreTest();
+        checkException();
     }
 
     public static void main(
