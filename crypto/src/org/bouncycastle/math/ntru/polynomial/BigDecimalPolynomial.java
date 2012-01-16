@@ -242,7 +242,7 @@ public class BigDecimalPolynomial
         int          newLength = to - from;
         BigDecimal[] tmp = new BigDecimal[to - from];
 
-        System.arraycopy(a, 0, tmp, 0, a.length < newLength ? a.length : newLength);
+        System.arraycopy(a, from, tmp, 0, (a.length - from) < newLength ? (a.length - from) : newLength);
 
         return tmp;
     }

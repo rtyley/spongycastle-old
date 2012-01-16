@@ -430,7 +430,7 @@ public class ASN1InputStream
             case BOOLEAN:
                 return ASN1Boolean.fromOctetString(getBuffer(defIn, tmpBuffers));
             case ENUMERATED:
-                return ASN1Enumerated.fromOctetString(defIn.toByteArray());
+                return ASN1Enumerated.fromOctetString(getBuffer(defIn, tmpBuffers));
             case GENERALIZED_TIME:
                 return new ASN1GeneralizedTime(defIn.toByteArray());
             case GENERAL_STRING:

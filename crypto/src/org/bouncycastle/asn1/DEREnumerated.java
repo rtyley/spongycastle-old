@@ -51,7 +51,7 @@ public class DEREnumerated
         }
         else
         {
-            return new ASN1Enumerated(((ASN1OctetString)o).getOctets());
+            return fromOctetString(((ASN1OctetString)o).getOctets());
         }
     }
 
@@ -111,5 +111,31 @@ public class DEREnumerated
     public int hashCode()
     {
         return Arrays.hashCode(bytes);
+    }
+
+    private static ASN1Enumerated[] cache = new ASN1Enumerated[12];
+
+    static ASN1Enumerated fromOctetString(byte[] enc)
+    {
+        if (enc.length > 1)
+        {
+            return new ASN1Enumerated(Arrays.clone(enc));
+        }
+
+        int value = enc[0] & 0xff;
+
+        if (value >= cache.length)
+        {
+            return new ASN1Enumerated(Arrays.clone(enc));
+        }
+
+        ASN1Enumerated possibleMatch = cache[value];
+
+        if (possibleMatch == null)
+        {
+            possibleMatch = cache[value] = new ASN1Enumerated(Arrays.clone(enc));
+        }
+
+        return possibleMatch;
     }
 }

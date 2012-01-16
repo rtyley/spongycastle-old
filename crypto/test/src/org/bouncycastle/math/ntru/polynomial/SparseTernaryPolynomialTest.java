@@ -20,12 +20,12 @@ public class SparseTernaryPolynomialTest
         IntegerPolynomial p2 = DenseTernaryPolynomial.generateRandom(1000, random);
 
         IntegerPolynomial prod1 = p1.mult(p2);
-        prod1 = p1.mult(p2);
         IntegerPolynomial prod2 = p1.mult(p2);
         assertEquals(prod1, prod2);
 
         BigIntPolynomial p3 = new BigIntPolynomial(p2);
         BigIntPolynomial prod3 = p1.mult(p3);
+
         assertEquals(new BigIntPolynomial(prod1), prod3);
     }
 
