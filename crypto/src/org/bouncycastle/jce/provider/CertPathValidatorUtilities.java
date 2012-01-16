@@ -1149,6 +1149,11 @@ public class CertPathValidatorUtilities
     {
         Set critical = crl.getCriticalExtensionOIDs();
 
+        if (critical == null)
+        {
+            return false;
+        }
+
         return critical.contains(RFC3280CertPathUtilities.DELTA_CRL_INDICATOR);
     }
 
