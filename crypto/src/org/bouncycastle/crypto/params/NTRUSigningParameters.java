@@ -5,9 +5,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.SecureRandom;
 import java.text.DecimalFormat;
 
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 
@@ -15,6 +17,7 @@ import org.bouncycastle.crypto.digests.SHA512Digest;
  * A set of parameters for NtruSign. Several predefined parameter sets are available and new ones can be created as well.
  */
 public class NTRUSigningParameters
+    extends KeyGenerationParameters
     implements Cloneable
 {
     /**
@@ -62,18 +65,22 @@ public class NTRUSigningParameters
     }
 
     public int N;
-    int q;
+    public int q;
     public int d, d1, d2, d3, B;
-    double beta, betaSq, normBound, normBoundSq;
-    int signFailTolerance = 100;
-    double keyNormBound, keyNormBoundSq;
-    boolean primeCheck;   // true if N and 2N+1 are prime
-    BasisType basisType;
+    double beta;
+    public double betaSq;
+    double normBound;
+    public double normBoundSq;
+    public int signFailTolerance = 100;
+    double keyNormBound;
+    public double keyNormBoundSq;
+    public boolean primeCheck;   // true if N and 2N+1 are prime
+    public BasisType basisType;
     int bitsF = 6;   // max #bits needed to encode one coefficient of the polynomial F
-    boolean sparse;   // whether to treat ternary polynomials as sparsely populated
-    KeyGenAlg keyGenAlg;
-    Digest hashAlg;
-    TernaryPolynomialType polyType;
+    public boolean sparse;   // whether to treat ternary polynomials as sparsely populated
+    public KeyGenAlg keyGenAlg;
+    public Digest hashAlg;
+    public TernaryPolynomialType polyType;
 
     /**
      * Constructs a parameter set that uses ternary private keys (i.e. </code>polyType=SIMPLE</code>).
@@ -93,6 +100,7 @@ public class NTRUSigningParameters
      */
     public NTRUSigningParameters(int N, int q, int d, int B, BasisType basisType, double beta, double normBound, double keyNormBound, boolean primeCheck, boolean sparse, KeyGenAlg keyGenAlg, Digest hashAlg)
     {
+        super(new SecureRandom(), N);
         this.N = N;
         this.q = q;
         this.d = d;
@@ -129,6 +137,7 @@ public class NTRUSigningParameters
      */
     public NTRUSigningParameters(int N, int q, int d1, int d2, int d3, int B, BasisType basisType, double beta, double normBound, double keyNormBound, boolean primeCheck, boolean sparse, KeyGenAlg keyGenAlg, Digest hashAlg)
     {
+        super(new SecureRandom(), N);
         this.N = N;
         this.q = q;
         this.d1 = d1;
@@ -163,6 +172,7 @@ public class NTRUSigningParameters
     public NTRUSigningParameters(InputStream is)
         throws IOException
     {
+        super(new SecureRandom(), 0);     // TODO:
         DataInputStream dis = new DataInputStream(is);
         N = dis.readInt();
         q = dis.readInt();

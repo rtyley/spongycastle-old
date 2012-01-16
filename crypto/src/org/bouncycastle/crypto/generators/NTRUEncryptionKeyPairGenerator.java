@@ -13,7 +13,7 @@ import org.bouncycastle.math.ntru.polynomial.ProductFormPolynomial;
 import org.bouncycastle.math.ntru.util.Util;
 
 /**
- * Encrypts, decrypts data and generates key pairs.<br/>
+ * Generates key pairs.<br/>
  * The parameter p is hardcoded to 3.
  */
 public class NTRUEncryptionKeyPairGenerator
@@ -24,16 +24,11 @@ public class NTRUEncryptionKeyPairGenerator
     /**
      * Constructs a new instance with a set of encryption parameters.
      *
-     * @param params encryption parameters
+     * @param param encryption parameters
      */
-    public void init(NTRUEncryptionParameters params)
-    {
-        this.params = params;
-    }
-
     public void init(KeyGenerationParameters param)
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        this.params = (NTRUEncryptionParameters)param;
     }
 
     /**

@@ -13,9 +13,9 @@ import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREnumerated;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -89,7 +89,7 @@ public class X509CRLEntryObject extends X509CRLEntry
             return null;
         }
 
-        byte[] ext = getExtensionValue(X509Extensions.CertificateIssuer.getId());
+        byte[] ext = getExtensionValue(X509Extension.certificateIssuer.getId());
         if (ext == null)
         {
             return previousCertificateIssuer;
@@ -130,7 +130,7 @@ public class X509CRLEntryObject extends X509CRLEntry
 
             while (e.hasMoreElements())
             {
-                DERObjectIdentifier oid = (DERObjectIdentifier) e.nextElement();
+                ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier) e.nextElement();
                 X509Extension ext = extensions.getExtension(oid);
 
                 if (critical == ext.isCritical())
@@ -161,7 +161,7 @@ public class X509CRLEntryObject extends X509CRLEntry
 
         if (exts != null)
         {
-            X509Extension ext = exts.getExtension(new DERObjectIdentifier(oid));
+            X509Extension ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
 
             if (ext != null)
             {
@@ -242,7 +242,7 @@ public class X509CRLEntryObject extends X509CRLEntry
 
                 while (e.hasMoreElements())
                 {
-                    DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
+                    ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
                     X509Extension ext = extensions.getExtension(oid);
                     if (ext.getValue() != null)
                     {
