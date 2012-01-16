@@ -29,7 +29,7 @@ import java.util.Random;
 import junit.framework.TestCase;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.generators.NTRUSigningKeyPairGenerator;
-import org.bouncycastle.crypto.params.NTRUSigningParameters;
+import org.bouncycastle.crypto.params.NTRUSigningKeyGenerationParameters;
 import org.bouncycastle.crypto.params.NTRUSigningPrivateKeyParameters;
 import org.bouncycastle.crypto.params.NTRUSigningPublicKeyParameters;
 import org.bouncycastle.math.ntru.polynomial.IntegerPolynomial;
@@ -40,11 +40,11 @@ public class NTRUSignerTest
     extends TestCase
 {
     public void testCreateBasis() {
-        for (NTRUSigningParameters params: new NTRUSigningParameters[] {NTRUSigningParameters.TEST157.clone(), NTRUSigningParameters.TEST157_PROD.clone()})
+        for (NTRUSigningKeyGenerationParameters params: new NTRUSigningKeyGenerationParameters[] {NTRUSigningKeyGenerationParameters.TEST157.clone(), NTRUSigningKeyGenerationParameters.TEST157_PROD.clone()})
             testCreateBasis(params);
     }
 
-    private void testCreateBasis(NTRUSigningParameters params) {
+    private void testCreateBasis(NTRUSigningKeyGenerationParameters params) {
         NTRUSigningKeyPairGenerator ntru = new NTRUSigningKeyPairGenerator();
 
         ntru.init(params);
@@ -53,7 +53,7 @@ public class NTRUSignerTest
         assertTrue(equalsQ(basis.f, basis.fPrime, basis.F, basis.G, params.q, params.N));
 
         // test KeyGenAlg.FLOAT (default=RESULTANT)
-        params.keyGenAlg = NTRUSigningParameters.KeyGenAlg.FLOAT;
+        params.keyGenAlg = NTRUSigningKeyGenerationParameters.KeyGenAlg.FLOAT;
         ntru.init(params);
         basis = (NTRUSigningKeyPairGenerator.FGBasis)ntru.generateBoundedBasis();
         assertTrue(equalsQ(basis.f, basis.fPrime, basis.F, basis.G, params.q, params.N));
@@ -74,14 +74,14 @@ public class NTRUSignerTest
     public void testSignVerify()
         throws IOException
     {
-        for (NTRUSigningParameters params: new NTRUSigningParameters[] {NTRUSigningParameters.TEST157.clone(), NTRUSigningParameters.TEST157_PROD.clone()})
+        for (NTRUSigningKeyGenerationParameters params: new NTRUSigningKeyGenerationParameters[] {NTRUSigningKeyGenerationParameters.TEST157.clone(), NTRUSigningKeyGenerationParameters.TEST157_PROD.clone()})
             testSignVerify(params);
     }
 
-    private void testSignVerify(NTRUSigningParameters params)
+    private void testSignVerify(NTRUSigningKeyGenerationParameters params)
         throws IOException
     {
-        NTRUSigner ntru = new NTRUSigner(params);
+        NTRUSigner ntru = new NTRUSigner(params.getSigningParameters());
         NTRUSigningKeyPairGenerator kGen = new NTRUSigningKeyPairGenerator();
 
         kGen.init(params);
@@ -109,7 +109,7 @@ public class NTRUSignerTest
 
         // encode, decode keypair, test
         NTRUSigningPrivateKeyParameters priv = new NTRUSigningPrivateKeyParameters(((NTRUSigningPrivateKeyParameters)kp.getPrivate()).getEncoded(), params);
-        NTRUSigningPublicKeyParameters pub = new NTRUSigningPublicKeyParameters(((NTRUSigningPublicKeyParameters)kp.getPublic()).getEncoded(), params);
+        NTRUSigningPublicKeyParameters pub = new NTRUSigningPublicKeyParameters(((NTRUSigningPublicKeyParameters)kp.getPublic()).getEncoded(), params.getSigningParameters());
         kp = new AsymmetricCipherKeyPair(pub, priv);
         s = ntru.sign(msg, kp);
         valid = ntru.verify(msg, s, (NTRUSigningPublicKeyParameters)kp.getPublic());
@@ -131,18 +131,18 @@ public class NTRUSignerTest
         params.sparse = !params.sparse;
 
         // decrease NormBound to force multiple signing attempts
-        NTRUSigningParameters params2 = params.clone();
+        NTRUSigningKeyGenerationParameters params2 = params.clone();
         params2.normBoundSq *= 4.0 / 9;
         params2.signFailTolerance = 10000;
-        ntru = new NTRUSigner(params2);
+        ntru = new NTRUSigner(params2.getSigningParameters());
         s = ntru.sign(msg, kp);
         valid = ntru.verify(msg, s, (NTRUSigningPublicKeyParameters)kp.getPublic());
         assertTrue(valid);
 
         // test KeyGenAlg.FLOAT (default=RESULTANT)
         params2 = params.clone();
-        params.keyGenAlg = NTRUSigningParameters.KeyGenAlg.FLOAT;
-        ntru = new NTRUSigner(params);
+        params.keyGenAlg = NTRUSigningKeyGenerationParameters.KeyGenAlg.FLOAT;
+        ntru = new NTRUSigner(params.getSigningParameters());
 
         kGen.init(params);
 
@@ -157,12 +157,12 @@ public class NTRUSignerTest
 
     /** test for the initSign/update/sign and initVerify/update/verify variant */
     public void testInitUpdateSign() {
-        for (NTRUSigningParameters params: new NTRUSigningParameters[] {NTRUSigningParameters.TEST157.clone(), NTRUSigningParameters.TEST157_PROD.clone()})
+        for (NTRUSigningKeyGenerationParameters params: new NTRUSigningKeyGenerationParameters[] {NTRUSigningKeyGenerationParameters.TEST157.clone(), NTRUSigningKeyGenerationParameters.TEST157_PROD.clone()})
             testInitUpdateSign(params);
     }
 
-    private void testInitUpdateSign(NTRUSigningParameters params) {
-        NTRUSigner ntru = new NTRUSigner(params);
+    private void testInitUpdateSign(NTRUSigningKeyGenerationParameters params) {
+        NTRUSigner ntru = new NTRUSigner(params.getSigningParameters());
         NTRUSigningKeyPairGenerator kGen = new NTRUSigningKeyPairGenerator();
 
         kGen.init(params);
@@ -199,12 +199,12 @@ public class NTRUSignerTest
     }
 
     public void testCreateMsgRep() {
-        for (NTRUSigningParameters params: new NTRUSigningParameters[] {NTRUSigningParameters.TEST157.clone(), NTRUSigningParameters.TEST157_PROD.clone()})
+        for (NTRUSigningKeyGenerationParameters params: new NTRUSigningKeyGenerationParameters[] {NTRUSigningKeyGenerationParameters.TEST157.clone(), NTRUSigningKeyGenerationParameters.TEST157_PROD.clone()})
             testCreateMsgRep(params);
     }
 
-    private void testCreateMsgRep(NTRUSigningParameters params) {
-        NTRUSigner ntru = new NTRUSigner(params);
+    private void testCreateMsgRep(NTRUSigningKeyGenerationParameters params) {
+        NTRUSigner ntru = new NTRUSigner(params.getSigningParameters());
         byte[] msgHash = "adfsadfsdfs23234234".getBytes();
 
         // verify that the message representative is reproducible

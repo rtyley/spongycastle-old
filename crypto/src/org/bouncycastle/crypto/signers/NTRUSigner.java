@@ -169,7 +169,7 @@ public class NTRUSigner {
     public void initVerify(NTRUSigningPublicKeyParameters pub) {
         verificationKey = pub;
 
-            hashAlg = params.hashAlg;
+        hashAlg = params.hashAlg;
 
         hashAlg.reset();
     }

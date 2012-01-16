@@ -28,7 +28,7 @@ public class NTRUSigningPrivateKeyParameters
      * @param b an encoded private key
      * @param params the NtruSign parameters to use
      */
-    public NTRUSigningPrivateKeyParameters(byte[] b, NTRUSigningParameters params)
+    public NTRUSigningPrivateKeyParameters(byte[] b, NTRUSigningKeyGenerationParameters params)
         throws IOException
     {
         super(true);
@@ -44,7 +44,7 @@ public class NTRUSigningPrivateKeyParameters
      * @param is an input stream
      * @param params the NtruSign parameters to use
      */
-    public NTRUSigningPrivateKeyParameters(InputStream is, NTRUSigningParameters params) throws IOException {
+    public NTRUSigningPrivateKeyParameters(InputStream is, NTRUSigningKeyGenerationParameters params) throws IOException {
         super(true);
         bases = new ArrayList<Basis>();
         for (int i=0; i<=params.B; i++)
@@ -147,7 +147,7 @@ public class NTRUSigningPrivateKeyParameters
         public Polynomial f;
         public Polynomial fPrime;
         public IntegerPolynomial h;
-        NTRUSigningParameters params;
+        NTRUSigningKeyGenerationParameters params;
         
         /**
          * Constructs a new basis from polynomials <code>f, f', h</code>.
@@ -156,7 +156,7 @@ public class NTRUSigningPrivateKeyParameters
          * @param h
          * @param params NtruSign parameters
          */
-        protected Basis(Polynomial f, Polynomial fPrime, IntegerPolynomial h, NTRUSigningParameters params) {
+        protected Basis(Polynomial f, Polynomial fPrime, IntegerPolynomial h, NTRUSigningKeyGenerationParameters params) {
             this.f = f;
             this.fPrime = fPrime;
             this.h = h;
@@ -169,7 +169,7 @@ public class NTRUSigningPrivateKeyParameters
          * @param params NtruSign parameters
          * @param include_h whether to read the polynomial <code>h</code> (<code>true</code>) or only <code>f</code> and <code>f'</code> (<code>false</code>)
          */
-        Basis(InputStream is, NTRUSigningParameters params, boolean include_h) throws IOException {
+        Basis(InputStream is, NTRUSigningKeyGenerationParameters params, boolean include_h) throws IOException {
             int N = params.N;
             int q = params.q;
             int d1 = params.d1;
@@ -178,21 +178,21 @@ public class NTRUSigningPrivateKeyParameters
             boolean sparse = params.sparse;
             this.params = params;
             
-            if (params.polyType == NTRUSigningParameters.TernaryPolynomialType.PRODUCT)
+            if (params.polyType == NTRUSigningKeyGenerationParameters.TernaryPolynomialType.PRODUCT)
                 f = ProductFormPolynomial.fromBinary(is, N, d1, d2, d3+1, d3);
             else {
                 IntegerPolynomial fInt = IntegerPolynomial.fromBinary3Tight(is, N);
                 f = sparse ? new SparseTernaryPolynomial(fInt) : new DenseTernaryPolynomial(fInt);
             }
             
-            if (params.basisType == NTRUSigningParameters.BasisType.STANDARD) {
+            if (params.basisType == NTRUSigningKeyGenerationParameters.BasisType.STANDARD) {
                 IntegerPolynomial fPrimeInt = IntegerPolynomial.fromBinary(is, N, q);
                 for (int i=0; i<fPrimeInt.coeffs.length; i++)
                     fPrimeInt.coeffs[i] -= q/2;
                 fPrime = fPrimeInt;
             }
             else
-                if (params.polyType == NTRUSigningParameters.TernaryPolynomialType.PRODUCT)
+                if (params.polyType == NTRUSigningKeyGenerationParameters.TernaryPolynomialType.PRODUCT)
                     fPrime = ProductFormPolynomial.fromBinary(is, N, d1, d2, d3 + 1, d3);
                 else
                     fPrime = IntegerPolynomial.fromBinary3Tight(is, N);
@@ -211,7 +211,7 @@ public class NTRUSigningPrivateKeyParameters
             int q = params.q;
             
             os.write(getEncoded(f));
-            if (params.basisType == NTRUSigningParameters.BasisType.STANDARD) {
+            if (params.basisType == NTRUSigningKeyGenerationParameters.BasisType.STANDARD) {
                 IntegerPolynomial fPrimeInt = fPrime.toIntegerPolynomial();
                 for (int i=0; i<fPrimeInt.coeffs.length; i++)
                     fPrimeInt.coeffs[i] += q/2;

@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
 import org.bouncycastle.crypto.KeyGenerationParameters;
-import org.bouncycastle.crypto.params.NTRUSigningParameters;
+import org.bouncycastle.crypto.params.NTRUSigningKeyGenerationParameters;
 import org.bouncycastle.crypto.params.NTRUSigningPrivateKeyParameters;
 import org.bouncycastle.crypto.params.NTRUSigningPublicKeyParameters;
 import org.bouncycastle.math.ntru.euclid.BigIntEuclidean;
@@ -31,11 +31,11 @@ import static java.math.BigInteger.ZERO;
 public class NTRUSigningKeyPairGenerator
     implements AsymmetricCipherKeyPairGenerator
 {
-    private NTRUSigningParameters params;
+    private NTRUSigningKeyGenerationParameters params;
 
     public void init(KeyGenerationParameters param)
     {
-        this.params = (NTRUSigningParameters)param;
+        this.params = (NTRUSigningKeyGenerationParameters)param;
     }
 
     /**
@@ -56,7 +56,7 @@ public class NTRUSigningKeyPairGenerator
                 try {
                     priv.add(basis.get());
                 if (k == 0)
-                    pub = new NTRUSigningPublicKeyParameters(basis.get().h, params);
+                    pub = new NTRUSigningPublicKeyParameters(basis.get().h, params.getSigningParameters());
                 } catch (Exception e) {
                     throw new IllegalStateException(e);
                 }
@@ -76,7 +76,7 @@ public class NTRUSigningKeyPairGenerator
                 NTRUSigningPrivateKeyParameters.Basis basis = generateBoundedBasis();
                 priv.add(basis);
                 if (k == 0)
-                    pub = new NTRUSigningPublicKeyParameters(basis.h, params);
+                    pub = new NTRUSigningPublicKeyParameters(basis.h, params.getSigningParameters());
             }
             return new AsymmetricCipherKeyPair(pub, priv);
         }
@@ -150,7 +150,7 @@ public class NTRUSigningKeyPairGenerator
             int d1 = params.d1;
             int d2 = params.d2;
             int d3 = params.d3;
-            NTRUSigningParameters.BasisType basisType = params.basisType;
+            NTRUSigningKeyGenerationParameters.BasisType basisType = params.basisType;
 
             Polynomial f;
             IntegerPolynomial fInt;
@@ -166,7 +166,7 @@ public class NTRUSigningKeyPairGenerator
 
             do {
                 do {
-                    f = params.polyType== NTRUSigningParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d + 1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3 + 1, d3, new SecureRandom());
+                    f = params.polyType== NTRUSigningKeyGenerationParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d + 1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3 + 1, d3, new SecureRandom());
                     fInt = f.toIntegerPolynomial();
                 } while (primeCheck && fInt.resultant(_2n1).res.equals(ZERO));
                 fq = fInt.invertFq(q);
@@ -176,7 +176,7 @@ public class NTRUSigningKeyPairGenerator
             do {
                 do {
                     do {
-                        g = params.polyType== NTRUSigningParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d+1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3+1, d3, new SecureRandom());
+                        g = params.polyType== NTRUSigningKeyGenerationParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d+1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3+1, d3, new SecureRandom());
                         gInt = g.toIntegerPolynomial();
                     } while (primeCheck && gInt.resultant(_2n1).res.equals(ZERO));
                 } while (gInt.invertFq(q) == null);
@@ -190,7 +190,7 @@ public class NTRUSigningKeyPairGenerator
             B.mult(r.y.multiply(BigInteger.valueOf(-q)));
 
             BigIntPolynomial C;
-            if (params.keyGenAlg == NTRUSigningParameters.KeyGenAlg.RESULTANT) {
+            if (params.keyGenAlg == NTRUSigningKeyGenerationParameters.KeyGenAlg.RESULTANT) {
                 int[] fRevCoeffs = new int[N];
                 int[] gRevCoeffs = new int[N];
                 fRevCoeffs[0] = fInt.coeffs[0];
@@ -240,7 +240,7 @@ public class NTRUSigningKeyPairGenerator
 
             Polynomial fPrime;
             IntegerPolynomial h;
-            if (basisType == NTRUSigningParameters.BasisType.STANDARD) {
+            if (basisType == NTRUSigningKeyGenerationParameters.BasisType.STANDARD) {
                 fPrime = FInt;
                 h = g.mult(fq, q);
             }
@@ -281,7 +281,7 @@ public class NTRUSigningKeyPairGenerator
         public IntegerPolynomial F;
             public IntegerPolynomial G;
 
-        FGBasis(Polynomial f, Polynomial fPrime, IntegerPolynomial h, IntegerPolynomial F, IntegerPolynomial G, NTRUSigningParameters params) {
+        FGBasis(Polynomial f, Polynomial fPrime, IntegerPolynomial h, IntegerPolynomial F, IntegerPolynomial G, NTRUSigningKeyGenerationParameters params) {
             super(f, fPrime, h, params);
             this.F = F;
             this.G = G;
@@ -289,7 +289,7 @@ public class NTRUSigningKeyPairGenerator
 
         /**
          * Returns <code>true</code> if the norms of the polynomials <code>F</code> and <code>G</code>
-         * are within {@link NTRUSigningParameters#keyNormBound}.
+         * are within {@link NTRUSigningKeyGenerationParameters#keyNormBound}.
          * @return
          */
         boolean isNormOk() {
