@@ -128,7 +128,7 @@ public class StringTest
 
         for (int i = 0; i != longChars.length; i++)
         {
-            longChars[i] = 'X';
+            longBytes[i] = (byte)'X';
         }
 
         checkString(new DERUniversalString(shortBytes), new DERUniversalString(longBytes));
