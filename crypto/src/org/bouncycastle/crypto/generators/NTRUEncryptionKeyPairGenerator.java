@@ -3,9 +3,10 @@ package org.bouncycastle.crypto.generators;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
 import org.bouncycastle.crypto.KeyGenerationParameters;
-import org.bouncycastle.crypto.params.NTRUEncryptionParameters;
+import org.bouncycastle.crypto.params.NTRUEncryptionKeyGenerationParameters;
 import org.bouncycastle.crypto.params.NTRUEncryptionPrivateKeyParameters;
 import org.bouncycastle.crypto.params.NTRUEncryptionPublicKeyParameters;
+import org.bouncycastle.crypto.params.NTRUParameters;
 import org.bouncycastle.math.ntru.polynomial.DenseTernaryPolynomial;
 import org.bouncycastle.math.ntru.polynomial.IntegerPolynomial;
 import org.bouncycastle.math.ntru.polynomial.Polynomial;
@@ -19,7 +20,7 @@ import org.bouncycastle.math.ntru.util.Util;
 public class NTRUEncryptionKeyPairGenerator
     implements AsymmetricCipherKeyPairGenerator
 {
-    private NTRUEncryptionParameters params;
+    private NTRUEncryptionKeyGenerationParameters params;
 
     /**
      * Constructs a new instance with a set of encryption parameters.
@@ -28,7 +29,7 @@ public class NTRUEncryptionKeyPairGenerator
      */
     public void init(KeyGenerationParameters param)
     {
-        this.params = (NTRUEncryptionParameters)param;
+        this.params = (NTRUEncryptionKeyGenerationParameters)param;
     }
 
     /**
@@ -61,14 +62,14 @@ public class NTRUEncryptionKeyPairGenerator
             if (fastFp)
             {
                 // if fastFp=true, f is always invertible mod 3
-                t = params.polyType == NTRUEncryptionParameters.TernaryPolynomialType.SIMPLE ? Util.generateRandomTernary(N, df, df, sparse, params.getRandom()) : ProductFormPolynomial.generateRandom(N, df1, df2, df3, df3, params.getRandom());
+                t = params.polyType == NTRUParameters.TernaryPolynomialType.SIMPLE ? Util.generateRandomTernary(N, df, df, sparse, params.getRandom()) : ProductFormPolynomial.generateRandom(N, df1, df2, df3, df3, params.getRandom());
                 f = t.toIntegerPolynomial();
                 f.mult(3);
                 f.coeffs[0] += 1;
             }
             else
             {
-                t = params.polyType == NTRUEncryptionParameters.TernaryPolynomialType.SIMPLE ? Util.generateRandomTernary(N, df, df - 1, sparse, params.getRandom()) : ProductFormPolynomial.generateRandom(N, df1, df2, df3, df3 - 1, params.getRandom());
+                t = params.polyType == NTRUParameters.TernaryPolynomialType.SIMPLE ? Util.generateRandomTernary(N, df, df - 1, sparse, params.getRandom()) : ProductFormPolynomial.generateRandom(N, df1, df2, df3, df3 - 1, params.getRandom());
                 f = t.toIntegerPolynomial();
                 fp = f.invertF3();
                 if (fp == null)
@@ -109,8 +110,8 @@ public class NTRUEncryptionKeyPairGenerator
         g.clear();
         fq.clear();
 
-        NTRUEncryptionPrivateKeyParameters priv = new NTRUEncryptionPrivateKeyParameters(h, t, fp, params);
-        NTRUEncryptionPublicKeyParameters pub = new NTRUEncryptionPublicKeyParameters(h, params);
+        NTRUEncryptionPrivateKeyParameters priv = new NTRUEncryptionPrivateKeyParameters(h, t, fp, params.getEncryptionParameters());
+        NTRUEncryptionPublicKeyParameters pub = new NTRUEncryptionPublicKeyParameters(h, params.getEncryptionParameters());
         return new AsymmetricCipherKeyPair(pub, priv);
     }
 }

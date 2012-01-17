@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
 import org.bouncycastle.crypto.KeyGenerationParameters;
+import org.bouncycastle.crypto.params.NTRUParameters;
 import org.bouncycastle.crypto.params.NTRUSigningKeyGenerationParameters;
 import org.bouncycastle.crypto.params.NTRUSigningPrivateKeyParameters;
 import org.bouncycastle.crypto.params.NTRUSigningPublicKeyParameters;
@@ -166,7 +167,7 @@ public class NTRUSigningKeyPairGenerator
 
             do {
                 do {
-                    f = params.polyType== NTRUSigningKeyGenerationParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d + 1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3 + 1, d3, new SecureRandom());
+                    f = params.polyType== NTRUParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d + 1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3 + 1, d3, new SecureRandom());
                     fInt = f.toIntegerPolynomial();
                 } while (primeCheck && fInt.resultant(_2n1).res.equals(ZERO));
                 fq = fInt.invertFq(q);
@@ -176,7 +177,7 @@ public class NTRUSigningKeyPairGenerator
             do {
                 do {
                     do {
-                        g = params.polyType== NTRUSigningKeyGenerationParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d+1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3+1, d3, new SecureRandom());
+                        g = params.polyType== NTRUParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d+1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3+1, d3, new SecureRandom());
                         gInt = g.toIntegerPolynomial();
                     } while (primeCheck && gInt.resultant(_2n1).res.equals(ZERO));
                 } while (gInt.invertFq(q) == null);

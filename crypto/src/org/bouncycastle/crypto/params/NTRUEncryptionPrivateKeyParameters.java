@@ -66,7 +66,7 @@ public class NTRUEncryptionPrivateKeyParameters
     {
         super(true, params);
 
-        if (params.polyType == NTRUEncryptionParameters.TernaryPolynomialType.PRODUCT)
+        if (params.polyType == NTRUParameters.TernaryPolynomialType.PRODUCT)
         {
             int N = params.N;
             int df1 = params.df1;

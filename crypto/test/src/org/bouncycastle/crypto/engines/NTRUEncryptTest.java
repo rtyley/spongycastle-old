@@ -8,9 +8,10 @@ import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.generators.NTRUEncryptionKeyPairGenerator;
-import org.bouncycastle.crypto.params.NTRUEncryptionParameters;
+import org.bouncycastle.crypto.params.NTRUEncryptionKeyGenerationParameters;
 import org.bouncycastle.crypto.params.NTRUEncryptionPrivateKeyParameters;
 import org.bouncycastle.crypto.params.NTRUEncryptionPublicKeyParameters;
+import org.bouncycastle.crypto.params.NTRUParameters;
 import org.bouncycastle.math.ntru.polynomial.DenseTernaryPolynomial;
 import org.bouncycastle.math.ntru.polynomial.IntegerPolynomial;
 import org.bouncycastle.math.ntru.polynomial.SparseTernaryPolynomial;
@@ -22,20 +23,20 @@ public class NTRUEncryptTest
     public void testEncryptDecrypt()
         throws InvalidCipherTextException
     {
-        NTRUEncryptionParameters params = NTRUEncryptionParameters.APR2011_743.clone();
+        NTRUEncryptionKeyGenerationParameters params = NTRUEncryptionKeyGenerationParameters.APR2011_743.clone();
         // set df1..df3 and dr1..dr3 so params can be used for SIMPLE as well as PRODUCT
-        params.df1 = NTRUEncryptionParameters.APR2011_743_FAST.df1;
-        params.df2 = NTRUEncryptionParameters.APR2011_743_FAST.df2;
-        params.df3 = NTRUEncryptionParameters.APR2011_743_FAST.df3;
-        params.dr1 = NTRUEncryptionParameters.APR2011_743_FAST.dr1;
-        params.dr2 = NTRUEncryptionParameters.APR2011_743_FAST.dr2;
-        params.dr3 = NTRUEncryptionParameters.APR2011_743_FAST.dr3;
+        params.df1 = NTRUEncryptionKeyGenerationParameters.APR2011_743_FAST.df1;
+        params.df2 = NTRUEncryptionKeyGenerationParameters.APR2011_743_FAST.df2;
+        params.df3 = NTRUEncryptionKeyGenerationParameters.APR2011_743_FAST.df3;
+        params.dr1 = NTRUEncryptionKeyGenerationParameters.APR2011_743_FAST.dr1;
+        params.dr2 = NTRUEncryptionKeyGenerationParameters.APR2011_743_FAST.dr2;
+        params.dr3 = NTRUEncryptionKeyGenerationParameters.APR2011_743_FAST.dr3;
 
-        NTRUEncryptionParameters.TernaryPolynomialType[] values = NTRUEncryptionParameters.TernaryPolynomialType.values();
+        NTRUParameters.TernaryPolynomialType[] values = NTRUParameters.TernaryPolynomialType.values();
 
         for (int i = 0; i != values.length; i++)
         {
-            NTRUEncryptionParameters.TernaryPolynomialType polyType = values[i];
+            NTRUParameters.TernaryPolynomialType polyType = values[i];
 
             boolean[] booleans = {true, false};
             for (int j = 0; j != booleans.length; j++)
@@ -67,7 +68,7 @@ public class NTRUEncryptTest
     }
 
     // encrypts and decrypts a polynomial
-    private void testPolynomial(NTRUEncryptionEngine ntru, AsymmetricCipherKeyPair kp, NTRUEncryptionParameters params)
+    private void testPolynomial(NTRUEncryptionEngine ntru, AsymmetricCipherKeyPair kp, NTRUEncryptionKeyGenerationParameters params)
     {
         SecureRandom random = new SecureRandom();
         IntegerPolynomial m = DenseTernaryPolynomial.generateRandom(params.N, random);
@@ -82,7 +83,7 @@ public class NTRUEncryptTest
     }
 
     // encrypts and decrypts text
-    private void testText(NTRUEncryptionEngine ntru, AsymmetricCipherKeyPair  kp, NTRUEncryptionParameters params)
+    private void testText(NTRUEncryptionEngine ntru, AsymmetricCipherKeyPair  kp, NTRUEncryptionKeyGenerationParameters params)
         throws InvalidCipherTextException
     {
         byte[] plainText = "text to encrypt".getBytes();
@@ -99,7 +100,7 @@ public class NTRUEncryptTest
     }
 
     // tests an empty message
-    private void testEmpty(NTRUEncryptionEngine ntru, AsymmetricCipherKeyPair kp, NTRUEncryptionParameters params)
+    private void testEmpty(NTRUEncryptionEngine ntru, AsymmetricCipherKeyPair kp, NTRUEncryptionKeyGenerationParameters params)
         throws InvalidCipherTextException
     {
         byte[] plainText = "".getBytes();
@@ -116,7 +117,7 @@ public class NTRUEncryptTest
     }
 
     // tests a message of the maximum allowed length
-    private void testMaxLength(NTRUEncryptionEngine ntru, AsymmetricCipherKeyPair kp, NTRUEncryptionParameters params)
+    private void testMaxLength(NTRUEncryptionEngine ntru, AsymmetricCipherKeyPair kp, NTRUEncryptionKeyGenerationParameters params)
         throws InvalidCipherTextException
     {
         byte[] plainText = new byte[params.maxMsgLenBytes];
@@ -133,7 +134,7 @@ public class NTRUEncryptTest
     }
 
     // tests a message that is too long
-    private void testTooLong(NTRUEncryptionEngine ntru, AsymmetricCipherKeyPair kp, NTRUEncryptionParameters params)
+    private void testTooLong(NTRUEncryptionEngine ntru, AsymmetricCipherKeyPair kp, NTRUEncryptionKeyGenerationParameters params)
     {
         byte[] plainText = new byte[params.maxMsgLenBytes + 1];
         try
@@ -162,7 +163,7 @@ public class NTRUEncryptTest
     }
 
     // tests that altering the public key *AFTER* encryption causes the decrypted message to be rejected
-    private void testInvalidEncoding(NTRUEncryptionEngine ntru, AsymmetricCipherKeyPair kp, NTRUEncryptionParameters params)
+    private void testInvalidEncoding(NTRUEncryptionEngine ntru, AsymmetricCipherKeyPair kp, NTRUEncryptionKeyGenerationParameters params)
     {
         try
         {
@@ -174,7 +175,7 @@ public class NTRUEncryptTest
             NTRUEncryptionPrivateKeyParameters orig = (NTRUEncryptionPrivateKeyParameters)kp.getPrivate();
             IntegerPolynomial h = ((NTRUEncryptionPublicKeyParameters)kp.getPublic()).h.clone();
             h.coeffs[0] = (h.coeffs[0] + 111) % params.q;   // alter h
-            NTRUEncryptionPrivateKeyParameters privKey = new NTRUEncryptionPrivateKeyParameters(h, orig.t, orig.fp, params);
+            NTRUEncryptionPrivateKeyParameters privKey = new NTRUEncryptionPrivateKeyParameters(h, orig.t, orig.fp, params.getEncryptionParameters());
 
             ntru.init(false, privKey);
 
@@ -195,7 +196,7 @@ public class NTRUEncryptTest
         byte[] plainText = "secret encrypted text".getBytes();
 
         // dense polynomials
-        NTRUEncryptionParameters params = NTRUEncryptionParameters.APR2011_743;
+        NTRUEncryptionKeyGenerationParameters params = NTRUEncryptionKeyGenerationParameters.APR2011_743;
         NTRUEncryptionEngine ntru = new NTRUEncryptionEngine();
 
         byte[] privBytes = {2, -94, 95, 65, -107, 27, 98, 62, -15, -62, 21, -4, 119, -117, 7, 68, 100, 113, -36, -82, 87, -87, -82, 24, -45, -75, -74, -108, 105, 24, 123, 117, 124, 74, -27, 42, -106, -78, 114, 27, 18, 77, -41, 105, -113, 39, 49, 46, 109, -69, 61, 77, 49, 117, 14, -29, 42, 3, 120, -121, -120, -37, 95, 84, 60, -9, -31, -64, 31, 72, 115, -15, 21, -6, 27, -60, -73, -29, -33, -81, -43, 106, 65, 114, 102, -14, -115, -96, 9, 54, 23, -18, -24, -76, 84, -41, -79, 35, 88, 11, 41, 67, 44, -63, -28, 76, 84, -41, -103, 106, -22, 35, -2, -40, -48, -121, -128, 76, 63, 123, -11, 103, -35, -32, 21, -51, -99, -40, -103, -12, 64, -80, 57, -56, 1, -51, 103, 83, 50, 111, -87, -98, 7, -109, 25, -51, 23, -92};
@@ -206,8 +207,8 @@ public class NTRUEncryptTest
         System.arraycopy(pubBytes, 0, fullBytes, 0, pubBytes.length);
         System.arraycopy(privBytes, 0, fullBytes, pubBytes.length, privBytes.length);
 
-        NTRUEncryptionPrivateKeyParameters priv = new NTRUEncryptionPrivateKeyParameters(fullBytes, params);
-        NTRUEncryptionPublicKeyParameters pub = new NTRUEncryptionPublicKeyParameters(pubBytes, params);
+        NTRUEncryptionPrivateKeyParameters priv = new NTRUEncryptionPrivateKeyParameters(fullBytes, params.getEncryptionParameters());
+        NTRUEncryptionPublicKeyParameters pub = new NTRUEncryptionPublicKeyParameters(pubBytes, params.getEncryptionParameters());
         AsymmetricCipherKeyPair kp = new AsymmetricCipherKeyPair(pub, priv);
 
         ntru.init(true, kp.getPublic());
@@ -220,7 +221,7 @@ public class NTRUEncryptTest
         assertTrue(Arrays.areEqual(plainText, decrypted));
 
         // sparse polynomials
-        params = NTRUEncryptionParameters.EES1499EP1;
+        params = NTRUEncryptionKeyGenerationParameters.EES1499EP1;
         ntru = new NTRUEncryptionEngine();
         privBytes = new byte[] {116, 7, 118, 121, 6, 77, -36, 60, 65, 108, 10, -106, 12, 9, -22, -113, 122, -31, -31, 18, 120, 81, -33, 5, 122, -76, 109, -30, -101, -45, 21, 13, -11, -49, -111, 46, 91, 4, -28, -109, 121, -119, -121, -58, -113, -9, -10, -25, -53, 40, -86, -22, -50, 42, 52, 107, 119, 17, 33, 125, -26, 33, 55, 25, -77, -65, -106, 116, -67, 91, 105, -7, 42, -107, -54, 101, 12, -12, 57, -116, 45, -107, -17, 110, 35, -64, 19, -38, -122, 115, -93, 53, 69, 66, -106, 17, 20, -71, 121, 23, -21, -45, 108, 97, 23, -98, -12, -41, -31, -53, 30, -42, 15, 85, -21, -89, 118, 42, -117, -39, 69, 0, -63, 83, 48, -80, -14, -123, -4, -116, -90, -107, -89, 119, 29, -30, 69, 22, -84, 47, 117, -123, 102, -116, 35, 93, -13, 84, -9, -122, 58, 101, 93, -106, -119, -35, -75, 76, 27, -125, -22, 68, 101, 49, 103, -13, -98, 93, -56, -110, -19, -12, 74, 104, 7, 6, -11, 47, 57, 90, 75, -30, 47, 66, -58, 14, 14, 70, 11, -119, -36, -118, -55, -53, 101, -73, -77, 33, -29, 96, -86, 38, 47, 103, 19, -37, -17, -50, -82, -87, -119, 37, -54, 77, -69, -16, -48, -52, 110, -26, 111, 35, 26, -53, -10, 9, -108, -34, 102, 7, -18, -72, -26, 24, -50, -43, 92, 56, -94, 23, -36, 60, 28, -121, 27, 127, -93, -79, -45, -60, 105, -6, -88, 72, -41, 47, -51, 3, 91, 116, 75, 122, -94, -113, 28, -96, -62, -29, -74, -85, -93, 51, 58, 72, 44, 9, 18, -48, -24, 73, 122, 60, -23, 83, -110, -7, -111, -69, 106, 51, 118, -83, -18, 109, -32, 40, 22};
 
@@ -231,8 +232,8 @@ public class NTRUEncryptTest
         System.arraycopy(pubBytes, 0, fullBytes, 0, pubBytes.length);
         System.arraycopy(privBytes, 0, fullBytes, pubBytes.length, privBytes.length);
 
-        priv = new NTRUEncryptionPrivateKeyParameters(fullBytes, params);
-        pub = new NTRUEncryptionPublicKeyParameters(pubBytes, params);
+        priv = new NTRUEncryptionPrivateKeyParameters(fullBytes, params.getEncryptionParameters());
+        pub = new NTRUEncryptionPublicKeyParameters(pubBytes, params.getEncryptionParameters());
         kp = new AsymmetricCipherKeyPair(pub, priv);
         ntru.init(true, kp.getPublic());
 
@@ -251,7 +252,7 @@ public class NTRUEncryptTest
     {
         byte[] plainText = "secret encrypted text".getBytes();
 
-        NTRUEncryptionParameters params = NTRUEncryptionParameters.APR2011_743_FAST;
+        NTRUEncryptionKeyGenerationParameters params = NTRUEncryptionKeyGenerationParameters.APR2011_743_FAST;
         NTRUEncryptionEngine ntru = new NTRUEncryptionEngine();
         byte[] privBytes = {10, 16, 2, 30, -40, -63, -109, -77, -72, -122, 66, 23, -30, -44, -82, 0, 95, 64, 68, 48, -62, -14, 26, -19, -72, -25, 72, 123, 98, 84, -83, 0, 7, 40, 65, 35, 68, 113, 12, -112, 32, -123, 58, 85, -30, -109, -74, 0, 34, -8, -126, 57, 30, 98, -107, -45, -88, 102, 68, 42, -30, -108, -89, 0, 38, -40, -61, 37, 82, 113, -115, 123, -100, 5, 46, 125, -23, 78, -111, -76, 36, -90, 67, -31, 10, 2, 96, -127, 21, 50, -79, 13, -125, -124, 38, 55, -67, -95, 81, -107, 12, 117, -86, 99, -127, 11};
         byte[] pubBytes = {108, -76, -104, -75, -87, -65, -18, -5, 45, -57, -100, -83, 51, 99, 94, 15, -73, 89, -100, 40, -114, 91, -107, 104, 127, 22, 13, 5, -16, 69, -104, -126, -44, 119, 47, -48, 75, 66, 83, -37, -66, -84, 73, 52, 23, -27, 53, 63, 56, 14, -2, 43, -59, -85, -80, 46, 38, -126, 75, -8, -63, 88, 104, 13, 72, -25, -10, -58, -51, 117, -84, 115, -24, -53, 83, -103, -97, 46, 90, -82, -61, 113, -49, -24, -72, 24, -124, -42, -36, 7, 41, 8, 14, -71, -75, -84, -24, -39, 56, 67, 88, 67, 66, -13, 70, -119, -64, 74, -100, -58, 35, 105, -20, 93, 80, -116, -55, 37, -52, 64, 0, -36, -71, 8, 77, -10, -41, -22, -73, 4, -115, -74, -74, -73, 23, -10, -26, 48, 125, -114, -32, -116, 74, 19, -104, 59, 43, 4, 97, -84, 112, 45, 16, 3, -110, -13, 119, -6, 29, -80, 109, 82, -31, 82, 30, 76, -111, -122, -50, -69, -41, -123, 107, 78, -35, 24, -121, -87, -108, 13, 70, 32, -74, 112, 104, -40, -61, 86, -125, 60, -94, -5, -18, 55, 54, -128, 83, -88, 71, 71, -66, 29, -113, 120, 30, 16, -38, 37, 96, -90, 38, -85, 88, 59, 15, -69, 6, -8, 1, 1, 71, 12, 60, -26, -110, 97, 77, 33, 58, 63, 104, 108, 83, 72, -21, -99, 115, -125, -16, 12, 99, 68, 39, -97, -6, 17, 26, -59, 123, -110, -37, -71, 47, 50, 5, 110, -34, 89, -74, 20, 79, -108, -7, 42, 106, -112, 44, 107, 106, -50, 55, 127, -124, 53, 123, -119, -46, -114, -52, -85, 75, 34, -39, -125, 58, -5, -31, -81, -37, -94, -123, 113, 11, -104, -124, 96, -103, 9, 108, 115, 97, -6, 98, -43, 26, -89, -23, 83, 60, 34, -86, -54, 107, 78, -48, 118, -31, -19, 29, -106, 108, 117, 83, 119, 51, -45, 115, 108, -13, -89, -29, 29, -120, 108, 20, 22, -3, 22, 78, -109, 95, 3, -68, -10, -53, -117, -96, -49, 9, 7, 38, 116, 33, -65, 31, 9, -5, -73, 127, 52, 113, 87, -39, 119, -96, 74, -105, 75, -89, 63, 69, -109, -127, 92, -54, 17, -98, -23, -69, 123, -125, 23, -93, 44, -11, -25, -101, 120, -29, 113, -33, 0, -117, -100, -114, 22, 41, -46, 29, -109, 107, 37, -94, 125, 46, 17, 16, -65, -14, 105, -118, 51, -21, 121, -5, 56, 29, 30, -69, -38, -10, -77, -74, 6, -105, 83, 110, 23, 114, -11, -123, -14, 30, -11, -9, 84, -90, -20, -29, 72, -85, 97, -74, -59, -112, -15, -51, -105, 117, 123, -17, -64, -127, 127, -33, -102, 88, 77, 122, -127, -15, 121, -125, -32, 53, 113, 45, -22, 84, -87, 20, 36, 65, 83, -84, -66, -22, 4, 15, -108, -92, 109, -128, -48, 4, -27, -13, 25, 51, -10, 34, 87, 88, 38, -87, 89, -64, -62, 20, 78, 35, -26, -2, 55, 3, -72, -64, 30, 28, -105, 6, -37, -38, -8, 26, -118, 105, -37, -30, 85, -66, 105, -46, -37, -11, -72, 71, 43, -65, -44, 17, -79, 98, 79, -77, -111, 95, 74, 101, -40, -106, 14, -108, -112, 86, 108, 49, 72, -38, -103, -31, 65, -119, 8, 78, -89, 100, -28, 116, 94, 15, -18, 108, 101, 85, 8, -6, 111, -82, -49, -66, -89, 28, -84, -85, -119, 111, 45, 83, -60, -40, -45, -101, -105, -35, 123, -1, 13, -112, 79, -80, -85, -109, -71, 69, 104, 95, -93, 121, -17, 83, 117, -73, -63, -65, -107, -72, 118, -102, -56, 38, 79, 121, -25, -86, -81, -38, 8, 122, 97, 37, 82, -40, 53, 11, 124, -94, -76, -107, -125, -9, -119, 63, 52, -34, -72, -21, 59, 3, -100, -127, 47, -102, 19, -37, -45, -114, -65, 39, -106, 6, -127, -110, -38, 96, -38, -51, 110, -3, 28, 8, 102, -102, 96, -127, 109, -56, -53, -13, 59, -98, 92, 80, 1, 55, -91, -122, -105, 28, 69, -85, 109, -38, 105, 87, -5, 3, -102, 62, -92, 60, 43, -20, -7, -23, -84, 106, 121, -48, 123, -112, 56, -17, -52, 14, -123, -122, 64, 14, -23, -71, 60, 70, -121, 6, 37, -15, 77, 96, 104, -34, 58, -125, -61, 1, -26, 118, -78, -35, -1, 0, 5, 33, -98, -86, -127, 25, 56, -91, 82, -33, 60, -64, -86, 27, 31, -80, -79, 118, -12, -18, 40, -72, 32, 119, -28, -62, 100, -121, -71, -79, -9, 38, -37, 25, 65, -46, 8, -112, 37, 9, -56, 123, -40, -44, -90, -21, -54, -2, -7, 107, -93, 24, -126, 69, 42, -111, -84, 57, 69, -119, 21, 60, 57, -122, 111, -99, 49, -46, -119, 100, 98, 24, -62, 112, 122, 46, 18, -35, -67, 89, 104, 82, 12, 125, 57, -70, -112, -109, 96, 51, -68, 1, -101, -59, -92, 54, 85, -41, 17, 31, 94, 75, -128, 53, 84, 0, -83, -94, -123, 49, -30, -24, 18, 46, 48, -33, 120, 66, -69, 70, 23, -124, -117, 81, 96, 46, 47, -33, 83, -13, -14, -94, 49, 66, -46, 84, -27, -77, 6, 0, -75, -18, 86, -119, -88, 82, -50, 55, -20, 63, 55, -57, 22, -108, -103, -17, -22, 64, 65, 90, -34, -96, -117, 51, 119, -103, -35, 95, -15, -118, 2, -31, 31, -9, -58, 84, -75, 80, 39, -101, -56, 16, -75, 59, 48, -63, -24, -95, 119, 73, -110, -115, 49, -18, 54, -124, 112, -61, -40, -105, -118, -66, 15, -107, 75, 82, -70, -87, -11, -11, 48, 41, 119, -42, -34, -33, 57, 23, -14, -45, -125, -108, -75, 3, 44, 44, 58, 126, -126, -20, -123, 58, 114, 79, -102, -115, 115, 12, 66, 108, 84, 43, -46, -80, -41, -70, 111, -114, 123, 21, 1, 34, -72, 23, 105, -52, -39, -54, -119, 45, 77, -16, -66, -105, -11, 91, -46, 77, -104, -93, 52, -3, 17, 55, -10, 67, -33, 43, 75, -103, 106, 7, -35, -65, -21, 68, 118, -38, 59, -115, 31};
@@ -261,8 +262,8 @@ public class NTRUEncryptTest
         System.arraycopy(pubBytes, 0, fullBytes, 0, pubBytes.length);
         System.arraycopy(privBytes, 0, fullBytes, pubBytes.length, privBytes.length);
 
-        NTRUEncryptionPrivateKeyParameters priv = new NTRUEncryptionPrivateKeyParameters(fullBytes, params);
-        NTRUEncryptionPublicKeyParameters pub = new NTRUEncryptionPublicKeyParameters(pubBytes, params);
+        NTRUEncryptionPrivateKeyParameters priv = new NTRUEncryptionPrivateKeyParameters(fullBytes, params.getEncryptionParameters());
+        NTRUEncryptionPublicKeyParameters pub = new NTRUEncryptionPublicKeyParameters(pubBytes, params.getEncryptionParameters());
         AsymmetricCipherKeyPair kp = new AsymmetricCipherKeyPair(pub, priv);
 
         ntru.init(true, kp.getPublic());

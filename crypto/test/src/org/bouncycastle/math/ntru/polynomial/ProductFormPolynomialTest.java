@@ -3,12 +3,12 @@ package org.bouncycastle.math.ntru.polynomial;
 import java.security.SecureRandom;
 
 import junit.framework.TestCase;
-import org.bouncycastle.crypto.params.NTRUEncryptionParameters;
+import org.bouncycastle.crypto.params.NTRUEncryptionKeyGenerationParameters;
 
 public class ProductFormPolynomialTest
     extends TestCase
 {
-    private NTRUEncryptionParameters params;
+    private NTRUEncryptionKeyGenerationParameters params;
     private int N;
     private int df1;
     private int df2;
@@ -17,7 +17,7 @@ public class ProductFormPolynomialTest
 
     public void setUp()
     {
-        params = NTRUEncryptionParameters.APR2011_439_FAST;
+        params = NTRUEncryptionKeyGenerationParameters.APR2011_439_FAST;
         N = params.N;
         df1 = params.df1;
         df2 = params.df2;

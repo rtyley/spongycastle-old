@@ -5,18 +5,55 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 
 /**
  * A set of parameters for NtruEncrypt. Several predefined parameter sets are available and new ones can be created as well.
  */
-public class NTRUEncryptionParameters
+public class NTRUEncryptionKeyGenerationParameters
+    extends KeyGenerationParameters
     implements Cloneable
 {
+    /**
+     * A conservative (in terms of security) parameter set that gives 256 bits of security and is optimized for key size.
+     */
+    public static final NTRUEncryptionKeyGenerationParameters EES1087EP2 = new NTRUEncryptionKeyGenerationParameters(1087, 2048, 120, 120, 256, 13, 25, 14, true, new byte[]{0, 6, 3}, true, false, new SHA512Digest());
+
+    /**
+     * A conservative (in terms of security) parameter set that gives 256 bits of security and is a tradeoff between key size and encryption/decryption speed.
+     */
+    public static final NTRUEncryptionKeyGenerationParameters EES1171EP1 = new NTRUEncryptionKeyGenerationParameters(1171, 2048, 106, 106, 256, 13, 20, 15, true, new byte[]{0, 6, 4}, true, false, new SHA512Digest());
+
+    /**
+     * A conservative (in terms of security) parameter set that gives 256 bits of security and is optimized for encryption/decryption speed.
+     */
+    public static final NTRUEncryptionKeyGenerationParameters EES1499EP1 = new NTRUEncryptionKeyGenerationParameters(1499, 2048, 79, 79, 256, 13, 17, 19, true, new byte[]{0, 6, 5}, true, false, new SHA512Digest());
+
+    /**
+     * A parameter set that gives 128 bits of security and uses simple ternary polynomials.
+     */
+    public static final NTRUEncryptionKeyGenerationParameters APR2011_439 = new NTRUEncryptionKeyGenerationParameters(439, 2048, 146, 130, 128, 9, 32, 9, true, new byte[]{0, 7, 101}, true, false, new SHA256Digest());
+
+    /**
+     * Like <code>APR2011_439</code>, this parameter set gives 128 bits of security but uses product-form polynomials and <code>f=1+pF</code>.
+     */
+    public static final NTRUEncryptionKeyGenerationParameters APR2011_439_FAST = new NTRUEncryptionKeyGenerationParameters(439, 2048, 9, 8, 5, 130, 128, 9, 32, 9, true, new byte[]{0, 7, 101}, true, true, new SHA256Digest());
+
+    /**
+     * A parameter set that gives 256 bits of security and uses simple ternary polynomials.
+     */
+    public static final NTRUEncryptionKeyGenerationParameters APR2011_743 = new NTRUEncryptionKeyGenerationParameters(743, 2048, 248, 220, 256, 10, 27, 14, true, new byte[]{0, 7, 105}, false, false, new SHA512Digest());
+
+    /**
+     * Like <code>APR2011_743</code>, this parameter set gives 256 bits of security but uses product-form polynomials and <code>f=1+pF</code>.
+     */
+    public static final NTRUEncryptionKeyGenerationParameters APR2011_743_FAST = new NTRUEncryptionKeyGenerationParameters(743, 2048, 11, 11, 15, 220, 256, 10, 27, 14, true, new byte[]{0, 7, 105}, false, true, new SHA512Digest());
 
     public int N, q, df, df1, df2, df3;
     public int dr;
@@ -58,8 +95,9 @@ public class NTRUEncryptionParameters
      * @param fastFp       whether <code>f=1+p*F</code> for a ternary <code>F</code> (true) or <code>f</code> is ternary (false)
      * @param hashAlg      a valid identifier for a <code>java.security.MessageDigest</code> instance such as <code>SHA-256</code>. The <code>MessageDigest</code> must support the <code>getDigestLength()</code> method.
      */
-    public NTRUEncryptionParameters(int N, int q, int df, int dm0, int db, int c, int minCallsR, int minCallsMask, boolean hashSeed, byte[] oid, boolean sparse, boolean fastFp, Digest hashAlg)
+    public NTRUEncryptionKeyGenerationParameters(int N, int q, int df, int dm0, int db, int c, int minCallsR, int minCallsMask, boolean hashSeed, byte[] oid, boolean sparse, boolean fastFp, Digest hashAlg)
     {
+        super(new SecureRandom(), db);
         this.N = N;
         this.q = q;
         this.df = df;
@@ -96,8 +134,10 @@ public class NTRUEncryptionParameters
      * @param fastFp       whether <code>f=1+p*F</code> for a ternary <code>F</code> (true) or <code>f</code> is ternary (false)
      * @param hashAlg      a valid identifier for a <code>java.security.MessageDigest</code> instance such as <code>SHA-256</code>
      */
-    public NTRUEncryptionParameters(int N, int q, int df1, int df2, int df3, int dm0, int db, int c, int minCallsR, int minCallsMask, boolean hashSeed, byte[] oid, boolean sparse, boolean fastFp, Digest hashAlg)
+    public NTRUEncryptionKeyGenerationParameters(int N, int q, int df1, int df2, int df3, int dm0, int db, int c, int minCallsR, int minCallsMask, boolean hashSeed, byte[] oid, boolean sparse, boolean fastFp, Digest hashAlg)
     {
+        super(new SecureRandom(), db);
+
         this.N = N;
         this.q = q;
         this.df1 = df1;
@@ -135,11 +175,12 @@ public class NTRUEncryptionParameters
      * Reads a parameter set from an input stream.
      *
      * @param is an input stream
-     * @throws IOException
+     * @throws java.io.IOException
      */
-    public NTRUEncryptionParameters(InputStream is)
+    public NTRUEncryptionKeyGenerationParameters(InputStream is)
         throws IOException
     {
+        super(new SecureRandom(), -1);
         DataInputStream dis = new DataInputStream(is);
         N = dis.readInt();
         q = dis.readInt();
@@ -173,7 +214,7 @@ public class NTRUEncryptionParameters
         init();
     }
 
-    public NTRUEncryptionParameters clone()
+    public NTRUEncryptionParameters getEncryptionParameters()
     {
         if (polyType == NTRUParameters.TernaryPolynomialType.SIMPLE)
         {
@@ -182,6 +223,18 @@ public class NTRUEncryptionParameters
         else
         {
             return new NTRUEncryptionParameters(N, q, df1, df2, df3, dm0, db, c, minCallsR, minCallsMask, hashSeed, oid, sparse, fastFp, hashAlg);
+        }
+    }
+
+    public NTRUEncryptionKeyGenerationParameters clone()
+    {
+        if (polyType == NTRUParameters.TernaryPolynomialType.SIMPLE)
+        {
+            return new NTRUEncryptionKeyGenerationParameters(N, q, df, dm0, db, c, minCallsR, minCallsMask, hashSeed, oid, sparse, fastFp, hashAlg);
+        }
+        else
+        {
+            return new NTRUEncryptionKeyGenerationParameters(N, q, df1, df2, df3, dm0, db, c, minCallsR, minCallsMask, hashSeed, oid, sparse, fastFp, hashAlg);
         }
     }
 
@@ -199,7 +252,7 @@ public class NTRUEncryptionParameters
      * Writes the parameter set to an output stream
      *
      * @param os an output stream
-     * @throws IOException
+     * @throws java.io.IOException
      */
     public void writeTo(OutputStream os)
         throws IOException
@@ -273,7 +326,7 @@ public class NTRUEncryptionParameters
         {
             return false;
         }
-        NTRUEncryptionParameters other = (NTRUEncryptionParameters)obj;
+        NTRUEncryptionKeyGenerationParameters other = (NTRUEncryptionKeyGenerationParameters)obj;
         if (N != other.N)
         {
             return false;

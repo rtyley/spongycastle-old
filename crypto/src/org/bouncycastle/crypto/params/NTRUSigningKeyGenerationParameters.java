@@ -59,11 +59,6 @@ public class NTRUSigningKeyGenerationParameters
         RESULTANT, FLOAT
     }
 
-    public enum TernaryPolynomialType
-    {
-        SIMPLE, PRODUCT
-    }
-
     public int N;
     public int q;
     public int d, d1, d2, d3, B;
@@ -80,7 +75,7 @@ public class NTRUSigningKeyGenerationParameters
     public boolean sparse;   // whether to treat ternary polynomials as sparsely populated
     public KeyGenAlg keyGenAlg;
     public Digest hashAlg;
-    public TernaryPolynomialType polyType;
+    public NTRUParameters.TernaryPolynomialType polyType;
 
     /**
      * Constructs a parameter set that uses ternary private keys (i.e. </code>polyType=SIMPLE</code>).
@@ -113,7 +108,7 @@ public class NTRUSigningKeyGenerationParameters
         this.sparse = sparse;
         this.keyGenAlg = keyGenAlg;
         this.hashAlg = hashAlg;
-        polyType = TernaryPolynomialType.SIMPLE;
+        polyType = NTRUParameters.TernaryPolynomialType.SIMPLE;
         init();
     }
 
@@ -152,7 +147,7 @@ public class NTRUSigningKeyGenerationParameters
         this.sparse = sparse;
         this.keyGenAlg = keyGenAlg;
         this.hashAlg = hashAlg;
-        polyType = TernaryPolynomialType.PRODUCT;
+        polyType = NTRUParameters.TernaryPolynomialType.PRODUCT;
         init();
     }
 
@@ -199,7 +194,7 @@ public class NTRUSigningKeyGenerationParameters
         {
             hashAlg = new SHA256Digest();
         }
-        polyType = TernaryPolynomialType.values()[dis.read()];
+        polyType = NTRUParameters.TernaryPolynomialType.values()[dis.read()];
         init();
     }
 
@@ -240,7 +235,7 @@ public class NTRUSigningKeyGenerationParameters
 
     public NTRUSigningKeyGenerationParameters clone()
     {
-        if (polyType == TernaryPolynomialType.SIMPLE)
+        if (polyType == NTRUParameters.TernaryPolynomialType.SIMPLE)
         {
             return new NTRUSigningKeyGenerationParameters(N, q, d, B, basisType, beta, normBound, keyNormBound, primeCheck, sparse, keyGenAlg, hashAlg);
         }
@@ -420,7 +415,7 @@ public class NTRUSigningKeyGenerationParameters
         DecimalFormat format = new DecimalFormat("0.00");
 
         StringBuilder output = new StringBuilder("SignatureParameters(N=" + N + " q=" + q);
-        if (polyType == TernaryPolynomialType.SIMPLE)
+        if (polyType == NTRUParameters.TernaryPolynomialType.SIMPLE)
         {
             output.append(" polyType=SIMPLE d=" + d);
         }

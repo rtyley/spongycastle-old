@@ -10,6 +10,7 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.params.NTRUEncryptionParameters;
 import org.bouncycastle.crypto.params.NTRUEncryptionPrivateKeyParameters;
 import org.bouncycastle.crypto.params.NTRUEncryptionPublicKeyParameters;
+import org.bouncycastle.crypto.params.NTRUParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.math.ntru.polynomial.DenseTernaryPolynomial;
 import org.bouncycastle.math.ntru.polynomial.IntegerPolynomial;
@@ -205,7 +206,7 @@ public class NTRUEncryptionEngine
     {
         IndexGenerator ig = new IndexGenerator(seed, params);
 
-        if (params.polyType == NTRUEncryptionParameters.TernaryPolynomialType.PRODUCT)
+        if (params.polyType == NTRUParameters.TernaryPolynomialType.PRODUCT)
         {
             SparseTernaryPolynomial r1 = new SparseTernaryPolynomial(generateBlindingCoeffs(ig, params.dr1));
             SparseTernaryPolynomial r2 = new SparseTernaryPolynomial(generateBlindingCoeffs(ig, params.dr2));
