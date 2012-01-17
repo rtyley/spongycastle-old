@@ -3,27 +3,23 @@ package org.bouncycastle.jcajce.provider.symmetric.util;
 import java.io.IOException;
 import java.security.AlgorithmParametersSpi;
 import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.DSAParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
 
-import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
 
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.pkcs.PKCS12PBEParams;
 import org.bouncycastle.asn1.pkcs.RC2CBCParameter;
-import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.util.Arrays;
 
 public abstract class BaseAlgorithmParameters
     extends AlgorithmParametersSpi
 {
-    protected boolean isASN1FormatString(String format)
+    protected static boolean isASN1FormatString(String format)
     {
         return format == null || format.equals("ASN.1");
     }
@@ -378,223 +374,6 @@ public abstract class BaseAlgorithmParameters
         protected String engineToString() 
         {
             return "PKCS12 PBE Parameters";
-        }
-    }
-
-    public static class DH
-        extends BaseAlgorithmParameters
-    {
-        DHParameterSpec     currentSpec;
-
-        /**
-         * Return the PKCS#3 ASN.1 structure DHParameter.
-         * <p>
-         * <pre>
-         *  DHParameter ::= SEQUENCE {
-         *                   prime INTEGER, -- p
-         *                   base INTEGER, -- g
-         *                   privateValueLength INTEGER OPTIONAL}
-         * </pre>
-         */
-        protected byte[] engineGetEncoded() 
-        {
-            DHParameter dhP = new DHParameter(currentSpec.getP(), currentSpec.getG(), currentSpec.getL());
-
-            try
-            {
-                return dhP.getEncoded(ASN1Encoding.DER);
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException("Error encoding DHParameters");
-            }
-        }
-
-        protected byte[] engineGetEncoded(
-            String format) 
-        {
-            if (isASN1FormatString(format))
-            {
-                return engineGetEncoded();
-            }
-
-            return null;
-        }
-
-        protected AlgorithmParameterSpec localEngineGetParameterSpec(
-            Class paramSpec) 
-            throws InvalidParameterSpecException
-        {
-            if (paramSpec == DHParameterSpec.class)
-            {
-                return currentSpec;
-            }
-
-            throw new InvalidParameterSpecException("unknown parameter spec passed to DH parameters object.");
-        }
-
-        protected void engineInit(
-            AlgorithmParameterSpec paramSpec) 
-            throws InvalidParameterSpecException
-        {
-            if (!(paramSpec instanceof DHParameterSpec))
-            {
-                throw new InvalidParameterSpecException("DHParameterSpec required to initialise a Diffie-Hellman algorithm parameters object");
-            }
-
-            this.currentSpec = (DHParameterSpec)paramSpec;
-        }
-
-        protected void engineInit(
-            byte[] params) 
-            throws IOException
-        {
-            try
-            {
-                DHParameter dhP = DHParameter.getInstance(ASN1Primitive.fromByteArray(params));
-
-                if (dhP.getL() != null)
-                {
-                    currentSpec = new DHParameterSpec(dhP.getP(), dhP.getG(), dhP.getL().intValue());
-                }
-                else
-                {
-                    currentSpec = new DHParameterSpec(dhP.getP(), dhP.getG());
-                }
-            }
-            catch (ClassCastException e)
-            {
-                throw new IOException("Not a valid DH Parameter encoding.");
-            }
-            catch (ArrayIndexOutOfBoundsException e)
-            {
-                throw new IOException("Not a valid DH Parameter encoding.");
-            }
-        }
-
-        protected void engineInit(
-            byte[] params,
-            String format) 
-            throws IOException
-        {
-            if (isASN1FormatString(format))
-            {
-                engineInit(params);
-            }
-            else
-            {
-                throw new IOException("Unknown parameter format " + format);
-            }
-        }
-
-        protected String engineToString() 
-        {
-            return "Diffie-Hellman Parameters";
-        }
-    }
-
-    public static class DSA
-        extends BaseAlgorithmParameters
-    {
-        DSAParameterSpec     currentSpec;
-
-        /**
-         * Return the X.509 ASN.1 structure DSAParameter.
-         * <p>
-         * <pre>
-         *  DSAParameter ::= SEQUENCE {
-         *                   prime INTEGER, -- p
-         *                   subprime INTEGER, -- q
-         *                   base INTEGER, -- g}
-         * </pre>
-         */
-        protected byte[] engineGetEncoded() 
-        {
-            DSAParameter dsaP = new DSAParameter(currentSpec.getP(), currentSpec.getQ(), currentSpec.getG());
-
-            try
-            {
-                return dsaP.getEncoded(ASN1Encoding.DER);
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException("Error encoding DSAParameters");
-            }
-        }
-
-        protected byte[] engineGetEncoded(
-            String format) 
-        {
-            if (isASN1FormatString(format))
-            {
-                return engineGetEncoded();
-            }
-
-            return null;
-        }
-
-        protected AlgorithmParameterSpec localEngineGetParameterSpec(
-            Class paramSpec) 
-            throws InvalidParameterSpecException
-        {
-            if (paramSpec == DSAParameterSpec.class)
-            {
-                return currentSpec;
-            }
-
-            throw new InvalidParameterSpecException("unknown parameter spec passed to DSA parameters object.");
-        }
-
-        protected void engineInit(
-            AlgorithmParameterSpec paramSpec) 
-            throws InvalidParameterSpecException
-        {
-            if (!(paramSpec instanceof DSAParameterSpec))
-            {
-                throw new InvalidParameterSpecException("DSAParameterSpec required to initialise a DSA algorithm parameters object");
-            }
-
-            this.currentSpec = (DSAParameterSpec)paramSpec;
-        }
-
-        protected void engineInit(
-            byte[] params) 
-            throws IOException
-        {
-            try
-            {
-                DSAParameter dsaP = DSAParameter.getInstance(params);
-
-                currentSpec = new DSAParameterSpec(dsaP.getP(), dsaP.getQ(), dsaP.getG());
-            }
-            catch (ClassCastException e)
-            {
-                throw new IOException("Not a valid DSA Parameter encoding.");
-            }
-            catch (ArrayIndexOutOfBoundsException e)
-            {
-                throw new IOException("Not a valid DSA Parameter encoding.");
-            }
-        }
-
-        protected void engineInit(
-            byte[] params,
-            String format) 
-            throws IOException
-        {
-            if (isASN1FormatString(format) || format.equalsIgnoreCase("X.509"))
-            {
-                engineInit(params);
-            }
-            else
-            {
-                throw new IOException("Unknown parameter format " + format);
-            }
-        }
-
-        protected String engineToString() 
-        {
-            return "DSA Parameters";
         }
     }
 }

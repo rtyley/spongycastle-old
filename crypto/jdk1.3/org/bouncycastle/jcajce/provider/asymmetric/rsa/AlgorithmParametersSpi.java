@@ -13,7 +13,7 @@ import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 public abstract class AlgorithmParametersSpi
     extends java.security.AlgorithmParametersSpi
 {
-    protected boolean isASN1FormatString(String format)
+    protected static boolean isASN1FormatString(String format)
     {
         return format == null || format.equals("ASN.1");
     }
