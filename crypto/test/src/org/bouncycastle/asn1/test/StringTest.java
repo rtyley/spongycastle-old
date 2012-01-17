@@ -123,7 +123,7 @@ public class StringTest
 
         checkString(new DERNumericString(new String(shortChars)), new DERNumericString(new String(longChars)));
 
-        byte[] shortBytes = new byte[] { 'a', 'b', 'c', 'd', 'e'};
+        byte[] shortBytes = new byte[] { (byte)'a', (byte)'b', (byte)'c', (byte)'d', (byte)'e'};
         byte[] longBytes = new byte[1000];
 
         for (int i = 0; i != longChars.length; i++)
