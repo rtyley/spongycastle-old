@@ -189,7 +189,7 @@ public final class RC2
             String format)
             throws IOException
         {
-            if (isASN1FormatString(format))
+            if (this.isASN1FormatString(format))
             {
                 if (parameterVersion == -1)
                 {
@@ -279,7 +279,7 @@ public final class RC2
             String format)
             throws IOException
         {
-            if (isASN1FormatString(format))
+            if (this.isASN1FormatString(format))
             {
                 RC2CBCParameter p = RC2CBCParameter.getInstance(ASN1Primitive.fromByteArray(params));
 

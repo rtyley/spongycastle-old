@@ -111,7 +111,7 @@ public final class CAST5
             String format)
             throws IOException
         {
-            if (isASN1FormatString(format))
+            if (this.isASN1FormatString(format))
             {
                 return new CAST5CBCParameters(engineGetEncoded(), keyLength).getEncoded();
             }
@@ -165,7 +165,7 @@ public final class CAST5
             String format)
             throws IOException
         {
-            if (isASN1FormatString(format))
+            if (this.isASN1FormatString(format))
             {
                 ASN1InputStream aIn = new ASN1InputStream(params);
                 CAST5CBCParameters      p = CAST5CBCParameters.getInstance(aIn.readObject());

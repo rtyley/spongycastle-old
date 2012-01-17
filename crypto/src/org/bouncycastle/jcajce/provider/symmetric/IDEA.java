@@ -131,7 +131,7 @@ public final class IDEA
             String format)
             throws IOException
         {
-            if (isASN1FormatString(format))
+            if (this.isASN1FormatString(format))
             {
                 return new IDEACBCPar(engineGetEncoded("RAW")).getEncoded();
             }

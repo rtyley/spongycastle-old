@@ -19,7 +19,7 @@ import org.bouncycastle.util.Arrays;
 public abstract class BaseAlgorithmParameters
     extends AlgorithmParametersSpi
 {
-    protected static boolean isASN1FormatString(String format)
+    protected boolean isASN1FormatString(String format)
     {
         return format == null || format.equals("ASN.1");
     }
@@ -92,7 +92,7 @@ public abstract class BaseAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (isASN1FormatString(format))
+            if (this.isASN1FormatString(format))
             {
                 if (parameterVersion == -1)
                 {
@@ -182,7 +182,7 @@ public abstract class BaseAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (isASN1FormatString(format))
+            if (this.isASN1FormatString(format))
             {
                 RC2CBCParameter p = RC2CBCParameter.getInstance(ASN1Primitive.fromByteArray(params));
 
@@ -231,7 +231,7 @@ public abstract class BaseAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format)
         {
-            if (isASN1FormatString(format))
+            if (this.isASN1FormatString(format))
             {
                 return engineGetEncoded();
             }
@@ -279,7 +279,7 @@ public abstract class BaseAlgorithmParameters
             String format)
             throws IOException
         {
-            if (isASN1FormatString(format))
+            if (this.isASN1FormatString(format))
             {
                 engineInit(params);
                 return;
@@ -314,7 +314,7 @@ public abstract class BaseAlgorithmParameters
         protected byte[] engineGetEncoded(
             String format) 
         {
-            if (isASN1FormatString(format))
+            if (this.isASN1FormatString(format))
             {
                 return engineGetEncoded();
             }
@@ -362,7 +362,7 @@ public abstract class BaseAlgorithmParameters
             String format) 
             throws IOException
         {
-            if (isASN1FormatString(format))
+            if (this.isASN1FormatString(format))
             {
                 engineInit(params);
                 return;
