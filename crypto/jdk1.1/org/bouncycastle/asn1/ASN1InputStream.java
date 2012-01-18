@@ -16,7 +16,7 @@ import org.bouncycastle.util.io.Streams;
  */
 public class ASN1InputStream
     extends FilterInputStream
-    implements DERTags
+    implements BERTags
 {
     private int limit;
     private boolean lazyEvaluate;

@@ -1,16 +1,15 @@
 package org.bouncycastle.asn1;
 
-import org.bouncycastle.util.Arrays;
-import org.bouncycastle.util.encoders.Hex;
-
-import java.io.IOException;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import org.bouncycastle.util.Arrays;
 
 /**
  * Base class for an application specific object
  */
 public class DERApplicationSpecific 
-    extends ASN1Object
+    extends ASN1Primitive
 {
     private boolean   isConstructed;
     private int       tag;
@@ -142,9 +141,9 @@ public class DERApplicationSpecific
         byte[] orig = this.getEncoded();
         byte[] tmp = replaceTagNumber(derTagNo, orig);
 
-        if ((orig[0] & DERTags.CONSTRUCTED) != 0)
+        if ((orig[0] & BERTags.CONSTRUCTED) != 0)
         {
-            tmp[0] |= DERTags.CONSTRUCTED;
+            tmp[0] |= BERTags.CONSTRUCTED;
         }
 
         return new ASN1InputStream(tmp).readObject();
@@ -155,10 +154,10 @@ public class DERApplicationSpecific
      */
     void encode(DEROutputStream out) throws IOException
     {
-        int classBits = DERTags.APPLICATION;
+        int classBits = BERTags.APPLICATION;
         if (isConstructed)
         {
-            classBits |= DERTags.CONSTRUCTED; 
+            classBits |= BERTags.CONSTRUCTED;
         }
 
         out.writeEncoded(classBits, tag, octets);
