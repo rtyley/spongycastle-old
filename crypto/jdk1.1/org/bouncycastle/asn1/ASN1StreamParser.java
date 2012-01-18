@@ -8,11 +8,12 @@ public class ASN1StreamParser
 {
     private InputStream _in;
     private int         _limit;
+    private byte[][] tmpBuffers;
 
     public ASN1StreamParser(
         InputStream in)
     {
-        this(in, ASN1InputStream.findLimit(in));
+        this(in, StreamUtil.findLimit(in));
     }
 
     public ASN1StreamParser(
@@ -21,6 +22,8 @@ public class ASN1StreamParser
     {
         this._in = in;
         this._limit = limit;
+
+        this.tmpBuffers = new byte[11][];
     }
 
     public ASN1StreamParser(
@@ -29,7 +32,7 @@ public class ASN1StreamParser
         this(new ByteArrayInputStream(encoding), encoding.length);
     }
 
-    DEREncodable readIndef(int tagValue) throws IOException
+    ASN1Encodable readIndef(int tagValue) throws IOException
     {
         // Note: INDEF => CONSTRUCTED
 
@@ -49,7 +52,7 @@ public class ASN1StreamParser
         }
     }
 
-    DEREncodable readImplicit(boolean constructed, int tag) throws IOException
+    ASN1Encodable readImplicit(boolean constructed, int tag) throws IOException
     {
         if (_in instanceof IndefiniteLengthInputStream)
         {
@@ -90,7 +93,7 @@ public class ASN1StreamParser
         throw new RuntimeException("implicit tagging not implemented");
     }
 
-    DERObject readTaggedObject(boolean constructed, int tag) throws IOException
+    ASN1Primitive readTaggedObject(boolean constructed, int tag) throws IOException
     {
         if (!constructed)
         {
@@ -113,7 +116,7 @@ public class ASN1StreamParser
             :   new DERTaggedObject(false, tag, DERFactory.createSequence(v));
     }
 
-    public DEREncodable readObject()
+    public ASN1Encodable readObject()
         throws IOException
     {
         int tag = _in.read();
@@ -192,8 +195,7 @@ public class ASN1StreamParser
                     case BERTags.EXTERNAL:
                         return new DERExternalParser(new ASN1StreamParser(defIn));
                     default:
-                        // TODO Add DERUnknownTagParser class?
-                        return new DERUnknownTag(true, tagNo, defIn.toByteArray());
+                        throw new IOException("unknown tag " + tagNo + " encountered");
                 }
             }
 
@@ -206,7 +208,7 @@ public class ASN1StreamParser
 
             try
             {
-                return ASN1InputStream.createPrimitiveDERObject(tagNo, defIn.toByteArray());
+                return ASN1InputStream.createPrimitiveDERObject(tagNo, defIn, tmpBuffers);
             }
             catch (IllegalArgumentException e)
             {
@@ -227,7 +229,7 @@ public class ASN1StreamParser
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        DEREncodable obj;
+        ASN1Encodable obj;
         while ((obj = readObject()) != null)
         {
             if (obj instanceof InMemoryRepresentable)
@@ -236,7 +238,7 @@ public class ASN1StreamParser
             }
             else
             {
-                v.add(obj.getDERObject());
+                v.add(obj.toASN1Primitive());
             }
         }
 
