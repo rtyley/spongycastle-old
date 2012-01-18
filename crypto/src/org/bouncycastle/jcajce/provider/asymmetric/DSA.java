@@ -9,7 +9,7 @@ import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
 
 public class DSA
 {
-    private static final String PREFIX = DSA.class.getPackage().getName() + ".dsa.";
+    private static final String PREFIX = "org.bouncycastle.jcajce.provider.asymmetric" + ".dsa.";
 
     public static class Mappings
         extends AsymmetricAlgorithmProvider

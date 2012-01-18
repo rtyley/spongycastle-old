@@ -12,7 +12,7 @@ import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
 
 public class RSA
 {
-    private static final String PREFIX = RSA.class.getPackage().getName() + ".rsa.";
+    private static final String PREFIX = "org.bouncycastle.jcajce.provider.asymmetric" + ".rsa.";
 
     public static class Mappings
         extends AsymmetricAlgorithmProvider

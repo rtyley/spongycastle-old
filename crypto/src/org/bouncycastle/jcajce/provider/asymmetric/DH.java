@@ -5,7 +5,7 @@ import org.bouncycastle.jcajce.provider.util.AsymmetricAlgorithmProvider;
 
 public class DH
 {
-    private static final String PREFIX = DH.class.getPackage().getName() + ".dh.";
+    private static final String PREFIX = "org.bouncycastle.jcajce.provider.asymmetric" + ".dh.";
 
     public static class Mappings
         extends AsymmetricAlgorithmProvider

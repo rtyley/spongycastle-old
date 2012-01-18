@@ -8,7 +8,7 @@ import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
 
 public class ElGamal
 {
-    private static final String PREFIX = ElGamal.class.getPackage().getName() + ".elgamal.";
+    private static final String PREFIX = "org.bouncycastle.jcajce.provider.asymmetric" + ".elgamal.";
 
     public static class Mappings
         extends AsymmetricAlgorithmProvider

@@ -9,7 +9,7 @@ import org.bouncycastle.jcajce.provider.util.AsymmetricAlgorithmProvider;
 
 public class EC
 {
-    private static final String PREFIX = EC.class.getPackage().getName() + ".ec.";
+    private static final String PREFIX = "org.bouncycastle.jcajce.provider.asymmetric" + ".ec.";
 
     public static class Mappings
         extends AsymmetricAlgorithmProvider
