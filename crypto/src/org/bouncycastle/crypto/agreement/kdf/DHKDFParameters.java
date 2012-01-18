@@ -7,10 +7,10 @@ import org.bouncycastle.crypto.DerivationParameters;
 public class DHKDFParameters
     implements DerivationParameters
 {
-    private final ASN1ObjectIdentifier algorithm;
-    private final int keySize;
-    private final byte[] z;
-    private final byte[] extraInfo;
+    private ASN1ObjectIdentifier algorithm;
+    private int keySize;
+    private byte[] z;
+    private byte[] extraInfo;
 
     public DHKDFParameters(
         DERObjectIdentifier algorithm,

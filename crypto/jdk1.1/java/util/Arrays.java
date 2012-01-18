@@ -5,6 +5,14 @@ public class Arrays
 
     private Arrays() {}
     
+    public static void fill(byte[] ret, byte v)
+    {
+       for (int i = 0; i != ret.length; i++)
+       {
+           ret[i] = v;
+       }
+    }
+
     public static boolean equals(byte[] a, byte[] a2) {
         if (a==a2)
             return true;
@@ -78,4 +86,5 @@ public class Arrays
             return indexOf(o) != -1;
         }
     }
+
 }

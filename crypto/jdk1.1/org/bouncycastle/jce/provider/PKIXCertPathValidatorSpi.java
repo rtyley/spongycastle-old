@@ -47,11 +47,11 @@ import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERConstructedOctetString;
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
@@ -106,7 +106,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
     /**
      * extract the value of the given extension, if it exists.
      */
-    private DERObject getExtensionValue(
+    private ASN1Primitive getExtensionValue(
         java.security.cert.X509Extension    ext,
         String                              oid)
         throws AnnotatedException
@@ -120,7 +120,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         return getObject(oid, bytes);
     }
 
-    private DERObject getObject(
+    private ASN1Primitive getObject(
         String oid,
         byte[] ext)
         throws AnnotatedException
@@ -545,7 +545,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
         {
             try
             {
-                aOut.writeObject(e.nextElement());
+                aOut.writeObject((ASN1Encodable)e.nextElement());
 
                 pq.add(new PolicyQualifierInfo(bOut.toByteArray()));
             }
@@ -799,7 +799,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
 
         AlgorithmIdentifier workingAlgId = getAlgorithmIdentifier(workingPublicKey);
         DERObjectIdentifier workingPublicKeyAlgorithm = workingAlgId.getObjectId();
-        DEREncodable        workingPublicKeyParameters = workingAlgId.getParameters();
+        ASN1Encodable        workingPublicKeyParameters = workingAlgId.getParameters();
     
         //
         // (k)
@@ -1153,7 +1153,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     //
                     // (a) check the policy mappings
                     //
-                    DERObject   pm = getExtensionValue(cert, POLICY_MAPPINGS);
+                    ASN1Primitive   pm = getExtensionValue(cert, POLICY_MAPPINGS);
                     if (pm != null)
                     {
                         ASN1Sequence mappings = (ASN1Sequence)pm;
@@ -1914,8 +1914,8 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                 //
                 // check the DeltaCRL indicator, base point and the issuing distribution point
                 //
-                DERObject idp = getExtensionValue(crl, ISSUING_DISTRIBUTION_POINT);
-                DERObject dci = getExtensionValue(crl, DELTA_CRL_INDICATOR);
+                ASN1Primitive idp = getExtensionValue(crl, ISSUING_DISTRIBUTION_POINT);
+                ASN1Primitive dci = getExtensionValue(crl, DELTA_CRL_INDICATOR);
 
                 if (dci != null)
                 {
@@ -1939,7 +1939,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     {
                         X509CRL base = (X509CRL)it.next();
 
-                        DERObject baseIdp = getExtensionValue(base, ISSUING_DISTRIBUTION_POINT);
+                        ASN1Primitive baseIdp = getExtensionValue(base, ISSUING_DISTRIBUTION_POINT);
                         
                         if (idp == null)
                         {

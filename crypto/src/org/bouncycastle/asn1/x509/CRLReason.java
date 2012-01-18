@@ -89,7 +89,7 @@ public class CRLReason
 
     private static final Hashtable table = new Hashtable();
 
-    private final ASN1Enumerated value;
+    private ASN1Enumerated value;
 
     public static CRLReason getInstance(Object o)
     {

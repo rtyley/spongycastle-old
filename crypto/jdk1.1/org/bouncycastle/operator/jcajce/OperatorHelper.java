@@ -2,6 +2,7 @@ package org.bouncycastle.operator.jcajce;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 import javax.crypto.Cipher;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -37,6 +39,7 @@ class OperatorHelper
     private static final Map oids = new HashMap();
     private static final Map asymmetricWrapperAlgNames = new HashMap();
     private static final Map symmetricWrapperAlgNames = new HashMap();
+    private static final Map symmetricKeyAlgNames = new HashMap();
 
     static
     {
@@ -67,6 +70,7 @@ class OperatorHelper
         asymmetricWrapperAlgNames.put(new ASN1ObjectIdentifier(PKCSObjectIdentifiers.rsaEncryption.getId()), "RSA/ECB/PKCS1Padding");
 
         symmetricWrapperAlgNames.put(PKCSObjectIdentifiers.id_alg_CMS3DESwrap, "DESEDEWrap");
+        symmetricWrapperAlgNames.put(PKCSObjectIdentifiers.id_alg_CMSRC2wrap, "RC2Wrap");
         symmetricWrapperAlgNames.put(NISTObjectIdentifiers.id_aes128_wrap, "AESWrap");
         symmetricWrapperAlgNames.put(NISTObjectIdentifiers.id_aes192_wrap, "AESWrap");
         symmetricWrapperAlgNames.put(NISTObjectIdentifiers.id_aes256_wrap, "AESWrap");
@@ -74,6 +78,14 @@ class OperatorHelper
         symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia192_wrap, "CamelliaWrap");
         symmetricWrapperAlgNames.put(NTTObjectIdentifiers.id_camellia256_wrap, "CamelliaWrap");
         symmetricWrapperAlgNames.put(KISAObjectIdentifiers.id_npki_app_cmsSeed_wrap, "SEEDWrap");
+        symmetricWrapperAlgNames.put(PKCSObjectIdentifiers.des_EDE3_CBC, "DESede");
+
+        symmetricKeyAlgNames.put(NISTObjectIdentifiers.aes, "AES");
+        symmetricKeyAlgNames.put(NISTObjectIdentifiers.id_aes128_CBC, "AES");
+        symmetricKeyAlgNames.put(NISTObjectIdentifiers.id_aes192_CBC, "AES");
+        symmetricKeyAlgNames.put(NISTObjectIdentifiers.id_aes256_CBC, "AES");
+        symmetricKeyAlgNames.put(PKCSObjectIdentifiers.des_EDE3_CBC, "DESede");
+        symmetricKeyAlgNames.put(PKCSObjectIdentifiers.RC2_CBC, "RC2");
     }
 
     private JcaJceHelper helper;
@@ -104,7 +116,15 @@ class OperatorHelper
             }
             return helper.createCipher(algorithm.getId());
         }
-        catch (Exception e)
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new OperatorCreationException("cannot create cipher: " + e.getMessage(), e);
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw new OperatorCreationException("cannot create cipher: " + e.getMessage(), e);
+        }
+        catch (GeneralSecurityException e)
         {
             throw new OperatorCreationException("cannot create cipher: " + e.getMessage(), e);
         }
@@ -131,7 +151,15 @@ class OperatorHelper
             }
             return helper.createCipher(algorithm.getId());
         }
-        catch (Exception e)
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new OperatorCreationException("cannot create cipher: " + e.getMessage(), e);
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw new OperatorCreationException("cannot create cipher: " + e.getMessage(), e);
+        }
+        catch (GeneralSecurityException e)
         {
             throw new OperatorCreationException("cannot create cipher: " + e.getMessage(), e);
         }
@@ -140,13 +168,13 @@ class OperatorHelper
     MessageDigest createDigest(AlgorithmIdentifier digAlgId)
         throws GeneralSecurityException
     {
+        try
+        {
         MessageDigest dig;
 
         try
         {
-        try
-        {
-            dig = helper.createDigest(getSignatureName(digAlgId));
+            dig = helper.createDigest(getDigestAlgName(digAlgId.getAlgorithm()));
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -224,10 +252,25 @@ class OperatorHelper
         try
         {
             String algName = getSignatureName(algorithm);
-    
+
             algName = "NONE" + algName.substring(algName.indexOf("WITH"));
 
             sig = helper.createSignature(algName);
+
+            // RFC 4056
+            // When the id-RSASSA-PSS algorithm identifier is used for a signature,
+            // the AlgorithmIdentifier parameters field MUST contain RSASSA-PSS-params.
+/*
+            if (algorithm.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
+            {
+                AlgorithmParameters params = helper.createAlgorithmParameters(algName);
+
+                params.init(algorithm.getParameters().toASN1Primitive().getEncoded(), "ASN.1");
+
+                PSSParameterSpec spec = (PSSParameterSpec)params.getParameterSpec(PSSParameterSpec.class);
+                sig.setParameter(spec);
+            }
+*/
         }
         catch (Exception e)
         {
@@ -240,14 +283,14 @@ class OperatorHelper
     private static String getSignatureName(
         AlgorithmIdentifier sigAlgId)
     {
-        DEREncodable params = sigAlgId.getParameters();
+        ASN1Encodable params = sigAlgId.getParameters();
 
         if (params != null && !DERNull.INSTANCE.equals(params))
         {
             if (sigAlgId.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
             {
                 RSASSAPSSparams rsaParams = RSASSAPSSparams.getInstance(params);
-                return getDigestAlgName(rsaParams.getHashAlgorithm().getAlgorithm()) + "withRSAandMGF1";
+                return getDigestAlgName(rsaParams.getHashAlgorithm().getAlgorithm()) + "WITHRSAANDMGF1";
             }
         }
 
@@ -349,5 +392,18 @@ class OperatorHelper
         {
             return cause;
         }
+    }
+
+    String getKeyAlgorithmName(ASN1ObjectIdentifier oid)
+    {
+
+        String name = (String)symmetricKeyAlgNames.get(oid);
+
+        if (name != null)
+        {
+            return name;
+        }
+
+        return oid.getId();
     }
 }

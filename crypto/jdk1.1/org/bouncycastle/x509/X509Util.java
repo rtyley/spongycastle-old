@@ -1,21 +1,5 @@
 package org.bouncycastle.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
-import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
-import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.util.Strings;
-
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -33,6 +17,22 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
+import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.Strings;
 
 class X509Util
 {
@@ -71,6 +71,8 @@ class X509Util
         algorithms.put("DSAWITHSHA1", X9ObjectIdentifiers.id_dsa_with_sha1);
         algorithms.put("SHA224WITHDSA", NISTObjectIdentifiers.dsa_with_sha224);
         algorithms.put("SHA256WITHDSA", NISTObjectIdentifiers.dsa_with_sha256);
+        algorithms.put("SHA384WITHDSA", NISTObjectIdentifiers.dsa_with_sha384);
+        algorithms.put("SHA512WITHDSA", NISTObjectIdentifiers.dsa_with_sha512);
         algorithms.put("SHA1WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA1);
         algorithms.put("ECDSAWITHSHA1", X9ObjectIdentifiers.ecdsa_with_SHA1);
         algorithms.put("SHA224WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA224);
@@ -95,7 +97,9 @@ class X509Util
         noParams.add(X9ObjectIdentifiers.id_dsa_with_sha1);
         noParams.add(NISTObjectIdentifiers.dsa_with_sha224);
         noParams.add(NISTObjectIdentifiers.dsa_with_sha256);
-
+        noParams.add(NISTObjectIdentifiers.dsa_with_sha384);
+        noParams.add(NISTObjectIdentifiers.dsa_with_sha512);
+        
         //
         // RFC 4491
         //
@@ -156,7 +160,7 @@ class X509Util
 
         if (params.containsKey(algorithmName))
         {
-            return new AlgorithmIdentifier(sigOid, (DEREncodable)params.get(algorithmName));
+            return new AlgorithmIdentifier(sigOid, (ASN1Encodable)params.get(algorithmName));
         }
         else
         {
@@ -218,14 +222,14 @@ class X509Util
 
         if (random != null)
         {
-            sig.initSign(key); // random method doesn't exist
+            sig.initSign(key);
         }
         else
         {
             sig.initSign(key);
         }
 
-        sig.update(object.getEncoded(ASN1Encodable.DER));
+        sig.update(object.toASN1Primitive().getEncoded(ASN1Encoding.DER));
 
         return sig.sign();
     }
@@ -250,14 +254,14 @@ class X509Util
 
         if (random != null)
         {
-            sig.initSign(key); // random method does not exist
+            sig.initSign(key);
         }
         else
         {
             sig.initSign(key);
         }
 
-        sig.update(object.getEncoded(ASN1Encodable.DER));
+        sig.update(object.toASN1Primitive().getEncoded(ASN1Encoding.DER));
 
         return sig.sign();
     }

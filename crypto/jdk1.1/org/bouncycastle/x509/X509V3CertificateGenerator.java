@@ -1,25 +1,5 @@
 package org.bouncycastle.x509;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle.asn1.x509.Time;
-import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.provider.X509CertificateObject;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -36,8 +16,28 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Iterator;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.TBSCertificateStructure;
+import org.bouncycastle.asn1.x509.Time;
+import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
+import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.provider.X509CertificateObject;
+import org.bouncycastle.x509.extension.X509ExtensionUtil;
+
 /**
  * class to produce an X.509 Version 3 certificate.
+ *  @deprecated use org.bouncycastle.cert.X509v3CertificateBuilder.
  */
 public class X509V3CertificateGenerator
 {
@@ -75,7 +75,7 @@ public class X509V3CertificateGenerator
         
         tbsGen.setSerialNumber(new DERInteger(serialNumber));
     }
-
+    
     /**
      * Set the issuer distinguished name - the issuer is the entity whose private key is used to sign the
      * certificate.
@@ -190,7 +190,7 @@ public class X509V3CertificateGenerator
     public void addExtension(
         String          oid,
         boolean         critical,
-        DEREncodable    value)
+        ASN1Encodable    value)
     {
         this.addExtension(new DERObjectIdentifier(oid), critical, value);
     }
@@ -201,9 +201,9 @@ public class X509V3CertificateGenerator
     public void addExtension(
         DERObjectIdentifier oid,
         boolean             critical,
-        DEREncodable        value)
+        ASN1Encodable        value)
     {
-        extGenerator.addExtension(oid, critical,  value);
+        extGenerator.addExtension(new ASN1ObjectIdentifier(oid.getId()), critical,  value);
     }
 
     /**
@@ -227,7 +227,7 @@ public class X509V3CertificateGenerator
         boolean             critical,
         byte[]              value)
     {
-        extGenerator.addExtension(oid, critical, value);
+        extGenerator.addExtension(new ASN1ObjectIdentifier(oid.getId()), critical, value);
     }
 
     /**

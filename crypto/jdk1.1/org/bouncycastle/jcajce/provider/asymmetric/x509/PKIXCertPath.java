@@ -1,4 +1,4 @@
-package org.bouncycastle.jce.provider;
+package org.bouncycastle.jcajce.provider.asymmetric.x509;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -20,20 +20,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.DEROutputStream;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.pkcs.ContentInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.SignedData;
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMWriter;
 
 /**
@@ -51,7 +52,7 @@ public  class PKIXCertPath
         encodings.add("PkiPath");
         encodings.add("PEM");
         encodings.add("PKCS7");
-        certPathEncodings = Collections.unmodifiableList( encodings );
+        certPathEncodings = Collections.unmodifiableList(encodings);
     }
 
     private List certificates;
@@ -62,111 +63,101 @@ public  class PKIXCertPath
     private List sortCerts(
         List certs)
     {
+        try
+        {
         if (certs.size() < 2)
         {
             return certs;
         }
         
-        try
+        X509Principal issuer = PrincipalUtil.getIssuerX509Principal(((X509Certificate)certs.get(0)));
+        boolean         okay = true;
+        
+        for (int i = 1; i != certs.size(); i++) 
         {
-            X509Principal   issuer = PrincipalUtil.getIssuerX509Principal(((X509Certificate)certs.get(0)));
-            boolean         okay = true;
+            X509Certificate cert = (X509Certificate)certs.get(i);
             
-            for (int i = 1; i != certs.size(); i++) 
+            if (issuer.equals(PrincipalUtil.getSubjectX509Principal(cert)))
             {
-                X509Certificate cert = (X509Certificate)certs.get(i);
-                
-                if (issuer.equals(PrincipalUtil.getSubjectX509Principal(cert)))
+                issuer = PrincipalUtil.getIssuerX509Principal(((X509Certificate)certs.get(i)));
+            }
+            else
+            {
+                okay = false;
+                break;
+            }
+        }
+        
+        if (okay)
+        {
+            return certs;
+        }
+        
+        // find end-entity cert
+        List retList = new ArrayList(certs.size());
+        List orig = new ArrayList(certs);
+
+        for (int i = 0; i < certs.size(); i++)
+        {
+            X509Certificate cert = (X509Certificate)certs.get(i);
+            boolean         found = false;
+            
+            X509Principal subject = PrincipalUtil.getSubjectX509Principal(cert);
+            
+            for (int j = 0; j != certs.size(); j++)
+            {
+                X509Certificate c = (X509Certificate)certs.get(j);
+                if (PrincipalUtil.getIssuerX509Principal(c).equals(subject))
                 {
-                    issuer = PrincipalUtil.getIssuerX509Principal(((X509Certificate)certs.get(i)));
-                }
-                else
-                {
-                    okay = false;
+                    found = true;
                     break;
                 }
             }
             
-            if (okay)
+            if (!found)
             {
-                return certs;
+                retList.add(cert);
+                certs.remove(i);
             }
+        }
+        
+        // can only have one end entity cert - something's wrong, give up.
+        if (retList.size() > 1)
+        {
+            return orig;
+        }
+
+        for (int i = 0; i != retList.size(); i++)
+        {
+            issuer = PrincipalUtil.getIssuerX509Principal(((X509Certificate)retList.get(i)));
             
-            // find end-entity cert
-            ArrayList       retList = new ArrayList(certs.size());
-            
-            for (int i = 0; i < certs.size(); i++)
+            for (int j = 0; j < certs.size(); j++)
             {
-                X509Certificate cert = (X509Certificate)certs.get(i);
-                boolean         found = false;
-                
-                X509Principal   subject = PrincipalUtil.getSubjectX509Principal(cert);
-                
-                for (int j = 0; j != certs.size(); j++)
+                X509Certificate c = (X509Certificate)certs.get(j);
+                if (issuer.equals(PrincipalUtil.getSubjectX509Principal(c)))
                 {
-                    X509Certificate c = (X509Certificate)certs.get(j);
-                    if (PrincipalUtil.getIssuerX509Principal(c).equals(subject))
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                
-                if (!found)
-                {
-                    retList.add(cert);
-                    certs.remove(i);
+                    retList.add(c);
+                    certs.remove(j);
+                    break;
                 }
             }
-            
-            // can only have one end entity cert - something's wrong, give up.
-            if (retList.size() > 1)
-            {
-                for (int i = 0; i != certs.size(); i++)
-                {
-                    retList.add(certs.get(i));
-                }
-                
-                return retList;
-            }
-            
-            for (int i = 0; i != retList.size(); i++)
-            {
-                issuer = PrincipalUtil.getIssuerX509Principal((X509Certificate)retList.get(i));
-                
-                for (int j = 0; j < certs.size(); j++)
-                {
-                    X509Certificate c = (X509Certificate)certs.get(j);
-                    if (issuer.equals(PrincipalUtil.getSubjectX509Principal(c)))
-                    {
-                        retList.add(c);
-                        certs.remove(j);
-                        break;
-                    }
-                }
-            }
-            
-            // make sure all certificates are accounted for.
-            for (int i = 0; i != certs.size(); i++)
-            {
-                retList.add(certs.get(i));
-            }
-            
-            return retList;
+        }
+        
+        // make sure all certificates are accounted for.
+        if (certs.size() > 0)
+        {
+            return orig;
+        }
+        
+        return retList;
         }
         catch (Exception e)
         {
-            return certs;
-        }
+             return certs;
+	}
     }
-    
-    /**
-     * Creates a CertPath of the specified type.
-     * This constructor is protected because most users should use
-     * a CertificateFactory to create CertPaths.
-     * @param type the standard name of the type of Certificatesin this path
-     **/
-    PKIXCertPath( List certificates )
+
+    PKIXCertPath(List certificates)
     {
         super("X.509");
         this.certificates = sortCerts(new ArrayList(certificates));
@@ -176,8 +167,6 @@ public  class PKIXCertPath
      * Creates a CertPath of the specified type.
      * This constructor is protected because most users should use
      * a CertificateFactory to create CertPaths.
-     *
-     * @param type the standard name of the type of Certificatesin this path
      **/
     PKIXCertPath(
         InputStream inStream,
@@ -185,38 +174,33 @@ public  class PKIXCertPath
         throws CertificateException
     {
         super("X.509");
-        try {
-            if (encoding.equalsIgnoreCase( "PkiPath" ))
+        try
+        {
+            if (encoding.equalsIgnoreCase("PkiPath"))
             {
                 ASN1InputStream derInStream = new ASN1InputStream(inStream);
                 ASN1Primitive derObject = derInStream.readObject();
                 if (!(derObject instanceof ASN1Sequence))
                 {
-                    throw new CertificateException("input stream does not contain a ASN1 SEQUENCE while reading PkiPath encoded data to load CertPath" );
+                    throw new CertificateException("input stream does not contain a ASN1 SEQUENCE while reading PkiPath encoded data to load CertPath");
                 }
                 Enumeration e = ((ASN1Sequence)derObject).getObjects();
-                InputStream certInStream;
-                ByteArrayOutputStream outStream;
-                DEROutputStream derOutStream;
                 certificates = new ArrayList();
-                CertificateFactory certFactory= CertificateFactory.getInstance( "X.509", "BC" );
-                while ( e.hasMoreElements() ) {
-                    outStream = new ByteArrayOutputStream();
-                    derOutStream = new DEROutputStream(outStream);
-        
-                    derOutStream.writeObject((ASN1Encodable)e.nextElement());
-                    derOutStream.close();
-    
-                    certInStream = new ByteArrayInputStream(outStream.toByteArray());
-                    certificates.add(0,certFactory.generateCertificate(certInStream));
+                CertificateFactory certFactory = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
+                while (e.hasMoreElements())
+                {
+                    ASN1Encodable element = (ASN1Encodable)e.nextElement();
+                    byte[] encoded = element.toASN1Primitive().getEncoded(ASN1Encoding.DER);
+                    certificates.add(0, certFactory.generateCertificate(
+                        new ByteArrayInputStream(encoded)));
                 }
             }
             else if (encoding.equalsIgnoreCase("PKCS7") || encoding.equalsIgnoreCase("PEM"))
             {
                 inStream = new BufferedInputStream(inStream);
                 certificates = new ArrayList();
-                CertificateFactory certFactory= CertificateFactory.getInstance( "X.509", "BC" );
-                Certificate cert = null;
+                CertificateFactory certFactory= CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
+                Certificate cert;
                 while ((cert = certFactory.generateCertificate(inStream)) != null)
                 {
                     certificates.add(cert);
@@ -224,16 +208,16 @@ public  class PKIXCertPath
             }
             else
             {
-                throw new CertificateException( "unsupported encoding: " + encoding);
+                throw new CertificateException("unsupported encoding: " + encoding);
             }
         }
-        catch (IOException ex) 
+        catch (IOException ex)
         {
-            throw new CertificateException( "IOException throw while decoding CertPath:\n" + ex.toString() ); 
+            throw new CertificateException("IOException throw while decoding CertPath:\n" + ex.toString());
         }
-        catch (NoSuchProviderException ex ) 
+        catch (NoSuchProviderException ex)
         {
-            throw new CertificateException( "BouncyCastle provider not found while trying to get a CertificateFactory:\n" + ex.toString() ); 
+            throw new CertificateException("BouncyCastle provider not found while trying to get a CertificateFactory:\n" + ex.toString());
         }
         
         this.certificates = sortCerts(certificates);
@@ -257,16 +241,16 @@ public  class PKIXCertPath
      * the default encoding.
      *
      * @return the encoded bytes
-     * @exception CertificateEncodingException if an encoding error occurs
+     * @exception java.security.cert.CertificateEncodingException if an encoding error occurs
      **/
     public byte[] getEncoded()
         throws CertificateEncodingException
     {
         Iterator iter = getEncodings();
-        if ( iter.hasNext() )
+        if (iter.hasNext())
         {
             Object enc = iter.next();
-            if ( enc instanceof String )
+            if (enc instanceof String)
             {
             return getEncoded((String)enc);
             }
@@ -280,7 +264,7 @@ public  class PKIXCertPath
      *
      * @param encoding the name of the encoding to use
      * @return the encoded bytes
-     * @exception CertificateEncodingException if an encoding error
+     * @exception java.security.cert.CertificateEncodingException if an encoding error
      * occurs or the encoding requested is not supported
      *
      **/
@@ -292,7 +276,7 @@ public  class PKIXCertPath
             ASN1EncodableVector v = new ASN1EncodableVector();
 
             ListIterator iter = certificates.listIterator(certificates.size());
-            while ( iter.hasPrevious() )
+            while (iter.hasPrevious())
             {
                 v.add(toASN1Object((X509Certificate)iter.previous()));
             }
@@ -309,11 +293,11 @@ public  class PKIXCertPath
                 v.add(toASN1Object((X509Certificate)certificates.get(i)));
             }
             
-            SignedData  sd = new SignedData(
-                                     new DERInteger(1),
+            SignedData sd = new SignedData(
+                                     new ASN1Integer(1),
                                      new DERSet(),
                                      encInfo, 
-                                     new DERSet(v), 
+                                     new DERSet(v),
                                      null, 
                                      new DERSet());
 
@@ -323,7 +307,7 @@ public  class PKIXCertPath
         else if (encoding.equalsIgnoreCase("PEM"))
         {
             ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            PEMWriter             pWrt = new PEMWriter(new OutputStreamWriter(bOut));
+            PEMWriter pWrt = new PEMWriter(new OutputStreamWriter(bOut));
 
             try
             {
@@ -359,14 +343,14 @@ public  class PKIXCertPath
     }
 
     /**
-     * Return a ASN1Primitive containing the encoded certificate.
+     * Return a DERObject containing the encoded certificate.
      *
      * @param cert the X509Certificate object to be encoded
      *
-     * @return the ASN1Primitive
+     * @return the DERObject
      **/
     private ASN1Primitive toASN1Object(
-        X509Certificate cert )
+        X509Certificate cert)
         throws CertificateEncodingException
     {
         try
@@ -379,22 +363,16 @@ public  class PKIXCertPath
         }
     }
     
-    private byte[] toDEREncoded(ASN1Encodable obj) 
+    private byte[] toDEREncoded(ASN1Encodable obj)
         throws CertificateEncodingException
     {
         try
         {
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            DEROutputStream       dOut = new DEROutputStream(bOut);
-            
-            dOut.writeObject(obj);
-            dOut.close();
-            
-            return bOut.toByteArray();
+            return obj.toASN1Primitive().getEncoded(ASN1Encoding.DER);
         }
         catch (IOException e)
         {
-            throw new CertificateEncodingException("Exeption thrown: " + e);
+            throw new CertificateEncodingException("Exception thrown: " + e);
         }
     }
 }
