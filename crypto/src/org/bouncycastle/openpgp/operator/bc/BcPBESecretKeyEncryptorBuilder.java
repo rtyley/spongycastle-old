@@ -60,7 +60,7 @@ public class BcPBESecretKeyEncryptorBuilder
                         this.random = new SecureRandom();
                     }
 
-                    BlockCipher engine = BcImplProvider.createBlockCipher(encAlgorithm);
+                    BlockCipher engine = BcImplProvider.createBlockCipher(this.encAlgorithm);
 
                     iv = new byte[engine.getBlockSize()];
 

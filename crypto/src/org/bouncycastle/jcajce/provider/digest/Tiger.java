@@ -62,6 +62,7 @@ public class Tiger
         public void configure(ConfigurableProvider provider)
         {
             provider.addAlgorithm("MessageDigest.TIGER", PREFIX + "$Digest");
+            provider.addAlgorithm("MessageDigest.Tiger", PREFIX + "$Digest"); // JDK 1.1.
 
             addHMACAlgorithm(provider, "TIGER", PREFIX + "$HashMac", PREFIX + "$KeyGenerator");
             addHMACAlias(provider, "TIGER", IANAObjectIdentifiers.hmacTIGER);

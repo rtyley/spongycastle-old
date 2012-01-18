@@ -50,7 +50,7 @@ public class RSA
             provider.addAlgorithm("Cipher.2.5.8.1.1", PREFIX + "CipherSpi$PKCS1v1_5Padding");
             provider.addAlgorithm("Cipher.RSA/1", PREFIX + "CipherSpi$PKCS1v1_5Padding_PrivateOnly");
             provider.addAlgorithm("Cipher.RSA/2", PREFIX + "CipherSpi$PKCS1v1_5Padding_PublicOnly");
-            provider.addAlgorithm("Cipher.RSA/OAEP", PREFIX + "Cipher$OAEPPadding");
+            provider.addAlgorithm("Cipher.RSA/OAEP", PREFIX + "CipherSpi$OAEPPadding");
             provider.addAlgorithm("Cipher." + PKCSObjectIdentifiers.id_RSAES_OAEP, PREFIX + "CipherSpi$OAEPPadding");
             provider.addAlgorithm("Cipher.RSA/ISO9796-1", PREFIX + "CipherSpi$ISO9796d1Padding");
 

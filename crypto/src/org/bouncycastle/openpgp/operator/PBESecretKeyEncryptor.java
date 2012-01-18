@@ -7,10 +7,10 @@ import org.bouncycastle.openpgp.PGPException;
 
 public abstract class PBESecretKeyEncryptor
 {
-    private int encAlgorithm;
-    private char[] passPhrase;
-    private PGPDigestCalculator s2kDigestCalculator;
-    private S2K s2k;
+    protected int encAlgorithm;
+    protected char[] passPhrase;
+    protected PGPDigestCalculator s2kDigestCalculator;
+    protected S2K s2k;
 
     protected SecureRandom random;
 

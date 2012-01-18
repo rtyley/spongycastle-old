@@ -254,10 +254,6 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.IES", "org.bouncycastle.jce.provider.JCEIESCipher$IES");
         put("Cipher.BrokenIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenIES");
 
-        put("Alg.Alias.Cipher.ELGAMAL/ECB/PKCS1PADDING", "ELGAMAL/PKCS1");
-        put("Alg.Alias.Cipher.ELGAMAL/NONE/PKCS1PADDING", "ELGAMAL/PKCS1");
-        put("Alg.Alias.Cipher.ELGAMAL/NONE/NOPADDING", "ELGAMAL");
-
         put("Cipher.PBEWITHMD5ANDDES", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithMD5AndDES");
         put("Cipher.BROKENPBEWITHMD5ANDDES", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$BrokePBEWithMD5AndDES");
         put("Cipher.PBEWITHMD5ANDRC2", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithMD5AndRC2");
@@ -474,6 +470,7 @@ public final class BouncyCastleProvider extends Provider
                 }
                 catch (Exception e)
                 {   // this should never ever happen!!
+e.printStackTrace();
                     throw new InternalError("cannot create instance of "
                         + packageName + names[i] + "$Mappings : " + e);
                 }

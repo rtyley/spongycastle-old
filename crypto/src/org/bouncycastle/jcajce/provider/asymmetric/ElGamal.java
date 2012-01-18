@@ -23,11 +23,17 @@ public class ElGamal
             provider.addAlgorithm("AlgorithmParameters.ELGAMAL", PREFIX + "AlgorithmParametersSpi");
 
             provider.addAlgorithm("Cipher.ELGAMAL", PREFIX + "CipherSpi$NoPadding");
+            provider.addAlgorithm("Cipher.ElGamal", PREFIX + "CipherSpi$NoPadding");
+            provider.addAlgorithm("Alg.Alias.Cipher.ELGAMAL/ECB/PKCS1PADDING", "ELGAMAL/PKCS1");
+            provider.addAlgorithm("Alg.Alias.Cipher.ELGAMAL/NONE/PKCS1PADDING", "ELGAMAL/PKCS1");
+            provider.addAlgorithm("Alg.Alias.Cipher.ELGAMAL/NONE/NOPADDING", "ELGAMAL");
+
             provider.addAlgorithm("Cipher.ELGAMAL/PKCS1", PREFIX + "CipherSpi$PKCS1v1_5Padding");
             provider.addAlgorithm("KeyFactory.ELGAMAL", PREFIX + "KeyFactorySpi");
             provider.addAlgorithm("KeyFactory.ElGamal", PREFIX + "KeyFactorySpi");
 
             provider.addAlgorithm("KeyPairGenerator.ELGAMAL", PREFIX + "KeyPairGeneratorSpi");
+            provider.addAlgorithm("KeyPairGenerator.ElGamal", PREFIX + "KeyPairGeneratorSpi");
 
             AsymmetricKeyInfoConverter keyFact = new KeyFactorySpi();
 
