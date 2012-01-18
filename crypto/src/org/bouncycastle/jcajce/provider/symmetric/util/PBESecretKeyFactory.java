@@ -53,11 +53,11 @@ public class PBESecretKeyFactory
 
             if (forCipher)
             {
-                param = Util.makePBEParameters(pbeSpec, scheme, digest, keySize, ivSize);
+                param = PBE.Util.makePBEParameters(pbeSpec, scheme, digest, keySize, ivSize);
             }
             else
             {
-                param = Util.makePBEMacParameters(pbeSpec, scheme, digest, keySize);
+                param = PBE.Util.makePBEMacParameters(pbeSpec, scheme, digest, keySize);
             }
 
             return new BCPBEKey(this.algName, this.algOid, scheme, digest, keySize, ivSize, pbeSpec, param);

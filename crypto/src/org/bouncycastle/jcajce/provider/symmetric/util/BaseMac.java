@@ -83,7 +83,7 @@ public class BaseMac
             }
             else if (params instanceof PBEParameterSpec)
             {
-                param = Util.makePBEMacParameters(k, params);
+                param = PBE.Util.makePBEMacParameters(k, params);
             }
             else
             {

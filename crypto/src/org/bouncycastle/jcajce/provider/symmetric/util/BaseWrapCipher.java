@@ -135,7 +135,7 @@ public abstract class BaseWrapCipher
 
             if (params instanceof PBEParameterSpec)
             {
-                param = Util.makePBEParameters(k, params, wrapEngine.getAlgorithmName());
+                param = PBE.Util.makePBEParameters(k, params, wrapEngine.getAlgorithmName());
             }
             else if (k.getParam() != null)
             {

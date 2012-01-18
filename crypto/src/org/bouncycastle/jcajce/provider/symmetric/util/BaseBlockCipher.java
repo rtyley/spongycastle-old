@@ -393,7 +393,7 @@ public class BaseBlockCipher
             else if (params instanceof PBEParameterSpec)
             {
                 pbeSpec = (PBEParameterSpec)params;
-                param = Util.makePBEParameters(k, params, cipher.getUnderlyingCipher().getAlgorithmName());
+                param = PBE.Util.makePBEParameters(k, params, cipher.getUnderlyingCipher().getAlgorithmName());
             }
             else
             {

@@ -177,7 +177,7 @@ public class BaseStreamCipher
             }
             else if (params instanceof PBEParameterSpec)
             {
-                param = Util.makePBEParameters(k, params, cipher.getAlgorithmName());
+                param = PBE.Util.makePBEParameters(k, params, cipher.getAlgorithmName());
                 pbeSpec = (PBEParameterSpec)params;
             }
             else
