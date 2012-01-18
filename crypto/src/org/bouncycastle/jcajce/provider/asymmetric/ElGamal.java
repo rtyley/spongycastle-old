@@ -20,7 +20,9 @@ public class ElGamal
         public void configure(ConfigurableProvider provider)
         {
             provider.addAlgorithm("AlgorithmParameterGenerator.ELGAMAL", PREFIX + "AlgorithmParameterGeneratorSpi");
+            provider.addAlgorithm("AlgorithmParameterGenerator.ElGamal", PREFIX + "AlgorithmParameterGeneratorSpi");
             provider.addAlgorithm("AlgorithmParameters.ELGAMAL", PREFIX + "AlgorithmParametersSpi");
+            provider.addAlgorithm("AlgorithmParameters.ElGamal", PREFIX + "AlgorithmParameterGeneratorSpi");
 
             provider.addAlgorithm("Cipher.ELGAMAL", PREFIX + "CipherSpi$NoPadding");
             provider.addAlgorithm("Cipher.ElGamal", PREFIX + "CipherSpi$NoPadding");
