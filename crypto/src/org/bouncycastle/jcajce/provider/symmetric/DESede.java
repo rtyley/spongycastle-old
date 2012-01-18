@@ -328,6 +328,7 @@ public final class DESede
         extends AlgorithmProvider
     {
         private static final String PREFIX = DESede.class.getName();
+        private static final String PACKAGE = "org.bouncycastle.jcajce.provider.symmetric"; // JDK 1.2
                 
         public Mappings()
         {
@@ -376,7 +377,7 @@ public final class DESede
             provider.addAlgorithm("Alg.Alias.Mac.DESEDEISO9797ALG1MACWITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
             provider.addAlgorithm("Alg.Alias.Mac.DESEDEISO9797ALG1WITHISO7816-4PADDING", "DESEDEMAC64WITHISO7816-4PADDING");
 
-            provider.addAlgorithm("AlgorithmParameters.DESEDE", DESede.class.getPackage().getName() + ".util.IvAlgorithmParameters");
+            provider.addAlgorithm("AlgorithmParameters.DESEDE", PACKAGE + ".util.IvAlgorithmParameters");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + PKCSObjectIdentifiers.des_EDE3_CBC, "DESEDE");
 
             provider.addAlgorithm("AlgorithmParameterGenerator.DESEDE",  PREFIX + "$AlgParamGen");

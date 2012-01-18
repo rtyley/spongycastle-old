@@ -253,6 +253,7 @@ public final class DES
         extends AlgorithmProvider
     {
         private static final String PREFIX = DES.class.getName();
+        private static final String PACKAGE = "org.bouncycastle.jcajce.provider.symmetric"; // JDK 1.2
 
         public Mappings()
         {
@@ -287,7 +288,7 @@ public final class DES
             provider.addAlgorithm("Alg.Alias.Mac.DESISO9797ALG1MACWITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
             provider.addAlgorithm("Alg.Alias.Mac.DESISO9797ALG1WITHISO7816-4PADDING", "DESMAC64WITHISO7816-4PADDING");
 
-            provider.addAlgorithm("AlgorithmParameters.DES", DES.class.getPackage().getName() + ".util.IvAlgorithmParameters");
+            provider.addAlgorithm("AlgorithmParameters.DES", PACKAGE + ".util.IvAlgorithmParameters");
             provider.addAlgorithm("Alg.Alias.AlgorithmParameters." + OIWObjectIdentifiers.desCBC, "DES");
 
             provider.addAlgorithm("AlgorithmParameterGenerator.DES",  PREFIX + "$AlgParamGen");
