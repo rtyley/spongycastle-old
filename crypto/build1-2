@@ -319,6 +319,8 @@ then
     rm -rf src/org/bouncycastle/ocsp
     rm -rf src/org/bouncycastle/mail
     rm -rf src/org/bouncycastle/cms
+    rm -rf src/org/bouncycastle/eac
+    rm -rf src/org/bouncycastle/cert
     rm -rf src/org/bouncycastle/tsp
     rm -rf src/org/bouncycastle/x509
     rm -rf src/org/bouncycastle/sasn1
