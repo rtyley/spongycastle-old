@@ -22,7 +22,7 @@ public class ElGamal
             provider.addAlgorithm("AlgorithmParameterGenerator.ELGAMAL", PREFIX + "AlgorithmParameterGeneratorSpi");
             provider.addAlgorithm("AlgorithmParameterGenerator.ElGamal", PREFIX + "AlgorithmParameterGeneratorSpi");
             provider.addAlgorithm("AlgorithmParameters.ELGAMAL", PREFIX + "AlgorithmParametersSpi");
-            provider.addAlgorithm("AlgorithmParameters.ElGamal", PREFIX + "AlgorithmParameterGeneratorSpi");
+            provider.addAlgorithm("AlgorithmParameters.ElGamal", PREFIX + "AlgorithmParametersSpi");
 
             provider.addAlgorithm("Cipher.ELGAMAL", PREFIX + "CipherSpi$NoPadding");
             provider.addAlgorithm("Cipher.ElGamal", PREFIX + "CipherSpi$NoPadding");

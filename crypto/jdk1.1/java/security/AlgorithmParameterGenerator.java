@@ -51,7 +51,7 @@ public class AlgorithmParameterGenerator
     public static AlgorithmParameterGenerator getInstance(String algorithm, String provider)
         throws NoSuchAlgorithmException, NoSuchProviderException
     {
-        SecurityUtil.Implementation  imp = SecurityUtil.getImplementation("AlgorithmParameterGenerator", algorithm, null);
+        SecurityUtil.Implementation  imp = SecurityUtil.getImplementation("AlgorithmParameterGenerator", algorithm, provider);
 
         if (imp != null)
         {
