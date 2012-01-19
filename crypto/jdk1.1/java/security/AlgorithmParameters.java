@@ -45,7 +45,7 @@ public class AlgorithmParameters extends Object
 
             if (imp != null)
             {
-                return new AlgorithmParameterGenerator((AlgorithmParameterGeneratorSpi)imp.getEngine(), imp.getProvider(), algorithm);
+                return new AlgorithmParameter((AlgorithmParameterSpi)imp.getEngine(), imp.getProvider(), algorithm);
             }
 
             throw new NoSuchAlgorithmException("can't find algorithm " + algorithm);
@@ -63,7 +63,7 @@ public class AlgorithmParameters extends Object
 
         if (imp != null)
         {
-            return new AlgorithmParameterGenerator((AlgorithmParameterGeneratorSpi)imp.getEngine(), imp.getProvider(), algorithm);
+            return new AlgorithmParameter((AlgorithmParameterSpi)imp.getEngine(), imp.getProvider(), algorithm);
         }
 
         throw new NoSuchAlgorithmException("can't find algorithm " + algorithm);
