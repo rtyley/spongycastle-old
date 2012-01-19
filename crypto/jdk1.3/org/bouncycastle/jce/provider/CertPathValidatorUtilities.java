@@ -39,7 +39,6 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.isismtt.ISISMTTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
-import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.DistributionPoint;
@@ -1031,30 +1030,61 @@ public class CertPathValidatorUtilities
         }
     }
     
-    protected static void getCertStatus(
-            Date validDate,
-            X509CRL crl,
-            Object cert,
-            CertStatus certStatus)
+        protected static void getCertStatus(
+        Date validDate,
+        X509CRL crl,
+        Object cert,
+        CertStatus certStatus)
         throws AnnotatedException
     {
-        // use BC X509CRLObject so that indirect CRLs are supported
-        X509CRLObject bcCRL = null;
-        try
+        // Note: will be an X509CRLEntryObject if it's an indirect CRL
+        X509CRLEntry crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
+
+        if (crl_entry != null)
         {
-            bcCRL = new X509CRLObject(new CertificateList((ASN1Sequence) ASN1Sequence.fromByteArray(crl.getEncoded())));
-        }
-        catch (Exception exception)
-        {
-            throw new AnnotatedException("Bouncy Castle X509CRLObject could not be created.", exception);
-        }
-        // use BC X509CRLEntryObject, so that getCertificateIssuer() is
-        // supported.
-        X509CRLEntryObject crl_entry = (X509CRLEntryObject) bcCRL.getRevokedCertificate(getSerialNumber(cert));
-        if (crl_entry != null
-                && (getEncodedIssuerPrincipal(cert).equals(crl_entry.getCertificateIssuer()) || getEncodedIssuerPrincipal(cert)
-                        .equals(getIssuerPrincipal(crl))))
-        {
+            boolean isIndirect;
+            try
+            {
+                isIndirect = X509CRLObject.isIndirectCRL(crl);
+            }
+            catch (CRLException exception)
+            {
+                throw new AnnotatedException("Failed check for indirect CRL.", exception);
+            }
+
+            if (isIndirect)
+            {
+                try
+                {
+                    crl_entry = new X509CRLEntryObject(TBSCertList.CRLEntry.getInstance(crl_entry.getEncoded()));
+                }
+                catch (CRLException e)
+                {
+                    // try reconstructing the CRL as a BC one.
+                    try
+                    {
+                        byte[] encoded = crl.getEncoded();
+                        ASN1InputStream aIn = new ASN1InputStream(encoded, true); // Lazy
+                        ASN1Sequence seq = ASN1Sequence.getInstance(aIn.readObject());
+                        crl = new X509CRLObject(CertificateList.getInstance(seq));
+                        crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
+                    }
+                    catch (Exception exception)
+                    {
+                        throw new AnnotatedException("Bouncy Castle X509CRLObject could not be created.", exception);
+                    }
+                }
+
+                if (!getEncodedIssuerPrincipal(cert).equals(((X509CRLEntryObject)crl_entry).getCertificateIssuer()))
+                {
+                    return;  // not for our issuer, ignore
+                }
+            }
+            else if (!getEncodedIssuerPrincipal(cert).equals(getIssuerPrincipal(crl)))
+            {
+                return;  // not for our issuer, ignore
+            }
+
             DEREnumerated reasonCode = null;
             if (crl_entry.hasExtensions())
             {
@@ -1063,7 +1093,7 @@ public class CertPathValidatorUtilities
                     reasonCode = DEREnumerated
                         .getInstance(CertPathValidatorUtilities
                             .getExtensionValue(crl_entry,
-                                X509Extensions.ReasonCode.getId()));
+                                X509Extension.reasonCode.getId()));
                 }
                 catch (Exception e)
                 {
