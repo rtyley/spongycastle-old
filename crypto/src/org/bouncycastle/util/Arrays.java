@@ -371,6 +371,19 @@ public final class Arrays
         return copy;
     }
 
+    public static BigInteger[] clone(BigInteger[] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+        BigInteger[] copy = new BigInteger[data.length];
+
+        System.arraycopy(data, 0, copy, 0, data.length);
+
+        return copy;
+    }
+
     public static byte[] copyOf(byte[] data, int newLength)
     {
         byte[] tmp = new byte[newLength];

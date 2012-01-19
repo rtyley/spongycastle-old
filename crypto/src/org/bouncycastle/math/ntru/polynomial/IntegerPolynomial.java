@@ -337,9 +337,9 @@ public class IntegerPolynomial
             IntegerPolynomial b1 = new IntegerPolynomial(Arrays.copyOf(b, n1));
             IntegerPolynomial b2 = new IntegerPolynomial(Arrays.copyOfRange(b, n1, n));
 
-            IntegerPolynomial A = a1.clone();
+            IntegerPolynomial A = (IntegerPolynomial)a1.clone();
             A.add(a2);
-            IntegerPolynomial B = b1.clone();
+            IntegerPolynomial B = (IntegerPolynomial)b1.clone();
             B.add(b2);
 
             IntegerPolynomial c1 = a1.multRecursive(b1);
@@ -460,7 +460,7 @@ public class IntegerPolynomial
             while (v < q)
             {
                 v *= 2;
-                LongPolynomial2 temp = FqLong.clone();
+                LongPolynomial2 temp = (LongPolynomial2)FqLong.clone();
                 temp.mult2And(v - 1);
                 FqLong = thisLong.mult(FqLong).mult(FqLong);
                 temp.subAnd(FqLong, v - 1);
@@ -1090,7 +1090,7 @@ public class IntegerPolynomial
     public long centeredNormSq(int q)
     {
         int N = coeffs.length;
-        IntegerPolynomial p = clone();
+        IntegerPolynomial p = (IntegerPolynomial)clone();
         p.shiftGap(q);
 
         long sum = 0;
@@ -1115,7 +1115,7 @@ public class IntegerPolynomial
     {
         modCenter(q);
 
-        int[] sorted = coeffs.clone();
+        int[] sorted = Arrays.clone(coeffs);
 
         sort(sorted);
 
@@ -1296,10 +1296,10 @@ public class IntegerPolynomial
 
     public IntegerPolynomial toIntegerPolynomial()
     {
-        return clone();
+        return (IntegerPolynomial)clone();
     }
 
-    public IntegerPolynomial clone()
+    public Object clone()
     {
         return new IntegerPolynomial(coeffs.clone());
     }

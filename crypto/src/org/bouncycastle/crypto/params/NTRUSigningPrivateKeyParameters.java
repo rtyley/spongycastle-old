@@ -228,7 +228,7 @@ public class NTRUSigningPrivateKeyParameters
             boolean sparse = params.sparse;
             this.params = params;
 
-            if (params.polyType == NTRUParameters.TernaryPolynomialType.PRODUCT)
+            if (params.polyType == NTRUParameters.TERNARY_POLYNOMIAL_TYPE_PRODUCT)
             {
                 f = ProductFormPolynomial.fromBinary(is, N, d1, d2, d3 + 1, d3);
             }
@@ -247,7 +247,7 @@ public class NTRUSigningPrivateKeyParameters
                 }
                 fPrime = fPrimeInt;
             }
-            else if (params.polyType == NTRUParameters.TernaryPolynomialType.PRODUCT)
+            else if (params.polyType == NTRUParameters.TERNARY_POLYNOMIAL_TYPE_PRODUCT)
             {
                 fPrime = ProductFormPolynomial.fromBinary(is, N, d1, d2, d3 + 1, d3);
             }

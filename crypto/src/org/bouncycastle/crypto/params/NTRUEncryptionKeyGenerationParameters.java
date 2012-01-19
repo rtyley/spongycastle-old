@@ -75,7 +75,7 @@ public class NTRUEncryptionKeyGenerationParameters
     public byte[] oid;
     public boolean sparse;
     public boolean fastFp;
-    public NTRUParameters.TernaryPolynomialType polyType;
+    public int polyType;
     public Digest hashAlg;
 
     /**
@@ -110,7 +110,7 @@ public class NTRUEncryptionKeyGenerationParameters
         this.oid = oid;
         this.sparse = sparse;
         this.fastFp = fastFp;
-        this.polyType = NTRUParameters.TernaryPolynomialType.SIMPLE;
+        this.polyType = NTRUParameters.TERNARY_POLYNOMIAL_TYPE_SIMPLE;
         this.hashAlg = hashAlg;
         init();
     }
@@ -152,7 +152,7 @@ public class NTRUEncryptionKeyGenerationParameters
         this.oid = oid;
         this.sparse = sparse;
         this.fastFp = fastFp;
-        this.polyType = NTRUParameters.TernaryPolynomialType.PRODUCT;
+        this.polyType = NTRUParameters.TERNARY_POLYNOMIAL_TYPE_PRODUCT;
         this.hashAlg = hashAlg;
         init();
     }
@@ -198,7 +198,7 @@ public class NTRUEncryptionKeyGenerationParameters
         dis.read(oid);
         sparse = dis.readBoolean();
         fastFp = dis.readBoolean();
-        polyType = NTRUParameters.TernaryPolynomialType.values()[dis.read()];
+        polyType = dis.read();
 
         String alg = dis.readUTF();
 
@@ -216,7 +216,7 @@ public class NTRUEncryptionKeyGenerationParameters
 
     public NTRUEncryptionParameters getEncryptionParameters()
     {
-        if (polyType == NTRUParameters.TernaryPolynomialType.SIMPLE)
+        if (polyType == NTRUParameters.TERNARY_POLYNOMIAL_TYPE_SIMPLE)
         {
             return new NTRUEncryptionParameters(N, q, df, dm0, db, c, minCallsR, minCallsMask, hashSeed, oid, sparse, fastFp, hashAlg);
         }
@@ -228,7 +228,7 @@ public class NTRUEncryptionKeyGenerationParameters
 
     public NTRUEncryptionKeyGenerationParameters clone()
     {
-        if (polyType == NTRUParameters.TernaryPolynomialType.SIMPLE)
+        if (polyType == NTRUParameters.TERNARY_POLYNOMIAL_TYPE_SIMPLE)
         {
             return new NTRUEncryptionKeyGenerationParameters(N, q, df, dm0, db, c, minCallsR, minCallsMask, hashSeed, oid, sparse, fastFp, hashAlg);
         }
@@ -273,7 +273,7 @@ public class NTRUEncryptionKeyGenerationParameters
         dos.write(oid);
         dos.writeBoolean(sparse);
         dos.writeBoolean(fastFp);
-        dos.write(polyType.ordinal());
+        dos.write(polyType);
         dos.writeUTF(hashAlg.getAlgorithmName());
     }
 
@@ -306,7 +306,7 @@ public class NTRUEncryptionKeyGenerationParameters
         result = prime * result + minCallsR;
         result = prime * result + Arrays.hashCode(oid);
         result = prime * result + pkLen;
-        result = prime * result + ((polyType == null) ? 0 : polyType.hashCode());
+        result = prime * result + polyType;
         result = prime * result + q;
         result = prime * result + (sparse ? 1231 : 1237);
         return result;
@@ -430,14 +430,7 @@ public class NTRUEncryptionKeyGenerationParameters
         {
             return false;
         }
-        if (polyType == null)
-        {
-            if (other.polyType != null)
-            {
-                return false;
-            }
-        }
-        else if (!polyType.equals(other.polyType))
+        if (polyType != other.polyType)
         {
             return false;
         }
@@ -455,7 +448,7 @@ public class NTRUEncryptionKeyGenerationParameters
     public String toString()
     {
         StringBuilder output = new StringBuilder("EncryptionParameters(N=" + N + " q=" + q);
-        if (polyType == NTRUParameters.TernaryPolynomialType.SIMPLE)
+        if (polyType == NTRUParameters.TERNARY_POLYNOMIAL_TYPE_SIMPLE)
         {
             output.append(" polyType=SIMPLE df=" + df);
         }

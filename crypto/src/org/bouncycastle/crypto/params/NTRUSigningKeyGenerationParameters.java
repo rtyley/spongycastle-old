@@ -72,7 +72,7 @@ public class NTRUSigningKeyGenerationParameters
     public boolean sparse;   // whether to treat ternary polynomials as sparsely populated
     public int keyGenAlg;
     public Digest hashAlg;
-    public NTRUParameters.TernaryPolynomialType polyType;
+    public int polyType;
 
     /**
      * Constructs a parameter set that uses ternary private keys (i.e. </code>polyType=SIMPLE</code>).
@@ -105,7 +105,7 @@ public class NTRUSigningKeyGenerationParameters
         this.sparse = sparse;
         this.keyGenAlg = keyGenAlg;
         this.hashAlg = hashAlg;
-        polyType = NTRUParameters.TernaryPolynomialType.SIMPLE;
+        polyType = NTRUParameters.TERNARY_POLYNOMIAL_TYPE_SIMPLE;
         init();
     }
 
@@ -144,7 +144,7 @@ public class NTRUSigningKeyGenerationParameters
         this.sparse = sparse;
         this.keyGenAlg = keyGenAlg;
         this.hashAlg = hashAlg;
-        polyType = NTRUParameters.TernaryPolynomialType.PRODUCT;
+        polyType = NTRUParameters.TERNARY_POLYNOMIAL_TYPE_PRODUCT;
         init();
     }
 
@@ -191,7 +191,7 @@ public class NTRUSigningKeyGenerationParameters
         {
             hashAlg = new SHA256Digest();
         }
-        polyType = NTRUParameters.TernaryPolynomialType.values()[dis.read()];
+        polyType = dis.read();
         init();
     }
 
@@ -222,7 +222,7 @@ public class NTRUSigningKeyGenerationParameters
         dos.writeInt(bitsF);
         dos.write(keyGenAlg);
         dos.writeUTF(hashAlg.getAlgorithmName());
-        dos.write(polyType.ordinal());
+        dos.write(polyType);
     }
 
     public NTRUSigningParameters getSigningParameters()
@@ -232,7 +232,7 @@ public class NTRUSigningKeyGenerationParameters
 
     public NTRUSigningKeyGenerationParameters clone()
     {
-        if (polyType == NTRUParameters.TernaryPolynomialType.SIMPLE)
+        if (polyType == NTRUParameters.TERNARY_POLYNOMIAL_TYPE_SIMPLE)
         {
             return new NTRUSigningKeyGenerationParameters(N, q, d, B, basisType, beta, normBound, keyNormBound, primeCheck, sparse, keyGenAlg, hashAlg);
         }
@@ -269,7 +269,7 @@ public class NTRUSigningKeyGenerationParameters
         result = prime * result + (int)(temp ^ (temp >>> 32));
         temp = Double.doubleToLongBits(normBoundSq);
         result = prime * result + (int)(temp ^ (temp >>> 32));
-        result = prime * result + ((polyType == null) ? 0 : polyType.hashCode());
+        result = prime * result + polyType;
         result = prime * result + (primeCheck ? 1231 : 1237);
         result = prime * result + q;
         result = prime * result + signFailTolerance;
@@ -363,14 +363,7 @@ public class NTRUSigningKeyGenerationParameters
         {
             return false;
         }
-        if (polyType == null)
-        {
-            if (other.polyType != null)
-            {
-                return false;
-            }
-        }
-        else if (!polyType.equals(other.polyType))
+        if (polyType != other.polyType)
         {
             return false;
         }
@@ -398,7 +391,7 @@ public class NTRUSigningKeyGenerationParameters
         DecimalFormat format = new DecimalFormat("0.00");
 
         StringBuilder output = new StringBuilder("SignatureParameters(N=" + N + " q=" + q);
-        if (polyType == NTRUParameters.TernaryPolynomialType.SIMPLE)
+        if (polyType == NTRUParameters.TERNARY_POLYNOMIAL_TYPE_SIMPLE)
         {
             output.append(" polyType=SIMPLE d=" + d);
         }

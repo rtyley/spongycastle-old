@@ -122,8 +122,8 @@ public class NTRUSigningKeyPairGenerator
         // [f(1)+g(1)]^2 = 4
         E -= 4;
 
-        IntegerPolynomial u = f.clone();
-        IntegerPolynomial v = g.clone();
+        IntegerPolynomial u = (IntegerPolynomial)f.clone();
+        IntegerPolynomial v = (IntegerPolynomial)g.clone();
         int j = 0;
         int k = 0;
         int maxAdjustment = N;
@@ -195,7 +195,7 @@ public class NTRUSigningKeyPairGenerator
         {
             do
             {
-                f = params.polyType== NTRUParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d + 1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3 + 1, d3, new SecureRandom());
+                f = params.polyType== NTRUParameters.TERNARY_POLYNOMIAL_TYPE_SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d + 1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3 + 1, d3, new SecureRandom());
                 fInt = f.toIntegerPolynomial();
             }
             while (primeCheck && fInt.resultant(_2n1).res.equals(ZERO));
@@ -210,7 +210,7 @@ public class NTRUSigningKeyPairGenerator
             {
                 do
                 {
-                    g = params.polyType == NTRUParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d + 1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3 + 1, d3, new SecureRandom());
+                    g = params.polyType == NTRUParameters.TERNARY_POLYNOMIAL_TYPE_SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d + 1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3 + 1, d3, new SecureRandom());
                     gInt = g.toIntegerPolynomial();
                 }
                 while (primeCheck && gInt.resultant(_2n1).res.equals(ZERO));
@@ -221,9 +221,9 @@ public class NTRUSigningKeyPairGenerator
         }
         while (!r.gcd.equals(ONE));
 
-        BigIntPolynomial A = rf.rho.clone();
+        BigIntPolynomial A = (BigIntPolynomial)rf.rho.clone();
         A.mult(r.x.multiply(BigInteger.valueOf(q)));
-        BigIntPolynomial B = rg.rho.clone();
+        BigIntPolynomial B = (BigIntPolynomial)rg.rho.clone();
         B.mult(r.y.multiply(BigInteger.valueOf(-q)));
 
         BigIntPolynomial C;
@@ -271,9 +271,9 @@ public class NTRUSigningKeyPairGenerator
             C = Cdec.round();
         }
 
-        BigIntPolynomial F = B.clone();
+        BigIntPolynomial F = (BigIntPolynomial)B.clone();
         F.sub(f.mult(C));
-        BigIntPolynomial G = A.clone();
+        BigIntPolynomial G = (BigIntPolynomial)A.clone();
         G.sub(g.mult(C));
 
         IntegerPolynomial FInt = new IntegerPolynomial(F);

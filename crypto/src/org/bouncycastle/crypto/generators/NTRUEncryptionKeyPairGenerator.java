@@ -62,14 +62,14 @@ public class NTRUEncryptionKeyPairGenerator
             if (fastFp)
             {
                 // if fastFp=true, f is always invertible mod 3
-                t = params.polyType == NTRUParameters.TernaryPolynomialType.SIMPLE ? Util.generateRandomTernary(N, df, df, sparse, params.getRandom()) : ProductFormPolynomial.generateRandom(N, df1, df2, df3, df3, params.getRandom());
+                t = params.polyType == NTRUParameters.TERNARY_POLYNOMIAL_TYPE_SIMPLE ? Util.generateRandomTernary(N, df, df, sparse, params.getRandom()) : ProductFormPolynomial.generateRandom(N, df1, df2, df3, df3, params.getRandom());
                 f = t.toIntegerPolynomial();
                 f.mult(3);
                 f.coeffs[0] += 1;
             }
             else
             {
-                t = params.polyType == NTRUParameters.TernaryPolynomialType.SIMPLE ? Util.generateRandomTernary(N, df, df - 1, sparse, params.getRandom()) : ProductFormPolynomial.generateRandom(N, df1, df2, df3, df3 - 1, params.getRandom());
+                t = params.polyType == NTRUParameters.TERNARY_POLYNOMIAL_TYPE_SIMPLE ? Util.generateRandomTernary(N, df, df - 1, sparse, params.getRandom()) : ProductFormPolynomial.generateRandom(N, df1, df2, df3, df3 - 1, params.getRandom());
                 f = t.toIntegerPolynomial();
                 fp = f.invertF3();
                 if (fp == null)

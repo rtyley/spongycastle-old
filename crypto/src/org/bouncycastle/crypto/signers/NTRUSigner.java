@@ -135,7 +135,7 @@ public class NTRUSigner {
             si.sub(x);
             s.add(si);
             
-            IntegerPolynomial hi = kPriv.getBasis(iLoop).h.clone();
+            IntegerPolynomial hi = (IntegerPolynomial)kPriv.getBasis(iLoop).h.clone();
             if (iLoop > 1)
                 hi.sub(kPriv.getBasis(iLoop-1).h);
             else

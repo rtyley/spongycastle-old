@@ -141,9 +141,9 @@ class LongPolynomial2
             LongPolynomial2 b1 = new LongPolynomial2(Arrays.copyOf(b, n1));
             LongPolynomial2 b2 = new LongPolynomial2(Arrays.copyOfRange(b, n1, n));
 
-            LongPolynomial2 A = a1.clone();
+            LongPolynomial2 A = (LongPolynomial2)a1.clone();
             A.add(a2);
-            LongPolynomial2 B = b1.clone();
+            LongPolynomial2 B = (LongPolynomial2)b1.clone();
             B.add(b2);
 
             LongPolynomial2 c1 = a1.multRecursive(b1);
@@ -234,7 +234,7 @@ class LongPolynomial2
         }
     }
 
-    public LongPolynomial2 clone()
+    public Object clone()
     {
         LongPolynomial2 p = new LongPolynomial2(coeffs.clone());
         p.numCoeffs = numCoeffs;

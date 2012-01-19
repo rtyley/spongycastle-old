@@ -150,7 +150,7 @@ public class NTRUEncryptionEngine
 
             Polynomial r = generateBlindingPoly(sData, M);
             IntegerPolynomial R = r.mult(pub, q);
-            IntegerPolynomial R4 = R.clone();
+            IntegerPolynomial R4 = (IntegerPolynomial)R.clone();
             R4.modPositive(4);
             byte[] oR4 = R4.toBinary(4);
             IntegerPolynomial mask = MGF(oR4, N, minCallsMask, hashSeed);
@@ -206,7 +206,7 @@ public class NTRUEncryptionEngine
     {
         IndexGenerator ig = new IndexGenerator(seed, params);
 
-        if (params.polyType == NTRUParameters.TernaryPolynomialType.PRODUCT)
+        if (params.polyType == NTRUParameters.TERNARY_POLYNOMIAL_TYPE_PRODUCT)
         {
             SparseTernaryPolynomial r1 = new SparseTernaryPolynomial(generateBlindingCoeffs(ig, params.dr1));
             SparseTernaryPolynomial r2 = new SparseTernaryPolynomial(generateBlindingCoeffs(ig, params.dr2));
@@ -407,10 +407,10 @@ public class NTRUEncryptionEngine
             throw new InvalidCipherTextException("Less than dm0 coefficients equal 1");
         }
 
-        IntegerPolynomial cR = e.clone();
+        IntegerPolynomial cR = (IntegerPolynomial)e.clone();
         cR.sub(ci);
         cR.modPositive(q);
-        IntegerPolynomial cR4 = cR.clone();
+        IntegerPolynomial cR4 = (IntegerPolynomial)cR.clone();
         cR4.modPositive(4);
         byte[] coR4 = cR4.toBinary(4);
         IntegerPolynomial mask = MGF(coR4, N, minCallsMask, hashSeed);

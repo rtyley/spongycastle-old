@@ -92,7 +92,7 @@ public class DenseTernaryPolynomial
         // even on 32-bit systems, LongPolynomial5 multiplies faster than IntegerPolynomial
         if (modulus == 2048)
         {
-            IntegerPolynomial poly2Pos = poly2.clone();
+            IntegerPolynomial poly2Pos = (IntegerPolynomial)poly2.clone();
             poly2Pos.modPositive(2048);
             LongPolynomial5 poly5 = new LongPolynomial5(poly2Pos);
             return poly5.mult(this).toIntegerPolynomial();

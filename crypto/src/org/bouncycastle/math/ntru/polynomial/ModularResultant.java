@@ -34,9 +34,9 @@ public class ModularResultant
         BigInteger prod = mod1.multiply(mod2);
         BigIntEuclidean er = BigIntEuclidean.calculate(mod2, mod1);
 
-        BigIntPolynomial rho1 = modRes1.rho.clone();
+        BigIntPolynomial rho1 = (BigIntPolynomial)modRes1.rho.clone();
         rho1.mult(er.x.multiply(mod2));
-        BigIntPolynomial rho2 = modRes2.rho.clone();
+        BigIntPolynomial rho2 = (BigIntPolynomial)modRes2.rho.clone();
         rho2.mult(er.y.multiply(mod1));
         rho1.add(rho2);
         rho1.mod(prod);

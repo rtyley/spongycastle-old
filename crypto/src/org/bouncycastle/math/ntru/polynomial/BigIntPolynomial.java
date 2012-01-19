@@ -2,7 +2,6 @@ package org.bouncycastle.math.ntru.polynomial;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -134,7 +133,7 @@ public class BigIntPolynomial
         int n = poly2.coeffs.length;
         if (n <= 1)
         {
-            BigInteger[] c = coeffs.clone();
+            BigInteger[] c = Arrays.clone(coeffs);
             for (int i = 0; i < coeffs.length; i++)
             {
                 c[i] = c[i].multiply(poly2.coeffs[0]);
@@ -150,9 +149,9 @@ public class BigIntPolynomial
             BigIntPolynomial b1 = new BigIntPolynomial(Arrays.copyOf(b, n1));
             BigIntPolynomial b2 = new BigIntPolynomial(Arrays.copyOfRange(b, n1, n));
 
-            BigIntPolynomial A = a1.clone();
+            BigIntPolynomial A = (BigIntPolynomial)a1.clone();
             A.add(a2);
-            BigIntPolynomial B = b1.clone();
+            BigIntPolynomial B = (BigIntPolynomial)b1.clone();
             B.add(b2);
 
             BigIntPolynomial c1 = a1.multRecursive(b1);
@@ -285,14 +284,14 @@ public class BigIntPolynomial
         BigInteger max = maxCoeffAbs();
         int coeffLength = (int)(max.bitLength() * LOG_10_2) + 1;
         // factor = 1/divisor
-        BigDecimal factor = BigDecimal.ONE.divide(divisor, coeffLength + decimalPlaces + 1, RoundingMode.HALF_EVEN);
+        BigDecimal factor = Constants.BIGDEC_ONE.divide(divisor, coeffLength + decimalPlaces + 1, BigDecimal.ROUND_HALF_EVEN);
 
         // multiply each coefficient by factor
         BigDecimalPolynomial p = new BigDecimalPolynomial(coeffs.length);
         for (int i = 0; i < coeffs.length; i++)
         // multiply, then truncate after decimalPlaces so subsequent operations aren't slowed down
         {
-            p.coeffs[i] = new BigDecimal(coeffs[i]).multiply(factor).setScale(decimalPlaces, RoundingMode.HALF_EVEN);
+            p.coeffs[i] = new BigDecimal(coeffs[i]).multiply(factor).setScale(decimalPlaces, BigDecimal.ROUND_HALF_EVEN);
         }
 
         return p;
@@ -353,7 +352,7 @@ public class BigIntPolynomial
     /**
      * Makes a copy of the polynomial that is independent of the original.
      */
-    public BigIntPolynomial clone()
+    public Object clone()
     {
         return new BigIntPolynomial(coeffs.clone());
     }

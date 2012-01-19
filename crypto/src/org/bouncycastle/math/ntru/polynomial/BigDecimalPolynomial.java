@@ -1,7 +1,6 @@
 package org.bouncycastle.math.ntru.polynomial;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 /**
  * A polynomial with {@link BigDecimal} coefficients.
@@ -132,9 +131,9 @@ public class BigDecimalPolynomial
             BigDecimalPolynomial b1 = new BigDecimalPolynomial(copyOf(b, n1));
             BigDecimalPolynomial b2 = new BigDecimalPolynomial(copyOfRange(b, n1, n));
 
-            BigDecimalPolynomial A = a1.clone();
+            BigDecimalPolynomial A = (BigDecimalPolynomial)a1.clone();
             A.add(a2);
-            BigDecimalPolynomial B = b1.clone();
+            BigDecimalPolynomial B = (BigDecimalPolynomial)b1.clone();
             B.add(b2);
 
             BigDecimalPolynomial c1 = a1.multRecursive(b1);
@@ -215,7 +214,7 @@ public class BigDecimalPolynomial
         BigIntPolynomial p = new BigIntPolynomial(N);
         for (int i = 0; i < N; i++)
         {
-            p.coeffs[i] = coeffs[i].setScale(0, RoundingMode.HALF_EVEN).toBigInteger();
+            p.coeffs[i] = coeffs[i].setScale(0, BigDecimal.ROUND_HALF_EVEN).toBigInteger();
         }
         return p;
     }
@@ -223,7 +222,7 @@ public class BigDecimalPolynomial
     /**
      * Makes a copy of the polynomial that is independent of the original.
      */
-    public BigDecimalPolynomial clone()
+    public Object clone()
     {
         return new BigDecimalPolynomial(coeffs.clone());
     }

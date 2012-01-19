@@ -32,11 +32,11 @@ public class NTRUEncryptTest
         params.dr2 = NTRUEncryptionKeyGenerationParameters.APR2011_743_FAST.dr2;
         params.dr3 = NTRUEncryptionKeyGenerationParameters.APR2011_743_FAST.dr3;
 
-        NTRUParameters.TernaryPolynomialType[] values = new NTRUParameters.TernaryPolynomialType[] { NTRUParameters.TernaryPolynomialType.SIMPLE, NTRUParameters.TernaryPolynomialType.PRODUCT };
+        int[] values = new int[] { NTRUParameters.TERNARY_POLYNOMIAL_TYPE_SIMPLE, NTRUParameters.TERNARY_POLYNOMIAL_TYPE_PRODUCT };
 
         for (int i = 0; i != values.length; i++)
         {
-            NTRUParameters.TernaryPolynomialType polyType = values[i];
+            int polyType = values[i];
 
             boolean[] booleans = {true, false};
             for (int j = 0; j != booleans.length; j++)
@@ -173,7 +173,7 @@ public class NTRUEncryptTest
             byte[] encrypted = ntru.processBlock(plainText, 0, plainText.length);
 
             NTRUEncryptionPrivateKeyParameters orig = (NTRUEncryptionPrivateKeyParameters)kp.getPrivate();
-            IntegerPolynomial h = ((NTRUEncryptionPublicKeyParameters)kp.getPublic()).h.clone();
+            IntegerPolynomial h = (IntegerPolynomial)((NTRUEncryptionPublicKeyParameters)kp.getPublic()).h.clone();
             h.coeffs[0] = (h.coeffs[0] + 111) % params.q;   // alter h
             NTRUEncryptionPrivateKeyParameters privKey = new NTRUEncryptionPrivateKeyParameters(h, orig.t, orig.fp, params.getEncryptionParameters());
 
