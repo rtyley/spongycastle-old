@@ -1100,7 +1100,7 @@ public class CertPathValidatorUtilities
                 reasonCode = DEREnumerated
                     .getInstance(CertPathValidatorUtilities
                         .getExtensionValue(crl_entry,
-                            X509Extension.reasonCode.getId()));
+                            org.bouncycastle.asn1.x509.X509Extension.reasonCode.getId()));
             }
             catch (Exception e)
             {
