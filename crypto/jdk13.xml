@@ -65,6 +65,7 @@
                 <exclude name="**/NTRU*.java" />
                 <exclude name="**/crypto/engines/BitStringTest.java" />
                 <exclude name="**/crypto/engines/AllTests.java" />
+                <exclude name="**/crypto/signers/AllTests.java" />
             </fileset>
             <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.html" />

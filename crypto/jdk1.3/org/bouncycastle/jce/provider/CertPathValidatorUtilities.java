@@ -9,7 +9,9 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509CRL;
+import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
+import java.security.cert.CRLException;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPublicKey;
 import java.security.spec.DSAPublicKeySpec;
@@ -41,6 +43,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -1093,7 +1096,7 @@ public class CertPathValidatorUtilities
                     reasonCode = DEREnumerated
                         .getInstance(CertPathValidatorUtilities
                             .getExtensionValue(crl_entry,
-                                X509Extension.reasonCode.getId()));
+                                org.bouncycastle.asn1.x509.X509Extension.reasonCode.getId()));
                 }
                 catch (Exception e)
                 {
