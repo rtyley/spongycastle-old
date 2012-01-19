@@ -620,7 +620,7 @@ public class BcPGPDSATest
 
     public String getName()
     {
-        return "PGPDSATest";
+        return "BcPGPDSATest";
     }
 
     public static void main(
