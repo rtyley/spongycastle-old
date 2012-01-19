@@ -36,7 +36,7 @@ public class AlgorithmParameters extends Object
         return spi.engineGetEncoded(format);
     }
 
-    public static AlgorithmParameterGenerator getInstance(String algorithm)
+    public static AlgorithmParameters getInstance(String algorithm)
         throws NoSuchAlgorithmException
     {
         try
@@ -45,7 +45,7 @@ public class AlgorithmParameters extends Object
 
             if (imp != null)
             {
-                return new AlgorithmParameter((AlgorithmParameterSpi)imp.getEngine(), imp.getProvider(), algorithm);
+                return new AlgorithmParameters((AlgorithmParametersSpi)imp.getEngine(), imp.getProvider(), algorithm);
             }
 
             throw new NoSuchAlgorithmException("can't find algorithm " + algorithm);
@@ -56,14 +56,14 @@ public class AlgorithmParameters extends Object
         }
     }
 
-    public static AlgorithmParameterGenerator getInstance(String algorithm, String provider)
+    public static AlgorithmParameters getInstance(String algorithm, String provider)
         throws NoSuchAlgorithmException, NoSuchProviderException
     {
         SecurityUtil.Implementation  imp = SecurityUtil.getImplementation("AlgorithmParameters", algorithm, provider);
 
         if (imp != null)
         {
-            return new AlgorithmParameter((AlgorithmParameterSpi)imp.getEngine(), imp.getProvider(), algorithm);
+            return new AlgorithmParameters((AlgorithmParametersSpi)imp.getEngine(), imp.getProvider(), algorithm);
         }
 
         throw new NoSuchAlgorithmException("can't find algorithm " + algorithm);
