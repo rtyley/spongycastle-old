@@ -36,18 +36,37 @@ public class AlgorithmParameters extends Object
         return spi.engineGetEncoded(format);
     }
 
-    public static AlgorithmParameters getInstance(String algorithm)
-    throws NoSuchAlgorithmException
+    public static AlgorithmParameterGenerator getInstance(String algorithm)
+        throws NoSuchAlgorithmException
     {
-        return null;
+        try
+        {
+            SecurityUtil.Implementation  imp = SecurityUtil.getImplementation("AlgorithmParameters", algorithm, null);
+
+            if (imp != null)
+            {
+                return new AlgorithmParameterGenerator((AlgorithmParameterGeneratorSpi)imp.getEngine(), imp.getProvider(), algorithm);
+            }
+
+            throw new NoSuchAlgorithmException("can't find algorithm " + algorithm);
+        }
+        catch (NoSuchProviderException e)
+        {
+            throw new NoSuchAlgorithmException(algorithm + " not found");
+        }
     }
 
-    public static AlgorithmParameters getInstance(
-        String algorithm,
-        String provider)
-    throws NoSuchAlgorithmException, NoSuchProviderException
+    public static AlgorithmParameterGenerator getInstance(String algorithm, String provider)
+        throws NoSuchAlgorithmException, NoSuchProviderException
     {
-        return null;
+        SecurityUtil.Implementation  imp = SecurityUtil.getImplementation("AlgorithmParameters", algorithm, provider);
+
+        if (imp != null)
+        {
+            return new AlgorithmParameterGenerator((AlgorithmParameterGeneratorSpi)imp.getEngine(), imp.getProvider(), algorithm);
+        }
+
+        throw new NoSuchAlgorithmException("can't find algorithm " + algorithm);
     }
 
     public final AlgorithmParameterSpec getParameterSpec(Class paramSpec)
