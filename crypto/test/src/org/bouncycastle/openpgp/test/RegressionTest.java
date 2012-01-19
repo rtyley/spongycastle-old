@@ -35,6 +35,10 @@ public class RegressionTest
         {
             TestResult  result = tests[i].perform();
             System.out.println(result);
+            if (result.getException() != null)
+            {
+                result.getException().printStackTrace();
+            }
         }
     }
 }
