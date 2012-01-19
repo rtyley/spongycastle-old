@@ -53,7 +53,7 @@ public class NTRUSignerTest
         assertTrue(equalsQ(basis.f, basis.fPrime, basis.F, basis.G, params.q, params.N));
 
         // test KeyGenAlg.FLOAT (default=RESULTANT)
-        params.keyGenAlg = NTRUSigningKeyGenerationParameters.KeyGenAlg.FLOAT;
+        params.keyGenAlg = NTRUSigningKeyGenerationParameters.KEY_GEN_ALG_FLOAT;
         ntru.init(params);
         basis = (NTRUSigningKeyPairGenerator.FGBasis)ntru.generateBoundedBasis();
         assertTrue(equalsQ(basis.f, basis.fPrime, basis.F, basis.G, params.q, params.N));
@@ -141,7 +141,7 @@ public class NTRUSignerTest
 
         // test KeyGenAlg.FLOAT (default=RESULTANT)
         params2 = params.clone();
-        params.keyGenAlg = NTRUSigningKeyGenerationParameters.KeyGenAlg.FLOAT;
+        params.keyGenAlg = NTRUSigningKeyGenerationParameters.KEY_GEN_ALG_FLOAT;
         ntru = new NTRUSigner(params.getSigningParameters());
 
         kGen.init(params);

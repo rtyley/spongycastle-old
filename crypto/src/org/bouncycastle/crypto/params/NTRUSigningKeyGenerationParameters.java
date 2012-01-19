@@ -19,45 +19,42 @@ import org.bouncycastle.crypto.digests.SHA512Digest;
 public class NTRUSigningKeyGenerationParameters
     extends KeyGenerationParameters
     implements Cloneable
-{
+{   
+    public static final int BASIS_TYPE_STANDARD = 0;
+    public static final int BASIS_TYPE_TRANSPOSE = 1;
+
+    public static final int KEY_GEN_ALG_RESULTANT = 0;
+    public static final int KEY_GEN_ALG_FLOAT = 1;
+    
     /**
      * Gives 128 bits of security
      */
-    public static final NTRUSigningKeyGenerationParameters APR2011_439 = new NTRUSigningKeyGenerationParameters(439, 2048, 146, 1, BasisType.TRANSPOSE, 0.165, 400, 280, false, true, KeyGenAlg.RESULTANT, new SHA256Digest());
+    public static final NTRUSigningKeyGenerationParameters APR2011_439 = new NTRUSigningKeyGenerationParameters(439, 2048, 146, 1, BASIS_TYPE_TRANSPOSE, 0.165, 400, 280, false, true, KEY_GEN_ALG_RESULTANT, new SHA256Digest());
 
     /**
      * Like <code>APR2011_439</code>, this parameter set gives 128 bits of security but uses product-form polynomials
      */
-    public static final NTRUSigningKeyGenerationParameters APR2011_439_PROD = new NTRUSigningKeyGenerationParameters(439, 2048, 9, 8, 5, 1, BasisType.TRANSPOSE, 0.165, 400, 280, false, true, KeyGenAlg.RESULTANT, new SHA256Digest());
+    public static final NTRUSigningKeyGenerationParameters APR2011_439_PROD = new NTRUSigningKeyGenerationParameters(439, 2048, 9, 8, 5, 1, BASIS_TYPE_TRANSPOSE, 0.165, 400, 280, false, true, KEY_GEN_ALG_RESULTANT, new SHA256Digest());
 
     /**
      * Gives 256 bits of security
      */
-    public static final NTRUSigningKeyGenerationParameters APR2011_743 = new NTRUSigningKeyGenerationParameters(743, 2048, 248, 1, BasisType.TRANSPOSE, 0.127, 405, 360, true, false, KeyGenAlg.RESULTANT, new SHA512Digest());
+    public static final NTRUSigningKeyGenerationParameters APR2011_743 = new NTRUSigningKeyGenerationParameters(743, 2048, 248, 1, BASIS_TYPE_TRANSPOSE, 0.127, 405, 360, true, false, KEY_GEN_ALG_RESULTANT, new SHA512Digest());
 
     /**
      * Like <code>APR2011_439</code>, this parameter set gives 256 bits of security but uses product-form polynomials
      */
-    public static final NTRUSigningKeyGenerationParameters APR2011_743_PROD = new NTRUSigningKeyGenerationParameters(743, 2048, 11, 11, 15, 1, BasisType.TRANSPOSE, 0.127, 405, 360, true, false, KeyGenAlg.RESULTANT, new SHA512Digest());
+    public static final NTRUSigningKeyGenerationParameters APR2011_743_PROD = new NTRUSigningKeyGenerationParameters(743, 2048, 11, 11, 15, 1, BASIS_TYPE_TRANSPOSE, 0.127, 405, 360, true, false, KEY_GEN_ALG_RESULTANT, new SHA512Digest());
 
     /**
      * Generates key pairs quickly. Use for testing only.
      */
-    public static final NTRUSigningKeyGenerationParameters TEST157 = new NTRUSigningKeyGenerationParameters(157, 256, 29, 1, BasisType.TRANSPOSE, 0.38, 200, 80, false, false, KeyGenAlg.RESULTANT, new SHA256Digest());
+    public static final NTRUSigningKeyGenerationParameters TEST157 = new NTRUSigningKeyGenerationParameters(157, 256, 29, 1, BASIS_TYPE_TRANSPOSE, 0.38, 200, 80, false, false, KEY_GEN_ALG_RESULTANT, new SHA256Digest());
     /**
      * Generates key pairs quickly. Use for testing only.
      */
-    public static final NTRUSigningKeyGenerationParameters TEST157_PROD = new NTRUSigningKeyGenerationParameters(157, 256, 5, 5, 8, 1, BasisType.TRANSPOSE, 0.38, 200, 80, false, false, KeyGenAlg.RESULTANT, new SHA256Digest());
+    public static final NTRUSigningKeyGenerationParameters TEST157_PROD = new NTRUSigningKeyGenerationParameters(157, 256, 5, 5, 8, 1, BASIS_TYPE_TRANSPOSE, 0.38, 200, 80, false, false, KEY_GEN_ALG_RESULTANT, new SHA256Digest());
 
-    public enum BasisType
-    {
-        STANDARD, TRANSPOSE
-    }
-
-    public enum KeyGenAlg
-    {
-        RESULTANT, FLOAT
-    }
 
     public int N;
     public int q;
@@ -70,10 +67,10 @@ public class NTRUSigningKeyGenerationParameters
     double keyNormBound;
     public double keyNormBoundSq;
     public boolean primeCheck;   // true if N and 2N+1 are prime
-    public BasisType basisType;
+    public int basisType;
     int bitsF = 6;   // max #bits needed to encode one coefficient of the polynomial F
     public boolean sparse;   // whether to treat ternary polynomials as sparsely populated
-    public KeyGenAlg keyGenAlg;
+    public int keyGenAlg;
     public Digest hashAlg;
     public NTRUParameters.TernaryPolynomialType polyType;
 
@@ -93,7 +90,7 @@ public class NTRUSigningKeyGenerationParameters
      * @param keyGenAlg    <code>RESULTANT</code> produces better bases, <code>FLOAT</code> is slightly faster. <code>RESULTANT</code> follows the EESS standard while <code>FLOAT</code> is described in Hoffstein et al: An Introduction to Mathematical Cryptography.
      * @param hashAlg      a valid identifier for a <code>java.security.MessageDigest</code> instance such as <code>SHA-256</code>. The <code>MessageDigest</code> must support the <code>getDigestLength()</code> method.
      */
-    public NTRUSigningKeyGenerationParameters(int N, int q, int d, int B, BasisType basisType, double beta, double normBound, double keyNormBound, boolean primeCheck, boolean sparse, KeyGenAlg keyGenAlg, Digest hashAlg)
+    public NTRUSigningKeyGenerationParameters(int N, int q, int d, int B, int basisType, double beta, double normBound, double keyNormBound, boolean primeCheck, boolean sparse, int keyGenAlg, Digest hashAlg)
     {
         super(new SecureRandom(), N);
         this.N = N;
@@ -130,7 +127,7 @@ public class NTRUSigningKeyGenerationParameters
      * @param keyGenAlg    <code>RESULTANT</code> produces better bases, <code>FLOAT</code> is slightly faster. <code>RESULTANT</code> follows the EESS standard while <code>FLOAT</code> is described in Hoffstein et al: An Introduction to Mathematical Cryptography.
      * @param hashAlg      a valid identifier for a <code>java.security.MessageDigest</code> instance such as <code>SHA-256</code>. The <code>MessageDigest</code> must support the <code>getDigestLength()</code> method.
      */
-    public NTRUSigningKeyGenerationParameters(int N, int q, int d1, int d2, int d3, int B, BasisType basisType, double beta, double normBound, double keyNormBound, boolean primeCheck, boolean sparse, KeyGenAlg keyGenAlg, Digest hashAlg)
+    public NTRUSigningKeyGenerationParameters(int N, int q, int d1, int d2, int d3, int B, int basisType, double beta, double normBound, double keyNormBound, boolean primeCheck, boolean sparse, int keyGenAlg, Digest hashAlg)
     {
         super(new SecureRandom(), N);
         this.N = N;
@@ -176,7 +173,7 @@ public class NTRUSigningKeyGenerationParameters
         d2 = dis.readInt();
         d3 = dis.readInt();
         B = dis.readInt();
-        basisType = BasisType.values()[dis.readInt()];
+        basisType = dis.readInt();
         beta = dis.readDouble();
         normBound = dis.readDouble();
         keyNormBound = dis.readDouble();
@@ -184,7 +181,7 @@ public class NTRUSigningKeyGenerationParameters
         primeCheck = dis.readBoolean();
         sparse = dis.readBoolean();
         bitsF = dis.readInt();
-        keyGenAlg = KeyGenAlg.values()[dis.read()];
+        keyGenAlg = dis.read();
         String alg = dis.readUTF();
         if ("SHA-512".equals(alg))
         {
@@ -215,7 +212,7 @@ public class NTRUSigningKeyGenerationParameters
         dos.writeInt(d2);
         dos.writeInt(d3);
         dos.writeInt(B);
-        dos.writeInt(basisType.ordinal());
+        dos.writeInt(basisType);
         dos.writeDouble(beta);
         dos.writeDouble(normBound);
         dos.writeDouble(keyNormBound);
@@ -223,7 +220,7 @@ public class NTRUSigningKeyGenerationParameters
         dos.writeBoolean(primeCheck);
         dos.writeBoolean(sparse);
         dos.writeInt(bitsF);
-        dos.write(keyGenAlg.ordinal());
+        dos.write(keyGenAlg);
         dos.writeUTF(hashAlg.getAlgorithmName());
         dos.write(polyType.ordinal());
     }
@@ -251,7 +248,7 @@ public class NTRUSigningKeyGenerationParameters
         int result = 1;
         result = prime * result + B;
         result = prime * result + N;
-        result = prime * result + ((basisType == null) ? 0 : basisType.hashCode());
+        result = prime * result + basisType;
         long temp;
         temp = Double.doubleToLongBits(beta);
         result = prime * result + (int)(temp ^ (temp >>> 32));
@@ -263,7 +260,7 @@ public class NTRUSigningKeyGenerationParameters
         result = prime * result + d2;
         result = prime * result + d3;
         result = prime * result + ((hashAlg == null) ? 0 : hashAlg.getAlgorithmName().hashCode());
-        result = prime * result + ((keyGenAlg == null) ? 0 : keyGenAlg.hashCode());
+        result = prime * result + keyGenAlg;
         temp = Double.doubleToLongBits(keyNormBound);
         result = prime * result + (int)(temp ^ (temp >>> 32));
         temp = Double.doubleToLongBits(keyNormBoundSq);
@@ -303,14 +300,7 @@ public class NTRUSigningKeyGenerationParameters
         {
             return false;
         }
-        if (basisType == null)
-        {
-            if (other.basisType != null)
-            {
-                return false;
-            }
-        }
-        else if (!basisType.equals(other.basisType))
+        if (basisType != other.basisType)
         {
             return false;
         }
@@ -353,14 +343,7 @@ public class NTRUSigningKeyGenerationParameters
         {
             return false;
         }
-        if (keyGenAlg == null)
-        {
-            if (other.keyGenAlg != null)
-            {
-                return false;
-            }
-        }
-        else if (!keyGenAlg.equals(other.keyGenAlg))
+        if (keyGenAlg != other.keyGenAlg)
         {
             return false;
         }

@@ -40,65 +40,84 @@ public class NTRUSigningKeyPairGenerator
     }
 
     /**
-         * Generates a new signature key pair. Starts <code>B+1</code> threads.
-         * @return a key pair
-         */
-        public AsymmetricCipherKeyPair generateKeyPair() {
-            NTRUSigningPrivateKeyParameters priv = new NTRUSigningPrivateKeyParameters();
-            NTRUSigningPublicKeyParameters pub = null;
-            ExecutorService executor = Executors.newCachedThreadPool();
-            List<Future<NTRUSigningPrivateKeyParameters.Basis>> bases = new ArrayList<Future<NTRUSigningPrivateKeyParameters.Basis>>();
-            for (int k=params.B; k>=0; k--)
-                bases.add(executor.submit(new BasisGenerationTask()));
-            executor.shutdown();
+     * Generates a new signature key pair. Starts <code>B+1</code> threads.
+     *
+     * @return a key pair
+     */
+    public AsymmetricCipherKeyPair generateKeyPair()
+    {
+        NTRUSigningPrivateKeyParameters priv = new NTRUSigningPrivateKeyParameters();
+        NTRUSigningPublicKeyParameters pub = null;
+        ExecutorService executor = Executors.newCachedThreadPool();
+        List<Future<NTRUSigningPrivateKeyParameters.Basis>> bases = new ArrayList<Future<NTRUSigningPrivateKeyParameters.Basis>>();
+        for (int k = params.B; k >= 0; k--)
+        {
+            bases.add(executor.submit(new BasisGenerationTask()));
+        }
+        executor.shutdown();
 
-            for (int k=params.B; k>=0; k--) {
-                Future<NTRUSigningPrivateKeyParameters.Basis> basis = bases.get(k);
-                try {
-                    priv.add(basis.get());
+        for (int k = params.B; k >= 0; k--)
+        {
+            Future<NTRUSigningPrivateKeyParameters.Basis> basis = bases.get(k);
+            try
+            {
+                priv.add(basis.get());
                 if (k == 0)
+                {
                     pub = new NTRUSigningPublicKeyParameters(basis.get().h, params.getSigningParameters());
-                } catch (Exception e) {
-                    throw new IllegalStateException(e);
                 }
             }
-            AsymmetricCipherKeyPair kp = new AsymmetricCipherKeyPair(pub, priv);
-            return kp;
-        }
-
-        /**
-         * Generates a new signature key pair. Runs in a single thread.
-         * @return a key pair
-         */
-        public AsymmetricCipherKeyPair generateKeyPairSingleThread() {
-            NTRUSigningPrivateKeyParameters priv = new NTRUSigningPrivateKeyParameters();
-            NTRUSigningPublicKeyParameters pub = null;
-            for (int k=params.B; k>=0; k--) {
-                NTRUSigningPrivateKeyParameters.Basis basis = generateBoundedBasis();
-                priv.add(basis);
-                if (k == 0)
-                    pub = new NTRUSigningPublicKeyParameters(basis.h, params.getSigningParameters());
+            catch (Exception e)
+            {
+                throw new IllegalStateException(e);
             }
-            return new AsymmetricCipherKeyPair(pub, priv);
         }
+        AsymmetricCipherKeyPair kp = new AsymmetricCipherKeyPair(pub, priv);
+        return kp;
+    }
+
+    /**
+     * Generates a new signature key pair. Runs in a single thread.
+     *
+     * @return a key pair
+     */
+    public AsymmetricCipherKeyPair generateKeyPairSingleThread()
+    {
+        NTRUSigningPrivateKeyParameters priv = new NTRUSigningPrivateKeyParameters();
+        NTRUSigningPublicKeyParameters pub = null;
+        for (int k = params.B; k >= 0; k--)
+        {
+            NTRUSigningPrivateKeyParameters.Basis basis = generateBoundedBasis();
+            priv.add(basis);
+            if (k == 0)
+            {
+                pub = new NTRUSigningPublicKeyParameters(basis.h, params.getSigningParameters());
+            }
+        }
+        return new AsymmetricCipherKeyPair(pub, priv);
+    }
 
 
-        /**
+    /**
      * Implementation of the optional steps 20 through 26 in EESS1v2.pdf, section 3.5.1.1.
      * This doesn't seem to have much of an effect and sometimes actually increases the
      * norm of F, but on average it slightly reduces the norm.<br/>
      * This method changes <code>F</code> and <code>g</code> but leaves <code>f</code> and
      * <code>g</code> unchanged.
+     *
      * @param f
      * @param g
      * @param F
      * @param G
      * @param N
      */
-    private void minimizeFG(IntegerPolynomial f, IntegerPolynomial g, IntegerPolynomial F, IntegerPolynomial G, int N) {
+    private void minimizeFG(IntegerPolynomial f, IntegerPolynomial g, IntegerPolynomial F, IntegerPolynomial G, int N)
+    {
         int E = 0;
-        for (int j=0; j<N; j++)
-            E += 2 * N * (f.coeffs[j]*f.coeffs[j] + g.coeffs[j]*g.coeffs[j]);
+        for (int j = 0; j < N; j++)
+        {
+            E += 2 * N * (f.coeffs[j] * f.coeffs[j] + g.coeffs[j] * g.coeffs[j]);
+        }
 
         // [f(1)+g(1)]^2 = 4
         E -= 4;
@@ -108,13 +127,15 @@ public class NTRUSigningKeyPairGenerator
         int j = 0;
         int k = 0;
         int maxAdjustment = N;
-        while (k<maxAdjustment && j<N) {
+        while (k < maxAdjustment && j < N)
+        {
             int D = 0;
             int i = 0;
-            while (i < N) {
+            while (i < N)
+            {
                 int D1 = F.coeffs[i] * f.coeffs[i];
                 int D2 = G.coeffs[i] * g.coeffs[i];
-                int D3 = 4 * N * (D1+D2);
+                int D3 = 4 * N * (D1 + D2);
                 D += D3;
                 i++;
             }
@@ -122,13 +143,15 @@ public class NTRUSigningKeyPairGenerator
             int D1 = 4 * (F.sumCoeffs() + G.sumCoeffs());
             D -= D1;
 
-            if (D > E) {
+            if (D > E)
+            {
                 F.sub(u);
                 G.sub(v);
                 k++;
                 j = 0;
             }
-            else if (D < -E) {
+            else if (D < -E)
+            {
                 F.add(u);
                 G.add(v);
                 k++;
@@ -139,150 +162,181 @@ public class NTRUSigningKeyPairGenerator
             v.rotate1();
         }
     }
-        /**
-         * Creates a NTRUSigner basis consisting of polynomials <code>f, g, F, G, h</code>.<br/>
-         * If <code>KeyGenAlg=FLOAT</code>, the basis may not be valid and this method must be rerun if that is the case.<br/>
-         * @see #generateBoundedBasis()
-         */
-        private FGBasis generateBasis() {
-            int N = params.N;
-            int q = params.q;
-            int d = params.d;
-            int d1 = params.d1;
-            int d2 = params.d2;
-            int d3 = params.d3;
-            NTRUSigningKeyGenerationParameters.BasisType basisType = params.basisType;
 
-            Polynomial f;
-            IntegerPolynomial fInt;
-            Polynomial g;
-            IntegerPolynomial gInt;
-            IntegerPolynomial fq;
-            Resultant rf;
-            Resultant rg;
-            BigIntEuclidean r;
+    /**
+     * Creates a NTRUSigner basis consisting of polynomials <code>f, g, F, G, h</code>.<br/>
+     * If <code>KeyGenAlg=FLOAT</code>, the basis may not be valid and this method must be rerun if that is the case.<br/>
+     *
+     * @see #generateBoundedBasis()
+     */
+    private FGBasis generateBasis()
+    {
+        int N = params.N;
+        int q = params.q;
+        int d = params.d;
+        int d1 = params.d1;
+        int d2 = params.d2;
+        int d3 = params.d3;
+        int basisType = params.basisType;
 
-            int _2n1 = 2*N+1;
-            boolean primeCheck = params.primeCheck;
+        Polynomial f;
+        IntegerPolynomial fInt;
+        Polynomial g;
+        IntegerPolynomial gInt;
+        IntegerPolynomial fq;
+        Resultant rf;
+        Resultant rg;
+        BigIntEuclidean r;
 
-            do {
-                do {
-                    f = params.polyType== NTRUParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d + 1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3 + 1, d3, new SecureRandom());
-                    fInt = f.toIntegerPolynomial();
-                } while (primeCheck && fInt.resultant(_2n1).res.equals(ZERO));
-                fq = fInt.invertFq(q);
-            } while (fq == null);
-            rf = fInt.resultant();
+        int _2n1 = 2 * N + 1;
+        boolean primeCheck = params.primeCheck;
 
-            do {
-                do {
-                    do {
-                        g = params.polyType== NTRUParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d+1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3+1, d3, new SecureRandom());
-                        gInt = g.toIntegerPolynomial();
-                    } while (primeCheck && gInt.resultant(_2n1).res.equals(ZERO));
-                } while (gInt.invertFq(q) == null);
-                rg = gInt.resultant();
-                r = BigIntEuclidean.calculate(rf.res, rg.res);
-            } while (!r.gcd.equals(ONE));
+        do
+        {
+            do
+            {
+                f = params.polyType== NTRUParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d + 1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3 + 1, d3, new SecureRandom());
+                fInt = f.toIntegerPolynomial();
+            }
+            while (primeCheck && fInt.resultant(_2n1).res.equals(ZERO));
+            fq = fInt.invertFq(q);
+        }
+        while (fq == null);
+        rf = fInt.resultant();
 
-            BigIntPolynomial A = rf.rho.clone();
-            A.mult(r.x.multiply(BigInteger.valueOf(q)));
-            BigIntPolynomial B = rg.rho.clone();
-            B.mult(r.y.multiply(BigInteger.valueOf(-q)));
-
-            BigIntPolynomial C;
-            if (params.keyGenAlg == NTRUSigningKeyGenerationParameters.KeyGenAlg.RESULTANT) {
-                int[] fRevCoeffs = new int[N];
-                int[] gRevCoeffs = new int[N];
-                fRevCoeffs[0] = fInt.coeffs[0];
-                gRevCoeffs[0] = gInt.coeffs[0];
-                for (int i=1; i<N; i++) {
-                    fRevCoeffs[i] = fInt.coeffs[N-i];
-                    gRevCoeffs[i] = gInt.coeffs[N-i];
+        do
+        {
+            do
+            {
+                do
+                {
+                    g = params.polyType == NTRUParameters.TernaryPolynomialType.SIMPLE ? DenseTernaryPolynomial.generateRandom(N, d + 1, d, new SecureRandom()) : ProductFormPolynomial.generateRandom(N, d1, d2, d3 + 1, d3, new SecureRandom());
+                    gInt = g.toIntegerPolynomial();
                 }
-                IntegerPolynomial fRev = new IntegerPolynomial(fRevCoeffs);
-                IntegerPolynomial gRev = new IntegerPolynomial(gRevCoeffs);
-
-                IntegerPolynomial t = f.mult(fRev);
-                t.add(g.mult(gRev));
-                Resultant rt = t.resultant();
-                C = fRev.mult(B);   // fRev.mult(B) is actually faster than new SparseTernaryPolynomial(fRev).mult(B), possibly due to cache locality?
-                C.add(gRev.mult(A));
-                C = C.mult(rt.rho);
-                C.div(rt.res);
+                while (primeCheck && gInt.resultant(_2n1).res.equals(ZERO));
             }
-            else {   // KeyGenAlg.FLOAT
-                // calculate ceil(log10(N))
-                int log10N = 0;
-                for (int i=1; i<N; i*=10)
-                    log10N++;
-
-                // * Cdec needs to be accurate to 1 decimal place so it can be correctly rounded;
-                // * fInv loses up to (#digits of longest coeff of B) places in fInv.mult(B);
-                // * multiplying fInv by B also multiplies the rounding error by a factor of N;
-                // so make #decimal places of fInv the sum of the above.
-                BigDecimalPolynomial fInv = rf.rho.div(new BigDecimal(rf.res), B.getMaxCoeffLength()+1+log10N);
-                BigDecimalPolynomial gInv = rg.rho.div(new BigDecimal(rg.res), A.getMaxCoeffLength()+1+log10N);
-
-                BigDecimalPolynomial Cdec = fInv.mult(B);
-                Cdec.add(gInv.mult(A));
-                Cdec.halve();
-                C = Cdec.round();
-            }
-
-            BigIntPolynomial F = B.clone();
-            F.sub(f.mult(C));
-            BigIntPolynomial G = A.clone();
-            G.sub(g.mult(C));
-
-            IntegerPolynomial FInt = new IntegerPolynomial(F);
-            IntegerPolynomial GInt = new IntegerPolynomial(G);
-            minimizeFG(fInt, gInt, FInt, GInt, N);
-
-            Polynomial fPrime;
-            IntegerPolynomial h;
-            if (basisType == NTRUSigningKeyGenerationParameters.BasisType.STANDARD) {
-                fPrime = FInt;
-                h = g.mult(fq, q);
-            }
-            else {
-                fPrime = g;
-                h = FInt.mult(fq, q);
-            }
-            h.modPositive(q);
-
-            return new FGBasis(f, fPrime, h, FInt, GInt, params);
+            while (gInt.invertFq(q) == null);
+            rg = gInt.resultant();
+            r = BigIntEuclidean.calculate(rf.res, rg.res);
         }
-             /**
-         * Creates a basis such that <code>|F| &lt; keyNormBound</code> and <code>|G| &lt; keyNormBound</code>
-         * @return a NTRUSigner basis
-         */
-             public NTRUSigningPrivateKeyParameters.Basis generateBoundedBasis() {
-            while (true) {
-                FGBasis basis = generateBasis();
-                if (basis.isNormOk())
-                    return basis;
+        while (!r.gcd.equals(ONE));
+
+        BigIntPolynomial A = rf.rho.clone();
+        A.mult(r.x.multiply(BigInteger.valueOf(q)));
+        BigIntPolynomial B = rg.rho.clone();
+        B.mult(r.y.multiply(BigInteger.valueOf(-q)));
+
+        BigIntPolynomial C;
+        if (params.keyGenAlg == NTRUSigningKeyGenerationParameters.KEY_GEN_ALG_RESULTANT)
+        {
+            int[] fRevCoeffs = new int[N];
+            int[] gRevCoeffs = new int[N];
+            fRevCoeffs[0] = fInt.coeffs[0];
+            gRevCoeffs[0] = gInt.coeffs[0];
+            for (int i = 1; i < N; i++)
+            {
+                fRevCoeffs[i] = fInt.coeffs[N - i];
+                gRevCoeffs[i] = gInt.coeffs[N - i];
+            }
+            IntegerPolynomial fRev = new IntegerPolynomial(fRevCoeffs);
+            IntegerPolynomial gRev = new IntegerPolynomial(gRevCoeffs);
+
+            IntegerPolynomial t = f.mult(fRev);
+            t.add(g.mult(gRev));
+            Resultant rt = t.resultant();
+            C = fRev.mult(B);   // fRev.mult(B) is actually faster than new SparseTernaryPolynomial(fRev).mult(B), possibly due to cache locality?
+            C.add(gRev.mult(A));
+            C = C.mult(rt.rho);
+            C.div(rt.res);
+        }
+        else
+        {   // KeyGenAlg.FLOAT
+            // calculate ceil(log10(N))
+            int log10N = 0;
+            for (int i = 1; i < N; i *= 10)
+            {
+                log10N++;
+            }
+
+            // * Cdec needs to be accurate to 1 decimal place so it can be correctly rounded;
+            // * fInv loses up to (#digits of longest coeff of B) places in fInv.mult(B);
+            // * multiplying fInv by B also multiplies the rounding error by a factor of N;
+            // so make #decimal places of fInv the sum of the above.
+            BigDecimalPolynomial fInv = rf.rho.div(new BigDecimal(rf.res), B.getMaxCoeffLength() + 1 + log10N);
+            BigDecimalPolynomial gInv = rg.rho.div(new BigDecimal(rg.res), A.getMaxCoeffLength() + 1 + log10N);
+
+            BigDecimalPolynomial Cdec = fInv.mult(B);
+            Cdec.add(gInv.mult(A));
+            Cdec.halve();
+            C = Cdec.round();
+        }
+
+        BigIntPolynomial F = B.clone();
+        F.sub(f.mult(C));
+        BigIntPolynomial G = A.clone();
+        G.sub(g.mult(C));
+
+        IntegerPolynomial FInt = new IntegerPolynomial(F);
+        IntegerPolynomial GInt = new IntegerPolynomial(G);
+        minimizeFG(fInt, gInt, FInt, GInt, N);
+
+        Polynomial fPrime;
+        IntegerPolynomial h;
+        if (basisType == NTRUSigningKeyGenerationParameters.BASIS_TYPE_STANDARD)
+        {
+            fPrime = FInt;
+            h = g.mult(fq, q);
+        }
+        else
+        {
+            fPrime = g;
+            h = FInt.mult(fq, q);
+        }
+        h.modPositive(q);
+
+        return new FGBasis(f, fPrime, h, FInt, GInt, params);
+    }
+
+    /**
+     * Creates a basis such that <code>|F| &lt; keyNormBound</code> and <code>|G| &lt; keyNormBound</code>
+     *
+     * @return a NTRUSigner basis
+     */
+    public NTRUSigningPrivateKeyParameters.Basis generateBoundedBasis()
+    {
+        while (true)
+        {
+            FGBasis basis = generateBasis();
+            if (basis.isNormOk())
+            {
+                return basis;
             }
         }
-    private class BasisGenerationTask implements Callable<NTRUSigningPrivateKeyParameters.Basis>
+    }
+
+    private class BasisGenerationTask
+        implements Callable<NTRUSigningPrivateKeyParameters.Basis>
     {
 
 
-
-        public NTRUSigningPrivateKeyParameters.Basis call() throws Exception {
+        public NTRUSigningPrivateKeyParameters.Basis call()
+            throws Exception
+        {
             return generateBoundedBasis();
         }
     }
 
-        /**
+    /**
      * A subclass of Basis that additionally contains the polynomials <code>F</code> and <code>G</code>.
      */
-        public class FGBasis extends NTRUSigningPrivateKeyParameters.Basis
-        {
+    public class FGBasis
+        extends NTRUSigningPrivateKeyParameters.Basis
+    {
         public IntegerPolynomial F;
-            public IntegerPolynomial G;
+        public IntegerPolynomial G;
 
-        FGBasis(Polynomial f, Polynomial fPrime, IntegerPolynomial h, IntegerPolynomial F, IntegerPolynomial G, NTRUSigningKeyGenerationParameters params) {
+        FGBasis(Polynomial f, Polynomial fPrime, IntegerPolynomial h, IntegerPolynomial F, IntegerPolynomial G, NTRUSigningKeyGenerationParameters params)
+        {
             super(f, fPrime, h, params);
             this.F = F;
             this.G = G;
@@ -291,12 +345,14 @@ public class NTRUSigningKeyPairGenerator
         /**
          * Returns <code>true</code> if the norms of the polynomials <code>F</code> and <code>G</code>
          * are within {@link NTRUSigningKeyGenerationParameters#keyNormBound}.
+         *
          * @return
          */
-        boolean isNormOk() {
+        boolean isNormOk()
+        {
             double keyNormBoundSq = params.keyNormBoundSq;
             int q = params.q;
-            return (F.centeredNormSq(q)<keyNormBoundSq && G.centeredNormSq(q)<keyNormBoundSq);
+            return (F.centeredNormSq(q) < keyNormBoundSq && G.centeredNormSq(q) < keyNormBoundSq);
         }
     }
 }

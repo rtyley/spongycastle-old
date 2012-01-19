@@ -32,7 +32,7 @@ public class NTRUEncryptTest
         params.dr2 = NTRUEncryptionKeyGenerationParameters.APR2011_743_FAST.dr2;
         params.dr3 = NTRUEncryptionKeyGenerationParameters.APR2011_743_FAST.dr3;
 
-        NTRUParameters.TernaryPolynomialType[] values = NTRUParameters.TernaryPolynomialType.values();
+        NTRUParameters.TernaryPolynomialType[] values = new NTRUParameters.TernaryPolynomialType[] { NTRUParameters.TernaryPolynomialType.SIMPLE, NTRUParameters.TernaryPolynomialType.PRODUCT };
 
         for (int i = 0; i != values.length; i++)
         {
