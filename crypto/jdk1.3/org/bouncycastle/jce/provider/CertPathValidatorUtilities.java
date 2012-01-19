@@ -6,12 +6,12 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
+import java.security.cert.CRLException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
-import java.security.cert.CRLException;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPublicKey;
 import java.security.spec.DSAPublicKeySpec;
@@ -43,13 +43,13 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
@@ -1033,7 +1033,7 @@ public class CertPathValidatorUtilities
         }
     }
     
-        protected static void getCertStatus(
+    protected static void getCertStatus(
         Date validDate,
         X509CRL crl,
         Object cert,
@@ -1041,93 +1041,96 @@ public class CertPathValidatorUtilities
         throws AnnotatedException
     {
         // Note: will be an X509CRLEntryObject if it's an indirect CRL
-        X509CRLEntry crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
+        X509CRLEntry crl_entry = null;
 
-        if (crl_entry != null)
+        boolean isIndirect;
+        try
         {
-            boolean isIndirect;
+            isIndirect = X509CRLObject.isIndirectCRL(crl);
+        }
+        catch (CRLException exception)
+        {
+            throw new AnnotatedException("Failed check for indirect CRL.", exception);
+        }
+
+        if (isIndirect)
+        {
+            crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
+
             try
             {
-                isIndirect = X509CRLObject.isIndirectCRL(crl);
+                crl_entry = new X509CRLEntryObject(TBSCertList.CRLEntry.getInstance(crl_entry.getEncoded()));
             }
-            catch (CRLException exception)
+            catch (CRLException e)
             {
-                throw new AnnotatedException("Failed check for indirect CRL.", exception);
-            }
-
-            if (isIndirect)
-            {
+                // try reconstructing the CRL as a BC one.
                 try
                 {
-                    crl_entry = new X509CRLEntryObject(TBSCertList.CRLEntry.getInstance(crl_entry.getEncoded()));
+                    byte[] encoded = crl.getEncoded();
+                    ASN1InputStream aIn = new ASN1InputStream(encoded, true); // Lazy
+                    ASN1Sequence seq = ASN1Sequence.getInstance(aIn.readObject());
+                    crl = new X509CRLObject(CertificateList.getInstance(seq));
+                    crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
                 }
-                catch (CRLException e)
+                catch (Exception exception)
                 {
-                    // try reconstructing the CRL as a BC one.
-                    try
-                    {
-                        byte[] encoded = crl.getEncoded();
-                        ASN1InputStream aIn = new ASN1InputStream(encoded, true); // Lazy
-                        ASN1Sequence seq = ASN1Sequence.getInstance(aIn.readObject());
-                        crl = new X509CRLObject(CertificateList.getInstance(seq));
-                        crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
-                    }
-                    catch (Exception exception)
-                    {
-                        throw new AnnotatedException("Bouncy Castle X509CRLObject could not be created.", exception);
-                    }
-                }
-
-                if (!getEncodedIssuerPrincipal(cert).equals(((X509CRLEntryObject)crl_entry).getCertificateIssuer()))
-                {
-                    return;  // not for our issuer, ignore
+                    throw new AnnotatedException("Bouncy Castle X509CRLObject could not be created.", exception);
                 }
             }
-            else if (!getEncodedIssuerPrincipal(cert).equals(getIssuerPrincipal(crl)))
+
+            if (!getEncodedIssuerPrincipal(cert).equals(((X509CRLEntryObject)crl_entry).getCertificateIssuer()))
             {
                 return;  // not for our issuer, ignore
             }
+        }
+        else if (!getEncodedIssuerPrincipal(cert).equals(getIssuerPrincipal(crl)))
+        {
+            return;  // not for our issuer, ignore
+        }
+        else
+        {
+            crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
+        }
 
-            DEREnumerated reasonCode = null;
-            if (crl_entry.hasExtensions())
+        DEREnumerated reasonCode = null;
+        if (crl_entry.hasExtensions())
+        {
+            try
             {
-                try
-                {
-                    reasonCode = DEREnumerated
-                        .getInstance(CertPathValidatorUtilities
-                            .getExtensionValue(crl_entry,
-                                org.bouncycastle.asn1.x509.X509Extension.reasonCode.getId()));
-                }
-                catch (Exception e)
-                {
-                    new AnnotatedException(
-                        "Reason code CRL entry extension could not be decoded.",
-                        e);
-                }
+                reasonCode = DEREnumerated
+                    .getInstance(CertPathValidatorUtilities
+                        .getExtensionValue(crl_entry,
+                            X509Extension.reasonCode.getId()));
             }
-
-            // for reason keyCompromise, caCompromise, aACompromise or
-            // unspecified
-            if (!(validDate.getTime() < crl_entry.getRevocationDate().getTime())
-                || reasonCode == null
-                || reasonCode.getValue().intValue() == 0
-                || reasonCode.getValue().intValue() == 1
-                || reasonCode.getValue().intValue() == 2
-                || reasonCode.getValue().intValue() == 8)
+            catch (Exception e)
             {
-
-                // (i) or (j) (1)
-                if (reasonCode != null)
-                {
-                    certStatus.setCertStatus(reasonCode.getValue().intValue());
-                }
-                // (i) or (j) (2)
-                else
-                {
-                    certStatus.setCertStatus(CRLReason.unspecified);
-                }
-                certStatus.setRevocationDate(crl_entry.getRevocationDate());
+                new AnnotatedException(
+                    "Reason code CRL entry extension could not be decoded.",
+                    e);
             }
+        }
+
+        // for reason keyCompromise, caCompromise, aACompromise or
+        // unspecified
+        if (!(validDate.getTime() < crl_entry.getRevocationDate().getTime())
+            || reasonCode == null
+            || reasonCode.getValue().intValue() == 0
+            || reasonCode.getValue().intValue() == 1
+            || reasonCode.getValue().intValue() == 2
+            || reasonCode.getValue().intValue() == 8)
+        {
+
+            // (i) or (j) (1)
+            if (reasonCode != null)
+            {
+                certStatus.setCertStatus(reasonCode.getValue().intValue());
+            }
+            // (i) or (j) (2)
+            else
+            {
+                certStatus.setCertStatus(CRLReason.unspecified);
+            }
+            certStatus.setRevocationDate(crl_entry.getRevocationDate());
         }
     }
 
