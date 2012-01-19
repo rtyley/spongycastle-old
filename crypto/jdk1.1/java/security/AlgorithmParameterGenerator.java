@@ -33,7 +33,7 @@ public class AlgorithmParameterGenerator
     {
         try
         {
-            SecurityUtil.Implementation  imp = SecurityUtil.getImplementation("KeyFactory", algorithm, null);
+            SecurityUtil.Implementation  imp = SecurityUtil.getImplementation("AlgorithmParameterGenerator", algorithm, null);
 
             if (imp != null)
             {
@@ -51,7 +51,7 @@ public class AlgorithmParameterGenerator
     public static AlgorithmParameterGenerator getInstance(String algorithm, String provider)
         throws NoSuchAlgorithmException, NoSuchProviderException
     {
-        SecurityUtil.Implementation  imp = SecurityUtil.getImplementation("KeyFactory", algorithm, null);
+        SecurityUtil.Implementation  imp = SecurityUtil.getImplementation("AlgorithmParameterGenerator", algorithm, null);
 
         if (imp != null)
         {
