@@ -686,7 +686,7 @@ public class X509CertificateObject
                     {
                         if (oid.equals(X509Extension.basicConstraints))
                         {
-                            buf.append(new BasicConstraints((ASN1Sequence)dIn.readObject())).append(nl);
+                            buf.append(BasicConstraints.getInstance(dIn.readObject())).append(nl);
                         }
                         else if (oid.equals(X509Extension.keyUsage))
                         {
