@@ -5,9 +5,9 @@ import java.util.Enumeration;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -23,32 +23,31 @@ public class QCStatement
     extends ASN1Object
     implements ETSIQCObjectIdentifiers, RFC3739QCObjectIdentifiers
 {
-    DERObjectIdentifier qcStatementId;
-    ASN1Encodable       qcStatementInfo;
+    ASN1ObjectIdentifier qcStatementId;
+    ASN1Encodable        qcStatementInfo;
 
     public static QCStatement getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof QCStatement)
+        if (obj instanceof QCStatement)
         {
             return (QCStatement)obj;
         }
-
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
             return new QCStatement(ASN1Sequence.getInstance(obj));            
         }
         
-        throw new IllegalArgumentException("unknown object in getInstance");
+        return null;
     }    
     
-    public QCStatement(
+    private QCStatement(
         ASN1Sequence seq)
     {
         Enumeration e = seq.getObjects();
 
         // qcStatementId
-        qcStatementId = DERObjectIdentifier.getInstance(e.nextElement());
+        qcStatementId = ASN1ObjectIdentifier.getInstance(e.nextElement());
         // qcstatementInfo
         if (e.hasMoreElements())
         {
@@ -57,21 +56,21 @@ public class QCStatement
     }    
     
     public QCStatement(
-        DERObjectIdentifier qcStatementId)
+        ASN1ObjectIdentifier qcStatementId)
     {
         this.qcStatementId = qcStatementId;
         this.qcStatementInfo = null;
     }
     
     public QCStatement(
-        DERObjectIdentifier qcStatementId, 
+        ASN1ObjectIdentifier qcStatementId,
         ASN1Encodable       qcStatementInfo)
     {
         this.qcStatementId = qcStatementId;
         this.qcStatementInfo = qcStatementInfo;
     }    
         
-    public DERObjectIdentifier getStatementId()
+    public ASN1ObjectIdentifier getStatementId()
     {
         return qcStatementId;
     }
