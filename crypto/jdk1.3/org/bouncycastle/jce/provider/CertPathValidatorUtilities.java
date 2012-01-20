@@ -197,6 +197,7 @@ public class CertPathValidatorUtilities
                 {
                     invalidKeyEx = ex;
                     trust = null;
+                    trustPublicKey = null;
                 }
             }
         }
