@@ -24,30 +24,28 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class BiometricData 
     extends ASN1Object
 {
-    TypeOfBiometricData typeOfBiometricData;
-    AlgorithmIdentifier hashAlgorithm;
-    ASN1OctetString     biometricDataHash;
-    DERIA5String        sourceDataUri;    
+    private TypeOfBiometricData typeOfBiometricData;
+    private AlgorithmIdentifier hashAlgorithm;
+    private ASN1OctetString     biometricDataHash;
+    private DERIA5String        sourceDataUri;
     
     public static BiometricData getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof BiometricData)
+        if (obj instanceof BiometricData)
         {
             return (BiometricData)obj;
         }
 
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
             return new BiometricData(ASN1Sequence.getInstance(obj));            
         }
-        else
-        {
-            throw new IllegalArgumentException("unknown object in getInstance");
-        }
+
+        return null;
     }                
             
-    public BiometricData(ASN1Sequence seq)
+    private BiometricData(ASN1Sequence seq)
     {
         Enumeration e = seq.getObjects();
 

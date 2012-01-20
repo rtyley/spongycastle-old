@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
@@ -26,7 +27,7 @@ public class QCStatementUnitTest
 
         checkConstruction(mv, RFC3739QCObjectIdentifiers.id_qcs_pkixQCSyntax_v1, null);
         
-        ASN1Encodable info = new SemanticsInformation(new DERObjectIdentifier("1.2"));
+        ASN1Encodable info = new SemanticsInformation(new ASN1ObjectIdentifier("1.2"));
         
         mv = new QCStatement(RFC3739QCObjectIdentifiers.id_qcs_pkixQCSyntax_v1, info);
 

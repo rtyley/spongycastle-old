@@ -4,6 +4,7 @@ import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -27,25 +28,25 @@ import org.bouncycastle.asn1.x509.GeneralName;
 public class SemanticsInformation
     extends ASN1Object
 {
-    DERObjectIdentifier semanticsIdentifier;
-    GeneralName[] nameRegistrationAuthorities;    
+    private ASN1ObjectIdentifier semanticsIdentifier;
+    private GeneralName[] nameRegistrationAuthorities;
     
     public static SemanticsInformation getInstance(Object obj)
     {
-        if (obj == null || obj instanceof SemanticsInformation)
+        if (obj instanceof SemanticsInformation)
         {
             return (SemanticsInformation)obj;
         }
 
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
             return new SemanticsInformation(ASN1Sequence.getInstance(obj));            
         }
         
-        throw new IllegalArgumentException("unknown object in getInstance");
+        return null;
     }
         
-    public SemanticsInformation(ASN1Sequence seq)
+    private SemanticsInformation(ASN1Sequence seq)
     {
         Enumeration e = seq.getObjects();
         if (seq.size() < 1)
@@ -79,14 +80,14 @@ public class SemanticsInformation
     }
         
     public SemanticsInformation(
-        DERObjectIdentifier semanticsIdentifier,
+        ASN1ObjectIdentifier semanticsIdentifier,
         GeneralName[] generalNames)
     {
         this.semanticsIdentifier = semanticsIdentifier;
         this.nameRegistrationAuthorities = generalNames;
     }
 
-    public SemanticsInformation(DERObjectIdentifier semanticsIdentifier)
+    public SemanticsInformation(ASN1ObjectIdentifier semanticsIdentifier)
     {
         this.semanticsIdentifier = semanticsIdentifier;
         this.nameRegistrationAuthorities = null;
@@ -98,7 +99,7 @@ public class SemanticsInformation
         this.nameRegistrationAuthorities = generalNames;
     }        
     
-    public DERObjectIdentifier getSemanticsIdentifier()
+    public ASN1ObjectIdentifier getSemanticsIdentifier()
     {
         return semanticsIdentifier;
     }

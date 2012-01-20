@@ -2,10 +2,10 @@ package org.bouncycastle.asn1.x509.qualified;
 
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 
 /**
  * The TypeOfBiometricData object.
@@ -35,16 +35,16 @@ public class TypeOfBiometricData
             return (TypeOfBiometricData)obj;
         }
 
-        if (obj instanceof DERInteger)
+        if (obj instanceof ASN1Integer)
         {
-            DERInteger predefinedBiometricTypeObj = DERInteger.getInstance(obj);
+            ASN1Integer predefinedBiometricTypeObj = ASN1Integer.getInstance(obj);
             int  predefinedBiometricType = predefinedBiometricTypeObj.getValue().intValue();
 
             return new TypeOfBiometricData(predefinedBiometricType);
         }
-        else if (obj instanceof DERObjectIdentifier)
+        else if (obj instanceof ASN1ObjectIdentifier)
         {
-            DERObjectIdentifier BiometricDataID = DERObjectIdentifier.getInstance(obj);
+            ASN1ObjectIdentifier BiometricDataID = ASN1ObjectIdentifier.getInstance(obj);
             return new TypeOfBiometricData(BiometricDataID);
         }
 
@@ -55,7 +55,7 @@ public class TypeOfBiometricData
     {
         if (predefinedBiometricType == PICTURE || predefinedBiometricType == HANDWRITTEN_SIGNATURE)
         {
-                obj = new DERInteger(predefinedBiometricType);
+                obj = new ASN1Integer(predefinedBiometricType);
         }
         else
         {
@@ -63,24 +63,24 @@ public class TypeOfBiometricData
         }        
     }
     
-    public TypeOfBiometricData(DERObjectIdentifier BiometricDataID)
+    public TypeOfBiometricData(ASN1ObjectIdentifier BiometricDataID)
     {
         obj = BiometricDataID;
     }
     
     public boolean isPredefined()
     {
-        return obj instanceof DERInteger;
+        return obj instanceof ASN1Integer;
     }
     
     public int getPredefinedBiometricType()
     {
-        return ((DERInteger)obj).getValue().intValue();
+        return ((ASN1Integer)obj).getValue().intValue();
     }
     
-    public DERObjectIdentifier getBiometricDataOid()
+    public ASN1ObjectIdentifier getBiometricDataOid()
     {
-        return (DERObjectIdentifier)obj;
+        return (ASN1ObjectIdentifier)obj;
     }
     
     public ASN1Primitive toASN1Primitive()

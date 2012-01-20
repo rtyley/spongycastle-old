@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -23,27 +24,27 @@ import org.bouncycastle.asn1.DERSequence;
 public class MonetaryValue 
     extends ASN1Object
 {
-    Iso4217CurrencyCode currency;
-    DERInteger          amount;
-    DERInteger          exponent;
+    private Iso4217CurrencyCode currency;
+    private ASN1Integer         amount;
+    private ASN1Integer         exponent;
         
     public static MonetaryValue getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof MonetaryValue)
+        if (obj instanceof MonetaryValue)
         {
             return (MonetaryValue)obj;
         }
 
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
             return new MonetaryValue(ASN1Sequence.getInstance(obj));            
         }
         
-        throw new IllegalArgumentException("unknown object in getInstance");
+        return null;
     }
         
-    public MonetaryValue(
+    private MonetaryValue(
         ASN1Sequence seq)
     {
         Enumeration e = seq.getObjects();    
@@ -61,8 +62,8 @@ public class MonetaryValue
         int                 exponent)
     {    
         this.currency = currency;
-        this.amount = new DERInteger(amount);
-        this.exponent = new DERInteger(exponent);                  
+        this.amount = new ASN1Integer(amount);
+        this.exponent = new ASN1Integer(exponent);
     }                    
              
     public Iso4217CurrencyCode getCurrency()

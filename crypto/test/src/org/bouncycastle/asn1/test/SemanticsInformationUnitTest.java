@@ -1,8 +1,9 @@
 package org.bouncycastle.asn1.test;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -21,7 +22,7 @@ public class SemanticsInformationUnitTest
     public void performTest() 
         throws Exception
     {
-        DERObjectIdentifier  statementId = new DERObjectIdentifier("1.1");
+        ASN1ObjectIdentifier statementId = new ASN1ObjectIdentifier("1.1");
         SemanticsInformation mv = new SemanticsInformation(statementId);
 
         checkConstruction(mv, statementId, null);
@@ -61,7 +62,7 @@ public class SemanticsInformationUnitTest
         {
             ASN1EncodableVector v = new ASN1EncodableVector();
             
-            new SemanticsInformation(new DERSequence(v));
+            SemanticsInformation.getInstance(new DERSequence(v));
             
             fail("constructor failed to detect empty sequence.");
         }
