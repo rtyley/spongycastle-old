@@ -994,6 +994,11 @@ public class CertPathValidatorUtilities
         {
             crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
 
+            if (crl_entry == null)
+            {
+                return;
+            }
+
             try
             {
                 crl_entry = new X509CRLEntryObject(TBSCertList.CRLEntry.getInstance(crl_entry.getEncoded()));
@@ -1027,6 +1032,11 @@ public class CertPathValidatorUtilities
         else
         {
             crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
+
+            if (crl_entry == null)
+            {
+                return;
+            }
         }
 
         DEREnumerated reasonCode = null;
