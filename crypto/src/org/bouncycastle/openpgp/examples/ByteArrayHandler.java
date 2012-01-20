@@ -1,24 +1,32 @@
 package org.bouncycastle.openpgp.examples;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.util.Date;
 
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openpgp.PGPCompressedData;
+import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
 import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
 import org.bouncycastle.openpgp.PGPEncryptedDataList;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPLiteralData;
-import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
-import org.bouncycastle.openpgp.PGPCompressedData;
+import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
 import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPPBEEncryptedData;
-import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
 import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBEDataDecryptorFactoryBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcePBEKeyEncryptionMethodGenerator;
+import org.bouncycastle.openpgp.operator.jcajce.JcePGPDataEncryptorBuilder;
 import org.bouncycastle.util.io.Streams;
 
 /**
@@ -55,7 +63,7 @@ public class ByteArrayHandler
         in = PGPUtil.getDecoderStream(in);
 
         PGPObjectFactory         pgpF = new PGPObjectFactory(in);
-        PGPEncryptedDataList   enc = null;
+        PGPEncryptedDataList     enc;
         Object                          o = pgpF.nextObject();
         
         //
@@ -72,7 +80,7 @@ public class ByteArrayHandler
 
         PGPPBEEncryptedData pbe = (PGPPBEEncryptedData)enc.get(0);
 
-        InputStream clear = pbe.getDataStream(passPhrase, "BC");
+        InputStream clear = pbe.getDataStream(new JcePBEDataDecryptorFactoryBuilder(new JcaPGPDigestCalculatorProviderBuilder().setProvider("BC").build()).setProvider("BC").build(passPhrase));
 
         PGPObjectFactory        pgpFact = new PGPObjectFactory(clear);
 
@@ -131,8 +139,8 @@ public class ByteArrayHandler
             out = new ArmoredOutputStream(out);
         }
 
-        PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(algorithm, new SecureRandom(), "BC");
-        encGen.addMethod(passPhrase);
+        PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(new JcePGPDataEncryptorBuilder(algorithm).setSecureRandom(new SecureRandom()).setProvider("BC"));
+        encGen.addMethod(new JcePBEKeyEncryptionMethodGenerator(passPhrase).setProvider("BC"));
 
         OutputStream encOut = encGen.open(out, compressedData.length);
 

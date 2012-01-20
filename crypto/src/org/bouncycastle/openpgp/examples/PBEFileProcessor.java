@@ -53,7 +53,7 @@ public class PBEFileProcessor
         in.close();
     }
 
-    /**
+    /*
      * decrypt the passed in message stream
      */
     private static void decryptFile(
