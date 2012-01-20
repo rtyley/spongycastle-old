@@ -22,6 +22,7 @@ public class NTRUSigningPrivateKeyParameters
     extends AsymmetricKeyParameter
 {
     private List<Basis> bases;
+    private NTRUSigningPublicKeyParameters publicKey;
 
     /**
      * Constructs a new private key from a byte array
@@ -32,14 +33,7 @@ public class NTRUSigningPrivateKeyParameters
     public NTRUSigningPrivateKeyParameters(byte[] b, NTRUSigningKeyGenerationParameters params)
         throws IOException
     {
-        super(true);
-        bases = new ArrayList<Basis>();
-        ByteArrayInputStream is = new ByteArrayInputStream(b);
-        for (int i = 0; i <= params.B; i++)
-        {
-            add(new Basis(is, params, i != 0));
-        }
-
+        this(new ByteArrayInputStream(b), params);
     }
 
     /**
@@ -58,15 +52,14 @@ public class NTRUSigningPrivateKeyParameters
         {
             add(new Basis(is, params, i != 0));
         }
+        publicKey = new NTRUSigningPublicKeyParameters(is, params.getSigningParameters());
     }
 
-    /**
-     * Constructs an empty private key
-     */
-    public NTRUSigningPrivateKeyParameters()
+    public NTRUSigningPrivateKeyParameters(List<Basis> bases, NTRUSigningPublicKeyParameters publicKey)
     {
         super(true);
-        bases = new ArrayList<Basis>();
+        this.bases = new ArrayList<Basis>(bases);
+        this.publicKey = publicKey;
     }
 
     /**
@@ -74,7 +67,7 @@ public class NTRUSigningPrivateKeyParameters
      *
      * @param b a NtruSign basis
      */
-    public void add(Basis b)
+    private void add(Basis b)
     {
         bases.add(b);
     }
@@ -88,6 +81,11 @@ public class NTRUSigningPrivateKeyParameters
     public Basis getBasis(int i)
     {
         return bases.get(i);
+    }
+
+    public NTRUSigningPublicKeyParameters getPublicKey()
+    {
+        return publicKey;
     }
 
     /**
@@ -104,6 +102,8 @@ public class NTRUSigningPrivateKeyParameters
             // all bases except for the first one contain a public key
             bases.get(i).encode(os, i != 0);
         }
+
+        os.write(publicKey.getEncoded());
 
         return os.toByteArray();
     }

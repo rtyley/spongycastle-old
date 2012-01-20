@@ -46,7 +46,6 @@ public class NTRUSigningKeyPairGenerator
      */
     public AsymmetricCipherKeyPair generateKeyPair()
     {
-        NTRUSigningPrivateKeyParameters priv = new NTRUSigningPrivateKeyParameters();
         NTRUSigningPublicKeyParameters pub = null;
         ExecutorService executor = Executors.newCachedThreadPool();
         List<Future<NTRUSigningPrivateKeyParameters.Basis>> bases = new ArrayList<Future<NTRUSigningPrivateKeyParameters.Basis>>();
@@ -56,12 +55,14 @@ public class NTRUSigningKeyPairGenerator
         }
         executor.shutdown();
 
+        List<NTRUSigningPrivateKeyParameters.Basis> basises = new ArrayList<NTRUSigningPrivateKeyParameters.Basis>();
+
         for (int k = params.B; k >= 0; k--)
         {
             Future<NTRUSigningPrivateKeyParameters.Basis> basis = bases.get(k);
             try
             {
-                priv.add(basis.get());
+                basises.add(basis.get());
                 if (k == 0)
                 {
                     pub = new NTRUSigningPublicKeyParameters(basis.get().h, params.getSigningParameters());
@@ -72,6 +73,7 @@ public class NTRUSigningKeyPairGenerator
                 throw new IllegalStateException(e);
             }
         }
+        NTRUSigningPrivateKeyParameters priv = new NTRUSigningPrivateKeyParameters(basises, pub);
         AsymmetricCipherKeyPair kp = new AsymmetricCipherKeyPair(pub, priv);
         return kp;
     }
@@ -83,17 +85,18 @@ public class NTRUSigningKeyPairGenerator
      */
     public AsymmetricCipherKeyPair generateKeyPairSingleThread()
     {
-        NTRUSigningPrivateKeyParameters priv = new NTRUSigningPrivateKeyParameters();
+        List<NTRUSigningPrivateKeyParameters.Basis> basises = new ArrayList<NTRUSigningPrivateKeyParameters.Basis>();
         NTRUSigningPublicKeyParameters pub = null;
         for (int k = params.B; k >= 0; k--)
         {
             NTRUSigningPrivateKeyParameters.Basis basis = generateBoundedBasis();
-            priv.add(basis);
+            basises.add(basis);
             if (k == 0)
             {
                 pub = new NTRUSigningPublicKeyParameters(basis.h, params.getSigningParameters());
             }
         }
+        NTRUSigningPrivateKeyParameters priv = new NTRUSigningPrivateKeyParameters(basises, pub);
         return new AsymmetricCipherKeyPair(pub, priv);
     }
 
