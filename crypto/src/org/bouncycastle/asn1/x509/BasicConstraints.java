@@ -27,25 +27,23 @@ public class BasicConstraints
     public static BasicConstraints getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof BasicConstraints)
+        if (obj instanceof BasicConstraints)
         {
             return (BasicConstraints)obj;
         }
-
-        if (obj instanceof ASN1Sequence)
-        {
-            return new BasicConstraints((ASN1Sequence)obj);
-        }
-
         if (obj instanceof X509Extension)
         {
             return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
         }
+        if (obj != null)
+        {
+            return new BasicConstraints(ASN1Sequence.getInstance(obj));
+        }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
     
-    public BasicConstraints(
+    private BasicConstraints(
         ASN1Sequence   seq)
     {
         if (seq.size() == 0)
@@ -75,27 +73,6 @@ public class BasicConstraints
                     throw new IllegalArgumentException("wrong sequence in constructor");
                 }
             }
-        }
-    }
-
-    /**
-     * @deprecated use one of the other two unambigous constructors.
-     * @param cA
-     * @param pathLenConstraint
-     */
-    public BasicConstraints(
-        boolean cA,
-        int     pathLenConstraint)
-    {
-        if (cA)
-        {
-            this.cA = new DERBoolean(cA);
-            this.pathLenConstraint = new DERInteger(pathLenConstraint);
-        }
-        else
-        {
-            this.cA = null;
-            this.pathLenConstraint = null;
         }
     }
 
