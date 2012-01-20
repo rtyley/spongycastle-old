@@ -1106,7 +1106,7 @@ public class CertPathValidatorUtilities
         }
         catch (IOException e)
         {
-            new AnnotatedException("Cannot extract issuer from CRL.", e);
+            throw new AnnotatedException("Cannot extract issuer from CRL.", e);
         }
 
         BigInteger completeCRLNumber = null;
