@@ -24,7 +24,7 @@ import org.bouncycastle.util.Arrays;
  * Encrypts, decrypts data and generates key pairs.<br/>
  * The parameter p is hardcoded to 3.
  */
-public class NTRUEncryptionEngine
+public class NTRUEngine
     implements AsymmetricBlockCipher
 {
     private boolean forEncryption;
@@ -37,7 +37,7 @@ public class NTRUEncryptionEngine
      * Constructs a new instance with a set of encryption parameters.
      *
      */
-    public NTRUEncryptionEngine()
+    public NTRUEngine()
     {
     }
 
