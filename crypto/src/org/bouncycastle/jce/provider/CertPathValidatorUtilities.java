@@ -557,9 +557,7 @@ public class CertPathValidatorUtilities
                     }
                     catch (Exception e)
                     {
-                        throw
-
-                            new AnnotatedException("Certificate policies cannot be decoded.", e);
+                        throw new AnnotatedException("Certificate policies cannot be decoded.", e);
                     }
                     Enumeration e = policies.getObjects();
                     while (e.hasMoreElements())
@@ -732,9 +730,7 @@ public class CertPathValidatorUtilities
                 }
                 catch (StoreException e)
                 {
-                    throw
-
-                        new AnnotatedException(
+                    throw new AnnotatedException(
                             "Problem while picking certificates from X.509 store.", e);
                 }
             }
@@ -777,9 +773,7 @@ public class CertPathValidatorUtilities
                 }
                 catch (StoreException e)
                 {
-                    throw
-
-                        new AnnotatedException(
+                    throw new AnnotatedException(
                             "Problem while picking certificates from X.509 store.", e);
                 }
             }
@@ -1051,7 +1045,7 @@ public class CertPathValidatorUtilities
             }
             catch (Exception e)
             {
-                new AnnotatedException(
+                throw new AnnotatedException(
                     "Reason code CRL entry extension could not be decoded.",
                     e);
             }
@@ -1214,7 +1208,7 @@ public class CertPathValidatorUtilities
         }
         catch (AnnotatedException e)
         {
-            new AnnotatedException(
+            throw new AnnotatedException(
                 "Could not get issuer information from distribution point.", e);
         }
         if (cert instanceof X509Certificate)
