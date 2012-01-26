@@ -32,6 +32,9 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509Principal;
 
+/**
+ * @deprecated use classes in org.bouncycastle.cert.ocsp.
+ */
 public class OCSPReqGenerator
 {
     private List            list = new ArrayList();

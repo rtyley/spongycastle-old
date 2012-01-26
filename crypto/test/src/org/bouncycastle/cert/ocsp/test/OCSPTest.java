@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Exception;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
@@ -16,6 +17,7 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
@@ -225,6 +227,47 @@ public class OCSPTest
         + "vL7EIfjK13nUxf8d49GzZlFMNqGDMjfMp1FYrHBGLZBr8br/G/7em1Cprw7iR8cw"
         + "pddz+QXXFIrIz5Y9D/x1RrwoLibPw0kMrSwI2G4aCvoBySfbD6cpnJf6YHRctdSb"
         + "755zhdBW7XWTl6ReUVuEt0hTFms4F60kFAi5hIbDRSN1Slv5yP2b0EA=");
+
+    private static byte[] invalidResp = Base64.decode(
+        "MIIGggoAoIIGfDCCBngGCSsGAQUFBzABAQSCBmkwggZlMIHeoTQwMjELMAkG"
+      + "A1UEBhMCVVMxDTALBgNVBAoMBGlXYXkxFDASBgNVBAMMC2lXYXkgT3BlbkNB"
+      + "GA8yMDEyMDEyMzIxMjkxMVowbjBsMEQwCQYFKw4DAhoFAAQUPA5ymcOyHyZJ"
+      + "d7DAidsEh79Uh6QEFMHnDLGSc/VElMBzr5f0+LQnpN2YAgsA5xIzv2Ln0dAa"
+      + "94IAGA8yMDEyMDEyMzIxMjkxMVqgERgPMjAxMjAxMjMyMTM0MTFaoSUwIzAh"
+      + "BgkrBgEFBQcwAQIEFCHEdgCz5w64KgppPIetaRzxewinMA0GCSqGSIb3DQEB"
+      + "CwUAA4IBAQBsW8cXR4eOLgclY/uRodjso/5xkHIAiJy+DpgqELRrnzKe87HO"
+      + "Km7DCicz1nwsPJskK14xtIw1rfQ8nzgztriComAUVc/pxJ9wQWGZI3d2dNbW"
+      + "AmecKb/mG0QrJrt3U5D0+CFTUq5u7NOs1jZRe+df9TDLBr0vIA6a0I6K9M9F"
+      + "ZOPWU/j5KVjoi0/kv4wnxRzQ2zc4Z3b5gm9T0MXMH5bST3z4yhOs/NRezNTA"
+      + "fBQvimS60d4fybH0pXcVYUH81y5fm9rCpuwQ6rMt2vi0ZKrfyVom4OIAr/gh"
+      + "Doj8Yh/LdtI1RvFkAL3pvzs06cfg3qM38b9Uh9w93w4/Hguw14eroIIEbDCC"
+      + "BGgwggRkMIIDTKADAgECAgEBMA0GCSqGSIb3DQEBCwUAMDIxCzAJBgNVBAYT"
+      + "AlVTMQ0wCwYDVQQKDARpV2F5MRQwEgYDVQQDDAtpV2F5IE9wZW5DQTAeFw0x"
+      + "MjAxMjAxNTIyMjFaFw0zMjAxMTUxNTIyMjFaMDIxCzAJBgNVBAYTAlVTMQ0w"
+      + "CwYDVQQKDARpV2F5MRQwEgYDVQQDDAtpV2F5IE9wZW5DQTCCASIwDQYJKoZI"
+      + "hvcNAQEBBQADggEPADCCAQoCggEBALOnLWYPvGNLxodQQ16tqCKflpEQF2OA"
+      + "0inZbIeUVxOgph5Qf562XV1Mtbv5Agv+z4/LSLbwuo28NTkhSlEEwf1k9vL9"
+      + "/wFvpPZ4ecpqXOS6LJ6khmMh53IwK/QpG8CeF9UxTZskjQzD9XgnNGYd2BIj"
+      + "qVbzU5qWhsPYPRrsAaE2jS6My5+xfiw46/Xj26VZQ/PR/rVURsc40fpCE30y"
+      + "TyORQeeZfjb/LxXH3e/3wjya04MBACv+uX89n5YXG7OH6zTriMAOn/aiXPfE"
+      + "E8g834RKvVS7ruELWG/IcZDC+Eoy2qtgG7y1rFlXd3H/6rny+Xd+BZrt0WP/"
+      + "hfezklVw3asCAwEAAaOCAYMwggF/MA8GA1UdEwEB/wQFMAMBAf8wCwYDVR0P"
+      + "BAQDAgEGMB0GA1UdDgQWBBTB5wyxknP1RJTAc6+X9Pi0J6TdmDAfBgNVHSME"
+      + "GDAWgBTB5wyxknP1RJTAc6+X9Pi0J6TdmDAjBgNVHREEHDAagRhzdXBwb3J0"
+      + "QGl3YXlzb2Z0d2FyZS5jb20wIwYDVR0SBBwwGoEYc3VwcG9ydEBpd2F5c29m"
+      + "dHdhcmUuY29tMIGYBggrBgEFBQcBAQSBizCBiDA5BggrBgEFBQcwAoYtaHR0"
+      + "cDovL2l3NTRjZW50LXZtMi9wa2kvcHViL2NhY2VydC9jYWNlcnQuY3J0MCUG"
+      + "CCsGAQUFBzABhhlodHRwOi8vaXc1NGNlbnQtdm0yOjI1NjAvMCQGCCsGAQUF"
+      + "BzAMhhhodHRwOi8vaXc1NGNlbnQtdm0yOjgzMC8wOgYDVR0fBDMwMTAvoC2g"
+      + "K4YpaHR0cDovL2l3NTRjZW50LXZtMi9wa2kvcHViL2NybC9jYWNybC5jcmww"
+      + "DQYJKoZIhvcNAQELBQADggEBAE9wBjQ1c+HAO2gIzT+J5Gqgrcu/m7t4hnHN"
+      + "m5eyIfwXD1T6wOhovFmzPTaO9BSNsi4G5R7yZxOHeLN4PIY2kwFIbSkg7mwe"
+      + "5aGp2RPIuK/MtzMZT6pq8uMGhzyHGsqtdkz7p26/G0anU2u59eimcvISdwNE"
+      + "QXOIp/KNUC+Vx+Pmfw8PuFYDNacZ6YXp5qKoEjyUoBhNicmVINTNfDu0CQhu"
+      + "pDr2UmDMDT2cdmTSRC0rcTe3BNzWqtsXNmIBFL1oB7B0PZbmFm8Bgvk1azxa"
+      + "ClrcOKZWKOWa14XJy/DJk6nlOiq5W2AglUt8JVOpa5oVdiNRIT2WoGnpqVV9"
+      + "tUeoWog=");
+
     private static final String BC = "BC";
 
     public String getName()
@@ -626,6 +669,33 @@ public class OCSPTest
         }
     }
 
+    public void testInvalidResp()
+        throws Exception
+    {
+        try
+        {
+            OCSPResp response = new OCSPResp(invalidResp);
+        }
+        catch (CertIOException e)
+        {
+            if (e.getCause() instanceof ASN1Exception)
+            {
+                Throwable c = ((ASN1Exception)e.getCause()).getCause();
+
+                if (!c.getMessage().equals("ENUMERATED has zero length"))
+                {
+                    fail("parsing failed, but for wrong reason: " + c.getMessage());
+                }
+            }
+            else
+            {
+                fail("parsing failed, but for wrong reason: " + e.getMessage());
+            }
+        }
+
+
+    }
+
     public void performTest()
         throws Exception
     {
@@ -861,6 +931,7 @@ public class OCSPTest
         testECDSA();
         testRSA();
         testIrregularVersionReq();
+        testInvalidResp();
     }
 
     public static void main(

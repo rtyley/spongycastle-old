@@ -2,6 +2,7 @@ package org.bouncycastle.cert.ocsp;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Exception;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
@@ -40,6 +41,10 @@ public class OCSPResp
             throw new CertIOException("malformed response: " + e.getMessage(), e);
         }
         catch (ClassCastException e)
+        {
+            throw new CertIOException("malformed response: " + e.getMessage(), e);
+        }
+        catch (ASN1Exception e)
         {
             throw new CertIOException("malformed response: " + e.getMessage(), e);
         }

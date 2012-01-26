@@ -34,7 +34,7 @@ public class TBSRequest
         this.requestExtensions = requestExtensions;
     }
 
-    public TBSRequest(
+    private TBSRequest(
         ASN1Sequence    seq)
     {
         int    index = 0;
@@ -82,16 +82,16 @@ public class TBSRequest
     public static TBSRequest getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof TBSRequest)
+        if (obj instanceof TBSRequest)
         {
             return (TBSRequest)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new TBSRequest((ASN1Sequence)obj);
+            return new TBSRequest(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public DERInteger getVersion()

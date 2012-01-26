@@ -23,7 +23,7 @@ public class Request
         this.singleRequestExtensions = singleRequestExtensions;
     }
 
-    public Request(
+    private Request(
         ASN1Sequence    seq)
     {
         reqCert = CertID.getInstance(seq.getObjectAt(0));
@@ -45,16 +45,16 @@ public class Request
     public static Request getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof Request)
+        if (obj instanceof Request)
         {
             return (Request)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new Request((ASN1Sequence)obj);
+            return new Request(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public CertID getReqCert()

@@ -22,7 +22,7 @@ public class OCSPRequest
         this.optionalSignature = optionalSignature;
     }
 
-    public OCSPRequest(
+    private OCSPRequest(
         ASN1Sequence    seq)
     {
         tbsRequest = TBSRequest.getInstance(seq.getObjectAt(0));
@@ -44,16 +44,16 @@ public class OCSPRequest
     public static OCSPRequest getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof OCSPRequest)
+        if (obj instanceof OCSPRequest)
         {
             return (OCSPRequest)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new OCSPRequest((ASN1Sequence)obj);
+            return new OCSPRequest(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
     
     public TBSRequest getTbsRequest()

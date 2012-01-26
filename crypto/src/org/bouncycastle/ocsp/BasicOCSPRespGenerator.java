@@ -35,6 +35,8 @@ import org.bouncycastle.asn1.x509.X509Extensions;
 
 /**
  * Generator for basic OCSP response objects.
+ *
+ * @deprecated use classes in org.bouncycastle.cert.ocsp.
  */
 public class BasicOCSPRespGenerator
 {

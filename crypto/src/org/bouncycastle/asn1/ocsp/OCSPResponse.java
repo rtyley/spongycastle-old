@@ -5,7 +5,6 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 
@@ -23,11 +22,10 @@ public class OCSPResponse
         this.responseBytes = responseBytes;
     }
 
-    public OCSPResponse(
+    private OCSPResponse(
         ASN1Sequence    seq)
     {
-        responseStatus = new OCSPResponseStatus(
-                            DEREnumerated.getInstance(seq.getObjectAt(0)));
+        responseStatus = OCSPResponseStatus.getInstance(seq.getObjectAt(0));
 
         if (seq.size() == 2)
         {
@@ -46,16 +44,16 @@ public class OCSPResponse
     public static OCSPResponse getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof OCSPResponse)
+        if (obj instanceof OCSPResponse)
         {
             return (OCSPResponse)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new OCSPResponse((ASN1Sequence)obj);
+            return new OCSPResponse(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public OCSPResponseStatus getResponseStatus()

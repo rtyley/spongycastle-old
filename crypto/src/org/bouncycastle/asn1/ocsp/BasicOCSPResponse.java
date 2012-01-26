@@ -30,7 +30,7 @@ public class BasicOCSPResponse
         this.certs = certs;
     }
 
-    public BasicOCSPResponse(
+    private BasicOCSPResponse(
         ASN1Sequence    seq)
     {
         this.tbsResponseData = ResponseData.getInstance(seq.getObjectAt(0));
@@ -53,16 +53,16 @@ public class BasicOCSPResponse
     public static BasicOCSPResponse getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof BasicOCSPResponse)
+        if (obj instanceof BasicOCSPResponse)
         {
             return (BasicOCSPResponse)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new BasicOCSPResponse((ASN1Sequence)obj);
+            return new BasicOCSPResponse(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public ResponseData getTbsResponseData()

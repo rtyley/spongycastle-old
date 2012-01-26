@@ -33,7 +33,7 @@ public class SingleResponse
         this.singleExtensions = singleExtensions;
     }
 
-    public SingleResponse(
+    private SingleResponse(
         ASN1Sequence    seq)
     {
         this.certID = CertID.getInstance(seq.getObjectAt(0));
@@ -72,16 +72,16 @@ public class SingleResponse
     public static SingleResponse getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof SingleResponse)
+        if (obj instanceof SingleResponse)
         {
             return (SingleResponse)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new SingleResponse((ASN1Sequence)obj);
+            return new SingleResponse(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public CertID getCertID()

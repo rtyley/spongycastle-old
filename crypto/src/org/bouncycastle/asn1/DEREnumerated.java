@@ -27,6 +27,7 @@ public class DEREnumerated
         {
             return new ASN1Enumerated(((DEREnumerated)obj).getValue());
         }
+
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -122,6 +123,10 @@ public class DEREnumerated
             return new ASN1Enumerated(Arrays.clone(enc));
         }
 
+        if (enc.length == 0)
+        {
+            throw new IllegalArgumentException("ENUMERATED has zero length");
+        }
         int value = enc[0] & 0xff;
 
         if (value >= cache.length)

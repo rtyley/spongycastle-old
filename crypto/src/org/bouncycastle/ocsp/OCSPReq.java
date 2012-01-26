@@ -62,6 +62,8 @@ import org.bouncycastle.asn1.x509.X509Extensions;
  *       issuerKeyHash       OCTET STRING, -- Hash of Issuers public key
  *       serialNumber        CertificateSerialNumber }
  * </pre>
+ *
+ * @deprecated use classes in org.bouncycastle.cert.ocsp.
  */
 public class OCSPReq
     implements java.security.cert.X509Extension

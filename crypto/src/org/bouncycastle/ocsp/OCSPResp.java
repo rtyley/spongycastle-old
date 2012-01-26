@@ -10,16 +10,25 @@ import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.ocsp.OCSPResponse;
 import org.bouncycastle.asn1.ocsp.ResponseBytes;
 
+/**
+ * @deprecated use classes in org.bouncycastle.cert.ocsp.
+ */
 public class OCSPResp
 {
     private OCSPResponse    resp;
 
+    /**
+     * @deprecated use classes in org.bouncycastle.cert.ocsp.
+     */
     public OCSPResp(
         OCSPResponse    resp)
     {
         this.resp = resp;
     }
 
+    /**
+     * @deprecated use classes in org.bouncycastle.cert.ocsp.
+     */
     public OCSPResp(
         byte[]          resp)
         throws IOException
@@ -27,6 +36,9 @@ public class OCSPResp
         this(new ASN1InputStream(resp));
     }
 
+    /**
+     * @deprecated use classes in org.bouncycastle.cert.ocsp.
+     */
     public OCSPResp(
         InputStream     in)
         throws IOException

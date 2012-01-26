@@ -41,6 +41,8 @@ import org.bouncycastle.asn1.x509.X509Extensions;
  *    signature            BIT STRING,
  *    certs                [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
  * </pre>
+ *
+ * @deprecated use classes in org.bouncycastle.cert.ocsp.
  */
 public class BasicOCSPResp
     implements java.security.cert.X509Extension

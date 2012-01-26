@@ -30,7 +30,7 @@ public class CertID
         this.serialNumber = serialNumber;
     }
 
-    public CertID(
+    private CertID(
         ASN1Sequence    seq)
     {
         hashAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(0));
@@ -49,16 +49,16 @@ public class CertID
     public static CertID getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof CertID)
+        if (obj instanceof CertID)
         {
             return (CertID)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new CertID((ASN1Sequence)obj);
+            return new CertID(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public AlgorithmIdentifier getHashAlgorithm()

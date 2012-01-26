@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Exception;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OutputStream;
@@ -87,6 +88,10 @@ public class OCSPReq
             throw new CertIOException("malformed request: " + e.getMessage(), e);
         }
         catch (ClassCastException e)
+        {
+            throw new CertIOException("malformed request: " + e.getMessage(), e);
+        }
+        catch (ASN1Exception e)
         {
             throw new CertIOException("malformed request: " + e.getMessage(), e);
         }

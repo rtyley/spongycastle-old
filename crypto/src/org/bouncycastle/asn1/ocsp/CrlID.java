@@ -3,6 +3,8 @@ package org.bouncycastle.asn1.ocsp;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -16,11 +18,11 @@ import org.bouncycastle.asn1.DERTaggedObject;
 public class CrlID
     extends ASN1Object
 {
-    DERIA5String        crlUrl;
-    DERInteger          crlNum;
-    DERGeneralizedTime  crlTime;
+    private DERIA5String         crlUrl;
+    private ASN1Integer          crlNum;
+    private ASN1GeneralizedTime  crlTime;
 
-    public CrlID(
+    private CrlID(
         ASN1Sequence    seq)
     {
         Enumeration    e = seq.getObjects();
@@ -47,17 +49,32 @@ public class CrlID
         }
     }
 
+    public static CrlID getInstance(
+        Object  obj)
+    {
+        if (obj instanceof CrlID)
+        {
+            return (CrlID)obj;
+        }
+        else if (obj != null)
+        {
+            return new CrlID(ASN1Sequence.getInstance(obj));
+        }
+
+        return null;
+    }
+
     public DERIA5String getCrlUrl()
     {
         return crlUrl;
     }
 
-    public DERInteger getCrlNum()
+    public ASN1Integer getCrlNum()
     {
         return crlNum;
     }
 
-    public DERGeneralizedTime getCrlTime()
+    public ASN1GeneralizedTime getCrlTime()
     {
         return crlTime;
     }

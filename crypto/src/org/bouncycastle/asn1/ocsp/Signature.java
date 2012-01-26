@@ -35,7 +35,7 @@ public class Signature
         this.certs = certs;
     }
 
-    public Signature(
+    private Signature(
         ASN1Sequence    seq)
     {
         signatureAlgorithm  = AlgorithmIdentifier.getInstance(seq.getObjectAt(0));
@@ -58,16 +58,16 @@ public class Signature
     public static Signature getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof Signature)
+        if (obj instanceof Signature)
         {
             return (Signature)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new Signature((ASN1Sequence)obj);
+            return new Signature(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public AlgorithmIdentifier getSignatureAlgorithm()

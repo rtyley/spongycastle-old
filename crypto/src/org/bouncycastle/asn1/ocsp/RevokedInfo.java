@@ -25,7 +25,7 @@ public class RevokedInfo
         this.revocationReason = revocationReason;
     }
 
-    public RevokedInfo(
+    private RevokedInfo(
         ASN1Sequence    seq)
     {
         this.revocationTime = (DERGeneralizedTime)seq.getObjectAt(0);
@@ -47,16 +47,16 @@ public class RevokedInfo
     public static RevokedInfo getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof RevokedInfo)
+        if (obj instanceof RevokedInfo)
         {
             return (RevokedInfo)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new RevokedInfo((ASN1Sequence)obj);
+            return new RevokedInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public DERGeneralizedTime getRevocationTime()

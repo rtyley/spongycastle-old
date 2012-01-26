@@ -1,13 +1,19 @@
 package org.bouncycastle.ocsp;
 
-import java.io.*;
+import java.io.IOException;
 
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.ocsp.*;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
+import org.bouncycastle.asn1.ocsp.OCSPResponse;
+import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
+import org.bouncycastle.asn1.ocsp.ResponseBytes;
 
 /**
  * base generator for an OCSP response - at the moment this only supports the
  * generation of responses containing BasicOCSP responses.
+ *
+ * @deprecated use classes in org.bouncycastle.cert.ocsp.
  */
 public class OCSPRespGenerator
 {

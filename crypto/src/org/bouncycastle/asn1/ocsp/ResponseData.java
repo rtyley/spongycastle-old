@@ -47,7 +47,7 @@ public class ResponseData
         this(V1, responderID, producedAt, responses, responseExtensions);
     }
     
-    public ResponseData(
+    private ResponseData(
         ASN1Sequence    seq)
     {
         int index = 0;
@@ -94,16 +94,16 @@ public class ResponseData
     public static ResponseData getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof ResponseData)
+        if (obj instanceof ResponseData)
         {
             return (ResponseData)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new ResponseData((ASN1Sequence)obj);
+            return new ResponseData(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public DERInteger getVersion()
