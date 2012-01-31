@@ -256,7 +256,7 @@ public class PGPSecretKey
         //
         // generate the certification
         //
-        sGen.initSign(certificationLevel, keyPair.getPrivateKey());
+        sGen.init(certificationLevel, keyPair.getPrivateKey());
 
         sGen.setHashedSubpackets(hashedPcks);
         sGen.setUnhashedSubpackets(unhashedPcks);

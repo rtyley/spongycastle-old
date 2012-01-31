@@ -314,8 +314,9 @@ public class PGPPublicKey
         int signatureType) 
     {
         Iterator signatures = this.getSignaturesOfType(signatureType);
-        
-        if (signatures.hasNext())
+        long     expiryTime = -1;
+
+        while (signatures.hasNext())
         {
             PGPSignature sig = (PGPSignature)signatures.next();
 
@@ -325,14 +326,21 @@ public class PGPPublicKey
                 
                 if (hashed != null)
                 {
-                    return hashed.getKeyExpirationTime();
+                    long current = hashed.getKeyExpirationTime();
+
+                    if (current == 0 || current > expiryTime)
+                    {
+                        expiryTime = current;
+                    }
                 }
-                
-                return 0;
+                else
+                {
+                    return 0;
+                }
             }
         }
         
-        return -1;
+        return expiryTime;
     }
     
     /**
