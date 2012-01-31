@@ -782,7 +782,7 @@ public class X509CertificateObject
 
         if (!signature.verify(this.getSignature()))
         {
-            throw new InvalidKeyException("Public key presented not for certificate signature");
+            throw new SignatureException("certificate does not verify with supplied key");
         }
     }
 
