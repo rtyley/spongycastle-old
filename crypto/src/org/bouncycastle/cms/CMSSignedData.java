@@ -48,7 +48,7 @@ import org.bouncycastle.x509.X509Store;
  * matches the given signer...
  *
  * <pre>
- *  CertStore               certs = s.getCertificatesAndCRLs("Collection", "BC");
+ *  Store                   certStore = s.getCertificates();
  *  SignerInformationStore  signers = s.getSignerInfos();
  *  Collection              c = signers.getSigners();
  *  Iterator                it = c.iterator();
@@ -58,7 +58,7 @@ import org.bouncycastle.x509.X509Store;
  *      SignerInformation   signer = (SignerInformation)it.next();
  *      Collection          certCollection = certStore.getMatches(signer.getSID());
  *
- *      Iterator        certIt = certCollection.iterator();
+ *      Iterator              certIt = certCollection.iterator();
  *      X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
  *  
  *      if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert)))
