@@ -504,9 +504,18 @@ public class CMSSignedData
     }
 
     /**
-     * return the ContentInfo 
+     * return the ContentInfo
+     * @deprecated use toASN1Structure()
      */
     public ContentInfo getContentInfo()
+    {
+        return contentInfo;
+    }
+
+    /**
+     * return the ContentInfo
+     */
+    public ContentInfo toASN1Structure()
     {
         return contentInfo;
     }
