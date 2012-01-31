@@ -3,19 +3,19 @@ package org.bouncycastle.asn1.cms;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERTaggedObject;
 
 public class EnvelopedData
     extends ASN1Object
 {
-    private DERInteger              version;
+    private ASN1Integer              version;
     private OriginatorInfo          originatorInfo;
     private ASN1Set                 recipientInfos;
     private EncryptedContentInfo    encryptedContentInfo;
@@ -27,7 +27,7 @@ public class EnvelopedData
         EncryptedContentInfo    encryptedContentInfo,
         ASN1Set                 unprotectedAttrs)
     {
-        version = new DERInteger(calculateVersion(originatorInfo, recipientInfos, unprotectedAttrs));
+        version = new ASN1Integer(calculateVersion(originatorInfo, recipientInfos, unprotectedAttrs));
 
         this.originatorInfo = originatorInfo;
         this.recipientInfos = recipientInfos;
@@ -40,7 +40,7 @@ public class EnvelopedData
     {
         int     index = 0;
         
-        version = (DERInteger)seq.getObjectAt(index++);
+        version = (ASN1Integer)seq.getObjectAt(index++);
         
         Object  tmp = seq.getObjectAt(index++);
 
@@ -85,20 +85,20 @@ public class EnvelopedData
     public static EnvelopedData getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof EnvelopedData)
+        if (obj instanceof EnvelopedData)
         {
             return (EnvelopedData)obj;
         }
         
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
-            return new EnvelopedData((ASN1Sequence)obj);
+            return new EnvelopedData(ASN1Sequence.getInstance(obj));
         }
         
-        throw new IllegalArgumentException("Invalid EnvelopedData: " + obj.getClass().getName());
+        return null;
     }
 
-    public DERInteger getVersion()
+    public ASN1Integer getVersion()
     {
         return version;
     }

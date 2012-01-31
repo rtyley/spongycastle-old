@@ -28,9 +28,14 @@ public class EncryptedContentInfo
         this.encryptedContent = encryptedContent;
     }
     
-    public EncryptedContentInfo(
+    private EncryptedContentInfo(
         ASN1Sequence seq)
     {
+        if (seq.size() < 2)
+        {
+            throw new IllegalArgumentException("Truncated Sequence Found");
+        }
+
         contentType = (ASN1ObjectIdentifier)seq.getObjectAt(0);
         contentEncryptionAlgorithm = AlgorithmIdentifier.getInstance(
                                                         seq.getObjectAt(1));
@@ -50,18 +55,16 @@ public class EncryptedContentInfo
     public static EncryptedContentInfo getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof EncryptedContentInfo)
+        if (obj instanceof EncryptedContentInfo)
         {
             return (EncryptedContentInfo)obj;
         }
-        
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
-            return new EncryptedContentInfo((ASN1Sequence)obj);
+            return new EncryptedContentInfo(ASN1Sequence.getInstance(obj));
         }
         
-        throw new IllegalArgumentException("Invalid EncryptedContentInfo: "
-                                                + obj.getClass().getName());
+        return null;
     }
 
     public ASN1ObjectIdentifier getContentType()

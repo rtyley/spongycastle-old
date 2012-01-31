@@ -62,9 +62,22 @@ public class TimeStampToken
     public TimeStampToken(ContentInfo contentInfo)
         throws TSPException, IOException
     {
-        this(new CMSSignedData(contentInfo));
-    }   
-    
+        this(getSignedData(contentInfo));
+    }
+
+    private static CMSSignedData getSignedData(ContentInfo contentInfo)
+        throws TSPException
+    {
+        try
+        {
+            return new CMSSignedData(contentInfo);
+        }
+        catch (CMSException e)
+        {
+            throw new TSPException("TSP parsing error: " + e.getMessage(), e.getCause());
+        }
+    }
+
     public TimeStampToken(CMSSignedData signedData)
         throws TSPException, IOException
     {

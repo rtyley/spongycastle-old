@@ -22,6 +22,7 @@ import org.bouncycastle.operator.InputExpanderProvider;
 public class CMSCompressedData
 {
     ContentInfo                 contentInfo;
+    CompressedData              comData;
 
     public CMSCompressedData(
         byte[]    compressedData) 
@@ -42,6 +43,19 @@ public class CMSCompressedData
         throws CMSException
     {
         this.contentInfo = contentInfo;
+
+        try
+        {
+            this.comData = CompressedData.getInstance(contentInfo.getContent());
+        }
+        catch (ClassCastException e)
+        {
+            throw new CMSException("Malformed content.", e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("Malformed content.", e);
+        }
     }
 
     /**
@@ -54,7 +68,6 @@ public class CMSCompressedData
     public byte[] getContent()
         throws CMSException
     {
-        CompressedData  comData = CompressedData.getInstance(contentInfo.getContent());
         ContentInfo     content = comData.getEncapContentInfo();
 
         ASN1OctetString bytes = (ASN1OctetString)content.getContent();
@@ -84,7 +97,6 @@ public class CMSCompressedData
     public byte[] getContent(int limit)
         throws CMSException
     {
-        CompressedData  comData = CompressedData.getInstance(contentInfo.getContent());
         ContentInfo     content = comData.getEncapContentInfo();
 
         ASN1OctetString bytes = (ASN1OctetString)content.getContent();
@@ -116,7 +128,6 @@ public class CMSCompressedData
     public byte[] getContent(InputExpanderProvider expanderProvider)
         throws CMSException
     {
-        CompressedData  comData = CompressedData.getInstance(contentInfo.getContent());
         ContentInfo     content = comData.getEncapContentInfo();
 
         ASN1OctetString bytes = (ASN1OctetString)content.getContent();

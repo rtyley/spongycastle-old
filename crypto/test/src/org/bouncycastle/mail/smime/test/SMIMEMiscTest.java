@@ -1,34 +1,5 @@
 package org.bouncycastle.mail.smime.test;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.cms.AttributeTable;
-import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
-import org.bouncycastle.asn1.smime.SMIMECapability;
-import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
-import org.bouncycastle.cms.RecipientInformation;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.cms.test.CMSTestUtil;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
-import org.bouncycastle.mail.smime.SMIMEEnveloped;
-import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
-import org.bouncycastle.mail.smime.SMIMESigned;
-import org.bouncycastle.mail.smime.SMIMESignedGenerator;
-import org.bouncycastle.mail.smime.SMIMESignedParser;
-import org.bouncycastle.mail.smime.SMIMEUtil;
-import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
-
-import javax.mail.Address;
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,6 +15,37 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+
+import javax.mail.Address;
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
+import org.bouncycastle.asn1.smime.SMIMECapability;
+import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.RecipientInformation;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.test.CMSTestUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
+import org.bouncycastle.mail.smime.SMIMEEnveloped;
+import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
+import org.bouncycastle.mail.smime.SMIMESigned;
+import org.bouncycastle.mail.smime.SMIMESignedGenerator;
+import org.bouncycastle.mail.smime.SMIMESignedParser;
+import org.bouncycastle.mail.smime.SMIMEUtil;
+import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
 
 public class SMIMEMiscTest
     extends TestCase
@@ -257,6 +259,25 @@ public class SMIMEMiscTest
         verifySigners(certs, s.getSignerInfos());
 
         tmpFile.delete();
+    }
+
+    public void testBrokenEnvelope()
+        throws Exception
+    {
+        Session session = Session.getDefaultInstance(System.getProperties(), null);
+        MimeMessage msg = new MimeMessage(session, getClass().getResourceAsStream("brokenEnv.message"));
+
+        try
+        {
+            new SMIMEEnveloped(msg);
+        }
+        catch (CMSException e)
+        {
+            if (!e.getMessage().equals("Malformed content."))
+            {
+                fail("wrong exception on bogus envelope");
+            }
+        }
     }
 
     private void verifySigners(CertStore certs, SignerInformationStore signers) 

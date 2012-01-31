@@ -59,39 +59,57 @@ public class CMSEnvelopedData
         this(CMSUtils.readContentInfo(envelopedData));
     }
 
+    /**
+     * Construct a CMSEnvelopedData object from a content info object.
+     *
+     * @param contentInfo the contentInfo containing the CMS EnvelopedData object.
+     * @throws CMSException in the case where malformed content is encountered.
+     */
     public CMSEnvelopedData(
         ContentInfo contentInfo)
+        throws CMSException
     {
         this.contentInfo = contentInfo;
 
-        EnvelopedData  envData = EnvelopedData.getInstance(contentInfo.getContent());
-
-        if (envData.getOriginatorInfo() != null)
+        try
         {
-            originatorInfo = new OriginatorInformation(envData.getOriginatorInfo());
+            EnvelopedData  envData = EnvelopedData.getInstance(contentInfo.getContent());
+
+            if (envData.getOriginatorInfo() != null)
+            {
+                originatorInfo = new OriginatorInformation(envData.getOriginatorInfo());
+            }
+
+            //
+            // read the recipients
+            //
+            ASN1Set recipientInfos = envData.getRecipientInfos();
+
+            //
+            // read the encrypted content info
+            //
+            EncryptedContentInfo encInfo = envData.getEncryptedContentInfo();
+            this.encAlg = encInfo.getContentEncryptionAlgorithm();
+            CMSReadable readable = new CMSProcessableByteArray(encInfo.getEncryptedContent().getOctets());
+            CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSEnvelopedSecureReadable(
+                this.encAlg, readable);
+
+            //
+            // build the RecipientInformationStore
+            //
+            this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
+                recipientInfos, this.encAlg, secureReadable);
+
+            this.unprotectedAttributes = envData.getUnprotectedAttrs();
         }
-
-        //
-        // read the recipients
-        //
-        ASN1Set recipientInfos = envData.getRecipientInfos();
-
-        //
-        // read the encrypted content info
-        //
-        EncryptedContentInfo encInfo = envData.getEncryptedContentInfo();
-        this.encAlg = encInfo.getContentEncryptionAlgorithm();
-        CMSReadable readable = new CMSProcessableByteArray(encInfo.getEncryptedContent().getOctets());
-        CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSEnvelopedSecureReadable(
-            this.encAlg, readable);
-
-        //
-        // build the RecipientInformationStore
-        //
-        this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, this.encAlg, secureReadable);
-
-        this.unprotectedAttributes = envData.getUnprotectedAttrs();
+        catch (ClassCastException e)
+        {
+            throw new CMSException("Malformed content.", e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("Malformed content.", e);
+        }
     }
 
     private byte[] encodeObj(

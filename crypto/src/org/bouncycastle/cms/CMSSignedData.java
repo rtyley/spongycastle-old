@@ -146,26 +146,29 @@ public class CMSSignedData
     public CMSSignedData(
         CMSProcessable  signedContent,
         ContentInfo     sigData)
+        throws CMSException
     {
         this.signedContent = signedContent;
         this.contentInfo = sigData;
-        this.signedData = SignedData.getInstance(contentInfo.getContent());
+        this.signedData = getSignedData();
     }
 
     public CMSSignedData(
         Map             hashes,
         ContentInfo     sigData)
+        throws CMSException
     {
         this.hashes = hashes;
         this.contentInfo = sigData;
-        this.signedData = SignedData.getInstance(contentInfo.getContent());
+        this.signedData = getSignedData();
     }
 
     public CMSSignedData(
         ContentInfo sigData)
+        throws CMSException
     {
         this.contentInfo = sigData;
-        this.signedData = SignedData.getInstance(contentInfo.getContent());
+        this.signedData = getSignedData();
 
         //
         // this can happen if the signed message is sent simply to send a
@@ -180,6 +183,23 @@ public class CMSSignedData
         else
         {
             this.signedContent = null;
+        }
+    }
+
+    private SignedData getSignedData()
+        throws CMSException
+    {
+        try
+        {
+            return SignedData.getInstance(contentInfo.getContent());
+        }
+        catch (ClassCastException e)
+        {
+            throw new CMSException("Malformed content.", e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("Malformed content.", e);
         }
     }
 

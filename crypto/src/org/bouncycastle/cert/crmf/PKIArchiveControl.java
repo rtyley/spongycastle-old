@@ -9,6 +9,7 @@ import org.bouncycastle.asn1.crmf.CRMFObjectIdentifiers;
 import org.bouncycastle.asn1.crmf.EncryptedKey;
 import org.bouncycastle.asn1.crmf.PKIArchiveOptions;
 import org.bouncycastle.cms.CMSEnvelopedData;
+import org.bouncycastle.cms.CMSException;
 
 /**
  * Carrier for a PKIArchiveOptions structure.
@@ -82,10 +83,22 @@ public class PKIArchiveControl
      * @return a CMSEnvelopedData object.
      */
     public CMSEnvelopedData getEnvelopedData()
+        throws CRMFException
     {
-        EncryptedKey encKey = EncryptedKey.getInstance(pkiArchiveOptions.getValue());
-        EnvelopedData data = EnvelopedData.getInstance(encKey.getValue());
-        
-        return new CMSEnvelopedData(new ContentInfo(CMSObjectIdentifiers.envelopedData, data));
+        try
+        {
+            EncryptedKey encKey = EncryptedKey.getInstance(pkiArchiveOptions.getValue());
+            EnvelopedData data = EnvelopedData.getInstance(encKey.getValue());
+
+            return new CMSEnvelopedData(new ContentInfo(CMSObjectIdentifiers.envelopedData, data));
+        }
+        catch (CMSException e)
+        {
+            throw new CRMFException("CMS parsing error: " + e.getMessage(), e.getCause());
+        }
+        catch (Exception e)
+        {
+            throw new CRMFException("CRMF parsing error: " + e.getMessage(), e);
+        }
     }
 }

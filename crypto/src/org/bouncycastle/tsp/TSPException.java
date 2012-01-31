@@ -3,14 +3,14 @@ package org.bouncycastle.tsp;
 public class TSPException
     extends Exception
 {
-    Exception underlyingException;
+    Throwable underlyingException;
 
     public TSPException(String message)
     {
         super(message);
     }
 
-    public TSPException(String message, Exception e)
+    public TSPException(String message, Throwable e)
     {
         super(message);
         underlyingException = e;
@@ -18,7 +18,7 @@ public class TSPException
 
     public Exception getUnderlyingException()
     {
-        return underlyingException;
+        return (Exception)underlyingException;
     }
 
     public Throwable getCause()
