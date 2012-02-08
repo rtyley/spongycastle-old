@@ -5,6 +5,7 @@ import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cms.KeyTransRecipientInfoGenerator;
@@ -34,6 +35,27 @@ public class JceKeyTransRecipientInfoGenerator
     public JceKeyTransRecipientInfoGenerator setProvider(Provider provider)
     {
         ((JceAsymmetricKeyWrapper)this.wrapper).setProvider(provider);
+
+        return this;
+    }
+
+    /**
+     * Internally algorithm ids are converted into cipher names using a lookup table. For some providers
+     * the standard lookup table won't work. Use this method to establish a specific mapping from an
+     * algorithm identifier to a specific algorithm.
+     * <p>
+     *     For example:
+     * <pre>
+     *     unwrapper.setAlgorithmMapping(PKCSObjectIdentifiers.rsaEncryption, "RSA");
+     * </pre>
+     * </p>
+     * @param algorithm  OID of algorithm in recipient.
+     * @param algorithmName JCE algorithm name to use.
+     * @return the current RecipientInfoGenerator.
+     */
+    public JceKeyTransRecipientInfoGenerator setAlgorithmMapping(ASN1ObjectIdentifier algorithm, String algorithmName)
+    {
+        ((JceAsymmetricKeyWrapper)this.wrapper).setAlgorithmMapping(algorithm, algorithmName);
 
         return this;
     }

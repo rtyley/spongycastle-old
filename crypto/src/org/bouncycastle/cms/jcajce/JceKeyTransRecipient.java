@@ -3,15 +3,19 @@ package org.bouncycastle.cms.jcajce;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.KeyTransRecipient;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
-import org.bouncycastle.operator.AsymmetricKeyUnwrapper;
 import org.bouncycastle.operator.OperatorException;
+import org.bouncycastle.operator.jcajce.JceAsymmetricKeyUnwrapper;
 
 public abstract class JceKeyTransRecipient
     implements KeyTransRecipient
@@ -20,6 +24,7 @@ public abstract class JceKeyTransRecipient
 
     protected EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
     protected EnvelopedDataHelper contentHelper = helper;
+    protected Map extraMappings = new HashMap();
 
     public JceKeyTransRecipient(PrivateKey recipientKey)
     {
@@ -55,6 +60,27 @@ public abstract class JceKeyTransRecipient
     }
 
     /**
+     * Internally algorithm ids are converted into cipher names using a lookup table. For some providers
+     * the standard lookup table won't work. Use this method to establish a specific mapping from an
+     * algorithm identifier to a specific algorithm.
+     * <p>
+     *     For example:
+     * <pre>
+     *     unwrapper.setAlgorithmMapping(PKCSObjectIdentifiers.rsaEncryption, "RSA");
+     * </pre>
+     * </p>
+     * @param algorithm  OID of algorithm in recipient.
+     * @param algorithmName JCE algorithm name to use.
+     * @return the current Recipient.
+     */
+    public JceKeyTransRecipient setAlgorithmMapping(ASN1ObjectIdentifier algorithm, String algorithmName)
+    {
+        extraMappings.put(algorithm, algorithmName);
+
+        return this;
+    }
+
+    /**
      * Set the provider to use for content processing.  If providerName is null a "no provider" search will be
      * used to satisfy getInstance calls.
      *
@@ -85,7 +111,17 @@ public abstract class JceKeyTransRecipient
     protected Key extractSecretKey(AlgorithmIdentifier keyEncryptionAlgorithm, AlgorithmIdentifier encryptedKeyAlgorithm, byte[] encryptedEncryptionKey)
         throws CMSException
     {
-        AsymmetricKeyUnwrapper unwrapper = helper.createAsymmetricUnwrapper(keyEncryptionAlgorithm, recipientKey);
+        JceAsymmetricKeyUnwrapper unwrapper = helper.createAsymmetricUnwrapper(keyEncryptionAlgorithm, recipientKey);
+
+        if (!extraMappings.isEmpty())
+        {
+            for (Iterator it = extraMappings.keySet().iterator(); it.hasNext();)
+            {
+                ASN1ObjectIdentifier algorithm = (ASN1ObjectIdentifier)it.next();
+
+                unwrapper.setAlgorithmMapping(algorithm, (String)extraMappings.get(algorithm));
+            }
+        }
 
         try
         {

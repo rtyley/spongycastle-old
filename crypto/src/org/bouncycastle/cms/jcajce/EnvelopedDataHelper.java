@@ -43,9 +43,9 @@ import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.jcajce.JcaJceHelper;
-import org.bouncycastle.operator.AsymmetricKeyUnwrapper;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.SymmetricKeyUnwrapper;
+import org.bouncycastle.operator.jcajce.JceAsymmetricKeyUnwrapper;
 
 class EnvelopedDataHelper
 {
@@ -601,7 +601,7 @@ class EnvelopedDataHelper
         }
     }
 
-    public AsymmetricKeyUnwrapper createAsymmetricUnwrapper(AlgorithmIdentifier keyEncryptionAlgorithm, PrivateKey keyEncryptionKey)
+    public JceAsymmetricKeyUnwrapper createAsymmetricUnwrapper(AlgorithmIdentifier keyEncryptionAlgorithm, PrivateKey keyEncryptionKey)
     {
         return helper.createAsymmetricUnwrapper(keyEncryptionAlgorithm, keyEncryptionKey);
     }

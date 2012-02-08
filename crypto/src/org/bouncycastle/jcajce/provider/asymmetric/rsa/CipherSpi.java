@@ -15,6 +15,7 @@ import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.MGF1ParameterSpec;
 
 import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.OAEPParameterSpec;
@@ -246,7 +247,7 @@ public class CipherSpi
         {
             if (key instanceof RSAPublicKey)
             {
-                if (privateKeyOnly)
+                if (privateKeyOnly && opmode == Cipher.ENCRYPT_MODE)
                 {
                     throw new InvalidKeyException(
                                 "mode 1 requires RSAPrivateKey");
@@ -256,7 +257,7 @@ public class CipherSpi
             }
             else if (key instanceof RSAPrivateKey)
             {
-                if (publicKeyOnly)
+                if (publicKeyOnly && opmode == Cipher.ENCRYPT_MODE)
                 {
                     throw new InvalidKeyException(
                                 "mode 2 requires RSAPublicKey");

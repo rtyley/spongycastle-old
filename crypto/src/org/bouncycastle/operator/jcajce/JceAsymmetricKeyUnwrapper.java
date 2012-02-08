@@ -6,12 +6,15 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.ProviderException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
@@ -24,6 +27,7 @@ public class JceAsymmetricKeyUnwrapper
     extends AsymmetricKeyUnwrapper
 {
     private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceHelper());
+    private Map extraMappings = new HashMap();
     private PrivateKey privKey;
 
     public JceAsymmetricKeyUnwrapper(AlgorithmIdentifier algorithmIdentifier, PrivateKey privKey)
@@ -47,6 +51,27 @@ public class JceAsymmetricKeyUnwrapper
         return this;
     }
 
+    /**
+     * Internally algorithm ids are converted into cipher names using a lookup table. For some providers
+     * the standard lookup table won't work. Use this method to establish a specific mapping from an
+     * algorithm identifier to a specific algorithm.
+     * <p>
+     *     For example:
+     * <pre>
+     *     unwrapper.setAlgorithmMapping(PKCSObjectIdentifiers.rsaEncryption, "RSA");
+     * </pre>
+     * </p>
+     * @param algorithm  OID of algorithm in recipient.
+     * @param algorithmName JCE algorithm name to use.
+     * @return  the current Unwrapper.
+     */
+    public JceAsymmetricKeyUnwrapper setAlgorithmMapping(ASN1ObjectIdentifier algorithm, String algorithmName)
+    {
+        extraMappings.put(algorithm, algorithmName);
+
+        return this;
+    }
+
     public GenericKey generateUnwrappedKey(AlgorithmIdentifier encryptedKeyAlgorithm, byte[] encryptedKey)
         throws OperatorException
     {
@@ -54,7 +79,7 @@ public class JceAsymmetricKeyUnwrapper
         {
             Key sKey = null;
 
-            Cipher keyCipher = helper.createAsymmetricWrapper(this.getAlgorithmIdentifier().getAlgorithm());
+            Cipher keyCipher = helper.createAsymmetricWrapper(this.getAlgorithmIdentifier().getAlgorithm(), extraMappings);
 
             try
             {

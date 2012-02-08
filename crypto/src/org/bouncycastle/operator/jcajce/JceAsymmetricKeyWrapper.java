@@ -6,9 +6,12 @@ import java.security.ProviderException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
@@ -21,6 +24,7 @@ public class JceAsymmetricKeyWrapper
     extends AsymmetricKeyWrapper
 {
     private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceHelper());
+    private Map extraMappings = new HashMap();
     private PublicKey publicKey;
     private SecureRandom random;
 
@@ -57,10 +61,31 @@ public class JceAsymmetricKeyWrapper
         return this;
     }
 
+    /**
+     * Internally algorithm ids are converted into cipher names using a lookup table. For some providers
+     * the standard lookup table won't work. Use this method to establish a specific mapping from an
+     * algorithm identifier to a specific algorithm.
+     * <p>
+     *     For example:
+     * <pre>
+     *     unwrapper.setAlgorithmMapping(PKCSObjectIdentifiers.rsaEncryption, "RSA");
+     * </pre>
+     * </p>
+     * @param algorithm  OID of algorithm in recipient.
+     * @param algorithmName JCE algorithm name to use.
+     * @return the current Wrapper.
+     */
+    public JceAsymmetricKeyWrapper setAlgorithmMapping(ASN1ObjectIdentifier algorithm, String algorithmName)
+    {
+        extraMappings.put(algorithm, algorithmName);
+
+        return this;
+    }
+
     public byte[] generateWrappedKey(GenericKey encryptionKey)
         throws OperatorException
     {
-        Cipher keyEncryptionCipher = helper.createAsymmetricWrapper(getAlgorithmIdentifier().getAlgorithm());
+        Cipher keyEncryptionCipher = helper.createAsymmetricWrapper(getAlgorithmIdentifier().getAlgorithm(), extraMappings);
         byte[] encryptedKeyBytes = null;
 
         try
