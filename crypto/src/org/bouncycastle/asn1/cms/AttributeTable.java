@@ -200,7 +200,7 @@ public class AttributeTable
         return v;
     }
 
-    public Attributes toAttributes()
+    public Attributes toASN1Structure()
     {
         return new Attributes(this.toASN1EncodableVector());
     }
