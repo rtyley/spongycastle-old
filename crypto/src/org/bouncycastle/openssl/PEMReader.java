@@ -376,27 +376,17 @@ public class PEMReader
                     throw new PEMException("malformed sequence in RSA private key");
                 }
 
-                //            DERInteger              v = (DERInteger)seq.getObjectAt(0);
-                DERInteger mod = (DERInteger)seq.getObjectAt(1);
-                DERInteger pubExp = (DERInteger)seq.getObjectAt(2);
-                DERInteger privExp = (DERInteger)seq.getObjectAt(3);
-                DERInteger p1 = (DERInteger)seq.getObjectAt(4);
-                DERInteger p2 = (DERInteger)seq.getObjectAt(5);
-                DERInteger exp1 = (DERInteger)seq.getObjectAt(6);
-                DERInteger exp2 = (DERInteger)seq.getObjectAt(7);
-                DERInteger crtCoef = (DERInteger)seq.getObjectAt(8);
+                org.bouncycastle.asn1.pkcs.RSAPrivateKey keyStruct = org.bouncycastle.asn1.pkcs.RSAPrivateKey.getInstance(seq);
 
                 RSAPublicKeySpec pubSpec = new RSAPublicKeySpec(
-                    mod.getValue(), pubExp.getValue());
+                    keyStruct.getModulus(), keyStruct.getPublicExponent());
                 RSAPrivateCrtKeySpec privSpec = new RSAPrivateCrtKeySpec(
-                    mod.getValue(), pubExp.getValue(), privExp.getValue(),
-                    p1.getValue(), p2.getValue(),
-                    exp1.getValue(), exp2.getValue(),
-                    crtCoef.getValue());
-
+                    keyStruct.getModulus(), keyStruct.getPublicExponent(), keyStruct.getPrivateExponent(),
+                    keyStruct.getPrime1(), keyStruct.getPrime2(),
+                    keyStruct.getExponent1(), keyStruct.getExponent2(),
+                    keyStruct.getCoefficient());
 
                 KeyFactory fact = KeyFactory.getInstance("RSA", provider);
-
 
                 return new KeyPair(
                     fact.generatePublic(pubSpec),
