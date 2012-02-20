@@ -63,7 +63,7 @@ public class NTRUSigningKeyPairGenerator
             try
             {
                 basises.add(basis.get());
-                if (k == 0)
+                if (k == params.B)
                 {
                     pub = new NTRUSigningPublicKeyParameters(basis.get().h, params.getSigningParameters());
                 }
