@@ -7,7 +7,7 @@ import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedAsymmetricBlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.jce.interfaces.ElGamalKey;
+import org.bouncycastle.crypto.params.ElGamalPrivateKeyParameters;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
@@ -57,8 +57,9 @@ public class BcPublicKeyDataDecryptorFactory
             }
             else
             {
-                ElGamalKey k = (ElGamalKey)privKey.getKey();
-                int size = (k.getParameters().getP().bitLength() + 7) / 8;
+                BcPGPKeyConverter converter = new BcPGPKeyConverter();
+                ElGamalPrivateKeyParameters parms = (ElGamalPrivateKeyParameters) converter.getPrivateKey(privKey);
+                int size = (parms.getParameters().getP().bitLength() + 7) / 8;
                 byte[] tmp = new byte[size];
 
                 byte[] bi = secKeyData[0].toByteArray();
