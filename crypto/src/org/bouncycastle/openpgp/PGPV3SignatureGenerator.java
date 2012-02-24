@@ -88,7 +88,7 @@ public class PGPV3SignatureGenerator
      * @param key
      * @throws PGPException
      */
-    public void initSign(
+    public void init(
         int           signatureType,
         PGPPrivateKey key)
         throws PGPException
@@ -119,7 +119,7 @@ public class PGPV3SignatureGenerator
         SecureRandom  random)
         throws PGPException
     {
-        initSign(signatureType, key);
+        init(signatureType, key);
     }
     
     public void update(

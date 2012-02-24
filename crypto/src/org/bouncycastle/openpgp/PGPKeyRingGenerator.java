@@ -135,7 +135,6 @@ public class PGPKeyRingGenerator
         this.keyEncryptor = new JcePBESecretKeyEncryptorBuilder(encAlgorithm).setProvider(provider).setSecureRandom(rand).build(passPhrase);
         this.checksumCalculator = convertSHA1Flag(useSHA1);
         this.keySignerBuilder = new JcaPGPContentSignerBuilder(masterKey.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1);
-        this.checksumCalculator = convertSHA1Flag(useSHA1);
 
         keys.add(new PGPSecretKey(certificationLevel, masterKey, id, checksumCalculator, hashedPcks, unhashedPcks, keySignerBuilder, keyEncryptor));
     }
