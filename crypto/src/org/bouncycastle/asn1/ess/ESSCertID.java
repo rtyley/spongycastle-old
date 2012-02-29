@@ -18,24 +18,22 @@ public class ESSCertID
 
     public static ESSCertID getInstance(Object o)
     {
-        if (o == null || o instanceof ESSCertID)
+        if (o instanceof ESSCertID)
         {
             return (ESSCertID)o;
         }
-        else if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new ESSCertID((ASN1Sequence)o);
+            return new ESSCertID(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'ESSCertID' factory : "
-                        + o.getClass().getName() + ".");
+        return null;
     }
 
     /**
      * constructor
      */
-    public ESSCertID(ASN1Sequence seq)
+    private ESSCertID(ASN1Sequence seq)
     {
         if (seq.size() < 1 || seq.size() > 2)
         {

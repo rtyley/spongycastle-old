@@ -16,24 +16,22 @@ public class SigningCertificate
 
     public static SigningCertificate getInstance(Object o)
     {
-        if (o == null || o instanceof SigningCertificate)
+        if (o instanceof SigningCertificate)
         {
             return (SigningCertificate) o;
         }
-        else if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new SigningCertificate((ASN1Sequence) o);
+            return new SigningCertificate(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'SigningCertificate' factory : "
-                        + o.getClass().getName() + ".");
+        return null;
     }
 
     /**
      * constructeurs
      */
-    public SigningCertificate(ASN1Sequence seq)
+    private SigningCertificate(ASN1Sequence seq)
     {
         if (seq.size() < 1 || seq.size() > 2)
         {

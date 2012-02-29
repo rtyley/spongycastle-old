@@ -121,7 +121,23 @@ public class PGPV3SignatureGenerator
     {
         init(signatureType, key);
     }
-    
+
+    /**
+     * Initialise the generator for signing.
+     *
+     * @param signatureType
+     * @param key
+     * @throws PGPException
+     * @deprecated use init()
+     */
+    public void initSign(
+        int           signatureType,
+        PGPPrivateKey key)
+        throws PGPException
+    {
+        init(signatureType, key);
+    }
+
     public void update(
         byte b) 
         throws SignatureException

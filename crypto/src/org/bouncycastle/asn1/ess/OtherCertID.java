@@ -19,24 +19,22 @@ public class OtherCertID
 
     public static OtherCertID getInstance(Object o)
     {
-        if (o == null || o instanceof OtherCertID)
+        if (o instanceof OtherCertID)
         {
             return (OtherCertID) o;
         }
-        else if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new OtherCertID((ASN1Sequence) o);
+            return new OtherCertID(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'OtherCertID' factory : "
-                        + o.getClass().getName() + ".");
+        return null;
     }
 
     /**
      * constructor
      */
-    public OtherCertID(ASN1Sequence seq)
+    private OtherCertID(ASN1Sequence seq)
     {
         if (seq.size() < 1 || seq.size() > 2)
         {

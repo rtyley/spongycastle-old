@@ -22,21 +22,19 @@ public class ESSCertIDv2
     public static ESSCertIDv2 getInstance(
         Object o)
     {
-        if (o == null || o instanceof ESSCertIDv2)
+        if (o instanceof ESSCertIDv2)
         {
             return (ESSCertIDv2) o;
         }
-        else if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new ESSCertIDv2((ASN1Sequence) o);
+            return new ESSCertIDv2(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'ESSCertIDv2' factory : "
-                        + o.getClass().getName() + ".");
+        return null;
     }
 
-    public ESSCertIDv2(
+    private ESSCertIDv2(
         ASN1Sequence seq)
     {
         if (seq.size() > 3)

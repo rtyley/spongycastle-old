@@ -25,12 +25,10 @@ public class SigningCertificateV2
             return new SigningCertificateV2((ASN1Sequence) o);
         }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'SigningCertificateV2' factory : "
-                        + o.getClass().getName() + ".");
+        return null;
     }
 
-    public SigningCertificateV2(
+    private SigningCertificateV2(
         ASN1Sequence seq)
     {
         if (seq.size() < 1 || seq.size() > 2)
