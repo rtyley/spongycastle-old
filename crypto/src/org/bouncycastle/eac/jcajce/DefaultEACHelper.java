@@ -4,9 +4,9 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 
 class DefaultEACHelper
-    extends EACHelper
+    implements EACHelper
 {
-    protected KeyFactory createKeyFactory(String type)
+    public KeyFactory createKeyFactory(String type)
         throws NoSuchAlgorithmException
     {
         return KeyFactory.getInstance(type);
