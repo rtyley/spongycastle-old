@@ -18,7 +18,6 @@ import javax.crypto.Cipher;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -47,7 +46,7 @@ class OperatorHelper
         //
         // reverse mappings
         //
-        oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.5"), "SHA1WITHRSA");
+        oids.put(new ASN1ObjectIdentifier("1.2.840.113549.1.1.5"), "SHA1WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha256WithRSAEncryption, "SHA256WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha384WithRSAEncryption, "SHA384WITHRSA");
@@ -55,9 +54,9 @@ class OperatorHelper
         oids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94, "GOST3411WITHGOST3410");
         oids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001, "GOST3411WITHECGOST3410");
 
-        oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.4"), "MD5WITHRSA");
-        oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.2"), "MD2WITHRSA");
-        oids.put(new DERObjectIdentifier("1.2.840.10040.4.3"), "SHA1WITHDSA");
+        oids.put(new ASN1ObjectIdentifier("1.2.840.113549.1.1.4"), "MD5WITHRSA");
+        oids.put(new ASN1ObjectIdentifier("1.2.840.113549.1.1.2"), "MD2WITHRSA");
+        oids.put(new ASN1ObjectIdentifier("1.2.840.10040.4.3"), "SHA1WITHDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, "SHA1WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA224, "SHA224WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA256, "SHA256WITHECDSA");
@@ -96,12 +95,22 @@ class OperatorHelper
         this.helper = helper;
     }
 
-    Cipher createAsymmetricWrapper(ASN1ObjectIdentifier algorithm)
+Cipher createAsymmetricWrapper(ASN1ObjectIdentifier algorithm, Map extraAlgNames)
         throws OperatorCreationException
     {
         try
         {
-            String cipherName = (String)asymmetricWrapperAlgNames.get(algorithm);
+            String cipherName = null;
+
+            if (!extraAlgNames.isEmpty())
+            {
+                cipherName = (String)extraAlgNames.get(algorithm);
+            }
+
+            if (cipherName == null)
+            {
+                cipherName = (String)asymmetricWrapperAlgNames.get(algorithm);
+            }
 
             if (cipherName != null)
             {
@@ -112,9 +121,22 @@ class OperatorHelper
                 }
                 catch (NoSuchAlgorithmException e)
                 {
+                    // try alternate for RSA
+                    if (cipherName.equals("RSA/ECB/PKCS1Padding"))
+                    {
+                        try
+                        {
+                            return helper.createCipher("RSA/NONE/PKCS1Padding");
+                        }
+                        catch (NoSuchAlgorithmException ex)
+                        {
+                            // Ignore
+                        }
+                    }
                     // Ignore
                 }
             }
+
             return helper.createCipher(algorithm.getId());
         }
         catch (GeneralSecurityException e)
@@ -267,7 +289,7 @@ Can;t do this pre-jdk1.4
     }
 
     private static String getDigestAlgName(
-        DERObjectIdentifier digestAlgOID)
+        ASN1ObjectIdentifier digestAlgOID)
     {
         if (PKCSObjectIdentifiers.md5.equals(digestAlgOID))
         {
