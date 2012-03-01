@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="crypto1.4" default="build" basedir=".">
+<project name="crypto1.5" default="build" basedir=".">
 
-    <property name="bc.javac.source" value="1.4" />
-    <property name="bc.javac.target" value="1.4" />
+    <property name="bc.javac.source" value="1.5" />
+    <property name="bc.javac.target" value="1.5" />
     <property name="build.dir" value="build" />
-    <property name="jdk.name" value="jdk1.4" />
-    <property name="src.dir" value="${build.dir}/${jdk.name}" />
+    <property name="jdk.name" value="jdk1.5" />
     <property name="artifacts.dir" value="${build.dir}/artifacts/${jdk.name}" />
-    <property name="target.prefix" value="jdk14" />
+    <property name="src.dir" value="${build.dir}/${jdk.name}" />
+    <property name="target.prefix" value="jdk15+" />
     <property name="javadoc.args" value="-breakiterator" />
 
     <target name="init">
@@ -20,54 +20,24 @@
         <mkdir dir="${artifacts.dir}/jars" />
         <mkdir dir="${artifacts.dir}/checkstyle" />
         <copy todir="${src.dir}">
-            <fileset dir="src">
-                <exclude name="**/ValidateSignedMail.java"/>
-                <exclude name="**/ECPointUtil.java" />
-                <exclude name="**/ECNamedCurveSpec.java" />
-                <exclude name="**/BCEC*.java" />
-                <exclude name="**/JCEEC5*.java" />
-                <exclude name="**/provider/JCEEC*.java" />
-                <exclude name="**/EC5*.java" />
-                <exclude name="**/JDKPKCS12StoreParameter.java" />
-                <exclude name="**/NTRU*.java" />
-                <exclude name="**/IndexGenerator.java" />
-                <exclude name="**/ntru/**/*.java" />
-            </fileset>
-            <fileset dir="test/src">
-                <exclude name="**/ECDSA5Test.java" />
-                <exclude name="**/CRL5Test.java" />
-                <exclude name="**/NamedCurveTest.java" />
-                <exclude name="**/X509LDAPCertStoreTest.java" />
-                <exclude name="**/X509StoreTest.java" />
-                <exclude name="**/MQVTest.java" />
-                <exclude name="**/pem/AllTests.java" />
-                <exclude name="**/ntru/**/*.java" />
-                <exclude name="**/NTRU*.java" />
-                <exclude name="**/crypto/engines/BitStringTest.java" />
-                <exclude name="**/crypto/engines/AllTests.java" />
-                <exclude name="**/crypto/signers/AllTests.java" />
-            </fileset>
+            <fileset dir="src" includes="**/*.java" />
+            <fileset dir="src" includes="**/*.html" />
             <fileset dir="src" includes="**/*.properties" />
+            <fileset dir="test/src" includes="**/*.java" />
             <fileset dir="test/src" includes="**/*.html" />
             <fileset dir="test/src" includes="**/*.pem" />
             <fileset dir="test/src" includes="**/*.properties" />
-            <fileset dir="test/src" includes="**/*.eml" />
-            <fileset dir="test/data" includes="**/*.pem" />
-            <fileset dir="test/data" includes="**/*.properties" />
+            <fileset dir="test/data" includes="**/*.message" />
             <fileset dir="test/data" includes="**/*.eml" />
             <fileset dir="test/data" includes="**/*.sig" />
-            <fileset dir="test/data" includes="**/*.p7m" />
             <fileset dir="test/data" includes="**/*.data" />
+            <fileset dir="test/data" includes="**/*.pem" />
+            <fileset dir="test/data" includes="**/*.p7m" />
             <fileset dir="test/data" includes="**/*.crt" />
             <fileset dir="test/data" includes="**/*.crl" />
-            <fileset dir="test/data" includes="**/*.message" />
             <fileset dir="test/data" includes="**/*.der" />
             <fileset dir="test/data" includes="**/*.csr" />
             <fileset dir="test/data" includes="**/*.cvcert" />
-        </copy>
-        <copy todir="${src.dir}" overwrite="true">
-            <fileset dir="jdk1.4" includes="**/*.java" />
-            <fileset dir="test/jdk1.4" includes="**/*.java" />
         </copy>
         <available classname="com.puppycrawl.tools.checkstyle.CheckStyleTask" property="checkstyle.on" />
     </target>
@@ -87,7 +57,7 @@
     
     <target name="checkstyle-off" unless="checkstyle.on">
     </target>
-
+    
     <target name="build" depends="init">
         <ant antfile="bc+-build.xml" dir="." />
         <ant antfile="bc+-build.xml" dir="." target="javadoc-lw" />
@@ -99,7 +69,7 @@
         <ant antfile="bc+-build.xml" dir="." target="javadoc-lw" />
     </target>
 
-    <target name="build-provider" depends="init,checkstyle-on,checkstyle-off">
+    <target name="build-provider" depends="init, checkstyle-on, checkstyle-off">
         <ant antfile="bc+-build.xml" dir="." target="build-provider" />
         <ant antfile="bc+-build.xml" dir="." target="javadoc-provider" />
     </target>

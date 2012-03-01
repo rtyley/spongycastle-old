@@ -32,11 +32,11 @@
     <property name="mail.target.docs.dir" value="${mail.target.dir}/docs" />
     <property name="mail.target.src.zip" value="${mail.target.dir}/src.zip" />
 
-    <property name="tsp.target" value="bctsp-${target.name}" />
-    <property name="tsp.target.dir" value="${artifacts.dir}/${tsp.target}" />
-    <property name="tsp.target.src.dir" value="${tsp.target.dir}/src" />
-    <property name="tsp.target.docs.dir" value="${tsp.target.dir}/docs" />
-    <property name="tsp.target.src.zip" value="${tsp.target.dir}/src.zip" />
+    <property name="pkix.target" value="bcpkix-${target.name}" />
+    <property name="pkix.target.dir" value="${artifacts.dir}/${pkix.target}" />
+    <property name="pkix.target.src.dir" value="${pkix.target.dir}/src" />
+    <property name="pkix.target.docs.dir" value="${pkix.target.dir}/docs" />
+    <property name="pkix.target.src.zip" value="${pkix.target.dir}/src.zip" />
 
     <property name="pg.target" value="bcpg-${target.name}" />
     <property name="pg.target.dir" value="${artifacts.dir}/${pg.target}" />
@@ -272,19 +272,15 @@
                  <exclude name="org/bouncycastle/**/test/*.cvcert" />
                  <exclude name="org/bouncycastle/**/test/*.csr" />
                  <exclude name="**/*.crl" />
-                 <exclude name="org/bouncycastle/mail/**/*.java" />
-                 <exclude name="org/bouncycastle/mail/**/*.properties" />
+                 <exclude name="org/bouncycastle/bcpg/**/*.java" />
+                 <exclude name="org/bouncycastle/cert/**/*.java" />
                  <exclude name="org/bouncycastle/cms/**/*.java" />
                  <exclude name="org/bouncycastle/eac/**/*.java" />
-                 <exclude name="org/bouncycastle/cert/**/*.java" />
-                 <exclude name="org/bouncycastle/pkcs/**/*.java" />
-                 <exclude name="org/bouncycastle/operator/**/*.java" />
-                 <exclude name="org/bouncycastle/jcajce/io/*.java" />
-                 <exclude name="org/bouncycastle/jcajce/*.java" />
-                 <exclude name="org/bouncycastle/sasn1/**/*.java" />
-                 <exclude name="org/bouncycastle/tsp/**/*.java" />
+                 <exclude name="org/bouncycastle/mail/**/*.*" />
                  <exclude name="org/bouncycastle/openpgp/**/*.java" />
-                 <exclude name="org/bouncycastle/bcpg/**/*.java" />
+                 <exclude name="org/bouncycastle/operator/**/*.java" />
+                 <exclude name="org/bouncycastle/pkcs/**/*.java" />
+                 <exclude name="org/bouncycastle/tsp/**/*.java" />
              </fileset>
              <fileset dir="${src.dir}" includes="org/bouncycastle/util/test/*.java" />
         </copy>
@@ -383,6 +379,8 @@
             <jarFileSet>
                 <include name="**/*.class"/>
                 <exclude name="**/IDEA*.class"/>
+                <exclude name="**/NTRU*.class" />
+                <exclude name="**/ntru/**/*.class" />
                 <include name="**/*.properties"/>
             </jarFileSet>
             <manifestElements>
@@ -419,10 +417,10 @@
         </packJar>
     </target>
 
-    <target name="build-libraries" depends="initMacros, build-mail, build-tsp, build-pg" />
+    <target name="build-libraries" depends="initMacros, build-pkix, build-pg, build-mail" />
 
     <!--
-          Mail
+          SMIME
     -->
     <target name="build-mail" depends="initMacros">
         <mkdir dir="${mail.target.dir}" />
@@ -433,13 +431,6 @@
              <fileset dir="${src.dir}">
                  <include name="org/bouncycastle/mail/**/*.java" />
                  <include name="org/bouncycastle/mail/**/*.properties" />
-                 <include name="org/bouncycastle/cms/**/*.java" />
-                 <include name="org/bouncycastle/eac/**/*.java" />
-                 <include name="org/bouncycastle/cert/**/*.java" />
-                 <include name="org/bouncycastle/pkcs/**/*.java" />
-                 <include name="org/bouncycastle/operator/**/*.java" />
-                 <include name="org/bouncycastle/jcajce/io/*.java" />
-                 <include name="org/bouncycastle/jcajce/*.java" />
                  <exclude name="**/*Test.java" />
                  <exclude name="**/*Tests.java" />
                  <exclude name="**/test/*.java" />
@@ -465,16 +456,18 @@
 
     </target>
 
-    <!--
-          TSP
-    -->
-    <target name="build-tsp" depends="initMacros">
-        <mkdir dir="${tsp.target.dir}" />
+    <target name="build-pkix" depends="initMacros">
+        <mkdir dir="${pkix.target.dir}" />
 
-        <copyStandardFiles toDir="${tsp.target.dir}" />
+        <copyStandardFiles toDir="${pkix.target.dir}" />
 
-        <copy todir="${tsp.target.src.dir}">
+        <copy todir="${pkix.target.src.dir}">
              <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/cms/**/*.java" />
+                 <include name="org/bouncycastle/eac/**/*.java" />
+                 <include name="org/bouncycastle/cert/**/*.java" />
+                 <include name="org/bouncycastle/pkcs/**/*.java" />
+                 <include name="org/bouncycastle/operator/**/*.java" />
                  <include name="org/bouncycastle/tsp/**/*.java" />
                  <exclude name="**/*Test.java" />
                  <exclude name="**/*Tests.java" />
@@ -482,14 +475,14 @@
              </fileset>
         </copy>
 
-        <compile target="${tsp.target}">
+        <compile target="${pkix.target}">
             <jarFileSet>
                 <include name="**/*.class"/>
                 <include name="**/*.properties"/>
             </jarFileSet>
             <manifestElements>
                 <attribute name="Manifest-Version" value="1.0" />
-                <attribute name="Extension-Name" value="org.bouncycastle.bctsp" />
+                <attribute name="Extension-Name" value="org.bouncycastle.bcpkix" />
                 <attribute name="Specification-Vendor" value="BouncyCastle.org" />
                 <attribute name="Specification-Version" value="1.1" />
                 <attribute name="Implementation-Vendor-Id" value="org.bouncycastle" />
@@ -650,7 +643,7 @@
         </junitreport>
     </target>
 
-    <target name="javadoc-libraries" depends="javadoc-mail, javadoc-tsp, javadoc-pg" />
+    <target name="javadoc-libraries" depends="javadoc-pkix, javadoc-mail, javadoc-pg" />
 
     <!--
           Provider JavaDoc
@@ -734,33 +727,14 @@
         <copy todir="${mail.target.src.dir}">
              <fileset dir="${src.dir}">
                  <include name="org/bouncycastle/mail/**/test/*.java" />
-                 <include name="org/bouncycastle/cms/**/test/*.java" />
-                 <include name="org/bouncycastle/eac/**/test/*.java" />
-                 <include name="org/bouncycastle/cert/**/test/*.java" />
-                 <include name="org/bouncycastle/pkcs/**/test/*.java" />
-                 <include name="org/bouncycastle/operator/**/test/*.java" />
                  <include name="org/bouncycastle/mail/**/*.html" />
-                 <include name="org/bouncycastle/cms/**/*.html" />
-                 <include name="org/bouncycastle/eac/**/*.html" />
-                 <include name="org/bouncycastle/cert/**/*.html" />
-                 <include name="org/bouncycastle/pkcs/**/*.html" />
-                 <include name="org/bouncycastle/operator/**/*.html" />
              </fileset>
         </copy>
 
         <compile-doc srcDir="${mail.target.src.dir}" docsDir="${artifacts.docs.dir}/bcmail">
             <docElements>
-                <package name="org.bouncycastle.cms.*" />
-                <package name="org.bouncycastle.eac.*" />
                 <package name="org.bouncycastle.mail.*" />
-                <package name="org.bouncycastle.cert.*" />
-                <package name="org.bouncycastle.pkcs.*" />
-                <package name="org.bouncycastle.operator.*" />
-                <group title="CMS Packages" packages="org.bouncycastle.cms*" />
-                <group title="Extended Access Control Packages" packages="org.bouncycastle.eac*" />
                 <group title="S/MIME Packages" packages="org.bouncycastle.mail.smime*" />
-                <group title="Certificate Packages" packages="org.bouncycastle.cert*" />
-                <group title="PKCS Packages" packages="org.bouncycastle.pkcs*" />
             </docElements>
         </compile-doc>
 
@@ -770,24 +744,43 @@
     </target>
 
     <!--
-          TSP JavaDoc
+          PKIX JavaDoc
     -->
-    <target name="javadoc-tsp" depends="initMacros">
-        <copy todir="${tsp.target.src.dir}">
+    <target name="javadoc-pkix" depends="initMacros">
+        <copy todir="${pkix.target.src.dir}">
              <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/cms/**/test/*.java" />
+                 <include name="org/bouncycastle/eac/**/test/*.java" />
+                 <include name="org/bouncycastle/cert/**/test/*.java" />
+                 <include name="org/bouncycastle/pkcs/**/test/*.java" />
+                 <include name="org/bouncycastle/operator/**/test/*.java" />
+                 <include name="org/bouncycastle/cms/**/*.html" />
+                 <include name="org/bouncycastle/eac/**/*.html" />
+                 <include name="org/bouncycastle/cert/**/*.html" />
+                 <include name="org/bouncycastle/pkcs/**/*.html" />
+                 <include name="org/bouncycastle/operator/**/*.html" />
                  <include name="org/bouncycastle/tsp/**/test/*.java" />
                  <include name="org/bouncycastle/tsp/**/*.html" />
              </fileset>
         </copy>
 
-        <compile-doc srcDir="${tsp.target.src.dir}" docsDir="${artifacts.docs.dir}/bctsp">
+        <compile-doc srcDir="${pkix.target.src.dir}" docsDir="${artifacts.docs.dir}/bcpkix">
             <docElements>
+                <package name="org.bouncycastle.cms.*" />
+                <package name="org.bouncycastle.eac.*" />
+                <package name="org.bouncycastle.cert.*" />
+                <package name="org.bouncycastle.pkcs.*" />
+                <package name="org.bouncycastle.operator.*" />
                 <package name="org.bouncycastle.tsp.*" />
                 <group title="TSP Packages" packages="org.bouncycastle.tsp*" />
+                <group title="CMS Packages" packages="org.bouncycastle.cms*" />
+                <group title="Extended Access Control Packages" packages="org.bouncycastle.eac*" />
+                <group title="Certificate Packages" packages="org.bouncycastle.cert*" />
+                <group title="PKCS Packages" packages="org.bouncycastle.pkcs*" />
             </docElements>
         </compile-doc>
 
-        <copy todir="${tsp.target.docs.dir}">
+        <copy todir="${pkix.target.docs.dir}">
              <fileset dir="${artifacts.docs.dir}/bctsp" />
         </copy>
     </target>
@@ -850,22 +843,45 @@
     <!--
         jar up the source directories
     -->
-    <target name="zip-src" depends="zip-src-check, zip-src-jce, zip-src-provider">
+    <target name="zip-src" depends="zip-src-check, zip-src-jce, zip-src-jce-ext, zip-src-provider, zip-src-provider-ext">
         <zip basedir="${mail.target.src.dir}" destfile="${mail.target.src.zip}" />
         <delete dir="${mail.target.src.dir}" />
-        <zip basedir="${tsp.target.src.dir}" destfile="${tsp.target.src.zip}" />
-        <delete dir="${tsp.target.src.dir}" />
+        <zip basedir="${pkix.target.src.dir}" destfile="${pkix.target.src.zip}" />
+        <delete dir="${pkix.target.src.dir}" />
         <zip basedir="${pg.target.src.dir}" destfile="${pg.target.src.zip}" />
         <delete dir="${pg.target.src.dir}" />
     </target>
 
     <target name="zip-src-jce" if="jce.present">
-        <zip basedir="${jce.target.src.dir}" destfile="${jce.target.src.zip}" />
-        <delete dir="${jce.target.src.dir}" />
+        <zip basedir="${jce.target.src.dir}" destfile="${jce.target.src.zip}">
+            <exclude name="**/IDEA*.java"/>
+            <exclude name="**/NTRU*.java" />
+            <exclude name="**/ntru/**/*.java" />
+        </zip>
     </target>
 
     <target name="zip-src-provider" if="provider.present">
-        <zip basedir="${provider.target.src.dir}" destfile="${provider.target.src.zip}"/>
+        <zip basedir="${provider.target.src.dir}" destfile="${provider.target.src.zip}">
+            <exclude name="**/IDEA*.java"/>
+            <exclude name="**/javax/crypto/**/*.java"/>
+            <exclude name="**/NTRU*.java" />
+            <exclude name="**/ntru/**/*.java" />
+        </zip>
+    </target>
+
+    <target name="zip-src-jce-ext" if="jce.present">
+        <zip basedir="${jce.target.src.dir}" destfile="${jce.target.src.zip}">
+        </zip>
+        <delete dir="${jce.target.src.dir}" />
+    </target>
+
+    <target name="zip-src-provider-ext" if="provider.present">
+        <zip basedir="${provider.target.src.dir}" destfile="${provider.target.src.zip}">
+                <exclude name="**/IDEA*.java"/>
+                <exclude name="**/javax/crypto/**/*.java"/>
+                <exclude name="**/NTRU*.java" />
+                <exclude name="**/ntru/**/*.java" />
+        </zip>
         <delete dir="${provider.target.src.dir}" />
     </target>
 

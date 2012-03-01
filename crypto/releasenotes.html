@@ -26,6 +26,18 @@ Release 1.47
 <h3>2.1.2 Defects Fixed</h3>
 <ul>
 <li>OpenPGP ID based certifications now support UTF-8. Note: this may mean that some old certifications no longer validate - if this happens a retry can be added using by converting the ID using Strings.fromByteArray(Strings.toByteArray(id)) - this will strip out the top byte in each character.</li>
+<li>IPv4/IPv6 parsing in CIDR no longer assumes octet boundaries on a mask.</li>
+<li>The CRL PKIX routines will now only rebuild the CRL as a last resort when looking for the certificate issuer.</li>
+<li>The DEK-Info header in PEM generation was lower case. It is now upper case in accordance with RFC 1421.</li>
+<li>An occasional issue causing an OutOfMemoryExcpetion for PGP compressed data generation has now been fixed.</li>
+<li>An illegal argument exception that could occur with multi-valued RDNs in the X509v3CertificateBuilder has been fixed.</li>
+<li>Shared secret calculation in IES could occassionally add a leading zero byte. This has been fixed.</li>
+<li>PEMReader would choke on a private key with an empty password. This has been fixed.</li>
+<li>The default MAC for a BKS key store was 2 bytes, this has been upgraded to 20 bytes.</li>
+<li>BKS key store loading no longer freezes on negative iteration counts.</li>
+<li>A regression in 1.46 which prevented parsing of PEM files with extra text at the start has been fixed.</li>
+<li>CMS secret key generation now attempts to stop use of invalid lengths with OIDs that predefine a key length.</li>
+<li>Check of DH parameter L could reject some valid keys. This is now fixed.</li>
 </ul>
 
 <h3>2.1.3 Additional Features and Functionality</h3>
@@ -35,7 +47,19 @@ Release 1.47
 <li>The OpenPGP API now supports operator based interfaces for most operations and lightweight implementations have been added for JCE related functionality.</li>
 <li>JcaSignerId and JceRecipientId will now match on serial number, issuer, and the subject key identifier if it's available.</li>
 <li>CMS Enveloped and AuthenticatedData now support OriginatorInfo.</li>
+<li>NTRU encryption and signing is now provided in the lightweight source and the ext version of the provider.</li>
+<li>There is now API support for Extended Access Control (EAC).</li>
+<li>The performance of CertPath building and validation has been improved.</li>
+<li>The TLS Java Client API has been updated to make support for GSI GSSAPI possible.</li>
+<li>Support for ECDSA_fixed_ECDH authentication has been added to the TLS client.</li>
+<li>Support for the Features signature sub-packet has been added to the PGP API.</li>
+<li>The number of lightweight operators for PGP and CMS/SMIME has been increased.</li>
 </ul>
+
+<h3>2.1.4 Other notes</h3>
+<p>
+Okay, so we have had to do another release. The issue we have run into is that we probably didn't go far enough in 1.46, but we are now confident that moving from this release to 2.0 should be largely just getting rid of deprecated methods. While this release does change a lot it is relatively straight forward to do a port and we have a <a href="http://www.bouncycastle.org/wiki/display/JA1/Porting+from+earlier+BC+releases+to+1.47+and+later">porting guide</a> which explains the important ones. The area there has been the most change in is the ASN.1 library which was in bad need of a rewrite after 10 years of patching. On the bright side the rewrite did allow us to eliminate a few problems and bugs in the ASN.1 library, so we have some hope anyone porting to it will also have similar benefits. As with 1.46 the other point of emphasis has been making sure interface support is available for operations across the major APIs, so the lightweight API or some local role your own methods can be used instead for doing encryption and signing.
+</p>
 
 <h3>2.2.1 Version</h3>
 Release 1.46
@@ -96,7 +120,7 @@ Release 1.45
 <ul>
 <li>Support for EC MQV has been added to the light weight API, provider, and the CMS/SMIME library.</li>
 </ul>
-<h3>2.2.4 Security Advisory</h3>
+<h3>2.3.4 Security Advisory</h3>
 <ul>
 <li>This version of the provider has been specifically reviewed to eliminate possible timing attacks on algorithms such as GCM and CCM mode.</li>
 </ul>
