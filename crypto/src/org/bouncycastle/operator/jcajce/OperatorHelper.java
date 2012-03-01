@@ -31,7 +31,7 @@ import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cms.jcajce.JcaJceExtHelper;
+import org.bouncycastle.jcajce.JcaJceHelper;
 import org.bouncycastle.operator.OperatorCreationException;
 
 class OperatorHelper
@@ -88,9 +88,9 @@ class OperatorHelper
         symmetricKeyAlgNames.put(PKCSObjectIdentifiers.RC2_CBC, "RC2");
     }
 
-    private JcaJceExtHelper helper;
+    private JcaJceHelper helper;
 
-    OperatorHelper(JcaJceExtHelper helper)
+    OperatorHelper(JcaJceHelper helper)
     {
         this.helper = helper;
     }
