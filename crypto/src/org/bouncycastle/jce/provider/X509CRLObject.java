@@ -213,7 +213,16 @@ public class X509CRLObject
             throw new CRLException("Signature algorithm on CertificateList does not match TBSCertList.");
         }
 
-        Signature sig = Signature.getInstance(getSigAlgName(), sigProvider);
+        Signature sig;
+
+        if (sigProvider != null)
+        {
+            sig = Signature.getInstance(getSigAlgName(), sigProvider);
+        }
+        else
+        {
+            sig = Signature.getInstance(getSigAlgName());
+        }
 
         sig.initVerify(key);
         sig.update(this.getTBSCertList());
