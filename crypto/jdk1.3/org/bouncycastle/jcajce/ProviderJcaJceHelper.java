@@ -30,7 +30,7 @@ import org.bouncycastle.operator.jcajce.JceSymmetricKeyUnwrapper;
 public class ProviderJcaJceHelper
     implements JcaJceExtHelper
 {
-    private final Provider provider;
+    protected final Provider provider;
 
     public ProviderJcaJceHelper(Provider provider)
     {
