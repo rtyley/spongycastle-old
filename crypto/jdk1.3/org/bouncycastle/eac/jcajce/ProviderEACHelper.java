@@ -6,7 +6,7 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 
 class ProviderEACHelper
-    extends EACHelper
+    implements EACHelper
 {
     private final Provider provider;
 
@@ -15,7 +15,7 @@ class ProviderEACHelper
         this.provider = provider;
     }
 
-    protected KeyFactory createKeyFactory(String type)
+    public KeyFactory createKeyFactory(String type)
         throws NoSuchAlgorithmException, NoSuchProviderException
     {
         return KeyFactory.getInstance(type, provider.getName());
