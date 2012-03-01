@@ -2,7 +2,6 @@ package org.bouncycastle.operator.jcajce;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -11,7 +10,6 @@ import java.security.Signature;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-//import java.security.spec.PSSParameterSpec;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,8 +30,10 @@ import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.jcajce.JcaJceHelper;
+import org.bouncycastle.cms.jcajce.JcaJceExtHelper;
 import org.bouncycastle.operator.OperatorCreationException;
+
+//import java.security.spec.PSSParameterSpec;
 
 class OperatorHelper
 {
@@ -89,9 +89,9 @@ class OperatorHelper
         symmetricKeyAlgNames.put(PKCSObjectIdentifiers.RC2_CBC, "RC2");
     }
 
-    private JcaJceHelper helper;
+    private JcaJceExtHelper helper;
 
-    OperatorHelper(JcaJceHelper helper)
+    OperatorHelper(JcaJceExtHelper helper)
     {
         this.helper = helper;
     }

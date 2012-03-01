@@ -2,10 +2,10 @@ package org.bouncycastle.openpgp.operator.jcajce;
 
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchProviderException;
-import java.security.NoSuchAlgorithmException;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Signature;
 
 import javax.crypto.Cipher;
@@ -15,7 +15,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
-import org.bouncycastle.jcajce.JcaJceHelper;
+import org.bouncycastle.cms.jcajce.JcaJceExtHelper;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.operator.PGPDataDecryptor;
@@ -23,9 +23,9 @@ import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
 
 class OperatorHelper
 {
-    private JcaJceHelper helper;
+    private JcaJceExtHelper helper;
 
-    OperatorHelper(JcaJceHelper helper)
+    OperatorHelper(JcaJceExtHelper helper)
     {
         this.helper = helper;
     }

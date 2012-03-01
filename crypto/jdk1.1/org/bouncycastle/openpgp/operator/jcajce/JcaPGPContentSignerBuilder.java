@@ -7,9 +7,9 @@ import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 
-import org.bouncycastle.jcajce.DefaultJcaJceHelper;
-import org.bouncycastle.jcajce.NamedJcaJceHelper;
-import org.bouncycastle.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle.cms.jcajce.DefaultJcaJceExtHelper;
+import org.bouncycastle.cms.jcajce.NamedJcaJceExtHelper;
+import org.bouncycastle.cms.jcajce.ProviderJcaJceExtHelper;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.operator.PGPContentSigner;
@@ -20,7 +20,7 @@ import org.bouncycastle.util.io.TeeOutputStream;
 public class JcaPGPContentSignerBuilder
     implements PGPContentSignerBuilder
 {
-    private OperatorHelper              helper = new OperatorHelper(new DefaultJcaJceHelper());
+    private OperatorHelper              helper = new OperatorHelper(new DefaultJcaJceExtHelper());
     private JcaPGPDigestCalculatorProviderBuilder digestCalculatorProviderBuilder = new JcaPGPDigestCalculatorProviderBuilder();
     private JcaPGPKeyConverter          keyConverter = new JcaPGPKeyConverter();
     private int                         hashAlgorithm;
@@ -42,7 +42,7 @@ public class JcaPGPContentSignerBuilder
 
     public JcaPGPContentSignerBuilder setProvider(Provider provider)
     {
-        this.helper = new OperatorHelper(new ProviderJcaJceHelper(provider));
+        this.helper = new OperatorHelper(new ProviderJcaJceExtHelper(provider));
         keyConverter.setProvider(provider);
         digestCalculatorProviderBuilder.setProvider(provider);
 
@@ -51,7 +51,7 @@ public class JcaPGPContentSignerBuilder
 
     public JcaPGPContentSignerBuilder setProvider(String providerName)
     {
-        this.helper = new OperatorHelper(new NamedJcaJceHelper(providerName));
+        this.helper = new OperatorHelper(new NamedJcaJceExtHelper(providerName));
         keyConverter.setProvider(providerName);
         digestCalculatorProviderBuilder.setProvider(providerName);
 
