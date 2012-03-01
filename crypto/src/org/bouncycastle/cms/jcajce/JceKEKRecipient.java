@@ -8,9 +8,6 @@ import javax.crypto.SecretKey;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.KEKRecipient;
-import org.bouncycastle.jcajce.DefaultJcaJceHelper;
-import org.bouncycastle.jcajce.NamedJcaJceHelper;
-import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.OperatorException;
 import org.bouncycastle.operator.SymmetricKeyUnwrapper;
 
@@ -19,7 +16,7 @@ public abstract class JceKEKRecipient
 {
     private SecretKey recipientKey;
 
-    protected EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
+    protected EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceExtHelper());
     protected EnvelopedDataHelper contentHelper = helper;
 
     public JceKEKRecipient(SecretKey recipientKey)
@@ -35,7 +32,7 @@ public abstract class JceKEKRecipient
      */
     public JceKEKRecipient setProvider(Provider provider)
     {
-        this.helper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+        this.helper = new EnvelopedDataHelper(new ProviderJcaJceExtHelper(provider));
         this.contentHelper = helper;
 
         return this;
@@ -49,7 +46,7 @@ public abstract class JceKEKRecipient
      */
     public JceKEKRecipient setProvider(String providerName)
     {
-        this.helper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
+        this.helper = new EnvelopedDataHelper(new NamedJcaJceExtHelper(providerName));
         this.contentHelper = helper;
 
         return this;
@@ -63,7 +60,7 @@ public abstract class JceKEKRecipient
      */
     public JceKEKRecipient setContentProvider(Provider provider)
     {
-        this.contentHelper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+        this.contentHelper = new EnvelopedDataHelper(new ProviderJcaJceExtHelper(provider));
 
         return this;
     }
@@ -76,7 +73,7 @@ public abstract class JceKEKRecipient
      */
     public JceKEKRecipient setContentProvider(String providerName)
     {
-        this.contentHelper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
+        this.contentHelper = new EnvelopedDataHelper(new NamedJcaJceExtHelper(providerName));
 
         return this;
     }

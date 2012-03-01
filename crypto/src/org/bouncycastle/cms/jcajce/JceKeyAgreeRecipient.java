@@ -27,9 +27,6 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cms.CMSEnvelopedGenerator;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.KeyAgreeRecipient;
-import org.bouncycastle.jcajce.DefaultJcaJceHelper;
-import org.bouncycastle.jcajce.NamedJcaJceHelper;
-import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.jce.spec.MQVPrivateKeySpec;
 import org.bouncycastle.jce.spec.MQVPublicKeySpec;
 
@@ -37,7 +34,7 @@ public abstract class JceKeyAgreeRecipient
     implements KeyAgreeRecipient
 {
     private PrivateKey recipientKey;
-    protected EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
+    protected EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceExtHelper());
     protected EnvelopedDataHelper contentHelper = helper;
 
     public JceKeyAgreeRecipient(PrivateKey recipientKey)
@@ -53,7 +50,7 @@ public abstract class JceKeyAgreeRecipient
      */
     public JceKeyAgreeRecipient setProvider(Provider provider)
     {
-        this.helper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+        this.helper = new EnvelopedDataHelper(new ProviderJcaJceExtHelper(provider));
         this.contentHelper = helper;
 
         return this;
@@ -67,7 +64,7 @@ public abstract class JceKeyAgreeRecipient
      */
     public JceKeyAgreeRecipient setProvider(String providerName)
     {
-        this.helper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
+        this.helper = new EnvelopedDataHelper(new NamedJcaJceExtHelper(providerName));
         this.contentHelper = helper;
 
         return this;

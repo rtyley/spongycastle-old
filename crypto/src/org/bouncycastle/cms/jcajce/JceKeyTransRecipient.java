@@ -11,9 +11,6 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.KeyTransRecipient;
-import org.bouncycastle.jcajce.DefaultJcaJceHelper;
-import org.bouncycastle.jcajce.NamedJcaJceHelper;
-import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.OperatorException;
 import org.bouncycastle.operator.jcajce.JceAsymmetricKeyUnwrapper;
 
@@ -22,7 +19,7 @@ public abstract class JceKeyTransRecipient
 {
     private PrivateKey recipientKey;
 
-    protected EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
+    protected EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceExtHelper());
     protected EnvelopedDataHelper contentHelper = helper;
     protected Map extraMappings = new HashMap();
 
@@ -39,7 +36,7 @@ public abstract class JceKeyTransRecipient
      */
     public JceKeyTransRecipient setProvider(Provider provider)
     {
-        this.helper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+        this.helper = new EnvelopedDataHelper(new ProviderJcaJceExtHelper(provider));
         this.contentHelper = helper;
 
         return this;
@@ -53,7 +50,7 @@ public abstract class JceKeyTransRecipient
      */
     public JceKeyTransRecipient setProvider(String providerName)
     {
-        this.helper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
+        this.helper = new EnvelopedDataHelper(new NamedJcaJceExtHelper(providerName));
         this.contentHelper = helper;
 
         return this;

@@ -9,9 +9,6 @@ import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.jcajce.DefaultJcaJceHelper;
-import org.bouncycastle.jcajce.NamedJcaJceHelper;
-import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 
 class CMSUtils
 {
@@ -49,11 +46,11 @@ class CMSUtils
     {
         if (provider != null)
         {
-            return new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+            return new EnvelopedDataHelper(new ProviderJcaJceExtHelper(provider));
         }
         else
         {
-            return new EnvelopedDataHelper(new DefaultJcaJceHelper());
+            return new EnvelopedDataHelper(new DefaultJcaJceExtHelper());
         }
     }
 
@@ -61,11 +58,11 @@ class CMSUtils
     {
         if (providerName != null)
         {
-            return new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
+            return new EnvelopedDataHelper(new NamedJcaJceExtHelper(providerName));
         }
         else
         {
-            return new EnvelopedDataHelper(new DefaultJcaJceHelper());
+            return new EnvelopedDataHelper(new DefaultJcaJceExtHelper());
         }
     }
 

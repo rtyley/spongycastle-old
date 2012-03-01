@@ -80,7 +80,7 @@ public class NistCertPathReviewerTest
                 new String[] { "BadSignedCACRL", TRUST_ANCHOR_ROOT_CRL},
                 1,
                 "CertPathReviewer.signatureNotVerified",
-                "The certificate signature is invalid. A java.security.InvalidKeyException occurred.");
+                "The certificate signature is invalid. A java.security.SignatureException occurred.");
     }
     
     public void testInvalidEESignatureTest3()
@@ -91,7 +91,7 @@ public class NistCertPathReviewerTest
             new String[] { TRUST_ANCHOR_ROOT_CRL, GOOD_CA_CRL },
             0,
             "CertPathReviewer.signatureNotVerified",
-            "The certificate signature is invalid. A java.security.InvalidKeyException occurred.");
+            "The certificate signature is invalid. A java.security.SignatureException occurred.");
     }
     
     public void testValidDSASignaturesTest4()
@@ -118,7 +118,7 @@ public class NistCertPathReviewerTest
                 new String[] { TRUST_ANCHOR_ROOT_CRL, "DSACACRL" },
                 0,
                 "CertPathReviewer.signatureNotVerified",
-                "The certificate signature is invalid. A java.security.InvalidKeyException occurred.");
+                "The certificate signature is invalid. A java.security.SignatureException occurred.");
     }
     
     public void testCANotBeforeDateTest1()

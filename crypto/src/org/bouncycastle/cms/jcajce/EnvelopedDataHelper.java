@@ -42,7 +42,6 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.jcajce.JcaJceHelper;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.SymmetricKeyUnwrapper;
 import org.bouncycastle.operator.jcajce.JceAsymmetricKeyUnwrapper;
@@ -122,9 +121,9 @@ class EnvelopedDataHelper
         0x3b, 0x05, 0x03, 0x54, 0x60, 0x48, 0x65, 0x18, 0xd2, 0xcd, 0x5f, 0x32, 0x88, 0x0e, 0x35, 0xfd
     };
 
-    private JcaJceHelper        helper;
+    private JcaJceExtHelper helper;
 
-    EnvelopedDataHelper(JcaJceHelper helper)
+    EnvelopedDataHelper(JcaJceExtHelper helper)
     {
         this.helper = helper;
     }

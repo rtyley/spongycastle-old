@@ -18,9 +18,6 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.jcajce.DefaultJcaJceHelper;
-import org.bouncycastle.jcajce.NamedJcaJceHelper;
-import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.jcajce.io.MacOutputStream;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.MacCalculator;
@@ -30,7 +27,7 @@ public class JceCMSMacCalculatorBuilder
     private final ASN1ObjectIdentifier macOID;
     private final int                  keySize;
 
-    private EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceHelper());
+    private EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceExtHelper());
     private SecureRandom random;
     private MacOutputStream macOutputStream;
 
@@ -47,14 +44,14 @@ public class JceCMSMacCalculatorBuilder
 
     public JceCMSMacCalculatorBuilder setProvider(Provider provider)
     {
-        this.helper = new EnvelopedDataHelper(new ProviderJcaJceHelper(provider));
+        this.helper = new EnvelopedDataHelper(new ProviderJcaJceExtHelper(provider));
 
         return this;
     }
 
     public JceCMSMacCalculatorBuilder setProvider(String providerName)
     {
-        this.helper = new EnvelopedDataHelper(new NamedJcaJceHelper(providerName));
+        this.helper = new EnvelopedDataHelper(new NamedJcaJceExtHelper(providerName));
 
         return this;
     }

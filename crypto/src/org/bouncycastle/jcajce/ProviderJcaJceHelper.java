@@ -6,7 +6,6 @@ import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Signature;
 import java.security.cert.CertificateException;
@@ -17,17 +16,11 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.operator.SymmetricKeyUnwrapper;
-import org.bouncycastle.operator.jcajce.JceAsymmetricKeyUnwrapper;
-import org.bouncycastle.operator.jcajce.JceSymmetricKeyUnwrapper;
 
 public class ProviderJcaJceHelper
     implements JcaJceHelper
 {
-    private final Provider provider;
+    protected final Provider provider;
 
     public ProviderJcaJceHelper(Provider provider)
     {
@@ -99,15 +92,5 @@ public class ProviderJcaJceHelper
         throws NoSuchAlgorithmException, CertificateException
     {
         return CertificateFactory.getInstance(algorithm, provider);
-    }
-
-    public JceAsymmetricKeyUnwrapper createAsymmetricUnwrapper(AlgorithmIdentifier keyEncryptionAlgorithm, PrivateKey keyEncryptionKey)
-    {
-        return new JceAsymmetricKeyUnwrapper(keyEncryptionAlgorithm, keyEncryptionKey).setProvider(provider);
-    }
-
-    public SymmetricKeyUnwrapper createSymmetricUnwrapper(AlgorithmIdentifier keyEncryptionAlgorithm, SecretKey keyEncryptionKey)
-    {
-        return new JceSymmetricKeyUnwrapper(keyEncryptionAlgorithm, keyEncryptionKey).setProvider(provider);
     }
 }
