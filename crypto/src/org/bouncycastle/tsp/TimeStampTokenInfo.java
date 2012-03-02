@@ -104,7 +104,16 @@ public class TimeStampTokenInfo
         return tstInfo.getEncoded();
     }
 
+    /**
+     * @deprecated use toASN1Structure
+     * @return
+     */
     public TSTInfo toTSTInfo()
+    {
+        return tstInfo;
+    }
+
+    public TSTInfo toASN1Structure()
     {
         return tstInfo;
     }

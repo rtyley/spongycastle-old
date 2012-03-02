@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.NoSuchProviderException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -22,8 +24,9 @@ import org.bouncycastle.asn1.x509.X509Extensions;
  * Base class for an RFC 3161 Time Stamp Request.
  */
 public class TimeStampRequest
-    implements java.security.cert.X509Extension
 {
+    private static Set EMPTY_SET = Collections.unmodifiableSet(new HashSet());
+
     private TimeStampReq req;
     private X509Extensions extensions;
 
@@ -240,6 +243,7 @@ public class TimeStampRequest
 
     /* (non-Javadoc)
      * @see java.security.cert.X509Extension#getExtensionValue(java.lang.String)
+     * @deprecated use getExtension(ASN1ObjectIdentifier)
      */
     public byte[] getExtensionValue(String oid)
     {
@@ -264,46 +268,32 @@ public class TimeStampRequest
 
         return null;
     }
-    
-    private Set getExtensionOIDS(
-        boolean critical)
-    {
-        Set             set = new HashSet();
-        X509Extensions  extensions = req.getExtensions();
 
-        if (extensions != null)
-        {
-            Enumeration     e = extensions.oids();
-
-            while (e.hasMoreElements())
-            {
-                DERObjectIdentifier                      oid = (DERObjectIdentifier)e.nextElement();
-                org.bouncycastle.asn1.x509.X509Extension ext = extensions.getExtension(oid);
-
-                if (ext.isCritical() == critical)
-                {
-                    set.add(oid.getId());
-                }
-            }
-
-            return set;
-        }
-
-        return null;
-    }
-
+    /**
+     * Returns a set of ASN1ObjectIdentifiers giving the non-critical extensions.
+     * @return a set of ASN1ObjectIdentifiers.
+     */
     public Set getNonCriticalExtensionOIDs() 
     {
-        return getExtensionOIDS(false);
+        if (extensions == null)
+        {
+            return EMPTY_SET;
+        }
+
+        return Collections.unmodifiableSet(new HashSet(Arrays.asList(extensions.getNonCriticalExtensionOIDs())));
     }
-    
+
+    /**
+     * Returns a set of ASN1ObjectIdentifiers giving the critical extensions.
+     * @return a set of ASN1ObjectIdentifiers.
+     */
     public Set getCriticalExtensionOIDs()
     {
-        return getExtensionOIDS(true);
-    }
-    
-    public boolean hasUnsupportedCriticalExtension()
-    {
-        return false;
+        if (extensions == null)
+        {
+            return EMPTY_SET;
+        }
+
+        return Collections.unmodifiableSet(new HashSet(Arrays.asList(extensions.getCriticalExtensionOIDs())));
     }
 }
