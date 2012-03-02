@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.Evidence;
@@ -88,7 +89,7 @@ class TimeStampDataUtil
             token = this.getTimeStampToken(timeStamps[0]);
 
             TimeStampTokenInfo info = token.getTimeStampInfo();
-            String algOID = info.getMessageImprintAlgOID();
+            ASN1ObjectIdentifier algOID = info.getMessageImprintAlgOID();
 
             DigestCalculator calc = calculatorProvider.get(new AlgorithmIdentifier(algOID));
 

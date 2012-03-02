@@ -6,10 +6,13 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
@@ -35,22 +38,40 @@ public class TimeStampResponseGenerator
     private Set                     acceptedAlgorithms;
     private Set                     acceptedPolicies;
     private Set                     acceptedExtensions;
-    
+
+    /**
+     *
+     * @param tokenGenerator
+     * @param acceptedAlgorithms a set of OIDs giving accepted algorithms.
+     */
     public TimeStampResponseGenerator(
         TimeStampTokenGenerator tokenGenerator,
         Set                     acceptedAlgorithms)
     {
         this(tokenGenerator, acceptedAlgorithms, null, null);
     }
-    
+
+    /**
+     *
+     * @param tokenGenerator
+     * @param acceptedAlgorithms a set of OIDs giving accepted algorithms.
+     * @param acceptedPolicies if non-null a set of policies OIDs we are willing to sign under.
+     */
     public TimeStampResponseGenerator(
         TimeStampTokenGenerator tokenGenerator,
         Set                     acceptedAlgorithms,
-        Set                     acceptedPolicy)
+        Set                     acceptedPolicies)
     {
-        this(tokenGenerator, acceptedAlgorithms, acceptedPolicy, null);
+        this(tokenGenerator, acceptedAlgorithms, acceptedPolicies, null);
     }
 
+    /**
+     *
+     * @param tokenGenerator
+     * @param acceptedAlgorithms a set of OIDs giving accepted algorithms.
+     * @param acceptedPolicies if non-null a set of policies OIDs we are willing to sign under.
+     * @param acceptedExtensions if non-null a set of extensions OIDs we are willing to accept.
+     */
     public TimeStampResponseGenerator(
         TimeStampTokenGenerator tokenGenerator,
         Set                     acceptedAlgorithms,
@@ -58,9 +79,9 @@ public class TimeStampResponseGenerator
         Set                     acceptedExtensions)
     {
         this.tokenGenerator = tokenGenerator;
-        this.acceptedAlgorithms = acceptedAlgorithms;
-        this.acceptedPolicies = acceptedPolicies;
-        this.acceptedExtensions = acceptedExtensions;
+        this.acceptedAlgorithms = convert(acceptedAlgorithms);
+        this.acceptedPolicies = convert(acceptedPolicies);
+        this.acceptedExtensions = convert(acceptedExtensions);
 
         statusStrings = new ASN1EncodableVector();
     }
@@ -284,5 +305,31 @@ public class TimeStampResponseGenerator
         {
             throw new TSPException("created badly formatted response!");
         }
+    }
+
+    private Set<ASN1ObjectIdentifier> convert(Set orig)
+    {
+        if (orig == null)
+        {
+            return orig;
+        }
+
+        Set con = new HashSet(orig.size());
+
+        for (Iterator it = orig.iterator(); it.hasNext();)
+        {
+            Object o = it.next();
+
+            if (o instanceof String)
+            {
+                con.add(new ASN1ObjectIdentifier((String)o));
+            }
+            else
+            {
+                con.add(o);
+            }
+        }
+
+        return con;
     }
 }

@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.Date;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.tsp.Accuracy;
 import org.bouncycastle.asn1.tsp.TSTInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -55,9 +56,9 @@ public class TimeStampTokenInfo
         return null;
     }
     
-    public String getPolicy()
+    public ASN1ObjectIdentifier getPolicy()
     {
-        return tstInfo.getPolicy().getId();
+        return tstInfo.getPolicy();
     }
     
     public BigInteger getSerialNumber()
@@ -88,9 +89,9 @@ public class TimeStampTokenInfo
         return tstInfo.getMessageImprint().getHashAlgorithm();
     }
 
-    public String getMessageImprintAlgOID()
+    public ASN1ObjectIdentifier getMessageImprintAlgOID()
     {
-        return tstInfo.getMessageImprint().getHashAlgorithm().getObjectId().getId();
+        return tstInfo.getMessageImprint().getHashAlgorithm().getAlgorithm();
     }
 
     public byte[] getMessageImprintDigest()

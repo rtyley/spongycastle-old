@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -76,9 +77,9 @@ public class TimeStampRequest
         return req.getVersion().getValue().intValue();
     }
 
-    public String getMessageImprintAlgOID()
+    public ASN1ObjectIdentifier getMessageImprintAlgOID()
     {
-        return req.getMessageImprint().getHashAlgorithm().getObjectId().getId();
+        return req.getMessageImprint().getHashAlgorithm().getAlgorithm();
     }
 
     public byte[] getMessageImprintDigest()
@@ -86,11 +87,11 @@ public class TimeStampRequest
         return req.getMessageImprint().getHashedMessage();
     }
 
-    public String getReqPolicy()
+    public ASN1ObjectIdentifier getReqPolicy()
     {
         if (req.getReqPolicy() != null)
         {
-            return req.getReqPolicy().getId();
+            return req.getReqPolicy();
         }
         else
         {
@@ -140,43 +141,28 @@ public class TimeStampRequest
         String  provider)
         throws TSPException, NoSuchProviderException
     {
-        if (!algorithms.contains(this.getMessageImprintAlgOID()))
-        {
-            throw new TSPValidationException("request contains unknown algorithm.", PKIFailureInfo.badAlg);
-        }
-        
-        if (policies != null && this.getReqPolicy() != null && !policies.contains(this.getReqPolicy()))
-        {
-            throw new TSPValidationException("request contains unknown policy.", PKIFailureInfo.unacceptedPolicy);
-        }
-        
-        if (this.getExtensions() != null && extensions != null)
-        {
-            Enumeration en = this.getExtensions().oids();
-            while(en.hasMoreElements())
-            {
-                String  oid = ((DERObjectIdentifier)en.nextElement()).getId();
-                if (!extensions.contains(oid))
-                {
-                    throw new TSPValidationException("request contains unknown extension.", PKIFailureInfo.unacceptedExtension);
-                }
-            }
-        }
-        
-        int digestLength = TSPUtil.getDigestLength(this.getMessageImprintAlgOID());
-        
-        if (digestLength != this.getMessageImprintDigest().length)
-        {
-            throw new TSPValidationException("imprint digest the wrong length.", PKIFailureInfo.badDataFormat);
-        }
+        validate(algorithms, policies, extensions);
     }
 
+    /**
+     * Validate the timestamp request, checking the digest to see if it is of an
+     * accepted type and whether it is of the correct length for the algorithm specified.
+     *
+     * @param algorithms a set of OIDs giving accepted algorithms.
+     * @param policies if non-null a set of policies OIDs we are willing to sign under.
+     * @param extensions if non-null a set of extensions OIDs we are willing to accept.
+     * @throws TSPException if the request is invalid, or processing fails.
+     */
     public void validate(
-        Set     algorithms,
-        Set     policies,
-        Set     extensions)
+        Set    algorithms,
+        Set    policies,
+        Set    extensions)
         throws TSPException
     {
+        algorithms = convert(algorithms);
+        policies = convert(policies);
+        extensions = convert(extensions);
+
         if (!algorithms.contains(this.getMessageImprintAlgOID()))
         {
             throw new TSPValidationException("request contains unknown algorithm.", PKIFailureInfo.badAlg);
@@ -200,7 +186,7 @@ public class TimeStampRequest
             }
         }
 
-        int digestLength = TSPUtil.getDigestLength(this.getMessageImprintAlgOID());
+        int digestLength = TSPUtil.getDigestLength(this.getMessageImprintAlgOID().getId());
 
         if (digestLength != this.getMessageImprintDigest().length)
         {
@@ -210,6 +196,7 @@ public class TimeStampRequest
 
    /**
     * return the ASN.1 encoded representation of this object.
+    * @return the default ASN,1 byte encoding for the object.
     */
     public byte[] getEncoded() throws IOException
     {
@@ -251,7 +238,7 @@ public class TimeStampRequest
 
         if (exts != null)
         {
-            org.bouncycastle.asn1.x509.X509Extension   ext = exts.getExtension(new DERObjectIdentifier(oid));
+            X509Extension   ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
 
             if (ext != null)
             {
@@ -273,7 +260,7 @@ public class TimeStampRequest
      * Returns a set of ASN1ObjectIdentifiers giving the non-critical extensions.
      * @return a set of ASN1ObjectIdentifiers.
      */
-    public Set getNonCriticalExtensionOIDs() 
+    public Set getNonCriticalExtensionOIDs()
     {
         if (extensions == null)
         {
@@ -295,5 +282,31 @@ public class TimeStampRequest
         }
 
         return Collections.unmodifiableSet(new HashSet(Arrays.asList(extensions.getCriticalExtensionOIDs())));
+    }
+
+    private Set convert(Set orig)
+    {
+        if (orig == null)
+        {
+            return orig;
+        }
+
+        Set con = new HashSet(orig.size());
+
+        for (Iterator it = orig.iterator(); it.hasNext();)
+        {
+            Object o = it.next();
+
+            if (o instanceof String)
+            {
+                con.add(new ASN1ObjectIdentifier((String)o));
+            }
+            else
+            {
+                con.add(o);
+            }
+        }
+
+        return con;
     }
 }

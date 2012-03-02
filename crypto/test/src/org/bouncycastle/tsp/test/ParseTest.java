@@ -2,12 +2,12 @@ package org.bouncycastle.tsp.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.cert.CertStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.cert.CertStore;
 
 import junit.framework.TestCase;
-
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.cmp.PKIStatus;
 import org.bouncycastle.tsp.TSPAlgorithms;
@@ -247,7 +247,7 @@ public class ParseTest
 
     private void requestParse(
         byte[]  request,
-        String  algorithm) 
+        ASN1ObjectIdentifier algorithm)
         throws IOException
     {
         TimeStampRequest    req = new TimeStampRequest(request);
@@ -260,7 +260,7 @@ public class ParseTest
         
         if (request != sha1Request && request != sha1noNonse)
         {
-            if (!req.getReqPolicy().equals(TSPTestUtil.EuroPKI_TSA_Test_Policy.getId()))
+            if (!req.getReqPolicy().equals(TSPTestUtil.EuroPKI_TSA_Test_Policy))
             {
                 fail("" + algorithm + " failed policy check.");
             }
@@ -276,9 +276,9 @@ public class ParseTest
         
         assertEquals("version not 1", 1, req.getVersion());
         
-        assertNull("critical extensions found when none expected", req.getCriticalExtensionOIDs());
+        assertEquals("critical extensions found when none expected", 0, req.getCriticalExtensionOIDs().size());
         
-        assertNull("non-critical extensions found when none expected", req.getNonCriticalExtensionOIDs());
+        assertEquals("non-critical extensions found when none expected", 0, req.getNonCriticalExtensionOIDs().size());
         
         if (request != sha1noNonse)
         {
@@ -313,7 +313,7 @@ public class ParseTest
     private void responseParse(
         byte[]  request,
         byte[]  response,
-        String  algorithm) 
+        ASN1ObjectIdentifier algorithm)
         throws Exception
     {
         TimeStampRequest  req = new TimeStampRequest(request);

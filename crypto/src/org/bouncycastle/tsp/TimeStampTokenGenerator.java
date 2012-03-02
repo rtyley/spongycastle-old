@@ -71,7 +71,7 @@ public class TimeStampTokenGenerator
 
     GeneralName tsa = null;
     
-    private String  tsaPolicyOID;
+    private ASN1ObjectIdentifier  tsaPolicyOID;
 
     PrivateKey      key;
     X509Certificate cert;
@@ -93,7 +93,7 @@ public class TimeStampTokenGenerator
         throws IllegalArgumentException, TSPException
     {
         this.signerInfoGen = signerInfoGen;
-        this.tsaPolicyOID = tsaPolicy.getId();
+        this.tsaPolicyOID = tsaPolicy;
 
         if (!signerInfoGen.hasAssociatedCertificate())
         {
@@ -143,6 +143,20 @@ public class TimeStampTokenGenerator
     }
 
     /**
+     * basic creation - only the default attributes will be included here.
+     * @deprecated use SignerInfoGenerator constructor
+     */
+    public TimeStampTokenGenerator(
+        PrivateKey      key,
+        X509Certificate cert,
+        ASN1ObjectIdentifier          digestOID,
+        String          tsaPolicyOID)
+        throws IllegalArgumentException, TSPException
+    {
+        this(key, cert, digestOID.getId(), tsaPolicyOID, null, null);
+    }
+
+    /**
      * create with a signer with extra signed/unsigned attributes.
      * @deprecated use SignerInfoGenerator constructor
      */
@@ -158,7 +172,7 @@ public class TimeStampTokenGenerator
         this.key = key;
         this.cert = cert;
         this.digestOID = digestOID;
-        this.tsaPolicyOID = tsaPolicyOID;
+        this.tsaPolicyOID = new ASN1ObjectIdentifier(tsaPolicyOID);
         this.unsignedAttr = unsignedAttr;
 
         //
@@ -340,7 +354,7 @@ public class TimeStampTokenGenerator
             throw new IllegalStateException("can only use this method with SignerInfoGenerator constructor");
         }
 
-        ASN1ObjectIdentifier digestAlgOID = new ASN1ObjectIdentifier(request.getMessageImprintAlgOID());
+        ASN1ObjectIdentifier digestAlgOID = request.getMessageImprintAlgOID();
 
         AlgorithmIdentifier algID = new AlgorithmIdentifier(digestAlgOID, new DERNull());
         MessageImprint      messageImprint = new MessageImprint(algID, request.getMessageImprintDigest());
@@ -381,10 +395,10 @@ public class TimeStampTokenGenerator
             nonce = new ASN1Integer(request.getNonce());
         }
 
-        ASN1ObjectIdentifier tsaPolicy = new ASN1ObjectIdentifier(tsaPolicyOID);
+        ASN1ObjectIdentifier tsaPolicy = tsaPolicyOID;
         if (request.getReqPolicy() != null)
         {
-            tsaPolicy = new ASN1ObjectIdentifier(request.getReqPolicy());
+            tsaPolicy = request.getReqPolicy();
         }
 
         TSTInfo tstInfo = new TSTInfo(tsaPolicy,

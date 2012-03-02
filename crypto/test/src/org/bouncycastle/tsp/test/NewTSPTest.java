@@ -15,6 +15,8 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
@@ -61,7 +63,8 @@ public class NewTSPTest
 
             Store certs = new JcaCertStore(certList);
             
-            basicTest(origKP.getPrivate(), origCert, certs);     
+            basicTest(origKP.getPrivate(), origCert, certs);
+            basicTestWithTSA(origKP.getPrivate(), origCert, certs);
             responseValidationTest(origKP.getPrivate(), origCert, certs);
             incorrectHashTest(origKP.getPrivate(), origCert, certs);
             badAlgorithmTest(origKP.getPrivate(), origCert, certs);
@@ -102,7 +105,37 @@ public class NewTSPTest
 
         assertNotNull("no signingCertificate attribute found", table.get(PKCSObjectIdentifiers.id_aa_signingCertificate));
     }
-    
+
+    private void basicTestWithTSA(
+        PrivateKey      privateKey,
+        X509Certificate cert,
+        Store certs)
+        throws Exception
+    {
+        TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
+                new JcaSimpleSignerInfoGeneratorBuilder().build("SHA1withRSA", privateKey, cert), new ASN1ObjectIdentifier("1.2"));
+
+        tsTokenGen.addCertificates(certs);
+        tsTokenGen.setTSA(new GeneralName(new X500Name("CN=Test")));
+
+        TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
+        TimeStampRequest          request = reqGen.generate(TSPAlgorithms.SHA1, new byte[20], BigInteger.valueOf(100));
+
+        TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
+
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date());
+
+        tsResp = new TimeStampResponse(tsResp.getEncoded());
+
+        TimeStampToken  tsToken = tsResp.getTimeStampToken();
+
+        tsToken.validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert));
+
+        AttributeTable  table = tsToken.getSignedAttributes();
+
+        assertNotNull("no signingCertificate attribute found", table.get(PKCSObjectIdentifiers.id_aa_signingCertificate));
+    }
+
     private void responseValidationTest(
         PrivateKey      privateKey,
         X509Certificate cert,
@@ -126,7 +159,7 @@ public class NewTSPTest
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        tsToken.validate(cert, "BC");
+        tsToken.validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert));
         
         //
         // check validation
@@ -227,7 +260,7 @@ public class NewTSPTest
         tsTokenGen.addCertificates(certs);
 
         TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
-        TimeStampRequest            request = reqGen.generate("1.2.3.4.5", new byte[20]);
+        TimeStampRequest            request = reqGen.generate(new ASN1ObjectIdentifier("1.2.3.4.5"), new byte[20]);
 
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
@@ -268,7 +301,7 @@ public class NewTSPTest
         tsTokenGen.addCertificates(certs);
 
         TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
-        TimeStampRequest            request = reqGen.generate("1.2.3.4.5", new byte[20]);
+        TimeStampRequest            request = reqGen.generate(new ASN1ObjectIdentifier("1.2.3.4.5"), new byte[20]);
 
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
@@ -371,7 +404,7 @@ public class NewTSPTest
         
         assertNull(tsToken.getTimeStampInfo().getGenTimeAccuracy());  // check for abscence of accuracy
         
-        assertEquals("1.2", tsToken.getTimeStampInfo().getPolicy());
+        assertEquals("1.2", tsToken.getTimeStampInfo().getPolicy().getId());
         
         try
         {
@@ -449,7 +482,7 @@ public class NewTSPTest
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        tsToken.validate(cert, "BC");
+        tsToken.validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert));
         
         //
         // check validation
@@ -472,7 +505,7 @@ public class NewTSPTest
         
         assertEquals(new BigInteger("23"), tstInfo.getSerialNumber());
         
-        assertEquals("1.2", tstInfo.getPolicy());
+        assertEquals("1.2", tstInfo.getPolicy().getId());
         
         //
         // test certReq
@@ -541,7 +574,7 @@ public class NewTSPTest
         
         assertEquals(new BigInteger("23"), tstInfo.getSerialNumber());
         
-        assertEquals("1.2.3", tstInfo.getPolicy());
+        assertEquals("1.2.3", tstInfo.getPolicy().getId());
         
         assertEquals(true, tstInfo.isOrdered());
         
@@ -603,7 +636,7 @@ public class NewTSPTest
         
         assertEquals(new BigInteger("24"), tstInfo.getSerialNumber());
         
-        assertEquals("1.2.3", tstInfo.getPolicy());
+        assertEquals("1.2.3", tstInfo.getPolicy().getId());
         
         assertEquals(false, tstInfo.isOrdered());
         

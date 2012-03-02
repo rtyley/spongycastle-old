@@ -4,12 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import org.bouncycastle.jce.cert.CertStore;
 
 import junit.framework.TestCase;
-
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.cmp.PKIStatus;
+import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampResponse;
@@ -247,7 +247,7 @@ public class ParseTest
 
     private void requestParse(
         byte[]  request,
-        String  algorithm) 
+        ASN1ObjectIdentifier algorithm)
         throws IOException
     {
         TimeStampRequest    req = new TimeStampRequest(request);
@@ -276,9 +276,9 @@ public class ParseTest
         
         assertEquals("version not 1", 1, req.getVersion());
         
-        assertNull("critical extensions found when none expected", req.getCriticalExtensionOIDs());
+        assertEquals("critical extensions found when none expected", 0, req.getCriticalExtensionOIDs().size());
         
-        assertNull("non-critical extensions found when none expected", req.getNonCriticalExtensionOIDs());
+        assertEquals("non-critical extensions found when none expected", 0, req.getNonCriticalExtensionOIDs().size());
         
         if (request != sha1noNonse)
         {

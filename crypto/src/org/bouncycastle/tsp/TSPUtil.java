@@ -110,7 +110,7 @@ public class TSPUtil
                         TimeStampToken timeStampToken = new TimeStampToken(contentInfo);
                         TimeStampTokenInfo tstInfo = timeStampToken.getTimeStampInfo();
 
-                        MessageDigest digest = createDigestInstance(tstInfo.getMessageImprintAlgOID(), provider);
+                        MessageDigest digest = createDigestInstance(tstInfo.getMessageImprintAlgOID().getId(), provider);
                         byte[] expectedDigest = digest.digest(signerInfo.getSignature());
 
                         if (!Arrays.constantTimeAreEqual(expectedDigest, tstInfo.getMessageImprintDigest()))

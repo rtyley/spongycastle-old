@@ -357,7 +357,7 @@ public class TSPTest
         
         assertNull(tsToken.getTimeStampInfo().getGenTimeAccuracy());  // check for abscence of accuracy
         
-        assertEquals("1.2", tsToken.getTimeStampInfo().getPolicy());
+        assertEquals("1.2", tsToken.getTimeStampInfo().getPolicy().getId());
         
         try
         {
@@ -456,7 +456,7 @@ public class TSPTest
         
         assertEquals(new BigInteger("23"), tstInfo.getSerialNumber());
         
-        assertEquals("1.2", tstInfo.getPolicy());
+        assertEquals("1.2", tstInfo.getPolicy().getId());
         
         //
         // test certReq
@@ -524,7 +524,7 @@ public class TSPTest
         
         assertEquals(new BigInteger("23"), tstInfo.getSerialNumber());
         
-        assertEquals("1.2.3", tstInfo.getPolicy());
+        assertEquals("1.2.3", tstInfo.getPolicy().getId());
         
         assertEquals(true, tstInfo.isOrdered());
         
@@ -585,7 +585,7 @@ public class TSPTest
         
         assertEquals(new BigInteger("24"), tstInfo.getSerialNumber());
         
-        assertEquals("1.2.3", tstInfo.getPolicy());
+        assertEquals("1.2.3", tstInfo.getPolicy().getId());
         
         assertEquals(false, tstInfo.isOrdered());
         

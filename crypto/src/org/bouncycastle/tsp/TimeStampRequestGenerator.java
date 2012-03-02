@@ -34,10 +34,20 @@ public class TimeStampRequestGenerator
     {
     }
 
+    /**
+     * @deprecated use method taking ASN1ObjectIdentifier
+     * @param reqPolicy
+     */
     public void setReqPolicy(
         String reqPolicy)
     {
         this.reqPolicy= new ASN1ObjectIdentifier(reqPolicy);
+    }
+
+    public void setReqPolicy(
+        ASN1ObjectIdentifier reqPolicy)
+    {
+        this.reqPolicy= reqPolicy;
     }
 
     public void setCertReq(
@@ -103,6 +113,9 @@ public class TimeStampRequestGenerator
         extOrdering.addElement(oid);
     }
 
+    /**
+     * @deprecated use method taking ANS1ObjectIdentifier
+     */
     public TimeStampRequest generate(
         String digestAlgorithm,
         byte[] digest)
@@ -110,6 +123,9 @@ public class TimeStampRequestGenerator
         return this.generate(digestAlgorithm, digest, null);
     }
 
+    /**
+     * @deprecated use method taking ANS1ObjectIdentifier
+     */
     public TimeStampRequest generate(
         String      digestAlgorithmOID,
         byte[]      digest,
