@@ -363,8 +363,6 @@
                  <exclude name="org/bouncycastle/eac/**/*.java" />
                  <exclude name="org/bouncycastle/cert/**/*.java" />
                  <exclude name="org/bouncycastle/pkcs/**/*.java" />
-                 <exclude name="org/bouncycastle/jcajce/io/*.java" />
-                 <exclude name="org/bouncycastle/jcajce/*.java" />
                  <exclude name="org/bouncycastle/operator/**/*.java" />
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
                  <exclude name="org/bouncycastle/tsp/**/*.java" />

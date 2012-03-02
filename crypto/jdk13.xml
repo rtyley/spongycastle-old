@@ -99,40 +99,40 @@
     </target>
 
     <target name="build" depends="init">
-        <ant antfile="bc-build.xml" dir="." />
-        <ant antfile="bc-build.xml" dir="." target="javadoc-lw" />
-        <ant antfile="bc-build.xml" dir="." target="javadoc-libraries" />
+        <ant antfile="bc+-build.xml" dir="." />
+        <ant antfile="bc+-build.xml" dir="." target="javadoc-lw" />
+        <ant antfile="bc+-build.xml" dir="." target="javadoc-libraries" />
     </target>
 
     <target name="build-lw" depends="init">
-        <ant antfile="bc-build.xml" dir="." target="build-lw" />
-        <ant antfile="bc-build.xml" dir="." target="javadoc-lw" />
+        <ant antfile="bc+-build.xml" dir="." target="build-lw" />
+        <ant antfile="bc+-build.xml" dir="." target="javadoc-lw" />
     </target>
 
     <target name="build-provider" depends="init">
-        <ant antfile="bc-build.xml" dir="." target="build-provider" />
-        <ant antfile="bc-build.xml" dir="." target="javadoc-provider" />
+        <ant antfile="bc+-build.xml" dir="." target="build-provider" />
+        <ant antfile="bc+-build.xml" dir="." target="javadoc-provider" />
     </target>
 
     <target name="build-jce" depends="init">
-        <ant antfile="bc-build.xml" dir="." target="build-jce" />
-        <ant antfile="bc-build.xml" dir="." target="javadoc-jce" />
+        <ant antfile="bc+-build.xml" dir="." target="build-jce" />
+        <ant antfile="bc+-build.xml" dir="." target="javadoc-jce" />
     </target>
 
     <target name="build-test" depends="init">
-        <ant antfile="bc-build.xml" dir="." target="build-test" />
+        <ant antfile="bc+-build.xml" dir="." target="build-test" />
     </target>
 
     <target name="test" depends="build-test">
-        <ant antfile="bc-build.xml" dir="." target="test" />
+        <ant antfile="bc+-build.xml" dir="." target="test" />
     </target>
 
     <target name="zip-src">
-        <ant antfile="bc-build.xml" dir="." target="zip-src" />
+        <ant antfile="bc+-build.xml" dir="." target="zip-src" />
     </target>
 
     <target name="zip-src-provider">
-        <ant antfile="bc-build.xml" dir="." target="zip-src-provider" />
+        <ant antfile="bc+-build.xml" dir="." target="zip-src-provider" />
     </target>
 
 </project>
