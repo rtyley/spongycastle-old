@@ -7,16 +7,16 @@ import java.security.MessageDigest;
 import java.security.Provider;
 
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.cms.jcajce.DefaultJcaJceExtHelper;
-import org.bouncycastle.cms.jcajce.NamedJcaJceExtHelper;
-import org.bouncycastle.cms.jcajce.ProviderJcaJceExtHelper;
+import org.bouncycastle.jcajce.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 
 public class JcaDigestCalculatorProviderBuilder
 {
-    private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceExtHelper());
+    private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceHelper());
 
     public JcaDigestCalculatorProviderBuilder()
     {
@@ -24,14 +24,14 @@ public class JcaDigestCalculatorProviderBuilder
 
     public JcaDigestCalculatorProviderBuilder setProvider(Provider provider)
     {
-        this.helper = new OperatorHelper(new ProviderJcaJceExtHelper(provider));
+        this.helper = new OperatorHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
     public JcaDigestCalculatorProviderBuilder setProvider(String providerName)
     {
-        this.helper = new OperatorHelper(new NamedJcaJceExtHelper(providerName));
+        this.helper = new OperatorHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }

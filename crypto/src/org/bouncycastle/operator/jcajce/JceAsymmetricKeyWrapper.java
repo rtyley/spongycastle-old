@@ -13,9 +13,9 @@ import javax.crypto.Cipher;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.cms.jcajce.DefaultJcaJceExtHelper;
-import org.bouncycastle.cms.jcajce.NamedJcaJceExtHelper;
-import org.bouncycastle.cms.jcajce.ProviderJcaJceExtHelper;
+import org.bouncycastle.jcajce.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.AsymmetricKeyWrapper;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OperatorException;
@@ -23,14 +23,14 @@ import org.bouncycastle.operator.OperatorException;
 public class JceAsymmetricKeyWrapper
     extends AsymmetricKeyWrapper
 {
-    private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceExtHelper());
+    private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceHelper());
     private Map extraMappings = new HashMap();
     private PublicKey publicKey;
     private SecureRandom random;
 
     public JceAsymmetricKeyWrapper(PublicKey publicKey)
     {
-        super(SubjectPublicKeyInfo.getInstance(publicKey.getEncoded()).getAlgorithmId());
+        super(SubjectPublicKeyInfo.getInstance(publicKey.getEncoded()).getAlgorithm());
 
         this.publicKey = publicKey;
     }
@@ -42,14 +42,14 @@ public class JceAsymmetricKeyWrapper
 
     public JceAsymmetricKeyWrapper setProvider(Provider provider)
     {
-        this.helper = new OperatorHelper(new ProviderJcaJceExtHelper(provider));
+        this.helper = new OperatorHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
     public JceAsymmetricKeyWrapper setProvider(String providerName)
     {
-        this.helper = new OperatorHelper(new NamedJcaJceExtHelper(providerName));
+        this.helper = new OperatorHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }

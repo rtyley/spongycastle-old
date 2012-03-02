@@ -11,7 +11,7 @@ import org.bouncycastle.operator.SymmetricKeyUnwrapper;
 import org.bouncycastle.operator.jcajce.JceAsymmetricKeyUnwrapper;
 import org.bouncycastle.operator.jcajce.JceSymmetricKeyUnwrapper;
 
-public class ProviderJcaJceExtHelper
+class ProviderJcaJceExtHelper
     extends ProviderJcaJceHelper
     implements JcaJceExtHelper
 {

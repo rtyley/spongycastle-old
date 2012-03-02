@@ -16,9 +16,9 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.cms.jcajce.DefaultJcaJceExtHelper;
-import org.bouncycastle.cms.jcajce.NamedJcaJceExtHelper;
-import org.bouncycastle.cms.jcajce.ProviderJcaJceExtHelper;
+import org.bouncycastle.jcajce.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.AsymmetricKeyUnwrapper;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OperatorException;
@@ -26,7 +26,7 @@ import org.bouncycastle.operator.OperatorException;
 public class JceAsymmetricKeyUnwrapper
     extends AsymmetricKeyUnwrapper
 {
-    private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceExtHelper());
+    private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceHelper());
     private Map extraMappings = new HashMap();
     private PrivateKey privKey;
 
@@ -39,14 +39,14 @@ public class JceAsymmetricKeyUnwrapper
 
     public JceAsymmetricKeyUnwrapper setProvider(Provider provider)
     {
-        this.helper = new OperatorHelper(new ProviderJcaJceExtHelper(provider));
+        this.helper = new OperatorHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
     public JceAsymmetricKeyUnwrapper setProvider(String providerName)
     {
-        this.helper = new OperatorHelper(new NamedJcaJceExtHelper(providerName));
+        this.helper = new OperatorHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }
