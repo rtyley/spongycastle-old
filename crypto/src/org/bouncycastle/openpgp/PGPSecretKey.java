@@ -43,8 +43,8 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
  */
 public class PGPSecretKey
 {    
-    final SecretKeyPacket secret;
-    final PGPPublicKey    pub;
+    SecretKeyPacket secret;
+    PGPPublicKey    pub;
 
     PGPSecretKey(
         SecretKeyPacket secret,
