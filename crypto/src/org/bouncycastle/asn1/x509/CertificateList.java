@@ -94,9 +94,9 @@ public class CertificateList
         return sig;
     }
 
-    public int getVersion()
+    public int getVersionNumber()
     {
-        return tbsCertList.getVersion();
+        return tbsCertList.getVersionNumber();
     }
 
     public X500Name getIssuer()

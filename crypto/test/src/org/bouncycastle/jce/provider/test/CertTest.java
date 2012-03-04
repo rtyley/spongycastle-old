@@ -2596,9 +2596,38 @@ public class CertTest
         }
     }
 
+    private void testCRLProblemBC147_RC()
+        throws Exception
+    {
+        // verify CRL with default (JCE) provider
+        CertificateFactory jceFac = CertificateFactory.getInstance("X.509");
+
+        X509Certificate jceIssuer = (X509Certificate)
+            jceFac.generateCertificate(this.getClass().getResourceAsStream("ThawteSGCCA.cer"));
+
+        X509CRL jceCRL = (X509CRL)jceFac.generateCRL(this.getClass().getResourceAsStream("ThawteSGCCA.crl"));
+
+        jceCRL.verify(jceIssuer.getPublicKey());
+
+
+        // verify CRL with BC provider
+        CertificateFactory bcFac = CertificateFactory.getInstance("X.509", "BC");
+
+        X509Certificate bcIssuer = (X509Certificate)
+            bcFac.generateCertificate(this.getClass().getResourceAsStream("ThawteSGCCA.cer"));
+
+        X509CRL bcCRL = (X509CRL)bcFac.generateCRL(this.getClass().getResourceAsStream("ThawteSGCCA.crl"));
+
+        jceCRL.verify(bcIssuer.getPublicKey());
+
+        bcCRL.verify(bcIssuer.getPublicKey());
+    }
+
     public void performTest()
         throws Exception
     {
+        testCRLProblemBC147_RC();
+
         checkCertificate(1, cert1);
         checkCertificate(2, cert2);
         checkCertificate(3, cert3);

@@ -227,6 +227,7 @@ public class X509CRLObject
 
         sig.initVerify(key);
         sig.update(this.getTBSCertList());
+
         if (!sig.verify(this.getSignature()))
         {
             throw new SignatureException("CRL does not verify with supplied public key.");
@@ -235,7 +236,7 @@ public class X509CRLObject
 
     public int getVersion()
     {
-        return c.getVersion();
+        return c.getVersionNumber();
     }
 
     public Principal getIssuerDN()

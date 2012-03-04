@@ -182,7 +182,7 @@ public class TBSCertList
         }
         else
         {
-            version = new ASN1Integer(0);
+            version = null;  // version is optional
         }
 
         signature = AlgorithmIdentifier.getInstance(seq.getObjectAt(seqPos++));
@@ -210,12 +210,16 @@ public class TBSCertList
         }
     }
 
-    public int getVersion()
+    public int getVersionNumber()
     {
+        if (version == null)
+        {
+            return 1;
+        }
         return version.getValue().intValue() + 1;
     }
 
-    public ASN1Integer getVersionNumber()
+    public ASN1Integer getVersion()
     {
         return version;
     }
@@ -276,7 +280,10 @@ public class TBSCertList
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        v.add(version);
+        if (version != null)
+        {
+            v.add(version);
+        }
         v.add(signature);
         v.add(issuer);
 
