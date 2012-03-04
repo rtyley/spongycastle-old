@@ -67,7 +67,7 @@ public class TBSCertificate
         return null;
     }
 
-    public TBSCertificate(
+    private TBSCertificate(
         ASN1Sequence seq)
     {
         int         seqStart = 0;
