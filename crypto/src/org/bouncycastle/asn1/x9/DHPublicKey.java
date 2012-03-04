@@ -1,18 +1,18 @@
 package org.bouncycastle.asn1.x9;
 
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 
 public class DHPublicKey
     extends ASN1Object
 {
-    private DERInteger y;
+    private ASN1Integer y;
 
     public static DHPublicKey getInstance(ASN1TaggedObject obj, boolean explicit)
     {
-        return getInstance(DERInteger.getInstance(obj, explicit));
+        return getInstance(ASN1Integer.getInstance(obj, explicit));
     }
 
     public static DHPublicKey getInstance(Object obj)
@@ -22,15 +22,15 @@ public class DHPublicKey
             return (DHPublicKey)obj;
         }
 
-        if (obj instanceof DERInteger)
+        if (obj instanceof ASN1Integer)
         {
-            return new DHPublicKey((DERInteger)obj);
+            return new DHPublicKey((ASN1Integer)obj);
         }
 
         throw new IllegalArgumentException("Invalid DHPublicKey: " + obj.getClass().getName());
     }
 
-    public DHPublicKey(DERInteger y)
+    public DHPublicKey(ASN1Integer y)
     {
         if (y == null)
         {
@@ -40,7 +40,7 @@ public class DHPublicKey
         this.y = y;
     }
 
-    public DERInteger getY()
+    public ASN1Integer getY()
     {
         return this.y;
     }

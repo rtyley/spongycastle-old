@@ -1,19 +1,19 @@
 package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 public class IssuerSerial
     extends ASN1Object
 {
     GeneralNames            issuer;
-    DERInteger              serial;
+    ASN1Integer              serial;
     DERBitString            issuerUID;
 
     public static IssuerSerial getInstance(
@@ -48,7 +48,7 @@ public class IssuerSerial
         }
         
         issuer = GeneralNames.getInstance(seq.getObjectAt(0));
-        serial = DERInteger.getInstance(seq.getObjectAt(1));
+        serial = ASN1Integer.getInstance(seq.getObjectAt(1));
 
         if (seq.size() == 3)
         {
@@ -58,7 +58,7 @@ public class IssuerSerial
     
     public IssuerSerial(
         GeneralNames    issuer,
-        DERInteger      serial)
+        ASN1Integer      serial)
     {
         this.issuer = issuer;
         this.serial = serial;
@@ -69,7 +69,7 @@ public class IssuerSerial
         return issuer;
     }
 
-    public DERInteger getSerial()
+    public ASN1Integer getSerial()
     {
         return serial;
     }

@@ -4,23 +4,23 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 public class ElGamalParameter
     extends ASN1Object
 {
-    DERInteger      p, g;
+    ASN1Integer      p, g;
 
     public ElGamalParameter(
         BigInteger  p,
         BigInteger  g)
     {
-        this.p = new DERInteger(p);
-        this.g = new DERInteger(g);
+        this.p = new ASN1Integer(p);
+        this.g = new ASN1Integer(g);
     }
 
     public ElGamalParameter(
@@ -28,8 +28,8 @@ public class ElGamalParameter
     {
         Enumeration     e = seq.getObjects();
 
-        p = (DERInteger)e.nextElement();
-        g = (DERInteger)e.nextElement();
+        p = (ASN1Integer)e.nextElement();
+        g = (ASN1Integer)e.nextElement();
     }
 
     public BigInteger getP()

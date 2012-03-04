@@ -4,13 +4,13 @@ import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -28,7 +28,7 @@ public class PKIHeader
     public static final int CMP_1999 = 1;
     public static final int CMP_2000 = 2;
 
-    private DERInteger pvno;
+    private ASN1Integer pvno;
     private GeneralName sender;
     private GeneralName recipient;
     private DERGeneralizedTime messageTime;
@@ -45,7 +45,7 @@ public class PKIHeader
     {
         Enumeration en = seq.getObjects();
 
-        pvno = DERInteger.getInstance(en.nextElement());
+        pvno = ASN1Integer.getInstance(en.nextElement());
         sender = GeneralName.getInstance(en.nextElement());
         recipient = GeneralName.getInstance(en.nextElement());
 
@@ -108,11 +108,11 @@ public class PKIHeader
         GeneralName sender,
         GeneralName recipient)
     {
-        this(new DERInteger(pvno), sender, recipient);
+        this(new ASN1Integer(pvno), sender, recipient);
     }
 
     private PKIHeader(
-        DERInteger pvno,
+        ASN1Integer pvno,
         GeneralName sender,
         GeneralName recipient)
     {
@@ -121,7 +121,7 @@ public class PKIHeader
         this.recipient = recipient;
     }
 
-    public DERInteger getPvno()
+    public ASN1Integer getPvno()
     {
         return pvno;
     }

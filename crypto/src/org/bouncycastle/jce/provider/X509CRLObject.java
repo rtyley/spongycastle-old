@@ -26,16 +26,17 @@ import javax.security.auth.x500.X500Principal;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.TBSCertList;
-import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.X509Principal;
@@ -64,7 +65,7 @@ public class X509CRLObject
     {
         try
         {
-            byte[] idp = crl.getExtensionValue(X509Extensions.IssuingDistributionPoint.getId());
+            byte[] idp = crl.getExtensionValue(Extension.issuingDistributionPoint.getId());
             return idp != null
                 && IssuingDistributionPoint.getInstance(X509ExtensionUtil.fromExtensionValue(idp)).isIndirectCRL();
         }
@@ -125,7 +126,7 @@ public class X509CRLObject
     {
         if (this.getVersion() == 2)
         {
-            X509Extensions extensions = c.getTBSCertList().getExtensions();
+            Extensions extensions = c.getTBSCertList().getExtensions();
 
             if (extensions != null)
             {
@@ -134,8 +135,8 @@ public class X509CRLObject
 
                 while (e.hasMoreElements())
                 {
-                    DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
-                    X509Extension ext = extensions.getExtension(oid);
+                    ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
+                    Extension ext = extensions.getExtension(oid);
 
                     if (critical == ext.isCritical())
                     {
@@ -162,17 +163,17 @@ public class X509CRLObject
 
     public byte[] getExtensionValue(String oid)
     {
-        X509Extensions exts = c.getTBSCertList().getExtensions();
+        Extensions exts = c.getTBSCertList().getExtensions();
 
         if (exts != null)
         {
-            X509Extension   ext = exts.getExtension(new DERObjectIdentifier(oid));
+            Extension ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
 
             if (ext != null)
             {
                 try
                 {
-                    return ext.getValue().getEncoded();
+                    return ext.getExtnValue().getEncoded();
                 }
                 catch (Exception e)
                 {
@@ -400,7 +401,7 @@ public class X509CRLObject
             }
         }
 
-        X509Extensions extensions = c.getTBSCertList().getExtensions();
+        Extensions extensions = c.getTBSCertList().getExtensions();
 
         if (extensions != null)
         {
@@ -413,12 +414,12 @@ public class X509CRLObject
 
             while (e.hasMoreElements())
             {
-                DERObjectIdentifier oid = (DERObjectIdentifier) e.nextElement();
-                X509Extension ext = extensions.getExtension(oid);
+                ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier) e.nextElement();
+                Extension ext = extensions.getExtension(oid);
 
-                if (ext.getValue() != null)
+                if (ext.getExtnValue() != null)
                 {
-                    byte[] octs = ext.getValue().getOctets();
+                    byte[] octs = ext.getExtnValue().getOctets();
                     ASN1InputStream dIn = new ASN1InputStream(octs);
                     buf.append("                       critical(").append(
                         ext.isCritical()).append(") ");

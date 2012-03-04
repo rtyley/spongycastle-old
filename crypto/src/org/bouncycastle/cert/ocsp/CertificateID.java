@@ -4,9 +4,9 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.ocsp.CertID;
@@ -48,7 +48,7 @@ public class CertificateID
         BigInteger number)
         throws OCSPException
     {
-        this.id = createCertID(digestCalculator, issuerCert, new DERInteger(number));
+        this.id = createCertID(digestCalculator, issuerCert, new ASN1Integer(number));
     }
 
     public ASN1ObjectIdentifier getHashAlgOID()
@@ -122,10 +122,10 @@ public class CertificateID
      */
     public static CertificateID deriveCertificateID(CertificateID original, BigInteger newSerialNumber)
     {
-        return new CertificateID(new CertID(original.id.getHashAlgorithm(), original.id.getIssuerNameHash(), original.id.getIssuerKeyHash(), new DERInteger(newSerialNumber)));
+        return new CertificateID(new CertID(original.id.getHashAlgorithm(), original.id.getIssuerNameHash(), original.id.getIssuerKeyHash(), new ASN1Integer(newSerialNumber)));
     }
 
-    private static CertID createCertID(DigestCalculator digCalc, X509CertificateHolder issuerCert, DERInteger serialNumber)
+    private static CertID createCertID(DigestCalculator digCalc, X509CertificateHolder issuerCert, ASN1Integer serialNumber)
         throws OCSPException
     {
         try

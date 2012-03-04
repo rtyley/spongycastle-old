@@ -1,8 +1,10 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.ess.OtherCertID;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -10,8 +12,6 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.asn1.x509.X509Name;
-
-import java.io.IOException;
 
 public class OtherCertIDUnitTest
     extends ASN1UnitTest
@@ -26,7 +26,7 @@ public class OtherCertIDUnitTest
     {
         AlgorithmIdentifier algId = new AlgorithmIdentifier(new DERObjectIdentifier("1.2.2.3"));
         byte[]              digest = new byte[20];
-        IssuerSerial        issuerSerial = new IssuerSerial(new GeneralNames(new GeneralName(new X509Name("CN=test"))), new DERInteger(1));
+        IssuerSerial        issuerSerial = new IssuerSerial(new GeneralNames(new GeneralName(new X509Name("CN=test"))), new ASN1Integer(1));
 
         OtherCertID certID = new OtherCertID(algId, digest);
 

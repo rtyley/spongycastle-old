@@ -16,9 +16,9 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.TBSCertList;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 
@@ -28,7 +28,7 @@ import org.bouncycastle.operator.ContentVerifierProvider;
 public class X509CRLHolder
 {
     private CertificateList x509CRL;
-    private X509Extensions extensions;
+    private Extensions extensions;
 
     private static CertificateList parseStream(InputStream stream)
         throws IOException
@@ -157,7 +157,7 @@ public class X509CRLHolder
      *
      * @return the extension if present, null otherwise.
      */
-    public X509Extension getExtension(ASN1ObjectIdentifier oid)
+    public Extension getExtension(ASN1ObjectIdentifier oid)
     {
         if (extensions != null)
         {

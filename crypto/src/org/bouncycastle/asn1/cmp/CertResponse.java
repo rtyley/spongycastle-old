@@ -2,24 +2,24 @@ package org.bouncycastle.asn1.cmp;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 public class CertResponse
     extends ASN1Object
 {
-    private DERInteger certReqId;
+    private ASN1Integer certReqId;
     private PKIStatusInfo status;
     private CertifiedKeyPair certifiedKeyPair;
     private ASN1OctetString rspInfo;
 
     private CertResponse(ASN1Sequence seq)
     {
-        certReqId = DERInteger.getInstance(seq.getObjectAt(0));
+        certReqId = ASN1Integer.getInstance(seq.getObjectAt(0));
         status = PKIStatusInfo.getInstance(seq.getObjectAt(1));
 
         if (seq.size() >= 3)
@@ -60,14 +60,14 @@ public class CertResponse
     }
 
     public CertResponse(
-        DERInteger certReqId,
+        ASN1Integer certReqId,
         PKIStatusInfo status)
     {
         this(certReqId, status, null, null);
     }
 
     public CertResponse(
-        DERInteger certReqId,
+        ASN1Integer certReqId,
         PKIStatusInfo status,
         CertifiedKeyPair certifiedKeyPair,
         ASN1OctetString rspInfo)
@@ -86,7 +86,7 @@ public class CertResponse
         this.rspInfo = rspInfo;
     }
 
-    public DERInteger getCertReqId()
+    public ASN1Integer getCertReqId()
     {
         return certReqId;
     }

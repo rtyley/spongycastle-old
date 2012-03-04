@@ -8,7 +8,6 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -51,9 +50,9 @@ public class MonetaryValue
         // currency
         currency = Iso4217CurrencyCode.getInstance(e.nextElement());
         // hashAlgorithm
-        amount = DERInteger.getInstance(e.nextElement());
+        amount = ASN1Integer.getInstance(e.nextElement());
         // exponent
-        exponent = DERInteger.getInstance(e.nextElement());            
+        exponent = ASN1Integer.getInstance(e.nextElement());            
     }
         
     public MonetaryValue(

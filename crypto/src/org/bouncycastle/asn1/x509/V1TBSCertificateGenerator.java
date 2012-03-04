@@ -1,7 +1,7 @@
 package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTCTime;
@@ -24,9 +24,9 @@ import org.bouncycastle.asn1.x500.X500Name;
  */
 public class V1TBSCertificateGenerator
 {
-    DERTaggedObject         version = new DERTaggedObject(true, 0, new DERInteger(0));
+    DERTaggedObject         version = new DERTaggedObject(true, 0, new ASN1Integer(0));
 
-    DERInteger              serialNumber;
+    ASN1Integer              serialNumber;
     AlgorithmIdentifier     signature;
     X500Name                issuer;
     Time                    startDate, endDate;
@@ -38,7 +38,7 @@ public class V1TBSCertificateGenerator
     }
 
     public void setSerialNumber(
-        DERInteger  serialNumber)
+        ASN1Integer  serialNumber)
     {
         this.serialNumber = serialNumber;
     }
@@ -109,7 +109,7 @@ public class V1TBSCertificateGenerator
         this.subjectPublicKeyInfo = pubKeyInfo;
     }
 
-    public TBSCertificateStructure generateTBSCertificate()
+    public TBSCertificate generateTBSCertificate()
     {
         if ((serialNumber == null) || (signature == null)
             || (issuer == null) || (startDate == null) || (endDate == null)
@@ -139,6 +139,6 @@ public class V1TBSCertificateGenerator
 
         seq.add(subjectPublicKeyInfo);
 
-        return new TBSCertificateStructure(new DERSequence(seq));
+        return new TBSCertificate(new DERSequence(seq));
     }
 }

@@ -5,11 +5,9 @@ import java.math.BigInteger;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
 
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
@@ -48,7 +46,7 @@ public class BCRSAPublicKey
     {
         try
         {
-            RSAPublicKeyStructure   pubKey = new RSAPublicKeyStructure((ASN1Sequence)info.parsePublicKey());
+            org.bouncycastle.asn1.pkcs.RSAPublicKey  pubKey = org.bouncycastle.asn1.pkcs.RSAPublicKey.getInstance(info.parsePublicKey());
 
             this.modulus = pubKey.getModulus();
             this.publicExponent = pubKey.getPublicExponent();
@@ -91,7 +89,7 @@ public class BCRSAPublicKey
 
     public byte[] getEncoded()
     {
-        return KeyUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, new DERNull()), new RSAPublicKeyStructure(getModulus(), getPublicExponent()));
+        return KeyUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, new DERNull()), new org.bouncycastle.asn1.pkcs.RSAPublicKey(getModulus(), getPublicExponent()));
     }
 
     public int hashCode()

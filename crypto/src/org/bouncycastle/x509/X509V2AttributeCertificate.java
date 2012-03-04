@@ -24,12 +24,12 @@ import java.util.Set;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.util.Arrays;
 
 /**
@@ -207,17 +207,17 @@ public class X509V2AttributeCertificate
 
     public byte[] getExtensionValue(String oid) 
     {
-        X509Extensions  extensions = cert.getAcinfo().getExtensions();
+        Extensions extensions = cert.getAcinfo().getExtensions();
 
         if (extensions != null)
         {
-            X509Extension   ext = extensions.getExtension(new DERObjectIdentifier(oid));
+            Extension ext = extensions.getExtension(new ASN1ObjectIdentifier(oid));
 
             if (ext != null)
             {
                 try
                 {
-                    return ext.getValue().getEncoded(ASN1Encoding.DER);
+                    return ext.getExtnValue().getEncoded(ASN1Encoding.DER);
                 }
                 catch (Exception e)
                 {
@@ -232,7 +232,7 @@ public class X509V2AttributeCertificate
     private Set getExtensionOIDs(
         boolean critical) 
     {
-        X509Extensions  extensions = cert.getAcinfo().getExtensions();
+        Extensions  extensions = cert.getAcinfo().getExtensions();
 
         if (extensions != null)
         {
@@ -241,8 +241,8 @@ public class X509V2AttributeCertificate
 
             while (e.hasMoreElements())
             {
-                DERObjectIdentifier oid = (DERObjectIdentifier)e.nextElement();
-                X509Extension       ext = extensions.getExtension(oid);
+                ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
+                Extension            ext = extensions.getExtension(oid);
 
                 if (ext.isCritical() == critical)
                 {

@@ -4,15 +4,15 @@ import java.math.BigInteger;
 import java.util.Date;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
 import org.bouncycastle.operator.ContentSigner;
 
 
@@ -22,7 +22,7 @@ import org.bouncycastle.operator.ContentSigner;
 public class X509v3CertificateBuilder
 {
     private V3TBSCertificateGenerator   tbsGen;
-    private X509ExtensionsGenerator     extGenerator;
+    private ExtensionsGenerator extGenerator;
 
     /**
      * Create a builder for a version 3 certificate.
@@ -37,14 +37,14 @@ public class X509v3CertificateBuilder
     public X509v3CertificateBuilder(X500Name issuer, BigInteger serial, Date notBefore, Date notAfter, X500Name subject, SubjectPublicKeyInfo publicKeyInfo)
     {
         tbsGen = new V3TBSCertificateGenerator();
-        tbsGen.setSerialNumber(new DERInteger(serial));
+        tbsGen.setSerialNumber(new ASN1Integer(serial));
         tbsGen.setIssuer(issuer);
         tbsGen.setStartDate(new Time(notBefore));
         tbsGen.setEndDate(new Time(notAfter));
         tbsGen.setSubject(subject);
         tbsGen.setSubjectPublicKeyInfo(publicKeyInfo);
 
-        extGenerator = new X509ExtensionsGenerator();
+        extGenerator = new ExtensionsGenerator();
     }
 
     /**
@@ -85,8 +85,9 @@ public class X509v3CertificateBuilder
         ASN1ObjectIdentifier oid,
         boolean isCritical,
         ASN1Encodable value)
+        throws CertIOException
     {
-        extGenerator.addExtension(oid, isCritical, value);
+        CertUtils.addExtension(extGenerator, oid, isCritical, value);
 
         return this;
     }
@@ -105,16 +106,16 @@ public class X509v3CertificateBuilder
         boolean isCritical,
         X509CertificateHolder certHolder)
     {
-        X509CertificateStructure cert = certHolder.toASN1Structure();
+        Certificate cert = certHolder.toASN1Structure();
 
-        X509Extension extension = cert.getTBSCertificate().getExtensions().getExtension(oid);
+        Extension extension = cert.getTBSCertificate().getExtensions().getExtension(oid);
 
         if (extension == null)
         {
             throw new NullPointerException("extension " + oid + " not present");
         }
 
-        extGenerator.addExtension(oid, isCritical, extension.getValue().getOctets());
+        extGenerator.addExtension(oid, isCritical, extension.getExtnValue().getOctets());
 
         return this;
     }

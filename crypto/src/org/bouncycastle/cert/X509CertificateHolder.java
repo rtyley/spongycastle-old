@@ -12,11 +12,11 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.TBSCertificate;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 
@@ -25,15 +25,15 @@ import org.bouncycastle.operator.ContentVerifierProvider;
  */
 public class X509CertificateHolder
 {
-    private X509CertificateStructure x509Certificate;
-    private X509Extensions extensions;
+    private Certificate x509Certificate;
+    private Extensions  extensions;
 
-    private static X509CertificateStructure parseBytes(byte[] certEncoding)
+    private static Certificate parseBytes(byte[] certEncoding)
         throws IOException
     {
         try
         {
-            return X509CertificateStructure.getInstance(ASN1Primitive.fromByteArray(certEncoding));
+            return Certificate.getInstance(ASN1Primitive.fromByteArray(certEncoding));
         }
         catch (ClassCastException e)
         {
@@ -62,15 +62,23 @@ public class X509CertificateHolder
      *
      * @param x509Certificate an ASN.1 Certificate structure.
      */
-    public X509CertificateHolder(X509CertificateStructure x509Certificate)
+    public X509CertificateHolder(Certificate x509Certificate)
     {
         this.x509Certificate = x509Certificate;
         this.extensions = x509Certificate.getTBSCertificate().getExtensions();
     }
 
+    public int getVersionNumber()
+    {
+        return x509Certificate.getVersionNumber();
+    }
+
+    /**
+     * @deprecated use getVersionNumber
+     */
     public int getVersion()
     {
-        return x509Certificate.getVersion();
+        return x509Certificate.getVersionNumber();
     }
 
     /**
@@ -90,7 +98,7 @@ public class X509CertificateHolder
      *
      * @return the extension if present, null otherwise.
      */
-    public X509Extension getExtension(ASN1ObjectIdentifier oid)
+    public Extension getExtension(ASN1ObjectIdentifier oid)
     {
         if (extensions != null)
         {
@@ -198,7 +206,7 @@ public class X509CertificateHolder
      *
      * @return a X509CertificateStructure object.
      */
-    public X509CertificateStructure toASN1Structure()
+    public Certificate toASN1Structure()
     {
         return x509Certificate;
     }
@@ -244,7 +252,7 @@ public class X509CertificateHolder
     public boolean isSignatureValid(ContentVerifierProvider verifierProvider)
         throws CertException
     {
-        TBSCertificateStructure tbsCert = x509Certificate.getTBSCertificate();
+        TBSCertificate tbsCert = x509Certificate.getTBSCertificate();
 
         if (!tbsCert.getSignature().equals(x509Certificate.getSignatureAlgorithm()))
         {

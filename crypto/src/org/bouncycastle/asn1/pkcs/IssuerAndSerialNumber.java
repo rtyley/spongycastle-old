@@ -7,7 +7,6 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.X509Name;
@@ -16,7 +15,7 @@ public class IssuerAndSerialNumber
     extends ASN1Object
 {
     X500Name name;
-    DERInteger  certSerialNumber;
+    ASN1Integer  certSerialNumber;
 
     public static IssuerAndSerialNumber getInstance(
         Object  obj)
@@ -37,7 +36,7 @@ public class IssuerAndSerialNumber
         ASN1Sequence    seq)
     {
         this.name = X500Name.getInstance(seq.getObjectAt(0));
-        this.certSerialNumber = (DERInteger)seq.getObjectAt(1);
+        this.certSerialNumber = (ASN1Integer)seq.getObjectAt(1);
     }
 
     public IssuerAndSerialNumber(
@@ -45,12 +44,12 @@ public class IssuerAndSerialNumber
         BigInteger  certSerialNumber)
     {
         this.name = X500Name.getInstance(name.toASN1Primitive());
-        this.certSerialNumber = new DERInteger(certSerialNumber);
+        this.certSerialNumber = new ASN1Integer(certSerialNumber);
     }
 
     public IssuerAndSerialNumber(
         X509Name    name,
-        DERInteger  certSerialNumber)
+        ASN1Integer  certSerialNumber)
     {
         this.name = X500Name.getInstance(name.toASN1Primitive());
         this.certSerialNumber = certSerialNumber;
@@ -69,7 +68,7 @@ public class IssuerAndSerialNumber
         return name;
     }
 
-    public DERInteger getCertificateSerialNumber()
+    public ASN1Integer getCertificateSerialNumber()
     {
         return certSerialNumber;
     }

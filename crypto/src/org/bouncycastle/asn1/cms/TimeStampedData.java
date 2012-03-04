@@ -1,18 +1,18 @@
 package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInteger;
 
 public class TimeStampedData
     extends ASN1Object
 {
-    private DERInteger version;
+    private ASN1Integer version;
     private DERIA5String dataUri;
     private MetaData metaData;
     private ASN1OctetString content;
@@ -20,7 +20,7 @@ public class TimeStampedData
 
     public TimeStampedData(DERIA5String dataUri, MetaData metaData, ASN1OctetString content, Evidence temporalEvidence)
     {
-        this.version = new DERInteger(1);
+        this.version = new ASN1Integer(1);
         this.dataUri = dataUri;
         this.metaData = metaData;
         this.content = content;
@@ -29,7 +29,7 @@ public class TimeStampedData
 
     private TimeStampedData(ASN1Sequence seq)
     {
-        this.version = DERInteger.getInstance(seq.getObjectAt(0));
+        this.version = ASN1Integer.getInstance(seq.getObjectAt(0));
 
         int index = 1;
         if (seq.getObjectAt(index) instanceof DERIA5String)

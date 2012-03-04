@@ -28,8 +28,8 @@ import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
+import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -429,7 +429,7 @@ public class CMSSignedData
 
                 if (obj instanceof ASN1Sequence)
                 {
-                    certList.add(new X509CertificateHolder(X509CertificateStructure.getInstance(obj)));
+                    certList.add(new X509CertificateHolder(Certificate.getInstance(obj)));
                 }
             }
 

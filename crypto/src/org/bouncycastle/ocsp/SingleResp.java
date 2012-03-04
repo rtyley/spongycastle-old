@@ -88,7 +88,7 @@ public class SingleResp
 
     public X509Extensions getSingleExtensions()
     {
-        return resp.getSingleExtensions();
+        return X509Extensions.getInstance(resp.getSingleExtensions());
     }
     
     /**

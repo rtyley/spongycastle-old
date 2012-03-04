@@ -1,12 +1,12 @@
 package org.bouncycastle.asn1.ocsp;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
@@ -16,13 +16,13 @@ public class CertID
     AlgorithmIdentifier    hashAlgorithm;
     ASN1OctetString        issuerNameHash;
     ASN1OctetString        issuerKeyHash;
-    DERInteger             serialNumber;
+    ASN1Integer             serialNumber;
 
     public CertID(
         AlgorithmIdentifier hashAlgorithm,
         ASN1OctetString     issuerNameHash,
         ASN1OctetString     issuerKeyHash,
-        DERInteger          serialNumber)
+        ASN1Integer         serialNumber)
     {
         this.hashAlgorithm = hashAlgorithm;
         this.issuerNameHash = issuerNameHash;
@@ -36,7 +36,7 @@ public class CertID
         hashAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(0));
         issuerNameHash = (ASN1OctetString)seq.getObjectAt(1);
         issuerKeyHash = (ASN1OctetString)seq.getObjectAt(2);
-        serialNumber = (DERInteger)seq.getObjectAt(3);
+        serialNumber = (ASN1Integer)seq.getObjectAt(3);
     }
 
     public static CertID getInstance(
@@ -76,7 +76,7 @@ public class CertID
         return issuerKeyHash;
     }
 
-    public DERInteger getSerialNumber()
+    public ASN1Integer getSerialNumber()
     {
         return serialNumber;
     }

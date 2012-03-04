@@ -9,7 +9,6 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTCTime;
@@ -44,7 +43,7 @@ public class TBSCertList
     {
         ASN1Sequence  seq;
 
-        X509Extensions      crlEntryExtensions;
+        Extensions    crlEntryExtensions;
 
         private CRLEntry(
             ASN1Sequence  seq)
@@ -71,7 +70,7 @@ public class TBSCertList
             return null;
         }
 
-        public DERInteger getUserCertificate()
+        public ASN1Integer getUserCertificate()
         {
             return ASN1Integer.getInstance(seq.getObjectAt(0));
         }
@@ -81,11 +80,11 @@ public class TBSCertList
             return Time.getInstance(seq.getObjectAt(1));
         }
 
-        public X509Extensions getExtensions()
+        public Extensions getExtensions()
         {
             if (crlEntryExtensions == null && seq.size() == 3)
             {
-                crlEntryExtensions = X509Extensions.getInstance(seq.getObjectAt(2));
+                crlEntryExtensions = Extensions.getInstance(seq.getObjectAt(2));
             }
             
             return crlEntryExtensions;
@@ -137,13 +136,13 @@ public class TBSCertList
         }
     }
 
-    DERInteger              version;
+    ASN1Integer              version;
     AlgorithmIdentifier     signature;
     X500Name                issuer;
     Time                    thisUpdate;
     Time                    nextUpdate;
     ASN1Sequence            revokedCertificates;
-    X509Extensions          crlExtensions;
+    Extensions              crlExtensions;
 
     public static TBSCertList getInstance(
         ASN1TaggedObject obj,
@@ -207,7 +206,7 @@ public class TBSCertList
         if (seqPos < seq.size()
             && seq.getObjectAt(seqPos) instanceof DERTaggedObject)
         {
-            crlExtensions = X509Extensions.getInstance(seq.getObjectAt(seqPos));
+            crlExtensions = Extensions.getInstance(ASN1Sequence.getInstance((ASN1TaggedObject)seq.getObjectAt(seqPos), true));
         }
     }
 
@@ -216,7 +215,7 @@ public class TBSCertList
         return version.getValue().intValue() + 1;
     }
 
-    public DERInteger getVersionNumber()
+    public ASN1Integer getVersionNumber()
     {
         return version;
     }
@@ -268,7 +267,7 @@ public class TBSCertList
         return new RevokedCertificatesEnumeration(revokedCertificates.getObjects());
     }
 
-    public X509Extensions getExtensions()
+    public Extensions getExtensions()
     {
         return crlExtensions;
     }

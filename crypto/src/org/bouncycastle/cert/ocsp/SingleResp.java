@@ -8,13 +8,13 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ocsp.CertStatus;
 import org.bouncycastle.asn1.ocsp.RevokedInfo;
 import org.bouncycastle.asn1.ocsp.SingleResponse;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 
 public class SingleResp
 {
     private SingleResponse  resp;
-    private X509Extensions extensions;
+    private Extensions extensions;
 
     public SingleResp(
         SingleResponse  resp)
@@ -75,7 +75,7 @@ public class SingleResp
         return extensions != null;
     }
 
-    public X509Extension getExtension(ASN1ObjectIdentifier oid)
+    public Extension getExtension(ASN1ObjectIdentifier oid)
     {
         if (extensions != null)
         {

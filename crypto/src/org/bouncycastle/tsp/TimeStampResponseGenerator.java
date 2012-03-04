@@ -307,7 +307,7 @@ public class TimeStampResponseGenerator
         }
     }
 
-    private Set<ASN1ObjectIdentifier> convert(Set orig)
+    private Set convert(Set orig)
     {
         if (orig == null)
         {

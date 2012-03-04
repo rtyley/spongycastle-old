@@ -26,9 +26,9 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.pkcs.ContentInfo;
@@ -286,7 +286,7 @@ public  class PKIXCertPath
             }
             
             SignedData  sd = new SignedData(
-                                     new DERInteger(1),
+                                     new ASN1Integer(1),
                                      new DERSet(),
                                      encInfo, 
                                      new DERSet(v), 

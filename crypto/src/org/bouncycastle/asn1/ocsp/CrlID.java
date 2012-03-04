@@ -11,7 +11,6 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 
@@ -37,7 +36,7 @@ public class CrlID
                 crlUrl = DERIA5String.getInstance(o, true);
                 break;
             case 1:
-                crlNum = DERInteger.getInstance(o, true);
+                crlNum = ASN1Integer.getInstance(o, true);
                 break;
             case 2:
                 crlTime = DERGeneralizedTime.getInstance(o, true);

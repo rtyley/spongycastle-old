@@ -7,13 +7,13 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.Certificate;
 
 public class CMPCertificate
     extends ASN1Object
     implements ASN1Choice
 {
-    private X509CertificateStructure x509v3PKCert;
+    private Certificate x509v3PKCert;
     private AttributeCertificate x509v2AttrCert;
 
     /**
@@ -24,9 +24,9 @@ public class CMPCertificate
         this.x509v2AttrCert = x509v2AttrCert;
     }
 
-    public CMPCertificate(X509CertificateStructure x509v3PKCert)
+    public CMPCertificate(Certificate x509v3PKCert)
     {
-        if (x509v3PKCert.getVersion() != 3)
+        if (x509v3PKCert.getVersionNumber() != 3)
         {
             throw new IllegalArgumentException("only version 3 certificates allowed");
         }
@@ -43,7 +43,7 @@ public class CMPCertificate
 
         if (o instanceof ASN1Sequence)
         {
-            return new CMPCertificate(X509CertificateStructure.getInstance(o));
+            return new CMPCertificate(Certificate.getInstance(o));
         }
 
         if (o instanceof ASN1TaggedObject)
@@ -59,7 +59,7 @@ public class CMPCertificate
          return x509v3PKCert != null;
     }
 
-    public X509CertificateStructure getX509v3PKCert()
+    public Certificate getX509v3PKCert()
     {
         return x509v3PKCert;
     }

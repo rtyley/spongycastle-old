@@ -4,17 +4,17 @@ import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OctetStringParser;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInteger;
 
 public class TimeStampedDataParser
 {
-    private DERInteger version;
+    private ASN1Integer version;
     private DERIA5String dataUri;
     private MetaData metaData;
     private ASN1OctetStringParser content;
@@ -25,7 +25,7 @@ public class TimeStampedDataParser
         throws IOException
     {
         this.parser = parser;
-        this.version = DERInteger.getInstance(parser.readObject());
+        this.version = ASN1Integer.getInstance(parser.readObject());
 
         ASN1Encodable obj = parser.readObject();
 

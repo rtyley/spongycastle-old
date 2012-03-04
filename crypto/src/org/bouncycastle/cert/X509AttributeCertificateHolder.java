@@ -17,8 +17,8 @@ import org.bouncycastle.asn1.x509.AttCertValidityPeriod;
 import org.bouncycastle.asn1.x509.Attribute;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x509.AttributeCertificateInfo;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
 
@@ -30,7 +30,7 @@ public class X509AttributeCertificateHolder
     private static Attribute[] EMPTY_ARRAY = new Attribute[0];
     
     private AttributeCertificate attrCert;
-    private X509Extensions extensions;
+    private Extensions extensions;
 
     private static AttributeCertificate parseBytes(byte[] certEncoding)
         throws IOException
@@ -106,7 +106,7 @@ public class X509AttributeCertificateHolder
      */
     public AttributeCertificateHolder getHolder()
     {
-        return new AttributeCertificateHolder((ASN1Sequence)attrCert.getAcinfo().getHolder().toASN1Object());
+        return new AttributeCertificateHolder((ASN1Sequence)attrCert.getAcinfo().getHolder().toASN1Primitive());
     }
 
     /**
@@ -202,7 +202,7 @@ public class X509AttributeCertificateHolder
      *
      * @return the extension if present, null otherwise.
      */
-    public X509Extension getExtension(ASN1ObjectIdentifier oid)
+    public Extension getExtension(ASN1ObjectIdentifier oid)
     {
         if (extensions != null)
         {

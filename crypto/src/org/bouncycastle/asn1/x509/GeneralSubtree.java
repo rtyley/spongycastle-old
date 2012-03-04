@@ -3,11 +3,11 @@ package org.bouncycastle.asn1.x509;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 
@@ -35,9 +35,9 @@ public class GeneralSubtree
 
     private GeneralName base;
 
-    private DERInteger minimum;
+    private ASN1Integer minimum;
 
-    private DERInteger maximum;
+    private ASN1Integer maximum;
 
     public GeneralSubtree(
         ASN1Sequence seq) 
@@ -53,10 +53,10 @@ public class GeneralSubtree
             switch (o.getTagNo()) 
             {
             case 0:
-                minimum = DERInteger.getInstance(o, false);
+                minimum = ASN1Integer.getInstance(o, false);
                 break;
             case 1:
-                maximum = DERInteger.getInstance(o, false);
+                maximum = ASN1Integer.getInstance(o, false);
                 break;
             default:
                 throw new IllegalArgumentException("Bad tag number: "
@@ -71,7 +71,7 @@ public class GeneralSubtree
                 {
                     throw new IllegalArgumentException("Bad tag number for 'minimum': " + oMin.getTagNo());
                 }
-                minimum = DERInteger.getInstance(oMin, false);
+                minimum = ASN1Integer.getInstance(oMin, false);
             }
 
             {
@@ -80,7 +80,7 @@ public class GeneralSubtree
                 {
                     throw new IllegalArgumentException("Bad tag number for 'maximum': " + oMax.getTagNo());
                 }
-                maximum = DERInteger.getInstance(oMax, false);
+                maximum = ASN1Integer.getInstance(oMax, false);
             }
 
             break;
@@ -116,7 +116,7 @@ public class GeneralSubtree
         this.base = base;
         if (maximum != null)
         {
-            this.maximum = new DERInteger(maximum);
+            this.maximum = new ASN1Integer(maximum);
         }
         if (minimum == null)
         {
@@ -124,7 +124,7 @@ public class GeneralSubtree
         }
         else
         {
-            this.minimum = new DERInteger(minimum);
+            this.minimum = new ASN1Integer(minimum);
         }
     }
 

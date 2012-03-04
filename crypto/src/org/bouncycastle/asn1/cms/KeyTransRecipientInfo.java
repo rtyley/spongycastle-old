@@ -1,19 +1,19 @@
 package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 public class KeyTransRecipientInfo
     extends ASN1Object
 {
-    private DERInteger          version;
+    private ASN1Integer          version;
     private RecipientIdentifier rid;
     private AlgorithmIdentifier keyEncryptionAlgorithm;
     private ASN1OctetString     encryptedKey;
@@ -25,11 +25,11 @@ public class KeyTransRecipientInfo
     {
         if (rid.toASN1Primitive() instanceof ASN1TaggedObject)
         {
-            this.version = new DERInteger(2);
+            this.version = new ASN1Integer(2);
         }
         else
         {
-            this.version = new DERInteger(0);
+            this.version = new ASN1Integer(0);
         }
 
         this.rid = rid;
@@ -40,7 +40,7 @@ public class KeyTransRecipientInfo
     public KeyTransRecipientInfo(
         ASN1Sequence seq)
     {
-        this.version = (DERInteger)seq.getObjectAt(0);
+        this.version = (ASN1Integer)seq.getObjectAt(0);
         this.rid = RecipientIdentifier.getInstance(seq.getObjectAt(1));
         this.keyEncryptionAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(2));
         this.encryptedKey = (ASN1OctetString)seq.getObjectAt(3);
@@ -69,7 +69,7 @@ public class KeyTransRecipientInfo
         "Illegal object in KeyTransRecipientInfo: " + obj.getClass().getName());
     } 
 
-    public DERInteger getVersion()
+    public ASN1Integer getVersion()
     {
         return version;
     }

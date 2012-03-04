@@ -18,8 +18,8 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.tsp.TimeStampReq;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 
 /**
  * Base class for an RFC 3161 Time Stamp Request.
@@ -29,7 +29,7 @@ public class TimeStampRequest
     private static Set EMPTY_SET = Collections.unmodifiableSet(new HashSet());
 
     private TimeStampReq req;
-    private X509Extensions extensions;
+    private Extensions extensions;
 
     public TimeStampRequest(TimeStampReq req)
     {
@@ -203,7 +203,7 @@ public class TimeStampRequest
         return req.getEncoded();
     }
 
-    X509Extensions getExtensions()
+    Extensions getExtensions()
     {
         return extensions;
     }
@@ -213,7 +213,7 @@ public class TimeStampRequest
         return extensions != null;
     }
 
-    public X509Extension getExtension(ASN1ObjectIdentifier oid)
+    public Extension getExtension(ASN1ObjectIdentifier oid)
     {
         if (extensions != null)
         {
@@ -234,17 +234,17 @@ public class TimeStampRequest
      */
     public byte[] getExtensionValue(String oid)
     {
-        X509Extensions exts = req.getExtensions();
+        Extensions exts = req.getExtensions();
 
         if (exts != null)
         {
-            X509Extension   ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
+            Extension   ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
 
             if (ext != null)
             {
                 try
                 {
-                    return ext.getValue().getEncoded();
+                    return ext.getExtnValue().getEncoded();
                 }
                 catch (Exception e)
                 {

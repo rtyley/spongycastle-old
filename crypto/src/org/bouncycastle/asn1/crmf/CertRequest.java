@@ -5,7 +5,6 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 public class CertRequest
@@ -17,7 +16,7 @@ public class CertRequest
 
     private CertRequest(ASN1Sequence seq)
     {
-        certReqId = new ASN1Integer(DERInteger.getInstance(seq.getObjectAt(0)).getValue());
+        certReqId = new ASN1Integer(ASN1Integer.getInstance(seq.getObjectAt(0)).getValue());
         certTemplate = CertTemplate.getInstance(seq.getObjectAt(1));
         if (seq.size() > 2)
         {

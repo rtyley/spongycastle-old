@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.DEROctetString;
 
 /**
  * Generator for X.509 extensions
+ * @deprecated use org.bouncycastle.asn1.x509.ExtensionsGenerator
  */
 public class X509ExtensionsGenerator
 {

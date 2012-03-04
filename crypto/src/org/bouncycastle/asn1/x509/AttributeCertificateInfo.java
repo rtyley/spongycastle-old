@@ -2,26 +2,26 @@ package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 public class AttributeCertificateInfo
     extends ASN1Object
 {
-    private DERInteger              version;
+    private ASN1Integer              version;
     private Holder                  holder;
     private AttCertIssuer           issuer;
     private AlgorithmIdentifier     signature;
-    private DERInteger              serialNumber;
+    private ASN1Integer              serialNumber;
     private AttCertValidityPeriod   attrCertValidityPeriod;
     private ASN1Sequence            attributes;
     private DERBitString            issuerUniqueID;
-    private X509Extensions          extensions;
+    private Extensions              extensions;
 
     public static AttributeCertificateInfo getInstance(
         ASN1TaggedObject obj,
@@ -53,11 +53,11 @@ public class AttributeCertificateInfo
             throw new IllegalArgumentException("Bad sequence size: " + seq.size());
         }
 
-        this.version = DERInteger.getInstance(seq.getObjectAt(0));
+        this.version = ASN1Integer.getInstance(seq.getObjectAt(0));
         this.holder = Holder.getInstance(seq.getObjectAt(1));
         this.issuer = AttCertIssuer.getInstance(seq.getObjectAt(2));
         this.signature = AlgorithmIdentifier.getInstance(seq.getObjectAt(3));
-        this.serialNumber = DERInteger.getInstance(seq.getObjectAt(4));
+        this.serialNumber = ASN1Integer.getInstance(seq.getObjectAt(4));
         this.attrCertValidityPeriod = AttCertValidityPeriod.getInstance(seq.getObjectAt(5));
         this.attributes = ASN1Sequence.getInstance(seq.getObjectAt(6));
         
@@ -69,14 +69,14 @@ public class AttributeCertificateInfo
             {
                 this.issuerUniqueID = DERBitString.getInstance(seq.getObjectAt(i));
             }
-            else if (obj instanceof ASN1Sequence || obj instanceof X509Extensions)
+            else if (obj instanceof ASN1Sequence || obj instanceof Extensions)
             {
-                this.extensions = X509Extensions.getInstance(seq.getObjectAt(i));
+                this.extensions = Extensions.getInstance(seq.getObjectAt(i));
             }
         }
     }
     
-    public DERInteger getVersion()
+    public ASN1Integer getVersion()
     {
         return version;
     }
@@ -96,7 +96,7 @@ public class AttributeCertificateInfo
         return signature;
     }
 
-    public DERInteger getSerialNumber()
+    public ASN1Integer getSerialNumber()
     {
         return serialNumber;
     }
@@ -116,7 +116,7 @@ public class AttributeCertificateInfo
         return issuerUniqueID;
     }
 
-    public X509Extensions getExtensions()
+    public Extensions getExtensions()
     {
         return extensions;
     }

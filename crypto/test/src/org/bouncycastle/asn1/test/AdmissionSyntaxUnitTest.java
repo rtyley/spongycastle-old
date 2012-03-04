@@ -1,8 +1,10 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.isismtt.x509.AdmissionSyntax;
 import org.bouncycastle.asn1.isismtt.x509.Admissions;
@@ -11,8 +13,6 @@ import org.bouncycastle.asn1.isismtt.x509.ProfessionInfo;
 import org.bouncycastle.asn1.x500.DirectoryString;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Name;
-
-import java.io.IOException;
 
 public class AdmissionSyntaxUnitTest
     extends ASN1UnitTest
@@ -28,7 +28,7 @@ public class AdmissionSyntaxUnitTest
         GeneralName     name = new GeneralName(new X509Name("CN=hello world"));
         ASN1Sequence    admissions = new DERSequence(
                                         new Admissions(name,
-                                          new NamingAuthority(new DERObjectIdentifier("1.2.3"), "url", new DirectoryString("fred")),
+                                          new NamingAuthority(new ASN1ObjectIdentifier("1.2.3"), "url", new DirectoryString("fred")),
                                           new ProfessionInfo[0]));
         AdmissionSyntax syntax = new AdmissionSyntax(name, admissions);
 

@@ -4,10 +4,10 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
 
@@ -39,8 +39,8 @@ public class MonetaryLimit
     extends ASN1Object
 {
     DERPrintableString currency;
-    DERInteger amount;
-    DERInteger exponent;
+    ASN1Integer amount;
+    ASN1Integer exponent;
 
     public static MonetaryLimit getInstance(Object obj)
     {
@@ -66,8 +66,8 @@ public class MonetaryLimit
         }
         Enumeration e = seq.getObjects();
         currency = DERPrintableString.getInstance(e.nextElement());
-        amount = DERInteger.getInstance(e.nextElement());
-        exponent = DERInteger.getInstance(e.nextElement());
+        amount = ASN1Integer.getInstance(e.nextElement());
+        exponent = ASN1Integer.getInstance(e.nextElement());
     }
 
     /**
@@ -83,8 +83,8 @@ public class MonetaryLimit
     public MonetaryLimit(String currency, int amount, int exponent)
     {
         this.currency = new DERPrintableString(currency, true);
-        this.amount = new DERInteger(amount);
-        this.exponent = new DERInteger(exponent);
+        this.amount = new ASN1Integer(amount);
+        this.exponent = new ASN1Integer(exponent);
     }
 
     public String getCurrency()

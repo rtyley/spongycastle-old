@@ -15,8 +15,8 @@ import java.util.List;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -61,7 +61,7 @@ public class AttributeCertificateHolder
     {
         holder = new org.bouncycastle.asn1.x509.Holder(new IssuerSerial(
             new GeneralNames(new DERSequence(new GeneralName(issuerName))),
-            new DERInteger(serialNumber)));
+            new ASN1Integer(serialNumber)));
     }
 
     public AttributeCertificateHolder(X500Principal issuerName,
@@ -85,7 +85,7 @@ public class AttributeCertificateHolder
         }
 
         holder = new Holder(new IssuerSerial(generateGeneralNames(name),
-            new DERInteger(cert.getSerialNumber())));
+            new ASN1Integer(cert.getSerialNumber())));
     }
 
     public AttributeCertificateHolder(X509Principal principal)

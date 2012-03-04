@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.X509Extensions;
 
 public class SingleResponse
@@ -17,14 +18,32 @@ public class SingleResponse
     private CertStatus          certStatus;
     private DERGeneralizedTime  thisUpdate;
     private DERGeneralizedTime  nextUpdate;
-    private X509Extensions      singleExtensions;
+    private Extensions      singleExtensions;
+
+    /**
+     * @depreacted use method taking Extensions
+     * @param certID
+     * @param certStatus
+     * @param thisUpdate
+     * @param nextUpdate
+     * @param singleExtensions
+     */
+    public SingleResponse(
+        CertID              certID,
+        CertStatus          certStatus,
+        DERGeneralizedTime  thisUpdate,
+        DERGeneralizedTime  nextUpdate,
+        X509Extensions singleExtensions)
+    {
+        this(certID, certStatus, thisUpdate, nextUpdate, Extensions.getInstance(singleExtensions));
+    }
 
     public SingleResponse(
         CertID              certID,
         CertStatus          certStatus,
         DERGeneralizedTime  thisUpdate,
         DERGeneralizedTime  nextUpdate,
-        X509Extensions      singleExtensions)
+        Extensions      singleExtensions)
     {
         this.certID = certID;
         this.certStatus = certStatus;
@@ -44,7 +63,7 @@ public class SingleResponse
         {
             this.nextUpdate = DERGeneralizedTime.getInstance(
                                 (ASN1TaggedObject)seq.getObjectAt(3), true);
-            this.singleExtensions = X509Extensions.getInstance(
+            this.singleExtensions = Extensions.getInstance(
                                 (ASN1TaggedObject)seq.getObjectAt(4), true);
         }
         else if (seq.size() > 3)
@@ -57,7 +76,7 @@ public class SingleResponse
             }
             else
             {
-                this.singleExtensions = X509Extensions.getInstance(o, true);
+                this.singleExtensions = Extensions.getInstance(o, true);
             }
         }
     }
@@ -104,7 +123,7 @@ public class SingleResponse
         return nextUpdate;
     }
 
-    public X509Extensions getSingleExtensions()
+    public Extensions getSingleExtensions()
     {
         return singleExtensions;
     }

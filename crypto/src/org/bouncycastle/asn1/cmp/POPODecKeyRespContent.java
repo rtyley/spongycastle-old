@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1.cmp;
 
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 
 public class POPODecKeyRespContent
     extends ASN1Object
@@ -30,13 +30,13 @@ public class POPODecKeyRespContent
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
-    public DERInteger[] toDERIntegerArray()
+    public ASN1Integer[] toASN1IntegerArray()
     {
-        DERInteger[] result = new DERInteger[content.size()];
+        ASN1Integer[] result = new ASN1Integer[content.size()];
 
         for (int i = 0; i != result.length; i++)
         {
-            result[i] = DERInteger.getInstance(content.getObjectAt(i));
+            result[i] = ASN1Integer.getInstance(content.getObjectAt(i));
         }
 
         return result;

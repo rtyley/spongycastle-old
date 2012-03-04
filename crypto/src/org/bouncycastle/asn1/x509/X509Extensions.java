@@ -15,6 +15,9 @@ import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 
+/**
+ * @deprecated use Extensions
+ */
 public class X509Extensions
     extends ASN1Object
 {
@@ -227,6 +230,11 @@ public class X509Extensions
             return new X509Extensions((ASN1Sequence)obj);
         }
 
+        if (obj instanceof Extensions)
+        {
+            return new X509Extensions((ASN1Sequence)((Extensions)obj).toASN1Primitive());
+        }
+
         if (obj instanceof ASN1TaggedObject)
         {
             return getInstance(((ASN1TaggedObject)obj).getObject());
@@ -359,7 +367,7 @@ public class X509Extensions
      * @return the extension if it's present, null otherwise.
      */
     public X509Extension getExtension(
-        ASN1ObjectIdentifier oid)
+        DERObjectIdentifier oid)
     {
         return (X509Extension)extensions.get(oid);
     }
@@ -370,7 +378,7 @@ public class X509Extensions
      * @return
      */
     public X509Extension getExtension(
-        DERObjectIdentifier oid)
+        ASN1ObjectIdentifier oid)
     {
         return (X509Extension)extensions.get(oid);
     }

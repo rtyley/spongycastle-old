@@ -169,7 +169,7 @@ public class X509Extension
     public static final ASN1ObjectIdentifier targetInformation = new ASN1ObjectIdentifier("2.5.29.55");
         
     boolean             critical;
-    ASN1OctetString      value;
+    ASN1OctetString     value;
 
     public X509Extension(
         DERBoolean              critical,
@@ -209,7 +209,6 @@ public class X509Extension
             return this.getValue().hashCode();
         }
 
-        
         return ~this.getValue().hashCode();
     }
 

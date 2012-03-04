@@ -2,9 +2,9 @@ package org.bouncycastle.asn1.cmp;
 
 import java.math.BigInteger;
 
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.DERInteger;
 
 public class PKIStatus
     extends ASN1Object
@@ -25,14 +25,14 @@ public class PKIStatus
     public static final PKIStatus revocationNotification = new PKIStatus(REVOCATION_NOTIFICATION);
     public static final PKIStatus keyUpdateWaiting = new PKIStatus(KEY_UPDATE_WARNING);
 
-    private DERInteger value;
+    private ASN1Integer value;
 
     private PKIStatus(int value)
     {
-        this(new DERInteger(value));
+        this(new ASN1Integer(value));
     }
 
-    private PKIStatus(DERInteger value)
+    private PKIStatus(ASN1Integer value)
     {
         this.value = value;
     }
@@ -44,9 +44,9 @@ public class PKIStatus
             return (PKIStatus)o;
         }
 
-        if (o instanceof DERInteger)
+        if (o instanceof ASN1Integer)
         {
-            return new PKIStatus((DERInteger)o);
+            return new PKIStatus((ASN1Integer)o);
         }
 
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());

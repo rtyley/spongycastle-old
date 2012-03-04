@@ -13,9 +13,9 @@ import org.bouncycastle.asn1.ASN1Exception;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -391,10 +391,11 @@ public class OCSPTest
 
         gen.setRequestorName(new GeneralName(GeneralName.directoryName, new X509Principal("CN=fred")));
 
-        oids.addElement(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
-        values.addElement(new X509Extension(false, new DEROctetString(new DEROctetString(sampleNonce))));
+        ExtensionsGenerator extGen = new ExtensionsGenerator();
 
-        gen.setRequestExtensions(new X509Extensions(oids, values));
+        extGen.addExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce, false, new DEROctetString(sampleNonce));
+
+        gen.setRequestExtensions(extGen.generate());
 
         gen.addRequest(
             new CertificateID(digCalcProv.get(CertificateID.HASH_SHA1), testCert, BigInteger.valueOf(1)));
@@ -430,7 +431,7 @@ public class OCSPTest
             fail("wrong number of non-critical extensions in OCSP request.");
         }
 
-        X509Extension extValue = req.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
+        Extension extValue = req.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
 
         ASN1Encodable extObj = extValue.getParsedValue();
 
@@ -573,8 +574,6 @@ public class OCSPTest
 
         gen = new OCSPReqBuilder();
 
-        Vector oids = new Vector();
-        Vector values = new Vector();
         byte[] sampleNonce = new byte[16];
         Random rand = new Random();
 
@@ -582,10 +581,11 @@ public class OCSPTest
 
         gen.setRequestorName(new GeneralName(GeneralName.directoryName, new X509Principal("CN=fred")));
 
-        oids.addElement(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
-        values.addElement(new X509Extension(false, new DEROctetString(new DEROctetString(sampleNonce))));
+        ExtensionsGenerator extGen = new ExtensionsGenerator();
 
-        gen.setRequestExtensions(new X509Extensions(oids, values));
+        extGen.addExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce, false, new DEROctetString(sampleNonce));
+
+        gen.setRequestExtensions(extGen.generate());
 
         gen.addRequest(
             new CertificateID(digCalcProv.get(CertificateID.HASH_SHA1), testCert, BigInteger.valueOf(1)));
@@ -621,7 +621,7 @@ public class OCSPTest
             fail("wrong number of non-critical extensions in OCSP request.");
         }
 
-        X509Extension ext = req.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
+        Extension ext = req.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
 
         ASN1Encodable extObj = ext.getParsedValue();
 
@@ -814,10 +814,11 @@ public class OCSPTest
 
         gen.setRequestorName(new GeneralName(GeneralName.directoryName, new X509Principal("CN=fred")));
 
-        oids.addElement(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
-        values.addElement(new X509Extension(false, new DEROctetString(new DEROctetString(sampleNonce))));
+        ExtensionsGenerator extGen = new ExtensionsGenerator();
 
-        gen.setRequestExtensions(new X509Extensions(oids, values));
+        extGen.addExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce, false, new DEROctetString(sampleNonce));
+
+        gen.setRequestExtensions(extGen.generate());
 
         gen.addRequest(
             new CertificateID(digCalcProv.get(CertificateID.HASH_SHA1), testCert, BigInteger.valueOf(1)));
@@ -853,7 +854,7 @@ public class OCSPTest
             fail("wrong number of non-critical extensions in OCSP request.");
         }
 
-        X509Extension ext = req.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
+        Extension ext = req.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
 
         ASN1Encodable extObj = ext.getParsedValue();
 

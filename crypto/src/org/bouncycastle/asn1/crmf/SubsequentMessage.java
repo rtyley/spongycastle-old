@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1.crmf;
 
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1Integer;
 
 public class SubsequentMessage
-    extends DERInteger
+    extends ASN1Integer
 {
     public static final SubsequentMessage encrCert = new SubsequentMessage(0);
     public static final SubsequentMessage challengeResp = new SubsequentMessage(1);

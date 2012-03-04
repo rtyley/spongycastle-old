@@ -4,17 +4,17 @@ import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 public class ErrorMsgContent
     extends ASN1Object
 {
     private PKIStatusInfo pkiStatusInfo;
-    private DERInteger errorCode;
+    private ASN1Integer errorCode;
     private PKIFreeText errorDetails;
 
     private ErrorMsgContent(ASN1Sequence seq)
@@ -27,9 +27,9 @@ public class ErrorMsgContent
         {
             Object o = en.nextElement();
 
-            if (o instanceof DERInteger)
+            if (o instanceof ASN1Integer)
             {
-                errorCode = DERInteger.getInstance(o);
+                errorCode = ASN1Integer.getInstance(o);
             }
             else
             {
@@ -60,7 +60,7 @@ public class ErrorMsgContent
 
     public ErrorMsgContent(
         PKIStatusInfo pkiStatusInfo,
-        DERInteger errorCode,
+        ASN1Integer errorCode,
         PKIFreeText errorDetails)
     {
         if (pkiStatusInfo == null)
@@ -78,7 +78,7 @@ public class ErrorMsgContent
         return pkiStatusInfo;
     }
 
-    public DERInteger getErrorCode()
+    public ASN1Integer getErrorCode()
     {
         return errorCode;
     }

@@ -5,9 +5,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -59,13 +59,13 @@ public class AttributeCertificateHolder
     {
         holder = new Holder(new IssuerSerial(
             new GeneralNames(new DERSequence(new GeneralName(issuerName))),
-            new DERInteger(serialNumber)));
+            new ASN1Integer(serialNumber)));
     }
 
     public AttributeCertificateHolder(X509CertificateHolder cert)
     {
         holder = new Holder(new IssuerSerial(generateGeneralNames(cert.getIssuer()),
-            new DERInteger(cert.getSerialNumber())));
+            new ASN1Integer(cert.getSerialNumber())));
     }
 
     public AttributeCertificateHolder(X500Name principal)

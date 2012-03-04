@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -23,7 +24,6 @@ import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERExternal;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERPrintableString;
@@ -197,9 +197,9 @@ public class ASN1Dump
         {
             buf.append(indent + "Boolean(" + ((DERBoolean)obj).isTrue() + ")" + nl);
         }
-        else if (obj instanceof DERInteger)
+        else if (obj instanceof ASN1Integer)
         {
-            buf.append(indent + "Integer(" + ((DERInteger)obj).getValue() + ")" + nl);
+            buf.append(indent + "Integer(" + ((ASN1Integer)obj).getValue() + ")" + nl);
         }
         else if (obj instanceof BERConstructedOctetString)
         {

@@ -1,11 +1,11 @@
 package org.bouncycastle.asn1.x509;
 
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 
@@ -18,6 +18,7 @@ import org.bouncycastle.asn1.x500.X500Name;
  *      signature               BIT STRING
  *  }
  * </pre>
+ * @deprecated use org.bouncycastle.asn1.x509.Certificate
  */
 public class X509CertificateStructure
     extends ASN1Object
@@ -81,7 +82,7 @@ public class X509CertificateStructure
         return tbsCert.getVersion();
     }
 
-    public DERInteger getSerialNumber()
+    public ASN1Integer getSerialNumber()
     {
         return tbsCert.getSerialNumber();
     }

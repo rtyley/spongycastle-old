@@ -4,11 +4,11 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -76,21 +76,21 @@ public class RSAPrivateKeyStructure
     {
         Enumeration e = seq.getObjects();
 
-        BigInteger  v = ((DERInteger)e.nextElement()).getValue();
+        BigInteger  v = ((ASN1Integer)e.nextElement()).getValue();
         if (v.intValue() != 0 && v.intValue() != 1)
         {
             throw new IllegalArgumentException("wrong version for RSA private key");
         }
 
         version = v.intValue();
-        modulus = ((DERInteger)e.nextElement()).getValue();
-        publicExponent = ((DERInteger)e.nextElement()).getValue();
-        privateExponent = ((DERInteger)e.nextElement()).getValue();
-        prime1 = ((DERInteger)e.nextElement()).getValue();
-        prime2 = ((DERInteger)e.nextElement()).getValue();
-        exponent1 = ((DERInteger)e.nextElement()).getValue();
-        exponent2 = ((DERInteger)e.nextElement()).getValue();
-        coefficient = ((DERInteger)e.nextElement()).getValue();
+        modulus = ((ASN1Integer)e.nextElement()).getValue();
+        publicExponent = ((ASN1Integer)e.nextElement()).getValue();
+        privateExponent = ((ASN1Integer)e.nextElement()).getValue();
+        prime1 = ((ASN1Integer)e.nextElement()).getValue();
+        prime2 = ((ASN1Integer)e.nextElement()).getValue();
+        exponent1 = ((ASN1Integer)e.nextElement()).getValue();
+        exponent2 = ((ASN1Integer)e.nextElement()).getValue();
+        coefficient = ((ASN1Integer)e.nextElement()).getValue();
         
         if (e.hasMoreElements())
         {
@@ -169,15 +169,15 @@ public class RSAPrivateKeyStructure
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 
-        v.add(new DERInteger(version));                       // version
-        v.add(new DERInteger(getModulus()));
-        v.add(new DERInteger(getPublicExponent()));
-        v.add(new DERInteger(getPrivateExponent()));
-        v.add(new DERInteger(getPrime1()));
-        v.add(new DERInteger(getPrime2()));
-        v.add(new DERInteger(getExponent1()));
-        v.add(new DERInteger(getExponent2()));
-        v.add(new DERInteger(getCoefficient()));
+        v.add(new ASN1Integer(version));                       // version
+        v.add(new ASN1Integer(getModulus()));
+        v.add(new ASN1Integer(getPublicExponent()));
+        v.add(new ASN1Integer(getPrivateExponent()));
+        v.add(new ASN1Integer(getPrime1()));
+        v.add(new ASN1Integer(getPrime2()));
+        v.add(new ASN1Integer(getExponent1()));
+        v.add(new ASN1Integer(getExponent2()));
+        v.add(new ASN1Integer(getCoefficient()));
 
         if (otherPrimeInfos != null)
         {

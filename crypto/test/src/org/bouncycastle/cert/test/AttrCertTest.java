@@ -27,9 +27,9 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.Attribute;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.cert.AttributeCertificateHolder;
 import org.bouncycastle.cert.AttributeCertificateIssuer;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
@@ -628,7 +628,7 @@ public class AttrCertTest
         Set exts = aCert.getCriticalExtensionOIDs();
         
         if (exts.size() != 1 || !exts.contains(new ASN1ObjectIdentifier("1.1")))
-        {
+        {               System.err.println(exts);
             fail("critical extension test failed");
         }
 
@@ -644,7 +644,7 @@ public class AttrCertTest
             fail("critical extensions not found");
         }
         
-        X509Extension ext = aCert.getExtension(new ASN1ObjectIdentifier("1.1"));
+        Extension ext = aCert.getExtension(new ASN1ObjectIdentifier("1.1"));
         ASN1Encodable extValue = ext.getParsedValue();
         
         if (!extValue.equals(new DEROctetString(new byte[10])))

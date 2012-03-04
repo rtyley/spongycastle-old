@@ -1,12 +1,12 @@
 package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /** 
@@ -22,7 +22,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class CompressedData
     extends ASN1Object
 {
-    private DERInteger           version;
+    private ASN1Integer           version;
     private AlgorithmIdentifier  compressionAlgorithm;
     private ContentInfo          encapContentInfo;
 
@@ -30,7 +30,7 @@ public class CompressedData
         AlgorithmIdentifier compressionAlgorithm,
         ContentInfo         encapContentInfo)
     {
-        this.version = new DERInteger(0);
+        this.version = new ASN1Integer(0);
         this.compressionAlgorithm = compressionAlgorithm;
         this.encapContentInfo = encapContentInfo;
     }
@@ -38,7 +38,7 @@ public class CompressedData
     public CompressedData(
         ASN1Sequence seq)
     {
-        this.version = (DERInteger)seq.getObjectAt(0);
+        this.version = (ASN1Integer)seq.getObjectAt(0);
         this.compressionAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
         this.encapContentInfo = ContentInfo.getInstance(seq.getObjectAt(2));
 
@@ -82,7 +82,7 @@ public class CompressedData
         throw new IllegalArgumentException("Invalid CompressedData: " + _obj.getClass().getName());
     }
 
-    public DERInteger getVersion()
+    public ASN1Integer getVersion()
     {
         return version;
     }

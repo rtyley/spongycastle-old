@@ -1,18 +1,18 @@
 package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.BERTaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 
 public class EncryptedData
     extends ASN1Object
 {
-    private DERInteger version;
+    private ASN1Integer version;
     private EncryptedContentInfo encryptedContentInfo;
     private ASN1Set unprotectedAttrs;
 
@@ -38,14 +38,14 @@ public class EncryptedData
 
     public EncryptedData(EncryptedContentInfo encInfo, ASN1Set unprotectedAttrs)
     {
-        this.version = new DERInteger((unprotectedAttrs == null) ? 0 : 2);
+        this.version = new ASN1Integer((unprotectedAttrs == null) ? 0 : 2);
         this.encryptedContentInfo = encInfo;
         this.unprotectedAttrs = unprotectedAttrs;
     }
 
     private EncryptedData(ASN1Sequence seq)
     {
-        this.version = DERInteger.getInstance(seq.getObjectAt(0));
+        this.version = ASN1Integer.getInstance(seq.getObjectAt(0));
         this.encryptedContentInfo = EncryptedContentInfo.getInstance(seq.getObjectAt(1));
 
         if (seq.size() == 3)
@@ -54,7 +54,7 @@ public class EncryptedData
         }
     }
 
-    public DERInteger getVersion()
+    public ASN1Integer getVersion()
     {
         return version;
     }

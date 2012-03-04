@@ -3,11 +3,11 @@ package org.bouncycastle.asn1.x9;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
@@ -32,8 +32,8 @@ public class X9ECParameters
     private X9ECParameters(
         ASN1Sequence  seq)
     {
-        if (!(seq.getObjectAt(0) instanceof DERInteger)
-           || !((DERInteger)seq.getObjectAt(0)).getValue().equals(ONE))
+        if (!(seq.getObjectAt(0) instanceof ASN1Integer)
+           || !((ASN1Integer)seq.getObjectAt(0)).getValue().equals(ONE))
         {
             throw new IllegalArgumentException("bad version in X9ECParameters");
         }
@@ -44,12 +44,12 @@ public class X9ECParameters
 
         this.curve = x9c.getCurve();
         this.g = new X9ECPoint(curve, (ASN1OctetString)seq.getObjectAt(3)).getPoint();
-        this.n = ((DERInteger)seq.getObjectAt(4)).getValue();
+        this.n = ((ASN1Integer)seq.getObjectAt(4)).getValue();
         this.seed = x9c.getSeed();
 
         if (seq.size() == 6)
         {
-            this.h = ((DERInteger)seq.getObjectAt(5)).getValue();
+            this.h = ((ASN1Integer)seq.getObjectAt(5)).getValue();
         }
     }
 
@@ -160,15 +160,15 @@ public class X9ECParameters
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        v.add(new DERInteger(1));
+        v.add(new ASN1Integer(1));
         v.add(fieldID);
         v.add(new X9Curve(curve, seed));
         v.add(new X9ECPoint(g));
-        v.add(new DERInteger(n));
+        v.add(new ASN1Integer(n));
 
         if (h != null)
         {
-            v.add(new DERInteger(h));
+            v.add(new ASN1Integer(h));
         }
 
         return new DERSequence(v);

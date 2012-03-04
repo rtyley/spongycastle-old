@@ -3,7 +3,7 @@ package org.bouncycastle.cert;
 import java.math.BigInteger;
 import java.util.Date;
 
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.Time;
@@ -41,7 +41,7 @@ public class X509v1CertificateBuilder
         }
 
         tbsGen = new V1TBSCertificateGenerator();
-        tbsGen.setSerialNumber(new DERInteger(serial));
+        tbsGen.setSerialNumber(new ASN1Integer(serial));
         tbsGen.setIssuer(issuer);
         tbsGen.setStartDate(new Time(notBefore));
         tbsGen.setEndDate(new Time(notAfter));

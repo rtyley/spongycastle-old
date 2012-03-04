@@ -17,11 +17,11 @@ import org.bouncycastle.asn1.oiw.ElGamalParameter;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.RSAPublicKey;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
-import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.asn1.x9.DHDomainParameters;
@@ -88,8 +88,7 @@ public class PublicKeyFactory
         if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.rsaEncryption)
             || algId.getAlgorithm().equals(X509ObjectIdentifiers.id_ea_rsa))
         {
-            RSAPublicKeyStructure pubKey = new RSAPublicKeyStructure(
-                (ASN1Sequence)keyInfo.parsePublicKey());
+            RSAPublicKey pubKey = RSAPublicKey.getInstance(keyInfo.parsePublicKey());
 
             return new RSAKeyParameters(false, pubKey.getModulus(), pubKey.getPublicExponent());
         }

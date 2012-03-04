@@ -5,13 +5,13 @@ import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
@@ -19,6 +19,7 @@ import org.bouncycastle.util.BigIntegers;
 
 /**
  * the elliptic curve private key object from SEC 1
+ * @deprecated use ECPrivateKey
  */
 public class ECPrivateKeyStructure
     extends ASN1Object
@@ -38,7 +39,7 @@ public class ECPrivateKeyStructure
 
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        v.add(new DERInteger(1));
+        v.add(new ASN1Integer(1));
         v.add(new DEROctetString(bytes));
 
         seq = new DERSequence(v);
@@ -60,7 +61,7 @@ public class ECPrivateKeyStructure
 
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        v.add(new DERInteger(1));
+        v.add(new ASN1Integer(1));
         v.add(new DEROctetString(bytes));
 
         if (parameters != null)

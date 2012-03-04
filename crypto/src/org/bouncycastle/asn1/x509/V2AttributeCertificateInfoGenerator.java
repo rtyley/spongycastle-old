@@ -2,10 +2,10 @@ package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 
@@ -28,14 +28,14 @@ import org.bouncycastle.asn1.DERSet;
  */
 public class V2AttributeCertificateInfoGenerator
 {
-    private DERInteger version;
+    private ASN1Integer version;
     private Holder holder;
     private AttCertIssuer issuer;
     private AlgorithmIdentifier signature;
-    private DERInteger serialNumber;
+    private ASN1Integer serialNumber;
     private ASN1EncodableVector attributes;
     private DERBitString issuerUniqueID;
-    private X509Extensions extensions;
+    private Extensions extensions;
 
     // Note: validity period start/end dates stored directly
     //private AttCertValidityPeriod attrCertValidityPeriod;
@@ -43,7 +43,7 @@ public class V2AttributeCertificateInfoGenerator
 
     public V2AttributeCertificateInfoGenerator()
     {
-        this.version = new DERInteger(1);
+        this.version = new ASN1Integer(1);
         attributes = new ASN1EncodableVector();
     }
     
@@ -66,7 +66,7 @@ public class V2AttributeCertificateInfoGenerator
     }
     
     public void setSerialNumber(
-        DERInteger  serialNumber)
+        ASN1Integer  serialNumber)
     {
         this.serialNumber = serialNumber;
     }
@@ -101,8 +101,18 @@ public class V2AttributeCertificateInfoGenerator
         this.issuerUniqueID = issuerUniqueID;
     }
 
+    /**
+     * @deprecated use method taking Extensions
+     * @param extensions
+     */
     public void setExtensions(
         X509Extensions    extensions)
+    {
+        this.extensions = Extensions.getInstance(extensions.toASN1Primitive());
+    }
+
+    public void setExtensions(
+        Extensions    extensions)
     {
         this.extensions = extensions;
     }

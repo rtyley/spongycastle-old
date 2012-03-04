@@ -1,19 +1,19 @@
 package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 public class KEKRecipientInfo
     extends ASN1Object
 {
-    private DERInteger          version;
+    private ASN1Integer          version;
     private KEKIdentifier       kekid;
     private AlgorithmIdentifier keyEncryptionAlgorithm;
     private ASN1OctetString     encryptedKey;
@@ -23,7 +23,7 @@ public class KEKRecipientInfo
         AlgorithmIdentifier keyEncryptionAlgorithm,
         ASN1OctetString     encryptedKey)
     {
-        this.version = new DERInteger(4);
+        this.version = new ASN1Integer(4);
         this.kekid = kekid;
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
         this.encryptedKey = encryptedKey;
@@ -32,7 +32,7 @@ public class KEKRecipientInfo
     public KEKRecipientInfo(
         ASN1Sequence seq)
     {
-        version = (DERInteger)seq.getObjectAt(0);
+        version = (ASN1Integer)seq.getObjectAt(0);
         kekid = KEKIdentifier.getInstance(seq.getObjectAt(1));
         keyEncryptionAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(2));
         encryptedKey = (ASN1OctetString)seq.getObjectAt(3);
@@ -76,7 +76,7 @@ public class KEKRecipientInfo
         throw new IllegalArgumentException("Invalid KEKRecipientInfo: " + obj.getClass().getName());
     }
 
-    public DERInteger getVersion()
+    public ASN1Integer getVersion()
     {
         return version;
     }

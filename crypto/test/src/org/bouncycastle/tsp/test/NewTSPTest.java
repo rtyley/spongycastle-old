@@ -343,7 +343,7 @@ public class NewTSPTest
 
         TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
         
-        reqGen.setReqPolicy("1.1");
+        reqGen.setReqPolicy(new ASN1ObjectIdentifier("1.1"));
         
         TimeStampRequest            request = reqGen.generate(TSPAlgorithms.SHA1, new byte[20]);
 

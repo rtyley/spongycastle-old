@@ -5,11 +5,11 @@ import java.io.OutputStream;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.operator.DigestCalculator;
 
 public class X509ExtensionUtils
@@ -24,7 +24,7 @@ public class X509ExtensionUtils
     public AuthorityKeyIdentifier createAuthorityKeyIdentifier(
         X509CertificateHolder certHolder)
     {
-        if (certHolder.getVersion() != 3)
+        if (certHolder.getVersionNumber() != 3)
         {
             GeneralName genName = new GeneralName(certHolder.getIssuer());
             SubjectPublicKeyInfo info = certHolder.getSubjectPublicKeyInfo();
@@ -35,7 +35,7 @@ public class X509ExtensionUtils
         else
         {
             GeneralName             genName = new GeneralName(certHolder.getIssuer());
-            X509Extension ext = certHolder.getExtension(X509Extension.subjectKeyIdentifier);
+            Extension ext = certHolder.getExtension(Extension.subjectKeyIdentifier);
 
             if (ext != null)
             {

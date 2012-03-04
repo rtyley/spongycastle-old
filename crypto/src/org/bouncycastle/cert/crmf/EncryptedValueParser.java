@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.bouncycastle.asn1.crmf.EncryptedValue;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.InputDecryptor;
 import org.bouncycastle.util.Strings;
@@ -85,7 +85,7 @@ public class EncryptedValueParser
     public X509CertificateHolder readCertificateHolder(ValueDecryptorGenerator decGen)
         throws CRMFException
     {
-        return new X509CertificateHolder(X509CertificateStructure.getInstance(decryptValue(decGen)));
+        return new X509CertificateHolder(Certificate.getInstance(decryptValue(decGen)));
     }
 
     /**

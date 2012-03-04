@@ -18,11 +18,12 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x509.CRLReason;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**
@@ -121,7 +122,7 @@ public class X509CRLEntryObject extends X509CRLEntry
 
     private Set getExtensionOIDs(boolean critical)
     {
-        X509Extensions extensions = c.getExtensions();
+        Extensions extensions = c.getExtensions();
 
         if (extensions != null)
         {
@@ -131,7 +132,7 @@ public class X509CRLEntryObject extends X509CRLEntry
             while (e.hasMoreElements())
             {
                 ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier) e.nextElement();
-                X509Extension ext = extensions.getExtension(oid);
+                Extension ext = extensions.getExtension(oid);
 
                 if (critical == ext.isCritical())
                 {
@@ -157,17 +158,17 @@ public class X509CRLEntryObject extends X509CRLEntry
 
     public byte[] getExtensionValue(String oid)
     {
-        X509Extensions exts = c.getExtensions();
+        Extensions exts = c.getExtensions();
 
         if (exts != null)
         {
-            X509Extension ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
+            Extension ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
 
             if (ext != null)
             {
                 try
                 {
-                    return ext.getValue().getEncoded();
+                    return ext.getExtnValue().getEncoded();
                 }
                 catch (Exception e)
                 {
@@ -231,7 +232,7 @@ public class X509CRLEntryObject extends X509CRLEntry
         buf.append("       revocationDate: ").append(this.getRevocationDate()).append(nl);
         buf.append("       certificateIssuer: ").append(this.getCertificateIssuer()).append(nl);
 
-        X509Extensions extensions = c.getExtensions();
+        Extensions extensions = c.getExtensions();
 
         if (extensions != null)
         {
@@ -243,10 +244,10 @@ public class X509CRLEntryObject extends X509CRLEntry
                 while (e.hasMoreElements())
                 {
                     ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)e.nextElement();
-                    X509Extension ext = extensions.getExtension(oid);
-                    if (ext.getValue() != null)
+                    Extension ext = extensions.getExtension(oid);
+                    if (ext.getExtnValue() != null)
                     {
-                        byte[]                  octs = ext.getValue().getOctets();
+                        byte[]                  octs = ext.getExtnValue().getOctets();
                         ASN1InputStream dIn = new ASN1InputStream(octs);
                         buf.append("                       critical(").append(ext.isCritical()).append(") ");
                         try

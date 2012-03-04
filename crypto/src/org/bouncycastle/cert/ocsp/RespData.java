@@ -5,7 +5,7 @@ import java.util.Date;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ocsp.ResponseData;
 import org.bouncycastle.asn1.ocsp.SingleResponse;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.Extensions;
 
 public class RespData
 {
@@ -45,7 +45,7 @@ public class RespData
         return rs;
     }
 
-    public X509Extensions getResponseExtensions()
+    public Extensions getResponseExtensions()
     {
         return data.getResponseExtensions();
     }

@@ -4,13 +4,16 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
+/**
+ * @deprecated use org.bouncycastle.asn1.pkcs.RSAPublicKey
+ */
 public class RSAPublicKeyStructure
     extends ASN1Object
 {
@@ -59,8 +62,8 @@ public class RSAPublicKeyStructure
 
         Enumeration e = seq.getObjects();
 
-        modulus = DERInteger.getInstance(e.nextElement()).getPositiveValue();
-        publicExponent = DERInteger.getInstance(e.nextElement()).getPositiveValue();
+        modulus = ASN1Integer.getInstance(e.nextElement()).getPositiveValue();
+        publicExponent = ASN1Integer.getInstance(e.nextElement()).getPositiveValue();
     }
 
     public BigInteger getModulus()
@@ -87,8 +90,8 @@ public class RSAPublicKeyStructure
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 
-        v.add(new DERInteger(getModulus()));
-        v.add(new DERInteger(getPublicExponent()));
+        v.add(new ASN1Integer(getModulus()));
+        v.add(new ASN1Integer(getPublicExponent()));
 
         return new DERSequence(v);
     }

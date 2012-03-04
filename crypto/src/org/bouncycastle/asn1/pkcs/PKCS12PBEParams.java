@@ -3,18 +3,18 @@ package org.bouncycastle.asn1.pkcs;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 
 public class PKCS12PBEParams
     extends ASN1Object
 {
-    DERInteger      iterations;
+    ASN1Integer      iterations;
     ASN1OctetString iv;
 
     public PKCS12PBEParams(
@@ -22,14 +22,14 @@ public class PKCS12PBEParams
         int         iterations)
     {
         this.iv = new DEROctetString(salt);
-        this.iterations = new DERInteger(iterations);
+        this.iterations = new ASN1Integer(iterations);
     }
 
-    public PKCS12PBEParams(
+    private PKCS12PBEParams(
         ASN1Sequence  seq)
     {
         iv = (ASN1OctetString)seq.getObjectAt(0);
-        iterations = (DERInteger)seq.getObjectAt(1);
+        iterations = ASN1Integer.getInstance(seq.getObjectAt(1));
     }
 
     public static PKCS12PBEParams getInstance(
@@ -39,12 +39,12 @@ public class PKCS12PBEParams
         {
             return (PKCS12PBEParams)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new PKCS12PBEParams((ASN1Sequence)obj);
+            return new PKCS12PBEParams(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public BigInteger getIterations()

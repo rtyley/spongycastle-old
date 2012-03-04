@@ -158,6 +158,9 @@ public class TimeStampToken
         return tsaSignerInfo.getUnsignedAttributes();
     }
 
+    /**
+     * @deprecated use getCertificates() or getCRLs()
+     */
     public CertStore getCertificatesAndCRLs(
         String type,
         String provider)

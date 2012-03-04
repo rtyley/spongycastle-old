@@ -1,12 +1,12 @@
 package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -14,7 +14,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class PasswordRecipientInfo
     extends ASN1Object
 {
-    private DERInteger          version;
+    private ASN1Integer          version;
     private AlgorithmIdentifier keyDerivationAlgorithm;
     private AlgorithmIdentifier keyEncryptionAlgorithm;
     private ASN1OctetString     encryptedKey;
@@ -23,7 +23,7 @@ public class PasswordRecipientInfo
         AlgorithmIdentifier     keyEncryptionAlgorithm,
         ASN1OctetString         encryptedKey)
     {
-        this.version = new DERInteger(0);
+        this.version = new ASN1Integer(0);
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
         this.encryptedKey = encryptedKey;
     }
@@ -33,7 +33,7 @@ public class PasswordRecipientInfo
         AlgorithmIdentifier     keyEncryptionAlgorithm,
         ASN1OctetString         encryptedKey)
     {
-        this.version = new DERInteger(0);
+        this.version = new ASN1Integer(0);
         this.keyDerivationAlgorithm = keyDerivationAlgorithm;
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
         this.encryptedKey = encryptedKey;
@@ -42,7 +42,7 @@ public class PasswordRecipientInfo
     public PasswordRecipientInfo(
         ASN1Sequence seq)
     {
-        version = (DERInteger)seq.getObjectAt(0);
+        version = (ASN1Integer)seq.getObjectAt(0);
         if (seq.getObjectAt(1) instanceof ASN1TaggedObject)
         {
             keyDerivationAlgorithm = AlgorithmIdentifier.getInstance((ASN1TaggedObject)seq.getObjectAt(1), false);
@@ -94,7 +94,7 @@ public class PasswordRecipientInfo
         throw new IllegalArgumentException("Invalid PasswordRecipientInfo: " + obj.getClass().getName());
     }
 
-    public DERInteger getVersion()
+    public ASN1Integer getVersion()
     {
         return version;
     }

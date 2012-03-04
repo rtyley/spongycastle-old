@@ -1,12 +1,12 @@
 package org.bouncycastle.asn1.cms;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -14,7 +14,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class KeyAgreeRecipientInfo
     extends ASN1Object
 {
-    private DERInteger                  version;
+    private ASN1Integer                  version;
     private OriginatorIdentifierOrKey   originator;
     private ASN1OctetString             ukm;
     private AlgorithmIdentifier         keyEncryptionAlgorithm;
@@ -26,7 +26,7 @@ public class KeyAgreeRecipientInfo
         AlgorithmIdentifier         keyEncryptionAlgorithm,
         ASN1Sequence                recipientEncryptedKeys)
     {
-        this.version = new DERInteger(3);
+        this.version = new ASN1Integer(3);
         this.originator = originator;
         this.ukm = ukm;
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
@@ -38,7 +38,7 @@ public class KeyAgreeRecipientInfo
     {
         int index = 0;
         
-        version = (DERInteger)seq.getObjectAt(index++);
+        version = (ASN1Integer)seq.getObjectAt(index++);
         originator = OriginatorIdentifierOrKey.getInstance(
                             (ASN1TaggedObject)seq.getObjectAt(index++), true);
 
@@ -94,7 +94,7 @@ public class KeyAgreeRecipientInfo
 
     } 
 
-    public DERInteger getVersion()
+    public ASN1Integer getVersion()
     {
         return version;
     }

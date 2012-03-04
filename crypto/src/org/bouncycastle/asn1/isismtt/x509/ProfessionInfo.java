@@ -5,11 +5,11 @@ import java.util.Enumeration;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
@@ -39,115 +39,115 @@ public class ProfessionInfo
     /**
      * Rechtsanw�ltin
      */
-    public static final DERObjectIdentifier Rechtsanwltin = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Rechtsanwltin = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".1");
 
     /**
      * Rechtsanwalt
      */
-    public static final DERObjectIdentifier Rechtsanwalt = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Rechtsanwalt = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".2");
 
     /**
      * Rechtsbeistand
      */
-    public static final DERObjectIdentifier Rechtsbeistand = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Rechtsbeistand = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".3");
 
     /**
      * Steuerberaterin
      */
-    public static final DERObjectIdentifier Steuerberaterin = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Steuerberaterin = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".4");
 
     /**
      * Steuerberater
      */
-    public static final DERObjectIdentifier Steuerberater = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Steuerberater = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".5");
 
     /**
      * Steuerbevollm�chtigte
      */
-    public static final DERObjectIdentifier Steuerbevollmchtigte = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Steuerbevollmchtigte = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".6");
 
     /**
      * Steuerbevollm�chtigter
      */
-    public static final DERObjectIdentifier Steuerbevollmchtigter = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Steuerbevollmchtigter = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".7");
 
     /**
      * Notarin
      */
-    public static final DERObjectIdentifier Notarin = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Notarin = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".8");
 
     /**
      * Notar
      */
-    public static final DERObjectIdentifier Notar = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Notar = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".9");
 
     /**
      * Notarvertreterin
      */
-    public static final DERObjectIdentifier Notarvertreterin = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Notarvertreterin = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".10");
 
     /**
      * Notarvertreter
      */
-    public static final DERObjectIdentifier Notarvertreter = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Notarvertreter = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".11");
 
     /**
      * Notariatsverwalterin
      */
-    public static final DERObjectIdentifier Notariatsverwalterin = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Notariatsverwalterin = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".12");
 
     /**
      * Notariatsverwalter
      */
-    public static final DERObjectIdentifier Notariatsverwalter = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Notariatsverwalter = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".13");
 
     /**
      * Wirtschaftspr�ferin
      */
-    public static final DERObjectIdentifier Wirtschaftsprferin = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Wirtschaftsprferin = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".14");
 
     /**
      * Wirtschaftspr�fer
      */
-    public static final DERObjectIdentifier Wirtschaftsprfer = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Wirtschaftsprfer = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".15");
 
     /**
      * Vereidigte Buchpr�ferin
      */
-    public static final DERObjectIdentifier VereidigteBuchprferin = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier VereidigteBuchprferin = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".16");
 
     /**
      * Vereidigter Buchpr�fer
      */
-    public static final DERObjectIdentifier VereidigterBuchprfer = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier VereidigterBuchprfer = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".17");
 
     /**
      * Patentanw�ltin
      */
-    public static final DERObjectIdentifier Patentanwltin = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Patentanwltin = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".18");
 
     /**
      * Patentanwalt
      */
-    public static final DERObjectIdentifier Patentanwalt = new DERObjectIdentifier(
+    public static final ASN1ObjectIdentifier Patentanwalt = new ASN1ObjectIdentifier(
         NamingAuthority.id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern + ".19");
 
     private NamingAuthority namingAuthority;
@@ -286,7 +286,7 @@ public class ProfessionInfo
      * @param addProfessionInfo  Additional infos in encoded form.
      */
     public ProfessionInfo(NamingAuthority namingAuthority,
-                          DirectoryString[] professionItems, DERObjectIdentifier[] professionOIDs,
+                          DirectoryString[] professionItems, ASN1ObjectIdentifier[] professionOIDs,
                           String registrationNumber, ASN1OctetString addProfessionInfo)
     {
         this.namingAuthority = namingAuthority;
@@ -383,17 +383,17 @@ public class ProfessionInfo
     /**
      * @return Returns the professionOIDs.
      */
-    public DERObjectIdentifier[] getProfessionOIDs()
+    public ASN1ObjectIdentifier[] getProfessionOIDs()
     {
         if (professionOIDs == null)
         {
-            return new DERObjectIdentifier[0];
+            return new ASN1ObjectIdentifier[0];
         }
-        DERObjectIdentifier[] oids = new DERObjectIdentifier[professionOIDs.size()];
+        ASN1ObjectIdentifier[] oids = new ASN1ObjectIdentifier[professionOIDs.size()];
         int count = 0;
         for (Enumeration e = professionOIDs.getObjects(); e.hasMoreElements();)
         {
-            oids[count++] = DERObjectIdentifier.getInstance(e.nextElement());
+            oids[count++] = ASN1ObjectIdentifier.getInstance(e.nextElement());
         }
         return oids;
     }

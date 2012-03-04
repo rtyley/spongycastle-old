@@ -113,7 +113,7 @@ public class BasicOCSPResp
 
     public X509Extensions getResponseExtensions()
     {
-        return data.getResponseExtensions();
+        return X509Extensions.getInstance(data.getResponseExtensions());
     }
     
     /**

@@ -44,9 +44,9 @@ import org.bouncycastle.asn1.pkcs.PBES2Parameters;
 import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.pkcs.PKCS12PBEParams;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.pkcs.RSAPublicKey;
 import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.ECNamedCurveTable;
@@ -464,7 +464,7 @@ public class PEMReader
                 ASN1InputStream ais = new ASN1InputStream(obj.getContent());
                 Object asnObject = ais.readObject();
                 ASN1Sequence sequence = (ASN1Sequence)asnObject;
-                RSAPublicKeyStructure rsaPubStructure = new RSAPublicKeyStructure(sequence);
+                RSAPublicKey rsaPubStructure = RSAPublicKey.getInstance(sequence);
                 RSAPublicKeySpec keySpec = new RSAPublicKeySpec(
                     rsaPubStructure.getModulus(),
                     rsaPubStructure.getPublicExponent());

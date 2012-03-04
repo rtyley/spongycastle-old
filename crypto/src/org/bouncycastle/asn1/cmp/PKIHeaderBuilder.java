@@ -2,10 +2,10 @@ package org.bouncycastle.asn1.cmp;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
@@ -14,7 +14,7 @@ import org.bouncycastle.asn1.x509.GeneralName;
 
 public class PKIHeaderBuilder
 {
-    private DERInteger pvno;
+    private ASN1Integer pvno;
     private GeneralName sender;
     private GeneralName recipient;
     private DERGeneralizedTime messageTime;
@@ -32,11 +32,11 @@ public class PKIHeaderBuilder
         GeneralName sender,
         GeneralName recipient)
     {
-        this(new DERInteger(pvno), sender, recipient);
+        this(new ASN1Integer(pvno), sender, recipient);
     }
 
     private PKIHeaderBuilder(
-        DERInteger pvno,
+        ASN1Integer pvno,
         GeneralName sender,
         GeneralName recipient)
     {

@@ -3,19 +3,19 @@ package org.bouncycastle.asn1.x509;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 public class BasicConstraints
     extends ASN1Object
 {
     DERBoolean  cA = new DERBoolean(false);
-    DERInteger  pathLenConstraint = null;
+    ASN1Integer  pathLenConstraint = null;
 
     public static BasicConstraints getInstance(
         ASN1TaggedObject obj,
@@ -60,13 +60,13 @@ public class BasicConstraints
             else
             {
                 this.cA = null;
-                this.pathLenConstraint = DERInteger.getInstance(seq.getObjectAt(0));
+                this.pathLenConstraint = ASN1Integer.getInstance(seq.getObjectAt(0));
             }
             if (seq.size() > 1)
             {
                 if (this.cA != null)
                 {
-                    this.pathLenConstraint = DERInteger.getInstance(seq.getObjectAt(1));
+                    this.pathLenConstraint = ASN1Integer.getInstance(seq.getObjectAt(1));
                 }
                 else
                 {
@@ -99,7 +99,7 @@ public class BasicConstraints
         int     pathLenConstraint)
     {
         this.cA = new DERBoolean(true);
-        this.pathLenConstraint = new DERInteger(pathLenConstraint);
+        this.pathLenConstraint = new ASN1Integer(pathLenConstraint);
     }
 
     public boolean isCA()

@@ -6,7 +6,6 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
@@ -42,7 +41,7 @@ public class V2TBSCertListGenerator
     private AlgorithmIdentifier signature;
     private X500Name            issuer;
     private Time                thisUpdate, nextUpdate=null;
-    private X509Extensions      extensions = null;
+    private Extensions          extensions = null;
     private ASN1EncodableVector crlentries = new ASN1EncodableVector();
 
     private final static ASN1Sequence[] reasons;
@@ -119,17 +118,17 @@ public class V2TBSCertListGenerator
         crlentries.add(crlEntry);
     }
 
-    public void addCRLEntry(DERInteger userCertificate, DERUTCTime revocationDate, int reason)
+    public void addCRLEntry(ASN1Integer userCertificate, DERUTCTime revocationDate, int reason)
     {
         addCRLEntry(userCertificate, new Time(revocationDate), reason);
     }
 
-    public void addCRLEntry(DERInteger userCertificate, Time revocationDate, int reason)
+    public void addCRLEntry(ASN1Integer userCertificate, Time revocationDate, int reason)
     {
         addCRLEntry(userCertificate, revocationDate, reason, null);
     }
 
-    public void addCRLEntry(DERInteger userCertificate, Time revocationDate, int reason, DERGeneralizedTime invalidityDate)
+    public void addCRLEntry(ASN1Integer userCertificate, Time revocationDate, int reason, DERGeneralizedTime invalidityDate)
     {
         if (reason != 0)
         {
@@ -157,7 +156,7 @@ public class V2TBSCertListGenerator
         }
     }
 
-    private void internalAddCRLEntry(DERInteger userCertificate, Time revocationDate, ASN1Sequence extensions)
+    private void internalAddCRLEntry(ASN1Integer userCertificate, Time revocationDate, ASN1Sequence extensions)
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
@@ -172,7 +171,7 @@ public class V2TBSCertListGenerator
         addCRLEntry(new DERSequence(v));
     }
 
-    public void addCRLEntry(DERInteger userCertificate, Time revocationDate, X509Extensions extensions)
+    public void addCRLEntry(ASN1Integer userCertificate, Time revocationDate, X509Extensions extensions)
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
@@ -186,9 +185,15 @@ public class V2TBSCertListGenerator
         
         addCRLEntry(new DERSequence(v));
     }
-    
+
     public void setExtensions(
         X509Extensions    extensions)
+    {
+        setExtensions(Extensions.getInstance(extensions));
+    }
+
+    public void setExtensions(
+        Extensions    extensions)
     {
         this.extensions = extensions;
     }

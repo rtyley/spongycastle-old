@@ -3,18 +3,18 @@ package org.bouncycastle.asn1.cmp;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 public class PKIStatusInfo
     extends ASN1Object
 {
-    DERInteger      status;
+    ASN1Integer      status;
     PKIFreeText     statusString;
     DERBitString    failInfo;
 
@@ -43,7 +43,7 @@ public class PKIStatusInfo
     public PKIStatusInfo(
         ASN1Sequence seq)
     {
-        this.status = DERInteger.getInstance(seq.getObjectAt(0));
+        this.status = ASN1Integer.getInstance(seq.getObjectAt(0));
 
         this.statusString = null;
         this.failInfo = null;
@@ -72,12 +72,12 @@ public class PKIStatusInfo
      */
     public PKIStatusInfo(int status)
     {
-        this.status = new DERInteger(status);
+        this.status = new ASN1Integer(status);
     }
 
     public PKIStatusInfo(PKIStatus status)
     {
-        this.status = DERInteger.getInstance(status.toASN1Primitive());
+        this.status = ASN1Integer.getInstance(status.toASN1Primitive());
     }
 
     /**
@@ -88,7 +88,7 @@ public class PKIStatusInfo
         int         status,
         PKIFreeText statusString)
     {
-        this.status = new DERInteger(status);
+        this.status = new ASN1Integer(status);
         this.statusString = statusString;
     }
 
@@ -96,7 +96,7 @@ public class PKIStatusInfo
         PKIStatus   status,
         PKIFreeText statusString)
     {
-        this.status = DERInteger.getInstance(status.toASN1Primitive());
+        this.status = ASN1Integer.getInstance(status.toASN1Primitive());
         this.statusString = statusString;
     }
 
@@ -105,7 +105,7 @@ public class PKIStatusInfo
             PKIFreeText    statusString,
             PKIFailureInfo failInfo)
     {
-        this.status = new DERInteger(status);
+        this.status = new ASN1Integer(status);
         this.statusString = statusString;
         this.failInfo = failInfo;
     }

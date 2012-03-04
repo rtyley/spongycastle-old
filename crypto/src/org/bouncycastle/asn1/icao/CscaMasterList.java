@@ -1,11 +1,11 @@
 package org.bouncycastle.asn1.icao;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
@@ -26,7 +26,7 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
 public class CscaMasterList 
     extends ASN1Object
 {
-    private DERInteger version = new DERInteger(0);
+    private ASN1Integer version = new ASN1Integer(0);
     private X509CertificateStructure[] certList;
 
     public static CscaMasterList getInstance(
@@ -57,7 +57,7 @@ public class CscaMasterList
                     "Incorrect sequence size: " + seq.size());
         }
         
-        version = DERInteger.getInstance(seq.getObjectAt(0));
+        version = ASN1Integer.getInstance(seq.getObjectAt(0));
         ASN1Set certSet = ASN1Set.getInstance(seq.getObjectAt(1));
         certList = new X509CertificateStructure[certSet.size()];
         for (int i = 0; i < certList.length; i++) {

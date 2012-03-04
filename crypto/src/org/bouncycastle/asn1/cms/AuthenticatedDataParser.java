@@ -10,7 +10,6 @@ import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.ASN1TaggedObjectParser;
 import org.bouncycastle.asn1.BERTags;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /**
@@ -49,7 +48,7 @@ public class AuthenticatedDataParser
         this.version = ASN1Integer.getInstance(seq.readObject());
     }
 
-    public DERInteger getVersion()
+    public ASN1Integer getVersion()
     {
         return version;
     }

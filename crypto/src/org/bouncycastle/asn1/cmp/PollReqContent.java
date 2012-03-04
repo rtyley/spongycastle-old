@@ -1,9 +1,9 @@
 package org.bouncycastle.asn1.cmp;
 
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 
 public class PollReqContent
     extends ASN1Object
@@ -30,25 +30,25 @@ public class PollReqContent
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
-    public DERInteger[][] getCertReqIds()
+    public ASN1Integer[][] getCertReqIds()
     {
-        DERInteger[][] result = new DERInteger[content.size()][];
+        ASN1Integer[][] result = new ASN1Integer[content.size()][];
 
         for (int i = 0; i != result.length; i++)
         {
-            result[i] = sequenceToDERIntegerArray((ASN1Sequence)content.getObjectAt(i));
+            result[i] = sequenceToASN1IntegerArray((ASN1Sequence)content.getObjectAt(i));
         }
 
         return result;
     }
 
-    private static DERInteger[] sequenceToDERIntegerArray(ASN1Sequence seq)
+    private static ASN1Integer[] sequenceToASN1IntegerArray(ASN1Sequence seq)
     {
-         DERInteger[] result = new DERInteger[seq.size()];
+         ASN1Integer[] result = new ASN1Integer[seq.size()];
 
         for (int i = 0; i != result.length; i++)
         {
-            result[i] = DERInteger.getInstance(seq.getObjectAt(i));
+            result[i] = ASN1Integer.getInstance(seq.getObjectAt(i));
         }
 
         return result;

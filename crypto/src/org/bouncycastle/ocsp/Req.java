@@ -28,7 +28,7 @@ public class Req
 
     public X509Extensions getSingleRequestExtensions()
     {
-        return req.getSingleRequestExtensions();
+        return X509Extensions.getInstance(req.getSingleRequestExtensions());
     }
     
     /**

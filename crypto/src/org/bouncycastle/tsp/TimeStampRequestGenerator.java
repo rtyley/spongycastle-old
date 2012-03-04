@@ -2,21 +2,17 @@ package org.bouncycastle.tsp;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Hashtable;
-import java.util.Vector;
 
+import org.bouncycastle.asn1.ASN1Boolean;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.tsp.MessageImprint;
 import org.bouncycastle.asn1.tsp.TimeStampReq;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.Extensions;
+import org.bouncycastle.asn1.x509.ExtensionsGenerator;
 
 /**
  * Generator for RFC 3161 Time Stamp Request objects.
@@ -25,10 +21,8 @@ public class TimeStampRequestGenerator
 {
     private ASN1ObjectIdentifier reqPolicy;
 
-    private DERBoolean certReq;
-    
-    private Hashtable   extensions = new Hashtable();
-    private Vector      extOrdering = new Vector();
+    private ASN1Boolean certReq;
+    private ExtensionsGenerator extGenerator = new ExtensionsGenerator();
 
     public TimeStampRequestGenerator()
     {
@@ -53,7 +47,7 @@ public class TimeStampRequestGenerator
     public void setCertReq(
         boolean certReq)
     {
-        this.certReq = new DERBoolean(certReq);
+        this.certReq = ASN1Boolean.getInstance(certReq);
     }
 
     /**
@@ -81,22 +75,20 @@ public class TimeStampRequestGenerator
         boolean         critical,
         byte[]          value)
     {
-        DERObjectIdentifier oid = new DERObjectIdentifier(OID);
-        extensions.put(oid, new X509Extension(critical, new DEROctetString(value)));
-        extOrdering.addElement(oid);
+        extGenerator.addExtension(new ASN1ObjectIdentifier(OID), critical, value);
     }
 
     /**
      * add a given extension field for the standard extensions tag (tag 3)
-     * @throws IOException
+     * @throws TSPIOException
      */
     public void addExtension(
         ASN1ObjectIdentifier oid,
-        boolean              critical,
+        boolean              isCritical,
         ASN1Encodable        value)
-        throws IOException
+        throws TSPIOException
     {
-        this.addExtension(oid, critical, value.toASN1Primitive().getEncoded());
+        TSPUtil.addExtension(extGenerator, oid, isCritical, value);
     }
 
     /**
@@ -106,11 +98,10 @@ public class TimeStampRequestGenerator
      */
     public void addExtension(
         ASN1ObjectIdentifier oid,
-        boolean              critical,
+        boolean              isCritical,
         byte[]               value)
     {
-        extensions.put(oid, new X509Extension(critical, new DEROctetString(value)));
-        extOrdering.addElement(oid);
+        extGenerator.addExtension(oid, isCritical, value);
     }
 
     /**
@@ -141,17 +132,17 @@ public class TimeStampRequestGenerator
         AlgorithmIdentifier algID = new AlgorithmIdentifier(digestAlgOID, new DERNull());
         MessageImprint messageImprint = new MessageImprint(algID, digest);
 
-        X509Extensions  ext = null;
+        Extensions  ext = null;
         
-        if (extOrdering.size() != 0)
+        if (!extGenerator.isEmpty())
         {
-            ext = new X509Extensions(extOrdering, extensions);
+            ext = extGenerator.generate();
         }
         
         if (nonce != null)
         {
             return new TimeStampRequest(new TimeStampReq(messageImprint,
-                    reqPolicy, new DERInteger(nonce), certReq, ext));
+                    reqPolicy, new ASN1Integer(nonce), certReq, ext));
         }
         else
         {

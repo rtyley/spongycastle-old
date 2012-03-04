@@ -15,10 +15,10 @@ import java.util.Iterator;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -80,7 +80,7 @@ public class X509V2AttributeCertificateGenerator
     public void setSerialNumber(
         BigInteger      serialNumber)
     {
-        acInfoGen.setSerialNumber(new DERInteger(serialNumber));
+        acInfoGen.setSerialNumber(new ASN1Integer(serialNumber));
     }
 
     public void setNotBefore(

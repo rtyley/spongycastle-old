@@ -5,6 +5,7 @@ import java.util.Enumeration;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1String;
@@ -40,10 +41,10 @@ public class NamingAuthority
      * �Recht, Wirtschaft, Steuern� (�Law, Economy, Taxes�) is registered as the
      * first naming authority under the OID id-isismtt-at-namingAuthorities.
      */
-    public static final DERObjectIdentifier id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern =
-        new DERObjectIdentifier(ISISMTTObjectIdentifiers.id_isismtt_at_namingAuthorities + ".1");
+    public static final ASN1ObjectIdentifier id_isismtt_at_namingAuthorities_RechtWirtschaftSteuern =
+        new ASN1ObjectIdentifier(ISISMTTObjectIdentifiers.id_isismtt_at_namingAuthorities + ".1");
 
-    private DERObjectIdentifier namingAuthorityId;
+    private ASN1ObjectIdentifier namingAuthorityId;
     private String namingAuthorityUrl;
     private DirectoryString namingAuthorityText;
 
@@ -97,9 +98,9 @@ public class NamingAuthority
         if (e.hasMoreElements())
         {
             ASN1Encodable o = (ASN1Encodable)e.nextElement();
-            if (o instanceof DERObjectIdentifier)
+            if (o instanceof ASN1ObjectIdentifier)
             {
-                namingAuthorityId = (DERObjectIdentifier)o;
+                namingAuthorityId = (ASN1ObjectIdentifier)o;
             }
             else if (o instanceof DERIA5String)
             {
@@ -151,7 +152,7 @@ public class NamingAuthority
     /**
      * @return Returns the namingAuthorityId.
      */
-    public DERObjectIdentifier getNamingAuthorityId()
+    public ASN1ObjectIdentifier getNamingAuthorityId()
     {
         return namingAuthorityId;
     }
@@ -172,6 +173,24 @@ public class NamingAuthority
         return namingAuthorityUrl;
     }
 
+        /**
+     * Constructor from given details.
+     * <p/>
+     * All parameters can be combined.
+     *
+     * @param namingAuthorityId   ObjectIdentifier for naming authority.
+     * @param namingAuthorityUrl  URL for naming authority.
+     * @param namingAuthorityText Textual representation of naming authority.
+         * @deprecated use ASN1ObjectIdentifier method
+     */
+    public NamingAuthority(DERObjectIdentifier namingAuthorityId,
+                           String namingAuthorityUrl, DirectoryString namingAuthorityText)
+    {
+        this.namingAuthorityId = new ASN1ObjectIdentifier(namingAuthorityId.getId());
+        this.namingAuthorityUrl = namingAuthorityUrl;
+        this.namingAuthorityText = namingAuthorityText;
+    }
+
     /**
      * Constructor from given details.
      * <p/>
@@ -181,7 +200,7 @@ public class NamingAuthority
      * @param namingAuthorityUrl  URL for naming authority.
      * @param namingAuthorityText Textual representation of naming authority.
      */
-    public NamingAuthority(DERObjectIdentifier namingAuthorityId,
+    public NamingAuthority(ASN1ObjectIdentifier namingAuthorityId,
                            String namingAuthorityUrl, DirectoryString namingAuthorityText)
     {
         this.namingAuthorityId = namingAuthorityId;

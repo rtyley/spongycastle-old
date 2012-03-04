@@ -2,19 +2,20 @@ package org.bouncycastle.asn1.crmf;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 
 public class CertTemplateBuilder
 {
-    private DERInteger version;
-    private DERInteger serialNumber;
+    private ASN1Integer version;
+    private ASN1Integer serialNumber;
     private AlgorithmIdentifier signingAlg;
     private X500Name issuer;
     private OptionalValidity validity;
@@ -22,17 +23,17 @@ public class CertTemplateBuilder
     private SubjectPublicKeyInfo publicKey;
     private DERBitString issuerUID;
     private DERBitString subjectUID;
-    private X509Extensions extensions;
+    private Extensions extensions;
 
     /** Sets the X.509 version. Note: for X509v3, use 2 here. */
     public CertTemplateBuilder setVersion(int ver)
     {
-        version = new DERInteger(ver);
+        version = new ASN1Integer(ver);
 
         return this;
     }
 
-    public CertTemplateBuilder setSerialNumber(DERInteger ser)
+    public CertTemplateBuilder setSerialNumber(ASN1Integer ser)
     {
         serialNumber = ser;
 
@@ -90,7 +91,17 @@ public class CertTemplateBuilder
         return this;
     }
 
+    /**
+     * @deprecated use method taking Extensions
+     * @param extens
+     * @return
+     */
     public CertTemplateBuilder setExtensions(X509Extensions extens)
+    {
+        return setExtensions(Extensions.getInstance(extens));
+    }
+
+    public CertTemplateBuilder setExtensions(Extensions extens)
     {
         extensions = extens;
 

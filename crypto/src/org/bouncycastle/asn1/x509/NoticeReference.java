@@ -5,10 +5,10 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -54,7 +54,7 @@ public class NoticeReference
          while (it.hasMoreElements())
          {
             Integer nm = (Integer) it.nextElement();
-               DERInteger di = new DERInteger(nm.intValue());
+               ASN1Integer di = new ASN1Integer(nm.intValue());
             av.add (di);
          }
       }

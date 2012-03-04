@@ -7,17 +7,17 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.Extensions;
 
 public class Request
     extends ASN1Object
 {
     CertID            reqCert;
-    X509Extensions    singleRequestExtensions;
+    Extensions    singleRequestExtensions;
 
     public Request(
         CertID          reqCert,
-        X509Extensions  singleRequestExtensions)
+        Extensions singleRequestExtensions)
     {
         this.reqCert = reqCert;
         this.singleRequestExtensions = singleRequestExtensions;
@@ -30,7 +30,7 @@ public class Request
 
         if (seq.size() == 2)
         {
-            singleRequestExtensions = X509Extensions.getInstance(
+            singleRequestExtensions = Extensions.getInstance(
                                 (ASN1TaggedObject)seq.getObjectAt(1), true);
         }
     }
@@ -62,7 +62,7 @@ public class Request
         return reqCert;
     }
 
-    public X509Extensions getSingleRequestExtensions()
+    public Extensions getSingleRequestExtensions()
     {
         return singleRequestExtensions;
     }

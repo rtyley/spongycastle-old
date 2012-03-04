@@ -21,6 +21,8 @@ import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.Holder;
@@ -399,7 +401,7 @@ public class CertificateTest
         // TODO, how to best test?
 
         // X509 Extensions
-        X509Extensions ext = acInfo.getExtensions();
+        Extensions ext = acInfo.getExtensions();
         if (ext != null)
         {
             Enumeration en = ext.oids();
@@ -407,7 +409,7 @@ public class CertificateTest
             {
                 ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier) en
                         .nextElement();
-                X509Extension extVal = ext.getExtension(oid);
+                Extension extVal = ext.getExtension(oid);
             }
         }
     }

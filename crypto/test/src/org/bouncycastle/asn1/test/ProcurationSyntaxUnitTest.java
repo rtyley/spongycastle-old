@@ -1,16 +1,16 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.isismtt.x509.ProcurationSyntax;
 import org.bouncycastle.asn1.x500.DirectoryString;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.asn1.x509.X509Name;
-
-import java.io.IOException;
 
 public class ProcurationSyntaxUnitTest
     extends ASN1UnitTest
@@ -26,7 +26,7 @@ public class ProcurationSyntaxUnitTest
         String country = "AU";
         DirectoryString  typeOfSubstitution = new DirectoryString("substitution");
         GeneralName thirdPerson = new GeneralName(new X509Name("CN=thirdPerson"));
-        IssuerSerial certRef = new IssuerSerial(new GeneralNames(new GeneralName(new X509Name("CN=test"))), new DERInteger(1));
+        IssuerSerial certRef = new IssuerSerial(new GeneralNames(new GeneralName(new X509Name("CN=test"))), new ASN1Integer(1));
 
         ProcurationSyntax procuration = new ProcurationSyntax(country, typeOfSubstitution, thirdPerson);
 

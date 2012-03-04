@@ -1,7 +1,7 @@
 package org.bouncycastle.cert.ocsp;
 
 import org.bouncycastle.asn1.ocsp.Request;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.Extensions;
 
 public class Req
 {
@@ -18,7 +18,7 @@ public class Req
         return new CertificateID(req.getReqCert());
     }
 
-    public X509Extensions getSingleRequestExtensions()
+    public Extensions getSingleRequestExtensions()
     {
         return req.getSingleRequestExtensions();
     }

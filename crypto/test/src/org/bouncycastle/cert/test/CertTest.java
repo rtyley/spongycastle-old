@@ -44,16 +44,17 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.RSAPublicKey;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.CRLReason;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
@@ -1406,7 +1407,7 @@ public class CertTest
         AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 
         sigGen = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(lwPrivKey);
-        SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPublicKeyStructure(lwPubKey.getModulus(), lwPubKey.getExponent()));
+        SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPublicKey(lwPubKey.getModulus(), lwPubKey.getExponent()));
         certGen = new X509v3CertificateBuilder(builder.build(), BigInteger.valueOf(1), new Date(System.currentTimeMillis() - 50000), new Date(System.currentTimeMillis() + 50000), builder.build(), pubInfo);
 
         certHolder = certGen.build(sigGen);
@@ -1807,7 +1808,7 @@ public class CertTest
             fail("failed CRL issuer test");
         }
 
-        X509Extension authExt = crl.getExtension(X509Extension.authorityKeyIdentifier);
+        Extension authExt = crl.getExtension(Extension.authorityKeyIdentifier);
 
         if (authExt == null)
         {
@@ -1833,7 +1834,7 @@ public class CertTest
             fail("CRL entry extension not found");
         }
 
-        X509Extension ext = entry.getExtension(X509Extension.reasonCode);
+        Extension ext = entry.getExtension(X509Extension.reasonCode);
 
         if (ext != null)
         {
@@ -2044,7 +2045,7 @@ public class CertTest
             if (crlEnt.getSerialNumber().intValue() == 1)
             {
                 oneFound = true;
-                X509Extension  extn = crlEnt.getExtension(X509Extension.reasonCode);
+                Extension  extn = crlEnt.getExtension(X509Extension.reasonCode);
 
                 if (extn != null)
                 {

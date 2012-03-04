@@ -3,10 +3,10 @@ package org.bouncycastle.asn1.icao;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
@@ -32,7 +32,7 @@ public class LDSSecurityObject
 {
     public static final int ub_DataGroups = 16;
     
-    private DERInteger version = new DERInteger(0);
+    private ASN1Integer version = new ASN1Integer(0);
     private AlgorithmIdentifier digestAlgorithmIdentifier;
     private DataGroupHash[] datagroupHash;
     private LDSVersionInfo versionInfo;
@@ -63,7 +63,7 @@ public class LDSSecurityObject
         Enumeration e = seq.getObjects();
 
         // version
-        version = DERInteger.getInstance(e.nextElement());
+        version = ASN1Integer.getInstance(e.nextElement());
         // digestAlgorithmIdentifier
         digestAlgorithmIdentifier = AlgorithmIdentifier.getInstance(e.nextElement());
       
@@ -87,7 +87,7 @@ public class LDSSecurityObject
         AlgorithmIdentifier digestAlgorithmIdentifier, 
         DataGroupHash[]       datagroupHash)
     {
-        this.version = new DERInteger(0);
+        this.version = new ASN1Integer(0);
         this.digestAlgorithmIdentifier = digestAlgorithmIdentifier;
         this.datagroupHash = datagroupHash;
         
@@ -99,7 +99,7 @@ public class LDSSecurityObject
         DataGroupHash[]     datagroupHash,
         LDSVersionInfo      versionInfo)
     {
-        this.version = new DERInteger(1);
+        this.version = new ASN1Integer(1);
         this.digestAlgorithmIdentifier = digestAlgorithmIdentifier;
         this.datagroupHash = datagroupHash;
         this.versionInfo = versionInfo;

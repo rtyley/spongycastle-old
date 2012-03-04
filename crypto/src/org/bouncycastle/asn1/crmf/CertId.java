@@ -1,11 +1,11 @@
 package org.bouncycastle.asn1.crmf;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.GeneralName;
 
@@ -13,12 +13,12 @@ public class CertId
     extends ASN1Object
 {
     private GeneralName issuer;
-    private DERInteger serialNumber;
+    private ASN1Integer serialNumber;
 
     private CertId(ASN1Sequence seq)
     {
         issuer = GeneralName.getInstance(seq.getObjectAt(0));
-        serialNumber = DERInteger.getInstance(seq.getObjectAt(1));
+        serialNumber = ASN1Integer.getInstance(seq.getObjectAt(1));
     }
 
     public static CertId getInstance(Object o)
@@ -46,7 +46,7 @@ public class CertId
         return issuer;
     }
 
-    public DERInteger getSerialNumber()
+    public ASN1Integer getSerialNumber()
     {
         return serialNumber;
     }

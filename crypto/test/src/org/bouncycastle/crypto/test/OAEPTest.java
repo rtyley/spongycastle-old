@@ -7,8 +7,8 @@ import java.security.SecureRandom;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
-import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
+import org.bouncycastle.asn1.pkcs.RSAPublicKey;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -312,9 +312,9 @@ public class OAEPTest
         //
         // extract the public key info.
         //
-        RSAPublicKeyStructure   pubStruct;
+        RSAPublicKey pubStruct;
 
-        pubStruct = new RSAPublicKeyStructure((ASN1Sequence)new SubjectPublicKeyInfo((ASN1Sequence)dIn.readObject()).parsePublicKey());
+        pubStruct = RSAPublicKey.getInstance(new SubjectPublicKeyInfo((ASN1Sequence)dIn.readObject()).parsePublicKey());
 
 
         bIn = new ByteArrayInputStream(privKeyEnc);
@@ -323,9 +323,9 @@ public class OAEPTest
         //
         // extract the private key info.
         //
-        RSAPrivateKeyStructure privStruct;
+        RSAPrivateKey privStruct;
 
-        privStruct = new RSAPrivateKeyStructure((ASN1Sequence)(new PrivateKeyInfo((ASN1Sequence)dIn.readObject()).parsePrivateKey()));
+        privStruct = RSAPrivateKey.getInstance(new PrivateKeyInfo((ASN1Sequence)dIn.readObject()).parsePrivateKey());
 
         RSAKeyParameters    pubParameters = new RSAKeyParameters(
                                                     false,

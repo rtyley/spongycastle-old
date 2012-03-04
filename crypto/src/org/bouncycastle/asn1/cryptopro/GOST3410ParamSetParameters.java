@@ -4,18 +4,18 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 public class GOST3410ParamSetParameters
     extends ASN1Object
 {
     int             keySize;
-    DERInteger      p, q, a;
+    ASN1Integer      p, q, a;
 
     public static GOST3410ParamSetParameters getInstance(
         ASN1TaggedObject obj,
@@ -47,9 +47,9 @@ public class GOST3410ParamSetParameters
         BigInteger  a)
     {
         this.keySize = keySize;
-        this.p = new DERInteger(p);
-        this.q = new DERInteger(q);
-        this.a = new DERInteger(a);
+        this.p = new ASN1Integer(p);
+        this.q = new ASN1Integer(q);
+        this.a = new ASN1Integer(a);
     }
 
     public GOST3410ParamSetParameters(
@@ -57,10 +57,10 @@ public class GOST3410ParamSetParameters
     {
         Enumeration     e = seq.getObjects();
 
-        keySize = ((DERInteger)e.nextElement()).getValue().intValue();
-        p = (DERInteger)e.nextElement();
-        q = (DERInteger)e.nextElement();
-        a = (DERInteger)e.nextElement();
+        keySize = ((ASN1Integer)e.nextElement()).getValue().intValue();
+        p = (ASN1Integer)e.nextElement();
+        q = (ASN1Integer)e.nextElement();
+        a = (ASN1Integer)e.nextElement();
     }
 
     /**
@@ -95,7 +95,7 @@ public class GOST3410ParamSetParameters
     {
         ASN1EncodableVector  v = new ASN1EncodableVector();
 
-        v.add(new DERInteger(keySize));
+        v.add(new ASN1Integer(keySize));
         v.add(p);
         v.add(q);
         v.add(a);

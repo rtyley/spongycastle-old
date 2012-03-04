@@ -2,24 +2,24 @@ package org.bouncycastle.asn1.crmf;
 
 import java.util.Enumeration;
 
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
 
 public class CertTemplate
     extends ASN1Object
 {
     private ASN1Sequence seq;
 
-    private DERInteger version;
-    private DERInteger serialNumber;
+    private ASN1Integer version;
+    private ASN1Integer serialNumber;
     private AlgorithmIdentifier signingAlg;
     private X500Name issuer;
     private OptionalValidity validity;
@@ -27,7 +27,7 @@ public class CertTemplate
     private SubjectPublicKeyInfo publicKey;
     private DERBitString issuerUID;
     private DERBitString subjectUID;
-    private X509Extensions extensions;
+    private Extensions extensions;
 
     private CertTemplate(ASN1Sequence seq)
     {
@@ -41,10 +41,10 @@ public class CertTemplate
             switch (tObj.getTagNo())
             {
             case 0:
-                version = DERInteger.getInstance(tObj, false);
+                version = ASN1Integer.getInstance(tObj, false);
                 break;
             case 1:
-                serialNumber = DERInteger.getInstance(tObj, false);
+                serialNumber = ASN1Integer.getInstance(tObj, false);
                 break;
             case 2:
                 signingAlg = AlgorithmIdentifier.getInstance(tObj, false);
@@ -68,7 +68,7 @@ public class CertTemplate
                 subjectUID = DERBitString.getInstance(tObj, false);
                 break;
             case 9:
-                extensions = X509Extensions.getInstance(tObj, false);
+                extensions = Extensions.getInstance(tObj, false);
                 break;
             default:
                 throw new IllegalArgumentException("unknown tag: " + tObj.getTagNo());
@@ -95,7 +95,7 @@ public class CertTemplate
         return version.getValue().intValue();
     }
 
-    public DERInteger getSerialNumber()
+    public ASN1Integer getSerialNumber()
     {
         return serialNumber;
     }
@@ -135,7 +135,7 @@ public class CertTemplate
         return subjectUID;
     }
 
-    public X509Extensions getExtensions()
+    public Extensions getExtensions()
     {
         return extensions;
     }

@@ -9,7 +9,6 @@ import org.bouncycastle.asn1.ASN1SequenceParser;
 import org.bouncycastle.asn1.ASN1SetParser;
 import org.bouncycastle.asn1.ASN1TaggedObjectParser;
 import org.bouncycastle.asn1.BERTags;
-import org.bouncycastle.asn1.DERInteger;
 
 /**
  * Produce an object suitable for an ASN1OutputStream.
@@ -41,7 +40,7 @@ public class AuthEnvelopedDataParser
         this.version = ASN1Integer.getInstance(seq.readObject());
     }
 
-    public DERInteger getVersion()
+    public ASN1Integer getVersion()
     {
         return version;
     }

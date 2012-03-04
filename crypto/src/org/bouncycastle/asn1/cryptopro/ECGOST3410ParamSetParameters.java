@@ -4,17 +4,17 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 public class ECGOST3410ParamSetParameters
     extends ASN1Object
 {
-    DERInteger      p, q, a, b, x, y;
+    ASN1Integer      p, q, a, b, x, y;
 
     public static ECGOST3410ParamSetParameters getInstance(
         ASN1TaggedObject obj,
@@ -47,12 +47,12 @@ public class ECGOST3410ParamSetParameters
         int        x,
         BigInteger y)
     {
-        this.a = new DERInteger(a);
-        this.b = new DERInteger(b);
-        this.p = new DERInteger(p);
-        this.q = new DERInteger(q);
-        this.x = new DERInteger(x);
-        this.y = new DERInteger(y);
+        this.a = new ASN1Integer(a);
+        this.b = new ASN1Integer(b);
+        this.p = new ASN1Integer(p);
+        this.q = new ASN1Integer(q);
+        this.x = new ASN1Integer(x);
+        this.y = new ASN1Integer(y);
     }
 
     public ECGOST3410ParamSetParameters(
@@ -60,12 +60,12 @@ public class ECGOST3410ParamSetParameters
     {
         Enumeration     e = seq.getObjects();
 
-        a = (DERInteger)e.nextElement();
-        b = (DERInteger)e.nextElement();
-        p = (DERInteger)e.nextElement();
-        q = (DERInteger)e.nextElement();
-        x = (DERInteger)e.nextElement();
-        y = (DERInteger)e.nextElement();
+        a = (ASN1Integer)e.nextElement();
+        b = (ASN1Integer)e.nextElement();
+        p = (ASN1Integer)e.nextElement();
+        q = (ASN1Integer)e.nextElement();
+        x = (ASN1Integer)e.nextElement();
+        y = (ASN1Integer)e.nextElement();
     }
     
     public BigInteger getP()

@@ -547,7 +547,7 @@ public class JDKPKCS12KeyStore
         throws IOException
     {
         String              algorithm = algId.getAlgorithm().getId();
-        PKCS12PBEParams     pbeParams = new PKCS12PBEParams((ASN1Sequence)algId.getParameters());
+        PKCS12PBEParams     pbeParams = PKCS12PBEParams.getInstance(algId.getParameters());
 
         PBEKeySpec          pbeSpec = new PBEKeySpec(password);
         PrivateKey          out;
@@ -619,8 +619,8 @@ public class JDKPKCS12KeyStore
         byte[]                data)
         throws IOException
     {
-        String          algorithm = algId.getObjectId().getId();
-        PKCS12PBEParams pbeParams = new PKCS12PBEParams((ASN1Sequence)algId.getParameters());
+        String          algorithm = algId.getAlgorithm().getId();
+        PKCS12PBEParams pbeParams = PKCS12PBEParams.getInstance(algId.getParameters());
         PBEKeySpec      pbeSpec = new PBEKeySpec(password);
 
         try

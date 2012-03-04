@@ -15,8 +15,8 @@ import org.bouncycastle.asn1.ocsp.Signature;
 import org.bouncycastle.asn1.ocsp.TBSRequest;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.ContentSigner;
 
@@ -24,16 +24,16 @@ public class OCSPReqBuilder
 {
     private List            list = new ArrayList();
     private GeneralName     requestorName = null;
-    private X509Extensions  requestExtensions = null;
+    private Extensions  requestExtensions = null;
     
     private class RequestObject
     {
         CertificateID   certId;
-        X509Extensions  extensions;
+        Extensions  extensions;
 
         public RequestObject(
             CertificateID   certId,
-            X509Extensions  extensions)
+            Extensions  extensions)
         {
             this.certId = certId;
             this.extensions = extensions;
@@ -67,7 +67,7 @@ public class OCSPReqBuilder
      */
     public OCSPReqBuilder addRequest(
         CertificateID   certId,
-        X509Extensions  singleRequestExtensions)
+        Extensions singleRequestExtensions)
     {
         list.add(new RequestObject(certId, singleRequestExtensions));
 
@@ -96,7 +96,7 @@ public class OCSPReqBuilder
     }
     
     public OCSPReqBuilder setRequestExtensions(
-        X509Extensions      requestExtensions)
+        Extensions      requestExtensions)
     {
         this.requestExtensions = requestExtensions;
 

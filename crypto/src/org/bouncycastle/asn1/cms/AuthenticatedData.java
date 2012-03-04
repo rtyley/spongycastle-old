@@ -3,6 +3,7 @@ package org.bouncycastle.asn1.cms;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -10,14 +11,13 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 public class AuthenticatedData
     extends ASN1Object
 {
-    private DERInteger version;
+    private ASN1Integer version;
     private OriginatorInfo originatorInfo;
     private ASN1Set recipientInfos;
     private AlgorithmIdentifier macAlgorithm;
@@ -45,7 +45,7 @@ public class AuthenticatedData
             }
         }
 
-        version = new DERInteger(calculateVersion(originatorInfo));
+        version = new ASN1Integer(calculateVersion(originatorInfo));
         
         this.originatorInfo = originatorInfo;
         this.macAlgorithm = macAlgorithm;
@@ -62,7 +62,7 @@ public class AuthenticatedData
     {
         int index = 0;
 
-        version = (DERInteger)seq.getObjectAt(index++);
+        version = (ASN1Integer)seq.getObjectAt(index++);
 
         Object tmp = seq.getObjectAt(index++);
 
@@ -139,7 +139,7 @@ public class AuthenticatedData
         throw new IllegalArgumentException("Invalid AuthenticatedData: " + obj.getClass().getName());
     }
 
-    public DERInteger getVersion()
+    public ASN1Integer getVersion()
     {
         return version;
     }

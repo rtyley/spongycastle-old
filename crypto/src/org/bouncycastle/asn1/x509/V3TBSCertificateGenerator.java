@@ -1,8 +1,8 @@
 package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTCTime;
@@ -28,15 +28,15 @@ import org.bouncycastle.asn1.x500.X500Name;
  */
 public class V3TBSCertificateGenerator
 {
-    DERTaggedObject         version = new DERTaggedObject(true, 0, new DERInteger(2));
+    DERTaggedObject         version = new DERTaggedObject(true, 0, new ASN1Integer(2));
 
-    DERInteger              serialNumber;
+    ASN1Integer              serialNumber;
     AlgorithmIdentifier     signature;
     X500Name                issuer;
     Time                    startDate, endDate;
     X500Name                subject;
     SubjectPublicKeyInfo    subjectPublicKeyInfo;
-    X509Extensions          extensions;
+    Extensions              extensions;
 
     private boolean altNamePresentAndCritical;
     private DERBitString issuerUniqueID;
@@ -47,7 +47,7 @@ public class V3TBSCertificateGenerator
     }
 
     public void setSerialNumber(
-        DERInteger  serialNumber)
+        ASN1Integer  serialNumber)
     {
         this.serialNumber = serialNumber;
     }
@@ -130,13 +130,23 @@ public class V3TBSCertificateGenerator
         this.subjectPublicKeyInfo = pubKeyInfo;
     }
 
+    /**
+     * @deprecated use method taking Extensions
+     * @param extensions
+     */
     public void setExtensions(
         X509Extensions    extensions)
+    {
+        setExtensions(Extensions.getInstance(extensions));
+    }
+
+    public void setExtensions(
+        Extensions    extensions)
     {
         this.extensions = extensions;
         if (extensions != null)
         {
-            X509Extension altName = extensions.getExtension(X509Extensions.SubjectAlternativeName);
+            Extension altName = extensions.getExtension(Extension.subjectAlternativeName);
 
             if (altName != null && altName.isCritical())
             {
@@ -145,7 +155,7 @@ public class V3TBSCertificateGenerator
         }
     }
 
-    public TBSCertificateStructure generateTBSCertificate()
+    public TBSCertificate generateTBSCertificate()
     {
         if ((serialNumber == null) || (signature == null)
             || (issuer == null) || (startDate == null) || (endDate == null)
@@ -197,6 +207,6 @@ public class V3TBSCertificateGenerator
             v.add(new DERTaggedObject(true, 3, extensions));
         }
 
-        return new TBSCertificateStructure(new DERSequence(v));
+        return new TBSCertificate(new DERSequence(v));
     }
 }

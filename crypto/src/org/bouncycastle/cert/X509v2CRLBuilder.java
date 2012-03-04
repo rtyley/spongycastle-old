@@ -5,16 +5,16 @@ import java.util.Date;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V2TBSCertListGenerator;
 import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
 import org.bouncycastle.operator.ContentSigner;
 
 /**
@@ -23,7 +23,7 @@ import org.bouncycastle.operator.ContentSigner;
 public class X509v2CRLBuilder
 {
     private V2TBSCertListGenerator      tbsGen;
-    private X509ExtensionsGenerator     extGenerator;
+    private ExtensionsGenerator         extGenerator;
 
     /**
      * Basic constructor.
@@ -36,7 +36,7 @@ public class X509v2CRLBuilder
         Date     thisUpdate)
     {
         tbsGen = new V2TBSCertListGenerator();
-        extGenerator = new X509ExtensionsGenerator();
+        extGenerator = new ExtensionsGenerator();
 
         tbsGen.setIssuer(issuer);
         tbsGen.setThisUpdate(new Time(thisUpdate));
@@ -66,7 +66,7 @@ public class X509v2CRLBuilder
      */
     public X509v2CRLBuilder addCRLEntry(BigInteger userCertificateSerial, Date revocationDate, int reason)
     {
-        tbsGen.addCRLEntry(new DERInteger(userCertificateSerial), new Time(revocationDate), reason);
+        tbsGen.addCRLEntry(new ASN1Integer(userCertificateSerial), new Time(revocationDate), reason);
 
         return this;
     }
@@ -83,7 +83,7 @@ public class X509v2CRLBuilder
      */
     public X509v2CRLBuilder addCRLEntry(BigInteger userCertificateSerial, Date revocationDate, int reason, Date invalidityDate)
     {
-        tbsGen.addCRLEntry(new DERInteger(userCertificateSerial), new Time(revocationDate), reason, new DERGeneralizedTime(invalidityDate));
+        tbsGen.addCRLEntry(new ASN1Integer(userCertificateSerial), new Time(revocationDate), reason, new DERGeneralizedTime(invalidityDate));
 
         return this;
     }
@@ -98,7 +98,7 @@ public class X509v2CRLBuilder
      */
     public X509v2CRLBuilder addCRLEntry(BigInteger userCertificateSerial, Date revocationDate, X509Extensions extensions)
     {
-        tbsGen.addCRLEntry(new DERInteger(userCertificateSerial), new Time(revocationDate), extensions);
+        tbsGen.addCRLEntry(new ASN1Integer(userCertificateSerial), new Time(revocationDate), extensions);
 
         return this;
     }
@@ -136,8 +136,9 @@ public class X509v2CRLBuilder
         ASN1ObjectIdentifier oid,
         boolean isCritical,
         ASN1Encodable value)
+        throws CertIOException
     {
-        extGenerator.addExtension(oid, isCritical, value);
+        CertUtils.addExtension(extGenerator, oid, isCritical, value);
 
         return this;
     }

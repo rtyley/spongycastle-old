@@ -7,7 +7,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.crmf.CertId;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.Extensions;
 
 public class RevAnnContent
     extends ASN1Object
@@ -16,7 +16,7 @@ public class RevAnnContent
     private CertId certId;
     private DERGeneralizedTime willBeRevokedAt;
     private DERGeneralizedTime badSinceDate;
-    private X509Extensions crlDetails;
+    private Extensions crlDetails;
     
     private RevAnnContent(ASN1Sequence seq)
     {
@@ -27,7 +27,7 @@ public class RevAnnContent
 
         if (seq.size() > 4)
         {
-            crlDetails = X509Extensions.getInstance(seq.getObjectAt(4));
+            crlDetails = Extensions.getInstance(seq.getObjectAt(4));
         }
     }
 
@@ -66,7 +66,7 @@ public class RevAnnContent
         return badSinceDate;
     }
 
-    public X509Extensions getCrlDetails()
+    public Extensions getCrlDetails()
     {
         return crlDetails;
     }

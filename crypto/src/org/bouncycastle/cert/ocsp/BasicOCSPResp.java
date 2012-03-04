@@ -12,9 +12,9 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
 import org.bouncycastle.asn1.ocsp.ResponseData;
 import org.bouncycastle.asn1.ocsp.SingleResponse;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
@@ -32,14 +32,14 @@ public class BasicOCSPResp
 {
     private BasicOCSPResponse   resp;
     private ResponseData        data;
-    private X509Extensions extensions;
+    private Extensions extensions;
 
     public BasicOCSPResp(
         BasicOCSPResponse   resp)
     {
         this.resp = resp;
         this.data = resp.getTbsResponseData();
-        this.extensions = resp.getTbsResponseData().getResponseExtensions();
+        this.extensions = Extensions.getInstance(resp.getTbsResponseData().getResponseExtensions());
     }
 
     /**
@@ -91,7 +91,7 @@ public class BasicOCSPResp
        return extensions != null;
    }
 
-   public X509Extension getExtension(ASN1ObjectIdentifier oid)
+   public Extension getExtension(ASN1ObjectIdentifier oid)
    {
        if (extensions != null)
        {
@@ -142,7 +142,7 @@ public class BasicOCSPResp
 
                 for (int i = 0; i != certs.length; i++)
                 {
-                    certs[i] = new X509CertificateHolder(X509CertificateStructure.getInstance(s.getObjectAt(i)));
+                    certs[i] = new X509CertificateHolder(Certificate.getInstance(s.getObjectAt(i)));
                 }
 
                 return certs;

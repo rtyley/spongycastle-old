@@ -6,8 +6,8 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -54,7 +54,7 @@ public class CertificateID
         AlgorithmIdentifier hashAlg = new AlgorithmIdentifier(
             new DERObjectIdentifier(hashAlgorithm), DERNull.INSTANCE);
 
-        this.id = createCertID(hashAlg, issuerCert, new DERInteger(number), provider);
+        this.id = createCertID(hashAlg, issuerCert, new ASN1Integer(number), provider);
     }
 
     /**
@@ -134,11 +134,11 @@ public class CertificateID
      */
     public static CertificateID deriveCertificateID(CertificateID original, BigInteger newSerialNumber)
     {
-        return new CertificateID(new CertID(original.id.getHashAlgorithm(), original.id.getIssuerNameHash(), original.id.getIssuerKeyHash(), new DERInteger(newSerialNumber)));
+        return new CertificateID(new CertID(original.id.getHashAlgorithm(), original.id.getIssuerNameHash(), original.id.getIssuerKeyHash(), new ASN1Integer(newSerialNumber)));
     }
 
     private static CertID createCertID(AlgorithmIdentifier hashAlg, X509Certificate issuerCert,
-        DERInteger serialNumber, String provider)
+        ASN1Integer serialNumber, String provider)
         throws OCSPException
     {
         try

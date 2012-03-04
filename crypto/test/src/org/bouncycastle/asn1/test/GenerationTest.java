@@ -13,7 +13,6 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
@@ -32,7 +31,7 @@ import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertList;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
+import org.bouncycastle.asn1.x509.TBSCertificate;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V1TBSCertificateGenerator;
 import org.bouncycastle.asn1.x509.V2TBSCertListGenerator;
@@ -85,7 +84,7 @@ public class GenerationTest
         Date                        startDate = new Date(1000);
         Date                        endDate = new Date(12000);
 
-        gen.setSerialNumber(new DERInteger(1));
+        gen.setSerialNumber(new ASN1Integer(1));
 
         gen.setStartDate(new Time(startDate));
         gen.setEndDate(new Time(endDate));
@@ -100,7 +99,7 @@ public class GenerationTest
 
         gen.setSubjectPublicKeyInfo(info);
 
-        TBSCertificateStructure     tbs = gen.generateTBSCertificate();
+        TBSCertificate              tbs = gen.generateTBSCertificate();
         ByteArrayOutputStream       bOut = new ByteArrayOutputStream();
         ASN1OutputStream            aOut = new ASN1OutputStream(bOut);
 
@@ -149,7 +148,7 @@ public class GenerationTest
         Date                        startDate = new Date(1000);
         Date                        endDate = new Date(2000);
 
-        gen.setSerialNumber(new DERInteger(2));
+        gen.setSerialNumber(new ASN1Integer(2));
 
         gen.setStartDate(new Time(startDate));
         gen.setEndDate(new Time(endDate));
@@ -159,7 +158,7 @@ public class GenerationTest
 
         gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption, new DERNull()));
 
-        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(BigInteger.valueOf(1), BigInteger.valueOf(2))), new DERInteger(3));
+        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(BigInteger.valueOf(1), BigInteger.valueOf(2))), new ASN1Integer(3));
 
         gen.setSubjectPublicKeyInfo(info);
 
@@ -181,7 +180,7 @@ public class GenerationTest
 
         gen.setExtensions(ex);
 
-        TBSCertificateStructure     tbs = gen.generateTBSCertificate();
+        TBSCertificate              tbs = gen.generateTBSCertificate();
         ByteArrayOutputStream       bOut = new ByteArrayOutputStream();
         ASN1OutputStream            aOut = new ASN1OutputStream(bOut);
 
@@ -216,7 +215,7 @@ public class GenerationTest
         Date                        startDate = new Date(1000);
         Date                        endDate = new Date(2000);
 
-        gen.setSerialNumber(new DERInteger(2));
+        gen.setSerialNumber(new ASN1Integer(2));
 
         gen.setStartDate(new Time(startDate));
         gen.setEndDate(new Time(endDate));
@@ -225,7 +224,7 @@ public class GenerationTest
 
         gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption, new DERNull()));
 
-        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(BigInteger.valueOf(1), BigInteger.valueOf(2))), new DERInteger(3));
+        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(BigInteger.valueOf(1), BigInteger.valueOf(2))), new ASN1Integer(3));
 
         gen.setSubjectPublicKeyInfo(info);
 
@@ -256,7 +255,7 @@ public class GenerationTest
 
         gen.setExtensions(ex);
 
-        TBSCertificateStructure     tbs = gen.generateTBSCertificate();
+        TBSCertificate              tbs = gen.generateTBSCertificate();
         ByteArrayOutputStream       bOut = new ByteArrayOutputStream();
         ASN1OutputStream            aOut = new ASN1OutputStream(bOut);
 
@@ -304,7 +303,7 @@ public class GenerationTest
         //
         Vector                  order = new Vector();
         Hashtable               extensions = new Hashtable();
-        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(BigInteger.valueOf(1), BigInteger.valueOf(2))), new DERInteger(3));
+        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(BigInteger.valueOf(1), BigInteger.valueOf(2))), new ASN1Integer(3));
 
         order.addElement(X509Extension.authorityKeyIdentifier);
         order.addElement(X509Extension.issuerAlternativeName);
@@ -313,7 +312,7 @@ public class GenerationTest
 
         extensions.put(X509Extension.authorityKeyIdentifier, new X509Extension(true, new DEROctetString(createAuthorityKeyId(info, new X500Name("CN=AU,O=Bouncy Castle,OU=Test 2"), 2))));
         extensions.put(X509Extension.issuerAlternativeName, new X509Extension(false, new DEROctetString(new GeneralNames(new DERSequence(new GeneralName(new X500Name("CN=AU,O=Bouncy Castle,OU=Test 3")))))));
-        extensions.put(X509Extension.cRLNumber, new X509Extension(false, new DEROctetString(new DERInteger(1))));
+        extensions.put(X509Extension.cRLNumber, new X509Extension(false, new DEROctetString(new ASN1Integer(1))));
         extensions.put(X509Extension.issuingDistributionPoint, new X509Extension(true, new DEROctetString(new IssuingDistributionPoint(new DERSequence()))));
 
         X509Extensions          ex = new X509Extensions(order, extensions);

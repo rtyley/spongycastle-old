@@ -4,12 +4,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import junit.framework.TestCase;
-
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.tsp.TSTInfo;
-import org.bouncycastle.tsp.GenTimeAccuracy;
-import org.bouncycastle.tsp.TSPAlgorithms;
-import org.bouncycastle.tsp.TimeStampTokenInfo;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -48,7 +44,7 @@ public class TimeStampTokenInfoUnitTest
         
         assertEquals(1130833041000L, tstInfo.getGenTime().getTime());
         
-        assertEquals("1.2.3", tstInfo.getPolicy());
+        assertEquals("1.2.3", tstInfo.getPolicy().getId());
         
         assertEquals(false, tstInfo.isOrdered());
         
@@ -79,7 +75,7 @@ public class TimeStampTokenInfoUnitTest
         
         assertEquals(1130833785000L, tstInfo.getGenTime().getTime());
         
-        assertEquals("1.2.3", tstInfo.getPolicy());
+        assertEquals("1.2.3", tstInfo.getPolicy().getId());
         
         assertEquals(false, tstInfo.isOrdered());
         
@@ -108,7 +104,7 @@ public class TimeStampTokenInfoUnitTest
         
         assertEquals(1130834855000L, tstInfo.getGenTime().getTime());
         
-        assertEquals("1.2.3", tstInfo.getPolicy());
+        assertEquals("1.2.3", tstInfo.getPolicy().getId());
         
         assertEquals(true, tstInfo.isOrdered());
         

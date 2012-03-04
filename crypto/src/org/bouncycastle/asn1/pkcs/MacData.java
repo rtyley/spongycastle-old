@@ -3,11 +3,11 @@ package org.bouncycastle.asn1.pkcs;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.DigestInfo;
@@ -45,7 +45,7 @@ public class MacData
 
         if (seq.size() == 3)
         {
-            this.iterationCount = ((DERInteger)seq.getObjectAt(2)).getValue();
+            this.iterationCount = ((ASN1Integer)seq.getObjectAt(2)).getValue();
         }
         else
         {
@@ -98,7 +98,7 @@ public class MacData
         
         if (!iterationCount.equals(ONE))
         {
-            v.add(new DERInteger(iterationCount));
+            v.add(new ASN1Integer(iterationCount));
         }
 
         return new DERSequence(v);

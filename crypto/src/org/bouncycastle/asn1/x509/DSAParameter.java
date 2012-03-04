@@ -4,17 +4,17 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 public class DSAParameter
     extends ASN1Object
 {
-    DERInteger      p, q, g;
+    ASN1Integer      p, q, g;
 
     public static DSAParameter getInstance(
         ASN1TaggedObject obj,
@@ -44,9 +44,9 @@ public class DSAParameter
         BigInteger  q,
         BigInteger  g)
     {
-        this.p = new DERInteger(p);
-        this.q = new DERInteger(q);
-        this.g = new DERInteger(g);
+        this.p = new ASN1Integer(p);
+        this.q = new ASN1Integer(q);
+        this.g = new ASN1Integer(g);
     }
 
     public DSAParameter(
@@ -59,9 +59,9 @@ public class DSAParameter
         
         Enumeration     e = seq.getObjects();
 
-        p = DERInteger.getInstance(e.nextElement());
-        q = DERInteger.getInstance(e.nextElement());
-        g = DERInteger.getInstance(e.nextElement());
+        p = ASN1Integer.getInstance(e.nextElement());
+        q = ASN1Integer.getInstance(e.nextElement());
+        g = ASN1Integer.getInstance(e.nextElement());
     }
 
     public BigInteger getP()

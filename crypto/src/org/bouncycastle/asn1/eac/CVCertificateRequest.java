@@ -5,12 +5,12 @@ import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1ParsingException;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERApplicationSpecific;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 
 //import java.math.BigInteger;
@@ -97,8 +97,8 @@ public class CVCertificateRequest
         return null;
     }
 
-    DERObjectIdentifier signOid = null;
-    DERObjectIdentifier keyOid = null;
+    ASN1ObjectIdentifier signOid = null;
+    ASN1ObjectIdentifier keyOid = null;
 
     public static byte[] ZeroArray = new byte[]{0};
 

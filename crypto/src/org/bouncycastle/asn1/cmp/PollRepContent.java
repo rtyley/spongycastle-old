@@ -1,23 +1,23 @@
 package org.bouncycastle.asn1.cmp;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 
 public class PollRepContent
     extends ASN1Object
 {
-    private DERInteger certReqId;
-    private DERInteger checkAfter;
+    private ASN1Integer certReqId;
+    private ASN1Integer checkAfter;
     private PKIFreeText reason;
 
     private PollRepContent(ASN1Sequence seq)
     {
-        certReqId = DERInteger.getInstance(seq.getObjectAt(0));
-        checkAfter = DERInteger.getInstance(seq.getObjectAt(1));
+        certReqId = ASN1Integer.getInstance(seq.getObjectAt(0));
+        checkAfter = ASN1Integer.getInstance(seq.getObjectAt(1));
 
         if (seq.size() > 2)
         {
@@ -40,12 +40,12 @@ public class PollRepContent
         throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
     }
 
-    public DERInteger getCertReqId()
+    public ASN1Integer getCertReqId()
     {
         return certReqId;
     }
 
-    public DERInteger getCheckAfter()
+    public ASN1Integer getCheckAfter()
     {
         return checkAfter;
     }

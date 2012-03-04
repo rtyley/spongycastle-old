@@ -7,7 +7,6 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.GeneralName;
 
@@ -55,9 +54,9 @@ public class SemanticsInformation
         }
         
         Object object = e.nextElement();
-        if (object instanceof DERObjectIdentifier)
+        if (object instanceof ASN1ObjectIdentifier)
         {
-            semanticsIdentifier = DERObjectIdentifier.getInstance(object);
+            semanticsIdentifier = ASN1ObjectIdentifier.getInstance(object);
             if (e.hasMoreElements())
             {
                 object = e.nextElement();

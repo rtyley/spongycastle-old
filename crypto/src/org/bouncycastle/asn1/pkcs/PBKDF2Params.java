@@ -4,11 +4,11 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 
@@ -16,8 +16,8 @@ public class PBKDF2Params
     extends ASN1Object
 {
     private ASN1OctetString octStr;
-    private DERInteger      iterationCount;
-    private DERInteger      keyLength;
+    private ASN1Integer      iterationCount;
+    private ASN1Integer      keyLength;
 
     public static PBKDF2Params getInstance(
         Object  obj)
@@ -40,7 +40,7 @@ public class PBKDF2Params
         int     iterationCount)
     {
         this.octStr = new DEROctetString(salt);
-        this.iterationCount = new DERInteger(iterationCount);
+        this.iterationCount = new ASN1Integer(iterationCount);
     }
 
     public PBKDF2Params(
@@ -50,7 +50,7 @@ public class PBKDF2Params
     {
     	this(salt, iterationCount);
 
-        this.keyLength = new DERInteger(keyLength);
+        this.keyLength = new ASN1Integer(keyLength);
     }
 
     public PBKDF2Params(
@@ -59,11 +59,11 @@ public class PBKDF2Params
         Enumeration e = seq.getObjects();
 
         octStr = (ASN1OctetString)e.nextElement();
-        iterationCount = (DERInteger)e.nextElement();
+        iterationCount = (ASN1Integer)e.nextElement();
 
         if (e.hasMoreElements())
         {
-            keyLength = (DERInteger)e.nextElement();
+            keyLength = (ASN1Integer)e.nextElement();
         }
         else
         {

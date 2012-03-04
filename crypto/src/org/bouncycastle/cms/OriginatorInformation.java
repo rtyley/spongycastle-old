@@ -9,8 +9,8 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.cms.OriginatorInfo;
+import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.util.CollectionStore;
@@ -44,7 +44,7 @@ public class OriginatorInformation
 
                 if (obj instanceof ASN1Sequence)
                 {
-                    certList.add(new X509CertificateHolder(X509CertificateStructure.getInstance(obj)));
+                    certList.add(new X509CertificateHolder(Certificate.getInstance(obj)));
                 }
             }
 

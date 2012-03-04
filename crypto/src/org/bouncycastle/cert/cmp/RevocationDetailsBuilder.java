@@ -2,7 +2,7 @@ package org.bouncycastle.cert.cmp;
 
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.cmp.RevDetails;
 import org.bouncycastle.asn1.crmf.CertTemplateBuilder;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -36,7 +36,7 @@ public class RevocationDetailsBuilder
     {
         if (serialNumber != null)
         {
-            templateBuilder.setSerialNumber(new DERInteger(serialNumber));
+            templateBuilder.setSerialNumber(new ASN1Integer(serialNumber));
         }
 
         return this;
