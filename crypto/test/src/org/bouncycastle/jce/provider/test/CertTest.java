@@ -70,6 +70,7 @@ import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 import org.bouncycastle.x509.X509V2CRLGenerator;
@@ -2596,16 +2597,19 @@ public class CertTest
         }
     }
 
-    private void testCRLProblemBC147_RC()
+    private void testV1CRL()
         throws Exception
     {
+        byte[] certData = Streams.readAll(this.getClass().getResourceAsStream("ThawteSGCCA.cer"));
+        byte[] crlData = Streams.readAll(this.getClass().getResourceAsStream("ThawteSGCCA.crl"));
+
         // verify CRL with default (JCE) provider
         CertificateFactory jceFac = CertificateFactory.getInstance("X.509");
 
         X509Certificate jceIssuer = (X509Certificate)
-            jceFac.generateCertificate(this.getClass().getResourceAsStream("ThawteSGCCA.cer"));
+            jceFac.generateCertificate(new ByteArrayInputStream(certData));
 
-        X509CRL jceCRL = (X509CRL)jceFac.generateCRL(this.getClass().getResourceAsStream("ThawteSGCCA.crl"));
+        X509CRL jceCRL = (X509CRL)jceFac.generateCRL(new ByteArrayInputStream(crlData));
 
         jceCRL.verify(jceIssuer.getPublicKey());
 
@@ -2614,9 +2618,9 @@ public class CertTest
         CertificateFactory bcFac = CertificateFactory.getInstance("X.509", "BC");
 
         X509Certificate bcIssuer = (X509Certificate)
-            bcFac.generateCertificate(this.getClass().getResourceAsStream("ThawteSGCCA.cer"));
+            bcFac.generateCertificate(new ByteArrayInputStream(certData));
 
-        X509CRL bcCRL = (X509CRL)bcFac.generateCRL(this.getClass().getResourceAsStream("ThawteSGCCA.crl"));
+        X509CRL bcCRL = (X509CRL)bcFac.generateCRL(new ByteArrayInputStream(crlData));
 
         jceCRL.verify(bcIssuer.getPublicKey());
 
@@ -2626,7 +2630,7 @@ public class CertTest
     public void performTest()
         throws Exception
     {
-        testCRLProblemBC147_RC();
+        testV1CRL();
 
         checkCertificate(1, cert1);
         checkCertificate(2, cert2);
