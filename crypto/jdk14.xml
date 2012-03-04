@@ -63,6 +63,7 @@
             <fileset dir="test/data" includes="**/*.message" />
             <fileset dir="test/data" includes="**/*.der" />
             <fileset dir="test/data" includes="**/*.csr" />
+            <fileset dir="test/data" includes="**/*.cer" />
             <fileset dir="test/data" includes="**/*.cvcert" />
         </copy>
         <copy todir="${src.dir}" overwrite="true">

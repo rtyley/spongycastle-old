@@ -37,6 +37,7 @@
             <fileset dir="test/data" includes="**/*.crl" />
             <fileset dir="test/data" includes="**/*.der" />
             <fileset dir="test/data" includes="**/*.csr" />
+            <fileset dir="test/data" includes="**/*.cer" />
             <fileset dir="test/data" includes="**/*.cvcert" />
         </copy>
         <available classname="com.puppycrawl.tools.checkstyle.CheckStyleTask" property="checkstyle.on" />

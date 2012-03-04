@@ -149,6 +149,7 @@
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.cvcert" />
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.csr" />
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.crl" />
+                     <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.cer" />
                      <fileset dir="${artifacts.dir}/@{target}/src" includes="**/*.der" />
                 </copy>
                 <packJar jarbase="${artifacts.jars.dir}/@{target}">
@@ -170,6 +171,7 @@
                             <include name="**/*.eml" />
                             <include name="**/*.sig" />
                             <include name="**/*.data" />
+                            <include name="**/*.cer" />
                             <include name="**/*.der" />
                             <include name="**/*.message" />
                             <include name="**/*.properties" />
@@ -271,6 +273,7 @@
                  <exclude name="org/bouncycastle/**/test/*.crt" />
                  <exclude name="org/bouncycastle/**/test/*.cvcert" />
                  <exclude name="org/bouncycastle/**/test/*.csr" />
+                 <exclude name="org/bouncycastle/**/test/*.cer" />
                  <exclude name="**/*.crl" />
                  <exclude name="org/bouncycastle/bcpg/**/*.java" />
                  <exclude name="org/bouncycastle/cert/**/*.java" />
@@ -351,6 +354,7 @@
                  <exclude name="org/bouncycastle/**/test/*.p7m" />
                  <exclude name="**/*.crl" />
                  <exclude name="org/bouncycastle/**/test/*.crt" />
+                 <exclude name="org/bouncycastle/**/test/*.cer" />
                  <exclude name="org/bouncycastle/**/test/*.csr" />
                  <exclude name="org/bouncycastle/**/test/*.cvcert" />
                  <exclude name="org/bouncycastle/**/test/*.eml" />
@@ -562,6 +566,7 @@
              <fileset dir="${src.dir}" includes="**/*.data" />
              <fileset dir="${src.dir}" includes="**/*.der" />
              <fileset dir="${src.dir}" includes="**/*.crt" />
+             <fileset dir="${src.dir}" includes="**/*.cer" />
              <fileset dir="${src.dir}" includes="**/*.crl" />
              <fileset dir="${src.dir}" includes="**/*.csr" />
              <fileset dir="${src.dir}" includes="**/*.cvcert" />
