@@ -207,6 +207,6 @@ public class V3TBSCertificateGenerator
             v.add(new DERTaggedObject(true, 3, extensions));
         }
 
-        return new TBSCertificate(new DERSequence(v));
+        return TBSCertificate.getInstance(new DERSequence(v));
     }
 }

@@ -139,6 +139,6 @@ public class V1TBSCertificateGenerator
 
         seq.add(subjectPublicKeyInfo);
 
-        return new TBSCertificate(new DERSequence(seq));
+        return TBSCertificate.getInstance(new DERSequence(seq));
     }
 }

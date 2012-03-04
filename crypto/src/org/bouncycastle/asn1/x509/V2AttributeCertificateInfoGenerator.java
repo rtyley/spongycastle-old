@@ -153,6 +153,6 @@ public class V2AttributeCertificateInfoGenerator
             v.add(extensions);
         }
 
-        return new AttributeCertificateInfo(new DERSequence(v));
+        return AttributeCertificateInfo.getInstance(new DERSequence(v));
     }
 }
