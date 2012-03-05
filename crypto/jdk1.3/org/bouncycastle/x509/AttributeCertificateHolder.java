@@ -14,7 +14,6 @@ import java.util.List;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
@@ -58,7 +57,7 @@ public class AttributeCertificateHolder
         BigInteger serialNumber)
     {
         holder = new org.bouncycastle.asn1.x509.Holder(new IssuerSerial(
-            new GeneralNames(new DERSequence(new GeneralName(issuerName))),
+            new GeneralNames(new GeneralName(issuerName)),
             new ASN1Integer(serialNumber)));
     }
 
