@@ -14,17 +14,17 @@ public class GeneralNames
     public static GeneralNames getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof GeneralNames)
+        if (obj instanceof GeneralNames)
         {
             return (GeneralNames)obj;
         }
 
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
-            return new GeneralNames((ASN1Sequence)obj);
+            return new GeneralNames(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
+        return null;
     }
 
     public static GeneralNames getInstance(
@@ -52,7 +52,7 @@ public class GeneralNames
         this.names = names;
     }
 
-    public GeneralNames(
+    private GeneralNames(
         ASN1Sequence  seq)
     {
         this.names = new GeneralName[seq.size()];

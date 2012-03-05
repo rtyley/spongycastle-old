@@ -33,47 +33,24 @@ public class SubjectKeyIdentifier
         {
             return (SubjectKeyIdentifier)obj;
         }
-        
-        if (obj instanceof SubjectPublicKeyInfo) 
+        else if (obj != null)
         {
-            return new SubjectKeyIdentifier((SubjectPublicKeyInfo)obj);
-        }
-        
-        if (obj instanceof ASN1OctetString) 
-        {
-            return new SubjectKeyIdentifier((ASN1OctetString)obj);
+            return new SubjectKeyIdentifier(ASN1OctetString.getInstance(obj));
         }
 
-        if (obj instanceof X509Extension)
-        {
-            return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
-        }
-
-        throw new IllegalArgumentException("Invalid SubjectKeyIdentifier: " + obj.getClass().getName());
+        return null;
     }
-    
+
     public SubjectKeyIdentifier(
         byte[] keyid)
     {
-        this.keyidentifier=keyid;
+        this.keyidentifier = keyid;
     }
 
-    public SubjectKeyIdentifier(
-        ASN1OctetString  keyid)
+    protected SubjectKeyIdentifier(
+        ASN1OctetString keyid)
     {
-        this.keyidentifier=keyid.getOctets();
-    }
-
-    /**
-     * Calculates the keyidentifier using a SHA1 hash over the BIT STRING
-     * from SubjectPublicKeyInfo as defined in RFC3280.
-     *
-     * @param spki the subject public key info.
-     */
-    public SubjectKeyIdentifier(
-        SubjectPublicKeyInfo    spki)
-    {
-        this.keyidentifier = getDigest(spki);
+        this.keyidentifier = keyid.getOctets();
     }
 
     public byte[] getKeyIdentifier()
@@ -86,6 +63,20 @@ public class SubjectKeyIdentifier
         return new DEROctetString(keyidentifier);
     }
 
+
+    /**
+     * Calculates the keyidentifier using a SHA1 hash over the BIT STRING
+     * from SubjectPublicKeyInfo as defined in RFC3280.
+     *
+     * @param spki the subject public key info.
+     * @deprecated
+     */
+    public SubjectKeyIdentifier(
+        SubjectPublicKeyInfo    spki)
+    {
+        this.keyidentifier = getDigest(spki);
+    }
+
     /**
      * Return a RFC 3280 type 1 key identifier. As in:
      * <pre>
@@ -95,6 +86,7 @@ public class SubjectKeyIdentifier
      * </pre>
      * @param keyInfo the key info object containing the subjectPublicKey field.
      * @return the key identifier.
+     * @deprecated use org.bouncycastle.cert.X509ExtensionUtils.createSubjectKeyIdentifier
      */
     public static SubjectKeyIdentifier createSHA1KeyIdentifier(SubjectPublicKeyInfo keyInfo)
     {
@@ -110,6 +102,7 @@ public class SubjectKeyIdentifier
      * </pre>
      * @param keyInfo the key info object containing the subjectPublicKey field.
      * @return the key identifier.
+     * @deprecated use org.bouncycastle.cert.X509ExtensionUtils.createTruncatedSubjectKeyIdentifier
      */
     public static SubjectKeyIdentifier createTruncatedSHA1KeyIdentifier(SubjectPublicKeyInfo keyInfo)
     {

@@ -46,7 +46,7 @@ public class AttributeCertificateIssuer
 
     public AttributeCertificateIssuer(X509Principal principal)
     {
-        form = new V2Form(new GeneralNames(new DERSequence(new GeneralName(principal))));
+        form = new V2Form(GeneralNames.getInstance(new DERSequence(new GeneralName(principal))));
     }
 
     private Object[] getNames()

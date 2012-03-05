@@ -26,7 +26,7 @@ import org.bouncycastle.asn1.DERSequence;
  *     AttributeValue ::= ANY DEFINED BY AttributeType
  * </pre>
  * 
- * @see org.bouncycastle.asn1.x509.X509Name for AttributeType ObjectIdentifiers.
+ * @see org.bouncycastle.asn1.x500.style.BCStyle for AttributeType ObjectIdentifiers.
  */
 public class SubjectDirectoryAttributes 
     extends ASN1Object
@@ -77,7 +77,7 @@ public class SubjectDirectoryAttributes
         while (e.hasMoreElements())
         {
             ASN1Sequence s = ASN1Sequence.getInstance(e.nextElement());
-            attributes.addElement(new Attribute(s));
+            attributes.addElement(Attribute.getInstance(s));
         }
     }
 

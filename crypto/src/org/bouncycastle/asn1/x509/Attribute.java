@@ -24,20 +24,20 @@ public class Attribute
     public static Attribute getInstance(
         Object o)
     {
-        if (o == null || o instanceof Attribute)
+        if (o instanceof Attribute)
         {
             return (Attribute)o;
         }
         
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new Attribute((ASN1Sequence)o);
+            return new Attribute(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + o.getClass().getName());
+        return null;
     }
     
-    public Attribute(
+    private Attribute(
         ASN1Sequence seq)
     {
         if (seq.size() != 2)

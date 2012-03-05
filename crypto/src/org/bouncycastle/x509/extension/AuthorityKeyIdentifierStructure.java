@@ -20,6 +20,7 @@ import org.bouncycastle.jce.PrincipalUtil;
 
 /**
  * A high level authority key identifier.
+ * @deprecated use JcaX509ExtensionUtils and AuthorityKeyIdentifier.getInstance()
  */
 public class AuthorityKeyIdentifierStructure
     extends AuthorityKeyIdentifier

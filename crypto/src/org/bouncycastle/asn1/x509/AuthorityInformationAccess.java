@@ -36,20 +36,15 @@ public class AuthorityInformationAccess
             return (AuthorityInformationAccess)obj;
         }
 
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
-            return new AuthorityInformationAccess((ASN1Sequence)obj);
+            return new AuthorityInformationAccess(ASN1Sequence.getInstance(obj));
         }
 
-        if (obj instanceof X509Extension)
-        {
-            return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
-        }
-
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
  
-    public AuthorityInformationAccess(
+    private AuthorityInformationAccess(
         ASN1Sequence   seq)
     {
         if (seq.size() < 1) 

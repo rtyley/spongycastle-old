@@ -1,6 +1,5 @@
 package org.bouncycastle.cms.test;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,8 +19,6 @@ import java.util.Date;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
@@ -31,6 +28,7 @@ import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cert.X509ExtensionUtils;
 import org.bouncycastle.cert.X509v2CRLBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
@@ -419,30 +417,21 @@ public class CMSTestUtil
      *  INTERNAL METHODS
      *  
      */ 
-    
+
+    private static final X509ExtensionUtils extUtils = new X509ExtensionUtils(new SHA1DigestCalculator());
+
     private static AuthorityKeyIdentifier createAuthorityKeyId(
         PublicKey _pubKey)
         throws IOException
     {
-
-        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey
-                .getEncoded());
-        SubjectPublicKeyInfo _info = new SubjectPublicKeyInfo(
-                (ASN1Sequence)new ASN1InputStream(_bais).readObject());
-
-        return new AuthorityKeyIdentifier(_info);
+        return extUtils.createAuthorityKeyIdentifier(SubjectPublicKeyInfo.getInstance(_pubKey.getEncoded()));
     }
 
     static SubjectKeyIdentifier createSubjectKeyId(
         PublicKey _pubKey)
         throws IOException
     {
-
-        ByteArrayInputStream _bais = new ByteArrayInputStream(_pubKey
-                .getEncoded());
-        SubjectPublicKeyInfo _info = new SubjectPublicKeyInfo(
-                (ASN1Sequence)new ASN1InputStream(_bais).readObject());
-        return new SubjectKeyIdentifier(_info);
+        return extUtils.createSubjectKeyIdentifier(SubjectPublicKeyInfo.getInstance(_pubKey.getEncoded()));
     }
 
     private static BigInteger allocateSerialNumber()

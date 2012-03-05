@@ -11,6 +11,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CRLException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
@@ -27,18 +28,17 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.util.ASN1Dump;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.Extensions;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.TBSCertList;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
@@ -241,7 +241,7 @@ public class X509CRLObject
 
     public Principal getIssuerDN()
     {
-        return new X509Principal(X509Name.getInstance(c.getIssuer().toASN1Primitive()));
+        return new X509Principal(X500Name.getInstance(c.getIssuer().toASN1Primitive()));
     }
 
     public X500Principal getIssuerX500Principal()
@@ -346,7 +346,7 @@ public class X509CRLObject
 
     public String getSigAlgOID()
     {
-        return c.getSignatureAlgorithm().getObjectId().getId();
+        return c.getSignatureAlgorithm().getAlgorithm().getId();
     }
 
     public byte[] getSigAlgParams()
@@ -426,14 +426,14 @@ public class X509CRLObject
                         ext.isCritical()).append(") ");
                     try
                     {
-                        if (oid.equals(X509Extensions.CRLNumber))
+                        if (oid.equals(Extension.cRLNumber))
                         {
                             buf.append(
                                 new CRLNumber(DERInteger.getInstance(
                                     dIn.readObject()).getPositiveValue()))
                                 .append(nl);
                         }
-                        else if (oid.equals(X509Extensions.DeltaCRLIndicator))
+                        else if (oid.equals(Extension.deltaCRLIndicator))
                         {
                             buf.append(
                                 "Base CRL: "
@@ -442,24 +442,21 @@ public class X509CRLObject
                                 .append(nl);
                         }
                         else if (oid
-                            .equals(X509Extensions.IssuingDistributionPoint))
+                            .equals(Extension.issuingDistributionPoint))
                         {
                             buf.append(
-                                new IssuingDistributionPoint((ASN1Sequence) dIn
-                                    .readObject())).append(nl);
+                               IssuingDistributionPoint.getInstance(dIn.readObject())).append(nl);
                         }
                         else if (oid
-                            .equals(X509Extensions.CRLDistributionPoints))
+                            .equals(Extension.cRLDistributionPoints))
                         {
                             buf.append(
-                                new CRLDistPoint((ASN1Sequence) dIn
-                                    .readObject())).append(nl);
+                                CRLDistPoint.getInstance(dIn.readObject())).append(nl);
                         }
-                        else if (oid.equals(X509Extensions.FreshestCRL))
+                        else if (oid.equals(Extension.freshestCRL))
                         {
                             buf.append(
-                                new CRLDistPoint((ASN1Sequence) dIn
-                                    .readObject())).append(nl);
+                                CRLDistPoint.getInstance(dIn.readObject())).append(nl);
                         }
                         else
                         {
@@ -510,14 +507,49 @@ public class X509CRLObject
 
         TBSCertList.CRLEntry[] certs = c.getRevokedCertificates();
 
+        X500Name caName = c.getIssuer();
+
         if (certs != null)
         {
             BigInteger serial = ((X509Certificate)cert).getSerialNumber();
 
             for (int i = 0; i < certs.length; i++)
             {
+                if (isIndirect && certs[i].hasExtensions())
+                {
+                    Extension currentCaName = certs[i].getExtensions().getExtension(Extension.certificateIssuer);
+
+                    if (currentCaName != null)
+                    {
+                        caName = X500Name.getInstance(GeneralNames.getInstance(currentCaName.getParsedValue()).getNames()[0].getName());
+                    }
+                }
+
                 if (certs[i].getUserCertificate().getValue().equals(serial))
                 {
+                    X500Name issuer;
+
+                    if (cert instanceof  X509Certificate)
+                    {
+                        issuer = X500Name.getInstance(((X509Certificate)cert).getIssuerX500Principal().getEncoded());
+                    }
+                    else
+                    {
+                        try
+                        {
+                            issuer = org.bouncycastle.asn1.x509.Certificate.getInstance(cert.getEncoded()).getIssuer();
+                        }
+                        catch (CertificateEncodingException e)
+                        {
+                            throw new RuntimeException("Cannot process certificate");
+                        }
+                    }
+
+                    if (!caName.equals(issuer))
+                    {
+                        return false;
+                    }
+
                     return true;
                 }
             }

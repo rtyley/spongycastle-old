@@ -60,7 +60,7 @@ public class AttributeCertificateHolder
         BigInteger serialNumber)
     {
         holder = new org.bouncycastle.asn1.x509.Holder(new IssuerSerial(
-            new GeneralNames(new DERSequence(new GeneralName(issuerName))),
+            GeneralNames.getInstance(new DERSequence(new GeneralName(issuerName))),
             new ASN1Integer(serialNumber)));
     }
 
@@ -200,7 +200,7 @@ public class AttributeCertificateHolder
 
     private GeneralNames generateGeneralNames(X509Principal principal)
     {
-        return new GeneralNames(new DERSequence(new GeneralName(principal)));
+        return GeneralNames.getInstance(new DERSequence(new GeneralName(principal)));
     }
 
     private boolean matchesDN(X509Principal subject, GeneralNames targets)

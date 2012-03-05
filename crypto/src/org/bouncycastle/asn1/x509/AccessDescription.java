@@ -32,15 +32,15 @@ public class AccessDescription
         {
             return (AccessDescription)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new AccessDescription((ASN1Sequence)obj);
+            return new AccessDescription(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
  
-    public AccessDescription(
+    private AccessDescription(
         ASN1Sequence   seq)
     {
         if (seq.size() != 2) 

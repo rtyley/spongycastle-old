@@ -180,7 +180,7 @@ public class JDKPKCS12KeyStore
     {
         try
         {
-            SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
+            SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(
                 (ASN1Sequence) ASN1Primitive.fromByteArray(pubKey.getEncoded()));
 
             return new SubjectKeyIdentifier(info);
@@ -362,7 +362,7 @@ public class JDKPKCS12KeyStore
                         byte[] authBytes = ((ASN1OctetString)aIn.readObject()).getOctets();
                         aIn = new ASN1InputStream(authBytes);
 
-                        AuthorityKeyIdentifier id = new AuthorityKeyIdentifier((ASN1Sequence)aIn.readObject());
+                        AuthorityKeyIdentifier id = AuthorityKeyIdentifier.getInstance(aIn.readObject());
                         if (id.getKeyIdentifier() != null)
                         {
                             nextC = (Certificate)chainCerts.get(new CertId(id.getKeyIdentifier()));

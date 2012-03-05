@@ -14,7 +14,6 @@ import javax.security.auth.x500.X500Principal;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x509.CRLReason;
@@ -258,7 +257,7 @@ public class X509CRLEntryObject extends X509CRLEntry
                             }
                             else if (oid.equals(X509Extension.certificateIssuer))
                             {
-                                buf.append("Certificate issuer: ").append(new GeneralNames((ASN1Sequence)dIn.readObject())).append(nl);
+                                buf.append("Certificate issuer: ").append(GeneralNames.getInstance(dIn.readObject())).append(nl);
                             }
                             else 
                             {

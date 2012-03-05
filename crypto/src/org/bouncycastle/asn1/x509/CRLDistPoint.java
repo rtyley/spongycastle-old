@@ -22,19 +22,19 @@ public class CRLDistPoint
     public static CRLDistPoint getInstance(
         Object  obj)
     {
-        if (obj instanceof CRLDistPoint || obj == null)
+        if (obj instanceof CRLDistPoint)
         {
             return (CRLDistPoint)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new CRLDistPoint((ASN1Sequence)obj);
+            return new CRLDistPoint(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
-    public CRLDistPoint(
+    private CRLDistPoint(
         ASN1Sequence seq)
     {
         this.seq = seq;

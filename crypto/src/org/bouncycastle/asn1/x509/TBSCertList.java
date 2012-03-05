@@ -136,7 +136,7 @@ public class TBSCertList
         }
     }
 
-    ASN1Integer              version;
+    ASN1Integer             version;
     AlgorithmIdentifier     signature;
     X500Name                issuer;
     Time                    thisUpdate;

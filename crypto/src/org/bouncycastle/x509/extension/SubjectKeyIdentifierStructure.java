@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 
 /**
  * A high level subject key identifier.
+ * @deprecated use JcaX509ExtensionUtils andSubjectKeyIdentifier.getInstance()
  */
 public class SubjectKeyIdentifierStructure
     extends SubjectKeyIdentifier

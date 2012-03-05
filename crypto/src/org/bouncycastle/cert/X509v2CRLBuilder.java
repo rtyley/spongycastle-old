@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.Time;
@@ -95,14 +96,30 @@ public class X509v2CRLBuilder
      * @param revocationDate date of certificate revocation.
      * @param extensions extension set to be associated with this CRLEntry.
      * @return the current builder.
+     * @deprecated use method taking Extensions
      */
     public X509v2CRLBuilder addCRLEntry(BigInteger userCertificateSerial, Date revocationDate, X509Extensions extensions)
+    {
+        tbsGen.addCRLEntry(new ASN1Integer(userCertificateSerial), new Time(revocationDate), Extensions.getInstance(extensions));
+
+        return this;
+    }
+
+    /**
+     * Add a CRL entry with extensions.
+     *
+     * @param userCertificateSerial serial number of revoked certificate.
+     * @param revocationDate date of certificate revocation.
+     * @param extensions extension set to be associated with this CRLEntry.
+     * @return the current builder.
+     */
+    public X509v2CRLBuilder addCRLEntry(BigInteger userCertificateSerial, Date revocationDate, Extensions extensions)
     {
         tbsGen.addCRLEntry(new ASN1Integer(userCertificateSerial), new Time(revocationDate), extensions);
 
         return this;
     }
-    
+
     /**
      * Add the CRLEntry objects contained in a previous CRL.
      * 

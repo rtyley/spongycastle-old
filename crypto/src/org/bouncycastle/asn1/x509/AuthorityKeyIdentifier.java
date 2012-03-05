@@ -51,19 +51,15 @@ public class AuthorityKeyIdentifier
         {
             return (AuthorityKeyIdentifier)obj;
         }
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
-            return new AuthorityKeyIdentifier((ASN1Sequence)obj);
-        }
-        if (obj instanceof X509Extension)
-        {
-            return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
+            return new AuthorityKeyIdentifier(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
-    public AuthorityKeyIdentifier(
+    protected AuthorityKeyIdentifier(
         ASN1Sequence   seq)
     {
         Enumeration     e = seq.getObjects();

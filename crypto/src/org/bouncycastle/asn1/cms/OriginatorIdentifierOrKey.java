@@ -27,7 +27,7 @@ public class OriginatorIdentifierOrKey
     public OriginatorIdentifierOrKey(
         ASN1OctetString id)
     {
-        this(new SubjectKeyIdentifier(id));
+        this(new SubjectKeyIdentifier(id.getOctets()));
     }
 
     public OriginatorIdentifierOrKey(

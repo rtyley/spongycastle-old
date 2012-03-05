@@ -8,7 +8,6 @@ import java.util.List;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -58,7 +57,7 @@ public class AttributeCertificateHolder
         BigInteger serialNumber)
     {
         holder = new Holder(new IssuerSerial(
-            new GeneralNames(new DERSequence(new GeneralName(issuerName))),
+            new GeneralNames(new GeneralName(issuerName)),
             new ASN1Integer(serialNumber)));
     }
 
@@ -173,7 +172,7 @@ public class AttributeCertificateHolder
 
     private GeneralNames generateGeneralNames(X500Name principal)
     {
-        return new GeneralNames(new DERSequence(new GeneralName(principal)));
+        return new GeneralNames(new GeneralName(principal));
     }
 
     private boolean matchesDN(X500Name subject, GeneralNames targets)

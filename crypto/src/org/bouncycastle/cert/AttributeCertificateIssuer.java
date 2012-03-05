@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AttCertIssuer;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -32,7 +31,7 @@ public class AttributeCertificateIssuer
 
     public AttributeCertificateIssuer(X500Name principal)
     {
-        form = new V2Form(new GeneralNames(new DERSequence(new GeneralName(principal))));
+        form = new V2Form(new GeneralNames(new GeneralName(principal)));
     }
 
     public X500Name[] getNames()

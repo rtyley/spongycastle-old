@@ -39,7 +39,7 @@ public class GeneralSubtree
 
     private ASN1Integer maximum;
 
-    public GeneralSubtree(
+    private GeneralSubtree(
         ASN1Sequence seq) 
     {
         base = GeneralName.getInstance(seq.getObjectAt(0));

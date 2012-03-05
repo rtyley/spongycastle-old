@@ -23,6 +23,9 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.CRLReason;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
+import org.bouncycastle.asn1.x509.ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
@@ -138,7 +141,7 @@ public class GenerationTest
         v.add(genName);
 
         return new AuthorityKeyIdentifier(
-            info, new GeneralNames(new DERSequence(v)), BigInteger.valueOf(sNumber));
+            info, GeneralNames.getInstance(new DERSequence(v)), BigInteger.valueOf(sNumber));
     }
     
     private void tbsV3CertGen()
@@ -301,21 +304,16 @@ public class GenerationTest
         //
         // extensions
         //
-        Vector                  order = new Vector();
-        Hashtable               extensions = new Hashtable();
         SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(BigInteger.valueOf(1), BigInteger.valueOf(2))), new ASN1Integer(3));
 
-        order.addElement(X509Extension.authorityKeyIdentifier);
-        order.addElement(X509Extension.issuerAlternativeName);
-        order.addElement(X509Extension.cRLNumber);
-        order.addElement(X509Extension.issuingDistributionPoint);
+        ExtensionsGenerator     extGen = new ExtensionsGenerator();
 
-        extensions.put(X509Extension.authorityKeyIdentifier, new X509Extension(true, new DEROctetString(createAuthorityKeyId(info, new X500Name("CN=AU,O=Bouncy Castle,OU=Test 2"), 2))));
-        extensions.put(X509Extension.issuerAlternativeName, new X509Extension(false, new DEROctetString(new GeneralNames(new DERSequence(new GeneralName(new X500Name("CN=AU,O=Bouncy Castle,OU=Test 3")))))));
-        extensions.put(X509Extension.cRLNumber, new X509Extension(false, new DEROctetString(new ASN1Integer(1))));
-        extensions.put(X509Extension.issuingDistributionPoint, new X509Extension(true, new DEROctetString(new IssuingDistributionPoint(new DERSequence()))));
+        extGen.addExtension(Extension.authorityKeyIdentifier, true, createAuthorityKeyId(info, new X500Name("CN=AU,O=Bouncy Castle,OU=Test 2"), 2));
+        extGen.addExtension(Extension.issuerAlternativeName, false, new GeneralNames(new GeneralName(new X500Name("CN=AU,O=Bouncy Castle,OU=Test 3"))));
+        extGen.addExtension(Extension.cRLNumber, false, new ASN1Integer(1));
+        extGen.addExtension(Extension.issuingDistributionPoint, true, IssuingDistributionPoint.getInstance(new DERSequence()));
 
-        X509Extensions          ex = new X509Extensions(order, extensions);
+        Extensions          ex = extGen.generate();
 
         gen.setExtensions(ex);
 

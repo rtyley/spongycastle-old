@@ -30,6 +30,7 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V2TBSCertListGenerator;
@@ -129,7 +130,7 @@ public class X509V2CRLGenerator
      **/
     public void addCRLEntry(BigInteger userCertificate, Date revocationDate, X509Extensions extensions)
     {
-        tbsGen.addCRLEntry(new ASN1Integer(userCertificate), new Time(revocationDate), extensions);
+        tbsGen.addCRLEntry(new ASN1Integer(userCertificate), new Time(revocationDate), Extensions.getInstance(extensions));
     }
     
     /**

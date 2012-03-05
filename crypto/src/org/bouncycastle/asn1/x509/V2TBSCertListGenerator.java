@@ -171,7 +171,7 @@ public class V2TBSCertListGenerator
         addCRLEntry(new DERSequence(v));
     }
 
-    public void addCRLEntry(ASN1Integer userCertificate, Time revocationDate, X509Extensions extensions)
+    public void addCRLEntry(ASN1Integer userCertificate, Time revocationDate, Extensions extensions)
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 

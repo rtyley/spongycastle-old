@@ -1,6 +1,5 @@
 package org.bouncycastle.mail.smime.examples;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -25,8 +24,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute;
@@ -34,13 +31,11 @@ import org.bouncycastle.asn1.smime.SMIMECapability;
 import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.asn1.smime.SMIMEEncryptionKeyPreferenceAttribute;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
@@ -58,29 +53,6 @@ public class CreateSignedMultipartMail
     //
     static int  serialNo = 1;
 
-    static AuthorityKeyIdentifier createAuthorityKeyId(
-        PublicKey pub) 
-        throws IOException
-    {
-        ByteArrayInputStream bIn = new ByteArrayInputStream(pub.getEncoded());
-        SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-            (ASN1Sequence)new ASN1InputStream(bIn).readObject());
-
-        return new AuthorityKeyIdentifier(info);
-    }
-
-    static SubjectKeyIdentifier createSubjectKeyId(
-        PublicKey pub) 
-        throws IOException
-    {
-        ByteArrayInputStream bIn = new ByteArrayInputStream(pub.getEncoded());
-
-        SubjectPublicKeyInfo info = new SubjectPublicKeyInfo(
-            (ASN1Sequence)new ASN1InputStream(bIn).readObject());
-
-        return new SubjectKeyIdentifier(info);
-    }
-
     /**
      * create a basic X509 certificate from the given keys
      */
@@ -95,17 +67,18 @@ public class CreateSignedMultipartMail
         PrivateKey issPriv = issKP.getPrivate();
         PublicKey  issPub  = issKP.getPublic();
 
+        JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
         X509v3CertificateBuilder v3CertGen = new JcaX509v3CertificateBuilder(new X500Name(issDN), BigInteger.valueOf(serialNo++), new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 100)), new X500Name(subDN), subPub);
 
         v3CertGen.addExtension(
             X509Extension.subjectKeyIdentifier,
             false,
-            createSubjectKeyId(subPub));
+            extUtils.createSubjectKeyIdentifier(subPub));
 
         v3CertGen.addExtension(
             X509Extension.authorityKeyIdentifier,
             false,
-            createAuthorityKeyId(issPub));
+            extUtils.createAuthorityKeyIdentifier(issPub));
 
         return new JcaX509CertificateConverter().setProvider("BC").getCertificate(v3CertGen.build(new JcaContentSignerBuilder("MD5withRSA").setProvider("BC").build(issPriv)));
     }
