@@ -16,6 +16,7 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.util.ASN1Dump;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.Extensions;
@@ -35,7 +36,7 @@ public class X509CRLEntryObject extends X509CRLEntry
 {
     private TBSCertList.CRLEntry c;
 
-    private X500Principal certificateIssuer;
+    private X500Name certificateIssuer;
     private int           hashValue;
     private boolean       isHashValueSet;
 
@@ -65,7 +66,7 @@ public class X509CRLEntryObject extends X509CRLEntry
     public X509CRLEntryObject(
         TBSCertList.CRLEntry c,
         boolean isIndirect,
-        X500Principal previousCertificateIssuer)
+        X500Name previousCertificateIssuer)
     {
         this.c = c;
         this.certificateIssuer = loadCertificateIssuer(isIndirect, previousCertificateIssuer);
@@ -82,7 +83,7 @@ public class X509CRLEntryObject extends X509CRLEntry
         return extns != null && !extns.isEmpty();
     }
 
-    private X500Principal loadCertificateIssuer(boolean isIndirect, X500Principal previousCertificateIssuer)
+    private X500Name loadCertificateIssuer(boolean isIndirect, X500Name previousCertificateIssuer)
     {
         if (!isIndirect)
         {
@@ -103,7 +104,7 @@ public class X509CRLEntryObject extends X509CRLEntry
             {
                 if (names[i].getTagNo() == GeneralName.directoryName)
                 {
-                    return new X500Principal(names[i].getName().toASN1Primitive().getEncoded(ASN1Encoding.DER));
+                    return X500Name.getInstance(names[i].getName());
                 }
             }
             return null;
@@ -116,7 +117,18 @@ public class X509CRLEntryObject extends X509CRLEntry
 
     public X500Principal getCertificateIssuer()
     {
-        return certificateIssuer;
+        if (certificateIssuer == null)
+        {
+            return null;
+        }
+        try
+        {
+            return new X500Principal(certificateIssuer.getEncoded());
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
     }
 
     private Set getExtensionOIDs(boolean critical)

@@ -276,13 +276,21 @@ public class X509CRLObject
         Set entrySet = new HashSet();
         Enumeration certs = c.getRevokedCertificateEnumeration();
 
-        X500Principal previousCertificateIssuer = getIssuerX500Principal();
+        X500Name previousCertificateIssuer = c.getIssuer();
         while (certs.hasMoreElements())
         {
             TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)certs.nextElement();
             X509CRLEntryObject crlEntry = new X509CRLEntryObject(entry, isIndirect, previousCertificateIssuer);
             entrySet.add(crlEntry);
-            previousCertificateIssuer = crlEntry.getCertificateIssuer();
+            if (isIndirect && entry.hasExtensions())
+            {
+                Extension currentCaName = entry.getExtensions().getExtension(Extension.certificateIssuer);
+
+                if (currentCaName != null)
+                {
+                    previousCertificateIssuer = X500Name.getInstance(GeneralNames.getInstance(currentCaName.getParsedValue()).getNames()[0].getName());
+                }
+            }
         }
 
         return entrySet;
@@ -292,18 +300,25 @@ public class X509CRLObject
     {
         Enumeration certs = c.getRevokedCertificateEnumeration();
 
-        X500Principal previousCertificateIssuer = getIssuerX500Principal();
+        X500Name previousCertificateIssuer = c.getIssuer();
         while (certs.hasMoreElements())
         {
             TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)certs.nextElement();
-            X509CRLEntryObject crlEntry = new X509CRLEntryObject(entry, isIndirect, previousCertificateIssuer);
 
             if (serialNumber.equals(entry.getUserCertificate().getValue()))
             {
-                return crlEntry;
+                return new X509CRLEntryObject(entry, isIndirect, previousCertificateIssuer);
             }
 
-            previousCertificateIssuer = crlEntry.getCertificateIssuer();
+            if (isIndirect && entry.hasExtensions())
+            {
+                Extension currentCaName = entry.getExtensions().getExtension(Extension.certificateIssuer);
+
+                if (currentCaName != null)
+                {
+                    previousCertificateIssuer = X500Name.getInstance(GeneralNames.getInstance(currentCaName.getParsedValue()).getNames()[0].getName());
+                }
+            }
         }
 
         return null;
