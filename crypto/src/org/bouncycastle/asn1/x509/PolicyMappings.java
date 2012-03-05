@@ -25,13 +25,27 @@ public class PolicyMappings
 {
     ASN1Sequence seq = null;
 
+    public static PolicyMappings getInstance(Object obj)
+    {
+        if (obj instanceof PolicyMappings)
+        {
+            return (PolicyMappings)obj;
+        }
+        if (obj != null)
+        {
+            return new PolicyMappings(ASN1Sequence.getInstance(obj));
+        }
+
+        return null;
+    }
+
     /**
      * Creates a new <code>PolicyMappings</code> instance.
      *
      * @param seq an <code>ASN1Sequence</code> constructed as specified
      *            in RFC 3280
      */
-    public PolicyMappings(ASN1Sequence seq)
+    private PolicyMappings(ASN1Sequence seq)
     {
         this.seq = seq;
     }

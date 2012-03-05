@@ -1655,7 +1655,7 @@ public class RFC3280CertPathUtilities
                 RFC3280CertPathUtilities.NAME_CONSTRAINTS));
             if (ncSeq != null)
             {
-                nc = new NameConstraints(ncSeq);
+                nc = NameConstraints.getInstance(ncSeq);
             }
         }
         catch (Exception e)

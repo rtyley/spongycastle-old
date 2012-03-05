@@ -29,10 +29,24 @@ public class IetfAttrSyntax
     Vector                  values          = new Vector();
     int                     valueChoice     = -1;
 
+    public static IetfAttrSyntax getInstance(Object obj)
+    {
+        if (obj instanceof IetfAttrSyntax)
+        {
+            return (IetfAttrSyntax)obj;
+        }
+        if (obj != null)
+        {
+            return new IetfAttrSyntax(ASN1Sequence.getInstance(obj));
+        }
+
+        return null;
+    }
+
     /**
      *  
      */
-    public IetfAttrSyntax(ASN1Sequence seq)
+    private IetfAttrSyntax(ASN1Sequence seq)
     {
         int i = 0;
 

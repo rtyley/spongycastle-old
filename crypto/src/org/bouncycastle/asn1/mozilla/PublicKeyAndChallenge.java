@@ -31,15 +31,15 @@ public class PublicKeyAndChallenge
         {
             return (PublicKeyAndChallenge)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new PublicKeyAndChallenge((ASN1Sequence)obj);
+            return new PublicKeyAndChallenge(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unkown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
-    public PublicKeyAndChallenge(ASN1Sequence seq)
+    private PublicKeyAndChallenge(ASN1Sequence seq)
     {
         pkacSeq = seq;
         spki = SubjectPublicKeyInfo.getInstance(seq.getObjectAt(0));

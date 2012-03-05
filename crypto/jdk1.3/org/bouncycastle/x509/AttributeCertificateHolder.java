@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.Principal;
-import org.bouncycastle.jce.cert.CertSelector;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateParsingException;
@@ -13,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -24,6 +23,7 @@ import org.bouncycastle.asn1.x509.IssuerSerial;
 import org.bouncycastle.asn1.x509.ObjectDigestInfo;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.cert.CertSelector;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Selector;
 
@@ -59,7 +59,7 @@ public class AttributeCertificateHolder
     {
         holder = new org.bouncycastle.asn1.x509.Holder(new IssuerSerial(
             new GeneralNames(new DERSequence(new GeneralName(issuerName))),
-            new DERInteger(serialNumber)));
+            new ASN1Integer(serialNumber)));
     }
 
     public AttributeCertificateHolder(X509Certificate cert)
@@ -77,7 +77,7 @@ public class AttributeCertificateHolder
         }
 
         holder = new Holder(new IssuerSerial(generateGeneralNames(name),
-            new DERInteger(cert.getSerialNumber())));
+            new ASN1Integer(cert.getSerialNumber())));
     }
 
     public AttributeCertificateHolder(X509Principal principal)
@@ -187,7 +187,7 @@ public class AttributeCertificateHolder
 
     private GeneralNames generateGeneralNames(X509Principal principal)
     {
-        return new GeneralNames(new DERSequence(new GeneralName(principal)));
+        return new GeneralNames(new GeneralName(principal));
     }
 
     private boolean matchesDN(X509Principal subject, GeneralNames targets)

@@ -36,17 +36,17 @@ public class SubjectDirectoryAttributes
     public static SubjectDirectoryAttributes getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof SubjectDirectoryAttributes)
+        if (obj instanceof SubjectDirectoryAttributes)
         {
             return (SubjectDirectoryAttributes)obj;
         }
 
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
-            return new SubjectDirectoryAttributes((ASN1Sequence)obj);
+            return new SubjectDirectoryAttributes(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
+        return null;
     }
 
     /**
@@ -70,7 +70,7 @@ public class SubjectDirectoryAttributes
      * @param seq
      *            The ASN.1 sequence.
      */
-    public SubjectDirectoryAttributes(ASN1Sequence seq)
+    private SubjectDirectoryAttributes(ASN1Sequence seq)
     {
         Enumeration e = seq.getObjects();
 

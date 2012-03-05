@@ -16,7 +16,21 @@ public class NameConstraints
 {
     private ASN1Sequence permitted, excluded;
 
-    public NameConstraints(ASN1Sequence seq)
+    public static NameConstraints getInstance(Object obj)
+    {
+        if (obj instanceof NameConstraints)
+        {
+            return (NameConstraints)obj;
+        }
+        if (obj != null)
+        {
+            return new NameConstraints(ASN1Sequence.getInstance(obj));
+        }
+
+        return null;
+    }
+
+    private NameConstraints(ASN1Sequence seq)
     {
         Enumeration e = seq.getObjects();
         while (e.hasMoreElements())

@@ -582,7 +582,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 
                 if (ncSeq != null)
                 {
-                    NameConstraints nc = new NameConstraints(ncSeq);
+                    NameConstraints nc = NameConstraints.getInstance(ncSeq);
 
                     //
                     // (g) (1) permitted subtrees

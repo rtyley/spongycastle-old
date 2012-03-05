@@ -20,21 +20,19 @@ public class TimeStampResp
 
     public static TimeStampResp getInstance(Object o)
     {
-        if (o == null || o instanceof TimeStampResp)
+        if (o instanceof TimeStampResp)
         {
             return (TimeStampResp) o;
         }
-        else if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new TimeStampResp((ASN1Sequence) o);
+            return new TimeStampResp(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'TimeStampResp' factory : "
-                        + o.getClass().getName() + ".");
+        return null;
     }
 
-    public TimeStampResp(ASN1Sequence seq)
+    private TimeStampResp(ASN1Sequence seq)
     {
 
         Enumeration e = seq.getObjects();

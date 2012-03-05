@@ -30,14 +30,19 @@ public class OtherRevVals
 
     public static OtherRevVals getInstance(Object obj)
     {
-        if (null == obj || obj instanceof OtherRevVals)
+        if (obj instanceof OtherRevVals)
         {
             return (OtherRevVals)obj;
         }
-        return new OtherRevVals((ASN1Sequence)obj);
+        if (obj != null)
+        {
+            return new OtherRevVals(ASN1Sequence.getInstance(obj));
+        }
+
+        return null;
     }
 
-    public OtherRevVals(ASN1Sequence seq)
+    private OtherRevVals(ASN1Sequence seq)
     {
         if (seq.size() != 2)
         {

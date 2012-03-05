@@ -30,21 +30,19 @@ public class TimeStampReq
 
     public static TimeStampReq getInstance(Object o)
     {
-        if (o == null || o instanceof TimeStampReq)
+        if (o instanceof TimeStampReq)
         {
             return (TimeStampReq) o;
         }
-        else if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new TimeStampReq((ASN1Sequence) o);
+            return new TimeStampReq(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException(
-                "Unknown object in 'TimeStampReq' factory : "
-                        + o.getClass().getName() + ".");
+        return null;
     }
 
-    public TimeStampReq(ASN1Sequence seq)
+    private TimeStampReq(ASN1Sequence seq)
     {
         int nbObjects = seq.size();
 
