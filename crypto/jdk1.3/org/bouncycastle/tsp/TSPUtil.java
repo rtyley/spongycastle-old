@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -328,6 +329,10 @@ public class TSPUtil
                 return MessageDigest.getInstance(digestName, provider.getName());
             }
             catch (NoSuchAlgorithmException e)
+            {
+                // Ignore
+            }
+            catch (NoSuchProviderException e)
             {
                 // Ignore
             }
