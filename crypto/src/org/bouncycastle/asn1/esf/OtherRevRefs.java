@@ -38,7 +38,7 @@ public class OtherRevRefs
             return new OtherRevRefs(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null value in getInstance");
+        return null;
     }
 
     private OtherRevRefs(ASN1Sequence seq)

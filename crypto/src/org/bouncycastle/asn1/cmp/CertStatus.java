@@ -49,12 +49,12 @@ public class CertStatus
             return (CertStatus)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new CertStatus((ASN1Sequence)o);
+            return new CertStatus(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public ASN1OctetString getCertHash()

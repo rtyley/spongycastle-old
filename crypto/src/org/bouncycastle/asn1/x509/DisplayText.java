@@ -129,11 +129,11 @@ public class DisplayText
 
    public static DisplayText getInstance(Object obj) 
    {
-      if (obj instanceof ASN1String)
+      if  (obj instanceof ASN1String)
       {
           return new DisplayText((ASN1String)obj);
       }
-      else if (obj instanceof DisplayText)
+      else if (obj == null || obj instanceof DisplayText)
       {
           return (DisplayText)obj;
       }

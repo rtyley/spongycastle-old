@@ -20,12 +20,16 @@ public class RC2CBCParameter
     public static RC2CBCParameter getInstance(
         Object  o)
     {
-        if (o instanceof ASN1Sequence)
+        if (o instanceof RC2CBCParameter)
         {
-            return new RC2CBCParameter((ASN1Sequence)o);
+            return (RC2CBCParameter)o;
+        }
+        if (o != null)
+        {
+            return new RC2CBCParameter(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("unknown object in RC2CBCParameter factory");
+        return null;
     }
 
     public RC2CBCParameter(
@@ -43,7 +47,7 @@ public class RC2CBCParameter
         this.iv = new DEROctetString(iv);
     }
 
-    public RC2CBCParameter(
+    private RC2CBCParameter(
         ASN1Sequence  seq)
     {
         if (seq.size() == 1)

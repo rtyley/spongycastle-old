@@ -122,12 +122,12 @@ public class NoticeReference
       {
           return (NoticeReference)as;
       }
-      else if (as instanceof ASN1Sequence)
+      else if (as != null)
       {
-          return new NoticeReference((ASN1Sequence)as);
+          return new NoticeReference(ASN1Sequence.getInstance(as));
       }
 
-      throw new IllegalArgumentException("unknown object in getInstance.");
+      return null;
    }
    
    public DisplayText getOrganization()

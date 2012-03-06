@@ -31,12 +31,12 @@ public class RevDetails
             return (RevDetails)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new RevDetails((ASN1Sequence)o);
+            return new RevDetails(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public RevDetails(CertTemplate certDetails)

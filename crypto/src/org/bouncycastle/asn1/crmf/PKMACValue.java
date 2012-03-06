@@ -33,12 +33,12 @@ public class PKMACValue
             return (PKMACValue)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new PKMACValue((ASN1Sequence)o);
+            return new PKMACValue(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public static PKMACValue getInstance(ASN1TaggedObject obj, boolean isExplicit)

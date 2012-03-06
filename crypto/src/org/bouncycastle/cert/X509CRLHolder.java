@@ -18,6 +18,8 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.Extensions;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.operator.ContentVerifier;
 import org.bouncycastle.operator.ContentVerifierProvider;
@@ -28,6 +30,7 @@ import org.bouncycastle.operator.ContentVerifierProvider;
 public class X509CRLHolder
 {
     private CertificateList x509CRL;
+    private boolean isIndirect;
     private Extensions extensions;
 
     private static CertificateList parseStream(InputStream stream)
@@ -45,6 +48,18 @@ public class X509CRLHolder
         {
             throw new CertIOException("malformed data: " + e.getMessage(), e);
         }
+    }
+
+    private static boolean isIndirectCRL(Extensions extensions)
+    {
+        if (extensions == null)
+        {
+            return false;
+        }
+
+        Extension ext = extensions.getExtension(Extension.issuingDistributionPoint);
+
+        return ext != null && IssuingDistributionPoint.getInstance(ext.getParsedValue()).isIndirectCRL();
     }
 
     /**
@@ -80,6 +95,7 @@ public class X509CRLHolder
     {
         this.x509CRL = x509CRL;
         this.extensions = x509CRL.getTBSCertList().getExtensions();
+        this.isIndirect = isIndirectCRL(extensions);
     }
 
     /**
@@ -106,13 +122,24 @@ public class X509CRLHolder
 
     public X509CRLEntryHolder getRevokedCertificate(BigInteger serialNumber)
     {
+        X500Name currentCA = this.getIssuer();
         for (Enumeration en = x509CRL.getRevokedCertificateEnumeration(); en.hasMoreElements();)
         {
             TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)en.nextElement();
 
             if (entry.getUserCertificate().getValue().equals(serialNumber))
             {
-                return new X509CRLEntryHolder(entry);
+                return new X509CRLEntryHolder(entry, isIndirect, currentCA);
+            }
+
+            if (isIndirect && entry.hasExtensions())
+            {
+                Extension currentCaName = entry.getExtensions().getExtension(Extension.certificateIssuer);
+
+                if (currentCaName != null)
+                {
+                    currentCA = X500Name.getInstance(GeneralNames.getInstance(currentCaName.getParsedValue()).getNames()[0].getName());
+                }
             }
         }
 
@@ -129,12 +156,16 @@ public class X509CRLHolder
     {
         TBSCertList.CRLEntry[] entries = x509CRL.getRevokedCertificates();
         List l = new ArrayList(entries.length);
+        X500Name currentCA = this.getIssuer();
 
         for (Enumeration en = x509CRL.getRevokedCertificateEnumeration(); en.hasMoreElements();)
         {
             TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)en.nextElement();
+            X509CRLEntryHolder crlEntry = new X509CRLEntryHolder(entry, isIndirect, currentCA);
 
-            l.add(new X509CRLEntryHolder(entry));
+            l.add(crlEntry);
+
+            currentCA = crlEntry.getCertificateIssuer();
         }
 
         return l;

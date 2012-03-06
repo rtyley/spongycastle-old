@@ -32,15 +32,15 @@ public class PKIStatusInfo
         {
             return (PKIStatusInfo)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new PKIStatusInfo((ASN1Sequence)obj);
+            return new PKIStatusInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
-    public PKIStatusInfo(
+    private PKIStatusInfo(
         ASN1Sequence seq)
     {
         this.status = ASN1Integer.getInstance(seq.getObjectAt(0));
@@ -70,28 +70,16 @@ public class PKIStatusInfo
     /**
      * @param status
      */
-    public PKIStatusInfo(int status)
-    {
-        this.status = new ASN1Integer(status);
-    }
-
     public PKIStatusInfo(PKIStatus status)
     {
         this.status = ASN1Integer.getInstance(status.toASN1Primitive());
     }
 
     /**
+     *
      * @param status
      * @param statusString
      */
-    public PKIStatusInfo(
-        int         status,
-        PKIFreeText statusString)
-    {
-        this.status = new ASN1Integer(status);
-        this.statusString = statusString;
-    }
-
     public PKIStatusInfo(
         PKIStatus   status,
         PKIFreeText statusString)
@@ -101,11 +89,11 @@ public class PKIStatusInfo
     }
 
     public PKIStatusInfo(
-            int            status,
-            PKIFreeText    statusString,
-            PKIFailureInfo failInfo)
+        PKIStatus      status,
+        PKIFreeText    statusString,
+        PKIFailureInfo failInfo)
     {
-        this.status = new ASN1Integer(status);
+        this.status = ASN1Integer.getInstance(status.toASN1Primitive());;
         this.statusString = statusString;
         this.failInfo = failInfo;
     }

@@ -20,7 +20,7 @@ public class DirectoryString
 
     public static DirectoryString getInstance(Object o)
     {
-        if (o instanceof DirectoryString)
+        if (o == null || o instanceof DirectoryString)
         {
             return (DirectoryString)o;
         }

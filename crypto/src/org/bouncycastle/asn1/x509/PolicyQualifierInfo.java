@@ -73,18 +73,18 @@ public class PolicyQualifierInfo
    }
 
    public static PolicyQualifierInfo getInstance(
-       Object as) 
+       Object obj)
    {
-        if (as instanceof PolicyQualifierInfo)
+        if (obj instanceof PolicyQualifierInfo)
         {
-            return (PolicyQualifierInfo)as;
+            return (PolicyQualifierInfo)obj;
         }
-        else if (as instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new PolicyQualifierInfo((ASN1Sequence)as);
+            return new PolicyQualifierInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in getInstance.");
+        return null;
    }
 
 

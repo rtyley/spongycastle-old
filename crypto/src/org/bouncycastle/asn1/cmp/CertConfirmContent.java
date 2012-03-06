@@ -21,12 +21,12 @@ public class CertConfirmContent
             return (CertConfirmContent)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new CertConfirmContent((ASN1Sequence)o);
+            return new CertConfirmContent(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public CertStatus[] toCertStatusArray()

@@ -32,7 +32,7 @@ public class OcspResponsesID
             return new OcspResponsesID(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null value in getInstance");
+        return null;
     }
 
     private OcspResponsesID(ASN1Sequence seq)

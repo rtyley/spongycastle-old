@@ -23,12 +23,12 @@ public class GenRepContent
             return (GenRepContent)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new GenRepContent((ASN1Sequence)o);
+            return new GenRepContent(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public GenRepContent(InfoTypeAndValue itv)

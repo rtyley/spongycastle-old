@@ -18,7 +18,7 @@ public class AttCertIssuer
     public static AttCertIssuer getInstance(
         Object  obj)
     {
-        if (obj instanceof AttCertIssuer)
+        if (obj == null || obj instanceof AttCertIssuer)
         {
             return (AttCertIssuer)obj;
         }

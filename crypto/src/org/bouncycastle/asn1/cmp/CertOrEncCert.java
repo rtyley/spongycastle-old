@@ -42,7 +42,7 @@ public class CertOrEncCert
             return new CertOrEncCert((ASN1TaggedObject)o);
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public CertOrEncCert(CMPCertificate certificate)

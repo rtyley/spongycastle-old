@@ -2673,6 +2673,18 @@ public class CertTest
 
         X509CRLHolder cRLHolder = builder.build(contentSignerBuilder.build(privateKey));
 
+        if (!cRLHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(certificate)))
+        {
+            fail("CRL signature not valid");
+        }
+
+        X509CRLEntryHolder cRLEntryHolder = cRLHolder.getRevokedCertificate(certificate.getSerialNumber());
+
+        if (!cRLEntryHolder.getCertificateIssuer().equals(cRLHolder.getIssuer()))
+        {
+            fail("certificate issuer incorrect");
+        }
+
         JcaX509CRLConverter converter = new JcaX509CRLConverter();
 
         converter.setProvider("BC");
@@ -2732,6 +2744,18 @@ public class CertTest
 
         X509CRLHolder cRLHolder = builder.build(contentSignerBuilder.build(privateKey));
 
+        if (!cRLHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(certificate)))
+        {
+            fail("CRL signature not valid");
+        }
+
+        X509CRLEntryHolder cRLEntryHolder = cRLHolder.getRevokedCertificate(certificate.getSerialNumber());
+
+        if (!cRLEntryHolder.getCertificateIssuer().equals(X500Name.getInstance(certificate.getIssuerX500Principal().getEncoded())))
+        {
+            fail("certificate issuer incorrect");
+        }
+
         JcaX509CRLConverter converter = new JcaX509CRLConverter();
 
         converter.setProvider("BC");
@@ -2789,6 +2813,18 @@ public class CertTest
         contentSignerBuilder.setProvider("BC");
 
         X509CRLHolder cRLHolder = builder.build(contentSignerBuilder.build(privateKey));
+
+        if (!cRLHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(certificate)))
+        {
+            fail("CRL signature not valid");
+        }
+
+        X509CRLEntryHolder cRLEntryHolder = cRLHolder.getRevokedCertificate(certificate.getSerialNumber());
+
+        if (!cRLEntryHolder.getCertificateIssuer().equals(cRLHolder.getIssuer()))
+        {
+            fail("certificate issuer incorrect");
+        }
 
         JcaX509CRLConverter converter = new JcaX509CRLConverter();
 

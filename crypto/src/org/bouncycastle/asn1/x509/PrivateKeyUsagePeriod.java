@@ -28,17 +28,12 @@ public class PrivateKeyUsagePeriod
             return (PrivateKeyUsagePeriod)obj;
         }
 
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
-            return new PrivateKeyUsagePeriod((ASN1Sequence)obj);
+            return new PrivateKeyUsagePeriod(ASN1Sequence.getInstance(obj));
         }
 
-        if (obj instanceof X509Extension)
-        {
-            return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
-        }
-
-        throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
+        return null;
     }
 
     private DERGeneralizedTime _notBefore, _notAfter;

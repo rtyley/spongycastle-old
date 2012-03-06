@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.crmf;
 
+import java.math.BigInteger;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
@@ -28,17 +30,28 @@ public class CertId
             return (CertId)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new CertId((ASN1Sequence)o);
+            return new CertId(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public static CertId getInstance(ASN1TaggedObject obj, boolean isExplicit)
     {
         return getInstance(ASN1Sequence.getInstance(obj, isExplicit));
+    }
+
+    public CertId(GeneralName issuer, BigInteger serialNumber)
+    {
+        this(issuer, new ASN1Integer(serialNumber));
+    }
+
+    public CertId(GeneralName issuer, ASN1Integer serialNumber)
+    {
+        this.issuer = issuer;
+        this.serialNumber = serialNumber;
     }
 
     public GeneralName getIssuer()

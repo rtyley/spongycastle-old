@@ -29,7 +29,7 @@ public class CompleteRevocationRefs
             return new CompleteRevocationRefs(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null value in getInstance");
+        return null;
     }
 
     private CompleteRevocationRefs(ASN1Sequence seq)

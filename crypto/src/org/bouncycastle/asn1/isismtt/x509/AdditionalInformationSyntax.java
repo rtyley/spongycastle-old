@@ -2,7 +2,6 @@ package org.bouncycastle.asn1.isismtt.x509;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.x500.DirectoryString;
 
 /**
@@ -25,12 +24,12 @@ public class AdditionalInformationSyntax
             return (AdditionalInformationSyntax)obj;
         }
 
-        if (obj instanceof ASN1String)
+        if (obj != null)
         {
             return new AdditionalInformationSyntax(DirectoryString.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
+        return null;
     }
 
     private AdditionalInformationSyntax(DirectoryString information)

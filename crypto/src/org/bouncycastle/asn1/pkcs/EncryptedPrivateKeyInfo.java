@@ -41,12 +41,12 @@ public class EncryptedPrivateKeyInfo
         {
             return (EncryptedPrivateKeyInfo)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         { 
-            return new EncryptedPrivateKeyInfo((ASN1Sequence)obj);
+            return new EncryptedPrivateKeyInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
     
     public AlgorithmIdentifier getEncryptionAlgorithm()

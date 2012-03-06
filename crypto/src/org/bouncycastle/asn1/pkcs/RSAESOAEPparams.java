@@ -30,12 +30,12 @@ public class RSAESOAEPparams
         {
             return (RSAESOAEPparams)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new RSAESOAEPparams((ASN1Sequence)obj);
+            return new RSAESOAEPparams(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
     
     /**

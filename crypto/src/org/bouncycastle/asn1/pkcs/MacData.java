@@ -28,15 +28,15 @@ public class MacData
         {
             return (MacData)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new MacData((ASN1Sequence)obj);
+            return new MacData(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
-    public MacData(
+    private MacData(
         ASN1Sequence seq)
     {
         this.digInfo = DigestInfo.getInstance(seq.getObjectAt(0));

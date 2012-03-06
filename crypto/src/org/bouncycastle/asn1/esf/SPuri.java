@@ -16,12 +16,10 @@ public class SPuri
         }
         else if (obj instanceof DERIA5String)
         {
-            return new SPuri((DERIA5String) obj);
+            return new SPuri(DERIA5String.getInstance(obj));
         }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'SPuri' factory: "
-                        + obj.getClass().getName() + ".");
+        return null;
     }
 
     public SPuri(

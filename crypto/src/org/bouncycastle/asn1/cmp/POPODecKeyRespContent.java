@@ -22,12 +22,12 @@ public class POPODecKeyRespContent
             return (POPODecKeyRespContent)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new POPODecKeyRespContent((ASN1Sequence)o);
+            return new POPODecKeyRespContent(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public ASN1Integer[] toASN1IntegerArray()

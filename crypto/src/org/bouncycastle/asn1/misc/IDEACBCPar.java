@@ -20,12 +20,12 @@ public class IDEACBCPar
         {
             return (IDEACBCPar)o;
         }
-        else if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new IDEACBCPar((ASN1Sequence)o);
+            return new IDEACBCPar(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("unknown object in IDEACBCPar factory");
+        return null;
     }
 
     public IDEACBCPar(

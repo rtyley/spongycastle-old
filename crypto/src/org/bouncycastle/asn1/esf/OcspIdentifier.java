@@ -33,7 +33,7 @@ public class OcspIdentifier
             return new OcspIdentifier(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null value in getInstance");
+        return null;
     }
 
     private OcspIdentifier(ASN1Sequence seq)

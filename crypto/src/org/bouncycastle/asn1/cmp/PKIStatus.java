@@ -44,12 +44,12 @@ public class PKIStatus
             return (PKIStatus)o;
         }
 
-        if (o instanceof ASN1Integer)
+        if (o != null)
         {
-            return new PKIStatus((ASN1Integer)o);
+            return new PKIStatus(ASN1Integer.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public BigInteger getValue()

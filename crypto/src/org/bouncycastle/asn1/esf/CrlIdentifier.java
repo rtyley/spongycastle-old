@@ -39,7 +39,7 @@ public class CrlIdentifier
             return new CrlIdentifier(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null value in getInstance");
+        return null;
     }
 
     private CrlIdentifier(ASN1Sequence seq)

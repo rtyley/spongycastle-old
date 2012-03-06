@@ -104,7 +104,7 @@ public class TimeStampResponseGenerator
         
         if (statusStrings.size() > 0)
         {
-            v.add(new PKIFreeText(new DERSequence(statusStrings)));
+            v.add(PKIFreeText.getInstance(new DERSequence(statusStrings)));
         }
 
         if (failInfo != 0)
@@ -113,7 +113,7 @@ public class TimeStampResponseGenerator
             v.add(failInfoBitString);
         }
 
-        return new PKIStatusInfo(new DERSequence(v));
+        return PKIStatusInfo.getInstance(new DERSequence(v));
     }
 
     /**

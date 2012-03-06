@@ -46,7 +46,7 @@ public class PKIBody
 
     public static PKIBody getInstance(Object o)
     {
-        if (o instanceof PKIBody)
+        if (o == null || o instanceof PKIBody)
         {
             return (PKIBody)o;
         }

@@ -49,9 +49,23 @@ public class POPOPrivKey
         }
     }
 
-    public static POPOPrivKey getInstance(ASN1TaggedObject tagged, boolean isExplicit)
+    public static POPOPrivKey getInstance(Object obj)
     {
-        return new POPOPrivKey(ASN1TaggedObject.getInstance(tagged.getObject()));
+        if (obj instanceof POPOPrivKey)
+        {
+            return (POPOPrivKey)obj;
+        }
+        if (obj != null)
+        {
+            return new POPOPrivKey(ASN1TaggedObject.getInstance(obj));
+        }
+
+        return null;
+    }
+
+    public static POPOPrivKey getInstance(ASN1TaggedObject obj, boolean explicit)
+    {
+        return getInstance(ASN1TaggedObject.getInstance(obj, explicit));
     }
 
     public POPOPrivKey(SubsequentMessage msg)

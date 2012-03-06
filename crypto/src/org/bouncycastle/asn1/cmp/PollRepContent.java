@@ -32,12 +32,12 @@ public class PollRepContent
             return (PollRepContent)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new PollRepContent((ASN1Sequence)o);
+            return new PollRepContent(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public ASN1Integer getCertReqId()

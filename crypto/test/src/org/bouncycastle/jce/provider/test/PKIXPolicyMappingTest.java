@@ -28,6 +28,7 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.CertificatePolicies;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.PolicyMappings;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -75,7 +76,7 @@ public class PKIXPolicyMappingTest
         PublicKey           pubKey,
         PrivateKey          caPrivKey,
         PublicKey           caPubKey,
-        ASN1EncodableVector policies,
+        CertificatePolicies policies,
         Hashtable           policyMap)
         throws Exception
     {
@@ -89,7 +90,7 @@ public class PKIXPolicyMappingTest
         v3CertGen.setSubjectDN(new X509Principal(subject));
         v3CertGen.setPublicKey(pubKey);
         v3CertGen.setSignatureAlgorithm("SHA1WithRSAEncryption");
-        v3CertGen.addExtension(X509Extensions.CertificatePolicies, true, new DERSequence(policies));
+        v3CertGen.addExtension(X509Extensions.CertificatePolicies, true, policies);
         v3CertGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true));
         v3CertGen.addExtension(X509Extensions.PolicyMappings, true, new PolicyMappings(policyMap));
         X509Certificate cert = v3CertGen.generate(caPrivKey);
@@ -262,7 +263,7 @@ public class PKIXPolicyMappingTest
         PublicKey           pubKey     = fact.generatePublic(pubKeySpec);
         
         X509Certificate     trustCert       = createTrustCert(caPubKey, caPrivKey);
-        ASN1EncodableVector intPolicies     = null;
+        CertificatePolicies intPolicies     = null;
         Hashtable           map             = null;
         ASN1EncodableVector policies        = null;
         Set                 requirePolicies = null;
@@ -272,8 +273,7 @@ public class PKIXPolicyMappingTest
         /**
          * valid test_00
          */
-        intPolicies = new ASN1EncodableVector();
-        intPolicies.add(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
+        intPolicies = new CertificatePolicies(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
         map.put("2.16.840.1.101.3.2.1.48.1","2.16.840.1.101.3.2.1.48.2");
         intCert = createIntmedCert(intPubKey, caPrivKey, caPubKey, intPolicies, map);
@@ -289,8 +289,7 @@ public class PKIXPolicyMappingTest
         /**
          * test_01
          */
-        intPolicies = new ASN1EncodableVector();
-        intPolicies.add(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
+        intPolicies = new CertificatePolicies(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
         map.put("2.16.840.1.101.3.2.1.48.1","2.16.840.1.101.3.2.1.48.2");
         intCert = createIntmedCert(intPubKey, caPrivKey, caPubKey, intPolicies, map);
@@ -307,8 +306,7 @@ public class PKIXPolicyMappingTest
         /**
          * test_02
          */
-        intPolicies = new ASN1EncodableVector();
-        intPolicies.add(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
+        intPolicies = new CertificatePolicies(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
         map.put("2.16.840.1.101.3.2.1.48.1","2.16.840.1.101.3.2.1.48.2");
         intCert = createIntmedCert(intPubKey, caPrivKey, caPubKey, intPolicies, map);
@@ -325,9 +323,10 @@ public class PKIXPolicyMappingTest
         /**
          * test_03
          */
-        intPolicies = new ASN1EncodableVector();
-        intPolicies.add(new PolicyInformation(new ASN1ObjectIdentifier("2.16.840.1.101.3.2.1.48.3")));
-        intPolicies.add(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
+        intPolicies = new CertificatePolicies(new PolicyInformation[]
+            { new PolicyInformation(new ASN1ObjectIdentifier("2.16.840.1.101.3.2.1.48.3")),
+              new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")) });
+
         map = new Hashtable();
         map.put("2.16.840.1.101.3.2.1.48.1","2.16.840.1.101.3.2.1.48.2");
         intCert = createIntmedCert(intPubKey, caPrivKey, caPubKey, intPolicies, map);
@@ -344,11 +343,11 @@ public class PKIXPolicyMappingTest
         /**
          * test_04
          */
-        intPolicies = new ASN1EncodableVector();
-        intPolicies.add(new PolicyInformation(new ASN1ObjectIdentifier("2.16.840.1.101.3.2.1.48.3")));
-        intPolicies.add(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
+        intPolicies = new CertificatePolicies(new PolicyInformation[]
+            { new PolicyInformation(new ASN1ObjectIdentifier("2.16.840.1.101.3.2.1.48.3")),
+              new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")) } );
         map = new Hashtable();
-        map.put("2.16.840.1.101.3.2.1.48.1","2.16.840.1.101.3.2.1.48.2");
+        map.put("2.16.840.1.101.3.2.1.48.1", "2.16.840.1.101.3.2.1.48.2");
         intCert = createIntmedCert(intPubKey, caPrivKey, caPubKey, intPolicies, map);
         
         policies   = new ASN1EncodableVector();
@@ -363,10 +362,9 @@ public class PKIXPolicyMappingTest
         /**
          * test_05
          */
-        intPolicies = new ASN1EncodableVector();
-        intPolicies.add(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
+        intPolicies = new CertificatePolicies(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
-        map.put("2.16.840.1.101.3.2.1.48.1","2.16.840.1.101.3.2.1.48.2");
+        map.put("2.16.840.1.101.3.2.1.48.1", "2.16.840.1.101.3.2.1.48.2");
         intCert = createIntmedCert(intPubKey, caPrivKey, caPubKey, intPolicies, map);
         
         policies   = new ASN1EncodableVector();
@@ -381,10 +379,9 @@ public class PKIXPolicyMappingTest
         /**
          * test_06
          */
-        intPolicies = new ASN1EncodableVector();
-        intPolicies.add(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
+        intPolicies = new CertificatePolicies(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
-        map.put("2.16.840.1.101.3.2.1.48.1","2.16.840.1.101.3.2.1.48.2");
+        map.put("2.16.840.1.101.3.2.1.48.1", "2.16.840.1.101.3.2.1.48.2");
         intCert = createIntmedCert(intPubKey, caPrivKey, caPubKey, intPolicies, map);
         
         policies   = new ASN1EncodableVector();
@@ -399,10 +396,9 @@ public class PKIXPolicyMappingTest
         /**
          * test_07
          */
-        intPolicies = new ASN1EncodableVector();
-        intPolicies.add(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
+        intPolicies = new CertificatePolicies(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
-        map.put("2.16.840.1.101.3.2.1.48.1","2.16.840.1.101.3.2.1.48.2");
+        map.put("2.16.840.1.101.3.2.1.48.1", "2.16.840.1.101.3.2.1.48.2");
         intCert = createIntmedCert(intPubKey, caPrivKey, caPubKey, intPolicies, map);
         
         policies   = new ASN1EncodableVector();
@@ -417,10 +413,9 @@ public class PKIXPolicyMappingTest
         /**
          * test_08
          */
-        intPolicies = new ASN1EncodableVector();
-        intPolicies.add(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
+        intPolicies = new CertificatePolicies(new PolicyInformation(new ASN1ObjectIdentifier("2.5.29.32.0")));
         map = new Hashtable();
-        map.put("2.16.840.1.101.3.2.1.48.1","2.16.840.1.101.3.2.1.48.2");
+        map.put("2.16.840.1.101.3.2.1.48.1", "2.16.840.1.101.3.2.1.48.2");
         intCert = createIntmedCert(intPubKey, caPrivKey, caPubKey, intPolicies, map);
         
         policies   = new ASN1EncodableVector();

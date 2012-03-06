@@ -31,12 +31,12 @@ public class SinglePubInfo
             return (SinglePubInfo)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new SinglePubInfo((ASN1Sequence)o);
+            return new SinglePubInfo(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public GeneralName getPubLocation()

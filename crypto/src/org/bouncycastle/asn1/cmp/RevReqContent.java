@@ -23,12 +23,12 @@ public class RevReqContent
             return (RevReqContent)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new RevReqContent((ASN1Sequence)o);
+            return new RevReqContent(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public RevReqContent(RevDetails revDetails)

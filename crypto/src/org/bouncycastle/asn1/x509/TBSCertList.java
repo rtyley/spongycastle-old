@@ -158,12 +158,12 @@ public class TBSCertList
         {
             return (TBSCertList)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new TBSCertList((ASN1Sequence)obj);
+            return new TBSCertList(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public TBSCertList(

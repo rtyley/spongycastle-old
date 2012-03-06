@@ -36,7 +36,7 @@ public class CMPCertificate
 
     public static CMPCertificate getInstance(Object o)
     {
-        if (o instanceof CMPCertificate)
+        if (o == null || o instanceof CMPCertificate)
         {
             return (CMPCertificate)o;
         }

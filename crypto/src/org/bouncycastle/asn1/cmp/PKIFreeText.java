@@ -29,15 +29,15 @@ public class PKIFreeText
         {
             return (PKIFreeText)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
             return new PKIFreeText((ASN1Sequence)obj);
         }
 
-        throw new IllegalArgumentException("Unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
-    public PKIFreeText(
+    private PKIFreeText(
         ASN1Sequence seq)
     {
         Enumeration e = seq.getObjects();
@@ -59,13 +59,15 @@ public class PKIFreeText
     }
 
     public PKIFreeText(
+        String p)
+    {
+        this(new DERUTF8String(p));
+    }
+
+    public PKIFreeText(
         DERUTF8String[] strs)
     {
-        ASN1EncodableVector v = new ASN1EncodableVector();
-        for (int i = 0; i < strs.length; i++) {
-            v.add(strs[i]);
-        }
-        strings = new DERSequence(v);
+        strings = new DERSequence(strs);
     }
 
     public PKIFreeText(

@@ -37,7 +37,7 @@ public class CrlOcspRef
             return new CrlOcspRef(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null value in getInstance");
+        return null;
     }
 
     private CrlOcspRef(ASN1Sequence seq)

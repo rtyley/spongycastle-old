@@ -47,12 +47,12 @@ public class POPOSigningKeyInput
             return (POPOSigningKeyInput)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new POPOSigningKeyInput((ASN1Sequence)o);
+            return new POPOSigningKeyInput(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     /**

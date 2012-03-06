@@ -39,12 +39,12 @@ public class DigestInfo
         {
             return (DigestInfo)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new DigestInfo((ASN1Sequence)obj);
+            return new DigestInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public DigestInfo(

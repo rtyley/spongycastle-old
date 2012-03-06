@@ -27,12 +27,12 @@ public class PBKDF2Params
             return (PBKDF2Params)obj;
         }
 
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
-            return new PBKDF2Params((ASN1Sequence)obj);
+            return new PBKDF2Params(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
     
     public PBKDF2Params(
@@ -53,7 +53,7 @@ public class PBKDF2Params
         this.keyLength = new ASN1Integer(keyLength);
     }
 
-    public PBKDF2Params(
+    private PBKDF2Params(
         ASN1Sequence  seq)
     {
         Enumeration e = seq.getObjects();

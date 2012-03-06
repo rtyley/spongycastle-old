@@ -30,7 +30,7 @@ public class OcspListID
             return new OcspListID(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null value in getInstance");
+        return null;
     }
 
     private OcspListID(ASN1Sequence seq)

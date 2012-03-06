@@ -25,12 +25,12 @@ public class ProtectedPart
             return (ProtectedPart)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new ProtectedPart((ASN1Sequence)o);
+            return new ProtectedPart(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public ProtectedPart(PKIHeader header, PKIBody body)

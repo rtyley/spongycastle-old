@@ -23,12 +23,12 @@ public class PKIMessages
             return (PKIMessages)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new PKIMessages((ASN1Sequence)o);
+            return new PKIMessages(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public PKIMessages(PKIMessage msg)

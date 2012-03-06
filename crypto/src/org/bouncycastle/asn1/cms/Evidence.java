@@ -27,7 +27,7 @@ public class Evidence
 
     public static Evidence getInstance(Object obj)
     {
-        if (obj instanceof Evidence)
+        if (obj == null || obj instanceof Evidence)
         {
             return (Evidence)obj;
         }

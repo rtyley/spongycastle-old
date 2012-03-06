@@ -17,7 +17,7 @@ public class PKIConfirmContent
 
     public static PKIConfirmContent getInstance(Object o)
     {
-        if (o instanceof PKIConfirmContent)
+        if (o == null || o instanceof PKIConfirmContent)
         {
             return (PKIConfirmContent)o;
         }

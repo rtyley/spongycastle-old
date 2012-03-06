@@ -26,13 +26,12 @@ public class IssuerAndSerialNumber
         {
             return (IssuerAndSerialNumber)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new IssuerAndSerialNumber((ASN1Sequence)obj);
+            return new IssuerAndSerialNumber(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException(
-            "Illegal object in IssuerAndSerialNumber: " + obj.getClass().getName());
+        return null;
     }
 
     public IssuerAndSerialNumber(

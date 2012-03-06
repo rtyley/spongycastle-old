@@ -30,7 +30,7 @@ public class CrlListID
             return new CrlListID(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null value in getInstance");
+        return null;
     }
 
     private CrlListID(ASN1Sequence seq)

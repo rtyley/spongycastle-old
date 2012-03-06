@@ -21,7 +21,7 @@ public class PKIArchiveOptions
 
     public static PKIArchiveOptions getInstance(Object o)
     {
-        if (o instanceof PKIArchiveOptions)
+        if (o == null || o instanceof PKIArchiveOptions)
         {
             return (PKIArchiveOptions)o;
         }

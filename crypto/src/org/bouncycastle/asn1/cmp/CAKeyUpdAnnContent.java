@@ -27,12 +27,19 @@ public class CAKeyUpdAnnContent
             return (CAKeyUpdAnnContent)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new CAKeyUpdAnnContent((ASN1Sequence)o);
+            return new CAKeyUpdAnnContent(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
+    }
+
+    public CAKeyUpdAnnContent(CMPCertificate oldWithNew, CMPCertificate newWithOld, CMPCertificate newWithNew)
+    {
+        this.oldWithNew = oldWithNew;
+        this.newWithOld = newWithOld;
+        this.newWithNew = newWithNew;
     }
 
     public CMPCertificate getOldWithNew()

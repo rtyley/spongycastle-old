@@ -44,7 +44,7 @@ public class Target
      */
     public static Target getInstance(Object obj)
     {
-        if (obj instanceof Target)
+        if (obj == null || obj instanceof Target)
         {
             return (Target) obj;
         }

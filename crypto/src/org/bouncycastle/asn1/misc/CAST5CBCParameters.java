@@ -22,12 +22,12 @@ public class CAST5CBCParameters
         {
             return (CAST5CBCParameters)o;
         }
-        else if (o instanceof ASN1Sequence)
+        else if (o != null)
         {
-            return new CAST5CBCParameters((ASN1Sequence)o);
+            return new CAST5CBCParameters(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("unknown object in CAST5CBCParameter factory");
+        return null;
     }
 
     public CAST5CBCParameters(

@@ -13,7 +13,7 @@ public class PolicyInformation
     private ASN1ObjectIdentifier   policyIdentifier;
     private ASN1Sequence          policyQualifiers;
 
-    public PolicyInformation(
+    private PolicyInformation(
         ASN1Sequence seq)
     {
         if (seq.size() < 1 || seq.size() > 2)

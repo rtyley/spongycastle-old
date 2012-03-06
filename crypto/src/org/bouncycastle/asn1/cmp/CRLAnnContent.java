@@ -3,6 +3,7 @@ package org.bouncycastle.asn1.cmp;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.CertificateList;
 
 public class CRLAnnContent
@@ -22,15 +23,20 @@ public class CRLAnnContent
             return (CRLAnnContent)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new CRLAnnContent((ASN1Sequence)o);
+            return new CRLAnnContent(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
-    public CertificateList[] toCertificateListArray()
+    public CRLAnnContent(CertificateList crl)
+    {
+        this.content = new DERSequence(crl);
+    }
+
+    public CertificateList[] getCertificateLists()
     {
         CertificateList[] result = new CertificateList[content.size()];
 

@@ -45,12 +45,12 @@ public class ErrorMsgContent
             return (ErrorMsgContent)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new ErrorMsgContent((ASN1Sequence)o);
+            return new ErrorMsgContent(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public ErrorMsgContent(PKIStatusInfo pkiStatusInfo)

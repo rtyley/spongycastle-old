@@ -36,12 +36,12 @@ public class Challenge
             return (Challenge)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new Challenge((ASN1Sequence)o);
+            return new Challenge(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public AlgorithmIdentifier getOwf()

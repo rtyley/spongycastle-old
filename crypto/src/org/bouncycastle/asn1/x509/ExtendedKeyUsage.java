@@ -39,17 +39,12 @@ public class ExtendedKeyUsage
             return (ExtendedKeyUsage)obj;
         }
         
-        if(obj instanceof ASN1Sequence) 
+        if (obj != null)
         {
-            return new ExtendedKeyUsage((ASN1Sequence)obj);
+            return new ExtendedKeyUsage(ASN1Sequence.getInstance(obj));
         }
 
-        if (obj instanceof X509Extension)
-        {
-            return getInstance(X509Extension.convertValueToObject((X509Extension)obj));
-        }
-
-        throw new IllegalArgumentException("Invalid ExtendedKeyUsage: " + obj.getClass().getName());
+        return null;
     }
 
     public ExtendedKeyUsage(

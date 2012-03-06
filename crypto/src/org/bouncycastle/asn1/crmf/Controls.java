@@ -23,12 +23,12 @@ public class Controls
             return (Controls)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new Controls((ASN1Sequence)o);
+            return new Controls(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public Controls(AttributeTypeAndValue atv)

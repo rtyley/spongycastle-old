@@ -53,6 +53,7 @@ import org.bouncycastle.asn1.isismtt.ISISMTTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLReason;
+import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -983,6 +984,18 @@ public class CertPathValidatorUtilities
 
         if (isIndirect)
         {
+            if (!(crl instanceof X509CRLObject))
+            {
+                try
+                {
+                    crl = new X509CRLObject(CertificateList.getInstance(crl.getEncoded()));
+                }
+                catch (CRLException exception)
+                {
+                    throw new AnnotatedException("Failed to recode indirect CRL.", exception);
+                }
+            }
+
             crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
 
             if (crl_entry == null)
@@ -990,7 +1003,7 @@ public class CertPathValidatorUtilities
                 return;
             }
 
-            X500Principal certIssuer = crl_entry.getCertificateIssuer();
+            X500Principal certIssuer = ((X509CRLEntryObject)crl_entry).getCertificateIssuer();
 
             if (certIssuer == null)
             {

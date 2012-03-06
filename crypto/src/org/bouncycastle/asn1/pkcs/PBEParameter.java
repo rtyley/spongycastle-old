@@ -29,7 +29,7 @@ public class PBEParameter
         this.iterations = new ASN1Integer(iterations);
     }
 
-    public PBEParameter(
+    private PBEParameter(
         ASN1Sequence  seq)
     {
         salt = (ASN1OctetString)seq.getObjectAt(0);
@@ -43,12 +43,12 @@ public class PBEParameter
         {
             return (PBEParameter)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new PBEParameter((ASN1Sequence)obj);
+            return new PBEParameter(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public BigInteger getIterationCount()

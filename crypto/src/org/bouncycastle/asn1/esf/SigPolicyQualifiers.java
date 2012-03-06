@@ -20,12 +20,10 @@ public class SigPolicyQualifiers
         }
         else if (obj instanceof ASN1Sequence)
         {
-            return new SigPolicyQualifiers((ASN1Sequence) obj);
+            return new SigPolicyQualifiers(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'SigPolicyQualifiers' factory: "
-                        + obj.getClass().getName() + ".");
+        return null;
     }
 
     public SigPolicyQualifiers(

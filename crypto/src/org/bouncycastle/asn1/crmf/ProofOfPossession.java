@@ -42,7 +42,7 @@ public class ProofOfPossession
 
     public static ProofOfPossession getInstance(Object o)
     {
-        if (o instanceof ProofOfPossession)
+        if (o == null || o instanceof ProofOfPossession)
         {
             return (ProofOfPossession)o;
         }

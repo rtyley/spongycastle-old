@@ -43,12 +43,12 @@ public class POPOSigningKey
             return (POPOSigningKey)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new POPOSigningKey((ASN1Sequence)o);
+            return new POPOSigningKey(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public static POPOSigningKey getInstance(ASN1TaggedObject obj, boolean explicit)

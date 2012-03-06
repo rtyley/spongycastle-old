@@ -33,12 +33,12 @@ public class CertRepMessage
             return (CertRepMessage)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new CertRepMessage((ASN1Sequence)o);
+            return new CertRepMessage(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public CertRepMessage(CMPCertificate[] caPubs, CertResponse[] response)

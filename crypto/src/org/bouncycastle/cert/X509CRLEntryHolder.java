@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.Extensions;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.TBSCertList;
 
 /**
@@ -16,10 +18,22 @@ import org.bouncycastle.asn1.x509.TBSCertList;
 public class X509CRLEntryHolder
 {
     private TBSCertList.CRLEntry entry;
+    private X500Name             ca;
 
-    X509CRLEntryHolder(TBSCertList.CRLEntry entry)
+    X509CRLEntryHolder(TBSCertList.CRLEntry entry, boolean isIndirect, X500Name previousCA)
     {
         this.entry = entry;
+        this.ca = previousCA;
+
+        if (isIndirect && entry.hasExtensions())
+        {
+            Extension currentCaName = entry.getExtensions().getExtension(Extension.certificateIssuer);
+
+            if (currentCaName != null)
+            {
+                ca = X500Name.getInstance(GeneralNames.getInstance(currentCaName.getParsedValue()).getNames()[0].getName());
+            }
+        }
     }
 
     /**
@@ -50,6 +64,21 @@ public class X509CRLEntryHolder
     public boolean hasExtensions()
     {
         return entry.hasExtensions();
+    }
+
+    /**
+     * Return the certificate issuer for the certificate referred to by this CRL entry.
+     * <p>
+     * Note: this will be the issuer of the CRL unless it has been specified that the CRL is indirect
+     * in the IssuingDistributionPoint extension and either a previous entry, or the current one,
+     * has specified a different CA via the certificateIssuer extension.
+     * </p>
+     *
+     * @return the revoked certificate's issuer.
+     */
+    public X500Name getCertificateIssuer()
+    {
+        return this.ca;
     }
 
     /**

@@ -51,13 +51,12 @@ public class Targets
         {
             return (Targets)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new Targets((ASN1Sequence)obj);
+            return new Targets(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: "
-            + obj.getClass());
+        return null;
     }
 
     /**

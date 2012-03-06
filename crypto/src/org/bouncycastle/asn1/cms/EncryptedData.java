@@ -23,12 +23,12 @@ public class EncryptedData
             return (EncryptedData)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new EncryptedData((ASN1Sequence)o);
+            return new EncryptedData(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid EncryptedData: " + o.getClass().getName());
+        return null;
     }
 
     public EncryptedData(EncryptedContentInfo encInfo)

@@ -45,12 +45,12 @@ public class CertificationRequestInfo
         {
             return (CertificationRequestInfo)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new CertificationRequestInfo((ASN1Sequence)obj);
+            return new CertificationRequestInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+        return null;
     }
 
     public CertificationRequestInfo(

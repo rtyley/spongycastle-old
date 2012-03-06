@@ -38,12 +38,12 @@ public class RevAnnContent
             return (RevAnnContent)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o != null)
         {
-            return new RevAnnContent((ASN1Sequence)o);
+            return new RevAnnContent(ASN1Sequence.getInstance(o));
         }
 
-        throw new IllegalArgumentException("Invalid object: " + o.getClass().getName());
+        return null;
     }
 
     public PKIStatus getStatus()
