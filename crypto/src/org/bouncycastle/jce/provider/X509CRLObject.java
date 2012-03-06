@@ -276,7 +276,7 @@ public class X509CRLObject
         Set entrySet = new HashSet();
         Enumeration certs = c.getRevokedCertificateEnumeration();
 
-        X500Name previousCertificateIssuer = c.getIssuer();
+        X500Name previousCertificateIssuer = null; // the issuer
         while (certs.hasMoreElements())
         {
             TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)certs.nextElement();
@@ -300,7 +300,7 @@ public class X509CRLObject
     {
         Enumeration certs = c.getRevokedCertificateEnumeration();
 
-        X500Name previousCertificateIssuer = c.getIssuer();
+        X500Name previousCertificateIssuer = null; // the issuer
         while (certs.hasMoreElements())
         {
             TBSCertList.CRLEntry entry = (TBSCertList.CRLEntry)certs.nextElement();

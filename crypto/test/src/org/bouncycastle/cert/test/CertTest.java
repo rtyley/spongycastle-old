@@ -2680,7 +2680,7 @@ public class CertTest
 
         X509CRLEntryHolder cRLEntryHolder = cRLHolder.getRevokedCertificate(certificate.getSerialNumber());
 
-        if (!cRLEntryHolder.getCertificateIssuer().equals(cRLHolder.getIssuer()))
+        if (!cRLEntryHolder.getCertificateIssuer().equals(new GeneralNames(new GeneralName(cRLHolder.getIssuer()))))
         {
             fail("certificate issuer incorrect");
         }
@@ -2751,7 +2751,7 @@ public class CertTest
 
         X509CRLEntryHolder cRLEntryHolder = cRLHolder.getRevokedCertificate(certificate.getSerialNumber());
 
-        if (!cRLEntryHolder.getCertificateIssuer().equals(X500Name.getInstance(certificate.getIssuerX500Principal().getEncoded())))
+        if (!cRLEntryHolder.getCertificateIssuer().equals(new GeneralNames(new GeneralName(X500Name.getInstance(certificate.getIssuerX500Principal().getEncoded())))))
         {
             fail("certificate issuer incorrect");
         }
@@ -2780,6 +2780,91 @@ public class CertTest
         if (!jceCRL.isRevoked(certificate))
         {
             fail("This certificate should also be revoked");
+        }
+    }
+
+    private void testIndirect2()
+        throws Exception
+    {
+        KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
+
+        ByteArrayInputStream input = new ByteArrayInputStream(testCAp12);
+
+        keyStore.load(input, "test".toCharArray());
+
+        X509Certificate certificate = (X509Certificate) keyStore.getCertificate("ca");
+        PrivateKey privateKey = (PrivateKey) keyStore.getKey("ca", null);
+
+        X500Name crlIssuer = X500Name.getInstance(certificate.getSubjectX500Principal().getEncoded());
+        X500Name caName = X500Name.getInstance(certificate.getIssuerX500Principal().getEncoded());
+
+        X509v2CRLBuilder builder = new X509v2CRLBuilder(crlIssuer, new Date());
+
+        builder.addExtension(Extension.issuingDistributionPoint, true, new IssuingDistributionPoint(null, true, false));
+
+        builder.addCRLEntry(BigInteger.valueOf(100), new Date(), CRLReason.cACompromise);
+        builder.addCRLEntry(BigInteger.valueOf(120), new Date(), CRLReason.cACompromise);
+
+        ExtensionsGenerator extGen = new ExtensionsGenerator();
+
+        extGen.addExtension(Extension.reasonCode, false, CRLReason.lookup(CRLReason.cACompromise));
+        extGen.addExtension(Extension.certificateIssuer, true, new GeneralNames(new GeneralName(caName)));
+
+        builder.addCRLEntry(certificate.getSerialNumber(), new Date(), extGen.generate());
+
+        builder.addCRLEntry(BigInteger.valueOf(130), new Date(), CRLReason.cACompromise);
+
+        JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder("SHA256WithRSAEncryption");
+
+        contentSignerBuilder.setProvider("BC");
+
+        X509CRLHolder cRLHolder = builder.build(contentSignerBuilder.build(privateKey));
+
+        if (!cRLHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(certificate)))
+        {
+            fail("CRL signature not valid");
+        }
+
+        X509CRLEntryHolder cRLEntryHolder = cRLHolder.getRevokedCertificate(certificate.getSerialNumber());
+
+        if (!cRLEntryHolder.getCertificateIssuer().equals(new GeneralNames(new GeneralName(caName))))
+        {
+            fail("certificate issuer incorrect");
+        }
+
+        cRLEntryHolder = cRLHolder.getRevokedCertificate(BigInteger.valueOf(130));
+
+        if (!cRLEntryHolder.getCertificateIssuer().equals(new GeneralNames(new GeneralName(caName))))
+        {
+            fail("certificate issuer incorrect");
+        }
+
+        cRLEntryHolder = cRLHolder.getRevokedCertificate(BigInteger.valueOf(100));
+
+        if (!cRLEntryHolder.getCertificateIssuer().equals(new GeneralNames(new GeneralName(cRLHolder.getIssuer()))))
+        {
+            fail("certificate issuer incorrect");
+        }
+
+        JcaX509CRLConverter converter = new JcaX509CRLConverter();
+
+        converter.setProvider("BC");
+
+        X509CRL crl = converter.getCRL(cRLHolder);
+
+        crl.verify(certificate.getPublicKey());
+
+        X509CRLEntry crlEntry = crl.getRevokedCertificate(BigInteger.valueOf(100));
+
+        if (crlEntry.getCertificateIssuer() != null)
+        {
+            fail("JCA 1 certificate issuer incorrect");
+        }
+
+        crlEntry = crl.getRevokedCertificate(BigInteger.valueOf(130));
+        if (!crlEntry.getCertificateIssuer().equals(new X500Principal(caName.getEncoded())))
+        {
+            fail("JCA 2 certificate issuer incorrect");
         }
     }
 
@@ -2821,7 +2906,7 @@ public class CertTest
 
         X509CRLEntryHolder cRLEntryHolder = cRLHolder.getRevokedCertificate(certificate.getSerialNumber());
 
-        if (!cRLEntryHolder.getCertificateIssuer().equals(cRLHolder.getIssuer()))
+        if (!cRLEntryHolder.getCertificateIssuer().equals(new GeneralNames(new GeneralName(cRLHolder.getIssuer()))))
         {
             fail("certificate issuer incorrect");
         }
@@ -2845,6 +2930,7 @@ public class CertTest
     {
         testDirect();
         testIndirect();
+        testIndirect2();
         testMalformedIndirect();
 
         checkCertificate(1, cert1);

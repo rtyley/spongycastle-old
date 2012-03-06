@@ -364,12 +364,12 @@ public class GetInstanceTest
         CertOrEncCert.getInstance(null);
         CertRepMessage.getInstance(null);
         doSequenceTest(CertResponse.class, new CertResponse(new ASN1Integer(1), new PKIStatusInfo(PKIStatus.granted)));
-        org.bouncycastle.asn1.cmp.CertStatus.getInstance(null);
-        Challenge.getInstance(null);
+        doSequenceTest(org.bouncycastle.asn1.cmp.CertStatus.class, new org.bouncycastle.asn1.cmp.CertStatus(new byte[10], BigInteger.valueOf(1), new PKIStatusInfo(PKIStatus.granted)));
+        doSequenceTest(Challenge.class, new Challenge(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE), new byte[10], new byte[10]));
 
         doSequenceTest(CMPCertificate.class, cmpCert);
         doSequenceTest(CRLAnnContent.class, new CRLAnnContent(crl));
-        ErrorMsgContent.getInstance(null);
+        doSequenceTest(ErrorMsgContent.class, new ErrorMsgContent(new PKIStatusInfo(PKIStatus.granted), new ASN1Integer(1), new PKIFreeText("fred")));
         GenMsgContent.getInstance(null);
         GenRepContent.getInstance(null);
         InfoTypeAndValue.getInstance(null);

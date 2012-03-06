@@ -6,6 +6,7 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
@@ -44,9 +45,31 @@ public class Challenge
         return null;
     }
 
+    public Challenge(byte[] witness, byte[] challenge)
+    {
+        this(null, witness, challenge);
+    }
+
+    public Challenge(AlgorithmIdentifier owf, byte[] witness, byte[] challenge)
+    {
+        this.owf = owf;
+        this.witness = new DEROctetString(witness);
+        this.challenge = new DEROctetString(challenge);
+    }
+
     public AlgorithmIdentifier getOwf()
     {
         return owf;
+    }
+
+    public byte[] getWitness()
+    {
+        return witness.getOctets();
+    }
+
+    public byte[] getChallenge()
+    {
+        return challenge.getOctets();
     }
 
     /**

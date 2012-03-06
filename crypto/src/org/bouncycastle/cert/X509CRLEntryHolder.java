@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.GeneralNames;
@@ -18,9 +17,9 @@ import org.bouncycastle.asn1.x509.TBSCertList;
 public class X509CRLEntryHolder
 {
     private TBSCertList.CRLEntry entry;
-    private X500Name             ca;
+    private GeneralNames ca;
 
-    X509CRLEntryHolder(TBSCertList.CRLEntry entry, boolean isIndirect, X500Name previousCA)
+    X509CRLEntryHolder(TBSCertList.CRLEntry entry, boolean isIndirect, GeneralNames previousCA)
     {
         this.entry = entry;
         this.ca = previousCA;
@@ -31,7 +30,7 @@ public class X509CRLEntryHolder
 
             if (currentCaName != null)
             {
-                ca = X500Name.getInstance(GeneralNames.getInstance(currentCaName.getParsedValue()).getNames()[0].getName());
+                ca = GeneralNames.getInstance(currentCaName.getParsedValue());
             }
         }
     }
@@ -67,7 +66,7 @@ public class X509CRLEntryHolder
     }
 
     /**
-     * Return the certificate issuer for the certificate referred to by this CRL entry.
+     * Return the available names for the certificate issuer for the certificate referred to by this CRL entry.
      * <p>
      * Note: this will be the issuer of the CRL unless it has been specified that the CRL is indirect
      * in the IssuingDistributionPoint extension and either a previous entry, or the current one,
@@ -76,7 +75,7 @@ public class X509CRLEntryHolder
      *
      * @return the revoked certificate's issuer.
      */
-    public X500Name getCertificateIssuer()
+    public GeneralNames getCertificateIssuer()
     {
         return this.ca;
     }
