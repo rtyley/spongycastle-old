@@ -390,7 +390,7 @@ public class X509V3CertificateGenerator
         SecureRandom    random)
         throws CertificateEncodingException, IllegalStateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
     {
-        TBSCertificateStructure tbsCert = generateTbsCert();
+        TBSCertificate tbsCert = generateTbsCert();
         byte[] signature;
 
         try
@@ -467,7 +467,7 @@ public class X509V3CertificateGenerator
         return tbsGen.generateTBSCertificate();
     }
 
-    private X509Certificate generateJcaObject(TBSCertificateStructure tbsCert, byte[] signature)
+    private X509Certificate generateJcaObject(TBSCertificate tbsCert, byte[] signature)
         throws CertificateParsingException
     {
         ASN1EncodableVector v = new ASN1EncodableVector();

@@ -23,7 +23,7 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -129,7 +129,7 @@ public class PKCS8Generator
         {
             throw new NoSuchAlgorithmException(algorithm + " found, but provider not available: " + e.getMessage());
         }
-        DERObjectIdentifier algOID = new DERObjectIdentifier(algorithm);
+        ASN1ObjectIdentifier algOID = new ASN1ObjectIdentifier(algorithm);
 
         try
         {
@@ -179,7 +179,7 @@ public class PKCS8Generator
             return new PemObject("PRIVATE KEY", keyData);
         }
 
-        DERObjectIdentifier algOID = new DERObjectIdentifier(algorithm);
+        ASN1ObjectIdentifier algOID = new ASN1ObjectIdentifier(algorithm);
 
         if (PEMUtilities.isPKCS5Scheme2(algOID))
         {
@@ -248,7 +248,7 @@ public class PKCS8Generator
                 v.add(new DEROctetString(salt));
                 v.add(new DERInteger(iterationCount));
 
-                EncryptedPrivateKeyInfo info = new EncryptedPrivateKeyInfo(new AlgorithmIdentifier(algOID, new PKCS12PBEParams(new DERSequence(v))), cipher.doFinal(keyData));
+                EncryptedPrivateKeyInfo info = new EncryptedPrivateKeyInfo(new AlgorithmIdentifier(algOID, PKCS12PBEParams.getInstance(new DERSequence(v))), cipher.doFinal(keyData));
 
                 return new PemObject("ENCRYPTED PRIVATE KEY", info.getEncoded());
             }

@@ -9,7 +9,7 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Selector;
@@ -157,7 +157,7 @@ public class SignerId
             }
             else if (this.getSubjectKeyIdentifier() != null)
             {
-                X509Extension ext = certHldr.getExtension(X509Extension.subjectKeyIdentifier);
+                Extension ext = certHldr.getExtension(Extension.subjectKeyIdentifier);
 
                 if (ext == null)
                 {

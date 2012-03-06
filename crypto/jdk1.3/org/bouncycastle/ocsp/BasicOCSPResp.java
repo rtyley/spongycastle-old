@@ -8,7 +8,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Signature;
+import org.bouncycastle.jce.cert.CertStore;
+import org.bouncycastle.jce.cert.CertStoreParameters;
 import java.security.cert.CertificateException;
+import org.bouncycastle.jce.cert.CertificateFactory;
+import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -28,10 +32,6 @@ import org.bouncycastle.asn1.ocsp.ResponseData;
 import org.bouncycastle.asn1.ocsp.SingleResponse;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.jce.cert.CertStore;
-import org.bouncycastle.jce.cert.CertStoreParameters;
-import org.bouncycastle.jce.cert.CertificateFactory;
-import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
 
 /**
  * <pre>
@@ -41,6 +41,8 @@ import org.bouncycastle.jce.cert.CollectionCertStoreParameters;
  *    signature            BIT STRING,
  *    certs                [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
  * </pre>
+ *
+ * @deprecated use classes in org.bouncycastle.cert.ocsp.
  */
 public class BasicOCSPResp
     implements java.security.cert.X509Extension
@@ -111,7 +113,7 @@ public class BasicOCSPResp
 
     public X509Extensions getResponseExtensions()
     {
-        return data.getResponseExtensions();
+        return X509Extensions.getInstance(data.getResponseExtensions());
     }
     
     /**

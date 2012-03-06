@@ -1035,66 +1035,10 @@ public class CertPathValidatorUtilities
         CertStatus certStatus)
         throws AnnotatedException
     {
-        // Note: will be an X509CRLEntryObject if it's an indirect CRL
-        X509CRLEntry crl_entry = null;
-
-        boolean isIndirect;
-        try
+        X509CRLEntry crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
+        if (crl_entry == null)
         {
-            isIndirect = X509CRLObject.isIndirectCRL(crl);
-        }
-        catch (CRLException exception)
-        {
-            throw new AnnotatedException("Failed check for indirect CRL.", exception);
-        }
-
-        if (isIndirect)
-        {
-            crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
-
-            if (crl_entry == null)
-            {
-                return;
-            }
-
-            try
-            {
-                crl_entry = new X509CRLEntryObject(TBSCertList.CRLEntry.getInstance(crl_entry.getEncoded()));
-            }
-            catch (CRLException e)
-            {
-                // try reconstructing the CRL as a BC one.
-                try
-                {
-                    byte[] encoded = crl.getEncoded();
-                    ASN1InputStream aIn = new ASN1InputStream(encoded, true); // Lazy
-                    ASN1Sequence seq = ASN1Sequence.getInstance(aIn.readObject());
-                    crl = new X509CRLObject(CertificateList.getInstance(seq));
-                    crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
-                }
-                catch (Exception exception)
-                {
-                    throw new AnnotatedException("Bouncy Castle X509CRLObject could not be created.", exception);
-                }
-            }
-
-            if (!getEncodedIssuerPrincipal(cert).equals(((X509CRLEntryObject)crl_entry).getCertificateIssuer()))
-            {
-                return;  // not for our issuer, ignore
-            }
-        }
-        else if (!getEncodedIssuerPrincipal(cert).equals(getIssuerPrincipal(crl)))
-        {
-            return;  // not for our issuer, ignore
-        }
-        else
-        {
-            crl_entry = crl.getRevokedCertificate(getSerialNumber(cert));
-
-            if (crl_entry == null)
-            {
-                return;
-            }
+            return;
         }
 
         DEREnumerated reasonCode = null;

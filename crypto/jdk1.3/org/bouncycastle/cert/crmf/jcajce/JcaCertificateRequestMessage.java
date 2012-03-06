@@ -7,14 +7,14 @@ import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.crmf.CRMFException;
 import org.bouncycastle.cert.crmf.CertificateRequestMessage;
-import org.bouncycastle.cms.jcajce.DefaultJcaJceExtHelper;
-import org.bouncycastle.cms.jcajce.NamedJcaJceExtHelper;
-import org.bouncycastle.cms.jcajce.ProviderJcaJceExtHelper;
+import org.bouncycastle.jcajce.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 
 public class JcaCertificateRequestMessage
     extends CertificateRequestMessage
 {
-    private CRMFHelper helper = new CRMFHelper(new DefaultJcaJceExtHelper());
+    private CRMFHelper helper = new CRMFHelper(new DefaultJcaJceHelper());
 
     public JcaCertificateRequestMessage(CertificateRequestMessage certReqMsg)
     {
@@ -28,14 +28,14 @@ public class JcaCertificateRequestMessage
 
     public JcaCertificateRequestMessage setProvider(String providerName)
     {
-        this.helper = new CRMFHelper(new NamedJcaJceExtHelper(providerName));
+        this.helper = new CRMFHelper(new NamedJcaJceHelper(providerName));
 
         return this;
     }
 
     public JcaCertificateRequestMessage setProvider(Provider provider)
     {
-        this.helper = new CRMFHelper(new ProviderJcaJceExtHelper(provider));
+        this.helper = new CRMFHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }

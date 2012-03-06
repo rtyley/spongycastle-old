@@ -23,7 +23,7 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -32,6 +32,7 @@ import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V2TBSCertListGenerator;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.provider.X509CRLObject;
@@ -91,7 +92,7 @@ public class X509V2CRLGenerator
      **/
     public void addCRLEntry(BigInteger userCertificate, Date revocationDate, int reason)
     {
-        tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), reason);
+        tbsGen.addCRLEntry(new ASN1Integer(userCertificate), new Time(revocationDate), reason);
     }
 
     /**
@@ -101,7 +102,7 @@ public class X509V2CRLGenerator
      **/
     public void addCRLEntry(BigInteger userCertificate, Date revocationDate, int reason, Date invalidityDate)
     {
-        tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), reason, new DERGeneralizedTime(invalidityDate));
+        tbsGen.addCRLEntry(new ASN1Integer(userCertificate), new Time(revocationDate), reason, new DERGeneralizedTime(invalidityDate));
     }
    
     /**
@@ -109,7 +110,7 @@ public class X509V2CRLGenerator
      **/
     public void addCRLEntry(BigInteger userCertificate, Date revocationDate, X509Extensions extensions)
     {
-        tbsGen.addCRLEntry(new DERInteger(userCertificate), new Time(revocationDate), extensions);
+        tbsGen.addCRLEntry(new ASN1Integer(userCertificate), new Time(revocationDate), Extensions.getInstance(extensions));
     }
     
     /**

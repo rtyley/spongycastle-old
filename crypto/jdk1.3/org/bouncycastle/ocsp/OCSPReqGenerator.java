@@ -25,11 +25,15 @@ import org.bouncycastle.asn1.ocsp.Request;
 import org.bouncycastle.asn1.ocsp.Signature;
 import org.bouncycastle.asn1.ocsp.TBSRequest;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509Principal;
 
+/**
+ * @deprecated use classes in org.bouncycastle.cert.ocsp.
+ */
 public class OCSPReqGenerator
 {
     private List            list = new ArrayList();
@@ -52,7 +56,7 @@ public class OCSPReqGenerator
         public Request toRequest()
             throws Exception
         {
-            return new Request(certId.toASN1Object(), extensions);
+            return new Request(certId.toASN1Object(), Extensions.getInstance(extensions));
         }
     }
 
@@ -81,9 +85,9 @@ public class OCSPReqGenerator
     }
 
     /**
-     * Set the requestor name to the passed in X509Principal
+     * Set the requestor name to the passed in X500Principal
      * 
-     * @param requestorName a X509Principal representing the requestor name.
+     * @param requestorName a X500Principal representing the requestor name.
      */
     public void setRequestorName(
         X509Principal        requestorName)
