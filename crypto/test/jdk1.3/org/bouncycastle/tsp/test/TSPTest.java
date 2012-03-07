@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import junit.framework.TestCase;
-
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -58,6 +57,7 @@ public class TSPTest
             responseValidationTest(origKP.getPrivate(), origCert, certs);
             incorrectHashTest(origKP.getPrivate(), origCert, certs);
             badAlgorithmTest(origKP.getPrivate(), origCert, certs);
+            timeNotAvailableTest(origKP.getPrivate(), origCert, certs);
             badPolicyTest(origKP.getPrivate(), origCert, certs);
             tokenEncodingTest(origKP.getPrivate(), origCert, certs);
             certReqTest(origKP.getPrivate(), origCert, certs);
@@ -198,7 +198,7 @@ public class TSPTest
             fail("incorrectHash - failInfo set to null.");
         }
         
-        if (failInfo.intValue() != PKIFailureInfo.BAD_DATA_FORMAT)
+        if (failInfo.intValue() != PKIFailureInfo.badDataFormat)
         {
             fail("incorrectHash - wrong failure info returned.");
         }
@@ -238,12 +238,52 @@ public class TSPTest
             fail("badAlgorithm - failInfo set to null.");
         }
         
-        if (failInfo.intValue() != PKIFailureInfo.BAD_ALG)
+        if (failInfo.intValue() != PKIFailureInfo.badAlg)
         {
             fail("badAlgorithm - wrong failure info returned.");
         }
     }
-    
+
+    private void timeNotAvailableTest(
+        PrivateKey      privateKey,
+        X509Certificate cert,
+        CertStore       certs)
+        throws Exception
+    {
+        TimeStampTokenGenerator tsTokenGen = new TimeStampTokenGenerator(
+                privateKey, cert, TSPAlgorithms.SHA1, "1.2");
+
+        tsTokenGen.setCertificatesAndCRLs(certs);
+
+        TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
+        TimeStampRequest            request = reqGen.generate("1.2.3.4.5", new byte[20]);
+
+        TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
+
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), null, "BC");
+
+        tsResp = new TimeStampResponse(tsResp.getEncoded());
+
+        TimeStampToken  tsToken = tsResp.getTimeStampToken();
+
+        if (tsToken != null)
+        {
+            fail("timeNotAvailable - token not null.");
+        }
+
+        PKIFailureInfo  failInfo = tsResp.getFailInfo();
+
+        if (failInfo == null)
+        {
+            fail("timeNotAvailable - failInfo set to null.");
+        }
+
+        if (failInfo.intValue() != PKIFailureInfo.timeNotAvailable)
+        {
+            fail("timeNotAvailable - wrong failure info returned.");
+        }
+    }
+
     private void badPolicyTest(
         PrivateKey      privateKey,
         X509Certificate cert,
@@ -257,7 +297,7 @@ public class TSPTest
 
         TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
         
-        reqGen.setReqPolicy("1.4");
+        reqGen.setReqPolicy("1.1");
         
         TimeStampRequest            request = reqGen.generate(TSPAlgorithms.SHA1, new byte[20]);
 
@@ -281,7 +321,7 @@ public class TSPTest
             fail("badPolicy - failInfo set to null.");
         }
         
-        if (failInfo.intValue() != PKIFailureInfo.UNACCEPTED_POLICY)
+        if (failInfo.intValue() != PKIFailureInfo.unacceptedPolicy)
         {
             fail("badPolicy - wrong failure info returned.");
         }
@@ -317,7 +357,7 @@ public class TSPTest
         
         assertNull(tsToken.getTimeStampInfo().getGenTimeAccuracy());  // check for abscence of accuracy
         
-        assertEquals("1.2", tsToken.getTimeStampInfo().getPolicy());
+        assertEquals("1.2", tsToken.getTimeStampInfo().getPolicy().getId());
         
         try
         {
@@ -416,7 +456,7 @@ public class TSPTest
         
         assertEquals(new BigInteger("23"), tstInfo.getSerialNumber());
         
-        assertEquals("1.2", tstInfo.getPolicy());
+        assertEquals("1.2", tstInfo.getPolicy().getId());
         
         //
         // test certReq
@@ -484,7 +524,7 @@ public class TSPTest
         
         assertEquals(new BigInteger("23"), tstInfo.getSerialNumber());
         
-        assertEquals("1.2.3", tstInfo.getPolicy());
+        assertEquals("1.2.3", tstInfo.getPolicy().getId());
         
         assertEquals(true, tstInfo.isOrdered());
         
@@ -545,7 +585,7 @@ public class TSPTest
         
         assertEquals(new BigInteger("24"), tstInfo.getSerialNumber());
         
-        assertEquals("1.2.3", tstInfo.getPolicy());
+        assertEquals("1.2.3", tstInfo.getPolicy().getId());
         
         assertEquals(false, tstInfo.isOrdered());
         

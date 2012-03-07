@@ -2,6 +2,7 @@ package org.bouncycastle.tsp.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import org.bouncycastle.jce.cert.CertStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -9,7 +10,6 @@ import junit.framework.TestCase;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.cmp.PKIStatus;
-import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampResponse;
@@ -260,7 +260,7 @@ public class ParseTest
         
         if (request != sha1Request && request != sha1noNonse)
         {
-            if (!req.getReqPolicy().equals(TSPTestUtil.EuroPKI_TSA_Test_Policy.getId()))
+            if (!req.getReqPolicy().equals(TSPTestUtil.EuroPKI_TSA_Test_Policy))
             {
                 fail("" + algorithm + " failed policy check.");
             }
@@ -313,7 +313,7 @@ public class ParseTest
     private void responseParse(
         byte[]  request,
         byte[]  response,
-        String  algorithm) 
+        ASN1ObjectIdentifier algorithm)
         throws Exception
     {
         TimeStampRequest  req = new TimeStampRequest(request);

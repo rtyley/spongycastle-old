@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
@@ -27,6 +28,7 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -41,16 +43,19 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.RSAPublicKey;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.CRLReason;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.asn1.x509.RSAPublicKeyStructure;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
@@ -95,11 +100,120 @@ import org.bouncycastle.util.test.SimpleTest;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
+import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.X509Principal;
+
 public class CertTest
     extends SimpleTest
 {
     private static final String BC = org.bouncycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
-    
+
+    // test CA
+    byte[] testCAp12 = Base64.decode(
+        "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"
+      + "HLhcYQcQ1R+RucctAgIEAAAA");
+
     //
     // server.crt
     //
@@ -1184,6 +1298,18 @@ public class CertTest
 
     }
 
+
+    /**
+     * Test a generated certificate with the sun provider
+     */
+    private void sunProviderCheck(byte[] encoding)
+        throws CertificateException
+    {
+        CertificateFactory certFact = CertificateFactory.getInstance("X.509");
+
+        certFact.generateCertificate(new ByteArrayInputStream(encoding));
+    }
+
     /**
      * we generate a self signed certificate for the sake of testing - RSA
      */
@@ -1245,6 +1371,8 @@ public class CertTest
 
         cert.verify(pubKey);
 
+        cert.verify(cert.getPublicKey());
+
         Set dummySet = cert.getNonCriticalExtensionOIDs();
         if (dummySet != null)
         {
@@ -1270,7 +1398,11 @@ public class CertTest
             .addExtension(new ASN1ObjectIdentifier("2.5.29.37"), true,
                 new DERSequence(KeyPurposeId.anyExtendedKeyUsage))
             .addExtension(new ASN1ObjectIdentifier("2.5.29.17"), true,
-                new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
+                new GeneralNames(new GeneralName[]
+                    {
+                        new GeneralName(GeneralName.rfc822Name, "test@test.test"),
+                        new GeneralName(GeneralName.dNSName, "dom.test.test")
+                    }));
 
         X509CertificateHolder certHolder = certGen.build(sigGen);
 
@@ -1279,6 +1411,7 @@ public class CertTest
         cert.checkValidity(new Date());
 
         cert.verify(pubKey);
+        cert.verify(cert.getPublicKey());
 
         ContentVerifierProvider contentVerifierProvider = new JcaContentVerifierProviderBuilder().setProvider(BC).build(pubKey);
         if (!certHolder.isSignatureValid(contentVerifierProvider))
@@ -1302,20 +1435,22 @@ public class CertTest
         {
             fail("failed extended key usage test");
         }
-*/
 
-/*
         Collection c = cert.getSubjectAlternativeNames();
         Iterator   it = c.iterator();
         while (it.hasNext())
         {
             List    gn = (List)it.next();
-            if (!gn.get(1).equals("test@test.test"))
+            if (!gn.get(1).equals("test@test.test") && !gn.get(1).equals("dom.test.test"))
             {
                 fail("failed subject alternative names test");
             }
         }
 */
+
+        sunProviderCheck(certHolder.getEncoded());
+        sunProviderCheck(cert.getEncoded());
+
         // System.out.println(cert);
 
         //
@@ -1329,6 +1464,7 @@ public class CertTest
         cert.checkValidity(new Date());
 
         cert.verify(pubKey);
+        cert.verify(cert.getPublicKey());
 
         bIn = new ByteArrayInputStream(cert.getEncoded());
         certFact = CertificateFactory.getInstance("X.509", "BC");
@@ -1341,6 +1477,8 @@ public class CertTest
             fail("name comparison fails");
         }
 
+        sunProviderCheck(certHolder.getEncoded());
+        sunProviderCheck(cert.getEncoded());
 //
         // a lightweight key pair.
         //
@@ -1381,7 +1519,7 @@ public class CertTest
         AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 
         sigGen = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(lwPrivKey);
-        SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPublicKeyStructure(lwPubKey.getModulus(), lwPubKey.getExponent()));
+        SubjectPublicKeyInfo pubInfo = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPublicKey(lwPubKey.getModulus(), lwPubKey.getExponent()));
         certGen = new X509v3CertificateBuilder(builder.build(), BigInteger.valueOf(1), new Date(System.currentTimeMillis() - 50000), new Date(System.currentTimeMillis() + 50000), builder.build(), pubInfo);
 
         certHolder = certGen.build(sigGen);
@@ -1782,7 +1920,7 @@ public class CertTest
             fail("failed CRL issuer test");
         }
 
-        X509Extension authExt = crl.getExtension(X509Extension.authorityKeyIdentifier);
+        Extension authExt = crl.getExtension(Extension.authorityKeyIdentifier);
 
         if (authExt == null)
         {
@@ -1808,7 +1946,7 @@ public class CertTest
             fail("CRL entry extension not found");
         }
 
-        X509Extension ext = entry.getExtension(X509Extension.reasonCode);
+        Extension ext = entry.getExtension(X509Extension.reasonCode);
 
         if (ext != null)
         {
@@ -1832,7 +1970,7 @@ public class CertTest
 
         Date                 now = new Date();
         KeyPair              pair = kpGen.generateKeyPair();
-        X509v2CRLBuilder     crlGen = new JcaX509v2CRLBuilder(new X500Name("CN=Test CA"), now);
+        X509v2CRLBuilder     crlGen = new X509v2CRLBuilder(new X500Name("CN=Test CA"), now);
 
         crlGen.setNextUpdate(new Date(now.getTime() + 100000));
         
@@ -1861,10 +1999,10 @@ public class CertTest
 
         X509CRL crl = new JcaX509CRLConverter().setProvider(BC).getCRL(crlHolder);
 
-         if (!crlHolder.getIssuer().equals(new X500Name("CN=Test CA")))
-         {
-           fail("failed CRL issuer test");
-         }
+        if (!PrincipalUtil.getIssuerX509Principal(crl).equals(new X509Principal("CN=Test CA")))
+        {
+            fail("failed CRL issuer test");
+        }
 
         byte[] authExt = crl.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
 
@@ -1944,7 +2082,7 @@ public class CertTest
 
         X509CRL crl = new JcaX509CRLConverter().setProvider(BC).getCRL(crlHolder);
 
-        if (!crlHolder.getIssuer().equals(new X500Name("CN=Test CA")))
+        if (!PrincipalUtil.getIssuerX509Principal(crl).equals(new X509Principal("CN=Test CA")))
         {
             fail("failed CRL issuer test");
         }
@@ -2019,7 +2157,7 @@ public class CertTest
             if (crlEnt.getSerialNumber().intValue() == 1)
             {
                 oneFound = true;
-                X509Extension  extn = crlEnt.getExtension(X509Extension.reasonCode);
+                Extension  extn = crlEnt.getExtension(X509Extension.reasonCode);
 
                 if (extn != null)
                 {
@@ -2514,9 +2652,168 @@ public class CertTest
         }
     }
 
+    private void testDirect()
+        throws Exception
+    {
+        KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
+
+        ByteArrayInputStream input = new ByteArrayInputStream(testCAp12);
+
+        keyStore.load(input, "test".toCharArray());
+
+        X509Certificate certificate = (X509Certificate) keyStore.getCertificate("ca");
+        PrivateKey privateKey = (PrivateKey) keyStore.getKey("ca", null);
+
+        X500Name issuer = X500Name.getInstance(PrincipalUtil.getIssuerX509Principal(certificate).getEncoded());
+
+        X509v2CRLBuilder builder = new X509v2CRLBuilder(issuer, new Date());
+
+        builder.addCRLEntry(certificate.getSerialNumber(), new Date(), CRLReason.cACompromise);
+
+        JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder("SHA256WithRSAEncryption");
+
+        contentSignerBuilder.setProvider("BC");
+
+        X509CRLHolder cRLHolder = builder.build(contentSignerBuilder.build(privateKey));
+
+        JcaX509CRLConverter converter = new JcaX509CRLConverter();
+
+        converter.setProvider("BC");
+
+        X509CRL crl = converter.getCRL(cRLHolder);
+
+        crl.verify(certificate.getPublicKey());
+
+        if (!crl.isRevoked(certificate))
+        {
+            fail("Certificate should be revoked");
+        }
+
+        // now encode the CRL and load the CRL with the JCE provider
+
+        CertificateFactory fac = CertificateFactory.getInstance("X.509");
+
+        X509CRL jceCRL = (X509CRL) fac.generateCRL(new ByteArrayInputStream(crl.getEncoded()));
+
+        jceCRL.verify(certificate.getPublicKey());
+
+        if (!jceCRL.isRevoked(certificate))
+        {
+            fail("This certificate should also be revoked");
+        }
+    }
+
+    private void testIndirect()
+        throws Exception
+    {
+        KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
+
+        ByteArrayInputStream input = new ByteArrayInputStream(testCAp12);
+
+        keyStore.load(input, "test".toCharArray());
+
+        X509Certificate certificate = (X509Certificate) keyStore.getCertificate("ca");
+        PrivateKey privateKey = (PrivateKey) keyStore.getKey("ca", null);
+
+        X500Name crlIssuer = X500Name.getInstance(PrincipalUtil.getSubjectX509Principal(certificate).getEncoded());
+        X500Name caName = X500Name.getInstance(PrincipalUtil.getIssuerX509Principal(certificate).getEncoded());
+
+        X509v2CRLBuilder builder = new X509v2CRLBuilder(crlIssuer, new Date());
+
+        builder.addExtension(Extension.issuingDistributionPoint, true, new IssuingDistributionPoint(null, true, false));
+
+        ExtensionsGenerator extGen = new ExtensionsGenerator();
+
+        extGen.addExtension(Extension.reasonCode, false, CRLReason.lookup(CRLReason.cACompromise));
+        extGen.addExtension(Extension.certificateIssuer, true, new GeneralNames(new GeneralName(caName)));
+
+        builder.addCRLEntry(certificate.getSerialNumber(), new Date(), extGen.generate());
+
+        JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder("SHA256WithRSAEncryption");
+
+        contentSignerBuilder.setProvider("BC");
+
+        X509CRLHolder cRLHolder = builder.build(contentSignerBuilder.build(privateKey));
+
+        JcaX509CRLConverter converter = new JcaX509CRLConverter();
+
+        converter.setProvider("BC");
+
+        X509CRL crl = converter.getCRL(cRLHolder);
+
+        crl.verify(certificate.getPublicKey());
+
+        if (!crl.isRevoked(certificate))
+        {
+            fail("Certificate should be revoked");
+        }
+
+        // now encode the CRL and load the CRL with the JCE provider
+
+        CertificateFactory fac = CertificateFactory.getInstance("X.509");
+
+        X509CRL jceCRL = (X509CRL) fac.generateCRL(new ByteArrayInputStream(crl.getEncoded()));
+
+        jceCRL.verify(certificate.getPublicKey());
+
+        if (!jceCRL.isRevoked(certificate))
+        {
+            fail("This certificate should also be revoked");
+        }
+    }
+
+    // issuing distribution point must be set for an indirect CRL to be recognised
+    private void testMalformedIndirect()
+        throws Exception
+    {
+        KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
+
+        ByteArrayInputStream input = new ByteArrayInputStream(testCAp12);
+
+        keyStore.load(input, "test".toCharArray());
+
+        X509Certificate certificate = (X509Certificate) keyStore.getCertificate("ca");
+        PrivateKey privateKey = (PrivateKey) keyStore.getKey("ca", null);
+
+        X500Name crlIssuer = X500Name.getInstance(PrincipalUtil.getSubjectX509Principal(certificate).getEncoded());
+        X500Name caName = X500Name.getInstance(PrincipalUtil.getIssuerX509Principal(certificate).getEncoded());
+
+        X509v2CRLBuilder builder = new X509v2CRLBuilder(crlIssuer, new Date());
+
+        ExtensionsGenerator extGen = new ExtensionsGenerator();
+
+        extGen.addExtension(Extension.reasonCode, false, CRLReason.lookup(CRLReason.cACompromise));
+        extGen.addExtension(Extension.certificateIssuer, true, new GeneralNames(new GeneralName(caName)));
+
+        builder.addCRLEntry(certificate.getSerialNumber(), new Date(), extGen.generate());
+
+        JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder("SHA256WithRSAEncryption");
+
+        contentSignerBuilder.setProvider("BC");
+
+        X509CRLHolder cRLHolder = builder.build(contentSignerBuilder.build(privateKey));
+
+        JcaX509CRLConverter converter = new JcaX509CRLConverter();
+
+        converter.setProvider("BC");
+
+        X509CRL crl = converter.getCRL(cRLHolder);
+
+        crl.verify(certificate.getPublicKey());
+
+        if (crl.isRevoked(certificate))
+        {
+            throw new Exception("Certificate should not be revoked");
+        }
+    }
+
     public void performTest()
         throws Exception
     {
+        testDirect();
+        testIndirect();
+        testMalformedIndirect();
+
         checkCertificate(1, cert1);
         checkCertificate(2, cert2);
         checkCertificate(3, cert3);
