@@ -54,7 +54,7 @@ public class CommitmentTypeQualifier
      * @param as <code>CommitmentTypeQualifier</code> structure
      * encoded as an ASN1Sequence. 
      */
-    public CommitmentTypeQualifier(
+    private CommitmentTypeQualifier(
         ASN1Sequence as)
     {
         commitmentTypeIdentifier = (ASN1ObjectIdentifier)as.getObjectAt(0);
@@ -67,16 +67,16 @@ public class CommitmentTypeQualifier
 
     public static CommitmentTypeQualifier getInstance(Object as)
     {
-        if (as instanceof CommitmentTypeQualifier || as == null)
+        if (as instanceof CommitmentTypeQualifier)
         {
             return (CommitmentTypeQualifier)as;
         }
-        else if (as instanceof ASN1Sequence)
+        else if (as != null)
         {
-            return new CommitmentTypeQualifier((ASN1Sequence)as);
+            return new CommitmentTypeQualifier(ASN1Sequence.getInstance(as));
         }
 
-        throw new IllegalArgumentException("unknown object in getInstance.");
+        return null;
     }
 
     public ASN1ObjectIdentifier getCommitmentTypeIdentifier()

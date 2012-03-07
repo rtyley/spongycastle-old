@@ -13,7 +13,7 @@ public class CommitmentTypeIndication
     private ASN1ObjectIdentifier   commitmentTypeId;
     private ASN1Sequence          commitmentTypeQualifier;
     
-    public CommitmentTypeIndication(
+    private CommitmentTypeIndication(
         ASN1Sequence seq)
     {
         commitmentTypeId = (ASN1ObjectIdentifier)seq.getObjectAt(0);
