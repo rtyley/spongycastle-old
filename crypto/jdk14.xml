@@ -37,6 +37,7 @@
                 <exclude name="**/ECDSA5Test.java" />
                 <exclude name="**/CRL5Test.java" />
                 <exclude name="**/NamedCurveTest.java" />
+                <exclude name="**/GetInstanceTest.java" />
                 <exclude name="**/X509LDAPCertStoreTest.java" />
                 <exclude name="**/X509StoreTest.java" />
                 <exclude name="**/MQVTest.java" />
