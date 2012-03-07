@@ -61,6 +61,7 @@
                 <exclude name="**/NullProviderTest.java" />
                 <exclude name="**/PKIXNameConstraintsTest.java" />
                 <exclude name="**/MiscDataStreamTest.java" />
+                <exclude name="**/GetInstanceTest.java" />
                 <exclude name="**/ntru/**/*.java" />
                 <exclude name="**/NTRU*.java" />
                 <exclude name="**/crypto/engines/BitStringTest.java" />
