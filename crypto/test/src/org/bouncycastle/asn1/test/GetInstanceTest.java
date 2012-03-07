@@ -2,13 +2,18 @@ package org.bouncycastle.asn1.test;
 
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.util.Date;
 
 import junit.framework.TestCase;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1UTCTime;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.cmp.CAKeyUpdAnnContent;
 import org.bouncycastle.asn1.cmp.CMPCertificate;
@@ -486,23 +491,29 @@ public class GetInstanceTest
         CommitmentTypeIndication.getInstance(null);
         CommitmentTypeQualifier.getInstance(null);
         CompleteRevocationRefs.getInstance(null);
-        CrlIdentifier.getInstance(null);
-        CrlListID.getInstance(null);
-        CrlOcspRef.getInstance(null);
-        CrlValidatedID.getInstance(null);
-        OcspIdentifier.getInstance(null);
-        OcspListID.getInstance(null);
-        OcspResponsesID.getInstance(null);
-        OtherHashAlgAndValue.getInstance(null);
+
+        doSequenceTest(CrlIdentifier.class, new CrlIdentifier(new X500Name("CN=Test"), new ASN1UTCTime(new Date()), BigInteger.valueOf(1)));
+        OcspIdentifier ocspIdentifier = new OcspIdentifier(new ResponderID(new X500Name("CN=Test")), new ASN1GeneralizedTime(new Date()));
+        CrlListID crlListID = new CrlListID(new CrlValidatedID[]{new CrlValidatedID(new OtherHash(new byte[20]))});
+        OcspListID ocspListID = new OcspListID(new OcspResponsesID[] { new OcspResponsesID(ocspIdentifier) });
+        OtherRevRefs otherRevRefs = new OtherRevRefs(new ASN1ObjectIdentifier("1.2.1"), new DERSequence());
+
+        doSequenceTest(CrlListID.class, crlListID);
+        doSequenceTest(CrlOcspRef.class, new CrlOcspRef(crlListID, ocspListID, otherRevRefs));
+        doSequenceTest(CrlValidatedID.class, new CrlValidatedID(new OtherHash(new byte[20])));
+        doSequenceTest(OcspIdentifier.class, ocspIdentifier);
+        doSequenceTest(OcspListID.class, ocspListID);
+        doSequenceTest(OcspResponsesID.class, new OcspResponsesID(ocspIdentifier));
+        doSequenceTest(OtherHashAlgAndValue.class, new OtherHashAlgAndValue(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE), new DEROctetString(new byte[10])));
         OtherHash.getInstance(null);
-        OtherRevRefs.getInstance(null);
+        doSequenceTest(OtherRevRefs.class, otherRevRefs);
         OtherRevVals.getInstance(null);
         RevocationValues.getInstance(null);
         SignaturePolicyIdentifier.getInstance(null);
         SignaturePolicyId.getInstance(null);
         SignerAttribute.getInstance(null);
         SignerLocation.getInstance(null);
-        SigPolicyQualifierInfo.getInstance(null);
+        doSequenceTest(SigPolicyQualifierInfo.class, new SigPolicyQualifierInfo(new ASN1ObjectIdentifier("1.2.1"), new DERSequence()));
         SigPolicyQualifiers.getInstance(null);
         SPuri.getInstance(null);
         SPUserNotice.getInstance(null);
