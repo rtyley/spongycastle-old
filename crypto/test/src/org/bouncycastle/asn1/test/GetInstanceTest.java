@@ -534,17 +534,21 @@ public class GetInstanceTest
         UnsignedInteger.getInstance(null);
         CommitmentTypeIndication.getInstance(null);
         CommitmentTypeQualifier.getInstance(null);
-        CompleteRevocationRefs.getInstance(null);
 
-        doSequenceTest(CrlIdentifier.class, new CrlIdentifier(new X500Name("CN=Test"), new ASN1UTCTime(new Date()), BigInteger.valueOf(1)));
         OcspIdentifier ocspIdentifier = new OcspIdentifier(new ResponderID(new X500Name("CN=Test")), new ASN1GeneralizedTime(new Date()));
         CrlListID crlListID = new CrlListID(new CrlValidatedID[]{new CrlValidatedID(new OtherHash(new byte[20]))});
         OcspListID ocspListID = new OcspListID(new OcspResponsesID[] { new OcspResponsesID(ocspIdentifier) });
         OtherRevRefs otherRevRefs = new OtherRevRefs(new ASN1ObjectIdentifier("1.2.1"), new DERSequence());
         OtherRevVals otherRevVals = new OtherRevVals(new ASN1ObjectIdentifier("1.2.1"), new DERSequence());
 
+        CrlOcspRef crlOcspRef = new CrlOcspRef(crlListID, ocspListID, otherRevRefs);
+        doSequenceTest(CompleteRevocationRefs.class, new CompleteRevocationRefs(new CrlOcspRef[] {crlOcspRef, crlOcspRef}));
+
+        doSequenceTest(CrlIdentifier.class, new CrlIdentifier(new X500Name("CN=Test"), new ASN1UTCTime(new Date()), BigInteger.valueOf(1)));
+
+
         doSequenceTest(CrlListID.class, crlListID);
-        doSequenceTest(CrlOcspRef.class, new CrlOcspRef(crlListID, ocspListID, otherRevRefs));
+        doSequenceTest(CrlOcspRef.class, crlOcspRef);
         doSequenceTest(CrlValidatedID.class, new CrlValidatedID(new OtherHash(new byte[20])));
         doSequenceTest(OcspIdentifier.class, ocspIdentifier);
         doSequenceTest(OcspListID.class, ocspListID);
