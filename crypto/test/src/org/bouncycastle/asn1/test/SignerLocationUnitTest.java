@@ -103,7 +103,7 @@ public class SignerLocationUnitTest
         
         try
         {
-            new SignerLocation(new DERSequence(new DERTaggedObject(2, postalAddress)));
+            SignerLocation.getInstance(new DERSequence(new DERTaggedObject(2, postalAddress)));
             
             fail("sequence constructor failed to detect bad postalAddress.");
         }
@@ -114,7 +114,7 @@ public class SignerLocationUnitTest
         
         try
         {
-            new SignerLocation(new DERSequence(new DERTaggedObject(5, postalAddress)));
+            SignerLocation.getInstance(new DERSequence(new DERTaggedObject(5, postalAddress)));
             
             fail("sequence constructor failed to detect bad tag.");
         }

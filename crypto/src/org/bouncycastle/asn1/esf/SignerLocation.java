@@ -30,7 +30,7 @@ public class SignerLocation
     private DERUTF8String   localityName;
     private ASN1Sequence    postalAddress;
     
-    public SignerLocation(
+    private SignerLocation(
         ASN1Sequence seq)
     {
         Enumeration     e = seq.getObjects();

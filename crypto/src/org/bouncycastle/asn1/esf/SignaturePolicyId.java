@@ -18,21 +18,19 @@ public class SignaturePolicyId
     public static SignaturePolicyId getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof SignaturePolicyId)
+        if (obj instanceof SignaturePolicyId)
         {
-            return (SignaturePolicyId) obj;
+            return (SignaturePolicyId)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new SignaturePolicyId((ASN1Sequence) obj);
+            return new SignaturePolicyId(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException(
-                "Unknown object in 'SignaturePolicyId' factory : "
-                        + obj.getClass().getName() + ".");
+        return null;
     }
 
-    public SignaturePolicyId(
+    private SignaturePolicyId(
         ASN1Sequence seq)
     {
         if (seq.size() != 2 && seq.size() != 3)

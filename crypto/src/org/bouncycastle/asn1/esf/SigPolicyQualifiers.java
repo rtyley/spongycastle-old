@@ -26,7 +26,7 @@ public class SigPolicyQualifiers
         return null;
     }
 
-    public SigPolicyQualifiers(
+    private SigPolicyQualifiers(
         ASN1Sequence seq)
     {
         qualifiers = seq;
@@ -56,10 +56,10 @@ public class SigPolicyQualifiers
     /**
      * Return the SigPolicyQualifierInfo at index i.
      *
-     * @param i index of the string of interest
-     * @return the string at index i.
+     * @param i index of the info of interest
+     * @return the info at index i.
      */
-    public SigPolicyQualifierInfo getStringAt(
+    public SigPolicyQualifierInfo getInfoAt(
         int i)
     {
         return SigPolicyQualifierInfo.getInstance(qualifiers.getObjectAt(i));

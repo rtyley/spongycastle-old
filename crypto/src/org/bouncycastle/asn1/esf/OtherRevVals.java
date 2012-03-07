@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.esf;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Object;
@@ -26,7 +27,7 @@ public class OtherRevVals
 
     private ASN1ObjectIdentifier otherRevValType;
 
-    private ASN1Primitive otherRevVals;
+    private ASN1Encodable otherRevVals;
 
     public static OtherRevVals getInstance(Object obj)
     {
@@ -62,7 +63,7 @@ public class OtherRevVals
     }
 
     public OtherRevVals(ASN1ObjectIdentifier otherRevValType,
-                        ASN1Primitive otherRevVals)
+                        ASN1Encodable otherRevVals)
     {
         this.otherRevValType = otherRevValType;
         this.otherRevVals = otherRevVals;
@@ -73,7 +74,7 @@ public class OtherRevVals
         return this.otherRevValType;
     }
 
-    public ASN1Primitive getOtherRevVals()
+    public ASN1Encodable getOtherRevVals()
     {
         return this.otherRevVals;
     }

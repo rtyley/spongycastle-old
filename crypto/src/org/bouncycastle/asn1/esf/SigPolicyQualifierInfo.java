@@ -22,7 +22,7 @@ public class SigPolicyQualifierInfo
         this.sigQualifier = sigQualifier;
     }
 
-    public SigPolicyQualifierInfo(
+    private SigPolicyQualifierInfo(
         ASN1Sequence seq)
     {
         sigPolicyQualifierId = ASN1ObjectIdentifier.getInstance(seq.getObjectAt(0));
@@ -32,18 +32,16 @@ public class SigPolicyQualifierInfo
     public static SigPolicyQualifierInfo getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof SigPolicyQualifierInfo)
+        if (obj instanceof SigPolicyQualifierInfo)
         {
             return (SigPolicyQualifierInfo) obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new SigPolicyQualifierInfo((ASN1Sequence) obj);
+            return new SigPolicyQualifierInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'SigPolicyQualifierInfo' factory: "
-                        + obj.getClass().getName() + ".");
+        return null;
     }
 
     public ASN1ObjectIdentifier getSigPolicyQualifierId()
