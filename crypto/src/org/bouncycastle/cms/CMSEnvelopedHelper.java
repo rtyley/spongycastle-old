@@ -3,7 +3,6 @@ package org.bouncycastle.cms;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.util.ArrayList;
@@ -98,21 +97,6 @@ class CMSEnvelopedHelper
         return keySize.intValue();
     }
 
-    private AlgorithmParameters createAlgorithmParams(
-        String algName,
-        Provider provider)
-        throws NoSuchAlgorithmException
-    {
-        if (provider != null)
-        {
-            return AlgorithmParameters.getInstance(algName, provider);
-        }
-        else
-        {
-            return AlgorithmParameters.getInstance(algName);
-        }
-    }
-
     private KeyGenerator createKeyGenerator(
         String algName,
         Provider provider)
@@ -126,16 +110,6 @@ class CMSEnvelopedHelper
         {
             return KeyGenerator.getInstance(algName);
         }
-    }
-
-    String getSymmetricCipherName(String oid)
-    {
-        String algName = (String)BASE_CIPHER_NAMES.get(oid);
-        if (algName != null)
-        {
-            return algName;
-        }
-        return oid;
     }
 
     static RecipientInformationStore buildRecipientInformationStore(
