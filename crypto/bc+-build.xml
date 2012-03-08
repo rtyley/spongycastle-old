@@ -784,7 +784,7 @@
         </compile-doc>
 
         <copy todir="${pkix.target.docs.dir}">
-             <fileset dir="${artifacts.docs.dir}/bctsp" />
+             <fileset dir="${artifacts.docs.dir}/bcpkix" />
         </copy>
     </target>
 

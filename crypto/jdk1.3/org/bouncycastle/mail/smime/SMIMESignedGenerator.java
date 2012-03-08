@@ -11,13 +11,14 @@ import org.bouncycastle.jce.cert.CertStore;
 import org.bouncycastle.jce.cert.CertStoreException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
@@ -28,6 +29,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -35,6 +37,7 @@ import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
 import org.bouncycastle.cms.SignerInfoGenerator;
@@ -68,10 +71,16 @@ import org.bouncycastle.x509.X509Store;
  *      MimeMultipart       smime = fact.generate(content);
  * </pre>
  * <p>
- * Note: if you are using this class with AS2 or some other protocol
+ * Note 1: if you are using this class with AS2 or some other protocol
  * that does not use "7bit" as the default content transfer encoding you
  * will need to use the constructor that allows you to specify the default
  * content transfer encoding, such as "binary".
+ * </p>
+ * <p>
+ * Note 2: between RFC 3851 and RFC 5751 the values used in the micalg parameter
+ * for signed messages changed. We will accept both, but the default is now to use
+ * RFC 5751. In the event you are dealing with an older style system you will also need
+ * to use a constructor that sets the micalgs table and call it with RFC3851_MICALGS.
  * </p>
  */
 public class SMIMESignedGenerator
@@ -99,22 +108,9 @@ public class SMIMESignedGenerator
     private static final String DETACHED_SIGNATURE_TYPE = "application/pkcs7-signature; name=smime.p7s; smime-type=signed-data";
     private static final String ENCAPSULATED_SIGNED_CONTENT_TYPE = "application/pkcs7-mime; name=smime.p7m; smime-type=signed-data";
 
-    private final String        _defaultContentTransferEncoding;
-
-    private List                _certStores = new ArrayList();
-    private List                certStores = new ArrayList();
-    private List                crlStores = new ArrayList();
-    private List                attrCertStores = new ArrayList();
-    private List                signerInfoGens = new ArrayList();
-    private List                _signers = new ArrayList();
-    private List                _oldSigners = new ArrayList();
-    private List                _attributeCerts = new ArrayList();
-    private Map                 _digests = new HashMap();
-    
-    static
-    {
-        CommandMap.setDefaultCommandMap(addCommands(CommandMap.getDefaultCommandMap()));
-    }
+    public static final Map RFC3851_MICALGS;
+    public static final Map RFC5751_MICALGS;
+    public static final Map STANDARD_MICALGS;
 
     private static MailcapCommandMap addCommands(CommandMap cm)
     {
@@ -129,12 +125,56 @@ public class SMIMESignedGenerator
         return mc;
     }
 
+    static
+    {
+        CommandMap.setDefaultCommandMap(addCommands(CommandMap.getDefaultCommandMap()));
+
+        Map stdMicAlgs = new HashMap();
+
+        stdMicAlgs.put(CMSAlgorithm.MD5, "md5");
+        stdMicAlgs.put(CMSAlgorithm.SHA1, "sha-1");
+        stdMicAlgs.put(CMSAlgorithm.SHA224, "sha-224");
+        stdMicAlgs.put(CMSAlgorithm.SHA256, "sha-256");
+        stdMicAlgs.put(CMSAlgorithm.SHA384, "sha-384");
+        stdMicAlgs.put(CMSAlgorithm.SHA512, "sha-512");
+        stdMicAlgs.put(CMSAlgorithm.GOST3411, "gostr3411-94");
+
+        RFC5751_MICALGS = Collections.unmodifiableMap(stdMicAlgs);
+
+        Map oldMicAlgs = new HashMap();
+
+        oldMicAlgs.put(CMSAlgorithm.MD5, "md5");
+        oldMicAlgs.put(CMSAlgorithm.SHA1, "sha1");
+        oldMicAlgs.put(CMSAlgorithm.SHA224, "sha224");
+        oldMicAlgs.put(CMSAlgorithm.SHA256, "sha256");
+        oldMicAlgs.put(CMSAlgorithm.SHA384, "sha384");
+        oldMicAlgs.put(CMSAlgorithm.SHA512, "sha512");
+        oldMicAlgs.put(CMSAlgorithm.GOST3411, "gostr3411-94");
+
+        RFC3851_MICALGS = Collections.unmodifiableMap(oldMicAlgs);
+
+        STANDARD_MICALGS = RFC5751_MICALGS;
+    }
+
+    private final String defaultContentTransferEncoding;
+    private final Map    micAlgs;
+
+    private List                _certStores = new ArrayList();
+    private List                certStores = new ArrayList();
+    private List                crlStores = new ArrayList();
+    private List                attrCertStores = new ArrayList();
+    private List                signerInfoGens = new ArrayList();
+    private List                _signers = new ArrayList();
+    private List                _oldSigners = new ArrayList();
+    private List                _attributeCerts = new ArrayList();
+    private Map                 _digests = new HashMap();
+
     /**
      * base constructor - default content transfer encoding 7bit
      */
     public SMIMESignedGenerator()
     {
-        _defaultContentTransferEncoding = "7bit";
+        this("7bit", STANDARD_MICALGS);
     }
 
     /**
@@ -145,9 +185,34 @@ public class SMIMESignedGenerator
     public SMIMESignedGenerator(
         String defaultContentTransferEncoding)
     {
-        _defaultContentTransferEncoding = defaultContentTransferEncoding;
+        this(defaultContentTransferEncoding, STANDARD_MICALGS);
     }
-    
+
+    /**
+     * base constructor - default content transfer encoding explicitly set
+     *
+     * @param micAlgs a map of ANS1ObjectIdentifiers to strings hash algorithm names.
+     */
+    public SMIMESignedGenerator(
+        Map micAlgs)
+    {
+        this("7bit", micAlgs);
+    }
+
+    /**
+     * base constructor - default content transfer encoding explicitly set
+     *
+     * @param defaultContentTransferEncoding new default to use.
+     * @param micAlgs a map of ANS1ObjectIdentifiers to strings hash algorithm names.
+     */
+    public SMIMESignedGenerator(
+        String defaultContentTransferEncoding,
+        Map micAlgs)
+    {
+        this.defaultContentTransferEncoding = defaultContentTransferEncoding;
+        this.micAlgs = micAlgs;
+    }
+
     /**
      * add a signer - no attributes other than the default ones will be
      * provided here.
@@ -164,7 +229,7 @@ public class SMIMESignedGenerator
         String          digestOID)
         throws IllegalArgumentException
     {
-        _signers.add(new Signer(key, cert, digestOID, null, null));
+        _signers.add(new Signer(key, cert, new ASN1ObjectIdentifier(digestOID), null, null));
     }
 
     /**
@@ -185,7 +250,7 @@ public class SMIMESignedGenerator
         String          digestOID)
         throws IllegalArgumentException
     {
-        _signers.add(new Signer(key, cert, encryptionOID, digestOID, null, null));
+        _signers.add(new Signer(key, cert, new ASN1ObjectIdentifier(encryptionOID), new ASN1ObjectIdentifier(digestOID), null, null));
     }
 
     /**
@@ -209,7 +274,7 @@ public class SMIMESignedGenerator
         AttributeTable  unsignedAttr)
         throws IllegalArgumentException
     {
-        _signers.add(new Signer(key, cert, digestOID, signedAttr, unsignedAttr));
+        _signers.add(new Signer(key, cert, new ASN1ObjectIdentifier(digestOID), signedAttr, unsignedAttr));
     }
 
     /**
@@ -236,7 +301,7 @@ public class SMIMESignedGenerator
         AttributeTable  unsignedAttr)
         throws IllegalArgumentException
     {
-        _signers.add(new Signer(key, cert, encryptionOID, digestOID, signedAttr, unsignedAttr));
+        _signers.add(new Signer(key, cert, new ASN1ObjectIdentifier(encryptionOID), new ASN1ObjectIdentifier(digestOID), signedAttr, unsignedAttr));
     }
 
     /**
@@ -320,12 +385,12 @@ public class SMIMESignedGenerator
         // build the hash header
         //
         Iterator   it = signers.iterator();
-        Set        micAlgs = new HashSet();
+        Set        micAlgSet = new TreeSet();
         
         while (it.hasNext())
         {
-            Object       signer = it.next();
-            String       digestOID;
+            Object              signer = it.next();
+            ASN1ObjectIdentifier digestOID;
 
             if (signer instanceof Signer)
             {
@@ -333,48 +398,26 @@ public class SMIMESignedGenerator
             }
             else if (signer instanceof SignerInformation)
             {
-                digestOID = ((SignerInformation)signer).getDigestAlgOID();
+                digestOID = ((SignerInformation)signer).getDigestAlgorithmID().getAlgorithm();
             }
             else
             {
-                digestOID = ((SignerInfoGenerator)signer).getDigestAlgorithm().getAlgorithm().getId();
+                digestOID = ((SignerInfoGenerator)signer).getDigestAlgorithm().getAlgorithm();
             }
 
-            if (digestOID.equals(DIGEST_SHA1))
+            String micAlg = (String)micAlgs.get(digestOID);
+
+            if (micAlg == null)
             {
-                micAlgs.add("sha1");
-            }
-            else if (digestOID.equals(DIGEST_MD5))
-            {
-                micAlgs.add("md5");
-            }
-            else if (digestOID.equals(DIGEST_SHA224))
-            {
-                micAlgs.add("sha224");
-            }
-            else if (digestOID.equals(DIGEST_SHA256))
-            {
-                micAlgs.add("sha256");
-            }
-            else if (digestOID.equals(DIGEST_SHA384))
-            {
-                micAlgs.add("sha384");
-            }
-            else if (digestOID.equals(DIGEST_SHA512))
-            {
-                micAlgs.add("sha512");
-            }
-            else if (digestOID.equals(DIGEST_GOST3411))
-            {
-                micAlgs.add("gostr3411-94");
+                micAlgSet.add("unknown");
             }
             else
             {
-                micAlgs.add("unknown");
+                micAlgSet.add(micAlg);
             }
         }
         
-        it = micAlgs.iterator();
+        it = micAlgSet.iterator();
         
         while (it.hasNext())
         {
@@ -382,7 +425,7 @@ public class SMIMESignedGenerator
 
             if (count == 0)
             {
-                if (micAlgs.size() != 1)
+                if (micAlgSet.size() != 1)
                 {
                     header.append("; micalg=\"");
                 }
@@ -403,7 +446,7 @@ public class SMIMESignedGenerator
 
         if (count != 0)
         {
-            if (micAlgs.size() != 1)
+            if (micAlgSet.size() != 1)
             {
                 header.append('\"');
             }
@@ -805,15 +848,15 @@ public class SMIMESignedGenerator
     {
         final PrivateKey      key;
         final X509Certificate cert;
-        final String          encryptionOID;
-        final String          digestOID;
+        final ASN1ObjectIdentifier encryptionOID;
+        final ASN1ObjectIdentifier digestOID;
         final AttributeTable  signedAttr;
         final AttributeTable  unsignedAttr;
         
         Signer(
             PrivateKey      key,
             X509Certificate cert,
-            String          digestOID,
+            ASN1ObjectIdentifier digestOID,
             AttributeTable  signedAttr,
             AttributeTable  unsignedAttr)
         {
@@ -823,8 +866,8 @@ public class SMIMESignedGenerator
         Signer(
             PrivateKey      key,
             X509Certificate cert,
-            String          encryptionOID,
-            String          digestOID,
+            ASN1ObjectIdentifier encryptionOID,
+            ASN1ObjectIdentifier digestOID,
             AttributeTable  signedAttr,
             AttributeTable  unsignedAttr)
         {
@@ -841,12 +884,12 @@ public class SMIMESignedGenerator
             return cert;
         }
 
-        public String getEncryptionOID()
+        public ASN1ObjectIdentifier getEncryptionOID()
         {
             return encryptionOID;
         }
 
-        public String getDigestOID()
+        public ASN1ObjectIdentifier getDigestOID()
         {
             return digestOID;
         }
@@ -932,11 +975,11 @@ public class SMIMESignedGenerator
 
                 if (signer.getEncryptionOID() != null)
                 {
-                    gen.addSigner(signer.getKey(), signer.getCert(), signer.getEncryptionOID(), signer.getDigestOID(), signer.getSignedAttr(), signer.getUnsignedAttr(), provider);
+                    gen.addSigner(signer.getKey(), signer.getCert(), signer.getEncryptionOID().getId(), signer.getDigestOID().getId(), signer.getSignedAttr(), signer.getUnsignedAttr(), provider);
                 }
                 else
                 {
-                    gen.addSigner(signer.getKey(), signer.getCert(), signer.getDigestOID(), signer.getSignedAttr(), signer.getUnsignedAttr(), provider);
+                    gen.addSigner(signer.getKey(), signer.getCert(), signer.getDigestOID().getId(), signer.getSignedAttr(), signer.getUnsignedAttr(), provider);
                 }
             }
 
@@ -984,7 +1027,7 @@ public class SMIMESignedGenerator
             }
             else
             {
-                if (SMIMEUtil.isCanonicalisationRequired(bodyPart, _defaultContentTransferEncoding))
+                if (SMIMEUtil.isCanonicalisationRequired(bodyPart, defaultContentTransferEncoding))
                 {
                     out = new CRLFOutputStream(out);
                 }
