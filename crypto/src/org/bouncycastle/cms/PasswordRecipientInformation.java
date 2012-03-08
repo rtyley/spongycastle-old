@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cms.jcajce.JceAlgorithmIdentifierConverter;
 import org.bouncycastle.cms.jcajce.JcePasswordAuthenticatedRecipient;
 import org.bouncycastle.cms.jcajce.JcePasswordEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JcePasswordRecipient;
@@ -99,10 +100,21 @@ public class PasswordRecipientInformation
     }
 
     /**
+     * Return the key derivation algorithm details for the key in this recipient.
+     *
+     * @return AlgorithmIdentifier representing the key derivation algorithm.
+     */
+    public AlgorithmIdentifier getKeyDerivationAlgorithm()
+    {
+        return info.getKeyDerivationAlgorithm();
+    }
+
+    /**
      * return an AlgorithmParameters object representing the parameters to the
      * key derivation algorithm to the recipient.
      *
      * @return AlgorithmParameters object, null if there aren't any.
+     * @deprecated use getKeyDerivationAlgorithm and JceAlgorithmIdentifierConverter().
      */
     public AlgorithmParameters getKeyDerivationAlgParameters(String provider)
         throws NoSuchProviderException
@@ -115,26 +127,13 @@ public class PasswordRecipientInformation
      * key derivation algorithm to the recipient.
      *
      * @return AlgorithmParameters object, null if there aren't any.
+    *  @deprecated use getKeyDerivationAlgorithm and JceAlgorithmIdentifierConverter().
      */
     public AlgorithmParameters getKeyDerivationAlgParameters(Provider provider)
     {
         try
         {
-            if (info.getKeyDerivationAlgorithm() != null)
-            {
-                ASN1Encodable params = info.getKeyDerivationAlgorithm().getParameters();
-                if (params != null)
-                {
-                    AlgorithmParameters algP = AlgorithmParameters.getInstance(
-                        info.getKeyDerivationAlgorithm().getAlgorithm().toString(), provider);
-
-                    algP.init(params.toASN1Primitive().getEncoded());
-
-                    return algP;
-                }
-            }
-
-            return null;
+            return new JceAlgorithmIdentifierConverter().setProvider(provider).getAlgorithmParameters(info.getKeyDerivationAlgorithm());
         }
         catch (Exception e)
         {
