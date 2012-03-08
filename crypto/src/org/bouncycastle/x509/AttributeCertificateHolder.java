@@ -16,6 +16,7 @@ import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -125,7 +126,7 @@ public class AttributeCertificateHolder
         String digestAlgorithm, String otherObjectTypeID, byte[] objectDigest)
     {
         holder = new Holder(new ObjectDigestInfo(digestedObjectType,
-            otherObjectTypeID, new AlgorithmIdentifier(digestAlgorithm), Arrays
+            new ASN1ObjectIdentifier(otherObjectTypeID), new AlgorithmIdentifier(digestAlgorithm), Arrays
                 .clone(objectDigest)));
     }
 

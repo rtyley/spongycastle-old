@@ -88,5 +88,10 @@ public abstract class ASN1Object
         return this.toASN1Primitive();
     }
 
+    protected static boolean hasEncodedTagValue(Object obj, int tagValue)
+    {
+        return (obj instanceof byte[]) && ((byte[])obj)[0] == tagValue;
+    }
+
     public abstract ASN1Primitive toASN1Primitive();
 }

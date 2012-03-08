@@ -1,6 +1,7 @@
 package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Enumerated;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -48,7 +49,7 @@ public class ObjectDigestInfo
      */
     public final static int otherObjectDigest = 2;
 
-    DEREnumerated digestedObjectType;
+    ASN1Enumerated digestedObjectType;
 
     ASN1ObjectIdentifier otherObjectTypeID;
 
@@ -59,18 +60,17 @@ public class ObjectDigestInfo
     public static ObjectDigestInfo getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof ObjectDigestInfo)
+        if (obj instanceof ObjectDigestInfo)
         {
             return (ObjectDigestInfo)obj;
         }
 
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
-            return new ObjectDigestInfo((ASN1Sequence)obj);
+            return new ObjectDigestInfo(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("illegal object in getInstance: "
-            + obj.getClass().getName());
+        return null;
     }
 
     public static ObjectDigestInfo getInstance(
@@ -95,18 +95,17 @@ public class ObjectDigestInfo
      */
     public ObjectDigestInfo(
         int digestedObjectType,
-        String otherObjectTypeID,
+        ASN1ObjectIdentifier otherObjectTypeID,
         AlgorithmIdentifier digestAlgorithm,
         byte[] objectDigest)
     {
-        this.digestedObjectType = new DEREnumerated(digestedObjectType);
+        this.digestedObjectType = new ASN1Enumerated(digestedObjectType);
         if (digestedObjectType == otherObjectDigest)
         {
-            this.otherObjectTypeID = new ASN1ObjectIdentifier(otherObjectTypeID);
+            this.otherObjectTypeID = otherObjectTypeID;
         }
 
-        this.digestAlgorithm = digestAlgorithm; 
-
+        this.digestAlgorithm = digestAlgorithm;
         this.objectDigest = new DERBitString(objectDigest);
     }
 

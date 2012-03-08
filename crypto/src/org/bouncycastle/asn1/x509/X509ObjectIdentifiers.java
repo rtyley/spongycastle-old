@@ -47,6 +47,11 @@ public interface X509ObjectIdentifiers
     static final ASN1ObjectIdentifier  id_pe = new ASN1ObjectIdentifier(id_pkix + ".1");
 
     //
+    // ISO ARC for standard certificate and CRL extensions
+    //
+    static final ASN1ObjectIdentifier id_ce = new ASN1ObjectIdentifier("2.5.29");
+
+    //
     // authority information access
     //
     static final ASN1ObjectIdentifier  id_ad = new ASN1ObjectIdentifier(id_pkix + ".48");

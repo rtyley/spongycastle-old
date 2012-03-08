@@ -4,6 +4,7 @@ import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERSequence;
@@ -11,6 +12,7 @@ import org.bouncycastle.asn1.x509.DisplayText;
 import org.bouncycastle.asn1.x509.NoticeReference;
 
 public class SPUserNotice
+    extends ASN1Object
 {
     private NoticeReference noticeRef;
     private DisplayText     explicitText;
@@ -18,21 +20,19 @@ public class SPUserNotice
     public static SPUserNotice getInstance(
         Object obj)
     {
-        if (obj == null || obj instanceof SPUserNotice)
+        if (obj instanceof SPUserNotice)
         {
-            return (SPUserNotice) obj;
+            return (SPUserNotice)obj;
         }
-        else if (obj instanceof ASN1Sequence)
+        else if (obj != null)
         {
-            return new SPUserNotice((ASN1Sequence) obj);
+            return new SPUserNotice(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'SPUserNotice' factory : "
-                        + obj.getClass().getName() + ".");
+        return null;
     }
 
-    public SPUserNotice(
+    private SPUserNotice(
         ASN1Sequence seq)
     {
         Enumeration e = seq.getObjects();

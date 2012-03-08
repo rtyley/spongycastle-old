@@ -17,7 +17,7 @@ import org.bouncycastle.asn1.pkcs.DHParameter;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
-import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
+import org.bouncycastle.asn1.sec.ECPrivateKey;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -152,8 +152,7 @@ public class PrivateKeyFactory
                 x9 = X9ECParameters.getInstance(params.getParameters());
             }
 
-            ECPrivateKeyStructure ec = new ECPrivateKeyStructure(
-                (ASN1Sequence)keyInfo.parsePrivateKey());
+            ECPrivateKey ec = ECPrivateKey.getInstance(keyInfo.parsePrivateKey());
             BigInteger d = ec.getKey();
 
             // TODO We lose any named parameters here

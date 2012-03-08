@@ -96,7 +96,7 @@ public class AttributeCertificateHolder
      * @param objectDigest The hash value.
      */
     public AttributeCertificateHolder(int digestedObjectType,
-        String digestAlgorithm, String otherObjectTypeID, byte[] objectDigest)
+        ASN1ObjectIdentifier digestAlgorithm, ASN1ObjectIdentifier otherObjectTypeID, byte[] objectDigest)
     {
         holder = new Holder(new ObjectDigestInfo(digestedObjectType,
             otherObjectTypeID, new AlgorithmIdentifier(digestAlgorithm), Arrays

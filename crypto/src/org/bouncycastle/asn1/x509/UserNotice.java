@@ -50,8 +50,7 @@ public class UserNotice
         NoticeReference noticeRef, 
         String str) 
     {
-        this.noticeRef = noticeRef;
-        this.explicitText = new DisplayText(str);
+        this(noticeRef, new DisplayText(str));
     }
 
     /**
@@ -63,7 +62,7 @@ public class UserNotice
      * calling @{link toASN1Primitive()} for a <code>UserNotice</code>
      * instance or from parsing it from a DER-encoded stream. 
      */
-    public UserNotice(
+    private UserNotice(
        ASN1Sequence as) 
     {
        if (as.size() == 2)
@@ -87,7 +86,23 @@ public class UserNotice
            throw new IllegalArgumentException("Bad sequence size: " + as.size());
        }
     }
-   
+
+    public static UserNotice getInstance(
+        Object obj)
+    {
+        if (obj instanceof UserNotice)
+        {
+            return (UserNotice)obj;
+        }
+
+        if (obj != null)
+        {
+            return new UserNotice(ASN1Sequence.getInstance(obj));
+        }
+
+        return null;
+    }
+
     public NoticeReference getNoticeRef()
     {
         return noticeRef;

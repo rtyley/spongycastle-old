@@ -3,6 +3,7 @@ package org.bouncycastle.asn1.test;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.Vector;
 
 import junit.framework.TestCase;
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -256,6 +257,7 @@ import org.bouncycastle.asn1.x509.Target;
 import org.bouncycastle.asn1.x509.TargetInformation;
 import org.bouncycastle.asn1.x509.Targets;
 import org.bouncycastle.asn1.x509.Time;
+import org.bouncycastle.asn1.x509.UserNotice;
 import org.bouncycastle.asn1.x509.V2Form;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -358,7 +360,7 @@ public class GetInstanceTest
 
     private static final Object[] NULL_ARGS = new Object[] { null };
 
-    private void doSequenceTest(Class clazz, ASN1Object o1)
+    private void doFullGetInstanceTest(Class clazz, ASN1Object o1)
         throws Exception
     {
         Method m;
@@ -406,19 +408,19 @@ public class GetInstanceTest
         CertificateList crl = CertificateList.getInstance(v2CertList);
         AttributeCertificate attributeCert = AttributeCertificate.getInstance(attrCert);
 
-        doSequenceTest(CAKeyUpdAnnContent.class, new CAKeyUpdAnnContent(cmpCert, cmpCert, cmpCert));
+        doFullGetInstanceTest(CAKeyUpdAnnContent.class, new CAKeyUpdAnnContent(cmpCert, cmpCert, cmpCert));
 
         CertConfirmContent.getInstance(null);
         CertifiedKeyPair.getInstance(null);
         CertOrEncCert.getInstance(null);
         CertRepMessage.getInstance(null);
-        doSequenceTest(CertResponse.class, new CertResponse(new ASN1Integer(1), new PKIStatusInfo(PKIStatus.granted)));
-        doSequenceTest(org.bouncycastle.asn1.cmp.CertStatus.class, new org.bouncycastle.asn1.cmp.CertStatus(new byte[10], BigInteger.valueOf(1), new PKIStatusInfo(PKIStatus.granted)));
-        doSequenceTest(Challenge.class, new Challenge(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE), new byte[10], new byte[10]));
+        doFullGetInstanceTest(CertResponse.class, new CertResponse(new ASN1Integer(1), new PKIStatusInfo(PKIStatus.granted)));
+        doFullGetInstanceTest(org.bouncycastle.asn1.cmp.CertStatus.class, new org.bouncycastle.asn1.cmp.CertStatus(new byte[10], BigInteger.valueOf(1), new PKIStatusInfo(PKIStatus.granted)));
+        doFullGetInstanceTest(Challenge.class, new Challenge(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE), new byte[10], new byte[10]));
 
-        doSequenceTest(CMPCertificate.class, cmpCert);
-        doSequenceTest(CRLAnnContent.class, new CRLAnnContent(crl));
-        doSequenceTest(ErrorMsgContent.class, new ErrorMsgContent(new PKIStatusInfo(PKIStatus.granted), new ASN1Integer(1), new PKIFreeText("fred")));
+        doFullGetInstanceTest(CMPCertificate.class, cmpCert);
+        doFullGetInstanceTest(CRLAnnContent.class, new CRLAnnContent(crl));
+        doFullGetInstanceTest(ErrorMsgContent.class, new ErrorMsgContent(new PKIStatusInfo(PKIStatus.granted), new ASN1Integer(1), new PKIFreeText("fred")));
         GenMsgContent.getInstance(null);
         GenRepContent.getInstance(null);
         InfoTypeAndValue.getInstance(null);
@@ -428,14 +430,14 @@ public class GetInstanceTest
         PKIBody.getInstance(null);
         PKIConfirmContent.getInstance(null);
         PKIFreeText.getInstance(null);
-        doSequenceTest(PKIFreeText.class, new PKIFreeText("hello world"));
-        doSequenceTest(PKIFreeText.class, new PKIFreeText(new String[] { "hello", "world" }));
-        doSequenceTest(PKIFreeText.class, new PKIFreeText(new DERUTF8String[] { new DERUTF8String("hello"), new DERUTF8String("world") }));
+        doFullGetInstanceTest(PKIFreeText.class, new PKIFreeText("hello world"));
+        doFullGetInstanceTest(PKIFreeText.class, new PKIFreeText(new String[]{"hello", "world"}));
+        doFullGetInstanceTest(PKIFreeText.class, new PKIFreeText(new DERUTF8String[]{new DERUTF8String("hello"), new DERUTF8String("world")}));
         PKIHeader.getInstance(null);
         PKIMessage.getInstance(null);
         PKIMessages.getInstance(null);
-        doSequenceTest(PKIStatusInfo.class, new PKIStatusInfo(PKIStatus.rejection, new PKIFreeText("hello world"), new PKIFailureInfo(PKIFailureInfo.badAlg)));
-        doSequenceTest(PKIStatusInfo.class, new PKIStatusInfo(PKIStatus.granted, new PKIFreeText("hello world")));
+        doFullGetInstanceTest(PKIStatusInfo.class, new PKIStatusInfo(PKIStatus.rejection, new PKIFreeText("hello world"), new PKIFailureInfo(PKIFailureInfo.badAlg)));
+        doFullGetInstanceTest(PKIStatusInfo.class, new PKIStatusInfo(PKIStatus.granted, new PKIFreeText("hello world")));
         PKIStatus.getInstance(null);
         PollRepContent.getInstance(null);
         PollReqContent.getInstance(null);
@@ -497,7 +499,7 @@ public class GetInstanceTest
         TimeStampTokenEvidence.getInstance(null);
         AttributeTypeAndValue.getInstance(null);
 
-        doSequenceTest(CertId.class, new CertId(new GeneralName(new X500Name("CN=Test")), BigInteger.valueOf(1)));
+        doFullGetInstanceTest(CertId.class, new CertId(new GeneralName(new X500Name("CN=Test")), BigInteger.valueOf(1)));
 
 
         CertReqMessages.getInstance(null);
@@ -540,41 +542,48 @@ public class GetInstanceTest
         OcspListID ocspListID = new OcspListID(new OcspResponsesID[] { new OcspResponsesID(ocspIdentifier) });
         OtherRevRefs otherRevRefs = new OtherRevRefs(new ASN1ObjectIdentifier("1.2.1"), new DERSequence());
         OtherRevVals otherRevVals = new OtherRevVals(new ASN1ObjectIdentifier("1.2.1"), new DERSequence());
-
         CrlOcspRef crlOcspRef = new CrlOcspRef(crlListID, ocspListID, otherRevRefs);
-        doSequenceTest(CompleteRevocationRefs.class, new CompleteRevocationRefs(new CrlOcspRef[] {crlOcspRef, crlOcspRef}));
+        doFullGetInstanceTest(CompleteRevocationRefs.class, new CompleteRevocationRefs(new CrlOcspRef[]{crlOcspRef, crlOcspRef}));
 
-        doSequenceTest(CrlIdentifier.class, new CrlIdentifier(new X500Name("CN=Test"), new ASN1UTCTime(new Date()), BigInteger.valueOf(1)));
+        doFullGetInstanceTest(CrlIdentifier.class, new CrlIdentifier(new X500Name("CN=Test"), new ASN1UTCTime(new Date()), BigInteger.valueOf(1)));
 
 
-        doSequenceTest(CrlListID.class, crlListID);
-        doSequenceTest(CrlOcspRef.class, crlOcspRef);
-        doSequenceTest(CrlValidatedID.class, new CrlValidatedID(new OtherHash(new byte[20])));
-        doSequenceTest(OcspIdentifier.class, ocspIdentifier);
-        doSequenceTest(OcspListID.class, ocspListID);
-        doSequenceTest(OcspResponsesID.class, new OcspResponsesID(ocspIdentifier));
+        doFullGetInstanceTest(CrlListID.class, crlListID);
+        doFullGetInstanceTest(CrlOcspRef.class, crlOcspRef);
+        doFullGetInstanceTest(CrlValidatedID.class, new CrlValidatedID(new OtherHash(new byte[20])));
+        doFullGetInstanceTest(OcspIdentifier.class, ocspIdentifier);
+        doFullGetInstanceTest(OcspListID.class, ocspListID);
+        doFullGetInstanceTest(OcspResponsesID.class, new OcspResponsesID(ocspIdentifier));
 
         OtherHashAlgAndValue otherHashAlgAndValue = new OtherHashAlgAndValue(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE), new DEROctetString(new byte[10]));
-        doSequenceTest(OtherHashAlgAndValue.class, otherHashAlgAndValue);
+        doFullGetInstanceTest(OtherHashAlgAndValue.class, otherHashAlgAndValue);
         OtherHash.getInstance(null);
-        doSequenceTest(OtherRevRefs.class, otherRevRefs);
-        doSequenceTest(OtherRevVals.class, otherRevVals);
-        doSequenceTest(RevocationValues.class, new RevocationValues(new CertificateList[]{crl}, null, otherRevVals));
-        SignaturePolicyIdentifier.getInstance(null);
-        doSequenceTest(SignaturePolicyId.class, new SignaturePolicyId(new ASN1ObjectIdentifier("1.2.1"), otherHashAlgAndValue));
-        doSequenceTest(SignerAttribute.class, new SignerAttribute(new org.bouncycastle.asn1.x509.Attribute[] { new org.bouncycastle.asn1.x509.Attribute(new ASN1ObjectIdentifier("1.2.1"), new DERSet())}));
-        doSequenceTest(SignerAttribute.class, new SignerAttribute(attributeCert));
+        doFullGetInstanceTest(OtherRevRefs.class, otherRevRefs);
+        doFullGetInstanceTest(OtherRevVals.class, otherRevVals);
+        doFullGetInstanceTest(RevocationValues.class, new RevocationValues(new CertificateList[]{crl}, null, otherRevVals));
+
+        SignaturePolicyId signaturePolicyId = new SignaturePolicyId(new ASN1ObjectIdentifier("1.2.1"), otherHashAlgAndValue);
+        doFullGetInstanceTest(SignaturePolicyIdentifier.class, new SignaturePolicyIdentifier());
+        doFullGetInstanceTest(SignaturePolicyIdentifier.class, new SignaturePolicyIdentifier(signaturePolicyId));
+        doFullGetInstanceTest(SignaturePolicyId.class, signaturePolicyId);
+        doFullGetInstanceTest(SignerAttribute.class, new SignerAttribute(new org.bouncycastle.asn1.x509.Attribute[]{new org.bouncycastle.asn1.x509.Attribute(new ASN1ObjectIdentifier("1.2.1"), new DERSet())}));
+        doFullGetInstanceTest(SignerAttribute.class, new SignerAttribute(attributeCert));
 
         ASN1EncodableVector postalAddr = new ASN1EncodableVector();
 
         postalAddr.add(new DERUTF8String("line 1"));
         postalAddr.add(new DERUTF8String("line 2"));
 
-        doSequenceTest(SignerLocation.class, new SignerLocation(new DERUTF8String("AU"), new DERUTF8String("Melbourne"), new DERSequence(postalAddr)));
-        doSequenceTest(SigPolicyQualifierInfo.class, new SigPolicyQualifierInfo(new ASN1ObjectIdentifier("1.2.1"), new DERSequence()));
+        doFullGetInstanceTest(SignerLocation.class, new SignerLocation(new DERUTF8String("AU"), new DERUTF8String("Melbourne"), new DERSequence(postalAddr)));
+        doFullGetInstanceTest(SigPolicyQualifierInfo.class, new SigPolicyQualifierInfo(new ASN1ObjectIdentifier("1.2.1"), new DERSequence()));
         SigPolicyQualifiers.getInstance(null);
         SPuri.getInstance(null);
-        SPUserNotice.getInstance(null);
+        Vector v = new Vector();
+
+        v.add(new Integer(1));
+        v.add(BigInteger.valueOf(2));
+        NoticeReference noticeReference = new NoticeReference("BC", v);
+        doFullGetInstanceTest(SPUserNotice.class, new SPUserNotice(noticeReference, new DisplayText("hello world")));
         ContentHints.getInstance(null);
         ContentIdentifier.getInstance(null);
         ESSCertID.getInstance(null);
@@ -593,7 +602,7 @@ public class GetInstanceTest
         BasicOCSPResponse.getInstance(null);
         BasicOCSPResponse.getInstance(null);
 
-        doSequenceTest(CertID.class, new CertID(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE), new DEROctetString(new byte[1]), new DEROctetString(new byte[1]), new ASN1Integer(1)));
+        doFullGetInstanceTest(CertID.class, new CertID(new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE), new DEROctetString(new byte[1]), new DEROctetString(new byte[1]), new ASN1Integer(1)));
 
         CertStatus.getInstance(null);
         CertStatus.getInstance(null);
@@ -705,24 +714,32 @@ public class GetInstanceTest
         GeneralName.getInstance(null);
         GeneralNames.getInstance(null);
         GeneralNames.getInstance(null);
-        GeneralSubtree.getInstance(null);
-        GeneralSubtree.getInstance(null);
-        Holder.getInstance(null);
+
+        GeneralSubtree generalSubtree = new GeneralSubtree(new GeneralName(new X500Name("CN=Test")));
+        ASN1ObjectIdentifier algOid = new ASN1ObjectIdentifier("1.2.1");
+        ObjectDigestInfo objectDigestInfo = new ObjectDigestInfo(ObjectDigestInfo.otherObjectDigest, algOid, new AlgorithmIdentifier(algOid), new byte[20]);
+
+        doFullGetInstanceTest(GeneralSubtree.class, generalSubtree);
+        doFullGetInstanceTest(Holder.class, new Holder(objectDigestInfo));
         IetfAttrSyntax.getInstance(null);
         IssuerSerial.getInstance(null);
         IssuerSerial.getInstance(null);
         IssuingDistributionPoint.getInstance(null);
         IssuingDistributionPoint.getInstance(null);
         DERBitString.getInstance(null);
-        NameConstraints.getInstance(null);
-        NoticeReference.getInstance(null);
-        ObjectDigestInfo.getInstance(null);
-        ObjectDigestInfo.getInstance(null);
+
+        v.clear();
+        v.add(generalSubtree);
+
+        doFullGetInstanceTest(NameConstraints.class, new NameConstraints(v, v));
+        doFullGetInstanceTest(NoticeReference.class, noticeReference);
+        doFullGetInstanceTest(ObjectDigestInfo.class, objectDigestInfo);
+
         PolicyInformation.getInstance(null);
         PolicyMappings.getInstance(null);
         PolicyQualifierInfo.getInstance(null);
         PrivateKeyUsagePeriod.getInstance(null);
-        RoleSyntax.getInstance(null);
+        doFullGetInstanceTest(RoleSyntax.class, new RoleSyntax(new GeneralNames(new GeneralName(new X500Name("CN=Test"))), new GeneralName(GeneralName.uniformResourceIdentifier, "http://bc")));
         RSAPublicKeyStructure.getInstance(null);
         RSAPublicKeyStructure.getInstance(null);
         SubjectDirectoryAttributes.getInstance(null);
@@ -742,6 +759,7 @@ public class GetInstanceTest
         TBSCertList.getInstance(null);
         Time.getInstance(null);
         Time.getInstance(null);
+        doFullGetInstanceTest(UserNotice.class, new UserNotice(noticeReference, "hello world"));
         V2Form.getInstance(null);
         V2Form.getInstance(null);
         X509CertificateStructure.getInstance(null);

@@ -1,12 +1,6 @@
 package org.bouncycastle.cms;
 
-import java.io.IOException;
-import java.security.AlgorithmParameters;
-import java.security.NoSuchAlgorithmException;
-import java.security.Provider;
 import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.InvalidParameterSpecException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,15 +29,6 @@ public class CMSAuthenticatedGenerator
         SecureRandom rand)
     {
         super(rand);
-    }
-
-    protected AlgorithmIdentifier getAlgorithmIdentifier(String encryptionOID, AlgorithmParameterSpec paramSpec, Provider provider)
-        throws IOException, NoSuchAlgorithmException, InvalidParameterSpecException
-    {
-        AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(encryptionOID, provider);
-        params.init(paramSpec);
-
-        return getAlgorithmIdentifier(encryptionOID, params);
     }
 
     public void setAuthenticatedAttributeGenerator(CMSAttributeTableGenerator authGen)

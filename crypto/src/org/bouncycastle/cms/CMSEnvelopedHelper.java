@@ -86,36 +86,6 @@ class CMSEnvelopedHelper
         }
     }
 
-    AlgorithmParameters createAlgorithmParameters(
-        String encryptionOID, 
-        Provider provider)
-        throws NoSuchAlgorithmException
-    {
-        try
-        {
-            return createAlgorithmParams(encryptionOID, provider);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            try
-            {
-                String algName = (String)BASE_CIPHER_NAMES.get(encryptionOID);
-                if (algName != null)
-                {
-                    return createAlgorithmParams(algName, provider);
-                }
-            }
-            catch (NoSuchAlgorithmException ex)
-            {
-                // ignore
-            }
-            //
-            // can't try with default provider here as parameters must be from the specified provider.
-            //
-            throw e;
-        }
-    }
-
     int getKeySize(String oid)
     {
         Integer keySize = (Integer)KEYSIZES.get(oid);
@@ -155,35 +125,6 @@ class CMSEnvelopedHelper
         else
         {
             return KeyGenerator.getInstance(algName);
-        }
-    }
-
-    AlgorithmParameters getEncryptionAlgorithmParameters(
-        String encOID,
-        byte[] encParams,
-        Provider provider)
-        throws CMSException
-    {
-        if (encParams == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            AlgorithmParameters params = createAlgorithmParameters(encOID, provider);
-
-            params.init(encParams, "ASN.1");
-
-            return params;
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find parameters for algorithm", e);
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("can't find parse parameters", e);
         }
     }
 

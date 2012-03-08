@@ -162,18 +162,6 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.KeyStore.bouncycastle", "BouncyCastle");
 
         //
-        // certificate factories.
-        //
-        put("CertificateFactory.X.509", "org.bouncycastle.jce.provider.JDKX509CertificateFactory");
-        put("Alg.Alias.CertificateFactory.X509", "X.509");
-
-        //
-        // algorithm parameter generators
-        //
-
-
-
-        //
         // algorithm parameters
         //
         put("AlgorithmParameters.IES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IES");

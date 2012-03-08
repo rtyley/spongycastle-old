@@ -3,7 +3,7 @@ package org.bouncycastle.asn1.esf;
 import org.bouncycastle.asn1.ASN1Null;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERNull;
 
 public class SignaturePolicyIdentifier
@@ -15,22 +15,20 @@ public class SignaturePolicyIdentifier
     public static SignaturePolicyIdentifier getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof SignaturePolicyIdentifier)
+        if (obj instanceof SignaturePolicyIdentifier)
         {
-            return (SignaturePolicyIdentifier) obj;
+            return (SignaturePolicyIdentifier)obj;
         }
-        else if (obj instanceof ASN1Sequence)
-        {
-            return new SignaturePolicyIdentifier(SignaturePolicyId.getInstance(obj));
-        }
-        else if (obj instanceof ASN1Null)
+        else if (obj instanceof ASN1Null || hasEncodedTagValue(obj, BERTags.NULL))
         {
             return new SignaturePolicyIdentifier();
         }
+        else if (obj != null)
+        {
+            return new SignaturePolicyIdentifier(SignaturePolicyId.getInstance(obj));
+        }
 
-        throw new IllegalArgumentException(
-                "unknown object in 'SignaturePolicyIdentifier' factory: "
-                        + obj.getClass().getName() + ".");
+        return null;
     }
 
     public SignaturePolicyIdentifier()

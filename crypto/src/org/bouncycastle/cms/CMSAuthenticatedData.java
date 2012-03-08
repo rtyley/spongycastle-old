@@ -14,6 +14,7 @@ import org.bouncycastle.asn1.cms.AuthenticatedData;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cms.jcajce.JceAlgorithmIdentifierConverter;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Arrays;
@@ -165,6 +166,16 @@ public class CMSAuthenticatedData
     }
 
     /**
+     * Return the MAC algorithm details for the MAC associated with the data in this object.
+     *
+     * @return AlgorithmIdentifier representing the MAC algorithm.
+     */
+    public AlgorithmIdentifier getMacAlgorithm()
+    {
+        return macAlg;
+    }
+
+    /**
      * return the object identifier for the content MAC algorithm.
      */
     public String getMacAlgOID()
@@ -196,12 +207,13 @@ public class CMSAuthenticatedData
      * @return the parameters object, null if there is not one.
      * @throws org.bouncycastle.cms.CMSException if the algorithm cannot be found, or the parameters can't be parsed.
      * @throws java.security.NoSuchProviderException if the provider cannot be found.
+     * @deprecated use getMacAlgorithm and JceAlgorithmIdentifierConverter().
      */
     public AlgorithmParameters getMacAlgorithmParameters(
         String  provider)
     throws CMSException, NoSuchProviderException
     {
-        return getMacAlgorithmParameters(CMSUtils.getProvider(provider));
+        return new JceAlgorithmIdentifierConverter().setProvider(provider).getAlgorithmParameters(macAlg);
     }
 
     /**
@@ -211,12 +223,13 @@ public class CMSAuthenticatedData
      * @param provider the provider to generate the parameters for.
      * @return the parameters object, null if there is not one.
      * @throws org.bouncycastle.cms.CMSException if the algorithm cannot be found, or the parameters can't be parsed.
+     * @deprecated use getMacAlgorithm and JceAlgorithmIdentifierConverter().
      */
     public AlgorithmParameters getMacAlgorithmParameters(
         Provider provider)
     throws CMSException
     {
-        return CMSEnvelopedHelper.INSTANCE.getEncryptionAlgorithmParameters(getMacAlgOID(), getMacAlgParams(), provider);
+        return new JceAlgorithmIdentifierConverter().setProvider(provider).getAlgorithmParameters(macAlg);
     }
 
     /**

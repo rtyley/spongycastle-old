@@ -4,13 +4,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.AlgorithmParameters;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cms.jcajce.JceAlgorithmIdentifierConverter;
 import org.bouncycastle.util.io.Streams;
 
 public abstract class RecipientInformation
@@ -55,6 +55,16 @@ public abstract class RecipientInformation
     }
 
     /**
+     * Return the key encryption algorithm details for the key in this recipient.
+     *
+     * @return AlgorithmIdentifier representing the key encryption algorithm.
+     */
+    public AlgorithmIdentifier getKeyEncryptionAlgorithm()
+    {
+        return keyEncAlg;
+    }
+
+    /**
      * return the object identifier for the key encryption algorithm.
      *
      * @return OID for key encryption algorithm.
@@ -90,12 +100,13 @@ public abstract class RecipientInformation
      * @return the parameters object, null if there is not one.
      * @throws CMSException            if the algorithm cannot be found, or the parameters can't be parsed.
      * @throws NoSuchProviderException if the provider cannot be found.
+     * @deprecated use getKeyEncryptionAlgorithm and JceAlgorithmIdentifierConverter().
      */
     public AlgorithmParameters getKeyEncryptionAlgorithmParameters(
         String provider)
         throws CMSException, NoSuchProviderException
     {
-        return getKeyEncryptionAlgorithmParameters(CMSUtils.getProvider(provider));
+        return new JceAlgorithmIdentifierConverter().setProvider(provider).getAlgorithmParameters(keyEncAlg);
     }
 
     /**
@@ -105,33 +116,13 @@ public abstract class RecipientInformation
      * @param provider the provider to generate the parameters for.
      * @return the parameters object, null if there is not one.
      * @throws CMSException if the algorithm cannot be found, or the parameters can't be parsed.
+     * @deprecated use getKeyEncryptionAlgorithm and JceAlgorithmIdentifierConverter().
      */
     public AlgorithmParameters getKeyEncryptionAlgorithmParameters(
         Provider provider)
         throws CMSException
     {
-        try
-        {
-            byte[] enc = this.encodeObj(keyEncAlg.getParameters());
-            if (enc == null)
-            {
-                return null;
-            }
-
-            AlgorithmParameters params = CMSEnvelopedHelper.INSTANCE.createAlgorithmParameters(getKeyEncryptionAlgOID(), provider);
-
-            params.init(enc, "ASN.1");
-
-            return params;
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find parameters for algorithm", e);
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("can't find parse parameters", e);
-        }
+        return new JceAlgorithmIdentifierConverter().setProvider(provider).getAlgorithmParameters(keyEncAlg);
     }
 
     /**

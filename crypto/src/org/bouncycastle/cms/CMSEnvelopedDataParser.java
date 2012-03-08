@@ -20,6 +20,7 @@ import org.bouncycastle.asn1.cms.EncryptedContentInfoParser;
 import org.bouncycastle.asn1.cms.EnvelopedDataParser;
 import org.bouncycastle.asn1.cms.OriginatorInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cms.jcajce.JceAlgorithmIdentifierConverter;
 
 /**
  * Parsing class for an CMS Enveloped Data object from an input stream.
@@ -56,12 +57,12 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class CMSEnvelopedDataParser
     extends CMSContentInfoParser
 {
-    RecipientInformationStore   _recipientInfoStore;
-    EnvelopedDataParser         _envelopedData;
+    RecipientInformationStore recipientInfoStore;
+    EnvelopedDataParser envelopedData;
     
-    private AlgorithmIdentifier _encAlg;
-    private AttributeTable      _unprotectedAttributes;
-    private boolean             _attrNotRead;
+    private AlgorithmIdentifier encAlg;
+    private AttributeTable unprotectedAttributes;
+    private boolean attrNotRead;
     private OriginatorInformation  originatorInfo;
 
     public CMSEnvelopedDataParser(
@@ -77,13 +78,13 @@ public class CMSEnvelopedDataParser
     {
         super(envelopedData);
 
-        this._attrNotRead = true;
-        this._envelopedData = new EnvelopedDataParser((ASN1SequenceParser)_contentInfo.getContent(BERTags.SEQUENCE));
+        this.attrNotRead = true;
+        this.envelopedData = new EnvelopedDataParser((ASN1SequenceParser)_contentInfo.getContent(BERTags.SEQUENCE));
 
         // TODO Validate version?
         //DERInteger version = this._envelopedData.getVersion();
 
-        OriginatorInfo info = _envelopedData.getOriginatorInfo();
+        OriginatorInfo info = this.envelopedData.getOriginatorInfo();
 
         if (info != null)
         {
@@ -93,23 +94,23 @@ public class CMSEnvelopedDataParser
         //
         // read the recipients
         //
-        ASN1Set recipientInfos = ASN1Set.getInstance(_envelopedData.getRecipientInfos().toASN1Primitive());
+        ASN1Set recipientInfos = ASN1Set.getInstance(this.envelopedData.getRecipientInfos().toASN1Primitive());
 
         //
         // read the encrypted content info
         //
-        EncryptedContentInfoParser encInfo = _envelopedData.getEncryptedContentInfo();
-        this._encAlg = encInfo.getContentEncryptionAlgorithm();
+        EncryptedContentInfoParser encInfo = this.envelopedData.getEncryptedContentInfo();
+        this.encAlg = encInfo.getContentEncryptionAlgorithm();
         CMSReadable readable = new CMSProcessableInputStream(
             ((ASN1OctetStringParser)encInfo.getEncryptedContent(BERTags.OCTET_STRING)).getOctetStream());
         CMSSecureReadable secureReadable = new CMSEnvelopedHelper.CMSEnvelopedSecureReadable(
-            this._encAlg, readable);
+            this.encAlg, readable);
 
         //
         // build the RecipientInformationStore
         //
-        this._recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
-            recipientInfos, this._encAlg, secureReadable);
+        this.recipientInfoStore = CMSEnvelopedHelper.buildRecipientInformationStore(
+            recipientInfos, this.encAlg, secureReadable);
     }
 
     /**
@@ -117,7 +118,7 @@ public class CMSEnvelopedDataParser
      */
     public String getEncryptionAlgOID()
     {
-        return _encAlg.getAlgorithm().toString();
+        return encAlg.getAlgorithm().toString();
     }
 
     /**
@@ -128,28 +129,22 @@ public class CMSEnvelopedDataParser
     {
         try
         {
-            return encodeObj(_encAlg.getParameters());
+            return encodeObj(encAlg.getParameters());
         }
         catch (Exception e)
         {
             throw new RuntimeException("exception getting encryption parameters " + e);
         }
     }
-    
+
     /**
-     * Return an AlgorithmParameters object giving the encryption parameters
-     * used to encrypt the message content.
-     * 
-     * @param provider the name of the provider to generate the parameters for.
-     * @return the parameters object, null if there is not one.
-     * @throws CMSException if the algorithm cannot be found, or the parameters can't be parsed.
-     * @throws NoSuchProviderException if the provider cannot be found.
+     * Return the content encryption algorithm details for the data in this object.
+     *
+     * @return AlgorithmIdentifier representing the content encryption algorithm.
      */
-    public AlgorithmParameters getEncryptionAlgorithmParameters(
-        String  provider) 
-        throws CMSException, NoSuchProviderException
+    public AlgorithmIdentifier getContentEncryptionAlgorithm()
     {
-        return getEncryptionAlgorithmParameters(CMSUtils.getProvider(provider));
+        return encAlg;
     }
 
     /**
@@ -159,12 +154,30 @@ public class CMSEnvelopedDataParser
      * @param provider the provider to generate the parameters for.
      * @return the parameters object, null if there is not one.
      * @throws CMSException if the algorithm cannot be found, or the parameters can't be parsed.
+     * @throws NoSuchProviderException if the provider cannot be found.
+     * @deprecated use getContentEncryptionAlgorithm and JceAlgorithmIdentifierConverter().
+     */
+    public AlgorithmParameters getEncryptionAlgorithmParameters(
+        String  provider)
+    throws CMSException, NoSuchProviderException
+    {
+        return new JceAlgorithmIdentifierConverter().setProvider(provider).getAlgorithmParameters(encAlg);
+    }
+
+    /**
+     * Return an AlgorithmParameters object giving the encryption parameters
+     * used to encrypt the message content.
+     *
+     * @param provider the provider to generate the parameters for.
+     * @return the parameters object, null if there is not one.
+     * @throws CMSException if the algorithm cannot be found, or the parameters can't be parsed.
+     * @deprecated use getContentEncryptionAlgorithm and JceAlgorithmIdentifierConverter().
      */
     public AlgorithmParameters getEncryptionAlgorithmParameters(
         Provider provider)
-        throws CMSException
+    throws CMSException
     {
-        return CMSEnvelopedHelper.INSTANCE.getEncryptionAlgorithmParameters(getEncryptionAlgOID(), getEncryptionAlgParams(), provider);
+        return new JceAlgorithmIdentifierConverter().setProvider(provider).getAlgorithmParameters(encAlg);
     }
 
     /**
@@ -182,7 +195,7 @@ public class CMSEnvelopedDataParser
      */
     public RecipientInformationStore getRecipientInfos()
     {
-        return _recipientInfoStore;
+        return recipientInfoStore;
     }
 
     /**
@@ -193,11 +206,11 @@ public class CMSEnvelopedDataParser
     public AttributeTable getUnprotectedAttributes() 
         throws IOException
     {
-        if (_unprotectedAttributes == null && _attrNotRead)
+        if (unprotectedAttributes == null && attrNotRead)
         {
-            ASN1SetParser             set = _envelopedData.getUnprotectedAttrs();
+            ASN1SetParser             set = envelopedData.getUnprotectedAttrs();
             
-            _attrNotRead = false;
+            attrNotRead = false;
             
             if (set != null)
             {
@@ -211,11 +224,11 @@ public class CMSEnvelopedDataParser
                     v.add(seq.toASN1Primitive());
                 }
                 
-                _unprotectedAttributes = new AttributeTable(new DERSet(v));
+                unprotectedAttributes = new AttributeTable(new DERSet(v));
             }
         }
 
-        return _unprotectedAttributes;
+        return unprotectedAttributes;
     }
 
     private byte[] encodeObj(

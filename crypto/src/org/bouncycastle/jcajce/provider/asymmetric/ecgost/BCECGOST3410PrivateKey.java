@@ -15,7 +15,6 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
@@ -23,7 +22,6 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X962Parameters;
@@ -253,7 +251,7 @@ public class BCECGOST3410PrivateKey
         }
         else
         {
-            ECPrivateKeyStructure ec = new ECPrivateKeyStructure((ASN1Sequence)privKey);
+            org.bouncycastle.asn1.sec.ECPrivateKey ec = org.bouncycastle.asn1.sec.ECPrivateKey.getInstance(privKey);
 
             this.d = ec.getKey();
             this.publicKey = ec.getPublicKey();
@@ -313,15 +311,15 @@ public class BCECGOST3410PrivateKey
         }
         
         PrivateKeyInfo          info;
-        ECPrivateKeyStructure keyStructure;
+        org.bouncycastle.asn1.sec.ECPrivateKey keyStructure;
 
         if (publicKey != null)
         {
-            keyStructure = new ECPrivateKeyStructure(this.getS(), publicKey, params);
+            keyStructure = new org.bouncycastle.asn1.sec.ECPrivateKey(this.getS(), publicKey, params);
         }
         else
         {
-            keyStructure = new ECPrivateKeyStructure(this.getS(), params);
+            keyStructure = new org.bouncycastle.asn1.sec.ECPrivateKey(this.getS(), params);
         }
 
         try

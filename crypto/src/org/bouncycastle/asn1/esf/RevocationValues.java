@@ -29,7 +29,7 @@ public class RevocationValues
 
     public static RevocationValues getInstance(Object obj)
     {
-        if (null == obj || obj instanceof RevocationValues)
+        if (obj instanceof RevocationValues)
         {
             return (RevocationValues)obj;
         }
@@ -38,7 +38,7 @@ public class RevocationValues
             return new RevocationValues(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("null value in getInstance");
+        return null;
     }
 
     private RevocationValues(ASN1Sequence seq)
