@@ -3,7 +3,6 @@ package org.bouncycastle.cms;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
@@ -87,36 +86,6 @@ class CMSEnvelopedHelper
         }
     }
 
-    AlgorithmParameters createAlgorithmParameters(
-        String encryptionOID, 
-        Provider provider)
-        throws NoSuchAlgorithmException
-    {
-        try
-        {
-            return createAlgorithmParams(encryptionOID, provider);
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            try
-            {
-                String algName = (String)BASE_CIPHER_NAMES.get(encryptionOID);
-                if (algName != null)
-                {
-                    return createAlgorithmParams(algName, provider);
-                }
-            }
-            catch (NoSuchAlgorithmException ex)
-            {
-                // ignore
-            }
-            //
-            // can't try with default provider here as parameters must be from the specified provider.
-            //
-            throw e;
-        }
-    }
-
     int getKeySize(String oid)
     {
         Integer keySize = (Integer)KEYSIZES.get(oid);
@@ -127,28 +96,6 @@ class CMSEnvelopedHelper
         }
 
         return keySize.intValue();
-    }
-
-    private AlgorithmParameters createAlgorithmParams(
-        String algName,
-        Provider provider)
-        throws NoSuchAlgorithmException
-    {
-        if (provider != null)
-        {
-            try
-            {
-                return AlgorithmParameters.getInstance(algName, provider.getName());
-            }
-            catch (NoSuchProviderException e)
-            {
-                throw new NoSuchAlgorithmException(e.toString());
-            }
-        }
-        else
-        {
-            return AlgorithmParameters.getInstance(algName);
-        }
     }
 
     private KeyGenerator createKeyGenerator(
@@ -171,45 +118,6 @@ class CMSEnvelopedHelper
         {
             return KeyGenerator.getInstance(algName);
         }
-    }
-
-    AlgorithmParameters getEncryptionAlgorithmParameters(
-        String encOID,
-        byte[] encParams,
-        Provider provider)
-        throws CMSException
-    {
-        if (encParams == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            AlgorithmParameters params = createAlgorithmParameters(encOID, provider);
-
-            params.init(encParams, "ASN.1");
-
-            return params;
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new CMSException("can't find parameters for algorithm", e);
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("can't find parse parameters", e);
-        }
-    }
-
-    String getSymmetricCipherName(String oid)
-    {
-        String algName = (String)BASE_CIPHER_NAMES.get(oid);
-        if (algName != null)
-        {
-            return algName;
-        }
-        return oid;
     }
 
     static RecipientInformationStore buildRecipientInformationStore(
