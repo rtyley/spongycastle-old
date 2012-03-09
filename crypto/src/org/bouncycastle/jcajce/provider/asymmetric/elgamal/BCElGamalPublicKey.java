@@ -27,7 +27,7 @@ public class BCElGamalPublicKey
     static final long serialVersionUID = 8712728417091216948L;
         
     private BigInteger              y;
-    private ElGamalParameterSpec    elSpec;
+    private transient ElGamalParameterSpec    elSpec;
 
     BCElGamalPublicKey(
         ElGamalPublicKeySpec spec)
@@ -134,7 +134,8 @@ public class BCElGamalPublicKey
         ObjectInputStream   in)
         throws IOException, ClassNotFoundException
     {
-        this.y = (BigInteger)in.readObject();
+        in.defaultReadObject();
+
         this.elSpec = new ElGamalParameterSpec((BigInteger)in.readObject(), (BigInteger)in.readObject());
     }
 
@@ -142,7 +143,8 @@ public class BCElGamalPublicKey
         ObjectOutputStream  out)
         throws IOException
     {
-        out.writeObject(this.getY());
+        out.defaultWriteObject();
+
         out.writeObject(elSpec.getP());
         out.writeObject(elSpec.getG());
     }

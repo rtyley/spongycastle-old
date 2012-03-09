@@ -33,11 +33,10 @@ public class BCElGamalPrivateKey
 {
     static final long serialVersionUID = 4819350091141529678L;
         
-    BigInteger      x;
+    private BigInteger      x;
 
-    ElGamalParameterSpec   elSpec;
-
-    private PKCS12BagAttributeCarrierImpl attrCarrier = new PKCS12BagAttributeCarrierImpl();
+    private transient ElGamalParameterSpec   elSpec;
+    private transient PKCS12BagAttributeCarrierImpl attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected BCElGamalPrivateKey()
     {
@@ -143,16 +142,18 @@ public class BCElGamalPrivateKey
         ObjectInputStream   in)
         throws IOException, ClassNotFoundException
     {
-        x = (BigInteger)in.readObject();
+        in.defaultReadObject();
 
         this.elSpec = new ElGamalParameterSpec((BigInteger)in.readObject(), (BigInteger)in.readObject());
+        this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
     }
 
     private void writeObject(
         ObjectOutputStream  out)
         throws IOException
     {
-        out.writeObject(this.getX());
+        out.defaultWriteObject();
+
         out.writeObject(elSpec.getP());
         out.writeObject(elSpec.getG());
     }
