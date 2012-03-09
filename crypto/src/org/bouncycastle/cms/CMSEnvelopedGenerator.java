@@ -13,7 +13,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -229,8 +228,12 @@ public class CMSEnvelopedGenerator
         Provider         provider)
         throws NoSuchAlgorithmException, InvalidKeyException
     {
+        List recipients = new ArrayList();
+
+        recipients.add(recipientCert);
+
         addKeyAgreementRecipients(agreementAlgorithm, senderPrivateKey, senderPublicKey,
-            Collections.singletonList(recipientCert), cekWrapAlgorithm, provider);
+            recipients, cekWrapAlgorithm, provider);
     }
 
     /**

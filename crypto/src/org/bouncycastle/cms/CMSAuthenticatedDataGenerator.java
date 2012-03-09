@@ -8,6 +8,7 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -164,7 +165,7 @@ public class CMSAuthenticatedDataGenerator
                 throw new CMSException("exception decoding algorithm parameters.", e);
             }
 
-            ASN1Set unauthed = (unauthGen != null) ? new BERSet(unauthGen.getAttributes(Collections.EMPTY_MAP).toASN1EncodableVector()) : null;
+            ASN1Set unauthed = (unauthGen != null) ? new BERSet(unauthGen.getAttributes(new HashMap()).toASN1EncodableVector()) : null;
 
             ContentInfo  eci = new ContentInfo(
                             CMSObjectIdentifiers.data,
