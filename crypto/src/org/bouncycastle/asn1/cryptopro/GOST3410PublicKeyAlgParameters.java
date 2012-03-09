@@ -25,17 +25,17 @@ public class GOST3410PublicKeyAlgParameters
     public static GOST3410PublicKeyAlgParameters getInstance(
         Object obj)
     {
-        if(obj == null || obj instanceof GOST3410PublicKeyAlgParameters)
+        if (obj instanceof GOST3410PublicKeyAlgParameters)
         {
             return (GOST3410PublicKeyAlgParameters)obj;
         }
 
-        if(obj instanceof ASN1Sequence)
+        if(obj != null)
         {
-            return new GOST3410PublicKeyAlgParameters((ASN1Sequence)obj);
+            return new GOST3410PublicKeyAlgParameters(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("Invalid GOST3410Parameter: " + obj.getClass().getName());
+        return null;
     }
     
     public GOST3410PublicKeyAlgParameters(

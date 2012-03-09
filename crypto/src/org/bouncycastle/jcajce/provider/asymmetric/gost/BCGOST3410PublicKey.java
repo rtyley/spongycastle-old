@@ -1,6 +1,8 @@
 package org.bouncycastle.jcajce.provider.asymmetric.gost;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -22,7 +24,7 @@ public class BCGOST3410PublicKey
     implements GOST3410PublicKey
 {
     private BigInteger      y;
-    private GOST3410Params  gost3410Spec;
+    private transient GOST3410Params  gost3410Spec;
 
     BCGOST3410PublicKey(
         GOST3410PublicKeySpec spec)
@@ -167,5 +169,47 @@ public class BCGOST3410PublicKey
     public int hashCode()
     {
         return y.hashCode() ^ gost3410Spec.hashCode();
+    }
+
+    private void readObject(
+        ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+    {
+        in.defaultReadObject();
+
+        String publicKeyParamSetOID = (String)in.readObject();
+        if (publicKeyParamSetOID != null)
+        {
+            this.gost3410Spec = new GOST3410ParameterSpec(publicKeyParamSetOID, (String)in.readObject(), (String)in.readObject());
+        }
+        else
+        {
+            this.gost3410Spec = new GOST3410ParameterSpec(new GOST3410PublicKeyParameterSetSpec((BigInteger)in.readObject(), (BigInteger)in.readObject(), (BigInteger)in.readObject()));
+            in.readObject();
+            in.readObject();
+        }
+    }
+
+    private void writeObject(
+        ObjectOutputStream out)
+        throws IOException
+    {
+        out.defaultWriteObject();
+
+        if (gost3410Spec.getPublicKeyParamSetOID() != null)
+        {
+            out.writeObject(gost3410Spec.getPublicKeyParamSetOID());
+            out.writeObject(gost3410Spec.getDigestParamSetOID());
+            out.writeObject(gost3410Spec.getEncryptionParamSetOID());
+        }
+        else
+        {
+            out.writeObject(null);
+            out.writeObject(gost3410Spec.getPublicKeyParameters().getP());
+            out.writeObject(gost3410Spec.getPublicKeyParameters().getQ());
+            out.writeObject(gost3410Spec.getPublicKeyParameters().getA());
+            out.writeObject(gost3410Spec.getDigestParamSetOID());
+            out.writeObject(gost3410Spec.getEncryptionParamSetOID());
+        }
     }
 }

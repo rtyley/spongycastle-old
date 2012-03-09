@@ -1,6 +1,8 @@
 package org.bouncycastle.jcajce.provider.asymmetric.gost;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.util.Enumeration;
 
@@ -27,10 +29,10 @@ import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 public class BCGOST3410PrivateKey
     implements GOST3410PrivateKey, PKCS12BagAttributeCarrier
 {
-    BigInteger          x;
-    GOST3410Params      gost3410Spec;
+    private BigInteger          x;
 
-    private PKCS12BagAttributeCarrier attrCarrier = new PKCS12BagAttributeCarrierImpl();
+    private transient   GOST3410Params      gost3410Spec;
+    private transient   PKCS12BagAttributeCarrier attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected BCGOST3410PrivateKey()
     {
@@ -167,5 +169,48 @@ public class BCGOST3410PrivateKey
     public Enumeration getBagAttributeKeys()
     {
         return attrCarrier.getBagAttributeKeys();
+    }
+
+    private void readObject(
+        ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+    {
+        in.defaultReadObject();
+
+        String publicKeyParamSetOID = (String)in.readObject();
+        if (publicKeyParamSetOID != null)
+        {
+            this.gost3410Spec = new GOST3410ParameterSpec(publicKeyParamSetOID, (String)in.readObject(), (String)in.readObject());
+        }
+        else
+        {
+            this.gost3410Spec = new GOST3410ParameterSpec(new GOST3410PublicKeyParameterSetSpec((BigInteger)in.readObject(), (BigInteger)in.readObject(), (BigInteger)in.readObject()));
+            in.readObject();
+            in.readObject();
+        }
+        this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
+    }
+
+    private void writeObject(
+        ObjectOutputStream out)
+        throws IOException
+    {
+        out.defaultWriteObject();
+
+        if (gost3410Spec.getPublicKeyParamSetOID() != null)
+        {
+            out.writeObject(gost3410Spec.getPublicKeyParamSetOID());
+            out.writeObject(gost3410Spec.getDigestParamSetOID());
+            out.writeObject(gost3410Spec.getEncryptionParamSetOID());
+        }
+        else
+        {
+            out.writeObject(null);
+            out.writeObject(gost3410Spec.getPublicKeyParameters().getP());
+            out.writeObject(gost3410Spec.getPublicKeyParameters().getQ());
+            out.writeObject(gost3410Spec.getPublicKeyParameters().getA());
+            out.writeObject(gost3410Spec.getDigestParamSetOID());
+            out.writeObject(gost3410Spec.getEncryptionParamSetOID());
+        }
     }
 }

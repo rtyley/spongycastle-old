@@ -1,32 +1,38 @@
 package org.bouncycastle.jce.provider.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.SignatureException;
-import java.security.InvalidKeyException;
 import java.security.UnrecoverableKeyException;
-import java.security.cert.X509Certificate;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Date;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.interfaces.ECPrivateKey;
+import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle.jce.interfaces.GOST3410PublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -34,7 +40,6 @@ import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
-import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
@@ -155,7 +160,7 @@ public class GOST3410Test
         }
 
         //
-        // default iniialisation test
+        // default initialisation test
         //
         s = Signature.getInstance("GOST3410", "BC");
         g = KeyPairGenerator.getInstance("GOST3410", "BC");
@@ -195,6 +200,11 @@ public class GOST3410Test
             fail("public number not decoded properly");
         }
 
+        if (!k1.getParameters().equals(((GOST3410PublicKey)vKey).getParameters()))
+        {
+            fail("public parameters not decoded properly");
+        }
+
         PKCS8EncodedKeySpec  pkcs8 = new PKCS8EncodedKeySpec(sKey.getEncoded());
         GOST3410PrivateKey   k2 = (GOST3410PrivateKey)f.generatePrivate(pkcs8);
 
@@ -203,27 +213,55 @@ public class GOST3410Test
             fail("private number not decoded properly");
         }
 
+        if (!k2.getParameters().equals(((GOST3410PrivateKey)sKey).getParameters()))
+        {
+            fail("private number not decoded properly");
+        }
+
+        k2 = (GOST3410PrivateKey)serializeDeserialize(sKey);
+        if (!k2.getX().equals(((GOST3410PrivateKey)sKey).getX()))
+        {
+            fail("private number not deserialised properly");
+        }
+
+        if (!k2.getParameters().equals(((GOST3410PrivateKey)sKey).getParameters()))
+        {
+            fail("private number not deserialised properly");
+        }
+
+        k1 = (GOST3410PublicKey)serializeDeserialize(vKey);
+
+        if (!k1.getY().equals(((GOST3410PublicKey)vKey).getY()))
+        {
+            fail("public number not deserialised properly");
+        }
+
+        if (!k1.getParameters().equals(((GOST3410PublicKey)vKey).getParameters()))
+        {
+            fail("public parameters not deserialised properly");
+        }
+
         //
         // ECGOST3410 generation test
         //
         s = Signature.getInstance("ECGOST3410", "BC");
         g = KeyPairGenerator.getInstance("ECGOST3410", "BC");
 
-        BigInteger mod_p = new BigInteger("57896044618658097711785492504343953926634992332820282019728792003956564821041"); //p
+//        BigInteger mod_p = new BigInteger("57896044618658097711785492504343953926634992332820282019728792003956564821041"); //p
+//
+//        ECCurve curve = new ECCurve.Fp(
+//            mod_p, // p
+//            new BigInteger("7"), // a
+//            new BigInteger("43308876546767276905765904595650931995942111794451039583252968842033849580414")); // b
+//
+//        ECParameterSpec ecSpec = new ECParameterSpec(
+//                curve,
+//                    new ECPoint.Fp(curve,
+//                                   new ECFieldElement.Fp(mod_p,new BigInteger("2")), // x
+//                                   new ECFieldElement.Fp(mod_p,new BigInteger("4018974056539037503335449422937059775635739389905545080690979365213431566280"))), // y
+//                    new BigInteger("57896044618658097711785492504343953927082934583725450622380973592137631069619")); // q
 
-        ECCurve curve = new ECCurve.Fp(
-            mod_p, // p
-            new BigInteger("7"), // a
-            new BigInteger("43308876546767276905765904595650931995942111794451039583252968842033849580414")); // b
-
-        ECParameterSpec ecSpec = new ECParameterSpec(
-                curve,
-                    new ECPoint.Fp(curve,
-                                   new ECFieldElement.Fp(mod_p,new BigInteger("2")), // x
-                                   new ECFieldElement.Fp(mod_p,new BigInteger("4018974056539037503335449422937059775635739389905545080690979365213431566280"))), // y
-                    new BigInteger("57896044618658097711785492504343953927082934583725450622380973592137631069619")); // q
-
-        g.initialize(ecSpec, new SecureRandom());
+        g.initialize(new ECGenParameterSpec("GostR3410-2001-CryptoPro-A"), new SecureRandom());
 
         p = g.generateKeyPair();
 
@@ -245,6 +283,60 @@ public class GOST3410Test
         if (!s.verify(sigBytes))
         {
             fail("ECGOST3410 verification failed");
+        }
+
+        //
+        // encoded test
+        //
+        f = KeyFactory.getInstance("ECGOST3410", "BC");
+
+        x509s = new X509EncodedKeySpec(vKey.getEncoded());
+        ECPublicKey eck1 = (ECPublicKey)f.generatePublic(x509s);
+
+        if (!eck1.getQ().equals(((ECPublicKey)vKey).getQ()))
+        {
+            fail("public number not decoded properly");
+        }
+
+        if (!eck1.getParameters().equals(((ECPublicKey)vKey).getParameters()))
+        {
+            fail("public parameters not decoded properly");
+        }
+
+        pkcs8 = new PKCS8EncodedKeySpec(sKey.getEncoded());
+        ECPrivateKey eck2 = (ECPrivateKey)f.generatePrivate(pkcs8);
+
+        if (!eck2.getD().equals(((ECPrivateKey)sKey).getD()))
+        {
+            fail("private number not decoded properly");
+        }
+
+        if (!eck2.getParameters().equals(((ECPrivateKey)sKey).getParameters()))
+        {
+            fail("private number not decoded properly");
+        }
+
+        eck2 = (ECPrivateKey)serializeDeserialize(sKey);
+        if (!eck2.getD().equals(((ECPrivateKey)sKey).getD()))
+        {
+            fail("private number not decoded properly");
+        }
+
+        if (!eck2.getParameters().equals(((ECPrivateKey)sKey).getParameters()))
+        {
+            fail("private number not decoded properly");
+        }
+
+        eck1 = (ECPublicKey)serializeDeserialize(vKey);
+
+        if (!eck1.getQ().equals(((ECPublicKey)vKey).getQ()))
+        {
+            fail("public number not decoded properly");
+        }
+
+        if (!eck1.getParameters().equals(((ECPublicKey)vKey).getParameters()))
+        {
+            fail("public parameters not decoded properly");
         }
     }
 
@@ -354,6 +446,20 @@ public class GOST3410Test
         sig[1] = new BigInteger(1, s);
 
         return sig;
+    }
+
+    private Object serializeDeserialize(Object o)
+        throws Exception
+    {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        ObjectOutputStream oOut = new ObjectOutputStream(bOut);
+
+        oOut.writeObject(o);
+        oOut.close();
+
+        ObjectInputStream oIn = new ObjectInputStream(new ByteArrayInputStream(bOut.toByteArray()));
+
+        return oIn.readObject();
     }
 
     public String getName()

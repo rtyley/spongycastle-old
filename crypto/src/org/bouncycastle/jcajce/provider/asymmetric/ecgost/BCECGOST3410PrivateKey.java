@@ -42,13 +42,12 @@ public class BCECGOST3410PrivateKey
     implements ECPrivateKey, org.bouncycastle.jce.interfaces.ECPrivateKey, PKCS12BagAttributeCarrier, ECPointEncoder
 {
     private String          algorithm = "ECGOST3410";
-    private BigInteger      d;
-    private ECParameterSpec ecSpec;
     private boolean         withCompression;
 
-    private DERBitString publicKey;
-
-    private PKCS12BagAttributeCarrierImpl attrCarrier = new PKCS12BagAttributeCarrierImpl();
+    private transient BigInteger      d;
+    private transient ECParameterSpec ecSpec;
+    private transient DERBitString publicKey;
+    private transient PKCS12BagAttributeCarrierImpl attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected BCECGOST3410PrivateKey()
     {
@@ -447,25 +446,21 @@ public class BCECGOST3410PrivateKey
         ObjectInputStream in)
         throws IOException, ClassNotFoundException
     {
+        in.defaultReadObject();
+
         byte[] enc = (byte[])in.readObject();
 
         populateFromPrivKeyInfo(PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(enc)));
 
-        this.algorithm = (String)in.readObject();
-        this.withCompression = in.readBoolean();
         this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
-
-        attrCarrier.readObject(in);
     }
 
     private void writeObject(
         ObjectOutputStream out)
         throws IOException
     {
-        out.writeObject(this.getEncoded());
-        out.writeObject(algorithm);
-        out.writeBoolean(withCompression);
+        out.defaultWriteObject();
 
-        attrCarrier.writeObject(out);
+        out.writeObject(this.getEncoded());
     }
 }
