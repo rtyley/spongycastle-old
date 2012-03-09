@@ -479,8 +479,6 @@ public class BCECPrivateKey
 
         this.configuration = BouncyCastleProvider.CONFIGURATION;
         this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
-
-        attrCarrier.readObject(in);
     }
 
     private void writeObject(
@@ -490,7 +488,5 @@ public class BCECPrivateKey
         out.defaultWriteObject();
 
         out.writeObject(this.getEncoded());
-
-        attrCarrier.writeObject(out);
     }
 }
