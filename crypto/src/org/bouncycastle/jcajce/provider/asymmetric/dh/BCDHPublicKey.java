@@ -27,8 +27,9 @@ public class BCDHPublicKey
     static final long serialVersionUID = -216691575254424324L;
     
     private BigInteger              y;
-    private DHParameterSpec         dhSpec;
-    private SubjectPublicKeyInfo    info;
+
+    private transient DHParameterSpec         dhSpec;
+    private transient SubjectPublicKeyInfo    info;
     
     BCDHPublicKey(
         DHPublicKeySpec spec)
@@ -162,15 +163,18 @@ public class BCDHPublicKey
         ObjectInputStream   in)
         throws IOException, ClassNotFoundException
     {
-        this.y = (BigInteger)in.readObject();
+        in.defaultReadObject();
+
         this.dhSpec = new DHParameterSpec((BigInteger)in.readObject(), (BigInteger)in.readObject(), in.readInt());
+        this.info = null;
     }
 
     private void writeObject(
         ObjectOutputStream  out)
         throws IOException
     {
-        out.writeObject(this.getY());
+        out.defaultWriteObject();
+
         out.writeObject(dhSpec.getP());
         out.writeObject(dhSpec.getG());
         out.writeInt(dhSpec.getL());

@@ -27,10 +27,10 @@ public class BCDHPrivateKey
 {
     static final long serialVersionUID = 311058815616901812L;
     
-    BigInteger      x;
+    private BigInteger      x;
 
-    private DHParameterSpec dhSpec;
-    private PrivateKeyInfo  info;
+    private transient DHParameterSpec dhSpec;
+    private transient PrivateKeyInfo  info;
 
     protected BCDHPrivateKey()
     {
@@ -147,16 +147,18 @@ public class BCDHPrivateKey
         ObjectInputStream   in)
         throws IOException, ClassNotFoundException
     {
-        x = (BigInteger)in.readObject();
+        in.defaultReadObject();
 
         this.dhSpec = new DHParameterSpec((BigInteger)in.readObject(), (BigInteger)in.readObject(), in.readInt());
+        this.info = null;
     }
 
     private void writeObject(
         ObjectOutputStream  out)
         throws IOException
     {
-        out.writeObject(this.getX());
+        out.defaultWriteObject();
+
         out.writeObject(dhSpec.getP());
         out.writeObject(dhSpec.getG());
         out.writeInt(dhSpec.getL());
