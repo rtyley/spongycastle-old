@@ -2,7 +2,6 @@ package org.bouncycastle.tsp.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.security.cert.CertStore;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -10,11 +9,13 @@ import junit.framework.TestCase;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cmp.PKIFailureInfo;
 import org.bouncycastle.asn1.cmp.PKIStatus;
-import org.bouncycastle.cms.jcajce.JcaX509CertSelectorConverter;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.tsp.TSPAlgorithms;
 import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Store;
 import org.bouncycastle.util.encoders.Base64;
 
 /**
@@ -238,8 +239,6 @@ public class ParseTest
       + "C0uiH9G2IB5QRyu6RsCUgrkeMTMBqlIBlnDBy+EgLouDU4Dehxy5uzEl5DBKZEewZpQZOTO/kAgL"
       + "WruAAg/Lj4r0f9vN12wRlHoS2UKDjrE1DnUBbrM=");
 
-    private static final JcaX509CertSelectorConverter selectorConverter = new JcaX509CertSelectorConverter();
-
     /* (non-Javadoc)
      * @see org.bouncycastle.util.test.Test#getName()
      */
@@ -390,10 +389,10 @@ public class ParseTest
     {
         TimeStampResponse response = new TimeStampResponse(encoded);
 
-        CertStore store = response.getTimeStampToken().getCertificatesAndCRLs("Collection", "BC");
-        X509Certificate cert = (X509Certificate)store.getCertificates(selectorConverter.getCertSelector(response.getTimeStampToken().getSID())).iterator().next();
+        Store store = response.getTimeStampToken().getCertificates();
+        X509CertificateHolder cert = (X509CertificateHolder)store.getMatches(response.getTimeStampToken().getSID()).iterator().next();
 
-        response.getTimeStampToken().validate(cert, "BC");
+        response.getTimeStampToken().validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert));
     }
 
     public void parse(
