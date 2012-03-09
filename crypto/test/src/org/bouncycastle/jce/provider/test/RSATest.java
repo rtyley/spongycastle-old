@@ -1,6 +1,10 @@
 package org.bouncycastle.jce.provider.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
@@ -16,10 +20,12 @@ import java.security.Signature;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -594,9 +600,37 @@ public class RSATest
         {
             fail("private key equality check failed");
         }
-        
+
+        crtKey = (RSAPrivateCrtKey)keyFact.generatePrivate(new PKCS8EncodedKeySpec(privKey.getEncoded()));
+
+        if (!privKey.equals(crtKey))
+        {
+            fail("private key equality check failed");
+        }
+
+        crtKey = (RSAPrivateCrtKey)serializeDeserialize(privKey);
+
+        if (!privKey.equals(crtKey))
+        {
+            fail("private key equality check failed");
+        }
+
         RSAPublicKey copyKey = (RSAPublicKey)keyFact.translateKey(pubKey);
         
+        if (!pubKey.equals(copyKey))
+        {
+            fail("public key equality check failed");
+        }
+
+        copyKey = (RSAPublicKey)keyFact.generatePublic(new X509EncodedKeySpec(pubKey.getEncoded()));
+
+        if (!pubKey.equals(copyKey))
+        {
+            fail("public key equality check failed");
+        }
+
+        copyKey = (RSAPublicKey)serializeDeserialize(pubKey);
+
         if (!pubKey.equals(copyKey))
         {
             fail("public key equality check failed");
@@ -703,6 +737,20 @@ public class RSATest
         {
             fail("raw mode signature verification failed");
         }
+    }
+
+    private Object serializeDeserialize(Object o)
+        throws Exception
+    {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        ObjectOutputStream oOut = new ObjectOutputStream(bOut);
+
+        oOut.writeObject(o);
+        oOut.close();
+
+        ObjectInputStream oIn = new ObjectInputStream(new ByteArrayInputStream(bOut.toByteArray()));
+
+        return oIn.readObject();
     }
 
     private byte[] derEncode(ASN1ObjectIdentifier oid, byte[] hash) throws IOException

@@ -29,7 +29,7 @@ public class BCRSAPrivateKey
     protected BigInteger modulus;
     protected BigInteger privateExponent;
 
-    private PKCS12BagAttributeCarrierImpl   attrCarrier = new PKCS12BagAttributeCarrierImpl();
+    private transient PKCS12BagAttributeCarrierImpl   attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected BCRSAPrivateKey()
     {
@@ -126,22 +126,15 @@ public class BCRSAPrivateKey
         ObjectInputStream   in)
         throws IOException, ClassNotFoundException
     {
-        this.modulus = (BigInteger)in.readObject();
-        this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
-        
-        attrCarrier.readObject(in);
+        in.defaultReadObject();
 
-        this.privateExponent = (BigInteger)in.readObject();
+        this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
     }
 
     private void writeObject(
         ObjectOutputStream  out)
         throws IOException
     {
-        out.writeObject(modulus);
-
-        attrCarrier.writeObject(out);
-
-        out.writeObject(privateExponent);
+        out.defaultWriteObject();
     }
 }
