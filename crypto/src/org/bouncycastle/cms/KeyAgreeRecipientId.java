@@ -1,24 +1,21 @@
 package org.bouncycastle.cms;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
-import org.bouncycastle.asn1.ASN1Encoding;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.util.Arrays;
+import org.bouncycastle.cert.selector.X509CertificateHolderSelector;
 
 public class KeyAgreeRecipientId
     extends RecipientId
 {
-    private byte[] subjectKeyId;
+    private X509CertificateHolderSelector baseSelector;
 
-    private X500Name issuer;
-    private BigInteger serialNumber;
+    private KeyAgreeRecipientId(X509CertificateHolderSelector baseSelector)
+    {
+        super(keyAgree);
+
+        this.baseSelector = baseSelector;
+    }
 
     /**
      * Construct a key agree recipient ID with the value of a public key's subjectKeyId.
@@ -27,17 +24,7 @@ public class KeyAgreeRecipientId
      */
     public KeyAgreeRecipientId(byte[] subjectKeyId)
     {
-        super(keyAgree);
-        try
-        {
-            super.setSubjectKeyIdentifier(new DEROctetString(subjectKeyId).getEncoded(ASN1Encoding.DER));
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("unable to encode subjectKeyId: " + e.getMessage());
-        }
-
-        this.subjectKeyId = subjectKeyId;
+        this(null, null, subjectKeyId);
     }
 
     /**
@@ -49,36 +36,27 @@ public class KeyAgreeRecipientId
      */
     public KeyAgreeRecipientId(X500Name issuer, BigInteger serialNumber)
     {
-        super(keyAgree);
-        this.issuer = issuer;
-        this.serialNumber = serialNumber;
+        this(issuer, serialNumber, null);
+    }
 
-        try
-        {
-            this.setIssuer(issuer.getEncoded(ASN1Encoding.DER));
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("invalid issuer: " + e.getMessage());
-        }
-        this.setSerialNumber(serialNumber);
+    public KeyAgreeRecipientId(X500Name issuer, BigInteger serialNumber, byte[] subjectKeyId)
+    {
+        this(new X509CertificateHolderSelector(issuer, serialNumber, subjectKeyId));
+    }
+
+    public BigInteger getSerialNumber()
+    {
+        return baseSelector.getSerialNumber();
+    }
+
+    public byte[] getSubjectKeyIdentifier()
+    {
+        return baseSelector.getSubjectKeyIdentifier();
     }
 
     public int hashCode()
     {
-        int code = Arrays.hashCode(subjectKeyId);
-
-        if (this.serialNumber != null)
-        {
-            code ^= this.serialNumber.hashCode();
-        }
-
-        if (this.issuer != null)
-        {
-            code ^= this.issuer.hashCode();
-        }
-
-        return code;
+        return baseSelector.hashCode();
     }
 
     public boolean equals(
@@ -91,52 +69,21 @@ public class KeyAgreeRecipientId
 
         KeyAgreeRecipientId id = (KeyAgreeRecipientId)o;
 
-        return Arrays.areEqual(subjectKeyId, id.subjectKeyId)
-            && equalsObj(this.serialNumber, id.serialNumber)
-            && equalsObj(this.issuer, id.issuer);
+        return this.baseSelector.equals(id.baseSelector);
     }
 
-    private boolean equalsObj(Object a, Object b)
+    public Object clone()
     {
-        return (a != null) ? a.equals(b) : b == null;
+        return new KeyAgreeRecipientId(baseSelector);
     }
 
     public boolean match(Object obj)
     {
-        if (obj instanceof X509CertificateHolder)
-        {
-            X509CertificateHolder certHldr = (X509CertificateHolder)obj;
-
-            if (this.getSerialNumber() != null)
-            {
-                IssuerAndSerialNumber iAndS = new IssuerAndSerialNumber(certHldr.toASN1Structure());
-
-                return iAndS.getName().equals(this.issuer)
-                    && iAndS.getSerialNumber().getValue().equals(this.getSerialNumber());
-            }
-            else if (this.getSubjectKeyIdentifier() != null)
-            {
-                Extension ext = certHldr.getExtension(Extension.subjectKeyIdentifier);
-
-                if (ext == null)
-                {
-                    return Arrays.areEqual(subjectKeyId, MSOutlookKeyIdCalculator.calculateKeyId(certHldr.getSubjectPublicKeyInfo()));
-                }
-
-                byte[] subKeyID = ASN1OctetString.getInstance(ext.getParsedValue()).getOctets();
-
-                return Arrays.areEqual(subjectKeyId, subKeyID);
-            }
-        }
-        else if (obj instanceof byte[])
-        {
-            return Arrays.areEqual(subjectKeyId, (byte[])obj);
-        }
-        else if (obj instanceof KeyAgreeRecipientInformation)
+        if (obj instanceof KeyAgreeRecipientInformation)
         {
             return ((KeyAgreeRecipientInformation)obj).getRID().equals(this);
         }
 
-        return false;
+        return baseSelector.match(obj);
     }
 }

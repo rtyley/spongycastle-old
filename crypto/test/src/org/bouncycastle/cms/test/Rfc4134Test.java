@@ -45,6 +45,7 @@ import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.jcajce.JcaX509CertSelectorConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.Streams;
@@ -57,6 +58,8 @@ public class Rfc4134Test
     
     private static byte[] exContent = getRfc4134Data("ExContent.bin");
     private static byte[] sha1 = Hex.decode("406aec085279ba6e16022d9e0629c0229687dd48");
+
+    private static final JcaX509CertSelectorConverter selectorConverter = new JcaX509CertSelectorConverter();
 
     public Rfc4134Test(String name)
     {
@@ -314,7 +317,7 @@ public class Rfc4134Test
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certStore.getCertificates(signer.getSID());
+            Collection          certCollection = certStore.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -358,7 +361,7 @@ public class Rfc4134Test
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certs.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();

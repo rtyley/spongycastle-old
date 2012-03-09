@@ -43,6 +43,7 @@ import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.jcajce.JcaX509CertSelectorConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.Streams;
@@ -386,6 +387,8 @@ public class SignedDataTest
         + "aWduaW5nIENBAgEzMAkGBSsOAwIaBQAwCwYHKoZIzjgEAQUABC8wLQIVAIGV"
         + "khm+kbV4a/+EP45PHcq0hIViAhR4M9os6IrJnoEDS3Y3l7O6zrSosA==");
 
+    private JcaX509CertSelectorConverter selectorConverter = new JcaX509CertSelectorConverter();
+
     /*
      *
      *  INFRASTRUCTURE
@@ -458,7 +461,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certStore.getCertificates(signer.getSID());
+            Collection          certCollection = certStore.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
     
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -561,7 +564,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certs.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -615,7 +618,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certs.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -922,7 +925,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   cSigner = (SignerInformation)it.next();
-            Collection          certCollection = certsAndCrls.getCertificates(cSigner.getSID());
+            Collection          certCollection = certsAndCrls.getCertificates(selectorConverter.getCertSelector(cSigner.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -1001,7 +1004,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certsAndCrls.getCertificates(signer.getSID());
+            Collection          certCollection = certsAndCrls.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -1044,7 +1047,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certsAndCrls.getCertificates(signer.getSID());
+            Collection          certCollection = certsAndCrls.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -1094,7 +1097,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certsAndCrls.getCertificates(signer.getSID());
+            Collection          certCollection = certsAndCrls.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
     
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -1137,7 +1140,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certsAndCrls.getCertificates(signer.getSID());
+            Collection          certCollection = certsAndCrls.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
     
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -1167,7 +1170,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certs.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
     
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -1190,7 +1193,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certs.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -1497,7 +1500,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   cSigner = (SignerInformation)it.next();
-            Collection          certCollection = sig.getCertificatesAndCRLs("Collection", BC).getCertificates(cSigner.getSID());
+            Collection          certCollection = sig.getCertificatesAndCRLs("Collection", BC).getCertificates(selectorConverter.getCertSelector(cSigner.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -1559,7 +1562,7 @@ public class SignedDataTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certs.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();

@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.asn1.ASN1OctetString;
-
 public class SignerInformationStore
 {
     private ArrayList all = new ArrayList();
@@ -81,18 +79,18 @@ public class SignerInformationStore
     public Collection getSigners(
         SignerId selector)
     {
-        if (selector.getIssuerName() != null && selector.getSubjectKeyIdentifier() != null)
+        if (selector.getIssuer() != null && selector.getSubjectKeyIdentifier() != null)
         {
             List results = new ArrayList();
 
-            Collection match1 = getSigners(new SignerId(selector.getIssuerName(), selector.getSerialNumber()));
+            Collection match1 = getSigners(new SignerId(selector.getIssuer(), selector.getSerialNumber()));
 
             if (match1 != null)
             {
                 results.addAll(match1);
             }
 
-            Collection match2 = getSigners(new SignerId(ASN1OctetString.getInstance(selector.getSubjectKeyIdentifier()).getOctets()));
+            Collection match2 = getSigners(new SignerId(selector.getSubjectKeyIdentifier()));
 
             if (match2 != null)
             {

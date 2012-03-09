@@ -53,6 +53,7 @@ import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.jcajce.JcaX509CertSelectorConverter;
 import org.bouncycastle.i18n.ErrorBundle;
 import org.bouncycastle.i18n.filter.TrustedInput;
 import org.bouncycastle.i18n.filter.UntrustedInput;
@@ -78,6 +79,8 @@ public class SignedMailValidator
     
     // (365.25*30)*24*3600*1000
     private static final long THIRTY_YEARS_IN_MILLI_SEC = 21915l*12l*3600l*1000l;
+
+    private static final JcaX509CertSelectorConverter selectorConverter = new JcaX509CertSelectorConverter();
 
     private CertStore certs;
 
@@ -246,7 +249,7 @@ public class SignedMailValidator
             try
             {
                 Collection certCollection = findCerts(usedParameters
-                        .getCertStores(), signer.getSID());
+                        .getCertStores(), selectorConverter.getCertSelector(signer.getSID()));
 
                 Iterator certIt = certCollection.iterator();
                 if (certIt.hasNext())

@@ -36,6 +36,7 @@ import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.jcajce.JcaX509CertSelectorConverter;
 import org.bouncycastle.cms.test.CMSTestUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.mail.smime.SMIMECompressedGenerator;
@@ -63,6 +64,8 @@ public class SMIMEMiscTest
     static String          reciDN;
     static KeyPair         reciKP;
     static X509Certificate reciCert;
+
+    private static final JcaX509CertSelectorConverter selectorConverter = new JcaX509CertSelectorConverter();
 
     KeyPair         dsaSignKP;
     X509Certificate dsaSignCert;
@@ -212,7 +215,7 @@ public class SMIMEMiscTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certs.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -289,7 +292,7 @@ public class SMIMEMiscTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certs.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
     
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();

@@ -18,7 +18,7 @@ import org.bouncycastle.util.Selector;
  * This class is an <code>Selector</code> like implementation to select
  * attribute certificates from a given set of criteria.
  */
-public class X509AttributeCertificateSelector
+public class X509AttributeCertificateHolderSelector
     implements Selector
 {
 
@@ -38,14 +38,14 @@ public class X509AttributeCertificateSelector
 
     private final Collection targetGroups;
 
-    X509AttributeCertificateSelector(
+    X509AttributeCertificateHolderSelector(
         AttributeCertificateHolder holder,
         AttributeCertificateIssuer issuer,
-        BigInteger                 serialNumber,
-        Date                       attributeCertificateValid,
+        BigInteger serialNumber,
+        Date attributeCertificateValid,
         X509AttributeCertificateHolder attributeCert,
-        Collection                 targetNames,
-        Collection                 targetGroups)
+        Collection targetNames,
+        Collection targetGroups)
     {
         this.holder = holder;
         this.issuer = issuer;
@@ -181,7 +181,7 @@ public class X509AttributeCertificateSelector
      */
     public Object clone()
     {
-        X509AttributeCertificateSelector sel = new X509AttributeCertificateSelector(
+        X509AttributeCertificateHolderSelector sel = new X509AttributeCertificateHolderSelector(
             holder, issuer, serialNumber, attributeCertificateValid, attributeCert, targetNames, targetGroups);
 
         return sel;

@@ -23,6 +23,7 @@ import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
 import org.bouncycastle.cms.CMSTypedStream;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.jcajce.JcaX509CertSelectorConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class MiscDataStreamTest
@@ -50,7 +51,9 @@ public class MiscDataStreamTest
     private static X509CRL         _origCrl;
 
     private static boolean         _initialised = false;
-    
+
+    private static final JcaX509CertSelectorConverter selectorConverter = new JcaX509CertSelectorConverter();
+
     public MiscDataStreamTest(String name)
     {
         super(name);
@@ -95,7 +98,7 @@ public class MiscDataStreamTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certStore.getCertificates(signer.getSID());
+            Collection          certCollection = certStore.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();

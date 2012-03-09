@@ -6,8 +6,8 @@ import java.security.cert.X509Certificate;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
+import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509Extension;
 
 class CMSUtils
@@ -22,7 +22,7 @@ class CMSUtils
     static IssuerAndSerialNumber getIssuerAndSerialNumber(X509Certificate cert)
         throws CertificateEncodingException
     {
-        X509CertificateStructure certStruct = X509CertificateStructure.getInstance(cert.getEncoded());
+        Certificate certStruct = Certificate.getInstance(cert.getEncoded());
 
         return new IssuerAndSerialNumber(certStruct.getIssuer(), cert.getSerialNumber());
     }

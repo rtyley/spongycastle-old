@@ -82,13 +82,13 @@ public class RecipientInformationStore
         if (selector instanceof KeyTransRecipientId)
         {
             KeyTransRecipientId keyTrans = (KeyTransRecipientId)selector;
-            byte[]              subjectKeyId = keyTrans.getSubjectKeyId();
+            byte[]              subjectKeyId = keyTrans.getSubjectKeyIdentifier();
 
-            if (keyTrans.getIssuerName() != null && subjectKeyId != null)
+            if (keyTrans.getIssuer() != null && subjectKeyId != null)
             {
                 List results = new ArrayList();
 
-                Collection match1 = getRecipients(new KeyTransRecipientId(keyTrans.getIssuerName(), keyTrans.getSerialNumber()));
+                Collection match1 = getRecipients(new KeyTransRecipientId(keyTrans.getIssuer(), keyTrans.getSerialNumber()));
 
                 if (match1 != null)
                 {

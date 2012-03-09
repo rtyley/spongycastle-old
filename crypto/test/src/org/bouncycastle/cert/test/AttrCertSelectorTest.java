@@ -24,7 +24,7 @@ import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v2AttributeCertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.cert.selector.X509AttributeCertificateSelectorBuilder;
+import org.bouncycastle.cert.selector.X509AttributeCertificateHolderSelectorBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -160,7 +160,7 @@ public class AttrCertSelectorTest
     public void testSelector() throws Exception
     {
         X509AttributeCertificateHolder aCert = createAttrCert();
-        X509AttributeCertificateSelectorBuilder sel = new X509AttributeCertificateSelectorBuilder();
+        X509AttributeCertificateHolderSelectorBuilder sel = new X509AttributeCertificateHolderSelectorBuilder();
         sel.setAttributeCert(aCert);
         boolean match = sel.build().match(aCert);
         if (!match)

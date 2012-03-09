@@ -1,12 +1,8 @@
-package org.bouncycastle.cms;
+package org.bouncycastle.cert.selector;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import org.bouncycastle.jce.cert.X509CertSelector;
 
-import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.Extension;
@@ -15,10 +11,9 @@ import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Selector;
 
 /**
- * a basic index for a signer.
+ * a basic index for a X509CertificateHolder class
  */
-public class SignerId
-    extends X509CertSelector
+public class X509CertificateHolderSelector
     implements Selector
 {
     private byte[] subjectKeyId;
@@ -27,35 +22,13 @@ public class SignerId
     private BigInteger serialNumber;
 
     /**
-     * @deprecated use specific constructor.
-     */
-    public SignerId()
-    {
-
-    }
-
-    /**
-     * Construct a signer ID with the value of a public key's subjectKeyId.
+     * Construct a selector with the value of a public key's subjectKeyId.
      *
      * @param subjectKeyId a subjectKeyId
      */
-    public SignerId(byte[] subjectKeyId)
+    public X509CertificateHolderSelector(byte[] subjectKeyId)
     {
-        setSubjectKeyID(subjectKeyId);
-    }
-
-    private void setSubjectKeyID(byte[] subjectKeyId)
-    {
-        try
-        {
-            super.setSubjectKeyIdentifier(new DEROctetString(subjectKeyId).getEncoded(ASN1Encoding.DER));
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("unable to encode subjectKeyId: " + e.getMessage());
-        }
-
-        this.subjectKeyId = subjectKeyId;
+        this(null, null, subjectKeyId);
     }
 
     /**
@@ -65,24 +38,9 @@ public class SignerId
      * @param issuer the issuer of the signer's associated certificate.
      * @param serialNumber the serial number of the signer's associated certificate.
      */
-    public SignerId(X500Name issuer, BigInteger serialNumber)
+    public X509CertificateHolderSelector(X500Name issuer, BigInteger serialNumber)
     {
-        setIssuerAndSerial(issuer, serialNumber);
-    }
-
-    private void setIssuerAndSerial(X500Name issuer, BigInteger serialNumber)
-    {
-        this.issuer = issuer;
-        this.serialNumber = serialNumber;
-        try
-        {
-            this.setIssuer(issuer.getEncoded(ASN1Encoding.DER));
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("invalid issuer: " + e.getMessage());
-        }
-        this.setSerialNumber(serialNumber);
+        this(issuer, serialNumber, null);
     }
 
     /**
@@ -93,16 +51,26 @@ public class SignerId
      * @param serialNumber the serial number of the signer's associated certificate.
      * @param subjectKeyId the subject key identifier to use to match the signers associated certificate.
      */
-    public SignerId(X500Name issuer, BigInteger serialNumber, byte[] subjectKeyId)
+    public X509CertificateHolderSelector(X500Name issuer, BigInteger serialNumber, byte[] subjectKeyId)
     {
-        setIssuerAndSerial(issuer, serialNumber);
-        setSubjectKeyID(subjectKeyId);
+        this.issuer = issuer;
+        this.serialNumber = serialNumber;
+        this.subjectKeyId = subjectKeyId;
     }
 
-        // TODO: change to getIssuer() when dependency on X509CertSelector removed.
-    X500Name getIssuerName()
+    public X500Name getIssuer()
     {
         return issuer;
+    }
+
+    public BigInteger getSerialNumber()
+    {
+        return serialNumber;
+    }
+
+    public byte[] getSubjectKeyIdentifier()
+    {
+        return Arrays.clone(subjectKeyId);
     }
 
     public int hashCode()
@@ -125,12 +93,12 @@ public class SignerId
     public boolean equals(
         Object  o)
     {
-        if (!(o instanceof SignerId))
+        if (!(o instanceof X509CertificateHolderSelector))
         {
             return false;
         }
 
-        SignerId id = (SignerId)o;
+        X509CertificateHolderSelector id = (X509CertificateHolderSelector)o;
 
         return Arrays.areEqual(subjectKeyId, id.subjectKeyId)
             && equalsObj(this.serialNumber, id.serialNumber)
@@ -155,7 +123,7 @@ public class SignerId
                 return iAndS.getName().equals(this.issuer)
                     && iAndS.getSerialNumber().getValue().equals(this.serialNumber);
             }
-            else if (this.getSubjectKeyIdentifier() != null)
+            else if (subjectKeyId != null)
             {
                 Extension ext = certHldr.getExtension(Extension.subjectKeyIdentifier);
 
@@ -173,11 +141,12 @@ public class SignerId
         {
             return Arrays.areEqual(subjectKeyId, (byte[])obj);
         }
-        else if (obj instanceof SignerInformation)
-        {
-            return ((SignerInformation)obj).getSID().equals(this);
-        }
 
         return false;
+    }
+
+    public Object clone()
+    {
+        return new X509CertificateHolderSelector(this.issuer, this.serialNumber, this.subjectKeyId);
     }
 }

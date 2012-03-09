@@ -17,7 +17,7 @@ import org.bouncycastle.cert.X509AttributeCertificateHolder;
 /**
  * This class builds selectors according to the set criteria.
  */
-public class X509AttributeCertificateSelectorBuilder
+public class X509AttributeCertificateHolderSelectorBuilder
 {
 
     // TODO: name constraints???
@@ -36,7 +36,7 @@ public class X509AttributeCertificateSelectorBuilder
 
     private Collection targetGroups = new HashSet();
 
-    public X509AttributeCertificateSelectorBuilder()
+    public X509AttributeCertificateHolderSelectorBuilder()
     {
     }
 
@@ -184,9 +184,9 @@ public class X509AttributeCertificateSelectorBuilder
         return temp;
     }
 
-    public X509AttributeCertificateSelector build()
+    public X509AttributeCertificateHolderSelector build()
     {
-        X509AttributeCertificateSelector sel = new X509AttributeCertificateSelector(
+        X509AttributeCertificateHolderSelector sel = new X509AttributeCertificateHolderSelector(
             holder, issuer, serialNumber, attributeCertificateValid, attributeCert, Collections.unmodifiableCollection(new HashSet(targetNames)), Collections.unmodifiableCollection(new HashSet(targetGroups)));
 
         return sel;

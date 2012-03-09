@@ -1,4 +1,4 @@
-package org.bouncycastle.cms;
+package org.bouncycastle.cert.selector;
 
 import java.io.IOException;
 

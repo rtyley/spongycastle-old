@@ -1,11 +1,8 @@
 package org.bouncycastle.cms;
 
-import java.security.cert.X509CertSelector;
-
 import org.bouncycastle.util.Selector;
 
 public abstract class RecipientId
-    extends X509CertSelector
     implements Selector
 {
     public static final int keyTrans = 0;
@@ -29,4 +26,6 @@ public abstract class RecipientId
     {
         return type;
     }
+
+    public abstract Object clone();
 }

@@ -27,6 +27,11 @@ public class PasswordRecipientId
         return true;
     }
 
+    public Object clone()
+    {
+        return new PasswordRecipientId();
+    }
+
     public boolean match(Object obj)
     {
         if (obj instanceof PasswordRecipientInformation)

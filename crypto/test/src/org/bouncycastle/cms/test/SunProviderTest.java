@@ -1,27 +1,5 @@
 package org.bouncycastle.cms.test;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.cms.ContentInfo;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.cms.CMSEnvelopedData;
-import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
-import org.bouncycastle.cms.CMSProcessable;
-import org.bouncycastle.cms.CMSProcessableByteArray;
-import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
-import org.bouncycastle.cms.CMSSignedDataParser;
-import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
-import org.bouncycastle.cms.CMSTypedStream;
-import org.bouncycastle.cms.RecipientInformation;
-import org.bouncycastle.cms.RecipientInformationStore;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -46,12 +24,36 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cms.CMSEnvelopedData;
+import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
+import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSSignedDataGenerator;
+import org.bouncycastle.cms.CMSSignedDataParser;
+import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
+import org.bouncycastle.cms.CMSTypedStream;
+import org.bouncycastle.cms.RecipientInformation;
+import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.jcajce.JcaX509CertSelectorConverter;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
+
 public class SunProviderTest
     extends TestCase
 {
     static KeyPair keyPair;
     static X509Certificate keyCert;
     private static final String TEST_MESSAGE = "Hello World!";
+    private static final JcaX509CertSelectorConverter selectorConverter = new JcaX509CertSelectorConverter();
 
     static
     {
@@ -100,7 +102,7 @@ public class SunProviderTest
         while (it.hasNext())
         {
             SignerInformation signer = (SignerInformation)it.next();
-            Collection          certCollection = certsAndCrls.getCertificates(signer.getSID());
+            Collection          certCollection = certsAndCrls.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -152,7 +154,7 @@ public class SunProviderTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certStore.getCertificates(signer.getSID());
+            Collection          certCollection = certStore.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();

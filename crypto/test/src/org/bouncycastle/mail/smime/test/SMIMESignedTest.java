@@ -51,6 +51,7 @@ import org.bouncycastle.asn1.smime.SMIMECapabilityVector;
 import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.jcajce.JcaX509CertSelectorConverter;
 import org.bouncycastle.cms.test.CMSTestUtil;
 import org.bouncycastle.mail.smime.SMIMESigned;
 import org.bouncycastle.mail.smime.SMIMESignedGenerator;
@@ -89,6 +90,8 @@ public class SMIMESignedTest
 
     private static KeyPair         _signEcGostKP;
     private static X509Certificate _signEcGostCert;
+
+    private static final JcaX509CertSelectorConverter selectorConverter = new JcaX509CertSelectorConverter();
 
     KeyPair         dsaSignKP;
     X509Certificate dsaSignCert;
@@ -1218,7 +1221,7 @@ public class SMIMESignedTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certs.getCertificates(signer.getSID());
+            Collection          certCollection = certs.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
     
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();

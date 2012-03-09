@@ -37,6 +37,7 @@ public class AllTests
 
         suite.addTest(MiscDataStreamTest.suite());
         suite.addTest(Rfc4134Test.suite());
+        suite.addTest(ConverterTest.suite());
 
         try
         {

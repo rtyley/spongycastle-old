@@ -1,27 +1,91 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.util.Arrays;
+import java.math.BigInteger;
 
-import java.security.cert.X509CertSelector;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Selector;
 
 /**
  * a basic index for an originator.
  */
 class OriginatorId
-    extends X509CertSelector
+    implements Selector
 {
+    private byte[] subjectKeyId;
+
+    private X500Name issuer;
+    private BigInteger serialNumber;
+
+    /**
+     * Construct a signer ID with the value of a public key's subjectKeyId.
+     *
+     * @param subjectKeyId a subjectKeyId
+     */
+    public OriginatorId(byte[] subjectKeyId)
+    {
+        setSubjectKeyID(subjectKeyId);
+    }
+
+    private void setSubjectKeyID(byte[] subjectKeyId)
+    {
+        this.subjectKeyId = subjectKeyId;
+    }
+
+    /**
+     * Construct a signer ID based on the issuer and serial number of the signer's associated
+     * certificate.
+     *
+     * @param issuer the issuer of the signer's associated certificate.
+     * @param serialNumber the serial number of the signer's associated certificate.
+     */
+    public OriginatorId(X500Name issuer, BigInteger serialNumber)
+    {
+        setIssuerAndSerial(issuer, serialNumber);
+    }
+
+    private void setIssuerAndSerial(X500Name issuer, BigInteger serialNumber)
+    {
+        this.issuer = issuer;
+        this.serialNumber = serialNumber;
+    }
+
+    /**
+     * Construct a signer ID based on the issuer and serial number of the signer's associated
+     * certificate.
+     *
+     * @param issuer the issuer of the signer's associated certificate.
+     * @param serialNumber the serial number of the signer's associated certificate.
+     * @param subjectKeyId the subject key identifier to use to match the signers associated certificate.
+     */
+    public OriginatorId(X500Name issuer, BigInteger serialNumber, byte[] subjectKeyId)
+    {
+        setIssuerAndSerial(issuer, serialNumber);
+        setSubjectKeyID(subjectKeyId);
+    }
+
+    public X500Name getIssuer()
+    {
+        return issuer;
+    }
+
+    public Object clone()
+    {
+        return new OriginatorId(this.issuer, this.serialNumber, this.subjectKeyId);
+    }
+
     public int hashCode()
     {
-        int code = Arrays.hashCode(this.getSubjectKeyIdentifier());
+        int code = Arrays.hashCode(subjectKeyId);
 
-        if (this.getSerialNumber() != null)
+        if (this.serialNumber != null)
         {
-            code ^= this.getSerialNumber().hashCode();
+            code ^= this.serialNumber.hashCode();
         }
 
-        if (this.getIssuerAsString() != null)
+        if (this.issuer != null)
         {
-            code ^= this.getIssuerAsString().hashCode();
+            code ^= this.issuer.hashCode();
         }
 
         return code;
@@ -37,13 +101,18 @@ class OriginatorId
 
         OriginatorId id = (OriginatorId)o;
 
-        return Arrays.areEqual(this.getSubjectKeyIdentifier(), id.getSubjectKeyIdentifier())
-            && equalsObj(this.getSerialNumber(), id.getSerialNumber())
-            && equalsObj(this.getIssuerAsString(), id.getIssuerAsString());
+        return Arrays.areEqual(subjectKeyId, id.subjectKeyId)
+            && equalsObj(this.serialNumber, id.serialNumber)
+            && equalsObj(this.issuer, id.issuer);
     }
 
     private boolean equalsObj(Object a, Object b)
     {
         return (a != null) ? a.equals(b) : b == null;
+    }
+
+    public boolean match(Object obj)
+    {
+        return false;
     }
 }

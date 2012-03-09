@@ -45,6 +45,7 @@ import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.jcajce.JcaX509CertSelectorConverter;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 public class NullProviderTest
@@ -53,6 +54,8 @@ public class NullProviderTest
     static KeyPair keyPair;
     static X509Certificate keyCert;
     private static final String TEST_MESSAGE = "Hello World!";
+
+    private JcaX509CertSelectorConverter selectorConverter = new JcaX509CertSelectorConverter();
 
     static
     {
@@ -101,7 +104,7 @@ public class NullProviderTest
         while (it.hasNext())
         {
             SignerInformation signer = (SignerInformation)it.next();
-            Collection          certCollection = certsAndCrls.getCertificates(signer.getSID());
+            Collection          certCollection = certsAndCrls.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();
@@ -153,7 +156,7 @@ public class NullProviderTest
         while (it.hasNext())
         {
             SignerInformation   signer = (SignerInformation)it.next();
-            Collection          certCollection = certStore.getCertificates(signer.getSID());
+            Collection          certCollection = certStore.getCertificates(selectorConverter.getCertSelector(signer.getSID()));
 
             Iterator        certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate)certIt.next();

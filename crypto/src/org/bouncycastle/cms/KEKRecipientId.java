@@ -37,6 +37,16 @@ public class KEKRecipientId
         return Arrays.areEqual(keyIdentifier, id.keyIdentifier);
     }
 
+    public byte[] getKeyIdentifier()
+    {
+        return Arrays.clone(keyIdentifier);
+    }
+
+    public Object clone()
+    {
+        return new KEKRecipientId(keyIdentifier);
+    }
+
     public boolean match(Object obj)
     {
         if (obj instanceof byte[])

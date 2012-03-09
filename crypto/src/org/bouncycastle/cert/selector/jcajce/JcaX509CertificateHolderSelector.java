@@ -1,15 +1,17 @@
-package org.bouncycastle.cms.jcajce;
+package org.bouncycastle.cert.selector.jcajce;
 
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.cms.SignerId;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.cert.selector.X509CertificateHolderSelector;
 
-public class JcaSignerId
-    extends SignerId
+public class JcaX509CertificateHolderSelector
+    extends X509CertificateHolderSelector
 {
     /**
      * Construct a signer identifier based on the issuer, serial number and subject key identifier (if present) of the passed in
@@ -17,9 +19,9 @@ public class JcaSignerId
      *
      * @param certificate certificate providing the issue and serial number and subject key identifier.
      */
-    public JcaSignerId(X509Certificate certificate)
+    public JcaX509CertificateHolderSelector(X509Certificate certificate)
     {
-        super(convertPrincipal(certificate.getIssuerX500Principal()), certificate.getSerialNumber(), CMSUtils.getSubjectKeyId(certificate));
+        super(convertPrincipal(certificate.getIssuerX500Principal()), certificate.getSerialNumber(), getSubjectKeyId(certificate));
     }
 
     /**
@@ -28,7 +30,7 @@ public class JcaSignerId
      * @param issuer the issuer to use.
      * @param serialNumber  the serial number to use.
      */
-    public JcaSignerId(X500Principal issuer, BigInteger serialNumber)
+    public JcaX509CertificateHolderSelector(X500Principal issuer, BigInteger serialNumber)
     {
         super(convertPrincipal(issuer), serialNumber);
     }
@@ -40,7 +42,7 @@ public class JcaSignerId
      * @param serialNumber  the serial number to use.
      * @param subjectKeyId the subject key ID to use.
      */
-    public JcaSignerId(X500Principal issuer, BigInteger serialNumber, byte[] subjectKeyId)
+    public JcaX509CertificateHolderSelector(X500Principal issuer, BigInteger serialNumber, byte[] subjectKeyId)
     {
         super(convertPrincipal(issuer), serialNumber, subjectKeyId);
     }
@@ -52,5 +54,19 @@ public class JcaSignerId
             return null;
         }
         return X500Name.getInstance(issuer.getEncoded());
+    }
+
+    private static byte[] getSubjectKeyId(X509Certificate cert)
+    {
+        byte[] ext = cert.getExtensionValue(X509Extension.subjectKeyIdentifier.getId());
+
+        if (ext != null)
+        {
+            return ASN1OctetString.getInstance(ASN1OctetString.getInstance(ext).getOctets()).getOctets();
+        }
+        else
+        {
+            return null;
+        }
     }
 }

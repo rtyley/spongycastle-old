@@ -45,6 +45,7 @@ public class AllTests
         }
 
         suite.addTestSuite(AllTests.class);
+        suite.addTest(ConverterTest.suite());
 
         return suite;
     }

@@ -91,19 +91,18 @@ public class KeyAgreeRecipientInformation
             return getPublicKeyInfoFromOriginatorPublicKey(recKeyAlgId, opk);
         }
 
-        OriginatorId origID = new OriginatorId();
+        OriginatorId origID;
 
         IssuerAndSerialNumber iAndSN = originator.getIssuerAndSerialNumber();
         if (iAndSN != null)
         {
-            origID.setIssuer(iAndSN.getName().getEncoded());
-            origID.setSerialNumber(iAndSN.getSerialNumber().getValue());
+            origID = new OriginatorId(iAndSN.getName(), iAndSN.getSerialNumber().getValue());
         }
         else
         {
             SubjectKeyIdentifier ski = originator.getSubjectKeyIdentifier();
 
-            origID.setSubjectKeyIdentifier(ski.getKeyIdentifier());
+            origID = new OriginatorId(ski.getKeyIdentifier());
         }
 
         return getPublicKeyInfoFromOriginatorId(origID);
