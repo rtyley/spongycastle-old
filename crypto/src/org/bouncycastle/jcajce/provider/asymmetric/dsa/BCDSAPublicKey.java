@@ -25,7 +25,7 @@ public class BCDSAPublicKey
     private static final long serialVersionUID = 1752452449903495175L;
 
     private BigInteger      y;
-    private DSAParams       dsaSpec;
+    private transient DSAParams       dsaSpec;
 
     BCDSAPublicKey(
         DSAPublicKeySpec spec)
@@ -153,7 +153,8 @@ public class BCDSAPublicKey
         ObjectInputStream in)
         throws IOException, ClassNotFoundException
     {
-        this.y = (BigInteger)in.readObject();
+        in.defaultReadObject();
+
         this.dsaSpec = new DSAParameterSpec((BigInteger)in.readObject(), (BigInteger)in.readObject(), (BigInteger)in.readObject());
     }
 
@@ -161,7 +162,8 @@ public class BCDSAPublicKey
         ObjectOutputStream out)
         throws IOException
     {
-        out.writeObject(y);
+        out.defaultWriteObject();
+
         out.writeObject(dsaSpec.getP());
         out.writeObject(dsaSpec.getQ());
         out.writeObject(dsaSpec.getG());

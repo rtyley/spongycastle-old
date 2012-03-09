@@ -22,8 +22,8 @@ public class BCDSAPrivateKey
 {
     private static final long serialVersionUID = -4677259546958385734L;
 
-    BigInteger          x;
-    DSAParams           dsaSpec;
+    private BigInteger          x;
+    private transient DSAParams           dsaSpec;
 
     protected BCDSAPrivateKey()
     {
@@ -123,7 +123,8 @@ public class BCDSAPrivateKey
         ObjectInputStream in)
         throws IOException, ClassNotFoundException
     {
-        this.x = (BigInteger)in.readObject();
+        in.defaultReadObject();
+
         this.dsaSpec = new DSAParameterSpec((BigInteger)in.readObject(), (BigInteger)in.readObject(), (BigInteger)in.readObject());
     }
 
@@ -131,7 +132,8 @@ public class BCDSAPrivateKey
         ObjectOutputStream out)
         throws IOException
     {
-        out.writeObject(x);
+        out.defaultWriteObject();
+
         out.writeObject(dsaSpec.getP());
         out.writeObject(dsaSpec.getQ());
         out.writeObject(dsaSpec.getG());
