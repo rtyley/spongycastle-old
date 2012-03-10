@@ -86,13 +86,13 @@ public abstract class KeyPairGeneratorSpi
         {
             this.strength = strength;
             this.random = random;
-            this.ecParams = ecParameters.get(new Integer(strength));
+            ECGenParameterSpec ecParams = (ECGenParameterSpec)ecParameters.get(new Integer(strength));
 
             if (ecParams != null)
             {
                 try
                 {
-                    initialize((ECGenParameterSpec)ecParams, random);
+                    initialize(ecParams, random);
                 }
                 catch (InvalidAlgorithmParameterException e)
                 {
@@ -187,15 +187,15 @@ public abstract class KeyPairGeneratorSpi
                             throw new InvalidAlgorithmParameterException("unknown curve name: " + curveName);
                         }
                     }
+                }
 
-                    this.ecParams = new ECNamedCurveSpec(
+                this.ecParams = new ECNamedCurveSpec(
                             curveName,
                             ecP.getCurve(),
                             ecP.getG(),
                             ecP.getN(),
                             ecP.getH(),
-                            null); // ecP.getSeed());   Work-around JDK bug -- it won't look up named curves properly if seed is present 
-                }
+                            null); // ecP.getSeed());   Work-around JDK bug -- it won't look up named curves properly if seed is present
 
                 java.security.spec.ECParameterSpec p = (java.security.spec.ECParameterSpec)ecParams;
 
