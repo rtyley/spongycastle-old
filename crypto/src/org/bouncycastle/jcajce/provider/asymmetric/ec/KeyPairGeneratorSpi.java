@@ -10,7 +10,6 @@ import java.security.spec.ECGenParameterSpec;
 import java.util.Hashtable;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
@@ -24,6 +23,7 @@ import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
@@ -133,68 +133,58 @@ public abstract class KeyPairGeneratorSpi
                 engine.init(param);
                 initialised = true;
             }
-            else if (params instanceof ECGenParameterSpec)
+            else if (params instanceof ECGenParameterSpec || params instanceof ECNamedCurveGenParameterSpec)
             {
-                final String curveName = ((ECGenParameterSpec)params).getName();
+                String curveName;
 
-                if (this.algorithm.equals("ECGOST3410"))
+                if (params instanceof ECGenParameterSpec)
                 {
-                    ECDomainParameters  ecP = ECGOST3410NamedCurves.getByName(curveName);
-                    if (ecP == null)
-                    {
-                        throw new InvalidAlgorithmParameterException("unknown curve name: " + curveName);
-                    }
-
-                    this.ecParams = new ECNamedCurveSpec(
-                                                    curveName,
-                                                    ecP.getCurve(),
-                                                    ecP.getG(),
-                                                    ecP.getN(),
-                                                    ecP.getH(),
-                                                    ecP.getSeed());
+                    curveName = ((ECGenParameterSpec)params).getName();
                 }
                 else
                 {
-                    X9ECParameters  ecP = X962NamedCurves.getByName(curveName);
+                    curveName = ((ECNamedCurveGenParameterSpec)params).getName();
+                }
+
+                X9ECParameters  ecP = X962NamedCurves.getByName(curveName);
+                if (ecP == null)
+                {
+                    ecP = SECNamedCurves.getByName(curveName);
                     if (ecP == null)
                     {
-                        ecP = SECNamedCurves.getByName(curveName);
-                        if (ecP == null)
+                        ecP = NISTNamedCurves.getByName(curveName);
+                    }
+                    if (ecP == null)
+                    {
+                        ecP = TeleTrusTNamedCurves.getByName(curveName);
+                    }
+                    if (ecP == null)
+                    {
+                        // See if it's actually an OID string (SunJSSE ServerHandshaker setupEphemeralECDHKeys bug)
+                        try
                         {
-                            ecP = NISTNamedCurves.getByName(curveName);
-                        }
-                        if (ecP == null)
-                        {
-                            ecP = TeleTrusTNamedCurves.getByName(curveName);
-                        }
-                        if (ecP == null)
-                        {
-                            // See if it's actually an OID string (SunJSSE ServerHandshaker setupEphemeralECDHKeys bug)
-                            try
+                            ASN1ObjectIdentifier oid = new ASN1ObjectIdentifier(curveName);
+                            ecP = X962NamedCurves.getByOID(oid);
+                            if (ecP == null)
                             {
-                                ASN1ObjectIdentifier oid = new ASN1ObjectIdentifier(curveName);
-                                ecP = X962NamedCurves.getByOID(oid);
-                                if (ecP == null)
-                                {
-                                    ecP = SECNamedCurves.getByOID(oid);
-                                }
-                                if (ecP == null)
-                                {
-                                    ecP = NISTNamedCurves.getByOID(oid);
-                                }
-                                if (ecP == null)
-                                {
-                                    ecP = TeleTrusTNamedCurves.getByOID(oid);
-                                }
-                                if (ecP == null)
-                                {
-                                    throw new InvalidAlgorithmParameterException("unknown curve OID: " + curveName);
-                                }
+                                ecP = SECNamedCurves.getByOID(oid);
                             }
-                            catch (IllegalArgumentException ex)
+                            if (ecP == null)
                             {
-                                throw new InvalidAlgorithmParameterException("unknown curve name: " + curveName);
+                                ecP = NISTNamedCurves.getByOID(oid);
                             }
+                            if (ecP == null)
+                            {
+                                ecP = TeleTrusTNamedCurves.getByOID(oid);
+                            }
+                            if (ecP == null)
+                            {
+                                throw new InvalidAlgorithmParameterException("unknown curve OID: " + curveName);
+                            }
+                        }
+                        catch (IllegalArgumentException ex)
+                        {
+                            throw new InvalidAlgorithmParameterException("unknown curve name: " + curveName);
                         }
                     }
 

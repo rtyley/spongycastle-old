@@ -8,15 +8,16 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
+import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.ECPrivateKeyStructure;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -43,13 +44,12 @@ public class BCECGOST3410PrivateKey
     implements ECPrivateKey, PKCS12BagAttributeCarrier, ECPointEncoder
 {
     private String          algorithm = "ECGOST3410";
-    private BigInteger      d;
-    private ECParameterSpec ecSpec;
     private boolean         withCompression;
 
-    private DERBitString publicKey;
-
-    private PKCS12BagAttributeCarrierImpl attrCarrier = new PKCS12BagAttributeCarrierImpl();
+    private transient BigInteger      d;
+    private transient ECParameterSpec ecSpec;
+    private transient DERBitString publicKey;
+    private transient PKCS12BagAttributeCarrierImpl attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected BCECGOST3410PrivateKey()
     {
@@ -132,7 +132,7 @@ public class BCECGOST3410PrivateKey
         if (params.isNamedCurve())
         {
             ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)params.getParameters();
-            X9ECParameters      ecP = ECUtil.getNamedCurveByOid(oid);
+            ECDomainParameters   ecP = ECGOST3410NamedCurves.getByOID(oid);
 
             ecSpec = new ECNamedCurveParameterSpec(
                                         ECUtil.getCurveName(oid),
@@ -156,9 +156,9 @@ public class BCECGOST3410PrivateKey
                                             ecP.getSeed());
         }
 
-        if (info.getPrivateKey() instanceof DERInteger)
+        if (info.getPrivateKey() instanceof ASN1Integer)
         {
-            DERInteger          derD = (DERInteger)info.getPrivateKey();
+            ASN1Integer          derD = ASN1Integer.getInstance(info.getPrivateKey());
 
             this.d = derD.getValue();
         }
@@ -347,29 +347,26 @@ public class BCECGOST3410PrivateKey
         }
     }
 
+
     private void readObject(
         ObjectInputStream in)
         throws IOException, ClassNotFoundException
     {
+        in.defaultReadObject();
+
         byte[] enc = (byte[])in.readObject();
 
         populateFromPrivKeyInfo(PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(enc)));
 
-        this.algorithm = (String)in.readObject();
-        this.withCompression = in.readBoolean();
         this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
-
-        attrCarrier.readObject(in);
     }
 
     private void writeObject(
         ObjectOutputStream out)
         throws IOException
     {
-        out.writeObject(this.getEncoded());
-        out.writeObject(algorithm);
-        out.writeBoolean(withCompression);
+        out.defaultWriteObject();
 
-        attrCarrier.writeObject(out);
+        out.writeObject(this.getEncoded());
     }
 }

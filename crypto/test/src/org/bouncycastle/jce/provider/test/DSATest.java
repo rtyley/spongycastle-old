@@ -36,6 +36,7 @@ import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 import org.bouncycastle.crypto.signers.DSASigner;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
@@ -654,6 +655,43 @@ public class DSATest
         checkEquals(eck1, vKey);
 
         PrivateKey eck2 = (PrivateKey)serializeDeserialize(sKey);
+
+        checkEquals(eck2, sKey);
+
+        // Named curve parameter
+        g.initialize(new ECNamedCurveGenParameterSpec("P-256"), new SecureRandom());
+
+        p = g.generateKeyPair();
+
+        sKey = p.getPrivate();
+        vKey = p.getPublic();
+
+        s.initSign(sKey);
+
+        s.update(data);
+
+        sigBytes = s.sign();
+
+        s = Signature.getInstance("ECDSA", "BC");
+
+        s.initVerify(vKey);
+
+        s.update(data);
+
+        if (!s.verify(sigBytes))
+        {
+            fail("ECDSA verification failed");
+        }
+
+        //
+        // key decoding test - serialisation test
+        //
+
+        eck1 = (PublicKey)serializeDeserialize(vKey);
+
+        checkEquals(eck1, vKey);
+
+        eck2 = (PrivateKey)serializeDeserialize(sKey);
 
         checkEquals(eck2, sKey);
 

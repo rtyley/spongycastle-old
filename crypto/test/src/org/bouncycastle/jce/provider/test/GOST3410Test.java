@@ -24,7 +24,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Date;
@@ -36,6 +35,7 @@ import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle.jce.interfaces.GOST3410PublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
@@ -261,7 +261,7 @@ public class GOST3410Test
 //                                   new ECFieldElement.Fp(mod_p,new BigInteger("4018974056539037503335449422937059775635739389905545080690979365213431566280"))), // y
 //                    new BigInteger("57896044618658097711785492504343953927082934583725450622380973592137631069619")); // q
 
-        g.initialize(new ECGenParameterSpec("GostR3410-2001-CryptoPro-A"), new SecureRandom());
+        g.initialize(new ECNamedCurveGenParameterSpec("GostR3410-2001-CryptoPro-A"), new SecureRandom());
 
         p = g.generateKeyPair();
 

@@ -7,6 +7,12 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Hashtable;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.nist.NISTNamedCurves;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
+import org.bouncycastle.asn1.x9.X962NamedCurves;
+import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.ECDomainParameters;
@@ -16,6 +22,8 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 
 public abstract class KeyPairGeneratorSpi
@@ -100,6 +108,68 @@ public abstract class KeyPairGeneratorSpi
                 this.ecParams = (ECParameterSpec)params;
 
                 param = new ECKeyGenerationParameters(new ECDomainParameters(p.getCurve(), p.getG(), p.getN()), random);
+
+                engine.init(param);
+                initialised = true;
+            }
+            else if (params instanceof ECNamedCurveGenParameterSpec)
+            {
+                String curveName;
+
+                curveName = ((ECNamedCurveGenParameterSpec)params).getName();
+
+                X9ECParameters  ecP = X962NamedCurves.getByName(curveName);
+                if (ecP == null)
+                {
+                    ecP = SECNamedCurves.getByName(curveName);
+                    if (ecP == null)
+                    {
+                        ecP = NISTNamedCurves.getByName(curveName);
+                    }
+                    if (ecP == null)
+                    {
+                        ecP = TeleTrusTNamedCurves.getByName(curveName);
+                    }
+                    if (ecP == null)
+                    {
+                        // See if it's actually an OID string (SunJSSE ServerHandshaker setupEphemeralECDHKeys bug)
+                        try
+                        {
+                            ASN1ObjectIdentifier oid = new ASN1ObjectIdentifier(curveName);
+                            ecP = X962NamedCurves.getByOID(oid);
+                            if (ecP == null)
+                            {
+                                ecP = SECNamedCurves.getByOID(oid);
+                            }
+                            if (ecP == null)
+                            {
+                                ecP = NISTNamedCurves.getByOID(oid);
+                            }
+                            if (ecP == null)
+                            {
+                                ecP = TeleTrusTNamedCurves.getByOID(oid);
+                            }
+                            if (ecP == null)
+                            {
+                                throw new InvalidAlgorithmParameterException("unknown curve OID: " + curveName);
+                            }
+                        }
+                        catch (IllegalArgumentException ex)
+                        {
+                            throw new InvalidAlgorithmParameterException("unknown curve name: " + curveName);
+                        }
+                    }
+
+                    this.ecParams = new ECNamedCurveParameterSpec(
+                            curveName,
+                            ecP.getCurve(),
+                            ecP.getG(),
+                            ecP.getN(),
+                            ecP.getH(),
+                            null); // ecP.getSeed());   Work-around JDK bug -- it won't look up named curves properly if seed is present
+                }
+
+                param = new ECKeyGenerationParameters(new ECDomainParameters(ecParams.getCurve(), ecParams.getG(), ecParams.getN()), random);
 
                 engine.init(param);
                 initialised = true;

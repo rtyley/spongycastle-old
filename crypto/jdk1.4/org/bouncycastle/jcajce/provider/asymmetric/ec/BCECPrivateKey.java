@@ -43,14 +43,14 @@ public class BCECPrivateKey
     implements ECPrivateKey, PKCS12BagAttributeCarrier, ECPointEncoder
 {
     private String          algorithm = "EC";
-    private BigInteger      d;
-    private ECParameterSpec ecSpec;
     private boolean         withCompression;
-    private ProviderConfiguration configuration;
 
-    private DERBitString publicKey;
+    private transient BigInteger              d;
+    private transient ECParameterSpec         ecSpec;
+    private transient ProviderConfiguration   configuration;
+    private transient DERBitString            publicKey;
 
-    private PKCS12BagAttributeCarrierImpl attrCarrier = new PKCS12BagAttributeCarrierImpl();
+    private transient PKCS12BagAttributeCarrierImpl attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected BCECPrivateKey()
     {
@@ -376,27 +376,22 @@ public class BCECPrivateKey
         ObjectInputStream in)
         throws IOException, ClassNotFoundException
     {
-        byte[] enc = (byte[])in.readObject();
+        in.defaultReadObject();
 
-        this.configuration = BouncyCastleProvider.CONFIGURATION;
+        byte[] enc = (byte[])in.readObject();
 
         populateFromPrivKeyInfo(PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(enc)));
 
-        this.algorithm = (String)in.readObject();
-        this.withCompression = in.readBoolean();
+        this.configuration = BouncyCastleProvider.CONFIGURATION;
         this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
-
-        attrCarrier.readObject(in);
     }
 
     private void writeObject(
         ObjectOutputStream out)
         throws IOException
     {
-        out.writeObject(this.getEncoded());
-        out.writeObject(algorithm);
-        out.writeBoolean(withCompression);
+        out.defaultWriteObject();
 
-        attrCarrier.writeObject(out);
+        out.writeObject(this.getEncoded());
     }
 }

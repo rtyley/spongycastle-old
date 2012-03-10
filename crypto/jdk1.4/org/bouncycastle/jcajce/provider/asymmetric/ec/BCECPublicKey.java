@@ -3,20 +3,14 @@ package org.bouncycastle.jcajce.provider.asymmetric.ec;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.math.BigInteger;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
-import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
-import org.bouncycastle.asn1.cryptopro.GOST3410PublicKeyAlgParameters;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X962Parameters;
@@ -28,7 +22,6 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
 import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
-import org.bouncycastle.jce.ECGOST3410NamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPointEncoder;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -41,12 +34,12 @@ import org.bouncycastle.math.ec.ECPoint;
 public class BCECPublicKey
     implements ECPublicKey, ECPointEncoder
 {
-    private String          algorithm = "EC";
-    private ECPoint         q;
-    private ECParameterSpec ecSpec;
-    private boolean         withCompression;
-    private GOST3410PublicKeyAlgParameters       gostParams;
-    private ProviderConfiguration configuration;
+    private String    algorithm = "EC";
+    private boolean   withCompression;
+
+    private transient org.bouncycastle.math.ec.ECPoint q;
+    private transient ECParameterSpec         ecSpec;
+    private transient ProviderConfiguration   configuration;
 
     public BCECPublicKey(
         String              algorithm,
@@ -57,7 +50,6 @@ public class BCECPublicKey
         this.q = key.q;
         this.ecSpec = key.ecSpec;
         this.withCompression = key.withCompression;
-        this.gostParams = key.gostParams;
         this.configuration = key.configuration;
     }
 
@@ -167,108 +159,68 @@ public class BCECPublicKey
 
     private void populateFromPubKeyInfo(SubjectPublicKeyInfo info)
     {
-        if (info.getAlgorithmId().getObjectId().equals(CryptoProObjectIdentifiers.gostR3410_2001))
+        X962Parameters          params = X962Parameters.getInstance(info.getAlgorithmId().getParameters());
+        ECCurve                 curve;
+
+        if (params.isNamedCurve())
         {
-            DERBitString bits = info.getPublicKeyData();
-            ASN1OctetString key;
-            this.algorithm = "ECGOST3410";
+            ASN1ObjectIdentifier oid = ASN1ObjectIdentifier.getInstance(params.getParameters());
+            X9ECParameters      ecP = ECUtil.getNamedCurveByOid(oid);
 
-            try
-            {
-                key = (ASN1OctetString)ASN1Primitive.fromByteArray(bits.getBytes());
-            }
-            catch (IOException ex)
-            {
-                throw new IllegalArgumentException("error recovering public key");
-            }
-
-            byte[]          keyEnc = key.getOctets();
-            byte[]          x = new byte[32];
-            byte[]          y = new byte[32];
-
-            for (int i = 0; i != x.length; i++)
-            {
-                x[i] = keyEnc[32 - 1 - i];
-            }
-
-            for (int i = 0; i != y.length; i++)
-            {
-                y[i] = keyEnc[64 - 1 - i];
-            }
-
-            gostParams = new GOST3410PublicKeyAlgParameters((ASN1Sequence)info.getAlgorithmId().getParameters());
-
-            ECNamedCurveParameterSpec spec = ECGOST3410NamedCurveTable.getParameterSpec(ECGOST3410NamedCurves.getName(gostParams.getPublicKeyParamSet()));
-
-            ecSpec = spec;
-
-            this.q = spec.getCurve().createPoint(new BigInteger(1, x), new BigInteger(1, y), false);
+            ecSpec = new ECNamedCurveParameterSpec(
+                                        ECUtil.getCurveName(oid),
+                                        ecP.getCurve(),
+                                        ecP.getG(),
+                                        ecP.getN(),
+                                        ecP.getH(),
+                                        ecP.getSeed());
+            curve = ((ECParameterSpec)ecSpec).getCurve();
+        }
+        else if (params.isImplicitlyCA())
+        {
+            ecSpec = null;
+            curve = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa().getCurve();
         }
         else
         {
-            X962Parameters          params = X962Parameters.getInstance(info.getAlgorithmId().getParameters());
-            ECCurve                 curve;
+            X9ECParameters ecP = X9ECParameters.getInstance(params.getParameters());
+            ecSpec = new ECParameterSpec(
+                                        ecP.getCurve(),
+                                        ecP.getG(),
+                                        ecP.getN(),
+                                        ecP.getH(),
+                                        ecP.getSeed());
+            curve = ((ECParameterSpec)ecSpec).getCurve();
+        }
 
-            if (params.isNamedCurve())
+        DERBitString    bits = info.getPublicKeyData();
+        byte[]          data = bits.getBytes();
+        ASN1OctetString key = new DEROctetString(data);
+
+        //
+        // extra octet string - one of our old certs...
+        //
+        if (data[0] == 0x04 && data[1] == data.length - 2
+            && (data[2] == 0x02 || data[2] == 0x03))
+        {
+            int qLength = new X9IntegerConverter().getByteLength(curve);
+
+            if (qLength >= data.length - 3)
             {
-                ASN1ObjectIdentifier oid = ASN1ObjectIdentifier.getInstance(params.getParameters());
-                X9ECParameters      ecP = ECUtil.getNamedCurveByOid(oid);
-
-                ecSpec = new ECNamedCurveParameterSpec(
-                                            ECUtil.getCurveName(oid),
-                                            ecP.getCurve(),
-                                            ecP.getG(),
-                                            ecP.getN(),
-                                            ecP.getH(),
-                                            ecP.getSeed());
-                curve = ((ECParameterSpec)ecSpec).getCurve();
-            }
-            else if (params.isImplicitlyCA())
-            {
-                ecSpec = null;
-                curve = BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa().getCurve();
-            }
-            else
-            {
-                X9ECParameters ecP = X9ECParameters.getInstance(params.getParameters());
-                ecSpec = new ECParameterSpec(
-                                            ecP.getCurve(),
-                                            ecP.getG(),
-                                            ecP.getN(),
-                                            ecP.getH(),
-                                            ecP.getSeed());
-                curve = ((ECParameterSpec)ecSpec).getCurve();
-            }
-
-            DERBitString    bits = info.getPublicKeyData();
-            byte[]          data = bits.getBytes();
-            ASN1OctetString key = new DEROctetString(data);
-
-            //
-            // extra octet string - one of our old certs...
-            //
-            if (data[0] == 0x04 && data[1] == data.length - 2
-                && (data[2] == 0x02 || data[2] == 0x03))
-            {
-                int qLength = new X9IntegerConverter().getByteLength(curve);
-
-                if (qLength >= data.length - 3)
+                try
                 {
-                    try
-                    {
-                        key = (ASN1OctetString)ASN1Primitive.fromByteArray(data);
-                    }
-                    catch (IOException ex)
-                    {
-                        throw new IllegalArgumentException("error recovering public key");
-                    }
+                    key = (ASN1OctetString)ASN1Primitive.fromByteArray(data);
+                }
+                catch (IOException ex)
+                {
+                    throw new IllegalArgumentException("error recovering public key");
                 }
             }
-
-            X9ECPoint derQ = new X9ECPoint(curve, key);
-
-            this.q = derQ.getPoint();
         }
+
+        X9ECPoint derQ = new X9ECPoint(curve, key);
+
+        this.q = derQ.getPoint();
     }
 
     public String getAlgorithm()
@@ -284,93 +236,40 @@ public class BCECPublicKey
     public byte[] getEncoded()
     {
         SubjectPublicKeyInfo info;
-        
-        if (algorithm.equals("ECGOST3410"))
+
+        X962Parameters          params = null;
+        if (ecSpec instanceof ECNamedCurveParameterSpec)
         {
-            ASN1Encodable          params = null;
-            if (gostParams != null)
-            {
-                params = gostParams;
-            }
-            else if (ecSpec instanceof ECNamedCurveParameterSpec)
-            {
-                params = new GOST3410PublicKeyAlgParameters(
-                                   ECGOST3410NamedCurves.getOID(((ECNamedCurveParameterSpec)ecSpec).getName()),
-                                   CryptoProObjectIdentifiers.gostR3411_94_CryptoProParamSet);
-            }
-            else
-            {
-                ECParameterSpec         p = (ECParameterSpec)ecSpec;
+            DERObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveParameterSpec)ecSpec).getName());
 
-                ECCurve curve = p.getG().getCurve();
-                ECPoint generator = curve.createPoint(p.getG().getX().toBigInteger(), p.getG().getY().toBigInteger(), withCompression);
-
-                X9ECParameters ecP = new X9ECParameters(
-                    p.getCurve(), generator, p.getN(), p.getH(), p.getSeed());
-
-                params = new X962Parameters(ecP);
-            }
-
-            ECPoint qq = this.getQ();
-            ECPoint point = qq.getCurve().createPoint(qq.getX().toBigInteger(), qq.getY().toBigInteger(), false);
-            ASN1OctetString p = ASN1OctetString.getInstance(new X9ECPoint(point));
-
-            BigInteger      bX = this.q.getX().toBigInteger();
-            BigInteger      bY = this.q.getY().toBigInteger();
-            byte[]          encKey = new byte[64];
-            
-            byte[] val = bX.toByteArray();
-            
-            for (int i = 0; i != 32; i++)
+            if (curveOid == null)
             {
-                encKey[i] = val[val.length - 1 - i];
+                curveOid = new DERObjectIdentifier(((ECNamedCurveParameterSpec)ecSpec).getName());
             }
-            
-            val = bY.toByteArray();
-            
-            for (int i = 0; i != 32; i++)
-            {
-                encKey[32 + i] = val[val.length - 1 - i];
-            }
-            
-            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params), new DEROctetString(encKey));
+            params = new X962Parameters(curveOid);
+        }
+        else if (ecSpec == null)
+        {
+            params = new X962Parameters(DERNull.INSTANCE);
         }
         else
         {
-            X962Parameters          params = null;
-            if (ecSpec instanceof ECNamedCurveParameterSpec)
-            {
-                DERObjectIdentifier curveOid = ECUtil.getNamedCurveOid(((ECNamedCurveParameterSpec)ecSpec).getName());
+            ECParameterSpec         p = (ECParameterSpec)ecSpec;
 
-                if (curveOid == null)
-                {
-                    curveOid = new DERObjectIdentifier(((ECNamedCurveParameterSpec)ecSpec).getName());
-                }
-                params = new X962Parameters(curveOid);
-            }
-            else if (ecSpec == null)
-            {
-                params = new X962Parameters(DERNull.INSTANCE);
-            }
-            else
-            {
-                ECParameterSpec         p = (ECParameterSpec)ecSpec;
+            ECCurve curve = p.getG().getCurve();
+            ECPoint generator = curve.createPoint(p.getG().getX().toBigInteger(), p.getG().getY().toBigInteger(), withCompression);
 
-                ECCurve curve = p.getG().getCurve();
-                ECPoint generator = curve.createPoint(p.getG().getX().toBigInteger(), p.getG().getY().toBigInteger(), withCompression);
+            X9ECParameters ecP = new X9ECParameters(
+                p.getCurve(), generator, p.getN(), p.getH(), p.getSeed());
 
-                X9ECParameters ecP = new X9ECParameters(
-                    p.getCurve(), generator, p.getN(), p.getH(), p.getSeed());
-
-                params = new X962Parameters(ecP);
-            }
-
-            ECCurve curve = this.engineGetQ().getCurve();
-            ECPoint point = curve.createPoint(this.getQ().getX().toBigInteger(), this.getQ().getY().toBigInteger(), withCompression);
-            ASN1OctetString p = ASN1OctetString.getInstance(new X9ECPoint(point));
-
-            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), p.getOctets());
+            params = new X962Parameters(ecP);
         }
+
+        ECCurve curve = this.engineGetQ().getCurve();
+        ECPoint point = curve.createPoint(this.getQ().getX().toBigInteger(), this.getQ().getY().toBigInteger(), withCompression);
+        ASN1OctetString p = ASN1OctetString.getInstance(new X9ECPoint(point));
+
+        info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey, params), p.getOctets());
         
         return KeyUtil.getEncodedSubjectPublicKeyInfo(info);
     }
@@ -456,22 +355,21 @@ public class BCECPublicKey
         ObjectInputStream in)
         throws IOException, ClassNotFoundException
     {
-        byte[] enc = (byte[])in.readObject();
+        in.defaultReadObject();
 
-        this.configuration = BouncyCastleProvider.CONFIGURATION;
+        byte[] enc = (byte[])in.readObject();
 
         populateFromPubKeyInfo(SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(enc)));
 
-        this.algorithm = (String)in.readObject();
-        this.withCompression = in.readBoolean();
+        this.configuration = BouncyCastleProvider.CONFIGURATION;
     }
 
     private void writeObject(
         ObjectOutputStream out)
         throws IOException
     {
+        out.defaultWriteObject();
+
         out.writeObject(this.getEncoded());
-        out.writeObject(algorithm);
-        out.writeBoolean(withCompression);
     }
 }

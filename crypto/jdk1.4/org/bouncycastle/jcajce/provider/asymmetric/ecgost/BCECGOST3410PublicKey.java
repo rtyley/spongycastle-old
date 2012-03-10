@@ -41,11 +41,12 @@ import org.bouncycastle.math.ec.ECPoint;
 public class BCECGOST3410PublicKey
     implements ECPublicKey, ECPointEncoder
 {
-    private String          algorithm = "ECGOST3410";
-    private ECPoint         q;
-    private ECParameterSpec ecSpec;
-    private boolean         withCompression;
-    private GOST3410PublicKeyAlgParameters       gostParams;
+    private String                  algorithm = "ECGOST3410";
+    private boolean                 withCompression;
+
+    private transient org.bouncycastle.math.ec.ECPoint q;
+    private transient ECParameterSpec         ecSpec;
+    private transient GOST3410PublicKeyAlgParameters       gostParams;
 
     public BCECGOST3410PublicKey(
         String              algorithm,
@@ -428,20 +429,19 @@ public class BCECGOST3410PublicKey
         ObjectInputStream in)
         throws IOException, ClassNotFoundException
     {
+        in.defaultReadObject();
+
         byte[] enc = (byte[])in.readObject();
 
         populateFromPubKeyInfo(SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(enc)));
-
-        this.algorithm = (String)in.readObject();
-        this.withCompression = in.readBoolean();
     }
 
     private void writeObject(
         ObjectOutputStream out)
         throws IOException
     {
+        out.defaultWriteObject();
+
         out.writeObject(this.getEncoded());
-        out.writeObject(algorithm);
-        out.writeBoolean(withCompression);
     }
 }

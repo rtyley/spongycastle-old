@@ -17,6 +17,7 @@ import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.EC5Util;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
@@ -91,9 +92,18 @@ public class KeyPairGeneratorSpi
             engine.init(param);
             initialised = true;
         }
-        else if (params instanceof ECGenParameterSpec)
+        else if (params instanceof ECGenParameterSpec || params instanceof ECNamedCurveGenParameterSpec)
         {
-            final String curveName = ((ECGenParameterSpec)params).getName();
+            String curveName;
+
+            if (params instanceof ECGenParameterSpec)
+            {
+                curveName = ((ECGenParameterSpec)params).getName();
+            }
+            else
+            {
+                curveName = ((ECNamedCurveGenParameterSpec)params).getName();
+            }
 
             ECDomainParameters ecP = ECGOST3410NamedCurves.getByName(curveName);
             if (ecP == null)

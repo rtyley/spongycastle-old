@@ -6,6 +6,7 @@ import java.security.KeyPair;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
+import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.ECDomainParameters;
@@ -13,6 +14,8 @@ import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 
 public class KeyPairGeneratorSpi
@@ -63,6 +66,31 @@ public class KeyPairGeneratorSpi
             this.ecParams = p;
 
             param = new ECKeyGenerationParameters(new ECDomainParameters(p.getCurve(), p.getG(), p.getN()), random);
+
+            engine.init(param);
+            initialised = true;
+        }
+        else if (params instanceof ECNamedCurveGenParameterSpec)
+        {
+            String curveName;
+
+            curveName = ((ECNamedCurveGenParameterSpec)params).getName();
+
+            ECDomainParameters ecP = ECGOST3410NamedCurves.getByName(curveName);
+            if (ecP == null)
+            {
+                throw new InvalidAlgorithmParameterException("unknown curve name: " + curveName);
+            }
+
+            this.ecParams = new ECNamedCurveParameterSpec(
+                curveName,
+                ecP.getCurve(),
+                ecP.getG(),
+                ecP.getN(),
+                ecP.getH(),
+                ecP.getSeed());
+
+            param = new ECKeyGenerationParameters(new ECDomainParameters(ecParams.getCurve(), ecParams.getG(), ecParams.getN()), random);
 
             engine.init(param);
             initialised = true;
