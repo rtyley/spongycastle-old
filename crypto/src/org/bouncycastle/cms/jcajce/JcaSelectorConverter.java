@@ -36,13 +36,20 @@ public class JcaSelectorConverter
 
     public KeyTransRecipientId getKeyTransRecipientId(X509CertSelector certSelector)
     {
-        if (certSelector.getSubjectKeyIdentifier() != null)
+        try
         {
-            return new JceKeyTransRecipientId(certSelector.getIssuer(), certSelector.getSerialNumber(), ASN1OctetString.getInstance(certSelector.getSubjectKeyIdentifier()).getOctets());
+            if (certSelector.getSubjectKeyIdentifier() != null)
+            {
+                return new KeyTransRecipientId(X500Name.getInstance(certSelector.getIssuerAsBytes()), certSelector.getSerialNumber(), ASN1OctetString.getInstance(certSelector.getSubjectKeyIdentifier()).getOctets());
+            }
+            else
+            {
+                return new KeyTransRecipientId(X500Name.getInstance(certSelector.getIssuerAsBytes()), certSelector.getSerialNumber());
+            }
         }
-        else
+        catch (IOException e)
         {
-            return new JceKeyTransRecipientId(certSelector.getIssuer(), certSelector.getSerialNumber());
+            throw new IllegalArgumentException("unable to convert issuer: " + e.getMessage());
         }
     }
 }
