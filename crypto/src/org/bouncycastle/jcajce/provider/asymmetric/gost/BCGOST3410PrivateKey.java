@@ -29,6 +29,8 @@ import org.bouncycastle.jce.spec.GOST3410PublicKeyParameterSetSpec;
 public class BCGOST3410PrivateKey
     implements GOST3410PrivateKey, PKCS12BagAttributeCarrier
 {
+    static final long serialVersionUID = 8581661527592305464L;
+
     private BigInteger          x;
 
     private transient   GOST3410Params      gost3410Spec;

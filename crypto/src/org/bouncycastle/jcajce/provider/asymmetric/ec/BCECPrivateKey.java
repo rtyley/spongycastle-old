@@ -40,6 +40,8 @@ import org.bouncycastle.math.ec.ECCurve;
 public class BCECPrivateKey
     implements ECPrivateKey, org.bouncycastle.jce.interfaces.ECPrivateKey, PKCS12BagAttributeCarrier, ECPointEncoder
 {
+    static final long serialVersionUID = 994553197664784084L;
+
     private String          algorithm = "EC";
     private boolean         withCompression;
 

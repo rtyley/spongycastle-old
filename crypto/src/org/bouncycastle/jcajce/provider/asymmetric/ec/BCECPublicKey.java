@@ -36,6 +36,8 @@ import org.bouncycastle.math.ec.ECCurve;
 public class BCECPublicKey
     implements ECPublicKey, org.bouncycastle.jce.interfaces.ECPublicKey, ECPointEncoder
 {
+    static final long serialVersionUID = 2422789860422731812L;
+
     private String    algorithm = "EC";
     private boolean   withCompression;
 

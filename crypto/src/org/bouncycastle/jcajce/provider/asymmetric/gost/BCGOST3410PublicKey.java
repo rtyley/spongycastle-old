@@ -23,6 +23,8 @@ import org.bouncycastle.jce.spec.GOST3410PublicKeySpec;
 public class BCGOST3410PublicKey
     implements GOST3410PublicKey
 {
+    static final long serialVersionUID = -6251023343619275990L;
+
     private BigInteger      y;
     private transient GOST3410Params  gost3410Spec;
 
