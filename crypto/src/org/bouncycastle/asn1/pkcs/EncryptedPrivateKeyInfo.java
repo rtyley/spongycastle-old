@@ -17,7 +17,7 @@ public class EncryptedPrivateKeyInfo
     private AlgorithmIdentifier algId;
     private ASN1OctetString     data;
 
-    public EncryptedPrivateKeyInfo(
+    private EncryptedPrivateKeyInfo(
         ASN1Sequence  seq)
     {
         Enumeration e = seq.getObjects();

@@ -1,5 +1,6 @@
 package org.bouncycastle.asn1.pkcs;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -13,13 +14,13 @@ import org.bouncycastle.asn1.DLTaggedObject;
 public class SafeBag
     extends ASN1Object
 {
-    ASN1ObjectIdentifier bagId;
-    ASN1Primitive bagValue;
-    ASN1Set                     bagAttributes;
+    private ASN1ObjectIdentifier bagId;
+    private ASN1Encodable bagValue;
+    private ASN1Set                     bagAttributes;
 
     public SafeBag(
         ASN1ObjectIdentifier oid,
-        ASN1Primitive obj)
+        ASN1Encodable obj)
     {
         this.bagId = oid;
         this.bagValue = obj;
@@ -28,7 +29,7 @@ public class SafeBag
 
     public SafeBag(
         ASN1ObjectIdentifier oid,
-        ASN1Primitive obj,
+        ASN1Encodable obj,
         ASN1Set                 bagAttributes)
     {
         this.bagId = oid;
@@ -68,7 +69,7 @@ public class SafeBag
         return bagId;
     }
 
-    public ASN1Primitive getBagValue()
+    public ASN1Encodable getBagValue()
     {
         return bagValue;
     }

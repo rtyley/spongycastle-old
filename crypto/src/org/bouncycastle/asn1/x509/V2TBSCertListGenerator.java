@@ -134,7 +134,19 @@ public class V2TBSCertListGenerator
         {
             ASN1EncodableVector v = new ASN1EncodableVector();
 
-            v.add(reasons[reason]);
+            if (reason < reasons.length)
+            {
+                if (reason < 0)
+                {
+                    throw new IllegalArgumentException("invalid reason value: " + reason);
+                }
+                v.add(reasons[reason]);
+            }
+            else
+            {
+                v.add(createReasonExtension(reason));
+            }
+
             if (invalidityDate != null)
             {
                 v.add(createInvalidityDateExtension(revocationDate));

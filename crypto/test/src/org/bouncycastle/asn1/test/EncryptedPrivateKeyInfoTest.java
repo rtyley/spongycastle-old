@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo;
 import org.bouncycastle.asn1.util.ASN1Dump;
@@ -73,7 +72,7 @@ public class EncryptedPrivateKeyInfoTest
 
         try
         {
-            info = new EncryptedPrivateKeyInfo((ASN1Sequence)aIn.readObject());
+            info = EncryptedPrivateKeyInfo.getInstance(aIn.readObject());
         }
         catch (Exception e)
         {

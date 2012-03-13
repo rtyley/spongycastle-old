@@ -344,6 +344,11 @@ public class GenerationTest
         {
             fail("failed v2 cert list read back test");
         }
+
+        //
+        // check we can add a custom reason
+        //
+        gen.addCRLEntry(new ASN1Integer(1), new Time(new Date(1000)), 128);
     }
     
     public void performTest()

@@ -1,5 +1,6 @@
 package org.bouncycastle.asn1.pkcs;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -11,21 +12,33 @@ import org.bouncycastle.asn1.DERTaggedObject;
 public class CertBag
     extends ASN1Object
 {
-    ASN1Sequence        seq;
-    ASN1ObjectIdentifier certId;
-    ASN1Primitive certValue;
+    private ASN1ObjectIdentifier certId;
+    private ASN1Encodable certValue;
 
-    public CertBag(
+    private CertBag(
         ASN1Sequence    seq)
     {
-        this.seq = seq;
         this.certId = (ASN1ObjectIdentifier)seq.getObjectAt(0);
         this.certValue = ((DERTaggedObject)seq.getObjectAt(1)).getObject();
     }
 
+    public static CertBag getInstance(Object o)
+    {
+        if (o instanceof CertBag)
+        {
+            return (CertBag)o;
+        }
+        else if (o != null)
+        {
+            return new CertBag(ASN1Sequence.getInstance(o));
+        }
+
+        return null;
+    }
+
     public CertBag(
         ASN1ObjectIdentifier certId,
-        ASN1Primitive           certValue)
+        ASN1Encodable        certValue)
     {
         this.certId = certId;
         this.certValue = certValue;
@@ -36,7 +49,7 @@ public class CertBag
         return certId;
     }
 
-    public ASN1Primitive getCertValue()
+    public ASN1Encodable getCertValue()
     {
         return certValue;
     }

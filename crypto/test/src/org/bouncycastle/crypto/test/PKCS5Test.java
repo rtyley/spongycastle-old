@@ -128,7 +128,7 @@ public class PKCS5Test
 
             try
             {
-                info = new EncryptedPrivateKeyInfo((ASN1Sequence)dIn.readObject());
+                info = EncryptedPrivateKeyInfo.getInstance(dIn.readObject());
             }
             catch (Exception e)
             {
