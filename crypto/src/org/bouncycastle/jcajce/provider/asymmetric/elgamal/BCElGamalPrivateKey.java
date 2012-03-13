@@ -138,6 +138,28 @@ public class BCElGamalPrivateKey
         return x;
     }
 
+    public boolean equals(
+        Object o)
+    {
+        if (!(o instanceof ElGamalPrivateKey))
+        {
+            return false;
+        }
+
+        DHPrivateKey other = (DHPrivateKey)o;
+
+        return this.getX().equals(other.getX())
+            && this.getParams().getG().equals(other.getParams().getG())
+            && this.getParams().getP().equals(other.getParams().getP())
+            && this.getParams().getL() == other.getParams().getL();
+    }
+
+    public int hashCode()
+    {
+        return this.getX().hashCode() ^ this.getParams().getG().hashCode()
+                ^ this.getParams().getP().hashCode() ^ this.getParams().getL();
+    }
+
     private void readObject(
         ObjectInputStream   in)
         throws IOException, ClassNotFoundException

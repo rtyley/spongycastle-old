@@ -8,22 +8,30 @@ import java.security.interfaces.DSAParams;
 import java.security.interfaces.DSAPrivateKey;
 import java.security.spec.DSAParameterSpec;
 import java.security.spec.DSAPrivateKeySpec;
+import java.util.Enumeration;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.DSAParameter;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DSAPrivateKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.util.KeyUtil;
+import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 
 public class BCDSAPrivateKey
-    implements DSAPrivateKey
+    implements DSAPrivateKey, PKCS12BagAttributeCarrier
 {
     private static final long serialVersionUID = -4677259546958385734L;
 
     private BigInteger          x;
-    private transient DSAParams           dsaSpec;
+    private transient DSAParams dsaSpec;
+
+    private transient PKCS12BagAttributeCarrierImpl attrCarrier = new PKCS12BagAttributeCarrierImpl();
 
     protected BCDSAPrivateKey()
     {
@@ -119,6 +127,24 @@ public class BCDSAPrivateKey
                 ^ this.getParams().getP().hashCode() ^ this.getParams().getQ().hashCode();
     }
 
+    public void setBagAttribute(
+        ASN1ObjectIdentifier oid,
+        ASN1Encodable attribute)
+    {
+        attrCarrier.setBagAttribute(oid, attribute);
+    }
+
+    public ASN1Encodable getBagAttribute(
+        DERObjectIdentifier oid)
+    {
+        return attrCarrier.getBagAttribute(oid);
+    }
+
+    public Enumeration getBagAttributeKeys()
+    {
+        return attrCarrier.getBagAttributeKeys();
+    }
+
     private void readObject(
         ObjectInputStream in)
         throws IOException, ClassNotFoundException
@@ -126,6 +152,7 @@ public class BCDSAPrivateKey
         in.defaultReadObject();
 
         this.dsaSpec = new DSAParameterSpec((BigInteger)in.readObject(), (BigInteger)in.readObject(), (BigInteger)in.readObject());
+        this.attrCarrier = new PKCS12BagAttributeCarrierImpl();
     }
 
     private void writeObject(
