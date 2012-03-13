@@ -130,6 +130,28 @@ public class BCElGamalPublicKey
         return y;
     }
 
+    public int hashCode()
+    {
+        return this.getY().hashCode() ^ this.getParams().getG().hashCode()
+                ^ this.getParams().getP().hashCode() ^ this.getParams().getL();
+    }
+
+    public boolean equals(
+        Object o)
+    {
+        if (!(o instanceof DHPublicKey))
+        {
+            return false;
+        }
+
+        DHPublicKey other = (DHPublicKey)o;
+
+        return this.getY().equals(other.getY())
+            && this.getParams().getG().equals(other.getParams().getG())
+            && this.getParams().getP().equals(other.getParams().getP())
+            && this.getParams().getL() == other.getParams().getL();
+    }
+
     private void readObject(
         ObjectInputStream   in)
         throws IOException, ClassNotFoundException

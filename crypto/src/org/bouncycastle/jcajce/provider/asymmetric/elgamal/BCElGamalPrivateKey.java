@@ -141,7 +141,7 @@ public class BCElGamalPrivateKey
     public boolean equals(
         Object o)
     {
-        if (!(o instanceof ElGamalPrivateKey))
+        if (!(o instanceof DHPrivateKey))
         {
             return false;
         }
