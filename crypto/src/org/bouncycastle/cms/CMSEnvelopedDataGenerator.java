@@ -61,6 +61,7 @@ public class CMSEnvelopedDataGenerator
     /**
      * constructor allowing specific source of randomness
      * @param rand instance of SecureRandom to use
+     * @deprecated use no args constructor.
      */
     public CMSEnvelopedDataGenerator(
         SecureRandom rand)
