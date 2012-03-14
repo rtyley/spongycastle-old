@@ -155,6 +155,42 @@ public class BCGOST3410PrivateKey
         return x;
     }
 
+    public boolean equals(
+        Object o)
+    {
+        if (!(o instanceof GOST3410PrivateKey))
+        {
+            return false;
+        }
+
+        GOST3410PrivateKey other = (GOST3410PrivateKey)o;
+
+        return this.getX().equals(other.getX())
+            && this.getParameters().getPublicKeyParameters().equals(other.getParameters().getPublicKeyParameters())
+            && this.getParameters().getDigestParamSetOID().equals(other.getParameters().getDigestParamSetOID())
+            && compareObj(this.getParameters().getEncryptionParamSetOID(), other.getParameters().getEncryptionParamSetOID());
+    }
+
+    private boolean compareObj(Object o1, Object o2)
+    {
+        if (o1 == o2)
+        {
+            return true;
+        }
+
+        if (o1 == null)
+        {
+            return false;
+        }
+
+        return o1.equals(o2);
+    }
+
+    public int hashCode()
+    {
+        return this.getX().hashCode() ^ gost3410Spec.hashCode();
+    }
+
     public void setBagAttribute(
         ASN1ObjectIdentifier oid,
         ASN1Encodable        attribute)

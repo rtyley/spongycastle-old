@@ -21,6 +21,7 @@ import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
@@ -157,15 +158,7 @@ public class ElGamalTest
         //
         // public key serialisation test
         //
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        ObjectOutputStream      oOut = new ObjectOutputStream(bOut);
-
-        oOut.writeObject(keyPair.getPublic());
-
-        ByteArrayInputStream   bIn = new ByteArrayInputStream(bOut.toByteArray());
-        ObjectInputStream      oIn = new ObjectInputStream(bIn);
-
-        pubKey = (DHPublicKey)oIn.readObject();
+        pubKey = (DHPublicKey)serializeDeserialize(keyPair.getPublic());
         spec = pubKey.getParams();
 
         if (!spec.getG().equals(elParams.getG()) || !spec.getP().equals(elParams.getP()))
@@ -176,6 +169,16 @@ public class ElGamalTest
         if (!((DHPublicKey)keyPair.getPublic()).getY().equals(pubKey.getY()))
         {
             fail(size + " bit public key serialisation test failed on y value");
+        }
+
+        if (!keyPair.getPublic().equals(pubKey))
+        {
+            fail("equals test failed");
+        }
+
+        if (keyPair.getPublic().hashCode() != pubKey.hashCode())
+        {
+            fail("hashCode test failed");
         }
 
         //
@@ -200,15 +203,7 @@ public class ElGamalTest
         //
         // private key serialisation test
         //
-        bOut = new ByteArrayOutputStream();
-        oOut = new ObjectOutputStream(bOut);
-
-        oOut.writeObject(keyPair.getPrivate());
-
-        bIn = new ByteArrayInputStream(bOut.toByteArray());
-        oIn = new ObjectInputStream(bIn);
-
-        privKey = (DHPrivateKey)oIn.readObject();
+        privKey = (DHPrivateKey)serializeDeserialize(keyPair.getPrivate());
         spec = privKey.getParams();
 
         if (!spec.getG().equals(elParams.getG()) || !spec.getP().equals(elParams.getP()))
@@ -220,6 +215,35 @@ public class ElGamalTest
         {
             fail(size + " bit private key serialisation test failed on y value");
         }
+
+        if (!keyPair.getPrivate().equals(privKey))
+        {
+            fail("equals test failed");
+        }
+
+        if (keyPair.getPrivate().hashCode() != privKey.hashCode())
+        {
+            fail("hashCode test failed");
+        }
+
+        if (!(privKey instanceof PKCS12BagAttributeCarrier))
+        {
+            fail("private key not implementing PKCS12 attribute carrier");
+        }
+    }
+
+    private Object serializeDeserialize(Object o)
+        throws Exception
+    {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        ObjectOutputStream oOut = new ObjectOutputStream(bOut);
+
+        oOut.writeObject(o);
+        oOut.close();
+
+        ObjectInputStream oIn = new ObjectInputStream(new ByteArrayInputStream(bOut.toByteArray()));
+
+        return oIn.readObject();
     }
 
     private void checkKeySize(int privateValueSize, KeyPair aKeyPair)

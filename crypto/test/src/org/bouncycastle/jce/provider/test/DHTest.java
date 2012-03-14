@@ -32,6 +32,7 @@ import javax.crypto.spec.DHParameterSpec;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jce.ECPointUtil;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Base64;
@@ -138,15 +139,7 @@ public class DHTest
         //
         // public key serialisation test
         //
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        ObjectOutputStream      oOut = new ObjectOutputStream(bOut);
-
-        oOut.writeObject(aKeyPair.getPublic());
-
-        ByteArrayInputStream   bIn = new ByteArrayInputStream(bOut.toByteArray());
-        ObjectInputStream      oIn = new ObjectInputStream(bIn);
-
-        pubKey = (DHPublicKey)oIn.readObject();
+        pubKey = (DHPublicKey)serializeDeserialize(aKeyPair.getPublic());
         spec = pubKey.getParams();
 
         if (!spec.getG().equals(dhParams.getG()) || !spec.getP().equals(dhParams.getP()))
@@ -157,6 +150,16 @@ public class DHTest
         if (!((DHPublicKey)aKeyPair.getPublic()).getY().equals(pubKey.getY()))
         {
             fail(size + " bit public key serialisation test failed on y value");
+        }
+
+        if (!aKeyPair.getPublic().equals(pubKey))
+        {
+            fail("equals test failed");
+        }
+
+        if (aKeyPair.getPublic().hashCode() != pubKey.hashCode())
+        {
+            fail("hashCode test failed");
         }
 
         //
@@ -181,15 +184,7 @@ public class DHTest
         //
         // private key serialisation test
         //
-        bOut = new ByteArrayOutputStream();
-        oOut = new ObjectOutputStream(bOut);
-
-        oOut.writeObject(aKeyPair.getPrivate());
-
-        bIn = new ByteArrayInputStream(bOut.toByteArray());
-        oIn = new ObjectInputStream(bIn);
-
-        privKey = (DHPrivateKey)oIn.readObject();
+        privKey = (DHPrivateKey)serializeDeserialize(aKeyPair.getPrivate());
         spec = privKey.getParams();
 
         if (!spec.getG().equals(dhParams.getG()) || !spec.getP().equals(dhParams.getP()))
@@ -199,7 +194,22 @@ public class DHTest
 
         if (!((DHPrivateKey)aKeyPair.getPrivate()).getX().equals(privKey.getX()))
         {
-            fail(size + " bit private key serialisation test failed on y value");
+            fail(size + " bit private key serialisation test failed on X value");
+        }
+
+        if (!aKeyPair.getPrivate().equals(privKey))
+        {
+            fail("equals test failed");
+        }
+
+        if (aKeyPair.getPrivate().hashCode() != privKey.hashCode())
+        {
+            fail("hashCode test failed");
+        }
+
+        if (!(privKey instanceof PKCS12BagAttributeCarrier))
+        {
+            fail("private key not implementing PKCS12 attribute carrier");
         }
 
         //
@@ -338,6 +348,20 @@ public class DHTest
         SecretKey k2 = bKeyAgree.generateSecret(PKCSObjectIdentifiers.id_alg_CMS3DESwrap.getId());
         
         // TODO Compare k1 and k2?
+    }
+
+    private Object serializeDeserialize(Object o)
+        throws Exception
+    {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+        ObjectOutputStream oOut = new ObjectOutputStream(bOut);
+
+        oOut.writeObject(o);
+        oOut.close();
+
+        ObjectInputStream oIn = new ObjectInputStream(new ByteArrayInputStream(bOut.toByteArray()));
+
+        return oIn.readObject();
     }
 
     private void checkKeySize(int privateValueSize, KeyPair aKeyPair)

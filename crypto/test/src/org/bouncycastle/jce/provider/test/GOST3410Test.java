@@ -34,6 +34,7 @@ import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
 import org.bouncycastle.jce.interfaces.GOST3410PublicKey;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
@@ -229,6 +230,13 @@ public class GOST3410Test
             fail("private number not deserialised properly");
         }
 
+        checkEquals(k2, sKey);
+
+        if (!(k2 instanceof PKCS12BagAttributeCarrier))
+        {
+            fail("private key not implementing PKCS12 attribute carrier");
+        }
+
         k1 = (GOST3410PublicKey)serializeDeserialize(vKey);
 
         if (!k1.getY().equals(((GOST3410PublicKey)vKey).getY()))
@@ -240,6 +248,8 @@ public class GOST3410Test
         {
             fail("public parameters not deserialised properly");
         }
+
+        checkEquals(k1, vKey);
 
         //
         // ECGOST3410 generation test
@@ -327,6 +337,13 @@ public class GOST3410Test
             fail("private number not decoded properly");
         }
 
+        checkEquals(eck2, sKey);
+
+        if (!(eck2 instanceof PKCS12BagAttributeCarrier))
+        {
+            fail("private key not implementing PKCS12 attribute carrier");
+        }
+
         eck1 = (ECPublicKey)serializeDeserialize(vKey);
 
         if (!eck1.getQ().equals(((ECPublicKey)vKey).getQ()))
@@ -338,6 +355,8 @@ public class GOST3410Test
         {
             fail("public parameters not decoded properly");
         }
+
+        checkEquals(eck1, vKey);
     }
 
     private void keyStoreTest(PrivateKey sKey, PublicKey vKey)
@@ -376,6 +395,19 @@ public class GOST3410Test
         ks.load(new ByteArrayInputStream(bOut.toByteArray()), "gost".toCharArray());
 
         PrivateKey gKey = (PrivateKey)ks.getKey("gost", "gost".toCharArray());
+    }
+
+    private void checkEquals(Object o1, Object o2)
+    {
+        if (!o1.equals(o2))
+        {
+            fail("comparison test failed");
+        }
+
+        if (o1.hashCode() != o2.hashCode())
+        {
+            fail("hashCode test failed");
+        }
     }
 
     private void parametersTest()

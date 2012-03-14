@@ -35,6 +35,7 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.crypto.params.DSAParameters;
 import org.bouncycastle.crypto.params.DSAPublicKeyParameters;
 import org.bouncycastle.crypto.signers.DSASigner;
+import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
@@ -602,9 +603,18 @@ public class DSATest
 
         checkPublic(k1, vKey);
 
+        checkEquals(k1, vKey);
+
         DSAPrivateKey k2 = (DSAPrivateKey)serializeDeserialize(sKey);
 
         checkPrivateKey(k2, sKey);
+
+        checkEquals(k2, sKey);
+
+        if (!(k2 instanceof PKCS12BagAttributeCarrier))
+        {
+            fail("private key not implementing PKCS12 attribute carrier");
+        }
 
         //
         // ECDSA Fp generation test
@@ -748,6 +758,11 @@ public class DSATest
         eck2 = (PrivateKey)serializeDeserialize(sKey);
 
         checkEquals(eck2, sKey);
+
+        if (!(eck2 instanceof PKCS12BagAttributeCarrier))
+        {
+            fail("private key not implementing PKCS12 attribute carrier");
+        }
     }
 
     private void checkEquals(Object o1, Object o2)
@@ -755,6 +770,11 @@ public class DSATest
         if (!o1.equals(o2))
         {
             fail("comparison test failed");
+        }
+
+        if (o1.hashCode() != o2.hashCode())
+        {
+            fail("hashCode test failed");
         }
     }
     

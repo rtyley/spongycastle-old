@@ -615,6 +615,11 @@ public class RSATest
             fail("private key equality check failed");
         }
 
+        if (privKey.hashCode() != crtKey.hashCode())
+        {
+            fail("private key hashCode check failed");
+        }
+
         RSAPublicKey copyKey = (RSAPublicKey)keyFact.translateKey(pubKey);
         
         if (!pubKey.equals(copyKey))
@@ -634,6 +639,11 @@ public class RSATest
         if (!pubKey.equals(copyKey))
         {
             fail("public key equality check failed");
+        }
+
+        if (pubKey.hashCode() != copyKey.hashCode())
+        {
+            fail("public key hashCode check failed");
         }
 
         oaepCompatibilityTest("SHA-1", priv2048Key, pub2048Key);
