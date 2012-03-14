@@ -304,7 +304,7 @@ class EnvelopedDataHelper
                 NoSuchPaddingException, NoSuchProviderException
             {
                 Cipher cipher = createCipher(encryptionAlgID.getAlgorithm());
-                ASN1Primitive sParams = (ASN1Primitive)encryptionAlgID.getParameters().toASN1Primitive();
+                ASN1Encodable sParams = encryptionAlgID.getParameters();
                 String encAlg = encryptionAlgID.getAlgorithm().getId();
 
                 if (sParams != null && !(sParams instanceof ASN1Null))
@@ -315,7 +315,7 @@ class EnvelopedDataHelper
 
                         try
                         {
-                            params.init(sParams.getEncoded(), "ASN.1");
+                            params.init(sParams.toASN1Primitive().getEncoded(), "ASN.1");
                         }
                         catch (IOException e)
                         {
@@ -371,7 +371,7 @@ class EnvelopedDataHelper
                 NoSuchPaddingException, NoSuchProviderException
             {
                 Mac mac = createMac(macAlgId.getAlgorithm());
-                ASN1Primitive sParams = (ASN1Primitive)macAlgId.getParameters().toASN1Primitive();
+                ASN1Encodable sParams = macAlgId.getParameters();
                 String macAlg = macAlgId.getAlgorithm().getId();
 
                 if (sParams != null && !(sParams instanceof ASN1Null))
@@ -382,7 +382,7 @@ class EnvelopedDataHelper
 
                         try
                         {
-                            params.init(sParams.getEncoded(), "ASN.1");
+                            params.init(sParams.toASN1Primitive().getEncoded(), "ASN.1");
                         }
                         catch (IOException e)
                         {
