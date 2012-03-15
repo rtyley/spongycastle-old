@@ -281,6 +281,8 @@
                  <exclude name="org/bouncycastle/eac/**/*.java" />
                  <exclude name="org/bouncycastle/mail/**/*.*" />
                  <exclude name="org/bouncycastle/openpgp/**/*.java" />
+                 <exclude name="org/bouncycastle/openssl/**/*.java" />
+                 <exclude name="org/bouncycastle/mozilla/**/*.java" />
                  <exclude name="org/bouncycastle/operator/**/*.java" />
                  <exclude name="org/bouncycastle/pkcs/**/*.java" />
                  <exclude name="org/bouncycastle/tsp/**/*.java" />
@@ -351,6 +353,7 @@
                  <exclude name="org/bouncycastle/**/test/*.java" />
                  <exclude name="org/bouncycastle/**/test/*/*.java" />
                  <exclude name="org/bouncycastle/**/test/*.pem" />
+                 <exclude name="org/bouncycastle/**/test/**/*.pem" />
                  <exclude name="org/bouncycastle/**/test/*.p7m" />
                  <exclude name="**/*.crl" />
                  <exclude name="org/bouncycastle/**/test/*.crt" />
@@ -371,6 +374,8 @@
                  <exclude name="org/bouncycastle/sasn1/**/*.java" />
                  <exclude name="org/bouncycastle/tsp/**/*.java" />
                  <exclude name="org/bouncycastle/openpgp/**/*.java" />
+                 <exclude name="org/bouncycastle/openssl/**/*.java" />
+                 <exclude name="org/bouncycastle/mozilla/**/*.java" />
                  <exclude name="org/bouncycastle/bcpg/**/*.java" />
                  <exclude name="org/apache/**/*.java" />
              </fileset>
@@ -468,8 +473,10 @@
                  <include name="org/bouncycastle/cms/**/*.java" />
                  <include name="org/bouncycastle/eac/**/*.java" />
                  <include name="org/bouncycastle/cert/**/*.java" />
-                 <include name="org/bouncycastle/pkcs/**/*.java" />
+                 <include name="org/bouncycastle/mozilla/**/*.java" />
+                 <include name="org/bouncycastle/openssl/**/*.java" />
                  <include name="org/bouncycastle/operator/**/*.java" />
+                 <include name="org/bouncycastle/pkcs/**/*.java" />
                  <include name="org/bouncycastle/tsp/**/*.java" />
                  <exclude name="**/*Test.java" />
                  <exclude name="**/*Tests.java" />
@@ -657,7 +664,6 @@
                  <include name="org/bouncycastle/jce/**/test/*.java" />
                  <include name="org/bouncycastle/jce/**/test/*/*.java" />
                  <include name="org/bouncycastle/x509/**/test/*.java" />
-                 <include name="org/bouncycastle/openssl/**/test/*.java" />
                  <include name="org/bouncycastle/ocsp/**/test/*.java" />
              </fileset>
         </copy>
@@ -667,13 +673,11 @@
                 <package name="org.bouncycastle.asn1.*" />
                 <package name="org.bouncycastle.crypto.*" />
                 <package name="org.bouncycastle.jce.*" />
-                <package name="org.bouncycastle.openssl.*" />
-                <package name="org.bouncycastle.mozilla.*" />
                 <package name="org.bouncycastle.x509.*" />
                 <package name="org.bouncycastle.ocsp.*" />
                 <package name="org.bouncycastle.util.*" />
                 <group title="JCE Utility and Extension Packages" packages="org.bouncycastle.jce*" />
-                <group title="OCSP and OpenSSL PEM Support Packages" packages="org.bouncycastle.ocsp*:org.bouncycastle.openssl*" />
+                <group title="OCSP Support Packages" packages="org.bouncycastle.ocsp*" />
                 <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
                 <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
                 <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
@@ -692,7 +696,6 @@
                  <include name="org/bouncycastle/jce/**/test/*.java" />
                  <include name="org/bouncycastle/jce/**/test/*/*.java" />
                  <include name="org/bouncycastle/x509/**/test/*.java" />
-                 <include name="org/bouncycastle/openssl/**/test/*.java" />
                  <include name="org/bouncycastle/ocsp/**/test/*.java" />
              </fileset>
         </copy>
@@ -702,15 +705,13 @@
                 <package name="org.bouncycastle.asn1.*" />
                 <package name="org.bouncycastle.crypto.*" />
                 <package name="org.bouncycastle.jce.*" />
-                <package name="org.bouncycastle.openssl.*" />
-                <package name="org.bouncycastle.mozilla.*" />
                 <package name="org.bouncycastle.x509.*" />
                 <package name="org.bouncycastle.ocsp.*" />
                 <package name="org.bouncycastle.util.*" />
                 <package name="javax.crypto.*" />
                 <group title="JCE Package" packages="javax.crypto*" />
                 <group title="JCE Utility and Extension Packages" packages="org.bouncycastle.jce*" />
-                <group title="OCSP and OpenSSL PEM Support Packages" packages="org.bouncycastle.ocsp*:org.bouncycastle.openssl*" />
+                <group title="OCSP Support Packages" packages="org.bouncycastle.ocsp*" />
                 <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
                 <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
                 <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
@@ -756,12 +757,16 @@
                  <include name="org/bouncycastle/eac/**/test/*.java" />
                  <include name="org/bouncycastle/cert/**/test/*.java" />
                  <include name="org/bouncycastle/pkcs/**/test/*.java" />
+                 <include name="org/bouncycastle/openssl/**/test/*.java" />
+                 <include name="org/bouncycastle/mozilla/**/test/*.java" />
                  <include name="org/bouncycastle/operator/**/test/*.java" />
                  <include name="org/bouncycastle/cms/**/*.html" />
                  <include name="org/bouncycastle/eac/**/*.html" />
                  <include name="org/bouncycastle/cert/**/*.html" />
                  <include name="org/bouncycastle/pkcs/**/*.html" />
+                 <include name="org/bouncycastle/openssl/**/*.html" />
                  <include name="org/bouncycastle/operator/**/*.html" />
+                 <include name="org/bouncycastle/mozilla/**/*.html" />
                  <include name="org/bouncycastle/tsp/**/test/*.java" />
                  <include name="org/bouncycastle/tsp/**/*.html" />
              </fileset>
@@ -773,13 +778,16 @@
                 <package name="org.bouncycastle.eac.*" />
                 <package name="org.bouncycastle.cert.*" />
                 <package name="org.bouncycastle.pkcs.*" />
+                <package name="org.bouncycastle.openssl.*" />
                 <package name="org.bouncycastle.operator.*" />
+                <package name="org.bouncycastle.mozilla.*" />
                 <package name="org.bouncycastle.tsp.*" />
                 <group title="TSP Packages" packages="org.bouncycastle.tsp*" />
                 <group title="CMS Packages" packages="org.bouncycastle.cms*" />
                 <group title="Extended Access Control Packages" packages="org.bouncycastle.eac*" />
                 <group title="Certificate Packages" packages="org.bouncycastle.cert*" />
                 <group title="PKCS Packages" packages="org.bouncycastle.pkcs*" />
+                <group title="OpenSSL and PEM Support Packages" packages="org.bouncycastle.openssl*" />
             </docElements>
         </compile-doc>
 
