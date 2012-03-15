@@ -266,6 +266,7 @@
                  <exclude name="org/bouncycastle/**/test/*.java" />
                  <exclude name="org/bouncycastle/**/test/*/*.java" />
                  <exclude name="org/bouncycastle/**/test/*.pem" />
+                 <exclude name="org/bouncycastle/**/test/**/*.pem" />
                  <exclude name="org/bouncycastle/**/test/*.p7m" />
                  <exclude name="org/bouncycastle/**/test/*.properties" />
                  <exclude name="org/bouncycastle/**/test/*.sig" />
