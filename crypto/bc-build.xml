@@ -62,7 +62,7 @@
                     <manifest-element/>
                     <fileset-element/>
                 </jar>
-                <pack200 src="@{jarbase}.tmp.jar" destfile="@{jarbase}.jar" repack="true" />
+                <pack200 src="@{jarbase}.tmp.jar" destfile="@{jarbase}.jar" repack="true" segmentLimit="-1" />
                 <delete file="@{jarbase}.tmp.jar" />
             </sequential>
         </macrodef>
