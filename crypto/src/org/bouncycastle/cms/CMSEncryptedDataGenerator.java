@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BEROctetString;
@@ -50,7 +49,6 @@ public class CMSEncryptedDataGenerator
         OutputEncryptor contentEncryptor)
         throws CMSException
     {
-        ASN1EncodableVector     recipientInfos = new ASN1EncodableVector();
         AlgorithmIdentifier     encAlgId;
         ASN1OctetString         encContent;
 
@@ -96,8 +94,7 @@ public class CMSEncryptedDataGenerator
     }
 
     /**
-     * generate an enveloped object that contains an CMS Enveloped Data
-     * object using the given provider.
+     * generate an encrypted object that contains an CMS Encrypted Data structure.
      *
      * @param content the content to be encrypted
      * @param contentEncryptor the symmetric key based encryptor to encrypt the content with.
