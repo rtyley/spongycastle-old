@@ -27,16 +27,6 @@ public class DERVisibleString
             return (DERVisibleString)obj;
         }
 
-        if (obj instanceof ASN1OctetString)
-        {
-            return new DERVisibleString(((ASN1OctetString)obj).getOctets());
-        }
-
-        if (obj instanceof ASN1TaggedObject)
-        {
-            return getInstance(((ASN1TaggedObject)obj).getObject());
-        }
-
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -53,7 +43,16 @@ public class DERVisibleString
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        return getInstance(obj.getObject());
+        ASN1Primitive o = obj.getObject();
+
+        if (explicit || o instanceof DERUTF8String)
+        {
+            return getInstance(o);
+        }
+        else
+        {
+            return new DERVisibleString(ASN1OctetString.getInstance(o).getOctets());
+        }
     }
 
     /**
