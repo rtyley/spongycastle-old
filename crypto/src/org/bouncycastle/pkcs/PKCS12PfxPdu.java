@@ -9,6 +9,9 @@ import org.bouncycastle.asn1.pkcs.Pfx;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.util.Arrays;
 
+/**
+ * A holding class for the PKCS12 Pfx structure.
+ */
 public class PKCS12PfxPdu
 {
     private Pfx pfx;
@@ -18,6 +21,11 @@ public class PKCS12PfxPdu
         this.pfx = pfx;
     }
 
+    /**
+     * Return whether or not there is MAC attached to this file.
+     *
+     * @return true if there is, false otherwise.
+     */
     public boolean hasMac()
     {
         return pfx.getMacData() != null;
@@ -26,7 +34,7 @@ public class PKCS12PfxPdu
     /**
      * Verify the MacData attached to the PFX is consistent with what is expected.
      *
-     * @param macCalcBuilder calculator for the MAC
+     * @param macCalcProviderBuilder provider builder for the calculator for the MAC
      * @param password password to use
      * @return true if mac data is valid, false otherwise.
      * @throws PKCSException if there is a problem evaluating the MAC.
@@ -59,6 +67,11 @@ public class PKCS12PfxPdu
         throw new IllegalStateException("no MAC present on PFX");
     }
 
+    /**
+     * Return the underlying ASN.1 object.
+     *
+     * @return a Pfx object.
+     */
     public Pfx toASN1Structure()
     {
         return pfx;
