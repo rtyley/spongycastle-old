@@ -13,6 +13,8 @@ import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Vector;
 
+import javax.security.auth.x500.X500Principal;
+
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
@@ -138,7 +140,49 @@ public class PKCS10Test
             fail(keyName + ": Failed public key check.");
         }
     }
-    
+
+    private void generationTestX500Principal(int keySize, String keyName, String sigName, String provider)
+        throws Exception
+    {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance(keyName, "BC");
+
+        kpg.initialize(keySize);
+
+        KeyPair kp = kpg.genKeyPair();
+
+
+        X500NameBuilder x500NameBld = new X500NameBuilder(BCStyle.INSTANCE);
+
+        x500NameBld.addRDN(BCStyle.C, "AU");
+        x500NameBld.addRDN(BCStyle.O, "The Legion of the Bouncy Castle");
+        x500NameBld.addRDN(BCStyle.L, "Melbourne");
+        x500NameBld.addRDN(BCStyle.ST, "Victoria");
+        x500NameBld.addRDN(BCStyle.EmailAddress, "feedback-crypto@bouncycastle.org");
+
+        X500Name    subject = x500NameBld.build();
+
+        PKCS10CertificationRequestBuilder requestBuilder = new JcaPKCS10CertificationRequestBuilder(new X500Principal(subject.getEncoded()), kp.getPublic());
+
+        PKCS10CertificationRequest req1 = requestBuilder.build(new JcaContentSignerBuilder(sigName).setProvider(provider).build(kp.getPrivate()));
+
+        JcaPKCS10CertificationRequest req2 = new JcaPKCS10CertificationRequest(req1.getEncoded()).setProvider(provider);
+
+        if (!req2.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider(provider).build(kp.getPublic())))
+        {
+            fail(sigName + ": Failed verify check.");
+        }
+
+        if (!Arrays.areEqual(req2.getPublicKey().getEncoded(), req1.getSubjectPublicKeyInfo().getEncoded()))
+        {
+            fail(keyName + ": Failed public key check.");
+        }
+
+        if (!Arrays.areEqual(req2.getSubject().getEncoded(), req1.getSubject().getEncoded()))
+        {
+            fail(keyName + ": Failed subject key check.");
+        }
+    }
+
     /*
      * we generate a self signed certificate for the sake of testing - SHA224withECDSA
      */
@@ -483,7 +527,8 @@ public class PKCS10Test
     public void performTest()
         throws Exception
     {
-        generationTest(512, "RSA", "SHA1withRSA", "BC");       
+        generationTest(512, "RSA", "SHA1withRSA", "BC");
+        generationTestX500Principal(512, "RSA", "SHA1withRSA", "BC");
         generationTest(512, "GOST3410", "GOST3411withGOST3410", "BC");
         
         if (Security.getProvider("SunRsaSign") != null)
