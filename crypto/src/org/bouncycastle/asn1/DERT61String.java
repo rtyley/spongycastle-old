@@ -45,7 +45,7 @@ public class DERT61String
     {
         ASN1Primitive o = obj.getObject();
 
-        if (explicit)
+        if (explicit || o instanceof DERT61String)
         {
             return getInstance(o);
         }

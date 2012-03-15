@@ -35,6 +35,17 @@ public abstract class ASN1TaggedObject
         {
                 return (ASN1TaggedObject)obj;
         }
+        else if (obj instanceof byte[])
+        {
+            try
+            {
+                return ASN1TaggedObject.getInstance(fromByteArray((byte[])obj));
+            }
+            catch (IOException e)
+            {
+                throw new IllegalArgumentException("failed to construct tagged object from byte[]: " + e.getMessage());
+            }
+        }
 
         throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
     }

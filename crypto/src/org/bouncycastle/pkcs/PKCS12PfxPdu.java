@@ -3,6 +3,8 @@ package org.bouncycastle.pkcs;
 import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.pkcs.ContentInfo;
 import org.bouncycastle.asn1.pkcs.MacData;
 import org.bouncycastle.asn1.pkcs.PKCS12PBEParams;
 import org.bouncycastle.asn1.pkcs.Pfx;
@@ -19,6 +21,24 @@ public class PKCS12PfxPdu
     public PKCS12PfxPdu(Pfx pfx)
     {
         this.pfx = pfx;
+    }
+
+    /**
+     * Return the content infos in the AuthenticatedSafe contained in this Pfx.
+     *
+     * @return an array of ContentInfo.
+     */
+    public ContentInfo[] getContentInfos()
+    {
+        ASN1Sequence seq = ASN1Sequence.getInstance(ASN1OctetString.getInstance(this.pfx.getAuthSafe().getContent()).getOctets());
+        ContentInfo[] content = new ContentInfo[seq.size()];
+
+        for (int i = 0; i != seq.size(); i++)
+        {
+            content[i] = ContentInfo.getInstance(seq.getObjectAt(i));
+        }
+
+        return content;
     }
 
     /**
@@ -50,8 +70,6 @@ public class PKCS12PfxPdu
 
             try
             {
-
-
                 MacData mData = mdGen.build(
                     password,
                     ASN1OctetString.getInstance(pfx.getAuthSafe().getContent()).getOctets());

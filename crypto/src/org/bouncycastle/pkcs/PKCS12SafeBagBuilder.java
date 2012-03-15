@@ -13,6 +13,8 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.SafeBag;
 import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.asn1.x509.CertificateList;
+import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.operator.OutputEncryptor;
 
@@ -28,10 +30,22 @@ public class PKCS12SafeBagBuilder
         this.bagValue = new PKCS8EncryptedPrivateKeyInfoBuilder(privateKeyInfo).build(encryptor).toASN1Structure();
     }
 
+    public PKCS12SafeBagBuilder(PrivateKeyInfo privateKeyInfo)
+    {
+        this.bagType = PKCSObjectIdentifiers.keyBag;
+        this.bagValue = privateKeyInfo;
+    }
+
     public PKCS12SafeBagBuilder(X509CertificateHolder certificate)
         throws IOException
     {
         this(certificate.toASN1Structure());
+    }
+
+    public PKCS12SafeBagBuilder(X509CRLHolder crl)
+        throws IOException
+    {
+        this(crl.toASN1Structure());
     }
 
     public PKCS12SafeBagBuilder(Certificate certificate)
@@ -39,6 +53,13 @@ public class PKCS12SafeBagBuilder
     {
         this.bagType = PKCSObjectIdentifiers.certBag;
         this.bagValue = new CertBag(PKCSObjectIdentifiers.x509Certificate, new DEROctetString(certificate.getEncoded()));
+    }
+
+    public PKCS12SafeBagBuilder(CertificateList crl)
+        throws IOException
+    {
+        this.bagType = PKCSObjectIdentifiers.crlBag;
+        this.bagValue = new CertBag(PKCSObjectIdentifiers.x509Crl, new DEROctetString(crl.getEncoded()));
     }
 
     public PKCS12SafeBagBuilder addBagAttribute(ASN1ObjectIdentifier attrType, ASN1Encodable attrValue)

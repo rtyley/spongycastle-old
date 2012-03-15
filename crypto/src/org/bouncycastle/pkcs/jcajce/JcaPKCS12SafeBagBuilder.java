@@ -37,4 +37,9 @@ public class JcaPKCS12SafeBagBuilder
     {
         super(PrivateKeyInfo.getInstance(privateKey.getEncoded()), encryptor);
     }
+
+    public JcaPKCS12SafeBagBuilder(PrivateKey privateKey)
+    {
+        super(PrivateKeyInfo.getInstance(privateKey.getEncoded()));
+    }
 }

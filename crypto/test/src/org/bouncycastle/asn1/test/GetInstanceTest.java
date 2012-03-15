@@ -7,17 +7,28 @@ import java.util.Vector;
 
 import junit.framework.TestCase;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Enumerated;
 import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.ASN1UTCTime;
+import org.bouncycastle.asn1.DERBMPString;
 import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERGeneralString;
+import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERNumericString;
 import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.DERT61String;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.DERUniversalString;
+import org.bouncycastle.asn1.DERVisibleString;
 import org.bouncycastle.asn1.cmp.CAKeyUpdAnnContent;
 import org.bouncycastle.asn1.cmp.CMPCertificate;
 import org.bouncycastle.asn1.cmp.CRLAnnContent;
@@ -399,11 +410,78 @@ public class GetInstanceTest
         {
             fail(clazz.getName() + " sequence equality failed");
         }
+
+        try
+        {
+            m = clazz.getMethod("getInstance", ASN1TaggedObject.class, Boolean.TYPE);
+        }
+        catch (NoSuchMethodException e)
+        {
+            return;
+        }
+
+        ASN1TaggedObject t = new DERTaggedObject(true, 0, o1);
+        o2 = (ASN1Object)m.invoke(clazz, t, true);
+        if (!o1.equals(o2) || !clazz.isInstance(o2))
+        {
+            fail(clazz.getName() + " tag equality failed");
+        }
+
+        t = new DERTaggedObject(true, 0, o1.toASN1Primitive());
+        o2 = (ASN1Object)m.invoke(clazz, t, true);
+        if (!o1.equals(o2) || !clazz.isInstance(o2))
+        {
+            fail(clazz.getName() + " tag equality failed");
+        }
+
+        t = ASN1TaggedObject.getInstance(t.getEncoded());
+        o2 = (ASN1Object)m.invoke(clazz, t, true);
+        if (!o1.equals(o2) || !clazz.isInstance(o2))
+        {
+            fail(clazz.getName() + " tag equality failed");
+        }
+
+        t = new DERTaggedObject(false, 0, o1);
+        o2 = (ASN1Object)m.invoke(clazz, t, false);
+        if (!o1.equals(o2) || !clazz.isInstance(o2))
+        {
+            fail(clazz.getName() + " tag equality failed");
+        }
+
+        t = new DERTaggedObject(false, 0, o1.toASN1Primitive());
+        o2 = (ASN1Object)m.invoke(clazz, t, false);
+        if (!o1.equals(o2) || !clazz.isInstance(o2))
+        {
+            fail(clazz.getName() + " tag equality failed");
+        }
+
+        t = ASN1TaggedObject.getInstance(t.getEncoded());
+        o2 = (ASN1Object)m.invoke(clazz, t, false);
+        if (!o1.equals(o2) || !clazz.isInstance(o2))
+        {
+            fail(clazz.getName() + " tag equality failed");
+        }
     }
 
     public void testGetInstance()
         throws Exception
     {
+        doFullGetInstanceTest(DERPrintableString.class, new DERPrintableString("hello world"));
+        doFullGetInstanceTest(DERBMPString.class, new DERBMPString("hello world"));
+        doFullGetInstanceTest(DERUTF8String.class, new DERUTF8String("hello world"));
+        doFullGetInstanceTest(DERUniversalString.class, new DERUniversalString(new byte[20]));
+        doFullGetInstanceTest(DERIA5String.class, new DERIA5String("hello world"));
+        doFullGetInstanceTest(DERGeneralString.class, new DERGeneralString("hello world"));
+        doFullGetInstanceTest(DERNumericString.class, new DERNumericString("hello world"));
+        doFullGetInstanceTest(DERNumericString.class, new DERNumericString("99999", true));
+        doFullGetInstanceTest(DERT61String.class, new DERT61String("hello world"));
+        doFullGetInstanceTest(DERVisibleString.class, new DERVisibleString("hello world"));
+
+        doFullGetInstanceTest(ASN1Integer.class, new ASN1Integer(1));
+        doFullGetInstanceTest(ASN1GeneralizedTime.class, new ASN1GeneralizedTime(new Date()));
+        doFullGetInstanceTest(ASN1UTCTime.class, new ASN1UTCTime(new Date()));
+        doFullGetInstanceTest(ASN1Enumerated.class, new ASN1Enumerated(1));
+
         CMPCertificate cmpCert = new CMPCertificate(Certificate.getInstance(cert1));
         CertificateList crl = CertificateList.getInstance(v2CertList);
         AttributeCertificate attributeCert = AttributeCertificate.getInstance(attrCert);

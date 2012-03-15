@@ -1,5 +1,6 @@
 package org.bouncycastle.asn1.pkcs;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -12,7 +13,7 @@ public class Attribute
     extends ASN1Object
 {
     private ASN1ObjectIdentifier attrType;
-    private ASN1Set             attrValues;
+    private ASN1Set              attrValues;
 
     /**
      * return an Attribute object from the given object.
@@ -59,6 +60,11 @@ public class Attribute
     public ASN1Set getAttrValues()
     {
         return attrValues;
+    }
+
+    public ASN1Encodable[] getAttributeValues()
+    {
+        return attrValues.toArray();
     }
 
     /** 

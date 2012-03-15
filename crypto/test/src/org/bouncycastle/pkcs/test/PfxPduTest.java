@@ -16,7 +16,11 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
 
 import junit.framework.TestCase;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERBMPString;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.pkcs.Attribute;
+import org.bouncycastle.asn1.pkcs.ContentInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -36,11 +40,14 @@ import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.InputDecryptorProvider;
+import org.bouncycastle.operator.OutputEncryptor;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS12PfxPdu;
 import org.bouncycastle.pkcs.PKCS12PfxPduBuilder;
 import org.bouncycastle.pkcs.PKCS12SafeBag;
 import org.bouncycastle.pkcs.PKCS12SafeBagBuilder;
+import org.bouncycastle.pkcs.PKCS12SafeBagFactory;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfoBuilder;
 import org.bouncycastle.pkcs.PKCSException;
@@ -342,6 +349,129 @@ public class PfxPduTest
         PrivateKeyInfo info = priv.decryptPrivateKeyInfo(new BcPKCS12PBEInputDecryptorProviderBuilder().build(passwd));
 
         assertTrue(Arrays.areEqual(info.getEncoded(), privKey.getEncoded()));
+    }
+
+    public void testKeyBag()
+        throws Exception
+    {
+        OutputEncryptor encOut = new BcPKCS12PBEOutputEncryptorBuilder(PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC, new CBCBlockCipher(new DESedeEngine())).build(passwd);
+        InputDecryptorProvider inputDecryptorProvider = new BcPKCS12PBEInputDecryptorProviderBuilder().build(passwd);
+        KeyFactory fact = KeyFactory.getInstance("RSA", BC);
+        PrivateKey privKey = fact.generatePrivate(privKeySpec);
+        PKCS12SafeBagBuilder keyBagBuilder = new JcaPKCS12SafeBagBuilder(privKey);
+
+        keyBagBuilder.addBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_friendlyName, new DERBMPString("Eric's Key"));
+
+        PKCS12PfxPduBuilder builder = new PKCS12PfxPduBuilder();
+
+        builder.addEncryptedData(encOut, keyBagBuilder.build());
+
+        PKCS12PfxPdu pfx = builder.build(new BcPKCS12MacCalculatorBuilder(), passwd);
+        assertTrue(pfx.hasMac());
+        assertTrue(pfx.isMacValid(new BcPKCS12MacCalculatorBuilderProviderBuilder(), passwd));
+
+        ContentInfo[] infos = pfx.getContentInfos();
+
+        for (int i = 0; i != infos.length; i++)
+        {
+            if (infos[i].getContentType().equals(PKCSObjectIdentifiers.encryptedData))
+            {
+                PKCS12SafeBagFactory dataFact = new PKCS12SafeBagFactory(infos[i], inputDecryptorProvider);
+
+                PKCS12SafeBag[] bags = dataFact.getSafeBags();
+
+                assertEquals(1, bags.length);
+                assertEquals(PKCSObjectIdentifiers.keyBag, bags[0].getType());
+
+                assertTrue(Arrays.areEqual(privKey.getEncoded(), ((PrivateKeyInfo)bags[0].getBagValue()).getEncoded()));
+
+                Attribute[] attributes = bags[0].getAttributes();
+
+                assertEquals(1, attributes.length);
+
+                assertEquals(PKCSObjectIdentifiers.pkcs_9_at_friendlyName, attributes[0].getAttrType());
+
+                ASN1Encodable[] attrValues = attributes[0].getAttributeValues();
+
+                assertEquals(1, attrValues.length);
+                assertEquals(new DERBMPString("Eric's Key"), attrValues[0]);
+            }
+            else
+            {
+                fail("unknown bag encountered");
+            }
+        }
+    }
+
+    public void testSafeBagRecovery()
+        throws Exception
+    {
+        InputDecryptorProvider inputDecryptorProvider = new BcPKCS12PBEInputDecryptorProviderBuilder().build(passwd);
+        KeyFactory fact = KeyFactory.getInstance("RSA", BC);
+        PrivateKey privKey = fact.generatePrivate(privKeySpec);
+        PublicKey pubKey = fact.generatePublic(pubKeySpec);
+
+        X509Certificate[] chain = createCertChain(fact, pubKey);
+
+        PKCS12PfxPdu pfx = createPfx(privKey, pubKey, chain);
+
+        ContentInfo[] infos = pfx.getContentInfos();
+
+        for (int i = 0; i != infos.length; i++)
+        {
+            if (infos[i].getContentType().equals(PKCSObjectIdentifiers.encryptedData))
+            {
+                PKCS12SafeBagFactory dataFact = new PKCS12SafeBagFactory(infos[i], inputDecryptorProvider);
+
+                PKCS12SafeBag[] bags = dataFact.getSafeBags();
+
+                assertEquals(3, bags.length);
+                assertEquals(PKCSObjectIdentifiers.certBag, bags[0].getType());
+
+                for (int j = 0; j != bags.length; j++)
+                {
+                    assertTrue(Arrays.areEqual(chain[j].getEncoded(), ((X509CertificateHolder)bags[j].getBagValue()).getEncoded()));
+                }
+            }
+            else
+            {
+                PKCS12SafeBagFactory dataFact = new PKCS12SafeBagFactory(infos[i]);
+
+                PKCS12SafeBag[] bags = dataFact.getSafeBags();
+
+                assertEquals(1, bags.length);
+                assertEquals(PKCSObjectIdentifiers.pkcs8ShroudedKeyBag, bags[0].getType());
+
+                PKCS8EncryptedPrivateKeyInfo encInfo = (PKCS8EncryptedPrivateKeyInfo)bags[0].getBagValue();
+                PrivateKeyInfo info = encInfo.decryptPrivateKeyInfo(inputDecryptorProvider);
+
+                assertTrue(Arrays.areEqual(info.getEncoded(), privKey.getEncoded()));
+            }
+        }
+    }
+
+    public void testExceptions()
+        throws Exception
+    {
+        PKCS12SafeBagFactory dataFact;
+
+        try
+        {
+            dataFact = new PKCS12SafeBagFactory(new ContentInfo(PKCSObjectIdentifiers.data, new DERSequence()), null);
+        }
+        catch (IllegalArgumentException e)
+        {
+
+        }
+
+        try
+        {
+            dataFact = new PKCS12SafeBagFactory(new ContentInfo(PKCSObjectIdentifiers.encryptedData, new DERSequence()));
+        }
+        catch (IllegalArgumentException e)
+        {
+
+        }
     }
 
     private X509Certificate[] createCertChain(KeyFactory fact, PublicKey pubKey)
