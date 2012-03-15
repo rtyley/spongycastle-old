@@ -45,7 +45,7 @@ public class DERVisibleString
     {
         ASN1Primitive o = obj.getObject();
 
-        if (explicit || o instanceof DERUTF8String)
+        if (explicit || o instanceof DERVisibleString)
         {
             return getInstance(o);
         }
