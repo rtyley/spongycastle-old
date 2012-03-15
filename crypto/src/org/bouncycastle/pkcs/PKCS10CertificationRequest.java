@@ -21,7 +21,7 @@ import org.bouncycastle.operator.ContentVerifierProvider;
 /**
  * Holding class for a PKCS#10 certification request.
  */
-public class PKCS10CertificationRequestHolder
+public class PKCS10CertificationRequest
 {
     private static Attribute[] EMPTY_ARRAY = new Attribute[0];
 
@@ -49,7 +49,7 @@ public class PKCS10CertificationRequestHolder
      *
      * @param certificationRequest the underlying ASN.1 structure representing a request.
      */
-    public PKCS10CertificationRequestHolder(CertificationRequest certificationRequest)
+    public PKCS10CertificationRequest(CertificationRequest certificationRequest)
     {
          this.certificationRequest = certificationRequest;
     }
@@ -60,7 +60,7 @@ public class PKCS10CertificationRequestHolder
      * @param encoded BER/DER encoding of the CertificationRequest structure.
      * @throws IOException in the event of corrupted data, or an incorrect structure.
      */
-    public PKCS10CertificationRequestHolder(byte[] encoded)
+    public PKCS10CertificationRequest(byte[] encoded)
         throws IOException
     {
         this(parseBytes(encoded));
@@ -219,12 +219,12 @@ public class PKCS10CertificationRequestHolder
             return true;
         }
 
-        if (!(o instanceof PKCS10CertificationRequestHolder))
+        if (!(o instanceof PKCS10CertificationRequest))
         {
             return false;
         }
 
-        PKCS10CertificationRequestHolder other = (PKCS10CertificationRequestHolder)o;
+        PKCS10CertificationRequest other = (PKCS10CertificationRequest)o;
 
         return this.toASN1Structure().equals(other.toASN1Structure());
     }

@@ -74,6 +74,22 @@ public class X500Name
         return null;
     }
 
+    public static X500Name getInstance(
+        X500NameStyle style,
+        Object        obj)
+    {
+        if (obj instanceof X500Name)
+        {
+            return getInstance(style, ((X500Name)obj).toASN1Primitive());
+        }
+        else if (obj != null)
+        {
+            return new X500Name(style, ASN1Sequence.getInstance(obj));
+        }
+
+        return null;
+    }
+
     /**
      * Constructor from ASN1Sequence
      *

@@ -1542,7 +1542,7 @@ public class JDKPKCS12KeyStore
     {
         public BCPKCS12KeyStore()
         {
-            super(bcProvider, pbeWithSHAAnd3_KeyTripleDES_CBC, pbewithSHAAnd40BitRC2_CBC);
+            super(bcProvider, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
         }
     }
 
@@ -1560,7 +1560,7 @@ public class JDKPKCS12KeyStore
     {
         public DefPKCS12KeyStore()
         {
-            super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbewithSHAAnd40BitRC2_CBC);
+            super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
         }
     }
 

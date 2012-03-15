@@ -12,4 +12,13 @@ public interface DigestAlgorithmIdentifierFinder
      * @return an algorithm identifier for the corresponding digest.
      */
     AlgorithmIdentifier find(AlgorithmIdentifier sigAlgId);
+
+    /**
+     * Find the algorithm identifier that matches with
+     * the passed in digest name.
+     *
+     * @param digAlgName the name of the digest algorithm of interest.
+     * @return an algorithm identifier for the digest signature.
+     */
+    AlgorithmIdentifier find(String digAlgName);
 }

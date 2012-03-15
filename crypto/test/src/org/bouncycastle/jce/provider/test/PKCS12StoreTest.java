@@ -981,14 +981,14 @@ public class PKCS12StoreTest
         }
         else if (type.endsWith("40RC2"))
         {
-            if (!cb.getEncryptionAlgorithm().getAlgorithm().equals(PKCSObjectIdentifiers.pbewithSHAAnd40BitRC2_CBC))
+            if (!cb.getEncryptionAlgorithm().getAlgorithm().equals(PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC2_CBC))
             {
                 fail("expected 40 bit RC2 found: " + cb.getEncryptionAlgorithm().getAlgorithm());
             }
         }
         else
         {
-            if (!cb.getEncryptionAlgorithm().getAlgorithm().equals(PKCSObjectIdentifiers.pbewithSHAAnd40BitRC2_CBC))
+            if (!cb.getEncryptionAlgorithm().getAlgorithm().equals(PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC2_CBC))
             {
                 fail("expected 40 bit RC2 found: " + cb.getEncryptionAlgorithm().getAlgorithm());
             }

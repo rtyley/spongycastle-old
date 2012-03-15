@@ -40,26 +40,31 @@ public class X509Name
 {
     /**
      * country code - StringType(SIZE(2))
+     * @deprecated use a X500NameStyle
      */
     public static final ASN1ObjectIdentifier C = new ASN1ObjectIdentifier("2.5.4.6");
 
     /**
      * organization - StringType(SIZE(1..64))
+     * @deprecated use a X500NameStyle
      */
     public static final ASN1ObjectIdentifier O = new ASN1ObjectIdentifier("2.5.4.10");
 
     /**
      * organizational unit name - StringType(SIZE(1..64))
+     * @deprecated use a X500NameStyle
      */
     public static final ASN1ObjectIdentifier OU = new ASN1ObjectIdentifier("2.5.4.11");
 
     /**
      * Title
+     * @deprecated use a X500NameStyle
      */
     public static final ASN1ObjectIdentifier T = new ASN1ObjectIdentifier("2.5.4.12");
 
     /**
      * common name - StringType(SIZE(1..64))
+     * @deprecated use a X500NameStyle
      */
     public static final ASN1ObjectIdentifier CN = new ASN1ObjectIdentifier("2.5.4.3");
 
@@ -184,6 +189,7 @@ public class X509Name
     /**
      * Email address (RSA PKCS#9 extension) - IA5String.
      * <p>Note: if you're trying to be ultra orthodox, don't use this! It shouldn't be in here.
+     * @deprecated use a X500NameStyle
      */
     public static final ASN1ObjectIdentifier EmailAddress = PKCSObjectIdentifiers.pkcs_9_at_emailAddress;
     

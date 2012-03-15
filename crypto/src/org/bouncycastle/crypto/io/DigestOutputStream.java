@@ -1,29 +1,25 @@
 package org.bouncycastle.crypto.io;
 
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import org.bouncycastle.crypto.Digest;
 
 public class DigestOutputStream
-    extends FilterOutputStream
+    extends OutputStream
 {
     protected Digest digest;
 
     public DigestOutputStream(
-        OutputStream    stream,
-        Digest          digest)
+        Digest          Digest)
     {
-        super(stream);
-        this.digest = digest;
+        this.digest = Digest;
     }
 
     public void write(int b)
         throws IOException
     {
         digest.update((byte)b);
-        out.write(b);
     }
 
     public void write(
@@ -33,11 +29,14 @@ public class DigestOutputStream
         throws IOException
     {
         digest.update(b, off, len);
-        out.write(b, off, len);
     }
 
-    public Digest getDigest()
+    public byte[] getDigest()
     {
-        return digest;
+        byte[] res = new byte[digest.getDigestSize()];
+        
+        digest.doFinal(res, 0);
+        
+        return res;
     }
 }

@@ -3,8 +3,8 @@ package org.bouncycastle.operator;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -18,6 +18,7 @@ public class DefaultDigestAlgorithmIdentifierFinder
     implements DigestAlgorithmIdentifierFinder
 {
     private static Map digestOids = new HashMap();
+    private static Map digestNameToOids = new HashMap();
 
     static
     {
@@ -55,6 +56,22 @@ public class DefaultDigestAlgorithmIdentifierFinder
 
         digestOids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94, CryptoProObjectIdentifiers.gostR3411);
         digestOids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001, CryptoProObjectIdentifiers.gostR3411);
+
+        digestNameToOids.put("SHA-1", OIWObjectIdentifiers.idSHA1);
+        digestNameToOids.put("SHA-224", NISTObjectIdentifiers.id_sha224);
+        digestNameToOids.put("SHA-256", NISTObjectIdentifiers.id_sha256);
+        digestNameToOids.put("SHA-384", NISTObjectIdentifiers.id_sha384);
+        digestNameToOids.put("SHA-512", NISTObjectIdentifiers.id_sha512);
+
+        digestNameToOids.put("GOST3411", CryptoProObjectIdentifiers.gostR3411);
+
+        digestNameToOids.put("MD2", PKCSObjectIdentifiers.md2);
+        digestNameToOids.put("MD4", PKCSObjectIdentifiers.md4);
+        digestNameToOids.put("MD5", PKCSObjectIdentifiers.md5);
+
+        digestNameToOids.put("RIPEMD128", TeleTrusTObjectIdentifiers.ripemd128);
+        digestNameToOids.put("RIPEMD160", TeleTrusTObjectIdentifiers.ripemd160);
+        digestNameToOids.put("RIPEMD256", TeleTrusTObjectIdentifiers.ripemd256);
     }
 
     public AlgorithmIdentifier find(AlgorithmIdentifier sigAlgId)
@@ -67,9 +84,14 @@ public class DefaultDigestAlgorithmIdentifierFinder
         }
         else
         {
-            digAlgId = new AlgorithmIdentifier((DERObjectIdentifier)digestOids.get(sigAlgId.getAlgorithm()), new DERNull());
+            digAlgId = new AlgorithmIdentifier((ASN1ObjectIdentifier)digestOids.get(sigAlgId.getAlgorithm()), new DERNull());
         }
 
         return digAlgId;
+    }
+
+    public AlgorithmIdentifier find(String digAlgName)
+    {
+        return new AlgorithmIdentifier((ASN1ObjectIdentifier)digestNameToOids.get(digAlgName), new DERNull());
     }
 }

@@ -244,6 +244,11 @@ public interface PKCSObjectIdentifiers
     static final ASN1ObjectIdentifier    pbeWithSHAAnd3_KeyTripleDES_CBC = pkcs_12PbeIds.branch("3");
     static final ASN1ObjectIdentifier    pbeWithSHAAnd2_KeyTripleDES_CBC = pkcs_12PbeIds.branch("4");
     static final ASN1ObjectIdentifier    pbeWithSHAAnd128BitRC2_CBC = pkcs_12PbeIds.branch("5");
+    static final ASN1ObjectIdentifier    pbeWithSHAAnd40BitRC2_CBC = pkcs_12PbeIds.branch("6");
+
+    /**
+     * @deprecated use pbeWithSHAAnd40BitRC2_CBC
+     */
     static final ASN1ObjectIdentifier    pbewithSHAAnd40BitRC2_CBC = pkcs_12PbeIds.branch("6");
 
     static final ASN1ObjectIdentifier    id_alg_CMS3DESwrap = new ASN1ObjectIdentifier("1.2.840.113549.1.9.16.3.6");

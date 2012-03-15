@@ -1,21 +1,18 @@
 package org.bouncycastle.crypto.io;
 
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import org.bouncycastle.crypto.Mac;
 
 public class MacOutputStream
-    extends FilterOutputStream
+    extends OutputStream
 {
     protected Mac mac;
 
     public MacOutputStream(
-        OutputStream stream,
         Mac          mac)
     {
-        super(stream);
         this.mac = mac;
     }
 
@@ -23,7 +20,6 @@ public class MacOutputStream
         throws IOException
     {
         mac.update((byte)b);
-        out.write(b);
     }
 
     public void write(
@@ -33,12 +29,14 @@ public class MacOutputStream
         throws IOException
     {
         mac.update(b, off, len);
-        out.write(b, off, len);
     }
 
-    public Mac getMac()
+    public byte[] getMac()
     {
-        return mac;
+        byte[] res = new byte[mac.getMacSize()];
+
+        mac.doFinal(res, 0);
+
+        return res;
     }
 }
-

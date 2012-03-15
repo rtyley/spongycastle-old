@@ -23,16 +23,16 @@ import org.bouncycastle.operator.OutputEncryptor;
  * }
  * </pre>
  */
-public class EncryptedPrivateKeyInfoBuilder
+public class PKCS8EncryptedPrivateKeyInfoBuilder
 {
     private PrivateKeyInfo privateKeyInfo;
 
-    public EncryptedPrivateKeyInfoBuilder(PrivateKeyInfo privateKeyInfo)
+    public PKCS8EncryptedPrivateKeyInfoBuilder(PrivateKeyInfo privateKeyInfo)
     {
         this.privateKeyInfo = privateKeyInfo;
     }
 
-    public EncryptedPrivateKeyInfoHolder build(
+    public PKCS8EncryptedPrivateKeyInfo build(
         OutputEncryptor encryptor)
     {
         try
@@ -44,7 +44,7 @@ public class EncryptedPrivateKeyInfoBuilder
 
             cOut.close();
 
-            return new EncryptedPrivateKeyInfoHolder(new EncryptedPrivateKeyInfo(encryptor.getAlgorithmIdentifier(), bOut.toByteArray()));
+            return new PKCS8EncryptedPrivateKeyInfo(new EncryptedPrivateKeyInfo(encryptor.getAlgorithmIdentifier(), bOut.toByteArray()));
         }
         catch (IOException e)
         {

@@ -368,7 +368,7 @@ public class JCESecretKeyFactory
    {
        public PBEWithSHAAnd40BitRC2()
        {
-           super("PBEwithSHAand40BitRC2-CBC", PKCSObjectIdentifiers.pbewithSHAAnd40BitRC2_CBC, true, PKCS12, SHA1, 40, 64);
+           super("PBEwithSHAand40BitRC2-CBC", PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC2_CBC, true, PKCS12, SHA1, 40, 64);
        }
    }
 

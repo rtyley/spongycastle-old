@@ -1,29 +1,25 @@
 package org.bouncycastle.crypto.io;
 
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import org.bouncycastle.crypto.Signer;
 
 public class SignerOutputStream
-    extends FilterOutputStream
+    extends OutputStream
 {
     protected Signer signer;
 
     public SignerOutputStream(
-        OutputStream    stream,
-        Signer          signer)
+        Signer          Signer)
     {
-        super(stream);
-        this.signer = signer;
+        this.signer = Signer;
     }
 
     public void write(int b)
         throws IOException
     {
         signer.update((byte)b);
-        out.write(b);
     }
 
     public void write(
@@ -33,7 +29,6 @@ public class SignerOutputStream
         throws IOException
     {
         signer.update(b, off, len);
-        out.write(b, off, len);
     }
 
     public Signer getSigner()

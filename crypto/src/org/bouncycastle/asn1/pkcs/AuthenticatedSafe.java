@@ -5,11 +5,13 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERSequence;
+import org.bouncycastle.asn1.DLSequence;
 
 public class AuthenticatedSafe
     extends ASN1Object
 {
-    ContentInfo[]    info;
+    private ContentInfo[]    info;
+    private boolean  isBer = true;
 
     private AuthenticatedSafe(
         ASN1Sequence  seq)
@@ -20,6 +22,8 @@ public class AuthenticatedSafe
         {
             info[i] = ContentInfo.getInstance(seq.getObjectAt(i));
         }
+
+        isBer = seq instanceof BERSequence;
     }
 
     public static AuthenticatedSafe getInstance(
@@ -58,6 +62,13 @@ public class AuthenticatedSafe
             v.add(info[i]);
         }
 
-        return new BERSequence(v);
+        if (isBer)
+        {
+            return new BERSequence(v);
+        }
+        else
+        {
+            return new DLSequence(v);
+        }
     }
 }

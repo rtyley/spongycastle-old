@@ -49,6 +49,7 @@ import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.jce.interfaces.BCKeyStore;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.io.Streams;
+import org.bouncycastle.util.io.TeeOutputStream;
 
 public class JDKKeyStore
     extends KeyStoreSpi
@@ -884,7 +885,7 @@ public class JDKKeyStore
         dOut.writeInt(iterationCount);
 
         HMac                    hMac = new HMac(new SHA1Digest());
-        MacOutputStream         mOut = new MacOutputStream(dOut, hMac);
+        MacOutputStream         mOut = new MacOutputStream(hMac);
         PBEParametersGenerator  pbeGen = new PKCS12ParametersGenerator(new SHA1Digest());
         byte[]                  passKey = PBEParametersGenerator.PKCS12PasswordToBytes(password);
 
@@ -897,7 +898,7 @@ public class JDKKeyStore
             passKey[i] = 0;
         }
 
-        saveStore(mOut);
+        saveStore(new TeeOutputStream(dOut, mOut));
 
         byte[]  mac = new byte[hMac.getMacSize()];
 
@@ -1012,16 +1013,13 @@ public class JDKKeyStore
             cipher = this.makePBECipher(STORE_CIPHER, Cipher.ENCRYPT_MODE, password, salt, iterationCount);
     
             CipherOutputStream  cOut = new CipherOutputStream(dOut, cipher);
-            DigestOutputStream  dgOut = new DigestOutputStream(cOut, new SHA1Digest());
+            DigestOutputStream  dgOut = new DigestOutputStream(new SHA1Digest());
     
-            this.saveStore(dgOut);
+            this.saveStore(new TeeOutputStream(cOut, dgOut));
     
-            Digest  dig = dgOut.getDigest();
-            byte[]  hash = new byte[dig.getDigestSize()];
-    
-            dig.doFinal(hash, 0);
-    
-            cOut.write(hash);
+            byte[]  dig = dgOut.getDigest();
+
+            cOut.write(dig);
     
             cOut.close();
         }

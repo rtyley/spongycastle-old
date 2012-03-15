@@ -68,6 +68,7 @@ import org.bouncycastle.util.Strings;
  *    values  SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{\@type})
  *  }
  * </pre>
+ * @deprecated use classes in org.bouncycastle.pkcs.
  */
 public class PKCS10CertificationRequest
     extends CertificationRequest

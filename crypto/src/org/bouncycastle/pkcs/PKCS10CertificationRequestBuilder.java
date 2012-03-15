@@ -95,7 +95,7 @@ public class PKCS10CertificationRequestBuilder
      * @param signer the content signer to be used to generate the signature validating the certificate.
      * @return a holder containing the resulting PKCS#10 certification request.
      */
-    public PKCS10CertificationRequestHolder build(
+    public PKCS10CertificationRequest build(
         ContentSigner signer)
     {
         CertificationRequestInfo info;
@@ -124,7 +124,7 @@ public class PKCS10CertificationRequestBuilder
 
             sOut.close();
 
-            return new PKCS10CertificationRequestHolder(new CertificationRequest(info, signer.getAlgorithmIdentifier(), new DERBitString(signer.getSignature())));
+            return new PKCS10CertificationRequest(new CertificationRequest(info, signer.getAlgorithmIdentifier(), new DERBitString(signer.getSignature())));
         }
         catch (IOException e)
         {

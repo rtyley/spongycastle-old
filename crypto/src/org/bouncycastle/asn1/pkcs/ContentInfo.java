@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.BERTaggedObject;
+import org.bouncycastle.asn1.DLSequence;
 
 public class ContentInfo
     extends ASN1Object
@@ -18,6 +19,7 @@ public class ContentInfo
 {
     private ASN1ObjectIdentifier contentType;
     private ASN1Encodable content;
+    private boolean       isBer = true;
 
     public static ContentInfo getInstance(
         Object  obj)
@@ -46,6 +48,8 @@ public class ContentInfo
         {
             content = ((ASN1TaggedObject)e.nextElement()).getObject();
         }
+
+        isBer = seq instanceof BERSequence;
     }
 
     public ContentInfo(
@@ -86,6 +90,13 @@ public class ContentInfo
             v.add(new BERTaggedObject(true, 0, content));
         }
 
-        return new BERSequence(v);
+        if (isBer)
+        {
+            return new BERSequence(v);
+        }
+        else
+        {
+            return new DLSequence(v);
+        }
     }
 }

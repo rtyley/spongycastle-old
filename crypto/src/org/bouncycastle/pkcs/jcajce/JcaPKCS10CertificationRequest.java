@@ -19,10 +19,10 @@ import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.JcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
-import org.bouncycastle.pkcs.PKCS10CertificationRequestHolder;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
-public class JcaPKCS10CertificationRequestHolder
-    extends PKCS10CertificationRequestHolder
+public class JcaPKCS10CertificationRequest
+    extends PKCS10CertificationRequest
 {
     private static Hashtable keyAlgorithms = new Hashtable();
 
@@ -37,30 +37,30 @@ public class JcaPKCS10CertificationRequestHolder
 
     private JcaJceHelper helper = new DefaultJcaJceHelper();
 
-    public JcaPKCS10CertificationRequestHolder(CertificationRequest certificationRequest)
+    public JcaPKCS10CertificationRequest(CertificationRequest certificationRequest)
     {
         super(certificationRequest);
     }
 
-    public JcaPKCS10CertificationRequestHolder(byte[] encoding)
+    public JcaPKCS10CertificationRequest(byte[] encoding)
         throws IOException
     {
         super(encoding);
     }
 
-    public JcaPKCS10CertificationRequestHolder(PKCS10CertificationRequestHolder requestHolder)
+    public JcaPKCS10CertificationRequest(PKCS10CertificationRequest requestHolder)
     {
         super(requestHolder.toASN1Structure());
     }
 
-    public JcaPKCS10CertificationRequestHolder setProvider(String providerName)
+    public JcaPKCS10CertificationRequest setProvider(String providerName)
     {
         helper = new NamedJcaJceHelper(providerName);
 
         return this;
     }
 
-    public JcaPKCS10CertificationRequestHolder setProvider(Provider provider)
+    public JcaPKCS10CertificationRequest setProvider(Provider provider)
     {
         helper = new ProviderJcaJceHelper(provider);
 
