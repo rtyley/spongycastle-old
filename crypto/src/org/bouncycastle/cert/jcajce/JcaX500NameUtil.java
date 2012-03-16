@@ -14,7 +14,7 @@ public class JcaX500NameUtil
 
     public static X500Name getSubject(X509Certificate certificate)
     {
-        return X500Name.getInstance(certificate.getIssuerX500Principal().getEncoded());
+        return X500Name.getInstance(certificate.getSubjectX500Principal().getEncoded());
     }
 
     public static X500Name getIssuer(X500NameStyle style, X509Certificate certificate)
@@ -24,6 +24,6 @@ public class JcaX500NameUtil
 
     public static X500Name getSubject(X500NameStyle style, X509Certificate certificate)
     {
-        return X500Name.getInstance(style, certificate.getIssuerX500Principal().getEncoded());
+        return X500Name.getInstance(style, certificate.getSubjectX500Principal().getEncoded());
     }
 }
