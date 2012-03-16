@@ -1316,7 +1316,7 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                     ASN1Sequence ncSeq = (ASN1Sequence)getExtensionValue(cert, NAME_CONSTRAINTS);
                     if (ncSeq != null)
                     {
-                        NameConstraints nc = new NameConstraints(ncSeq);
+                        NameConstraints nc = NameConstraints.getInstance(ncSeq);
     
                         //
                         // (g) (1) permitted subtrees

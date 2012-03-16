@@ -44,7 +44,7 @@ import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
 public final class BouncyCastleProvider extends Provider
     implements ConfigurableProvider
 {
-    private static String info = "BouncyCastle Security Provider v1.47b";
+    private static String info = "BouncyCastle Security Provider v1.47";
 
     public static String PROVIDER_NAME = "BC";
 
@@ -96,7 +96,7 @@ public final class BouncyCastleProvider extends Provider
      */
     public BouncyCastleProvider()
     {
-        super(PROVIDER_NAME, 1.465, info);
+        super(PROVIDER_NAME, 1.47, info);
 
         setup();
     }
@@ -151,12 +151,6 @@ public final class BouncyCastleProvider extends Provider
         put("Alg.Alias.KeyStore.UBER", "BouncyCastle");
         put("Alg.Alias.KeyStore.BOUNCYCASTLE", "BouncyCastle");
         put("Alg.Alias.KeyStore.bouncycastle", "BouncyCastle");
-
-        //
-        // algorithm parameter generators
-        //
-
-
 
         //
         // algorithm parameters
@@ -238,10 +232,6 @@ public final class BouncyCastleProvider extends Provider
         put("Cipher.BrokenECIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenECIES");
         put("Cipher.IES", "org.bouncycastle.jce.provider.JCEIESCipher$IES");
         put("Cipher.BrokenIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenIES");
-
-        put("Alg.Alias.Cipher.ELGAMAL/ECB/PKCS1PADDING", "ELGAMAL/PKCS1");
-        put("Alg.Alias.Cipher.ELGAMAL/NONE/PKCS1PADDING", "ELGAMAL/PKCS1");
-        put("Alg.Alias.Cipher.ELGAMAL/NONE/NOPADDING", "ELGAMAL");
 
         put("Cipher.PBEWITHMD5ANDDES", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithMD5AndDES");
         put("Cipher.BROKENPBEWITHMD5ANDDES", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$BrokePBEWithMD5AndDES");

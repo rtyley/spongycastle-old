@@ -19,14 +19,14 @@ import java.util.Iterator;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
+import org.bouncycastle.asn1.x509.TBSCertificate;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
@@ -73,7 +73,7 @@ public class X509V3CertificateGenerator
             throw new IllegalArgumentException("serial number must be a positive integer");
         }
         
-        tbsGen.setSerialNumber(new DERInteger(serialNumber));
+        tbsGen.setSerialNumber(new ASN1Integer(serialNumber));
     }
     
     /**
@@ -394,7 +394,7 @@ public class X509V3CertificateGenerator
         SecureRandom    random)
         throws CertificateEncodingException, IllegalStateException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
     {
-        TBSCertificateStructure tbsCert = generateTbsCert();
+        TBSCertificate tbsCert = generateTbsCert();
         byte[] signature;
 
         try
@@ -439,7 +439,7 @@ public class X509V3CertificateGenerator
         SecureRandom    random)
         throws CertificateEncodingException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException
     {
-        TBSCertificateStructure tbsCert = generateTbsCert();
+        TBSCertificate tbsCert = generateTbsCert();
         byte[] signature;
 
         try
@@ -461,7 +461,7 @@ public class X509V3CertificateGenerator
         }
     }
 
-    private TBSCertificateStructure generateTbsCert()
+    private TBSCertificate generateTbsCert()
     {
         if (!extGenerator.isEmpty())
         {
@@ -471,7 +471,7 @@ public class X509V3CertificateGenerator
         return tbsGen.generateTBSCertificate();
     }
 
-    private X509Certificate generateJcaObject(TBSCertificateStructure tbsCert, byte[] signature)
+    private X509Certificate generateJcaObject(TBSCertificate tbsCert, byte[] signature)
         throws CertificateParsingException
     {
         ASN1EncodableVector v = new ASN1EncodableVector();

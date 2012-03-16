@@ -35,7 +35,8 @@ import org.bouncycastle.asn1.pkcs.ContentInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.SignedData;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 
 /**
  * CertPath implementation for X.509 certificates.
@@ -307,13 +308,13 @@ public  class PKIXCertPath
         else if (encoding.equalsIgnoreCase("PEM"))
         {
             ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            PEMWriter pWrt = new PEMWriter(new OutputStreamWriter(bOut));
+            PemWriter pWrt = new PemWriter(new OutputStreamWriter(bOut));
 
             try
             {
                 for (int i = 0; i != certificates.size(); i++)
                 {
-                    pWrt.writeObject(certificates.get(i));
+                    pWrt.writeObject(new PemObject("CERTIFICATE", ((X509Certificate)certificates.get(i)).getEncoded()));
                 }
             
                 pWrt.close();
