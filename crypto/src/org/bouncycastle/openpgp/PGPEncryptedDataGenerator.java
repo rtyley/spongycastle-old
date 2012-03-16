@@ -204,7 +204,7 @@ public class PGPEncryptedDataGenerator
      * @param passPhrase
      * @throws NoSuchProviderException
      * @throws PGPException
-     * @deprecated  use addMethod that takes  PGPKeyEncryptionMethodBuilder
+     * @deprecated  use addMethod that takes  PGPKeyEncryptionMethodGenerator
      */
     public void addMethod(
         char[]    passPhrase) 
@@ -220,7 +220,7 @@ public class PGPEncryptedDataGenerator
      * @param s2kDigest digest algorithm to use for S2K calculation
      * @throws NoSuchProviderException
      * @throws PGPException
-     * @deprecated  use addMethod that takes  PGPKeyEncryptionMethodBuilder
+     * @deprecated  use addMethod that takes  PGPKeyEncryptionMethodGenerator
      */
     public void addMethod(
         char[]    passPhrase,
@@ -241,7 +241,7 @@ public class PGPEncryptedDataGenerator
      * @param key
      * @throws NoSuchProviderException
      * @throws PGPException
-     * @deprecated  use addMethod that takes  PGPKeyEncryptionMethodBuilder
+     * @deprecated  use addMethod that takes  PGPKeyEncryptionMethodGenerator
      */
     public void addMethod(
         PGPPublicKey    key) 
