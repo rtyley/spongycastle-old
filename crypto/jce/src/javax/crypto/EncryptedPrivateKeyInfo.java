@@ -51,7 +51,7 @@ public class EncryptedPrivateKeyInfo
         ByteArrayInputStream    bIn = new ByteArrayInputStream(encoded);
         ASN1InputStream         dIn = new ASN1InputStream(bIn);
 
-        infoObj = new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo((ASN1Sequence)dIn.readObject());
+        infoObj = org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo.getInstance((ASN1Sequence)dIn.readObject());
 
         try
         {
