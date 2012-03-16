@@ -1,10 +1,14 @@
-package org.bouncycastle.math.ntru.polynomial;
+package org.bouncycastle.math.ntru.polynomial.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
 
 import junit.framework.TestCase;
+import org.bouncycastle.math.ntru.polynomial.BigIntPolynomial;
+import org.bouncycastle.math.ntru.polynomial.DenseTernaryPolynomial;
+import org.bouncycastle.math.ntru.polynomial.IntegerPolynomial;
+import org.bouncycastle.math.ntru.polynomial.SparseTernaryPolynomial;
 
 public class SparseTernaryPolynomialTest
     extends TestCase

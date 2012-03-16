@@ -1,4 +1,4 @@
-package org.bouncycastle.crypto.engines;
+package org.bouncycastle.crypto.engines.test;
 
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -7,6 +7,7 @@ import junit.framework.TestCase;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.engines.NTRUEngine;
 import org.bouncycastle.crypto.generators.NTRUEncryptionKeyPairGenerator;
 import org.bouncycastle.crypto.params.NTRUEncryptionKeyGenerationParameters;
 import org.bouncycastle.crypto.params.NTRUEncryptionPrivateKeyParameters;
@@ -14,7 +15,9 @@ import org.bouncycastle.crypto.params.NTRUEncryptionPublicKeyParameters;
 import org.bouncycastle.crypto.params.NTRUParameters;
 import org.bouncycastle.math.ntru.polynomial.DenseTernaryPolynomial;
 import org.bouncycastle.math.ntru.polynomial.IntegerPolynomial;
+import org.bouncycastle.math.ntru.polynomial.Polynomial;
 import org.bouncycastle.math.ntru.polynomial.SparseTernaryPolynomial;
+import org.bouncycastle.math.ntru.polynomial.TernaryPolynomial;
 import org.bouncycastle.util.Arrays;
 
 public class NTRUEncryptTest
@@ -44,7 +47,7 @@ public class NTRUEncryptTest
                 params.polyType = polyType;
                 params.fastFp = booleans[j];
 
-                NTRUEngine ntru = new NTRUEngine();
+                VisibleNTRUEngine ntru = new VisibleNTRUEngine();
                 NTRUEncryptionKeyPairGenerator ntruGen = new NTRUEncryptionKeyPairGenerator();
 
                 ntruGen.init(params);
@@ -68,7 +71,7 @@ public class NTRUEncryptTest
     }
 
     // encrypts and decrypts a polynomial
-    private void testPolynomial(NTRUEngine ntru, AsymmetricCipherKeyPair kp, NTRUEncryptionKeyGenerationParameters params)
+    private void testPolynomial(VisibleNTRUEngine ntru, AsymmetricCipherKeyPair kp, NTRUEncryptionKeyGenerationParameters params)
     {
         SecureRandom random = new SecureRandom();
         IntegerPolynomial m = DenseTernaryPolynomial.generateRandom(params.N, random);
@@ -277,5 +280,19 @@ public class NTRUEncryptTest
         byte[] decrypted = ntru.processBlock(encrypted, 0, encrypted.length);
 
         assertTrue(Arrays.areEqual(plainText, decrypted));
+    }
+
+    private class VisibleNTRUEngine
+        extends NTRUEngine
+    {
+        public IntegerPolynomial encrypt(IntegerPolynomial m, TernaryPolynomial r, IntegerPolynomial pubKey)
+        {
+            return super.encrypt(m, r, pubKey);
+        }
+
+        public IntegerPolynomial decrypt(IntegerPolynomial e, Polynomial priv_t, IntegerPolynomial priv_fp)
+        {
+            return super.decrypt(e, priv_t, priv_fp);
+        }
     }
 }

@@ -1,4 +1,4 @@
-package org.bouncycastle.crypto.signers;
+package org.bouncycastle.math.ntru.util.test;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -14,12 +14,10 @@ public class AllTests
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("NTRU Signing Tests");
+        TestSuite suite = new TestSuite("NTRU ArrayEncoder Tests");
         
-        suite.addTestSuite(NTRUSignatureKeyTest.class);
-        suite.addTestSuite(NTRUSignerTest.class);
-        suite.addTestSuite(NTRUSigningParametersTest.class);
-
+        suite.addTestSuite(ArrayEncoderTest.class);
+        
         return suite;
     }
 }

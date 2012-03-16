@@ -1,10 +1,14 @@
-package org.bouncycastle.math.ntru.polynomial;
+package org.bouncycastle.math.ntru.polynomial.test;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import junit.framework.TestCase;
 import org.bouncycastle.crypto.params.NTRUSigningKeyGenerationParameters;
+import org.bouncycastle.math.ntru.polynomial.BigIntPolynomial;
+import org.bouncycastle.math.ntru.polynomial.DenseTernaryPolynomial;
+import org.bouncycastle.math.ntru.polynomial.IntegerPolynomial;
+import org.bouncycastle.math.ntru.polynomial.Resultant;
 import org.bouncycastle.util.Arrays;
 
 
@@ -162,20 +166,21 @@ public class IntegerPolynomialTest
     private void verifyResultant(IntegerPolynomial a, Resultant r)
     {
         BigIntPolynomial b = new BigIntPolynomial(a).mult(r.rho);
+        BigInteger[]     bCoeffs = b.getCoeffs();
 
-        for (int j = 1; j < b.coeffs.length - 1; j++)
+        for (int j = 1; j < bCoeffs.length - 1; j++)
         {
-            assertEquals(BigInteger.ZERO, b.coeffs[j]);
+            assertEquals(BigInteger.ZERO, bCoeffs[j]);
         }
         if (r.res.equals(BigInteger.ZERO))
         {
-            assertEquals(BigInteger.ZERO, b.coeffs[0].subtract(b.coeffs[b.coeffs.length - 1]));
+            assertEquals(BigInteger.ZERO, bCoeffs[0].subtract(bCoeffs[bCoeffs.length - 1]));
         }
         else
         {
-            assertEquals(BigInteger.ZERO, (b.coeffs[0].subtract(b.coeffs[b.coeffs.length - 1]).mod(r.res)));
+            assertEquals(BigInteger.ZERO, (bCoeffs[0].subtract(bCoeffs[bCoeffs.length - 1]).mod(r.res)));
         }
-        assertEquals(b.coeffs[0].subtract(r.res), b.coeffs[b.coeffs.length - 1].negate());
+        assertEquals(bCoeffs[0].subtract(r.res), bCoeffs[bCoeffs.length - 1].negate());
     }
 
     public void testResultantMod()
@@ -199,20 +204,21 @@ public class IntegerPolynomialTest
     {
         BigIntPolynomial b = new BigIntPolynomial(a).mult(r.rho);
         b.mod(BigInteger.valueOf(p));
+        BigInteger[]     bCoeffs = b.getCoeffs();
 
-        for (int j = 1; j < b.coeffs.length - 1; j++)
+        for (int j = 1; j < bCoeffs.length - 1; j++)
         {
-            assertEquals(BigInteger.ZERO, b.coeffs[j]);
+            assertEquals(BigInteger.ZERO, bCoeffs[j]);
         }
         if (r.res.equals(BigInteger.ZERO))
         {
-            assertEquals(BigInteger.ZERO, b.coeffs[0].subtract(b.coeffs[b.coeffs.length - 1]));
+            assertEquals(BigInteger.ZERO, bCoeffs[0].subtract(bCoeffs[bCoeffs.length - 1]));
         }
         else
         {
-            assertEquals(BigInteger.ZERO, (b.coeffs[0].subtract(b.coeffs[b.coeffs.length - 1]).subtract(r.res).mod(BigInteger.valueOf(p))));
+            assertEquals(BigInteger.ZERO, (bCoeffs[0].subtract(bCoeffs[bCoeffs.length - 1]).subtract(r.res).mod(BigInteger.valueOf(p))));
         }
-        assertEquals(BigInteger.ZERO, b.coeffs[0].subtract(r.res).subtract(b.coeffs[b.coeffs.length - 1].negate()).mod(BigInteger.valueOf(p)));
+        assertEquals(BigInteger.ZERO, bCoeffs[0].subtract(r.res).subtract(bCoeffs[bCoeffs.length - 1].negate()).mod(BigInteger.valueOf(p)));
     }
 
     private byte[] copyOf(byte[] src, int length)

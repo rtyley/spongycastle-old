@@ -20,9 +20,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package org.bouncycastle.math.ntru.euclid;
+package org.bouncycastle.math.ntru.euclid.test;
 
 import junit.framework.TestCase;
+import org.bouncycastle.math.ntru.euclid.IntEuclidean;
 
 public class IntEuclideanTest
     extends TestCase

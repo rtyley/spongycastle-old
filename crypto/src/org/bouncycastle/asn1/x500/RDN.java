@@ -36,8 +36,8 @@ public class RDN
     /**
      * Create a single valued RDN.
      *
-     * @param oid
-     * @param value
+     * @param oid RDN type.
+     * @param value RDN value.
      */
     public RDN(ASN1ObjectIdentifier oid, ASN1Encodable value)
     {
@@ -56,6 +56,8 @@ public class RDN
 
     /**
      * Create a multi-valued RDN.
+     *
+     * @param aAndVs attribute type/value pairs making up the RDN
      */
     public RDN(AttributeTypeAndValue[] aAndVs)
     {
@@ -108,7 +110,7 @@ public class RDN
      *        type     AttributeType,
      *        value    AttributeValue }
      * </pre>
-     * @return
+     * @return this object as an ASN1Primitive type
      */
     public ASN1Primitive toASN1Primitive()
     {

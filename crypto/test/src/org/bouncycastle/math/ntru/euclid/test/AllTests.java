@@ -1,4 +1,4 @@
-package org.bouncycastle.math.ntru.util;
+package org.bouncycastle.math.ntru.euclid.test;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -14,10 +14,11 @@ public class AllTests
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("NTRU ArrayEncoder Tests");
+        TestSuite suite = new TestSuite("NTRU Euclid Tests");
         
-        suite.addTestSuite(ArrayEncoderTest.class);
-        
+        suite.addTestSuite(BigIntEuclideanTest.class);
+        suite.addTestSuite(IntEuclideanTest.class);
+
         return suite;
     }
 }

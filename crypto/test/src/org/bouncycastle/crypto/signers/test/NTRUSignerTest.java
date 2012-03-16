@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package org.bouncycastle.crypto.signers;
+package org.bouncycastle.crypto.signers.test;
 
 
 import java.io.IOException;
@@ -30,8 +30,10 @@ import junit.framework.TestCase;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.generators.NTRUSigningKeyPairGenerator;
 import org.bouncycastle.crypto.params.NTRUSigningKeyGenerationParameters;
+import org.bouncycastle.crypto.params.NTRUSigningParameters;
 import org.bouncycastle.crypto.params.NTRUSigningPrivateKeyParameters;
 import org.bouncycastle.crypto.params.NTRUSigningPublicKeyParameters;
+import org.bouncycastle.crypto.signers.NTRUSigner;
 import org.bouncycastle.math.ntru.polynomial.IntegerPolynomial;
 import org.bouncycastle.math.ntru.polynomial.Polynomial;
 import org.bouncycastle.util.Arrays;
@@ -285,7 +287,7 @@ public class NTRUSignerTest
 
     private void testCreateMsgRep(NTRUSigningKeyGenerationParameters params)
     {
-        NTRUSigner ntru = new NTRUSigner(params.getSigningParameters());
+        VisibleNTRUSigner ntru = new VisibleNTRUSigner(params.getSigningParameters());
         byte[] msgHash = "adfsadfsdfs23234234".getBytes();
 
         // verify that the message representative is reproducible
@@ -299,5 +301,25 @@ public class NTRUSignerTest
         i1 = ntru.createMsgRep(msgHash, 2);
         i2 = ntru.createMsgRep(msgHash, 3);
         assertFalse(Arrays.areEqual(i1.coeffs, i2.coeffs));
+    }
+
+    private class VisibleNTRUSigner
+        extends NTRUSigner
+    {
+
+        /**
+         * Constructs a new instance with a set of signature parameters.
+         *
+         * @param params signature parameters
+         */
+        public VisibleNTRUSigner(NTRUSigningParameters params)
+        {
+            super(params);
+        }
+
+        public IntegerPolynomial createMsgRep(byte[] hash, int i)
+        {
+            return super.createMsgRep(hash, i);
+        }
     }
 }

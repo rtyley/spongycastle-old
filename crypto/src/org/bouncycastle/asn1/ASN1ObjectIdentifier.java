@@ -17,7 +17,7 @@ public class ASN1ObjectIdentifier
      * Return an OID that creates a branch under the current one.
      *
      * @param branchID node numbers for the new branch.
-     * @return
+     * @return the OID for the new created branch.
      */
     public ASN1ObjectIdentifier branch(String branchID)
     {

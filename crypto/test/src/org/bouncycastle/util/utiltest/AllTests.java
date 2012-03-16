@@ -1,4 +1,4 @@
-package org.bouncycastle.util;
+package org.bouncycastle.util.utiltest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;

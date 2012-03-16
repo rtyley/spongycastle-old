@@ -81,7 +81,7 @@ public abstract class ASN1Object
 
     /**
      * @deprecated use toASN1Primitive()
-     * @return
+     * @return the underlying primitive type.
      */
     public ASN1Primitive toASN1Object()
     {

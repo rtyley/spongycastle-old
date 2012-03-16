@@ -7,7 +7,7 @@ import org.bouncycastle.util.Arrays;
  * faster multiplication in 64 bit environments.<br/>
  * Coefficients can be between 0 and 2047 and are stored in pairs in the bits 0..10 and 24..34 of a <code>long</code> number.
  */
-class LongPolynomial2
+public class LongPolynomial2
 {
     private long[] coeffs;   // each representing two coefficients in the original IntegerPolynomial
     private int numCoeffs;
@@ -17,7 +17,7 @@ class LongPolynomial2
      *
      * @param p the original polynomial. Coefficients must be between 0 and 2047.
      */
-    LongPolynomial2(IntegerPolynomial p)
+    public LongPolynomial2(IntegerPolynomial p)
     {
         numCoeffs = p.coeffs.length;
         coeffs = new long[(numCoeffs + 1) / 2];
@@ -210,7 +210,7 @@ class LongPolynomial2
      * @param b    another polynomial
      * @param mask a bit mask less than 2048 to apply to each 11-bit coefficient
      */
-    void subAnd(LongPolynomial2 b, int mask)
+    public void subAnd(LongPolynomial2 b, int mask)
     {
         long longMask = (((long)mask) << 24) + mask;
         for (int i = 0; i < b.coeffs.length; i++)
@@ -225,7 +225,7 @@ class LongPolynomial2
      *
      * @param mask a bit mask less than 2048 to apply to each 11-bit coefficient
      */
-    void mult2And(int mask)
+    public void mult2And(int mask)
     {
         long longMask = (((long)mask) << 24) + mask;
         for (int i = 0; i < coeffs.length; i++)

@@ -1,4 +1,4 @@
-package org.bouncycastle.math.ntru.polynomial;
+package org.bouncycastle.math.ntru.polynomial.test;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

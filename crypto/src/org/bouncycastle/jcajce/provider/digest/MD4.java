@@ -5,7 +5,7 @@ import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.digests.MD4Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
-import org.bouncycastle.jce.provider.JCEKeyGenerator;
+import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jce.provider.JCEMac;
 
 public class MD4
@@ -23,7 +23,7 @@ public class MD4
     }
 
     public static class KeyGenerator
-        extends JCEKeyGenerator
+        extends BaseKeyGenerator
     {
         public KeyGenerator()
         {

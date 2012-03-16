@@ -16,12 +16,15 @@ import org.bouncycastle.asn1.pkcs.RC2CBCParameter;
 import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.engines.RC2Engine;
 import org.bouncycastle.crypto.engines.RC2WrapEngine;
+import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
+import org.bouncycastle.crypto.macs.CFBBlockCipherMac;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameterGenerator;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseAlgorithmParameters;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseBlockCipher;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
+import org.bouncycastle.jcajce.provider.symmetric.util.BaseMac;
 import org.bouncycastle.jcajce.provider.symmetric.util.BaseWrapCipher;
 import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -63,6 +66,27 @@ public final class RC2
         public Wrap()
         {
             super(new RC2WrapEngine());
+        }
+    }
+
+    /**
+     * RC2
+     */
+    public static class CBCMAC
+        extends BaseMac
+    {
+        public CBCMAC()
+        {
+            super(new CBCBlockCipherMac(new RC2Engine()));
+        }
+    }
+
+    public static class CFB8MAC
+        extends BaseMac
+    {
+        public CFB8MAC()
+        {
+            super(new CFBBlockCipherMac(new RC2Engine()));
         }
     }
 
@@ -332,9 +356,12 @@ public final class RC2
             provider.addAlgorithm("Cipher.RC2", PREFIX + "$ECB");
             provider.addAlgorithm("Cipher.RC2WRAP", PREFIX + "$Wrap");
             provider.addAlgorithm("Alg.Alias.Cipher." + PKCSObjectIdentifiers.id_alg_CMSRC2wrap, "RC2WRAP");
-
             provider.addAlgorithm("Cipher.1.2.840.113549.3.2", PREFIX + "$CBC");
 
+            provider.addAlgorithm("Mac.RC2MAC", PREFIX + "$CBCMAC");
+            provider.addAlgorithm("Alg.Alias.Mac.RC2", "RC2MAC");
+            provider.addAlgorithm("Mac.RC2MAC/CFB8", PREFIX + "$CFB8MAC");
+            provider.addAlgorithm("Alg.Alias.Mac.RC2/CFB8", "RC2MAC/CFB8");
         }
     }
 }

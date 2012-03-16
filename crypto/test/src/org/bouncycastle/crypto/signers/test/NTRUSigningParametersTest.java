@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package org.bouncycastle.crypto.signers;
+package org.bouncycastle.crypto.signers.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -1,8 +1,11 @@
-package org.bouncycastle.math.ntru.polynomial;
+package org.bouncycastle.math.ntru.polynomial.test;
 
 import java.security.SecureRandom;
 
 import junit.framework.TestCase;
+import org.bouncycastle.math.ntru.polynomial.DenseTernaryPolynomial;
+import org.bouncycastle.math.ntru.polynomial.IntegerPolynomial;
+import org.bouncycastle.math.ntru.polynomial.LongPolynomial5;
 import org.bouncycastle.util.Arrays;
 
 public class LongPolynomial5Test

@@ -6,7 +6,7 @@ import org.bouncycastle.crypto.CipherKeyGenerator;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;
-import org.bouncycastle.jce.provider.JCEKeyGenerator;
+import org.bouncycastle.jcajce.provider.symmetric.util.BaseKeyGenerator;
 import org.bouncycastle.jce.provider.JCEMac;
 
 public class RIPEMD160
@@ -43,7 +43,7 @@ public class RIPEMD160
     }
 
     public static class KeyGenerator
-        extends JCEKeyGenerator
+        extends BaseKeyGenerator
     {
         public KeyGenerator()
         {

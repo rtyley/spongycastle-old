@@ -2,11 +2,12 @@ package org.bouncycastle.crypto.engines;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.params.NTRUEncryptionParameters;
+import org.bouncycastle.util.Arrays;
 
 /**
  * An implementation of the Index Generation Function in IEEE P1363.1.
  */
-class IndexGenerator
+public class IndexGenerator
 {
     private byte[] seed;
     private int N;
@@ -120,7 +121,7 @@ class IndexGenerator
     /**
      * Represents a string of bits and supports appending, reading the head, and reading the tail.
      */
-    static class BitString
+    public static class BitString
     {
         byte[] bytes = new byte[4];
         int numBytes;   // includes the last byte even if only some of its bits are used
@@ -144,7 +145,7 @@ class IndexGenerator
          *
          * @param b a byte
          */
-        void appendBits(byte b)
+        public void appendBits(byte b)
         {
             if (numBytes == bytes.length)
             {
@@ -175,7 +176,7 @@ class IndexGenerator
          * @param numBits number of bits
          * @return a new <code>BitString</code> of length <code>numBits</code>
          */
-        BitString getTrailing(int numBits)
+        public BitString getTrailing(int numBits)
         {
             BitString newStr = new BitString();
             newStr.numBytes = (numBits + 7) / 8;
@@ -205,7 +206,7 @@ class IndexGenerator
          * @param numBits number of bits
          * @return an <code>int</code> whose lower <code>numBits</code> bits are the beginning of the bit string
          */
-        int getLeadingAsInt(int numBits)
+        public int getLeadingAsInt(int numBits)
         {
             int startBit = (numBytes - 1) * 8 + lastByteBits - numBits;
             int startByte = startBit / 8;
@@ -220,6 +221,11 @@ class IndexGenerator
             }
 
             return sum;
+        }
+
+        public byte[] getBytes()
+        {
+            return Arrays.clone(bytes);
         }
     }
 

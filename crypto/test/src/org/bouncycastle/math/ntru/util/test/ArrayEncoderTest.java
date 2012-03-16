@@ -1,11 +1,12 @@
-package org.bouncycastle.math.ntru.util;
+package org.bouncycastle.math.ntru.util.test;
 
 import java.security.SecureRandom;
 import java.util.Random;
 
 import junit.framework.TestCase;
 import org.bouncycastle.math.ntru.polynomial.DenseTernaryPolynomial;
-import org.bouncycastle.math.ntru.polynomial.PolynomialGenerator;
+import org.bouncycastle.math.ntru.polynomial.test.PolynomialGenerator;
+import org.bouncycastle.math.ntru.util.ArrayEncoder;
 import org.bouncycastle.util.Arrays;
 
 public class ArrayEncoderTest

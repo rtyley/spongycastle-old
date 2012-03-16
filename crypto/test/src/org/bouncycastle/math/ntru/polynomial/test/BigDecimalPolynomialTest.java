@@ -1,9 +1,13 @@
-package org.bouncycastle.math.ntru.polynomial;
+package org.bouncycastle.math.ntru.polynomial.test;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 
 import junit.framework.TestCase;
+import org.bouncycastle.math.ntru.polynomial.BigDecimalPolynomial;
+import org.bouncycastle.math.ntru.polynomial.BigIntPolynomial;
+import org.bouncycastle.math.ntru.polynomial.DenseTernaryPolynomial;
+import org.bouncycastle.math.ntru.polynomial.IntegerPolynomial;
 
 public class BigDecimalPolynomialTest
     extends TestCase
@@ -13,12 +17,14 @@ public class BigDecimalPolynomialTest
         BigDecimalPolynomial a = new BigDecimalPolynomial(new BigIntPolynomial(new IntegerPolynomial(new int[]{4, -1, 9, 2, 1, -5, 12, -7, 0, -9, 5})));
         BigDecimalPolynomial b = new BigDecimalPolynomial(new BigIntPolynomial(new IntegerPolynomial(new int[]{-6, 0, 0, 13, 3, -2, -4, 10, 11, 2, -1})));
         BigDecimalPolynomial c = a.mult(b);
-        BigDecimal[] expectedCoeffs = new BigDecimalPolynomial(new BigIntPolynomial(new IntegerPolynomial(new int[]{2, -189, 77, 124, -29, 0, -75, 124, -49, 267, 34}))).coeffs;
+        BigDecimal[] expectedCoeffs = new BigDecimalPolynomial(new BigIntPolynomial(new IntegerPolynomial(new int[]{2, -189, 77, 124, -29, 0, -75, 124, -49, 267, 34}))).getCoeffs();
 
-        assertEquals(expectedCoeffs.length, c.coeffs.length);
-        for (int i = 0; i != c.coeffs.length; i++)
+        BigDecimal[] cCoeffs = c.getCoeffs();
+
+        assertEquals(expectedCoeffs.length, cCoeffs.length);
+        for (int i = 0; i != cCoeffs.length; i++)
         {
-            assertEquals(expectedCoeffs[i], c.coeffs[i]);
+            assertEquals(expectedCoeffs[i], cCoeffs[i]);
         }
 
         // multiply a polynomial by its inverse modulo 2048 and check that the result is 1

@@ -1,15 +1,13 @@
 package org.bouncycastle.jce.provider.test.rsa3;
 
+import java.security.Security;
+import java.security.Signature;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.bouncycastle.openssl.PEMReader;
-
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.security.Security;
-import java.security.Signature;
-import java.security.cert.X509Certificate;
 
 /**
  * Marius Schilder's Bleichenbacher's Forgery Attack Tests
@@ -110,10 +108,9 @@ public class RSA3CertTest
         String certName)
         throws Exception
     {
-        Reader    in = new InputStreamReader(getClass().getResourceAsStream(certName));
-        PEMReader rd = new PEMReader(in);
+        CertificateFactory rd = CertificateFactory.getInstance("X.509", "BC");
         
-        return (X509Certificate)rd.readObject();
+        return (X509Certificate)rd.generateCertificate(getClass().getResourceAsStream(certName));
     }
     
     public static void main (String[] args) 

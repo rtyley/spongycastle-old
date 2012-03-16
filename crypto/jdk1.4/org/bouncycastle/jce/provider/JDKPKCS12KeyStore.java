@@ -740,7 +740,7 @@ public class JDKPKCS12KeyStore
                         SafeBag b = SafeBag.getInstance(seq.getObjectAt(j));
                         if (b.getBagId().equals(pkcs8ShroudedKeyBag))
                         {
-                            org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo eIn = new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo((ASN1Sequence)b.getBagValue());
+                            org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo eIn =  org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo.getInstance(b.getBagValue());
                             PrivateKey              privKey = unwrapKey(eIn.getEncryptionAlgorithm(), eIn.getEncryptedData(), password, wrongPKCS12Zero);
 
                             //
@@ -839,7 +839,7 @@ public class JDKPKCS12KeyStore
                         }
                         else if (b.getBagId().equals(pkcs8ShroudedKeyBag))
                         {
-                            org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo eIn = new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo((ASN1Sequence)b.getBagValue());
+                            org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo eIn = org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo.getInstance(b.getBagValue());
                             PrivateKey              privKey = unwrapKey(eIn.getEncryptionAlgorithm(), eIn.getEncryptedData(), password, wrongPKCS12Zero);
 
                             //
@@ -983,7 +983,7 @@ public class JDKPKCS12KeyStore
         for (int i = 0; i != chain.size(); i++)
         {
             SafeBag     b = (SafeBag)chain.elementAt(i);
-            CertBag     cb = new CertBag((ASN1Sequence)b.getBagValue());
+            CertBag     cb = CertBag.getInstance(b.getBagValue());
 
             if (!cb.getCertId().equals(x509Certificate))
             {
@@ -1481,7 +1481,7 @@ public class JDKPKCS12KeyStore
     {
         public BCPKCS12KeyStore()
         {
-            super(bcProvider, pbeWithSHAAnd3_KeyTripleDES_CBC, pbewithSHAAnd40BitRC2_CBC);
+            super(bcProvider, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
         }
     }
 
@@ -1499,7 +1499,7 @@ public class JDKPKCS12KeyStore
     {
         public DefPKCS12KeyStore()
         {
-            super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbewithSHAAnd40BitRC2_CBC);
+            super(null, pbeWithSHAAnd3_KeyTripleDES_CBC, pbeWithSHAAnd40BitRC2_CBC);
         }
     }
 

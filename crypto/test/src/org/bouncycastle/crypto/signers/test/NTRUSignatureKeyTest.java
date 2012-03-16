@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package org.bouncycastle.crypto.signers;
+package org.bouncycastle.crypto.signers.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,6 +32,7 @@ import org.bouncycastle.crypto.generators.NTRUSigningKeyPairGenerator;
 import org.bouncycastle.crypto.params.NTRUSigningKeyGenerationParameters;
 import org.bouncycastle.crypto.params.NTRUSigningPrivateKeyParameters;
 import org.bouncycastle.crypto.params.NTRUSigningPublicKeyParameters;
+import org.bouncycastle.crypto.signers.NTRUSigner;
 
 public class NTRUSignatureKeyTest
     extends TestCase

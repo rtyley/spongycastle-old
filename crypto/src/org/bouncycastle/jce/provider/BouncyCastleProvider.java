@@ -232,8 +232,6 @@ public final class BouncyCastleProvider extends Provider
         //
         // cipher engines
         //
-        put("Cipher.1.2.840.113549.3.2", "org.bouncycastle.jce.provider.JCEBlockCipher$RC2CBC");
-        
         put("Alg.Alias.Cipher.PBEWithSHAAnd3KeyTripleDES",  "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
         
 
@@ -328,7 +326,6 @@ public final class BouncyCastleProvider extends Provider
         //
         // secret key factories.
         //
-        put("SecretKeyFactory.DES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$DES");
         put("SecretKeyFactory.PBEWITHMD2ANDDES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD2AndDES");
 
         put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.pbeWithMD2AndDES_CBC, "PBEWITHMD2ANDDES");
@@ -471,12 +468,6 @@ e.printStackTrace();
     //
     private void addMacAlgorithms()
     {
-        put("Mac.DESMAC", "org.bouncycastle.jce.provider.JCEMac$DES");
-        put("Alg.Alias.Mac.DES", "DESMAC");
-        put("Mac.DESMAC64", "org.bouncycastle.jce.provider.JCEMac$DES64");
-        put("Alg.Alias.Mac.DES64", "DESMAC64");
-        put("Mac.DESMAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$DESCFB8");
-        put("Alg.Alias.Mac.DES/CFB8", "DESMAC/CFB8");
 
         put("Mac.DESWITHISO9797", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3");
         put("Alg.Alias.Mac.DESISO9797MAC", "DESWITHISO9797");
@@ -485,14 +476,6 @@ e.printStackTrace();
         put("Alg.Alias.Mac.ISO9797ALG3", "ISO9797ALG3MAC");
         put("Mac.ISO9797ALG3WITHISO7816-4PADDING", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3with7816d4");
         put("Alg.Alias.Mac.ISO9797ALG3MACWITHISO7816-4PADDING", "ISO9797ALG3WITHISO7816-4PADDING");
-
-        put("Mac.RC2MAC", "org.bouncycastle.jce.provider.JCEMac$RC2");
-        put("Alg.Alias.Mac.RC2", "RC2MAC");
-        put("Mac.RC2MAC/CFB8", "org.bouncycastle.jce.provider.JCEMac$RC2CFB8");
-        put("Alg.Alias.Mac.RC2/CFB8", "RC2MAC/CFB8");
-
-
-
 
         put("Mac.OLDHMACSHA384", "org.bouncycastle.jce.provider.JCEMac$OldSHA384");
 

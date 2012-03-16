@@ -85,7 +85,7 @@ public class SubjectPublicKeyInfo
 
     /**
      * @deprecated use getAlgorithm()
-     * @return
+     * @return    alg ID.
      */
     public AlgorithmIdentifier getAlgorithmId()
     {
@@ -98,6 +98,7 @@ public class SubjectPublicKeyInfo
      *
      * @exception IOException - if the bit string doesn't represent a DER
      * encoded object.
+     * @return the public key as an ASN.1 primitive.
      */
     public ASN1Primitive parsePublicKey()
         throws IOException
@@ -114,6 +115,7 @@ public class SubjectPublicKeyInfo
      * @exception IOException - if the bit string doesn't represent a DER
      * encoded object.
      * @deprecated use parsePublicKey
+     * @return the public key as an ASN.1 primitive.
      */
     public ASN1Primitive getPublicKey()
         throws IOException
@@ -124,7 +126,9 @@ public class SubjectPublicKeyInfo
     }
 
     /**
-     * for when the public key is raw bits...
+     * for when the public key is raw bits.
+     *
+     * @return the public key as the raw bit string...
      */
     public DERBitString getPublicKeyData()
     {

@@ -92,7 +92,7 @@ public class SparseTernaryPolynomial
      * @return the decoded polynomial
      * @throws IOException
      */
-    static SparseTernaryPolynomial fromBinary(InputStream is, int N, int numOnes, int numNegOnes)
+    public static SparseTernaryPolynomial fromBinary(InputStream is, int N, int numOnes, int numNegOnes)
         throws IOException
     {
         int maxIndex = 1 << BITS_PER_INDEX;
@@ -234,7 +234,7 @@ public class SparseTernaryPolynomial
      *
      * @return the encoded polynomial
      */
-    byte[] toBinary()
+    public byte[] toBinary()
     {
         int maxIndex = 1 << BITS_PER_INDEX;
         byte[] bin1 = ArrayEncoder.encodeModQ(ones, maxIndex);

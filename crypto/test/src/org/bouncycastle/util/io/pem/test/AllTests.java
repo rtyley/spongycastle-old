@@ -1,4 +1,4 @@
-package org.bouncycastle.util.io.pem;
+package org.bouncycastle.util.io.pem.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,6 +10,9 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.bouncycastle.util.io.pem.PemHeader;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 
 public class AllTests
     extends TestCase

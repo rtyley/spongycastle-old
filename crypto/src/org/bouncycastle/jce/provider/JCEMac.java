@@ -198,14 +198,7 @@ public class JCEMac
     /**
      * RC2CFB8
      */
-    public static class RC2CFB8
-        extends JCEMac
-    {
-        public RC2CFB8()
-        {
-            super(new CFBBlockCipherMac(new RC2Engine()));
-        }
-    }
+
 
     /**
      * DES9797Alg3with7816-4Padding

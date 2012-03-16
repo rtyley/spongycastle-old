@@ -43,7 +43,7 @@ public class BigDecimalPolynomial
      *
      * @param p the original polynomial
      */
-    BigDecimalPolynomial(BigIntPolynomial p)
+    public BigDecimalPolynomial(BigIntPolynomial p)
     {
         int N = p.coeffs.length;
         coeffs = new BigDecimal[N];
@@ -83,7 +83,7 @@ public class BigDecimalPolynomial
      * @param poly2 the polynomial to multiply by
      * @return a new polynomial
      */
-    BigDecimalPolynomial mult(BigDecimalPolynomial poly2)
+    public BigDecimalPolynomial mult(BigDecimalPolynomial poly2)
     {
         int N = coeffs.length;
         if (poly2.coeffs.length != N)
@@ -245,4 +245,14 @@ public class BigDecimalPolynomial
 
         return tmp;
     }
+
+    public BigDecimal[] getCoeffs()
+    {
+        BigDecimal[] tmp = new BigDecimal[coeffs.length];
+
+        System.arraycopy(coeffs, 0, tmp, 0, coeffs.length);
+
+        return tmp;
+    }
+
 }

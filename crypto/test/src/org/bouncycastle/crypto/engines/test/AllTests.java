@@ -1,4 +1,4 @@
-package org.bouncycastle.crypto.engines;
+package org.bouncycastle.crypto.engines.test;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

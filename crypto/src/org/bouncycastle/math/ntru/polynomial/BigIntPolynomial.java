@@ -326,7 +326,7 @@ public class BigIntPolynomial
      *
      * @param modulus
      */
-    void mod(BigInteger modulus)
+    public void mod(BigInteger modulus)
     {
         for (int i = 0; i < coeffs.length; i++)
         {
@@ -385,5 +385,10 @@ public class BigIntPolynomial
             return false;
         }
         return true;
+    }
+
+    public BigInteger[] getCoeffs()
+    {
+        return Arrays.clone(coeffs);
     }
 }

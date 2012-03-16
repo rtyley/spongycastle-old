@@ -1,4 +1,4 @@
-package org.bouncycastle.crypto.engines;
+package org.bouncycastle.crypto.engines.test;
 
 import junit.framework.TestCase;
 import org.bouncycastle.crypto.engines.IndexGenerator.BitString;
@@ -24,9 +24,11 @@ public class BitStringTest
 
     private void assertBitStringEquals(BitString bs, byte[] arr)
     {
-        assertTrue(bs.bytes.length >= arr.length);
-        arr = copyOf(arr, bs.bytes.length);
-        assertTrue(Arrays.areEqual(arr, bs.bytes));
+        byte[] bsBytes = bs.getBytes();
+
+        assertTrue(bsBytes.length >= arr.length);
+        arr = copyOf(arr, bsBytes.length);
+        assertTrue(Arrays.areEqual(arr, bsBytes));
     }
 
     public void testGetTrailing()

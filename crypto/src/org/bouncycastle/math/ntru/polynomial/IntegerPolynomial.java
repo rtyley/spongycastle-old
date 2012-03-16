@@ -1057,7 +1057,7 @@ public class IntegerPolynomial
     /**
      * Takes each coefficient modulo <code>modulus</code>.
      */
-    void mod(int modulus)
+    public void mod(int modulus)
     {
         for (int i = 0; i < coeffs.length; i++)
         {
@@ -1225,7 +1225,7 @@ public class IntegerPolynomial
      *
      * @return true iff all coefficients are equal to zero, except for the lowest coefficient which must equal 1
      */
-    boolean equalsOne()
+    public boolean equalsOne()
     {
         for (int i = 1; i < coeffs.length; i++)
         {

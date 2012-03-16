@@ -1,4 +1,4 @@
-package org.bouncycastle.math.ntru.euclid;
+package org.bouncycastle.crypto.signers.test;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -14,10 +14,11 @@ public class AllTests
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("NTRU Euclid Tests");
+        TestSuite suite = new TestSuite("NTRU Signing Tests");
         
-        suite.addTestSuite(BigIntEuclideanTest.class);
-        suite.addTestSuite(IntEuclideanTest.class);
+        suite.addTestSuite(NTRUSignatureKeyTest.class);
+        suite.addTestSuite(NTRUSignerTest.class);
+        suite.addTestSuite(NTRUSigningParametersTest.class);
 
         return suite;
     }

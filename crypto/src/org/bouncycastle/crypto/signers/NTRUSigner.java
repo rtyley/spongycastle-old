@@ -229,7 +229,7 @@ public class NTRUSigner
         return centeredNormSq <= normBoundSq;
     }
 
-    IntegerPolynomial createMsgRep(byte[] msgHash, int r)
+    protected IntegerPolynomial createMsgRep(byte[] msgHash, int r)
     {
         int N = params.N;
         int q = params.q;

@@ -187,7 +187,7 @@ public class NTRUEngine
         return sData;
     }
 
-    IntegerPolynomial encrypt(IntegerPolynomial m, TernaryPolynomial r, IntegerPolynomial pubKey)
+    protected IntegerPolynomial encrypt(IntegerPolynomial m, TernaryPolynomial r, IntegerPolynomial pubKey)
     {
         IntegerPolynomial e = r.mult(pubKey, params.q);
         e.add(m, params.q);
@@ -457,7 +457,7 @@ public class NTRUEngine
      * @param priv_fp
      * @return
      */
-    IntegerPolynomial decrypt(IntegerPolynomial e, Polynomial priv_t, IntegerPolynomial priv_fp)
+    protected IntegerPolynomial decrypt(IntegerPolynomial e, Polynomial priv_t, IntegerPolynomial priv_fp)
     {
         IntegerPolynomial a;
         if (params.fastFp)

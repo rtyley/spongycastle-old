@@ -7,7 +7,7 @@ import org.bouncycastle.util.Arrays;
  * faster multiplication by a ternary polynomial.<br/>
  * Coefficients can be between 0 and 2047 and are stored in bits 0..11, 12..23, ..., 48..59 of a <code>long</code> number.
  */
-class LongPolynomial5
+public class LongPolynomial5
 {
     private long[] coeffs;   // groups of 5 coefficients
     private int numCoeffs;
@@ -17,7 +17,7 @@ class LongPolynomial5
      *
      * @param p the original polynomial. Coefficients must be between 0 and 2047.
      */
-    LongPolynomial5(IntegerPolynomial p)
+    public LongPolynomial5(IntegerPolynomial p)
     {
         numCoeffs = p.coeffs.length;
 

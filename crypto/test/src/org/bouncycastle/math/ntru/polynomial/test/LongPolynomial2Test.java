@@ -1,8 +1,10 @@
-package org.bouncycastle.math.ntru.polynomial;
+package org.bouncycastle.math.ntru.polynomial.test;
 
 import java.util.Random;
 
 import junit.framework.TestCase;
+import org.bouncycastle.math.ntru.polynomial.IntegerPolynomial;
+import org.bouncycastle.math.ntru.polynomial.LongPolynomial2;
 import org.bouncycastle.util.Arrays;
 
 public class LongPolynomial2Test

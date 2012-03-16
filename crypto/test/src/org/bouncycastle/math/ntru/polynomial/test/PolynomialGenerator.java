@@ -1,6 +1,8 @@
-package org.bouncycastle.math.ntru.polynomial;
+package org.bouncycastle.math.ntru.polynomial.test;
 
 import java.util.Random;
+
+import org.bouncycastle.math.ntru.polynomial.IntegerPolynomial;
 
 public class PolynomialGenerator
 {
