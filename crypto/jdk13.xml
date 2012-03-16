@@ -64,9 +64,9 @@
                 <exclude name="**/GetInstanceTest.java" />
                 <exclude name="**/ntru/**/*.java" />
                 <exclude name="**/NTRU*.java" />
-                <exclude name="**/crypto/engines/BitStringTest.java" />
-                <exclude name="**/crypto/engines/AllTests.java" />
-                <exclude name="**/crypto/signers/AllTests.java" />
+                <exclude name="**/crypto/engines/test/BitStringTest.java" />
+                <exclude name="**/crypto/engines/test/AllTests.java" />
+                <exclude name="**/crypto/signers/test/AllTests.java" />
             </fileset>
             <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.html" />
