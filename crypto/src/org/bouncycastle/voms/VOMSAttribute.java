@@ -1,7 +1,7 @@
 package org.bouncycastle.voms;
 
 import java.util.List;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DERIA5String;
@@ -25,8 +25,8 @@ public class VOMSAttribute
     private X509AttributeCertificate myAC;
     private String myHostPort;
     private String myVo;
-    private Vector myStringList = new Vector();
-    private Vector myFQANs = new Vector();
+    private List myStringList = new ArrayList();
+    private List myFQANs = new ArrayList();
 
     /**
      * Parses the contents of an attribute certificate.<br>
