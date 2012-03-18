@@ -1,21 +1,25 @@
 package org.bouncycastle.operator.jcajce;
 
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.Key;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.ProviderException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.cms.jcajce.DefaultJcaJceExtHelper;
-import org.bouncycastle.cms.jcajce.NamedJcaJceExtHelper;
-import org.bouncycastle.cms.jcajce.ProviderJcaJceExtHelper;
+import org.bouncycastle.jcajce.DefaultJcaJceHelper;
+import org.bouncycastle.jcajce.NamedJcaJceHelper;
+import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.AsymmetricKeyUnwrapper;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OperatorException;
@@ -23,7 +27,8 @@ import org.bouncycastle.operator.OperatorException;
 public class JceAsymmetricKeyUnwrapper
     extends AsymmetricKeyUnwrapper
 {
-    private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceExtHelper());
+    private OperatorHelper helper = new OperatorHelper(new DefaultJcaJceHelper());
+    private Map extraMappings = new HashMap();
     private PrivateKey privKey;
 
     public JceAsymmetricKeyUnwrapper(AlgorithmIdentifier algorithmIdentifier, PrivateKey privKey)
@@ -35,14 +40,35 @@ public class JceAsymmetricKeyUnwrapper
 
     public JceAsymmetricKeyUnwrapper setProvider(Provider provider)
     {
-        this.helper = new OperatorHelper(new ProviderJcaJceExtHelper(provider));
+        this.helper = new OperatorHelper(new ProviderJcaJceHelper(provider));
 
         return this;
     }
 
     public JceAsymmetricKeyUnwrapper setProvider(String providerName)
     {
-        this.helper = new OperatorHelper(new NamedJcaJceExtHelper(providerName));
+        this.helper = new OperatorHelper(new NamedJcaJceHelper(providerName));
+
+        return this;
+    }
+
+    /**
+     * Internally algorithm ids are converted into cipher names using a lookup table. For some providers
+     * the standard lookup table won't work. Use this method to establish a specific mapping from an
+     * algorithm identifier to a specific algorithm.
+     * <p>
+     *     For example:
+     * <pre>
+     *     unwrapper.setAlgorithmMapping(PKCSObjectIdentifiers.rsaEncryption, "RSA");
+     * </pre>
+     * </p>
+     * @param algorithm  OID of algorithm in recipient.
+     * @param algorithmName JCE algorithm name to use.
+     * @return  the current Unwrapper.
+     */
+    public JceAsymmetricKeyUnwrapper setAlgorithmMapping(ASN1ObjectIdentifier algorithm, String algorithmName)
+    {
+        extraMappings.put(algorithm, algorithmName);
 
         return this;
     }
@@ -54,17 +80,17 @@ public class JceAsymmetricKeyUnwrapper
         {
             Key sKey = null;
 
-            Cipher keyCipher = helper.createAsymmetricWrapper(this.getAlgorithmIdentifier().getAlgorithm());
+            Cipher keyCipher = helper.createAsymmetricWrapper(this.getAlgorithmIdentifier().getAlgorithm(), extraMappings);
 
             try
             {
                 keyCipher.init(Cipher.UNWRAP_MODE, privKey);
-                sKey = keyCipher.unwrap(encryptedKey, encryptedKeyAlgorithm.getAlgorithm().getId(), Cipher.SECRET_KEY);
-            }
-            catch (InvalidKeyException e)
-            {
+                sKey = keyCipher.unwrap(encryptedKey, helper.getKeyAlgorithmName(encryptedKeyAlgorithm.getAlgorithm()), Cipher.SECRET_KEY);
             }
             catch (NoSuchAlgorithmException e)
+            {
+            }
+            catch (InvalidKeyException e)
             {
             }
             catch (IllegalStateException e)

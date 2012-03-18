@@ -18,7 +18,7 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERGeneralizedTime;
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
@@ -111,7 +111,7 @@ public class X509V2AttributeCertificateGenerator
     public void setSerialNumber(
         BigInteger      serialNumber)
     {
-        acInfoGen.setSerialNumber(new DERInteger(serialNumber));
+        acInfoGen.setSerialNumber(new ASN1Integer(serialNumber));
     }
 
     public void setNotBefore(
@@ -169,7 +169,7 @@ public class X509V2AttributeCertificateGenerator
         ASN1Encodable   value)
         throws IOException
     {
-        this.addExtension(OID, critical, value.getEncoded());
+        this.addExtension(OID, critical, value.toASN1Primitive().getEncoded());
     }
 
     /**

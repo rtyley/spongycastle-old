@@ -2,6 +2,7 @@ package org.bouncycastle.x509;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.Target;
@@ -358,7 +359,7 @@ public class X509AttributeCertStoreSelector
      */
     public void addTargetName(byte[] name) throws IOException
     {
-        addTargetName(GeneralName.getInstance(ASN1Object.fromByteArray(name)));
+        addTargetName(GeneralName.getInstance(ASN1Primitive.fromByteArray(name)));
     }
 
     /**
@@ -425,7 +426,7 @@ public class X509AttributeCertStoreSelector
      */
     public void addTargetGroup(byte[] name) throws IOException
     {
-        addTargetGroup(GeneralName.getInstance(ASN1Object.fromByteArray(name)));
+        addTargetGroup(GeneralName.getInstance(ASN1Primitive.fromByteArray(name)));
     }
 
     /**
@@ -479,7 +480,7 @@ public class X509AttributeCertStoreSelector
             }
             else
             {
-                temp.add(GeneralName.getInstance(ASN1Object.fromByteArray((byte[])o)));
+                temp.add(GeneralName.getInstance(ASN1Primitive.fromByteArray((byte[])o)));
             }
         }
         return temp;

@@ -18,7 +18,6 @@ import javax.crypto.Cipher;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -30,7 +29,10 @@ import org.bouncycastle.asn1.teletrust.TeleTrusTObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.jcajce.JcaJceHelper;
 import org.bouncycastle.operator.OperatorCreationException;
+
+//import java.security.spec.PSSParameterSpec;
 
 class OperatorHelper
 {
@@ -44,7 +46,7 @@ class OperatorHelper
         //
         // reverse mappings
         //
-        oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.5"), "SHA1WITHRSA");
+        oids.put(new ASN1ObjectIdentifier("1.2.840.113549.1.1.5"), "SHA1WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha224WithRSAEncryption, "SHA224WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha256WithRSAEncryption, "SHA256WITHRSA");
         oids.put(PKCSObjectIdentifiers.sha384WithRSAEncryption, "SHA384WITHRSA");
@@ -52,9 +54,9 @@ class OperatorHelper
         oids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_94, "GOST3411WITHGOST3410");
         oids.put(CryptoProObjectIdentifiers.gostR3411_94_with_gostR3410_2001, "GOST3411WITHECGOST3410");
 
-        oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.4"), "MD5WITHRSA");
-        oids.put(new DERObjectIdentifier("1.2.840.113549.1.1.2"), "MD2WITHRSA");
-        oids.put(new DERObjectIdentifier("1.2.840.10040.4.3"), "SHA1WITHDSA");
+        oids.put(new ASN1ObjectIdentifier("1.2.840.113549.1.1.4"), "MD5WITHRSA");
+        oids.put(new ASN1ObjectIdentifier("1.2.840.113549.1.1.2"), "MD2WITHRSA");
+        oids.put(new ASN1ObjectIdentifier("1.2.840.10040.4.3"), "SHA1WITHDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA1, "SHA1WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA224, "SHA224WITHECDSA");
         oids.put(X9ObjectIdentifiers.ecdsa_with_SHA256, "SHA256WITHECDSA");
@@ -93,12 +95,24 @@ class OperatorHelper
         this.helper = helper;
     }
 
-    Cipher createAsymmetricWrapper(ASN1ObjectIdentifier algorithm)
+Cipher createAsymmetricWrapper(ASN1ObjectIdentifier algorithm, Map extraAlgNames)
         throws OperatorCreationException
     {
         try
         {
-            String cipherName = (String)asymmetricWrapperAlgNames.get(algorithm);
+try
+{
+            String cipherName = null;
+
+            if (!extraAlgNames.isEmpty())
+            {
+                cipherName = (String)extraAlgNames.get(algorithm);
+            }
+
+            if (cipherName == null)
+            {
+                cipherName = (String)asymmetricWrapperAlgNames.get(algorithm);
+            }
 
             if (cipherName != null)
             {
@@ -109,18 +123,32 @@ class OperatorHelper
                 }
                 catch (NoSuchAlgorithmException e)
                 {
+                    // try alternate for RSA
+                    if (cipherName.equals("RSA/ECB/PKCS1Padding"))
+                    {
+                        try
+                        {
+                            return helper.createCipher("RSA/NONE/PKCS1Padding");
+                        }
+                        catch (NoSuchAlgorithmException ex)
+                        {
+                            // Ignore
+                        }
+                    }
                     // Ignore
                 }
             }
+
             return helper.createCipher(algorithm.getId());
-        }
-        catch (NoSuchAlgorithmException e)
-        {
+}
+catch (NoSuchAlgorithmException e)
+{
             throw new OperatorCreationException("cannot create cipher: " + e.getMessage(), e);
-        }
-        catch (NoSuchProviderException e)
-        {
+}
+catch (NoSuchProviderException e)
+{
             throw new OperatorCreationException("cannot create cipher: " + e.getMessage(), e);
+}
         }
         catch (GeneralSecurityException e)
         {
@@ -166,8 +194,8 @@ class OperatorHelper
     MessageDigest createDigest(AlgorithmIdentifier digAlgId)
         throws GeneralSecurityException
     {
-        try
-        {
+try
+{
         MessageDigest dig;
 
         try
@@ -192,22 +220,22 @@ class OperatorHelper
         }
 
         return dig;
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new GeneralSecurityException(e.toString());
-        }
-        catch (NoSuchProviderException e)
-        {
-            throw new GeneralSecurityException(e.toString());
-        }
+}
+catch (NoSuchProviderException e)
+{
+    throw new GeneralSecurityException(e.toString());
+}
+catch (NoSuchAlgorithmException e)
+{
+    throw new GeneralSecurityException(e.toString());
+}
     }
 
     Signature createSignature(AlgorithmIdentifier sigAlgId)
         throws GeneralSecurityException
     {
-        try
-        {
+try
+{
         Signature   sig;
 
         try
@@ -232,15 +260,15 @@ class OperatorHelper
         }
 
         return sig;
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new GeneralSecurityException(e.toString());
-        }
-        catch (NoSuchProviderException e)
-        {
-            throw new GeneralSecurityException(e.toString());
-        }
+}
+catch (NoSuchProviderException e)
+{
+    throw new GeneralSecurityException(e.toString());
+}
+catch (NoSuchAlgorithmException e)
+{
+    throw new GeneralSecurityException(e.toString());
+}
     }
 
     public Signature createRawSignature(AlgorithmIdentifier algorithm)
@@ -259,6 +287,7 @@ class OperatorHelper
             // When the id-RSASSA-PSS algorithm identifier is used for a signature,
             // the AlgorithmIdentifier parameters field MUST contain RSASSA-PSS-params.
 /*
+Can;t do this pre-jdk1.4
             if (algorithm.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
             {
                 AlgorithmParameters params = helper.createAlgorithmParameters(algName);
@@ -301,7 +330,7 @@ class OperatorHelper
     }
 
     private static String getDigestAlgName(
-        DERObjectIdentifier digestAlgOID)
+        ASN1ObjectIdentifier digestAlgOID)
     {
         if (PKCSObjectIdentifiers.md5.equals(digestAlgOID))
         {
