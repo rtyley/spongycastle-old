@@ -109,7 +109,7 @@ public class PKCS10Test
 
         kpg.initialize(keySize);
 
-        KeyPair kp = kpg.genKeyPair();
+        KeyPair kp = kpg.generateKeyPair();
 
 
         X500NameBuilder x500NameBld = new X500NameBuilder(BCStyle.INSTANCE);
@@ -422,15 +422,15 @@ public class PKCS10Test
 
         Vector oids = new Vector();
         Vector values = new Vector();
-        oids.add(X509Extension.basicConstraints);
-        values.add(new X509Extension(true, new DEROctetString(new BasicConstraints(true))));
-        oids.add(X509Extension.keyUsage);
-        values.add(new X509Extension(true, new DEROctetString(
+        oids.addElement(X509Extension.basicConstraints);
+        values.addElement(new X509Extension(true, new DEROctetString(new BasicConstraints(true))));
+        oids.addElement(X509Extension.keyUsage);
+        values.addElement(new X509Extension(true, new DEROctetString(
             new KeyUsage(KeyUsage.keyCertSign | KeyUsage.cRLSign))));
         SubjectKeyIdentifier subjectKeyIdentifier = new SubjectKeyIdentifierStructure(pair.getPublic());
         X509Extension ski = new X509Extension(false, new DEROctetString(subjectKeyIdentifier));
-        oids.add(X509Extension.subjectKeyIdentifier);
-        values.add(ski);
+        oids.addElement(X509Extension.subjectKeyIdentifier);
+        values.addElement(ski);
 
         PKCS10CertificationRequest p1 = new JcaPKCS10CertificationRequestBuilder(
             new X500Name("cn=csr"),

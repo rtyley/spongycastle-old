@@ -70,7 +70,7 @@ public class OCSPTestUtil
 
     public static X509Certificate makeCertificate(KeyPair _subKP,
             String _subDN, KeyPair _issKP, String _issDN)
-            throws GeneralSecurityException, IOException
+            throws Exception
     {
 
         return makeCertificate(_subKP, _subDN, _issKP, _issDN, false);
@@ -78,7 +78,7 @@ public class OCSPTestUtil
 
     public static X509Certificate makeECDSACertificate(KeyPair _subKP,
             String _subDN, KeyPair _issKP, String _issDN)
-            throws GeneralSecurityException, IOException
+            throws Exception
     {
 
         return makeECDSACertificate(_subKP, _subDN, _issKP, _issDN, false);
@@ -86,7 +86,7 @@ public class OCSPTestUtil
 
     public static X509Certificate makeCACertificate(KeyPair _subKP,
             String _subDN, KeyPair _issKP, String _issDN)
-            throws GeneralSecurityException, IOException
+            throws Exception
     {
 
         return makeCertificate(_subKP, _subDN, _issKP, _issDN, true);
@@ -94,21 +94,21 @@ public class OCSPTestUtil
 
     public static X509Certificate makeCertificate(KeyPair _subKP,
             String _subDN, KeyPair _issKP, String _issDN, boolean _ca)
-            throws GeneralSecurityException, IOException
+            throws Exception
     {
         return makeCertificate(_subKP,_subDN, _issKP, _issDN, "MD5withRSA", _ca);
     }
 
     public static X509Certificate makeECDSACertificate(KeyPair _subKP,
             String _subDN, KeyPair _issKP, String _issDN, boolean _ca)
-            throws GeneralSecurityException, IOException
+            throws Exception
     {
         return makeCertificate(_subKP,_subDN, _issKP, _issDN, "SHA1WithECDSA", _ca);
     }
 
     public static X509Certificate makeCertificate(KeyPair _subKP,
             String _subDN, KeyPair _issKP, String _issDN, String algorithm, boolean _ca)
-            throws GeneralSecurityException, IOException
+            throws Exception
     {
 
         PublicKey _subPub = _subKP.getPublic();
@@ -176,7 +176,7 @@ public class OCSPTestUtil
     private static BigInteger allocateSerialNumber()
     {
         BigInteger _tmp = serialNumber;
-        serialNumber = serialNumber.add(BigInteger.ONE);
+        serialNumber = serialNumber.add(BigInteger.valueOf(1));
         return _tmp;
     }
 }

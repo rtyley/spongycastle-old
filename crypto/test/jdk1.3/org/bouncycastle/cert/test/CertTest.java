@@ -1905,7 +1905,7 @@ public class CertTest
 
         crlGen.setNextUpdate(new Date(now.getTime() + 100000));
 
-        crlGen.addCRLEntry(BigInteger.ONE, now, CRLReason.privilegeWithdrawn);
+        crlGen.addCRLEntry(BigInteger.valueOf(1), now, CRLReason.privilegeWithdrawn);
 
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
 
@@ -1925,14 +1925,14 @@ public class CertTest
 
         AuthorityKeyIdentifier authId = new AuthorityKeyIdentifierStructure(authExt);
 
-        X509CRLEntryHolder entry = crl.getRevokedCertificate(BigInteger.ONE);
+        X509CRLEntryHolder entry = crl.getRevokedCertificate(BigInteger.valueOf(1));
 
         if (entry == null)
         {
             fail("failed to find CRL entry");
         }
 
-        if (!entry.getSerialNumber().equals(BigInteger.ONE))
+        if (!entry.getSerialNumber().equals(BigInteger.valueOf(1)))
         {
             fail("CRL cert serial number does not match");
         }
@@ -1987,7 +1987,7 @@ public class CertTest
 
         X509Extensions entryExtensions = new X509Extensions(extOids, extValues);
 
-        crlGen.addCRLEntry(BigInteger.ONE, now, entryExtensions);
+        crlGen.addCRLEntry(BigInteger.valueOf(1), now, entryExtensions);
 
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
 
@@ -2009,14 +2009,14 @@ public class CertTest
 
         AuthorityKeyIdentifier authId = new AuthorityKeyIdentifierStructure(authExt);
 
-        X509CRLEntry entry = crl.getRevokedCertificate(BigInteger.ONE);
+        X509CRLEntry entry = crl.getRevokedCertificate(BigInteger.valueOf(1));
 
         if (entry == null)
         {
             fail("failed to find CRL entry");
         }
 
-        if (!entry.getSerialNumber().equals(BigInteger.ONE))
+        if (!entry.getSerialNumber().equals(BigInteger.valueOf(1)))
         {
             fail("CRL cert serial number does not match");
         }
@@ -2070,7 +2070,7 @@ public class CertTest
 
         X509Extensions entryExtensions = new X509Extensions(extOids, extValues);
 
-        crlGen.addCRLEntry(BigInteger.ONE, now, entryExtensions);
+        crlGen.addCRLEntry(BigInteger.valueOf(1), now, entryExtensions);
 
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
 
@@ -2092,14 +2092,14 @@ public class CertTest
 
         AuthorityKeyIdentifier authId = new AuthorityKeyIdentifierStructure(authExt);
 
-        X509CRLEntry entry = crl.getRevokedCertificate(BigInteger.ONE);
+        X509CRLEntry entry = crl.getRevokedCertificate(BigInteger.valueOf(1));
 
         if (entry == null)
         {
             fail("failed to find CRL entry");
         }
 
-        if (!entry.getSerialNumber().equals(BigInteger.ONE))
+        if (!entry.getSerialNumber().equals(BigInteger.valueOf(1)))
         {
             fail("CRL cert serial number does not match");
         }

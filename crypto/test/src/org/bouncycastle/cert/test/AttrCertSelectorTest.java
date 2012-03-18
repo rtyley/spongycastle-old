@@ -126,7 +126,7 @@ public class AttrCertSelectorTest
         X509v2AttributeCertificateBuilder gen = new X509v2AttributeCertificateBuilder(
                 new AttributeCertificateHolder(iCertHolder.getSubject()),
                 new AttributeCertificateIssuer(new X500Name("cn=test")),
-                BigInteger.ONE,
+                BigInteger.valueOf(1),
                 new Date(System.currentTimeMillis() - 50000),
                 new Date(System.currentTimeMillis() + 50000));
 

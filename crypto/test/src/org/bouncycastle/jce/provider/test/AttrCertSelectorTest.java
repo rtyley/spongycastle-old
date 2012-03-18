@@ -137,7 +137,7 @@ public class AttrCertSelectorTest
             "cn=test")));
         gen.setNotBefore(new Date(System.currentTimeMillis() - 50000));
         gen.setNotAfter(new Date(System.currentTimeMillis() + 50000));
-        gen.setSerialNumber(BigInteger.ONE);
+        gen.setSerialNumber(BigInteger.valueOf(1));
         gen.setSignatureAlgorithm("SHA1WithRSAEncryption");
 
         Target targetName = new Target(Target.targetName, new GeneralName(GeneralName.dNSName,

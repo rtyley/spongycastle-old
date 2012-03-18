@@ -282,7 +282,7 @@ public class AttrCertTest
         X509v2AttributeCertificateBuilder gen = new X509v2AttributeCertificateBuilder(
             new AttributeCertificateHolder(new JcaX509CertificateHolder(iCert)),
             new AttributeCertificateIssuer(new X500Name("cn=test")),
-            BigInteger.ONE,
+            BigInteger.valueOf(1),
             new Date(System.currentTimeMillis() - 50000),
             new Date(System.currentTimeMillis() + 50000));
 
@@ -396,7 +396,7 @@ public class AttrCertTest
         X509v2AttributeCertificateBuilder gen = new X509v2AttributeCertificateBuilder(
             new AttributeCertificateHolder(new JcaX509CertificateHolder(iCert).getSubject()),
             new AttributeCertificateIssuer(new X500Name("cn=test")),
-            BigInteger.ONE,
+            BigInteger.valueOf(1),
             new Date(System.currentTimeMillis() - 50000),
             new Date(System.currentTimeMillis() + 50000));
         
