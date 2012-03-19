@@ -2625,7 +2625,7 @@ public class BigInteger
         {
             for (int i = 0; i < magnitude.length; i++)
             {
-                h = "0000000" + Integer.toHexString(magnitude[i]);
+                h = new StringBuffer("0000000").append(Integer.toHexString(magnitude[i])).toString();
                 h = h.substring(h.length() - 8);
                 sb.append(h);
             }
@@ -2679,7 +2679,7 @@ public class BigInteger
         if (s.length() == 0)
             s = "0";
         else if (sign == -1)
-            s = "-" + s;
+            s = new StringBuffer("-").append(s).toString();
 
         return s;
     }

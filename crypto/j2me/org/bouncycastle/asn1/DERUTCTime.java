@@ -1,27 +1,34 @@
 package org.bouncycastle.asn1;
 
 import java.io.IOException;
-import java.util.Date;
+
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Strings;
 
 /**
  * UTC time object.
  */
 public class DERUTCTime
-    extends ASN1Object
+    extends ASN1Primitive
 {
-    String      time;
+    private byte[]      time;
 
     /**
      * return an UTC Time from the passed in object.
      *
      * @exception IllegalArgumentException if the object cannot be converted.
      */
-    public static DERUTCTime getInstance(
+    public static ASN1UTCTime getInstance(
         Object  obj)
     {
-        if (obj == null || obj instanceof DERUTCTime)
+        if (obj == null || obj instanceof ASN1UTCTime)
         {
-            return (DERUTCTime)obj;
+            return (ASN1UTCTime)obj;
+        }
+
+        if (obj instanceof DERUTCTime)
+        {
+            return new ASN1UTCTime(((DERUTCTime)obj).time);
         }
 
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
@@ -36,19 +43,19 @@ public class DERUTCTime
      * @exception IllegalArgumentException if the tagged object cannot
      *               be converted.
      */
-    public static DERUTCTime getInstance(
+    public static ASN1UTCTime getInstance(
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        DERObject o = obj.getObject();
+        ASN1Object o = obj.getObject();
 
-        if (explicit || o instanceof DERUTCTime)
+        if (explicit || o instanceof ASN1UTCTime)
         {
             return getInstance(o);
         }
         else
         {
-            return new DERUTCTime(((ASN1OctetString)o).getOctets());
+            return new ASN1UTCTime(((ASN1OctetString)o).getOctets());
         }
     }
     
@@ -65,23 +72,13 @@ public class DERUTCTime
     public DERUTCTime(
         String  time)
     {
-        this.time = time;
+        this.time = Strings.toByteArray(time);
     }
 
     DERUTCTime(
-        byte[]  bytes)
+        byte[]  time)
     {
-        //
-        // explicitly convert to characters
-        //
-        char[]  dateC = new char[bytes.length];
-
-        for (int i = 0; i != dateC.length; i++)
-        {
-            dateC[i] = (char)(bytes[i] & 0xff);
-        }
-
-        this.time = new String(dateC);
+        this.time = time;
     }
 
     /**
@@ -102,30 +99,32 @@ public class DERUTCTime
      */
     public String getTime()
     {
+        String stime = Strings.fromByteArray(time);
+
         //
         // standardise the format.
         //
-        if (time.indexOf('-') < 0 && time.indexOf('+') < 0)
+        if (stime.indexOf('-') < 0 && stime.indexOf('+') < 0)
         {
-            if (time.length() == 11)
+            if (stime.length() == 11)
             {
-                return time.substring(0, 10) + "00GMT+00:00";
+                return stime.substring(0, 10) + "00GMT+00:00";
             }
             else
             {
-                return time.substring(0, 12) + "GMT+00:00";
+                return stime.substring(0, 12) + "GMT+00:00";
             }
         }
         else
         {
-            int index = time.indexOf('-');
+            int index = stime.indexOf('-');
             if (index < 0)
             {
-                index = time.indexOf('+');
+                index = stime.indexOf('+');
             }
-            String d = time;
+            String d = stime;
 
-            if (index == time.length() - 3)
+            if (index == stime.length() - 3)
             {
                 d += "00";
             }
@@ -159,44 +158,52 @@ public class DERUTCTime
         }
     }
 
-    private byte[] getOctets()
+    boolean isConstructed()
     {
-        char[]  cs = time.toCharArray();
-        byte[]  bs = new byte[cs.length];
+        return false;
+    }
 
-        for (int i = 0; i != cs.length; i++)
-        {
-            bs[i] = (byte)cs[i];
-        }
+    int encodedLength()
+    {
+        int length = time.length;
 
-        return bs;
+        return 1 + StreamUtil.calculateBodyLength(length) + length;
     }
 
     void encode(
-        DEROutputStream  out)
+        ASN1OutputStream  out)
         throws IOException
     {
-        out.writeEncoded(UTC_TIME, this.getOctets());
+        out.write(BERTags.UTC_TIME);
+
+        int length = time.length;
+
+        out.writeLength(length);
+
+        for (int i = 0; i != length; i++)
+        {
+            out.write((byte)time[i]);
+        }
     }
     
     boolean asn1Equals(
-        DERObject  o)
+        ASN1Primitive o)
     {
         if (!(o instanceof DERUTCTime))
         {
             return false;
         }
 
-        return time.equals(((DERUTCTime)o).time);
+        return Arrays.areEqual(time, ((DERUTCTime)o).time);
     }
     
     public int hashCode()
     {
-        return time.hashCode();
+        return Arrays.hashCode(time);
     }
 
     public String toString() 
     {
-      return time;
+      return Strings.fromByteArray(time);
     }
 }

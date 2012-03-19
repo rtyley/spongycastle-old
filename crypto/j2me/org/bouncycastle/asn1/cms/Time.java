@@ -1,7 +1,5 @@
 package org.bouncycastle.asn1.cms;
 
-import java.util.Date;
-
 import org.bouncycastle.asn1.*;
 
 public class Time
