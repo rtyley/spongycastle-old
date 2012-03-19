@@ -1,7 +1,6 @@
 package org.bouncycastle.asn1.eac;
 
 import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.util.Hashtable;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -70,7 +69,7 @@ public class CertificateHolderAuthorization
         Integer i = (Integer)AuthorizationRole.getReverse(description);
         if (i == null)
         {
-            throw new InvalidParameterException("Unknown value " + description);
+            throw new IllegalArgumentException("Unknown value " + description);
         }
 
         return i.intValue();
