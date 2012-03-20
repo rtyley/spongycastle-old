@@ -1,7 +1,5 @@
 package org.bouncycastle.tsp;
 
-import java.text.DecimalFormat;
-
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.tsp.Accuracy;
 
@@ -41,9 +39,22 @@ public class GenTimeAccuracy
     }
     
     public String toString()
+    {                               // digits
+        return getSeconds() + "." + format(getMillis()) + format(getMicros());
+    }
+
+    private String format(int v)
     {
-        DecimalFormat formatter = new DecimalFormat("000"); // three integer
-                                                            // digits
-        return getSeconds() + "." + formatter.format(getMillis()) + formatter.format(getMicros());
+        if (v < 10)
+        {
+            return "00" + v;
+        }
+
+        if (v < 100)
+        {
+            return "0" + v;
+        }
+
+        return Integer.toString(v);
     }
 }
