@@ -1,7 +1,5 @@
 package org.bouncycastle.cms.bc;
 
-import java.security.cert.CertificateException;
-
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSSignatureAlgorithmNameGenerator;
 import org.bouncycastle.cms.SignerInformationVerifier;
@@ -28,7 +26,7 @@ public class BcRSASignerInfoVerifierBuilder
     }
 
     public SignerInformationVerifier build(X509CertificateHolder certHolder)
-        throws OperatorCreationException, CertificateException
+        throws OperatorCreationException
     {
         return new SignerInformationVerifier(sigAlgNameGen, sigAlgIdFinder, contentVerifierProviderBuilder.build(certHolder), digestCalculatorProvider);
     }
