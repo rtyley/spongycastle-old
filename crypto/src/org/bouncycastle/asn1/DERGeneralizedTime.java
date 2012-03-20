@@ -88,7 +88,7 @@ public class DERGeneralizedTime
     }
 
     /**
-     * base constructer from a java.util.date object
+     * base constructor from a java.util.date object
      */
     public DERGeneralizedTime(
         Date time)
