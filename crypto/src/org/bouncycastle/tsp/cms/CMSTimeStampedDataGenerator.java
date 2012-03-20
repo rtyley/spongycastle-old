@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.BEROctetString;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
@@ -52,10 +52,10 @@ public class CMSTimeStampedDataGenerator
 
         if (contentOut.size() != 0)
         {
-            encContent = new BERConstructedOctetString(contentOut.toByteArray());
+            encContent = new BEROctetString(contentOut.toByteArray());
         }
 
-        TimeStampAndCRL stamp = new TimeStampAndCRL(timeStamp.toCMSSignedData().getContentInfo());
+        TimeStampAndCRL stamp = new TimeStampAndCRL(timeStamp.toCMSSignedData().toASN1Structure());
 
         DERIA5String asn1DataUri = null;
 
