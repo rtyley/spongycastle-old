@@ -1,6 +1,8 @@
 package org.bouncycastle.tsp;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -33,6 +35,7 @@ import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.ess.ESSCertID;
 import org.bouncycastle.asn1.ess.SigningCertificate;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.tsp.Accuracy;
 import org.bouncycastle.asn1.tsp.MessageImprint;
@@ -53,6 +56,7 @@ import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.cms.SimpleAttributeTableGenerator;
 import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.jce.interfaces.GOST3410PrivateKey;
+import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
@@ -85,26 +89,45 @@ public class TimeStampTokenGenerator
     private SignerInfoGenerator signerInfoGen;
 
     /**
+     * Basic Constructor - set up a calculator based on signerInfoGen with a ESSCertID calculated from
+     * the signer's associated certificate using the sha1DigestCalculator.
      *
+     * @param sha1DigestCalculator calculator for SHA-1 of certificate.
+     * @param signerInfoGen the generator for the signer we are using.
+     * @param tsaPolicy tasPolicy to send.
+     * @throws IllegalArgumentException if calculator is not SHA-1 or there is no associated certificate for the signer,
+     * @throws TSPException if the signer certificate cannot be processed.
      */
     public TimeStampTokenGenerator(
-        final SignerInfoGenerator     signerInfoGen,
-        ASN1ObjectIdentifier          tsaPolicy)
+        DigestCalculator sha1DigestCalculator,
+        final SignerInfoGenerator         signerInfoGen,
+        ASN1ObjectIdentifier              tsaPolicy)
         throws IllegalArgumentException, TSPException
     {
         this.signerInfoGen = signerInfoGen;
         this.tsaPolicyOID = tsaPolicy;
 
+        if (!sha1DigestCalculator.getAlgorithmIdentifier().getAlgorithm().equals(OIWObjectIdentifiers.idSHA1))
+        {
+            throw new IllegalArgumentException("Digest calculator must be for SHA-1");
+        }
+
         if (!signerInfoGen.hasAssociatedCertificate())
         {
             throw new IllegalArgumentException("SignerInfoGenerator must have an associated certificate");
         }
-        
+
         TSPUtil.validateCertificate(signerInfoGen.getAssociatedCertificate());
 
         try
         {
-            final ESSCertID essCertid = new ESSCertID(MessageDigest.getInstance("SHA-1").digest(signerInfoGen.getAssociatedCertificate().getEncoded()));
+            OutputStream dOut = sha1DigestCalculator.getOutputStream();
+
+            dOut.write(signerInfoGen.getAssociatedCertificate().getEncoded());
+
+            dOut.close();
+
+            final ESSCertID essCertid = new ESSCertID(sha1DigestCalculator.getDigest());
 
             this.signerInfoGen = new SignerInfoGenerator(signerInfoGen, new CMSAttributeTableGenerator()
             {
@@ -118,10 +141,6 @@ public class TimeStampTokenGenerator
             }, signerInfoGen.getUnsignedAttributeTableGenerator());
 
         }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new TSPException("Can't find a SHA-1 implementation.", e);
-        }
         catch (IOException e)
         {
             throw new TSPException("Exception processing certificate.", e);
@@ -130,7 +149,44 @@ public class TimeStampTokenGenerator
 
     /**
      * basic creation - only the default attributes will be included here.
-     * @deprecated use SignerInfoGenerator constructor
+     * @deprecated use SignerInfoGenerator constructor that takes a digest calculator
+     */
+    public TimeStampTokenGenerator(
+        final SignerInfoGenerator     signerInfoGen,
+        ASN1ObjectIdentifier          tsaPolicy)
+        throws IllegalArgumentException, TSPException
+    {
+        this(new DigestCalculator()
+        {
+            private ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+
+            public AlgorithmIdentifier getAlgorithmIdentifier()
+            {
+                return new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE);
+            }
+
+            public OutputStream getOutputStream()
+            {
+                return bOut;
+            }
+
+            public byte[] getDigest()
+            {
+                try
+                {
+                    return MessageDigest.getInstance("SHA-1").digest(bOut.toByteArray());
+                }
+                catch (NoSuchAlgorithmException e)
+                {
+                    throw new IllegalStateException("cannot find sha-1: "+ e.getMessage());
+                }
+            }
+        }, signerInfoGen, tsaPolicy);
+    }
+
+    /**
+     * basic creation - only the default attributes will be included here.
+     * @deprecated use SignerInfoGenerator constructor that takes a digest calculator.
      */
     public TimeStampTokenGenerator(
         PrivateKey      key,
@@ -144,7 +200,7 @@ public class TimeStampTokenGenerator
 
     /**
      * basic creation - only the default attributes will be included here.
-     * @deprecated use SignerInfoGenerator constructor
+     * @deprecated use SignerInfoGenerator constructor that takes a digest calculator.
      */
     public TimeStampTokenGenerator(
         PrivateKey      key,
@@ -158,7 +214,7 @@ public class TimeStampTokenGenerator
 
     /**
      * create with a signer with extra signed/unsigned attributes.
-     * @deprecated use SignerInfoGenerator constructor
+     * @deprecated use SignerInfoGenerator constructor that takes a digest calculator.
      */
     public TimeStampTokenGenerator(
         PrivateKey      key,
