@@ -18,6 +18,7 @@ import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSAESOAEPparams;
 import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.jcajce.provider.util.DigestFactory;
 
 public abstract class AlgorithmParametersSpi
     extends java.security.AlgorithmParametersSpi
@@ -53,12 +54,12 @@ public abstract class AlgorithmParametersSpi
         protected byte[] engineGetEncoded() 
         {
             AlgorithmIdentifier hashAlgorithm = new AlgorithmIdentifier(
-                                                            JCEDigestUtil.getOID(currentSpec.getDigestAlgorithm()),
+                                                            DigestFactory.getOID(currentSpec.getDigestAlgorithm()),
                                                             new DERNull());
             MGF1ParameterSpec mgfSpec = (MGF1ParameterSpec)currentSpec.getMGFParameters();
             AlgorithmIdentifier maskGenAlgorithm = new AlgorithmIdentifier(
                                                             PKCSObjectIdentifiers.id_mgf1,
-                                                            new AlgorithmIdentifier(JCEDigestUtil.getOID(mgfSpec.getDigestAlgorithm()), new DERNull()));
+                                                            new AlgorithmIdentifier(DigestFactory.getOID(mgfSpec.getDigestAlgorithm()), new DERNull()));
             PSource.PSpecified      pSource = (PSource.PSpecified)currentSpec.getPSource();
             AlgorithmIdentifier pSourceAlgorithm = new AlgorithmIdentifier(
                                                             PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(pSource.getValue()));
@@ -168,12 +169,12 @@ public abstract class AlgorithmParametersSpi
         {
             PSSParameterSpec pssSpec = currentSpec;
             AlgorithmIdentifier hashAlgorithm = new AlgorithmIdentifier(
-                                                JCEDigestUtil.getOID(pssSpec.getDigestAlgorithm()),
+                                                DigestFactory.getOID(pssSpec.getDigestAlgorithm()),
                                                 new DERNull());
             MGF1ParameterSpec mgfSpec = (MGF1ParameterSpec)pssSpec.getMGFParameters();
             AlgorithmIdentifier maskGenAlgorithm = new AlgorithmIdentifier(
                                                 PKCSObjectIdentifiers.id_mgf1,
-                                                new AlgorithmIdentifier(JCEDigestUtil.getOID(mgfSpec.getDigestAlgorithm()), new DERNull()));
+                                                new AlgorithmIdentifier(DigestFactory.getOID(mgfSpec.getDigestAlgorithm()), new DERNull()));
             RSASSAPSSparams pssP = new RSASSAPSSparams(hashAlgorithm, maskGenAlgorithm, new ASN1Integer(pssSpec.getSaltLength()), new ASN1Integer(pssSpec.getTrailerField()));
             
             return pssP.getEncoded("DER");

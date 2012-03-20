@@ -32,6 +32,7 @@ import org.bouncycastle.crypto.encodings.PKCS1Encoding;
 import org.bouncycastle.crypto.engines.RSABlindedEngine;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.jcajce.provider.asymmetric.util.BaseCipherSpi;
+import org.bouncycastle.jcajce.provider.util.DigestFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.Strings;
 
@@ -79,7 +80,7 @@ public class CipherSpi
         throws NoSuchPaddingException
     {
         MGF1ParameterSpec mgfParams = (MGF1ParameterSpec)pSpec.getMGFParameters();
-        Digest digest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
+        Digest digest = DigestFactory.getDigest(mgfParams.getDigestAlgorithm());
         
         if (digest == null)
         {
@@ -286,7 +287,7 @@ public class CipherSpi
                     throw new InvalidAlgorithmParameterException("unkown MGF parameters");
                 }
     
-                Digest digest = JCEDigestUtil.getDigest(spec.getDigestAlgorithm());
+                Digest digest = DigestFactory.getDigest(spec.getDigestAlgorithm());
 
                 if (digest == null)
                 {
@@ -294,7 +295,7 @@ public class CipherSpi
                 }
 
                 MGF1ParameterSpec mgfParams = (MGF1ParameterSpec)spec.getMGFParameters();
-                Digest mgfDigest = JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
+                Digest mgfDigest = DigestFactory.getDigest(mgfParams.getDigestAlgorithm());
                 
                 if (mgfDigest == null)
                 {
@@ -323,12 +324,12 @@ public class CipherSpi
 
         switch (opmode)
         {
-        case javax.crypto.Cipher.ENCRYPT_MODE:
-        case javax.crypto.Cipher.WRAP_MODE:
+        case Cipher.ENCRYPT_MODE:
+        case Cipher.WRAP_MODE:
             cipher.init(true, param);
             break;
-        case javax.crypto.Cipher.DECRYPT_MODE:
-        case javax.crypto.Cipher.UNWRAP_MODE:
+        case Cipher.DECRYPT_MODE:
+        case Cipher.UNWRAP_MODE:
             cipher.init(false, param);
             break;
         default:
