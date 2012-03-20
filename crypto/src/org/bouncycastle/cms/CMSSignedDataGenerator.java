@@ -778,7 +778,7 @@ public class CMSSignedDataGenerator
      * @return a store containing the signers.
      */
     public SignerInformationStore generateCounterSigners(SignerInformation signer)
-        throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
+        throws CMSException
     {
         return this.generate(new CMSProcessableByteArray(null, signer.getSignature()), false).getSignerInfos();
     }
