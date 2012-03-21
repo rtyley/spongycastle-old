@@ -628,6 +628,6 @@ public class BcPGPDSATest
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        runTest(new PGPSignatureTest());
+        runTest(new BcPGPDSATest());
     }
 }
