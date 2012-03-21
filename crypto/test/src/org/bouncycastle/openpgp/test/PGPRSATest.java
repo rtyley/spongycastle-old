@@ -56,6 +56,7 @@ import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPKeyPair;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Base64;
@@ -626,8 +627,8 @@ public class PGPRSATest
         KeyPair kpSgn = kpg.generateKeyPair();
         KeyPair kpEnc = kpg.generateKeyPair();
 
-        PGPKeyPair sgnKeyPair = new PGPKeyPair(PGPPublicKey.RSA_SIGN, kpSgn, date);
-        PGPKeyPair encKeyPair = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, kpEnc, date);
+        PGPKeyPair sgnKeyPair = new JcaPGPKeyPair(PGPPublicKey.RSA_SIGN, kpSgn, date);
+        PGPKeyPair encKeyPair = new JcaPGPKeyPair(PGPPublicKey.RSA_GENERAL, kpEnc, date);
 
         PGPSignatureSubpacketVector unhashedPcks = null;
         PGPSignatureSubpacketGenerator svg = new PGPSignatureSubpacketGenerator();
@@ -741,8 +742,8 @@ public class PGPRSATest
         KeyPair kpSgn = kpg.generateKeyPair();
         KeyPair kpEnc = kpg.generateKeyPair();
 
-        PGPKeyPair sgnKeyPair = new PGPKeyPair(PGPPublicKey.RSA_SIGN, kpSgn, date);
-        PGPKeyPair encKeyPair = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, kpEnc, date);
+        PGPKeyPair sgnKeyPair = new JcaPGPKeyPair(PGPPublicKey.RSA_SIGN, kpSgn, date);
+        PGPKeyPair encKeyPair = new JcaPGPKeyPair(PGPPublicKey.RSA_GENERAL, kpEnc, date);
 
         PGPSignatureSubpacketVector unhashedPcks = null;
         PGPSignatureSubpacketGenerator svg = new PGPSignatureSubpacketGenerator();
@@ -1191,7 +1192,7 @@ public class PGPRSATest
         //
         // use of PGPKeyPair
         //
-        PGPKeyPair    pgpKp = new PGPKeyPair(PGPPublicKey.RSA_GENERAL , kp.getPublic(), kp.getPrivate(), new Date());
+        PGPKeyPair    pgpKp = new JcaPGPKeyPair(PGPPublicKey.RSA_GENERAL , kp, new Date());
         
         PGPPublicKey k1 = pgpKp.getPublicKey();
         

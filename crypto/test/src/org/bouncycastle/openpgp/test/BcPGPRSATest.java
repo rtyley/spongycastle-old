@@ -5,8 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
+import java.math.BigInteger;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -23,6 +22,9 @@ import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.bcpg.attr.ImageAttribute;
 import org.bouncycastle.bcpg.sig.Features;
 import org.bouncycastle.bcpg.sig.KeyFlags;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
+import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
@@ -62,9 +64,9 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDataEncryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
+import org.bouncycastle.openpgp.operator.bc.BcPGPKeyPair;
 import org.bouncycastle.openpgp.operator.bc.BcPublicKeyDataDecryptorFactory;
 import org.bouncycastle.openpgp.operator.bc.BcPublicKeyKeyEncryptionMethodGenerator;
-import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
@@ -628,14 +630,14 @@ public class BcPGPRSATest
         char[] passPhrase = "test".toCharArray();
         String identity = "TEST <test@test.org>";
         Date date = new Date();
-        Security.addProvider(new BouncyCastleProvider());
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", "BC");
-        kpg.initialize(2048);
-        KeyPair kpSgn = kpg.generateKeyPair();
-        KeyPair kpEnc = kpg.generateKeyPair();
 
-        PGPKeyPair sgnKeyPair = new PGPKeyPair(PGPPublicKey.RSA_SIGN, kpSgn, date);
-        PGPKeyPair encKeyPair = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, kpEnc, date);
+        RSAKeyPairGenerator kpg = new RSAKeyPairGenerator();
+        kpg.init(new RSAKeyGenerationParameters(BigInteger.valueOf(0x11), new SecureRandom(), 2048, 25));
+        AsymmetricCipherKeyPair kpSgn = kpg.generateKeyPair();
+        AsymmetricCipherKeyPair kpEnc = kpg.generateKeyPair();
+
+        PGPKeyPair sgnKeyPair = new BcPGPKeyPair(PGPPublicKey.RSA_SIGN, kpSgn, date);
+        PGPKeyPair encKeyPair = new BcPGPKeyPair(PGPPublicKey.RSA_GENERAL, kpEnc, date);
 
         PGPSignatureSubpacketVector unhashedPcks = null;
         PGPSignatureSubpacketGenerator svg = new PGPSignatureSubpacketGenerator();
@@ -660,8 +662,8 @@ public class BcPGPRSATest
         PGPSignatureSubpacketVector hashedPcks = svg.generate();
 
         PGPKeyRingGenerator keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION,
-            sgnKeyPair, identity, PGPEncryptedData.AES_256, passPhrase,
-            true, hashedPcks, unhashedPcks, new SecureRandom(), "BC");
+               sgnKeyPair, identity, new BcPGPDigestCalculatorProvider().get(HashAlgorithmTags.SHA1),
+               hashedPcks, unhashedPcks, new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, HashAlgorithmTags.SHA1), new BcPBESecretKeyEncryptorBuilder(PGPEncryptedData.AES_256).build(passPhrase));
 
         svg = new PGPSignatureSubpacketGenerator();
         svg.setKeyExpirationTime(true, 86400L * 366 * 2);
@@ -1037,13 +1039,13 @@ public class BcPGPRSATest
         //
         char[]                    passPhrase = "hello".toCharArray();
         
-        KeyPairGenerator    kpg = KeyPairGenerator.getInstance("RSA", "BC");
-    
-        kpg.initialize(1024);
-    
-        KeyPair                    kp = kpg.generateKeyPair();
+        RSAKeyPairGenerator       kpg = new RSAKeyPairGenerator();
 
-        PGPSecretKey    secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, PublicKeyAlgorithmTags.RSA_GENERAL, kp.getPublic(), kp.getPrivate(), new Date(), "fred", null, null, new JcaPGPContentSignerBuilder(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1).setProvider("BC"), new BcPBESecretKeyEncryptorBuilder(SymmetricKeyAlgorithmTags.CAST5).build(passPhrase));
+        kpg.init(new RSAKeyGenerationParameters(BigInteger.valueOf(0x11), new SecureRandom(), 1024, 25));
+
+        AsymmetricCipherKeyPair   kp = kpg.generateKeyPair();
+
+        PGPSecretKey    secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, new BcPGPKeyPair(PublicKeyAlgorithmTags.RSA_GENERAL, kp, new Date()), "fred", null, null, new BcPGPContentSignerBuilder(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1), new BcPBESecretKeyEncryptorBuilder(SymmetricKeyAlgorithmTags.CAST5).build(passPhrase));
     
         PGPPublicKey    key = secretKey.getPublicKey();
 
@@ -1105,7 +1107,7 @@ public class BcPGPRSATest
         //
         // use of PGPKeyPair
         //
-        PGPKeyPair    pgpKp = new PGPKeyPair(PGPPublicKey.RSA_GENERAL , kp.getPublic(), kp.getPrivate(), new Date());
+        PGPKeyPair    pgpKp = new BcPGPKeyPair(PGPPublicKey.RSA_GENERAL , kp, new Date());
         
         PGPPublicKey k1 = pgpKp.getPublicKey();
         
@@ -1120,8 +1122,8 @@ public class BcPGPRSATest
         //
         kp = kpg.generateKeyPair();
 
-        secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, PublicKeyAlgorithmTags.RSA_GENERAL, kp.getPublic(), kp.getPrivate(), new Date(), "fred", null, null, new JcaPGPContentSignerBuilder(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1).setProvider("BC"), new BcPBESecretKeyEncryptorBuilder(SymmetricKeyAlgorithmTags.AES_256).build(passPhrase));
-    
+        secretKey = new PGPSecretKey(PGPSignature.DEFAULT_CERTIFICATION, new BcPGPKeyPair(PublicKeyAlgorithmTags.RSA_GENERAL, kp, new Date()), "fred", null, null, new BcPGPContentSignerBuilder(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1), new BcPBESecretKeyEncryptorBuilder(SymmetricKeyAlgorithmTags.AES_256).build(passPhrase));
+
         secretKey.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(passPhrase));
         
         secretKey.encode(new ByteArrayOutputStream());

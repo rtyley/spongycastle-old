@@ -316,6 +316,9 @@ public class PGPSecretKey
         this(certificationLevel, new PGPKeyPair(algorithm, pubKey, privKey, time), id, encAlgorithm, passPhrase, useSHA1, hashedPcks, unhashedPcks, rand, provider);
     }
 
+    /**
+     * @deprecated use method taking PGPKeyPair
+     */
     public PGPSecretKey(
         int                         certificationLevel,
         int                         algorithm,
@@ -333,6 +336,9 @@ public class PGPSecretKey
         this(certificationLevel, new PGPKeyPair(algorithm, pubKey, privKey, time), id, checksumCalculator, hashedPcks, unhashedPcks, certificationSignerBuilder, keyEncryptor);
     }
 
+    /**
+     * @deprecated use method taking PGPKeyPair
+     */
     public PGPSecretKey(
         int                         certificationLevel,
         int                         algorithm,

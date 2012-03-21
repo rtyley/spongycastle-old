@@ -30,7 +30,7 @@ public class PGPKeyPair
     protected PGPPrivateKey       priv;
 
     /**
-     * @deprecated use version without provider.
+     * @deprecated use BcPGPKeyPair or JcaPGPKeyPair as appropriate.
      */
     public PGPKeyPair(
         int             algorithm,
@@ -42,6 +42,9 @@ public class PGPKeyPair
         this(algorithm, keyPair.getPublic(), keyPair.getPrivate(), time, provider);
     }
 
+    /**
+     * @deprecated use BcPGPKeyPair or JcaPGPKeyPair as appropriate.
+     */
     public PGPKeyPair(
         int             algorithm,
         KeyPair         keyPair,
@@ -52,7 +55,7 @@ public class PGPKeyPair
     }
 
     /**
-     * @deprecated use version without provider.
+     * @deprecated use BcPGPKeyPair or JcaPGPKeyPair as appropriate.
      */
     public PGPKeyPair(
         int             algorithm,
@@ -65,6 +68,9 @@ public class PGPKeyPair
         this(algorithm, pubKey, privKey, time);
     }
 
+    /**
+     * @deprecated use BcPGPKeyPair or JcaPGPKeyPair as appropriate.
+     */
     public PGPKeyPair(
         int             algorithm,
         PublicKey       pubKey,
