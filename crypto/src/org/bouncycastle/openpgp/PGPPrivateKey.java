@@ -62,10 +62,10 @@ public class PGPPrivateKey
 
     }
 
-    PGPPrivateKey(
-        long              keyID,
-        PublicKeyPacket   publicKeyPacket,
-        BCPGKey           privateKeyDataPacket)
+    public PGPPrivateKey(
+        long keyID,
+        PublicKeyPacket publicKeyPacket,
+        BCPGKey privateKeyDataPacket)
     {
         this.keyID = keyID;
         this.publicKeyPacket = publicKeyPacket;

@@ -26,8 +26,8 @@ import org.bouncycastle.jce.interfaces.ElGamalPrivateKey;
  */
 public class PGPKeyPair
 {
-    PGPPublicKey        pub;
-    PGPPrivateKey       priv;
+    protected PGPPublicKey        pub;
+    protected PGPPrivateKey       priv;
 
     /**
      * @deprecated use version without provider.
@@ -115,7 +115,11 @@ public class PGPKeyPair
         this.pub = pub;
         this.priv = priv;
     }
-    
+
+    protected PGPKeyPair()
+    {
+    }
+
     /**
      * Return the keyID associated with this key pair.
      * 
