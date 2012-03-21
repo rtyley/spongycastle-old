@@ -896,10 +896,7 @@
 
     <target name="zip-src-provider-ext" if="provider.present">
         <zip basedir="${provider.target.src.dir}" destfile="${provider.target.src.zip}">
-                <exclude name="**/IDEA*.java"/>
                 <exclude name="**/javax/crypto/**/*.java"/>
-                <exclude name="**/NTRU*.java" />
-                <exclude name="**/ntru/**/*.java" />
         </zip>
         <delete dir="${provider.target.src.dir}" />
     </target>
