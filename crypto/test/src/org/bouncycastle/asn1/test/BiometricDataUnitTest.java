@@ -1,6 +1,6 @@
 package org.bouncycastle.asn1.test;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -24,7 +24,7 @@ public class BiometricDataUnitTest
 
     private byte[] generateHash()
     {
-        Random rand = new Random();
+        SecureRandom rand = new SecureRandom();
         byte[] bytes = new byte[20];
         
         rand.nextBytes(bytes);
