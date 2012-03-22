@@ -10,6 +10,11 @@ public class ASN1UTCTime
         super(bytes);
     }
 
+    public ASN1UTCTime(Date date)
+    {
+        super(date);
+    }
+
     public ASN1UTCTime(String time)
     {
         super(time);

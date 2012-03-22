@@ -10,6 +10,16 @@ public class ASN1GeneralizedTime
         super(bytes);
     }
 
+    public ASN1GeneralizedTime(Date date)
+    {
+        super(date);
+    }
+
+    public ASN1GeneralizedTime(Date date, boolean includeMillis)
+    {
+        super(date, includeMillis);
+    }
+
     public ASN1GeneralizedTime(String time)
     {
         super(time);

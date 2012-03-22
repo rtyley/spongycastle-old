@@ -1,15 +1,11 @@
 package org.bouncycastle.crypto.test;
 
-import org.bouncycastle.crypto.test.GOST28147Test;
-import org.bouncycastle.crypto.test.GOST3410Test;
-import org.bouncycastle.util.test.*;
+import org.bouncycastle.util.test.Test;
+import org.bouncycastle.util.test.TestResult;
 
 public final class RegressionTest
 {
-    private RegressionTest() 
-    { }; 
-    
-    private static Test[]    _tests = {
+    public static Test[]    tests = {
             new AESTest(),
         new DESTest(),
         new DESedeTest(),
@@ -62,9 +58,9 @@ public final class RegressionTest
     public static void main(
         String[]    args)
     {
-        for (int i = 0; i != _tests.length; i++)
+        for (int i = 0; i != tests.length; i++)
         {
-            TestResult  result = _tests[i].perform();
+            TestResult  result = tests[i].perform();
             System.out.println(result);
         }
     }

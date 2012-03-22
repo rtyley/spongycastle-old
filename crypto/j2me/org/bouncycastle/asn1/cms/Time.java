@@ -1,21 +1,30 @@
 package org.bouncycastle.asn1.cms;
 
-import org.bouncycastle.asn1.*;
+import java.util.Calendar;
+import java.util.Date;
+
+import org.bouncycastle.asn1.ASN1Choice;
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERGeneralizedTime;
+import org.bouncycastle.asn1.DERUTCTime;
 
 public class Time
-    implements DEREncodable, ASN1Choice
+    extends ASN1Object
+    implements ASN1Choice
 {
-    DERObject   time;
+    ASN1Primitive time;
 
     public static Time getInstance(
         ASN1TaggedObject obj,
         boolean          explicit)
     {
-        return getInstance(obj.getObject());
+        return getInstance(obj.getObject()); // must be explicitly tagged
     }
 
     public Time(
-        DERObject   time)
+        ASN1Primitive   time)
     {
         if (!(time instanceof DERUTCTime)
             && !(time instanceof DERGeneralizedTime))
@@ -24,6 +33,30 @@ public class Time
         }
 
         this.time = time; 
+    }
+
+    /**
+     * creates a time object from a given date - if the date is between 1950
+     * and 2049 a UTCTime object is generated, otherwise a GeneralizedTime
+     * is used.
+     */
+    public Time(
+        Date    date)
+    {
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.setTime(date);
+
+        int     year = calendar.get(Calendar.YEAR);
+
+        if (year < 1950 || year > 2049)
+        {
+            time = new DERGeneralizedTime(date);
+        }
+        else
+        {
+            time = new DERUTCTime(date);
+        }
     }
 
     public static Time getInstance(
@@ -42,7 +75,7 @@ public class Time
             return new Time((DERGeneralizedTime)obj);
         }
 
-        throw new IllegalArgumentException("unknown object in factory");
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
     }
 
     public String getTime()
@@ -57,15 +90,33 @@ public class Time
         }
     }
 
+    public Date getDate()
+    {
+        if (time instanceof DERUTCTime)
+        {
+            return ((DERUTCTime)time).getAdjustedDate();
+        }
+        else
+        {
+            return ((DERGeneralizedTime)time).getDate();
+        }
+    }
+
     /**
+     * Produce an object suitable for an ASN1OutputStream.
      * <pre>
      * Time ::= CHOICE {
      *             utcTime        UTCTime,
      *             generalTime    GeneralizedTime }
      * </pre>
      */
-    public DERObject getDERObject()
+    public ASN1Primitive toASN1Primitive()
     {
         return time;
+    }
+
+    public String toString()
+    {
+        return getTime();
     }
 }

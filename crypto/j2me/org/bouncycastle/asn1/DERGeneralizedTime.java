@@ -1,6 +1,7 @@
 package org.bouncycastle.asn1;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.TimeZone;
 
 import org.bouncycastle.util.Arrays;
@@ -62,7 +63,7 @@ public class DERGeneralizedTime
     
     /**
      * The correct format for this is YYYYMMDDHHMMSS[.f]Z, or without the Z
-     * for local time, or Z+-HHMM on the end, for difference between local
+     * for local time, or Z|[+|-]HHMM on the end, for difference between local
      * time and UTC time. The fractional second amount f must consist of at
      * least one number with trailing zeroes removed.
      *
@@ -72,7 +73,30 @@ public class DERGeneralizedTime
     public DERGeneralizedTime(
         String  time)
     {
+        char last = time.charAt(time.length() - 1);
+        if (last != 'Z' && !(last >= 0 && last <= '9'))
+        {
+            if (time.indexOf('-') < 0 && time.indexOf('+') < 0)
+            {
+                throw new IllegalArgumentException("time needs to be in format YYYYMMDDHHMMSS[.f]Z or YYYYMMDDHHMMSS[.f][+-]HHMM");
+            }
+        }
+
         this.time = Strings.toByteArray(time);
+    }
+
+    /**
+     * base constructer from a java.util.date object
+     */
+    public DERGeneralizedTime(
+        Date time)
+    {
+        this.time = Strings.toByteArray(DateFormatter.getGeneralizedTimeDateString(time, false));
+    }
+
+    protected DERGeneralizedTime(Date date, boolean includeMillis)
+    {
+        this.time = Strings.toByteArray(DateFormatter.getGeneralizedTimeDateString(date, true));
     }
 
     DERGeneralizedTime(
@@ -153,19 +177,19 @@ public class DERGeneralizedTime
         }
         int hours = offset / (60 * 60 * 1000);
         int minutes = (offset - (hours * 60 * 60 * 1000)) / (60 * 1000);
-/*
-        try
-        {
-            if (timeZone.useDaylightTime() && timeZone.inDaylightTime(this.getDate()))
-            {
-                hours += sign.equals("+") ? 1 : -1;
-            }
-        }
-        catch (ParseException e)
-        {
-            // we'll do our best and ignore daylight savings
-        }
-*/
+
+//        try
+//        {
+//            if (timeZone.useDaylightTime() && timeZone.inDaylightTime(this.getDate()))
+//            {
+//                hours += sign.equals("+") ? 1 : -1;
+//            }
+//        }
+//        catch (ParseException e)
+//        {
+//            // we'll do our best and ignore daylight savings
+//        }
+
         return "GMT" + sign + convert(hours) + ":" + convert(minutes);
     }
 
@@ -177,6 +201,11 @@ public class DERGeneralizedTime
         }
 
         return Integer.toString(time);
+    }
+
+    public Date getDate()
+    {
+        return DateFormatter.fromGeneralizedTimeString(time);
     }
 
     private boolean hasFractionalSeconds()

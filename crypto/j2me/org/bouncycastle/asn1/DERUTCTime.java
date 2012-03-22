@@ -1,6 +1,7 @@
 package org.bouncycastle.asn1;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.Strings;
@@ -72,13 +73,53 @@ public class DERUTCTime
     public DERUTCTime(
         String  time)
     {
+        if (time.charAt(time.length() - 1) != 'Z')
+        {
+            // we accept this as a variation
+            if (time.indexOf('-') < 0 && time.indexOf('+') < 0)
+            {
+                throw new IllegalArgumentException("time needs to be in format YYMMDDHHMMSSZ");
+            }
+        }
+
         this.time = Strings.toByteArray(time);
+    }
+
+    /**
+     * base constructor from a java.util.date object
+     */
+    public DERUTCTime(
+        Date time)
+    {
+        this.time = Strings.toByteArray(DateFormatter.toUTCDateString(time));
     }
 
     DERUTCTime(
         byte[]  time)
     {
         this.time = time;
+    }
+
+    /**
+     * return the time as a date based on whatever a 2 digit year will return. For
+     * standardised processing use getAdjustedDate().
+     *
+     * @return the resulting date
+     */
+    public Date getDate()
+    {
+        return DateFormatter.adjustedFromUTCDateString(time);
+    }
+
+    /**
+     * return the time as an adjusted date
+     * in the range of 1950 - 2049.
+     *
+     * @return a date in the range of 1950 to 2049.
+     */
+    public Date getAdjustedDate()
+    {
+         return DateFormatter.adjustedFromUTCDateString(time);
     }
 
     /**
@@ -156,6 +197,15 @@ public class DERUTCTime
         {
             return "19" + d;
         }
+    }
+
+    /**
+     * Return the time.
+     * @return The time string as it appeared in the encoded object.
+     */
+    public String getTimeString()
+    {
+        return Strings.fromByteArray(time);
     }
 
     boolean isConstructed()
