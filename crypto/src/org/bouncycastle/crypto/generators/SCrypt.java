@@ -72,7 +72,7 @@ public class SCrypt
 
             for (int i = 0; i < N; ++i)
             {
-                V[i] = (int[]) X.clone();
+                V[i] = Arrays.clone(X);
                 BlockMix(X, blockX1, blockX2, blockY, r);
             }
 
