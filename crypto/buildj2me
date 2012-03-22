@@ -42,6 +42,12 @@ src/org/bouncycastle/crypto/util \
 src/org/bouncycastle/util \
 src/org/bouncycastle/bcpg \
 src/org/bouncycastle/asn1 \
+src/org/bouncycastle/cert \
+src/org/bouncycastle/cms \
+src/org/bouncycastle/pkcs \
+src/org/bouncycastle/tsp \
+src/org/bouncycastle/operator \
+src/org/bouncycastle/openpgp \
 | (cd lcrypto-j2me-$base; tar xf -)
     (cd test; tar cf - src/org/bouncycastle/crypto/test src/org/bouncycastle/asn1/test | (cd ../lcrypto-j2me-$base; tar xf -))
     (cd j2me; tar cf - * | (cd ../lcrypto-j2me-$base; cd src; tar xf -))
@@ -89,7 +95,25 @@ src/org/bouncycastle/asn1 \
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/GCMReorderTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/HCFamilyVecTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/RSABlindedTest.java
+    rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/test/SCryptTest.java
     rm lcrypto-j2me-$base/src/org/bouncycastle/crypto/examples/DESExample.java
+    rm -r lcrypto-j2me-$base/src/org/bouncycastle/util/io/pem
+
+    (cd lcrypto-j2me-$base;
+        rm -rf src/org/bouncycastle/math/ntru
+        rm -rf src/org/bouncycastle/crypto/test/ntru
+        rm -rf src/org/bouncycastle/crypto/*/NTRU*
+        rm -rf src/org/bouncycastle/crypto/*/BitStringTest*
+        rm -rf src/org/bouncycastle/crypto/*/IndexGenerator*
+        find src -name AllTests.java -exec rm {} \;
+        find src -name jcajce -exec rm -r {} \;
+        rm src/org/bouncycastle/asn1/test/GetInstanceTest.java
+        rm src/org/bouncycastle/asn1/test/ASN1SequenceParserTest.java
+        rm src/org/bouncycastle/asn1/test/OctetStringTest.java
+        rm src/org/bouncycastle/asn1/test/ParseTest.java
+        rm src/org/bouncycastle/crypto/test/GCMReorderTest.java
+    )
+
 
    (2>&1 find lcrypto-j2me-$base -name CVS -exec rm -rf \{\} \; ) > /dev/null
 
@@ -99,7 +123,13 @@ src/org/bouncycastle/asn1 \
       -header "$HEADER" \
     -group "Lightweight Crypto Packages" "org.bouncycastle.crypto*" \
     -group "ASN.1 Support Packages" "org.bouncycastle.asn1*" \
-    -group "BCPG OpenPGP Support Packages" "org.bouncycastle.bcpg*" \
+    -group "OpenPGP Support Packages" "org.bouncycastle.bcpg*:org.bouncycastle.openpgp*" \
+    -group "Basic Signing And Encryption" "org.bouncycastle.operator*" \
+    -group "Certificate Generation And Handling Support Packages" "org.bouncycastle.cert*" \
+    -group "CMS Support Packages" "org.bouncycastle.cms*" \
+    -group "EAC Support Packages" "org.bouncycastle.eac*" \
+    -group "TSP Support Packages" "org.bouncycastle.tsp*" \
+    -group "PKCS Support Packages" "org.bouncycastle.pkcs*" \
     -group "Utility Packages" "org.bouncycastle.util*:org.bouncycastle.math*" \
       -classpath classes \
       -d docs -sourcepath src -breakiterator \
