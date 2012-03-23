@@ -29,9 +29,9 @@ Release 1.47
 <li>IPv4/IPv6 parsing in CIDR no longer assumes octet boundaries on a mask.</li>
 <li>The CRL PKIX routines will now only rebuild the CRL as a last resort when looking for the certificate issuer.</li>
 <li>The DEK-Info header in PEM generation was lower case. It is now upper case in accordance with RFC 1421.</li>
-<li>An occasional issue causing an OutOfMemoryExcpetion for PGP compressed data generation has now been fixed.</li>
+<li>An occasional issue causing an OutOfMemoryException for PGP compressed data generation has now been fixed.</li>
 <li>An illegal argument exception that could occur with multi-valued RDNs in the X509v3CertificateBuilder has been fixed.</li>
-<li>Shared secret calculation in IES could occassionally add a leading zero byte. This has been fixed.</li>
+<li>Shared secret calculation in IES could occasionally add a leading zero byte. This has been fixed.</li>
 <li>PEMReader would choke on a private key with an empty password. This has been fixed.</li>
 <li>The default MAC for a BKS key store was 2 bytes, this has been upgraded to 20 bytes.</li>
 <li>BKS key store loading no longer freezes on negative iteration counts.</li>
