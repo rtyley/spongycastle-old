@@ -23,9 +23,9 @@ public class Base64
         {
             encoder.encode(data, 0, data.length, bOut);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new RuntimeException("exception encoding base64 string: " + e);
+            throw new EncoderException("exception encoding base64 string: " + e.getMessage(), e);
         }
         
         return bOut.toByteArray();
@@ -74,9 +74,9 @@ public class Base64
         {
             encoder.decode(data, 0, data.length, bOut);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new RuntimeException("exception decoding base64 string: " + e);
+            throw new DecoderException("unable to decode base64 data: " + e.getMessage(), e);
         }
         
         return bOut.toByteArray();
@@ -97,9 +97,9 @@ public class Base64
         {
             encoder.decode(data, bOut);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new RuntimeException("exception decoding base64 string: " + e);
+            throw new DecoderException("unable to decode base64 string: " + e.getMessage(), e);
         }
         
         return bOut.toByteArray();

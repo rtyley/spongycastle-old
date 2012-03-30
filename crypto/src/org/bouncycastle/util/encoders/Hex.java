@@ -35,9 +35,9 @@ public class Hex
         {
             encoder.encode(data, off, length, bOut);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new RuntimeException("exception encoding Hex string: " + e);
+            throw new EncoderException("exception encoding Hex string: " + e.getMessage(), e);
         }
         
         return bOut.toByteArray();
@@ -85,9 +85,9 @@ public class Hex
         {
             encoder.decode(data, 0, data.length, bOut);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new RuntimeException("exception decoding Hex string: " + e);
+            throw new DecoderException("exception decoding Hex data: " + e.getMessage(), e);
         }
         
         return bOut.toByteArray();
@@ -107,9 +107,9 @@ public class Hex
         {
             encoder.decode(data, bOut);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new RuntimeException("exception decoding Hex string: " + e);
+            throw new DecoderException("exception decoding Hex string: " + e.getMessage(), e);
         }
         
         return bOut.toByteArray();

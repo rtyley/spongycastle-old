@@ -31,6 +31,11 @@ public class Base64Encoder
 
     protected void initialiseDecodingTable()
     {
+        for (int i = 0; i < decodingTable.length; i++)
+        {
+            decodingTable[i] = (byte)0xff;
+        }
+        
         for (int i = 0; i < encodingTable.length; i++)
         {
             decodingTable[encodingTable[i]] = (byte)i;
@@ -163,6 +168,11 @@ public class Base64Encoder
             
             b4 = decodingTable[data[i++]];
 
+            if ((b1 | b2 | b3 | b4) < 0)
+            {
+                throw new IOException("invalid characters encountered in base64 data");
+            }
+            
             out.write((b1 << 2) | (b2 >> 4));
             out.write((b2 << 4) | (b3 >> 2));
             out.write((b3 << 6) | b4);
@@ -233,6 +243,11 @@ public class Base64Encoder
             
             b4 = decodingTable[data.charAt(i++)];
 
+            if ((b1 | b2 | b3 | b4) < 0)
+            {
+                throw new IOException("invalid characters encountered in base64 data");
+            }
+               
             out.write((b1 << 2) | (b2 >> 4));
             out.write((b2 << 4) | (b3 >> 2));
             out.write((b3 << 6) | b4);
@@ -257,6 +272,11 @@ public class Base64Encoder
             b1 = decodingTable[c1];
             b2 = decodingTable[c2];
 
+            if ((b1 | b2) < 0)
+            {
+                throw new IOException("invalid characters encountered at end of base64 data");
+            }
+
             out.write((b1 << 2) | (b2 >> 4));
             
             return 1;
@@ -267,6 +287,11 @@ public class Base64Encoder
             b2 = decodingTable[c2];
             b3 = decodingTable[c3];
 
+            if ((b1 | b2 | b3) < 0)
+            {
+                throw new IOException("invalid characters encountered at end of base64 data");
+            }
+            
             out.write((b1 << 2) | (b2 >> 4));
             out.write((b2 << 4) | (b3 >> 2));
             
@@ -279,6 +304,11 @@ public class Base64Encoder
             b3 = decodingTable[c3];
             b4 = decodingTable[c4];
 
+            if ((b1 | b2 | b3 | b4) < 0)
+            {
+                throw new IOException("invalid characters encountered at end of base64 data");
+            }
+            
             out.write((b1 << 2) | (b2 >> 4));
             out.write((b2 << 4) | (b3 >> 2));
             out.write((b3 << 6) | b4);
