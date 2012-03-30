@@ -34,9 +34,9 @@ public class UrlBase64
         {
             encoder.encode(data, 0, data.length, bOut);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new RuntimeException("exception encoding URL safe base64 string: " + e);
+            throw new EncoderException("exception encoding URL safe base64 data: " + e.getMessage(), e);
         }
         
         return bOut.toByteArray();
@@ -69,9 +69,9 @@ public class UrlBase64
         {
             encoder.decode(data, 0, data.length, bOut);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new RuntimeException("exception decoding URL safe base64 string: " + e);
+            throw new DecoderException("exception decoding URL safe base64 string: " + e.getMessage(), e);
         }
         
         return bOut.toByteArray();
@@ -105,9 +105,9 @@ public class UrlBase64
         {
             encoder.decode(data, bOut);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new RuntimeException("exception decoding URL safe base64 string: " + e);
+            throw new DecoderException("exception decoding URL safe base64 string: " + e.getMessage(), e);
         }
         
         return bOut.toByteArray();
