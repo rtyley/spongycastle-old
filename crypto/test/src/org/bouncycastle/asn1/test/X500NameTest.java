@@ -24,6 +24,7 @@ import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
+import org.bouncycastle.asn1.x500.style.BCStrictStyle;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.X509DefaultEntryConverter;
 import org.bouncycastle.util.encoders.Hex;
@@ -388,7 +389,18 @@ public class X500NameTest
         n2 = new X500Name("2.5.4.5=8,O=,CN=ABC Class 3 CA,C=LT");
 
         equalityTest(n1, n2);
-        
+
+        equalityTest(X500Name.getInstance(BCStrictStyle.INSTANCE, n1), X500Name.getInstance(BCStrictStyle.INSTANCE, n2));
+
+        n2 = new X500Name("C=LT,2.5.4.5=8,O=,CN=ABC Class 3 CA");
+
+        equalityTest(n1, n2);
+
+        if (X500Name.getInstance(BCStrictStyle.INSTANCE, n1).equals(X500Name.getInstance(BCStrictStyle.INSTANCE, n2)))
+        {
+            fail("strict comparison failed");
+        }
+
         //
         // inequality to sequences
         //
