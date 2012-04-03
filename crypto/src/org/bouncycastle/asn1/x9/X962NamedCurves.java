@@ -170,7 +170,7 @@ public class X962NamedCurves
                 c2m163v1.decodePoint(
                     Hex.decode("0307AF69989546103D79329FCC3D74880F33BBE803CB")),
                 c2m163v1n, c2m163v1h,
-                Hex.decode("D2COFB15760860DEF1EEF4D696E6768756151754"));
+                Hex.decode("D2C0FB15760860DEF1EEF4D696E6768756151754"));
         }
     };
 
