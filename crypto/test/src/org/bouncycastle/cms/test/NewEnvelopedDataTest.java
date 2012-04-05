@@ -658,7 +658,7 @@ public class NewEnvelopedDataTest
         RecipientInformationStore  recipients = ed.getRecipientInfos();
 
         assertEquals(checkOID.getId(), ed.getEncryptionAlgOID());
-        assertEquals(keySize, ((SecretKey)encryptor.getKey().getRepresentation()).getEncoded().length);
+        assertEquals(keySize, ((byte[])encryptor.getKey().getRepresentation()).length);
 
         if (asn1Params != null)
         {

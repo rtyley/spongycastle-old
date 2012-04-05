@@ -15,13 +15,12 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.util.encoders.Base64;
@@ -177,22 +176,21 @@ public class TSPTestUtil
         _v3CertGen.setPublicKey(_subPub);
         _v3CertGen.setSignatureAlgorithm("MD5WithRSAEncryption");
 
-        _v3CertGen.addExtension(X509Extensions.SubjectKeyIdentifier, false,
+        _v3CertGen.addExtension(Extension.subjectKeyIdentifier, false,
                 createSubjectKeyId(_subPub));
 
-        _v3CertGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false,
+        _v3CertGen.addExtension(Extension.authorityKeyIdentifier, false,
                 createAuthorityKeyId(_issPub));
 
         if (_ca)
         {
-            _v3CertGen.addExtension(X509Extensions.BasicConstraints, false,
+            _v3CertGen.addExtension(Extension.basicConstraints, false,
                     new BasicConstraints(_ca));
         }
         else
         {
-            _v3CertGen.addExtension(X509Extensions.ExtendedKeyUsage, true,
-                    new ExtendedKeyUsage(new DERSequence(
-                            KeyPurposeId.id_kp_timeStamping)));
+            _v3CertGen.addExtension(Extension.extendedKeyUsage, true,
+                    new ExtendedKeyUsage(KeyPurposeId.id_kp_timeStamping));
         }
 
         X509Certificate _cert = _v3CertGen.generate(_issPriv);
