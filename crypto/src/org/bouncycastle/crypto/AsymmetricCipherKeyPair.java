@@ -1,12 +1,14 @@
 package org.bouncycastle.crypto;
 
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+
 /**
  * a holding class for public/private parameter pairs.
  */
 public class AsymmetricCipherKeyPair
 {
-    private CipherParameters    publicParam;
-    private CipherParameters    privateParam;
+    private AsymmetricKeyParameter    publicParam;
+    private AsymmetricKeyParameter    privateParam;
 
     /**
      * basic constructor.
@@ -15,11 +17,26 @@ public class AsymmetricCipherKeyPair
      * @param privateParam the corresponding private key parameters.
      */
     public AsymmetricCipherKeyPair(
-        CipherParameters    publicParam,
-        CipherParameters    privateParam)
+        AsymmetricKeyParameter    publicParam,
+        AsymmetricKeyParameter    privateParam)
     {
         this.publicParam = publicParam;
         this.privateParam = privateParam;
+    }
+
+    /**
+     * basic constructor.
+     *
+     * @param publicParam a public key parameters object.
+     * @param privateParam the corresponding private key parameters.
+     * @deprecated use AsymmetricKeyParameter
+     */
+    public AsymmetricCipherKeyPair(
+        CipherParameters    publicParam,
+        CipherParameters    privateParam)
+    {
+        this.publicParam = (AsymmetricKeyParameter)publicParam;
+        this.privateParam = (AsymmetricKeyParameter)privateParam;
     }
 
     /**
@@ -27,7 +44,7 @@ public class AsymmetricCipherKeyPair
      *
      * @return the public key parameters.
      */
-    public CipherParameters getPublic()
+    public AsymmetricKeyParameter getPublic()
     {
         return publicParam;
     }
@@ -37,7 +54,7 @@ public class AsymmetricCipherKeyPair
      *
      * @return the private key parameters.
      */
-    public CipherParameters getPrivate()
+    public AsymmetricKeyParameter getPrivate()
     {
         return privateParam;
     }

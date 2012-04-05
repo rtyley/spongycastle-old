@@ -305,8 +305,15 @@ public class BCECGOST3410PublicKey
             {
                 encKey[32 + i] = val[val.length - 1 - i];
             }
-            
-            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params), new DEROctetString(encKey));
+
+            try
+            {
+                info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params), new DEROctetString(encKey));
+            }
+            catch (IOException e)
+            {
+                return null;
+            }
         }
         else
         {
