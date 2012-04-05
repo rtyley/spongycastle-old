@@ -4,9 +4,9 @@ import java.math.BigInteger;
 import java.util.Date;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.x509.AttCertIssuer;
 import org.bouncycastle.asn1.x509.Attribute;
@@ -30,8 +30,8 @@ public class X509v2AttributeCertificateBuilder
         acInfoGen.setHolder(holder.holder);
         acInfoGen.setIssuer(AttCertIssuer.getInstance(issuer.form));
         acInfoGen.setSerialNumber(new ASN1Integer(serialNumber));
-        acInfoGen.setStartDate(new DERGeneralizedTime(notBefore));
-        acInfoGen.setEndDate(new DERGeneralizedTime(notAfter));
+        acInfoGen.setStartDate(new ASN1GeneralizedTime(notBefore));
+        acInfoGen.setEndDate(new ASN1GeneralizedTime(notAfter));
     }
 
     /**

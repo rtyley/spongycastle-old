@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.x509;
 
+import java.math.BigInteger;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
@@ -19,17 +21,17 @@ public class IssuerSerial
     public static IssuerSerial getInstance(
             Object  obj)
     {
-        if (obj == null || obj instanceof IssuerSerial)
+        if (obj instanceof IssuerSerial)
         {
             return (IssuerSerial)obj;
         }
 
-        if (obj instanceof ASN1Sequence)
+        if (obj != null)
         {
-            return new IssuerSerial((ASN1Sequence)obj);
+            return new IssuerSerial(ASN1Sequence.getInstance(obj));
         }
 
-        throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
+        return null;
     }
 
     public static IssuerSerial getInstance(
@@ -39,7 +41,7 @@ public class IssuerSerial
         return getInstance(ASN1Sequence.getInstance(obj, explicit));
     }
     
-    public IssuerSerial(
+    private IssuerSerial(
         ASN1Sequence    seq)
     {
         if (seq.size() != 2 && seq.size() != 3)
@@ -55,7 +57,14 @@ public class IssuerSerial
             issuerUID = DERBitString.getInstance(seq.getObjectAt(2));
         }
     }
-    
+
+    public IssuerSerial(
+        GeneralNames    issuer,
+        BigInteger serial)
+    {
+        this(issuer, new ASN1Integer(serial));
+    }
+
     public IssuerSerial(
         GeneralNames    issuer,
         ASN1Integer      serial)

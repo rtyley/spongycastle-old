@@ -45,7 +45,7 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.BERConstructedOctetString;
+import org.bouncycastle.asn1.BEROctetString;
 import org.bouncycastle.asn1.BEROutputStream;
 import org.bouncycastle.asn1.DERBMPString;
 import org.bouncycastle.asn1.DERNull;
@@ -66,9 +66,9 @@ import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.DigestInfo;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
 import org.bouncycastle.jcajce.provider.symmetric.util.BCPBEKey;
 import org.bouncycastle.jce.interfaces.BCKeyStore;
@@ -357,7 +357,7 @@ public class JDKPKCS12KeyStore
                 X509Certificate     x509c = (X509Certificate)c;
                 Certificate         nextC = null;
 
-                byte[]  bytes = x509c.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
+                byte[]  bytes = x509c.getExtensionValue(Extension.authorityKeyIdentifier.getId());
                 if (bytes != null)
                 {
                     try
@@ -367,7 +367,7 @@ public class JDKPKCS12KeyStore
                         byte[] authBytes = ((ASN1OctetString)aIn.readObject()).getOctets();
                         aIn = new ASN1InputStream(authBytes);
 
-                        AuthorityKeyIdentifier id = AuthorityKeyIdentifier.getInstance((ASN1Sequence)aIn.readObject());
+                        AuthorityKeyIdentifier id = AuthorityKeyIdentifier.getInstance(aIn.readObject());
                         if (id.getKeyIdentifier() != null)
                         {
                             nextC = (Certificate)chainCerts.get(new CertId(id.getKeyIdentifier()));
@@ -1222,7 +1222,7 @@ public class JDKPKCS12KeyStore
         }
 
         byte[]                    keySEncoded = new DERSequence(keyS).getEncoded(ASN1Encoding.DER);
-        BERConstructedOctetString keyString = new BERConstructedOctetString(keySEncoded);
+        BEROctetString keyString = new BEROctetString(keySEncoded);
 
         //
         // certificate processing
@@ -1446,7 +1446,7 @@ public class JDKPKCS12KeyStore
 
         byte[]          certSeqEncoded = new DERSequence(certSeq).getEncoded(ASN1Encoding.DER);
         byte[]          certBytes = cryptData(true, cAlgId, password, false, certSeqEncoded);
-        EncryptedData   cInfo = new EncryptedData(data, cAlgId, new BERConstructedOctetString(certBytes));
+        EncryptedData   cInfo = new EncryptedData(data, cAlgId, new BEROctetString(certBytes));
 
         ContentInfo[] info = new ContentInfo[]
         {
@@ -1471,7 +1471,7 @@ public class JDKPKCS12KeyStore
 
         byte[]              pkg = bOut.toByteArray();
 
-        ContentInfo         mainInfo = new ContentInfo(data, new BERConstructedOctetString(pkg));
+        ContentInfo         mainInfo = new ContentInfo(data, new BEROctetString(pkg));
 
         //
         // create the mac

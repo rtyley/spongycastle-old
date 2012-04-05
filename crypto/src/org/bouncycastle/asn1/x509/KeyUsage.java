@@ -1,5 +1,7 @@
 package org.bouncycastle.asn1.x509;
 
+import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERBitString;
 
 /**
@@ -20,7 +22,7 @@ import org.bouncycastle.asn1.DERBitString;
  * </pre>
  */
 public class KeyUsage
-    extends DERBitString
+    extends ASN1Object
 {
     public static final int        digitalSignature = (1 << 7); 
     public static final int        nonRepudiation   = (1 << 6);
@@ -32,19 +34,20 @@ public class KeyUsage
     public static final int        encipherOnly     = (1 << 0);
     public static final int        decipherOnly     = (1 << 15);
 
-    public static DERBitString getInstance(Object obj)   // needs to be DERBitString for other VMs
+    private DERBitString bitString;
+
+    public static KeyUsage getInstance(Object obj)   // needs to be DERBitString for other VMs
     {
         if (obj instanceof KeyUsage)
         {
             return (KeyUsage)obj;
         }
-
-        if (obj instanceof X509Extension)
+        else if (obj != null)
         {
-            return new KeyUsage(DERBitString.getInstance(X509Extension.convertValueToObject((X509Extension)obj)));
+            return new KeyUsage(DERBitString.getInstance(obj));
         }
 
-        return new KeyUsage(DERBitString.getInstance(obj));
+        return null;
     }
     
     /**
@@ -57,21 +60,38 @@ public class KeyUsage
     public KeyUsage(
         int usage)
     {
-        super(getBytes(usage), getPadBits(usage));
+        this.bitString = new DERBitString(usage);
     }
 
-    public KeyUsage(
-        DERBitString usage)
+    private KeyUsage(
+        DERBitString bitString)
     {
-        super(usage.getBytes(), usage.getPadBits());
+        this.bitString = bitString;
+    }
+
+    public byte[] getBytes()
+    {
+        return bitString.getBytes();
+    }
+
+    public int getPadBits()
+    {
+        return bitString.getPadBits();
     }
 
     public String toString()
     {
+        byte[] data = bitString.getBytes();
+
         if (data.length == 1)
         {
             return "KeyUsage: 0x" + Integer.toHexString(data[0] & 0xff);
         }
         return "KeyUsage: 0x" + Integer.toHexString((data[1] & 0xff) << 8 | (data[0] & 0xff));
+    }
+
+    public ASN1Primitive toASN1Primitive()
+    {
+        return bitString;
     }
 }

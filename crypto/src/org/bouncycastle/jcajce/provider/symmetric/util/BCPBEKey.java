@@ -3,7 +3,7 @@ package org.bouncycastle.jcajce.provider.symmetric.util;
 import javax.crypto.interfaces.PBEKey;
 import javax.crypto.spec.PBEKeySpec;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.PBEParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
@@ -13,7 +13,7 @@ public class BCPBEKey
     implements PBEKey
 {
     String              algorithm;
-    DERObjectIdentifier oid;
+    ASN1ObjectIdentifier oid;
     int                 type;
     int                 digest;
     int                 keySize;
@@ -27,7 +27,7 @@ public class BCPBEKey
      */
     public BCPBEKey(
         String algorithm,
-        DERObjectIdentifier oid,
+        ASN1ObjectIdentifier oid,
         int type,
         int digest,
         int keySize,
@@ -134,7 +134,7 @@ public class BCPBEKey
         return pbeKeySpec.getIterationCount();
     }
     
-    public DERObjectIdentifier getOID()
+    public ASN1ObjectIdentifier getOID()
     {
         return oid;
     }

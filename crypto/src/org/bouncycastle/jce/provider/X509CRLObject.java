@@ -27,8 +27,9 @@ import javax.security.auth.x500.X500Principal;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
@@ -41,7 +42,6 @@ import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**
  * The following extensions are listed in RFC 2459 as relevant to CRLs
@@ -67,7 +67,7 @@ public class X509CRLObject
         {
             byte[] idp = crl.getExtensionValue(Extension.issuingDistributionPoint.getId());
             return idp != null
-                && IssuingDistributionPoint.getInstance(X509ExtensionUtil.fromExtensionValue(idp)).isIndirectCRL();
+                && IssuingDistributionPoint.getInstance(ASN1OctetString.getInstance(idp).getOctets()).isIndirectCRL();
         }
         catch (Exception e)
         {
@@ -444,7 +444,7 @@ public class X509CRLObject
                         if (oid.equals(Extension.cRLNumber))
                         {
                             buf.append(
-                                new CRLNumber(DERInteger.getInstance(
+                                new CRLNumber(ASN1Integer.getInstance(
                                     dIn.readObject()).getPositiveValue()))
                                 .append(nl);
                         }
@@ -452,7 +452,7 @@ public class X509CRLObject
                         {
                             buf.append(
                                 "Base CRL: "
-                                    + new CRLNumber(DERInteger.getInstance(
+                                    + new CRLNumber(ASN1Integer.getInstance(
                                         dIn.readObject()).getPositiveValue()))
                                 .append(nl);
                         }

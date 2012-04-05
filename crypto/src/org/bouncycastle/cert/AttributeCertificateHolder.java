@@ -261,7 +261,7 @@ public class AttributeCertificateHolder
 
     public Object clone()
     {
-        return new AttributeCertificateHolder((ASN1Sequence)holder.toASN1Object());
+        return new AttributeCertificateHolder((ASN1Sequence)holder.toASN1Primitive());
     }
 
     public boolean match(Object obj)

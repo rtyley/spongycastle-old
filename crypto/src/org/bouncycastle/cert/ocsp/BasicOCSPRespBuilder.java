@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERNull;
@@ -66,12 +67,12 @@ public class BasicOCSPRespBuilder
                 if (rs.hasRevocationReason())
                 {
                     this.certStatus = new CertStatus(
-                                            new RevokedInfo(new DERGeneralizedTime(rs.getRevocationTime()), CRLReason.lookup(rs.getRevocationReason())));
+                                            new RevokedInfo(new ASN1GeneralizedTime(rs.getRevocationTime()), CRLReason.lookup(rs.getRevocationReason())));
                 }
                 else
                 {
                     this.certStatus = new CertStatus(
-                                            new RevokedInfo(new DERGeneralizedTime(rs.getRevocationTime()), null));
+                                            new RevokedInfo(new ASN1GeneralizedTime(rs.getRevocationTime()), null));
                 }
             }
 
@@ -226,7 +227,7 @@ public class BasicOCSPRespBuilder
             }
         }
 
-        ResponseData  tbsResp = new ResponseData(responderID.toASN1Object(), new DERGeneralizedTime(producedAt), new DERSequence(responses), responseExtensions);
+        ResponseData  tbsResp = new ResponseData(responderID.toASN1Object(), new ASN1GeneralizedTime(producedAt), new DERSequence(responses), responseExtensions);
         DERBitString    bitSig;
 
         try

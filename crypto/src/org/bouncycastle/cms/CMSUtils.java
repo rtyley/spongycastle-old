@@ -28,9 +28,9 @@ import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.IssuerAndSerialNumber;
+import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.asn1.x509.CertificateList;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.TBSCertificate;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -69,8 +69,7 @@ class CMSUtils
             {
                 X509Certificate c = (X509Certificate)it.next();
 
-                certs.add(X509CertificateStructure.getInstance(
-                                                       ASN1Primitive.fromByteArray(c.getEncoded())));
+                certs.add(Certificate.getInstance(ASN1Primitive.fromByteArray(c.getEncoded())));
             }
 
             return certs;
@@ -222,12 +221,12 @@ class CMSUtils
         return octGen.getOctetOutputStream();
     }
 
-    static TBSCertificateStructure getTBSCertificateStructure(
+    static TBSCertificate getTBSCertificateStructure(
         X509Certificate cert)
     {
         try
         {
-            return TBSCertificateStructure.getInstance(
+            return TBSCertificate.getInstance(
                 ASN1Primitive.fromByteArray(cert.getTBSCertificate()));
         }
         catch (Exception e)
@@ -239,7 +238,7 @@ class CMSUtils
 
     static IssuerAndSerialNumber getIssuerAndSerialNumber(X509Certificate cert)
     {
-        TBSCertificateStructure tbsCert = getTBSCertificateStructure(cert);
+        TBSCertificate tbsCert = getTBSCertificateStructure(cert);
         return new IssuerAndSerialNumber(tbsCert.getIssuer(), tbsCert.getSerialNumber().getValue());
     }
 

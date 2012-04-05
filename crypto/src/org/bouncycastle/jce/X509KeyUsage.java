@@ -52,6 +52,6 @@ public class X509KeyUsage
 
     public ASN1Primitive toASN1Primitive()
     {
-        return new KeyUsage(usage);
+        return new KeyUsage(usage).toASN1Primitive();
     }
 }

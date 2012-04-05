@@ -1,11 +1,11 @@
 package org.bouncycastle.asn1.x509;
 
+import org.bouncycastle.asn1.ASN1Boolean;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 
@@ -96,11 +96,11 @@ public class IssuingDistributionPoint
         }
         if (onlyContainsUserCerts)
         {
-            vec.add(new DERTaggedObject(false, 1, new DERBoolean(true)));
+            vec.add(new DERTaggedObject(false, 1, ASN1Boolean.getInstance(true)));
         }
         if (onlyContainsCACerts)
         {
-            vec.add(new DERTaggedObject(false, 2, new DERBoolean(true)));
+            vec.add(new DERTaggedObject(false, 2, ASN1Boolean.getInstance(true)));
         }
         if (onlySomeReasons != null)
         {
@@ -108,11 +108,11 @@ public class IssuingDistributionPoint
         }
         if (indirectCRL)
         {
-            vec.add(new DERTaggedObject(false, 4, new DERBoolean(true)));
+            vec.add(new DERTaggedObject(false, 4, ASN1Boolean.getInstance(true)));
         }
         if (onlyContainsAttributeCerts)
         {
-            vec.add(new DERTaggedObject(false, 5, new DERBoolean(true)));
+            vec.add(new DERTaggedObject(false, 5, ASN1Boolean.getInstance(true)));
         }
 
         seq = new DERSequence(vec);
@@ -155,19 +155,19 @@ public class IssuingDistributionPoint
                 distributionPoint = DistributionPointName.getInstance(o, true);
                 break;
             case 1:
-                onlyContainsUserCerts = DERBoolean.getInstance(o, false).isTrue();
+                onlyContainsUserCerts = ASN1Boolean.getInstance(o, false).isTrue();
                 break;
             case 2:
-                onlyContainsCACerts = DERBoolean.getInstance(o, false).isTrue();
+                onlyContainsCACerts = ASN1Boolean.getInstance(o, false).isTrue();
                 break;
             case 3:
                 onlySomeReasons = new ReasonFlags(ReasonFlags.getInstance(o, false));
                 break;
             case 4:
-                indirectCRL = DERBoolean.getInstance(o, false).isTrue();
+                indirectCRL = ASN1Boolean.getInstance(o, false).isTrue();
                 break;
             case 5:
-                onlyContainsAttributeCerts = DERBoolean.getInstance(o, false).isTrue();
+                onlyContainsAttributeCerts = ASN1Boolean.getInstance(o, false).isTrue();
                 break;
             default:
                 throw new IllegalArgumentException(

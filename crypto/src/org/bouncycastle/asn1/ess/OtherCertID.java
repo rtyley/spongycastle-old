@@ -54,7 +54,7 @@ public class OtherCertID
 
         if (seq.size() > 1)
         {
-            issuerSerial = new IssuerSerial(ASN1Sequence.getInstance(seq.getObjectAt(1)));
+            issuerSerial = IssuerSerial.getInstance(seq.getObjectAt(1));
         }
     }
 

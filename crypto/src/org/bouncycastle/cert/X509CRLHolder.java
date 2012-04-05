@@ -256,7 +256,7 @@ public class X509CRLHolder
     {
         TBSCertList tbsCRL = x509CRL.getTBSCertList();
 
-        if (!tbsCRL.getSignature().equals(x509CRL.getSignatureAlgorithm()))
+        if (!CertUtils.isAlgIdEqual(tbsCRL.getSignature(), x509CRL.getSignatureAlgorithm()))
         {
             throw new CertException("signature invalid - algorithm identifier mismatch");
         }

@@ -8,7 +8,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.Certificate;
 
 /**
  * The CscaMasterList object. This object can be wrapped in a
@@ -27,7 +27,7 @@ public class CscaMasterList
     extends ASN1Object
 {
     private ASN1Integer version = new ASN1Integer(0);
-    private X509CertificateStructure[] certList;
+    private Certificate[] certList;
 
     public static CscaMasterList getInstance(
         Object obj)
@@ -59,31 +59,32 @@ public class CscaMasterList
         
         version = ASN1Integer.getInstance(seq.getObjectAt(0));
         ASN1Set certSet = ASN1Set.getInstance(seq.getObjectAt(1));
-        certList = new X509CertificateStructure[certSet.size()];
+        certList = new Certificate[certSet.size()];
         for (int i = 0; i < certList.length; i++) {
             certList[i]
-                = X509CertificateStructure.getInstance(certSet.getObjectAt(i));
+                = Certificate.getInstance(certSet.getObjectAt(i));
         }
     }
 
     public CscaMasterList(
-        X509CertificateStructure[] certStructs)
+        Certificate[] certStructs)
     {
         certList = copyCertList(certStructs);
     }
 
-    public int getVersion() {
+    public int getVersion()
+    {
         return version.getValue().intValue();
     }
 
-    public X509CertificateStructure[] getCertStructs()
+    public Certificate[] getCertStructs()
     {
         return copyCertList(certList);
     }
 
-    private X509CertificateStructure[] copyCertList(X509CertificateStructure[] orig)
+    private Certificate[] copyCertList(Certificate[] orig)
     {
-        X509CertificateStructure[] certs = new X509CertificateStructure[orig.length];
+        Certificate[] certs = new Certificate[orig.length];
 
         for (int i = 0; i != certs.length; i++)
         {

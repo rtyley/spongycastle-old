@@ -21,7 +21,6 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -408,12 +407,12 @@ public class SignerInformation
                     throw new CMSException("[For counter signatures,] the signedAttributes field MUST NOT contain a content-type attribute");
                 }
 
-                if (!(validContentType instanceof DERObjectIdentifier))
+                if (!(validContentType instanceof ASN1ObjectIdentifier))
                 {
                     throw new CMSException("content-type attribute value not of ASN.1 type 'OBJECT IDENTIFIER'");
                 }
 
-                DERObjectIdentifier signedContentType = (DERObjectIdentifier)validContentType;
+                ASN1ObjectIdentifier signedContentType = (ASN1ObjectIdentifier)validContentType;
 
                 if (!signedContentType.equals(contentType))
                 {

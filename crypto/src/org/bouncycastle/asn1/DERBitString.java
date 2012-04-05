@@ -159,17 +159,18 @@ public class DERBitString
     }
 
     public DERBitString(
-        ASN1Encodable  obj)
+        int value)
     {
-        try
-        {
-            this.data = obj.toASN1Primitive().getEncoded(ASN1Encoding.DER);
-            this.padBits = 0;
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("Error processing object : " + e.toString());
-        }
+        this.data = getBytes(value);
+        this.padBits = getPadBits(value);
+    }
+
+    public DERBitString(
+        ASN1Encodable obj)
+        throws IOException
+    {
+        this.data = obj.toASN1Primitive().getEncoded(ASN1Encoding.DER);
+        this.padBits = 0;
     }
 
     public byte[] getBytes()

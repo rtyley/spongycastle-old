@@ -31,6 +31,11 @@ public class DERObjectIdentifier
             return new ASN1ObjectIdentifier(((DERObjectIdentifier)obj).getId());
         }
 
+        if (obj instanceof ASN1Encodable && ((ASN1Encodable)obj).toASN1Primitive() instanceof ASN1ObjectIdentifier)
+        {
+            return (ASN1ObjectIdentifier)((ASN1Encodable)obj).toASN1Primitive();
+        }
+
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 

@@ -58,7 +58,7 @@ public class ESSCertIDv2
 
         if (seq.size() > count)
         {
-            this.issuerSerial = new IssuerSerial(ASN1Sequence.getInstance(seq.getObjectAt(count).toASN1Primitive()));
+            this.issuerSerial = IssuerSerial.getInstance(seq.getObjectAt(count));
         }
     }
 

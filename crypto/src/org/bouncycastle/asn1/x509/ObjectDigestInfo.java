@@ -8,7 +8,6 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -118,7 +117,7 @@ public class ObjectDigestInfo
                 + seq.size());
         }
 
-        digestedObjectType = DEREnumerated.getInstance(seq.getObjectAt(0));
+        digestedObjectType = ASN1Enumerated.getInstance(seq.getObjectAt(0));
 
         int offset = 0;
 
@@ -133,7 +132,7 @@ public class ObjectDigestInfo
         objectDigest = DERBitString.getInstance(seq.getObjectAt(2 + offset));
     }
 
-    public DEREnumerated getDigestedObjectType()
+    public ASN1Enumerated getDigestedObjectType()
     {
         return digestedObjectType;
     }

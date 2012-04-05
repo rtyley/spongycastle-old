@@ -175,7 +175,7 @@ public class PKMACBuilder
 
             public GenericKey getKey()
             {
-                return new GenericKey(key);
+                return new GenericKey(getAlgorithmIdentifier(), key);
             }
 
             public OutputStream getOutputStream()

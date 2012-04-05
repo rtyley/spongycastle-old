@@ -1,12 +1,12 @@
 package org.bouncycastle.asn1.ocsp;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREnumerated;
-import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.CRLReason;
@@ -14,11 +14,11 @@ import org.bouncycastle.asn1.x509.CRLReason;
 public class RevokedInfo
     extends ASN1Object
 {
-    private DERGeneralizedTime  revocationTime;
+    private ASN1GeneralizedTime  revocationTime;
     private CRLReason           revocationReason;
 
     public RevokedInfo(
-        DERGeneralizedTime  revocationTime,
+        ASN1GeneralizedTime  revocationTime,
         CRLReason           revocationReason)
     {
         this.revocationTime = revocationTime;
@@ -28,7 +28,7 @@ public class RevokedInfo
     private RevokedInfo(
         ASN1Sequence    seq)
     {
-        this.revocationTime = (DERGeneralizedTime)seq.getObjectAt(0);
+        this.revocationTime = ASN1GeneralizedTime.getInstance(seq.getObjectAt(0));
 
         if (seq.size() > 1)
         {
@@ -59,7 +59,7 @@ public class RevokedInfo
         return null;
     }
 
-    public DERGeneralizedTime getRevocationTime()
+    public ASN1GeneralizedTime getRevocationTime()
     {
         return revocationTime;
     }

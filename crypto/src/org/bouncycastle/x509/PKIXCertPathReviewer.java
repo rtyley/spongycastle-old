@@ -587,7 +587,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     //
                     // (g) (1) permitted subtrees
                     //
-                    ASN1Sequence permitted = nc.getPermittedSubtrees();
+                    GeneralSubtree[] permitted = nc.getPermittedSubtrees();
                     if (permitted != null)
                     {
                         nameConstraintValidator.intersectPermittedSubtree(permitted);
@@ -596,15 +596,12 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     //
                     // (g) (2) excluded subtrees
                     //
-                    ASN1Sequence excluded = nc.getExcludedSubtrees();
+                    GeneralSubtree[] excluded = nc.getExcludedSubtrees();
                     if (excluded != null)
                     {
-                        Enumeration e = excluded.getObjects();
-                        while (e.hasMoreElements())
+                        for (int c = 0; c != excluded.length; c++)
                         {
-                            GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
-
-                            nameConstraintValidator.addExcludedSubtree(subtree);
+                             nameConstraintValidator.addExcludedSubtree(excluded[c]);
                         }
                     }
                 }

@@ -7,7 +7,6 @@ import java.math.BigInteger;
 
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.agreement.srp.SRP6Client;
@@ -73,7 +72,7 @@ class TlsSRPKeyExchange implements TlsKeyExchange
             throw new TlsFatalAlert(AlertDescription.unexpected_message);
         }
 
-        X509CertificateStructure x509Cert = serverCertificate.certs[0];
+        org.bouncycastle.asn1.x509.Certificate x509Cert = serverCertificate.certs[0];
         SubjectPublicKeyInfo keyInfo = x509Cert.getSubjectPublicKeyInfo();
 
         try

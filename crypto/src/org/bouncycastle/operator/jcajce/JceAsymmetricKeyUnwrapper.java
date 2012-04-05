@@ -106,7 +106,7 @@ public class JceAsymmetricKeyUnwrapper
                 sKey = new SecretKeySpec(keyCipher.doFinal(encryptedKey), encryptedKeyAlgorithm.getAlgorithm().getId());
             }
 
-            return new GenericKey(sKey);
+            return new JceGenericKey(encryptedKeyAlgorithm, sKey);
         }
         catch (InvalidKeyException e)
         {

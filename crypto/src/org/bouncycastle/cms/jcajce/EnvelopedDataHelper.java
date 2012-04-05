@@ -34,7 +34,6 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RC2CBCParameter;
@@ -427,7 +426,7 @@ class EnvelopedDataHelper
     }
 
 
-    KeyPairGenerator createKeyPairGenerator(DERObjectIdentifier algorithm)
+    KeyPairGenerator createKeyPairGenerator(ASN1ObjectIdentifier algorithm)
         throws CMSException
     {
         try

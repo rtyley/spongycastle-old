@@ -1,12 +1,12 @@
 package org.bouncycastle.asn1.crmf;
 
+import org.bouncycastle.asn1.ASN1Boolean;
 import org.bouncycastle.asn1.ASN1Choice;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERTaggedObject;
 
 public class PKIArchiveOptions
@@ -44,7 +44,7 @@ public class PKIArchiveOptions
             value = ASN1OctetString.getInstance(tagged, false);
             break;
         case archiveRemGenPrivKey:
-            value = DERBoolean.getInstance(tagged, false);
+            value = ASN1Boolean.getInstance(tagged, false);
             break;
         default:
             throw new IllegalArgumentException("unknown tag number: " + tagged.getTagNo());
@@ -63,7 +63,7 @@ public class PKIArchiveOptions
 
     public PKIArchiveOptions(boolean archiveRemGenPrivKey)
     {
-        this.value = new DERBoolean(archiveRemGenPrivKey);
+        this.value = ASN1Boolean.getInstance(archiveRemGenPrivKey);
     }
 
     public int getType()

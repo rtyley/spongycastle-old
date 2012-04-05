@@ -393,20 +393,21 @@ public class PKCS10CertificationRequest
                 InvalidKeyException
     {
         SubjectPublicKeyInfo    subjectPKInfo = reqInfo.getSubjectPublicKeyInfo();
-        X509EncodedKeySpec      xspec = new X509EncodedKeySpec(new DERBitString(subjectPKInfo).getBytes());
-        AlgorithmIdentifier     keyAlg = subjectPKInfo.getAlgorithmId();
+
         
         try
         {
+            X509EncodedKeySpec      xspec = new X509EncodedKeySpec(new DERBitString(subjectPKInfo).getBytes());
+            AlgorithmIdentifier     keyAlg = subjectPKInfo.getAlgorithm();
             try
             {
                 if (provider == null)
                 {
-                    return KeyFactory.getInstance(keyAlg.getObjectId().getId()).generatePublic(xspec);
+                    return KeyFactory.getInstance(keyAlg.getAlgorithm().getId()).generatePublic(xspec);
                 }
                 else
                 {
-                    return KeyFactory.getInstance(keyAlg.getObjectId().getId(), provider).generatePublic(xspec);
+                    return KeyFactory.getInstance(keyAlg.getAlgorithm().getId(), provider).generatePublic(xspec);
                 }
             }
             catch (NoSuchAlgorithmException e)
@@ -432,6 +433,10 @@ public class PKCS10CertificationRequest
             }
         }
         catch (InvalidKeySpecException e)
+        {
+            throw new InvalidKeyException("error decoding public key");
+        }
+        catch (IOException e)
         {
             throw new InvalidKeyException("error decoding public key");
         }

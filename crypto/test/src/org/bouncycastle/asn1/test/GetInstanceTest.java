@@ -809,7 +809,7 @@ public class GetInstanceTest
         v.clear();
         v.add(generalSubtree);
 
-        doFullGetInstanceTest(NameConstraints.class, new NameConstraints(v, v));
+        doFullGetInstanceTest(NameConstraints.class, new NameConstraints(null, null));
         doFullGetInstanceTest(NoticeReference.class, noticeReference);
         doFullGetInstanceTest(ObjectDigestInfo.class, objectDigestInfo);
 

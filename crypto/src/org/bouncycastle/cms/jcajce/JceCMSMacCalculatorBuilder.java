@@ -21,6 +21,7 @@ import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.jcajce.io.MacOutputStream;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.MacCalculator;
+import org.bouncycastle.operator.jcajce.JceGenericKey;
 
 public class JceCMSMacCalculatorBuilder
 {
@@ -29,7 +30,6 @@ public class JceCMSMacCalculatorBuilder
 
     private EnvelopedDataHelper helper = new EnvelopedDataHelper(new DefaultJcaJceExtHelper());
     private SecureRandom random;
-    private MacOutputStream macOutputStream;
 
     public JceCMSMacCalculatorBuilder(ASN1ObjectIdentifier macOID)
     {
@@ -123,7 +123,7 @@ public class JceCMSMacCalculatorBuilder
 
         public GenericKey getKey()
         {
-            return new GenericKey(encKey);
+            return new JceGenericKey(algorithmIdentifier, encKey);
         }
 
         protected AlgorithmParameterSpec generateParameterSpec(ASN1ObjectIdentifier macOID, SecretKey encKey)

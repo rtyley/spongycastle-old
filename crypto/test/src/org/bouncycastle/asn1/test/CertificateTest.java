@@ -4,11 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AttCertIssuer;
@@ -19,6 +18,7 @@ import org.bouncycastle.asn1.x509.AttributeCertificateInfo;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
+import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
 import org.bouncycastle.asn1.x509.Extension;
@@ -30,10 +30,7 @@ import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.TBSCertificate;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.test.SimpleTest;
 
@@ -232,47 +229,47 @@ public class CertificateTest
         ASN1Sequence      seq = (ASN1Sequence)aIn.readObject();
 //        String dump = ASN1Dump.dumpAsString(seq);
 
-        X509CertificateStructure    obj = new X509CertificateStructure(seq);
-        TBSCertificateStructure     tbsCert = obj.getTBSCertificate();
+        Certificate obj = Certificate.getInstance(seq);
+        TBSCertificate     tbsCert = obj.getTBSCertificate();
         
         if (!tbsCert.getSubject().toString().equals(subjects[id - 1]))
         {
             fail("failed subject test for certificate id " + id + " got " + tbsCert.getSubject().toString());
         }
         
-        if (tbsCert.getVersion() == 3)
+        if (tbsCert.getVersionNumber() == 3)
         {
-            X509Extensions                ext = tbsCert.getExtensions();
+            Extensions                ext = tbsCert.getExtensions();
             if (ext != null)
             {
                 Enumeration    en = ext.oids();
                 while (en.hasMoreElements())
                 {
-                    ASN1ObjectIdentifier    oid = (ASN1ObjectIdentifier)en.nextElement();
-                    X509Extension            extVal = ext.getExtension(oid);
+                    ASN1ObjectIdentifier oid = (ASN1ObjectIdentifier)en.nextElement();
+                    Extension            extVal = ext.getExtension(oid);
                     
-                    ASN1OctetString        oct = extVal.getValue();
+                    ASN1OctetString        oct = extVal.getExtnValue();
                     ASN1InputStream        extIn = new ASN1InputStream(new ByteArrayInputStream(oct.getOctets()));
                     
-                    if (oid.equals(X509Extension.subjectKeyIdentifier))
+                    if (oid.equals(Extension.subjectKeyIdentifier))
                     {
                         SubjectKeyIdentifier si = SubjectKeyIdentifier.getInstance(extIn.readObject());
                     }
-                    else if (oid.equals(X509Extension.keyUsage))
+                    else if (oid.equals(Extension.keyUsage))
                     {
-                        DERBitString ku = KeyUsage.getInstance(extIn.readObject());
+                        KeyUsage ku = KeyUsage.getInstance(extIn.readObject());
                     }
-                    else if (oid.equals(X509Extension.extendedKeyUsage))
+                    else if (oid.equals(Extension.extendedKeyUsage))
                     {
                         ExtendedKeyUsage ku = ExtendedKeyUsage.getInstance(extIn.readObject());
                         
                         ASN1Sequence    sq = (ASN1Sequence)ku.toASN1Primitive();
                         for (int i = 0; i != sq.size(); i++)
                         {
-                            ASN1ObjectIdentifier    p = KeyPurposeId.getInstance(sq.getObjectAt(i));
+                            ASN1ObjectIdentifier    p = ASN1ObjectIdentifier.getInstance(KeyPurposeId.getInstance(sq.getObjectAt(i)));
                         }
                     }
-                    else if (oid.equals(X509Extension.subjectAlternativeName))
+                    else if (oid.equals(Extension.subjectAlternativeName))
                     {
                         GeneralNames    gn = GeneralNames.getInstance(extIn.readObject());
                         
@@ -282,7 +279,7 @@ public class CertificateTest
                             GeneralName    n = GeneralName.getInstance(sq.getObjectAt(i));
                         }
                     }
-                    else if (oid.equals(X509Extension.issuerAlternativeName))
+                    else if (oid.equals(Extension.issuerAlternativeName))
                     {
                         GeneralNames    gn = GeneralNames.getInstance(extIn.readObject());
                         
@@ -292,7 +289,7 @@ public class CertificateTest
                             GeneralName    n = GeneralName.getInstance(sq.getObjectAt(i));
                         }
                     }
-                    else if (oid.equals(X509Extension.cRLDistributionPoints))
+                    else if (oid.equals(Extension.cRLDistributionPoints))
                     {
                         CRLDistPoint    p = CRLDistPoint.getInstance(extIn.readObject());
                         
@@ -302,7 +299,7 @@ public class CertificateTest
                             // do nothing
                         }
                     }
-                    else if (oid.equals(X509Extension.certificatePolicies))
+                    else if (oid.equals(Extension.certificatePolicies))
                     {
                         ASN1Sequence    cp = (ASN1Sequence)extIn.readObject();
                         
@@ -311,11 +308,11 @@ public class CertificateTest
                             PolicyInformation.getInstance(cp.getObjectAt(i));
                         }
                     }
-                    else if (oid.equals(X509Extension.authorityKeyIdentifier))
+                    else if (oid.equals(Extension.authorityKeyIdentifier))
                     {
                         AuthorityKeyIdentifier    auth = AuthorityKeyIdentifier.getInstance(extIn.readObject());
                     }
-                    else if (oid.equals(X509Extension.basicConstraints))
+                    else if (oid.equals(Extension.basicConstraints))
                     {
                         BasicConstraints    bc = BasicConstraints.getInstance(extIn.readObject());
                     }
@@ -348,8 +345,8 @@ public class CertificateTest
         AttributeCertificateInfo acInfo = obj.getAcinfo();
 
         // Version
-        if (!(acInfo.getVersion().equals(new DERInteger(1)))
-                && (!(acInfo.getVersion().equals(new DERInteger(2)))))
+        if (!(acInfo.getVersion().equals(new ASN1Integer(1)))
+                && (!(acInfo.getVersion().equals(new ASN1Integer(2)))))
         {
             fail(
                     "failed AC Version test for id " + id);
@@ -380,7 +377,7 @@ public class CertificateTest
         }
 
         // Serial
-        DERInteger serial = acInfo.getSerialNumber();
+        ASN1Integer serial = acInfo.getSerialNumber();
 
         // Validity
         AttCertValidityPeriod validity = acInfo.getAttrCertValidityPeriod();

@@ -80,7 +80,7 @@ public class DefaultDigestAlgorithmIdentifierFinder
 
         if (sigAlgId.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS))
         {
-            digAlgId = ((RSASSAPSSparams)sigAlgId.getParameters()).getHashAlgorithm();
+            digAlgId = RSASSAPSSparams.getInstance(sigAlgId.getParameters()).getHashAlgorithm();
         }
         else
         {

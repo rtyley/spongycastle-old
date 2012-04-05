@@ -17,12 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -45,7 +45,7 @@ class CMSSignedHelper
     private static final Map     digestAlgs = new HashMap();
     private static final Map     digestAliases = new HashMap();
 
-    private static void addEntries(DERObjectIdentifier alias, String digest, String encryption)
+    private static void addEntries(ASN1ObjectIdentifier alias, String digest, String encryption)
     {
         digestAlgs.put(alias.getId(), digest);
         encryptionAlgs.put(alias.getId(), encryption);
@@ -383,18 +383,18 @@ class CMSSignedHelper
     {
         if (algId.getParameters() == null)
         {
-            return new AlgorithmIdentifier(algId.getObjectId(), DERNull.INSTANCE);
+            return new AlgorithmIdentifier(algId.getAlgorithm(), DERNull.INSTANCE);
         }
 
         return algId;
     }
 
-    void setSigningEncryptionAlgorithmMapping(DERObjectIdentifier oid, String algorithmName)
+    void setSigningEncryptionAlgorithmMapping(ASN1ObjectIdentifier oid, String algorithmName)
     {
         encryptionAlgs.put(oid.getId(), algorithmName);
     }
 
-    void setSigningDigestAlgorithmMapping(DERObjectIdentifier oid, String algorithmName)
+    void setSigningDigestAlgorithmMapping(ASN1ObjectIdentifier oid, String algorithmName)
     {
         digestAlgs.put(oid.getId(), algorithmName);
     }

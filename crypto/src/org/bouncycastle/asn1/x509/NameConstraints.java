@@ -1,7 +1,6 @@
 package org.bouncycastle.asn1.x509;
 
 import java.util.Enumeration;
-import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
@@ -14,7 +13,7 @@ import org.bouncycastle.asn1.DERTaggedObject;
 public class NameConstraints
     extends ASN1Object
 {
-    private ASN1Sequence permitted, excluded;
+    private GeneralSubtree[] permitted, excluded;
 
     public static NameConstraints getInstance(Object obj)
     {
@@ -38,12 +37,12 @@ public class NameConstraints
             ASN1TaggedObject o = ASN1TaggedObject.getInstance(e.nextElement());
             switch (o.getTagNo())
             {
-            case 0:
-                permitted = ASN1Sequence.getInstance(o, false);
-                break;
-            case 1:
-                excluded = ASN1Sequence.getInstance(o, false);
-                break;
+                case 0:
+                    permitted = createArray(ASN1Sequence.getInstance(o, false));
+                    break;
+                case 1:
+                    excluded = createArray(ASN1Sequence.getInstance(o, false));
+                    break;
             }
         }
     }
@@ -52,7 +51,7 @@ public class NameConstraints
      * Constructor from a given details.
      * 
      * <p>
-     * permitted and excluded are Vectors of GeneralSubtree objects.
+     * permitted and excluded are arrays of GeneralSubtree objects.
      * 
      * @param permitted
      *            Permitted subtrees
@@ -60,37 +59,38 @@ public class NameConstraints
      *            Excludes subtrees
      */
     public NameConstraints(
-        Vector permitted,
-        Vector excluded)
+        GeneralSubtree[] permitted,
+        GeneralSubtree[] excluded)
     {
         if (permitted != null)
         {
-            this.permitted = createSequence(permitted);
+            this.permitted = permitted;
         }
+
         if (excluded != null)
         {
-            this.excluded = createSequence(excluded);
+            this.excluded = excluded;
         }
     }
 
-    private DERSequence createSequence(Vector subtree)
+    private GeneralSubtree[] createArray(ASN1Sequence subtree)
     {
-        ASN1EncodableVector vec = new ASN1EncodableVector();
-        Enumeration e = subtree.elements(); 
-        while (e.hasMoreElements())
+        GeneralSubtree[] ar = new GeneralSubtree[subtree.size()];
+
+        for (int i = 0; i != ar.length; i++)
         {
-            vec.add((GeneralSubtree)e.nextElement());
+            ar[i] = GeneralSubtree.getInstance(subtree.getObjectAt(i));
         }
-        
-        return new DERSequence(vec);
+
+        return ar;
     }
 
-    public ASN1Sequence getPermittedSubtrees() 
+    public GeneralSubtree[] getPermittedSubtrees()
     {
         return permitted;
     }
 
-    public ASN1Sequence getExcludedSubtrees() 
+    public GeneralSubtree[] getExcludedSubtrees()
     {
         return excluded;
     }
@@ -103,14 +103,14 @@ public class NameConstraints
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        if (permitted != null) 
+        if (permitted != null)
         {
-            v.add(new DERTaggedObject(false, 0, permitted));
+            v.add(new DERTaggedObject(false, 0, new DERSequence(permitted)));
         }
 
-        if (excluded != null) 
+        if (excluded != null)
         {
-            v.add(new DERTaggedObject(false, 1, excluded));
+            v.add(new DERTaggedObject(false, 1, new DERSequence(excluded)));
         }
 
         return new DERSequence(v);

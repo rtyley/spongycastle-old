@@ -78,16 +78,16 @@ public class JcaPKCS10CertificationRequest
 
             try
             {
-                kFact = helper.createKeyFactory(keyInfo.getAlgorithmId().getAlgorithm().getId());
+                kFact = helper.createKeyFactory(keyInfo.getAlgorithm().getAlgorithm().getId());
             }
             catch (NoSuchAlgorithmException e)
             {
                 //
                 // try an alternate
                 //
-                if (keyAlgorithms.get(keyInfo.getAlgorithmId().getAlgorithm()) != null)
+                if (keyAlgorithms.get(keyInfo.getAlgorithm().getAlgorithm()) != null)
                 {
-                    String  keyAlgorithm = (String)keyAlgorithms.get(keyInfo.getAlgorithmId().getAlgorithm());
+                    String  keyAlgorithm = (String)keyAlgorithms.get(keyInfo.getAlgorithm().getAlgorithm());
 
                     kFact = helper.createKeyFactory(keyAlgorithm);
                 }

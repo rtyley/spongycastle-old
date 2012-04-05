@@ -11,7 +11,7 @@ import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.params.DESParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
@@ -22,11 +22,11 @@ public class BaseSecretKeyFactory
     implements PBE
 {
     protected String                algName;
-    protected DERObjectIdentifier   algOid;
+    protected ASN1ObjectIdentifier   algOid;
 
     protected BaseSecretKeyFactory(
         String algName,
-        DERObjectIdentifier algOid)
+        ASN1ObjectIdentifier algOid)
     {
         this.algName = algName;
         this.algOid = algOid;
@@ -114,7 +114,7 @@ public class BaseSecretKeyFactory
         
         public DESPBEKeyFactory(
             String              algorithm,
-            DERObjectIdentifier oid,
+            ASN1ObjectIdentifier oid,
             boolean             forCipher,
             int                 scheme,
             int                 digest,

@@ -305,7 +305,7 @@ public class X509AttributeCertificateHolder
     {
         AttributeCertificateInfo acinfo = attrCert.getAcinfo();
 
-        if (!acinfo.getSignature().equals(attrCert.getSignatureAlgorithm()))
+        if (!CertUtils.isAlgIdEqual(acinfo.getSignature(), attrCert.getSignatureAlgorithm()))
         {
             throw new CertException("signature invalid - algorithm identifier mismatch");
         }

@@ -143,7 +143,14 @@ public class NetscapeCertRequest
         //content_der.add(new SubjectPublicKeyInfo(sigAlg, new RSAPublicKeyStructure(pubkey.getModulus(), pubkey.getPublicExponent()).getDERObject()));
         content_der.add(new DERIA5String(challenge));
 
-        content = new DERBitString(new DERSequence(content_der));
+        try
+        {
+            content = new DERBitString(new DERSequence(content_der));
+        }
+        catch (IOException e)
+        {
+            throw new InvalidKeySpecException("exception encoding key: " + e.toString());
+        }
     }
 
     public String getChallenge()

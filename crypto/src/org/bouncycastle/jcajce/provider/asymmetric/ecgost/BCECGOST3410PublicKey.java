@@ -349,7 +349,14 @@ public class BCECGOST3410PublicKey
             extractBytes(encKey, 0, bX);
             extractBytes(encKey, 32, bY);
 
-            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params), new DEROctetString(encKey));
+            try
+            {
+                info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_2001, params), new DEROctetString(encKey));
+            }
+            catch (IOException e)
+            {
+                return null;
+            }
         }
         else
         {

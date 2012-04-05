@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cmp.CMPCertificate;
 import org.bouncycastle.asn1.cmp.InfoTypeAndValue;
@@ -104,7 +104,7 @@ public class ProtectedPKIMessageBuilder
      */
     public ProtectedPKIMessageBuilder setMessageTime(Date time)
     {
-        hdrBuilder.setMessageTime(new DERGeneralizedTime(time));
+        hdrBuilder.setMessageTime(new ASN1GeneralizedTime(time));
 
         return this;
     }

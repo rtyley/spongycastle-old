@@ -1,10 +1,10 @@
 package org.bouncycastle.asn1.esf;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.ocsp.ResponderID;
 
@@ -20,7 +20,7 @@ public class OcspIdentifier
     extends ASN1Object
 {
     private ResponderID ocspResponderID;
-    private DERGeneralizedTime producedAt;
+    private ASN1GeneralizedTime producedAt;
 
     public static OcspIdentifier getInstance(Object obj)
     {
@@ -44,10 +44,10 @@ public class OcspIdentifier
                 + seq.size());
         }
         this.ocspResponderID = ResponderID.getInstance(seq.getObjectAt(0));
-        this.producedAt = (DERGeneralizedTime)seq.getObjectAt(1);
+        this.producedAt = (ASN1GeneralizedTime)seq.getObjectAt(1);
     }
 
-    public OcspIdentifier(ResponderID ocspResponderID, DERGeneralizedTime producedAt)
+    public OcspIdentifier(ResponderID ocspResponderID, ASN1GeneralizedTime producedAt)
     {
         this.ocspResponderID = ocspResponderID;
         this.producedAt = producedAt;
@@ -58,7 +58,7 @@ public class OcspIdentifier
         return this.ocspResponderID;
     }
 
-    public DERGeneralizedTime getProducedAt()
+    public ASN1GeneralizedTime getProducedAt()
     {
         return this.producedAt;
     }

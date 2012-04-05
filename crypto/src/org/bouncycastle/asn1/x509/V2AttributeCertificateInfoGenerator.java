@@ -2,10 +2,10 @@ package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
 
@@ -39,7 +39,7 @@ public class V2AttributeCertificateInfoGenerator
 
     // Note: validity period start/end dates stored directly
     //private AttCertValidityPeriod attrCertValidityPeriod;
-    private DERGeneralizedTime startDate, endDate; 
+    private ASN1GeneralizedTime startDate, endDate; 
 
     public V2AttributeCertificateInfoGenerator()
     {
@@ -84,13 +84,13 @@ public class V2AttributeCertificateInfoGenerator
     }
 
     public void setStartDate(
-        DERGeneralizedTime startDate)
+        ASN1GeneralizedTime startDate)
     {
         this.startDate = startDate;
     }
 
     public void setEndDate(
-        DERGeneralizedTime endDate)
+        ASN1GeneralizedTime endDate)
     {
         this.endDate = endDate;
     }

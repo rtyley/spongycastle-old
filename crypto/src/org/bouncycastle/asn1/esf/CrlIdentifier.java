@@ -7,8 +7,8 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1UTCTime;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.x500.X500Name;
 
 /**
@@ -25,7 +25,7 @@ public class CrlIdentifier
     extends ASN1Object
 {
     private X500Name crlIssuer;
-    private DERUTCTime crlIssuedTime;
+    private ASN1UTCTime crlIssuedTime;
     private ASN1Integer crlNumber;
 
     public static CrlIdentifier getInstance(Object obj)
@@ -49,19 +49,19 @@ public class CrlIdentifier
             throw new IllegalArgumentException();
         }
         this.crlIssuer = X500Name.getInstance(seq.getObjectAt(0));
-        this.crlIssuedTime = DERUTCTime.getInstance(seq.getObjectAt(1));
+        this.crlIssuedTime = ASN1UTCTime.getInstance(seq.getObjectAt(1));
         if (seq.size() > 2)
         {
             this.crlNumber = ASN1Integer.getInstance(seq.getObjectAt(2));
         }
     }
 
-    public CrlIdentifier(X500Name crlIssuer, DERUTCTime crlIssuedTime)
+    public CrlIdentifier(X500Name crlIssuer, ASN1UTCTime crlIssuedTime)
     {
         this(crlIssuer, crlIssuedTime, null);
     }
 
-    public CrlIdentifier(X500Name crlIssuer, DERUTCTime crlIssuedTime,
+    public CrlIdentifier(X500Name crlIssuer, ASN1UTCTime crlIssuedTime,
                          BigInteger crlNumber)
     {
         this.crlIssuer = crlIssuer;
@@ -77,7 +77,7 @@ public class CrlIdentifier
         return this.crlIssuer;
     }
 
-    public DERUTCTime getCrlIssuedTime()
+    public ASN1UTCTime getCrlIssuedTime()
     {
         return this.crlIssuedTime;
     }

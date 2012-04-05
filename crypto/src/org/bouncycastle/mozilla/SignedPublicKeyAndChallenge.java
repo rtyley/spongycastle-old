@@ -8,7 +8,6 @@ import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -92,18 +91,25 @@ public class SignedPublicKeyAndChallenge
         Signature sig = null;
         if (provider == null)
         {
-            sig = Signature.getInstance(signatureAlgorithm.getObjectId().getId());
+            sig = Signature.getInstance(signatureAlgorithm.getAlgorithm().getId());
         }
         else
         {
-            sig = Signature.getInstance(signatureAlgorithm.getObjectId().getId(), provider);
+            sig = Signature.getInstance(signatureAlgorithm.getAlgorithm().getId(), provider);
         }
         PublicKey pubKey = this.getPublicKey(provider);
         sig.initVerify(pubKey);
-        DERBitString pkBytes = new DERBitString(pkac);
-        sig.update(pkBytes.getBytes());
+        try
+        {
+            DERBitString pkBytes = new DERBitString(pkac);
+            sig.update(pkBytes.getBytes());
 
-        return sig.verify(signature.getBytes());
+            return sig.verify(signature.getBytes());
+        }
+        catch (Exception e)
+        {
+            throw new InvalidKeyException("error encoding public key");
+        }
     }
 
     public PublicKey getPublicKey(String provider)
@@ -117,15 +123,15 @@ public class SignedPublicKeyAndChallenge
             X509EncodedKeySpec xspec = new X509EncodedKeySpec(bStr.getBytes());
             
 
-            AlgorithmIdentifier keyAlg = subjectPKInfo.getAlgorithmId ();
+            AlgorithmIdentifier keyAlg = subjectPKInfo.getAlgorithm();
 
             KeyFactory factory =
-                KeyFactory.getInstance(keyAlg.getObjectId().getId(),provider);
+                KeyFactory.getInstance(keyAlg.getAlgorithm().getId(),provider);
 
             return factory.generatePublic(xspec);
                            
         }
-        catch (InvalidKeySpecException e)
+        catch (Exception e)
         {
             throw new InvalidKeyException("error encoding public key");
         }

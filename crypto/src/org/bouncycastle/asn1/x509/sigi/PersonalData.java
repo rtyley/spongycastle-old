@@ -4,12 +4,12 @@ import java.math.BigInteger;
 import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
@@ -38,7 +38,7 @@ public class PersonalData
 {
     private NameOrPseudonym nameOrPseudonym;
     private BigInteger nameDistinguisher;
-    private DERGeneralizedTime dateOfBirth;
+    private ASN1GeneralizedTime dateOfBirth;
     private DirectoryString placeOfBirth;
     private String gender;
     private DirectoryString postalAddress;
@@ -98,7 +98,7 @@ public class PersonalData
                     nameDistinguisher = ASN1Integer.getInstance(o, false).getValue();
                     break;
                 case 1:
-                    dateOfBirth = DERGeneralizedTime.getInstance(o, false);
+                    dateOfBirth = ASN1GeneralizedTime.getInstance(o, false);
                     break;
                 case 2:
                     placeOfBirth = DirectoryString.getInstance(o, true);
@@ -126,7 +126,7 @@ public class PersonalData
      * @param postalAddress     Postal Address.
      */
     public PersonalData(NameOrPseudonym nameOrPseudonym,
-                        BigInteger nameDistinguisher, DERGeneralizedTime dateOfBirth,
+                        BigInteger nameDistinguisher, ASN1GeneralizedTime dateOfBirth,
                         DirectoryString placeOfBirth, String gender, DirectoryString postalAddress)
     {
         this.nameOrPseudonym = nameOrPseudonym;
@@ -147,7 +147,7 @@ public class PersonalData
         return nameDistinguisher;
     }
 
-    public DERGeneralizedTime getDateOfBirth()
+    public ASN1GeneralizedTime getDateOfBirth()
     {
         return dateOfBirth;
     }

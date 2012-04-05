@@ -2,7 +2,6 @@ package org.bouncycastle.jce.provider;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1518,6 +1517,11 @@ public class PKIXNameConstraintValidator
         }
     }
 
+    public void intersectPermittedSubtree(GeneralSubtree permitted)
+    {
+        intersectPermittedSubtree(new GeneralSubtree[] { permitted });
+    }
+
     /**
      * Updates the permitted set of these name constraints with the intersection
      * with the given subtree.
@@ -1525,14 +1529,14 @@ public class PKIXNameConstraintValidator
      * @param permitted The permitted subtrees
      */
 
-    public void intersectPermittedSubtree(ASN1Sequence permitted)
+    public void intersectPermittedSubtree(GeneralSubtree[] permitted)
     {
         Map subtreesMap = new HashMap();
 
         // group in sets in a map ordered by tag no.
-        for (Enumeration e = permitted.getObjects(); e.hasMoreElements();)
+        for (int i = 0; i != permitted.length; i++)
         {
-            GeneralSubtree subtree = GeneralSubtree.getInstance(e.nextElement());
+            GeneralSubtree subtree = permitted[i];
             Integer tagNo = new Integer(subtree.getBase().getTagNo());
             if (subtreesMap.get(tagNo) == null)
             {

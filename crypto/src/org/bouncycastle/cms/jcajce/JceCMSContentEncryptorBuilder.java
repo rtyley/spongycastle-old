@@ -19,6 +19,7 @@ import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OutputEncryptor;
+import org.bouncycastle.operator.jcajce.JceGenericKey;
 
 public class JceCMSContentEncryptorBuilder
 {
@@ -154,7 +155,7 @@ public class JceCMSContentEncryptorBuilder
 
         public GenericKey getKey()
         {
-            return new GenericKey(encKey);
+            return new JceGenericKey(algorithmIdentifier, encKey);
         }
     }
 }

@@ -1,14 +1,15 @@
 package org.bouncycastle.asn1.test;
 
+import java.io.IOException;
+import java.math.BigInteger;
+
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.x500.DirectoryString;
 import org.bouncycastle.asn1.x509.sigi.NameOrPseudonym;
 import org.bouncycastle.asn1.x509.sigi.PersonalData;
-
-import java.io.IOException;
-import java.math.BigInteger;
 
 public class PersonalDataUnitTest
     extends ASN1UnitTest
@@ -23,7 +24,7 @@ public class PersonalDataUnitTest
     {
         NameOrPseudonym nameOrPseudonym = new NameOrPseudonym("pseudonym");
         BigInteger nameDistinguisher = BigInteger.valueOf(10);
-        DERGeneralizedTime dateOfBirth= new DERGeneralizedTime("20070315173729Z");
+        ASN1GeneralizedTime dateOfBirth= new ASN1GeneralizedTime("20070315173729Z");
         DirectoryString placeOfBirth = new DirectoryString("placeOfBirth");
         String gender = "M";
         DirectoryString postalAddress = new DirectoryString("address");

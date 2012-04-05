@@ -8,9 +8,9 @@ import java.security.SecureRandom;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.kisa.KISAObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.ntt.NTTObjectIdentifiers;
@@ -82,18 +82,18 @@ public class JceSymmetricKeyWrapper
 
         if (algorithm.startsWith("DES"))
         {
-            return new AlgorithmIdentifier(new DERObjectIdentifier(
+            return new AlgorithmIdentifier(new ASN1ObjectIdentifier(
                     "1.2.840.113549.1.9.16.3.6"), new DERNull());
         }
         else if (algorithm.startsWith("RC2"))
         {
-            return new AlgorithmIdentifier(new DERObjectIdentifier(
-                    "1.2.840.113549.1.9.16.3.7"), new DERInteger(58));
+            return new AlgorithmIdentifier(new ASN1ObjectIdentifier(
+                    "1.2.840.113549.1.9.16.3.7"), new ASN1Integer(58));
         }
         else if (algorithm.startsWith("AES"))
         {
             int length = key.getEncoded().length * 8;
-            DERObjectIdentifier wrapOid;
+            ASN1ObjectIdentifier wrapOid;
 
             if (length == 128)
             {
@@ -123,7 +123,7 @@ public class JceSymmetricKeyWrapper
         else if (algorithm.startsWith("Camellia"))
         {
             int length = key.getEncoded().length * 8;
-            DERObjectIdentifier wrapOid;
+            ASN1ObjectIdentifier wrapOid;
 
             if (length == 128)
             {

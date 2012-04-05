@@ -1,12 +1,11 @@
 package org.bouncycastle.asn1.test;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.isismtt.ocsp.RequestedCertificate;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.util.encoders.Base64;
-
 import java.io.IOException;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.isismtt.ocsp.RequestedCertificate;
+import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.util.encoders.Base64;
 
 public class RequestedCertificateUnitTest
     extends ASN1UnitTest
@@ -31,8 +30,7 @@ public class RequestedCertificateUnitTest
     {
         int type = 1;
         byte[] certOctets = new byte[20];
-        X509CertificateStructure cert = new X509CertificateStructure(
-            (ASN1Sequence)new ASN1InputStream(certBytes).readObject());
+        Certificate cert = Certificate.getInstance(certBytes);
 
         RequestedCertificate requested = new RequestedCertificate(type, certOctets);
 
@@ -65,7 +63,7 @@ public class RequestedCertificateUnitTest
         RequestedCertificate requested,
         int type,
         byte[] certOctets,
-        X509CertificateStructure cert)
+        Certificate cert)
         throws IOException
     {
         checkValues(requested, type, certOctets, cert);
@@ -87,7 +85,7 @@ public class RequestedCertificateUnitTest
         RequestedCertificate requested,
         int type,
         byte[] certOctets,
-        X509CertificateStructure cert)
+        Certificate cert)
         throws IOException
     {
         checkMandatoryField("certType", type, requested.getType());

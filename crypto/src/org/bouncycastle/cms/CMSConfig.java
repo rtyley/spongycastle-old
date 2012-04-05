@@ -1,6 +1,6 @@
 package org.bouncycastle.cms;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 public class CMSConfig
 {
@@ -13,7 +13,7 @@ public class CMSConfig
      */
     public static void setSigningEncryptionAlgorithmMapping(String oid, String algorithmName)
     {
-        DERObjectIdentifier id = new DERObjectIdentifier(oid);
+        ASN1ObjectIdentifier id = new ASN1ObjectIdentifier(oid);
 
         CMSSignedHelper.INSTANCE.setSigningEncryptionAlgorithmMapping(id, algorithmName);
     }
@@ -27,7 +27,7 @@ public class CMSConfig
      */
     public static void setSigningDigestAlgorithmMapping(String oid, String algorithmName)
     {
-        DERObjectIdentifier id = new DERObjectIdentifier(oid);
+        ASN1ObjectIdentifier id = new ASN1ObjectIdentifier(oid);
 
         CMSSignedHelper.INSTANCE.setSigningDigestAlgorithmMapping(id, algorithmName);
     }

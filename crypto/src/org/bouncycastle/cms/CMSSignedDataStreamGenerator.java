@@ -14,12 +14,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.BERTaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
@@ -821,7 +821,7 @@ public class CMSSignedDataStreamGenerator
     //       THEN version MUST be 3
     //       ELSE version MUST be 1
     //
-    private DERInteger calculateVersion(
+    private ASN1Integer calculateVersion(
         ASN1ObjectIdentifier contentOid)
     {
         boolean otherCert = false;
@@ -856,7 +856,7 @@ public class CMSSignedDataStreamGenerator
 
         if (otherCert)
         {
-            return new DERInteger(5);
+            return new ASN1Integer(5);
         }
 
         if (crls != null)         // no need to check if otherCert is true
@@ -873,30 +873,30 @@ public class CMSSignedDataStreamGenerator
 
         if (otherCrl)
         {
-            return new DERInteger(5);
+            return new ASN1Integer(5);
         }
 
         if (attrCertV2Found)
         {
-            return new DERInteger(4);
+            return new ASN1Integer(4);
         }
 
         if (attrCertV1Found)
         {
-            return new DERInteger(3);
+            return new ASN1Integer(3);
         }
 
         if (checkForVersion3(_signers))
         {
-            return new DERInteger(3);
+            return new ASN1Integer(3);
         }
 
         if (!CMSObjectIdentifiers.data.equals(contentOid))
         {
-            return new DERInteger(3);
+            return new ASN1Integer(3);
         }
 
-        return new DERInteger(1);
+        return new ASN1Integer(1);
     }
 
     private boolean checkForVersion3(List signerInfos)

@@ -3,13 +3,13 @@ package org.bouncycastle.asn1.x509;
 import java.io.IOException;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERGeneralizedTime;
+import org.bouncycastle.asn1.ASN1UTCTime;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.DERUTCTime;
 import org.bouncycastle.asn1.x500.X500Name;
 
 /**
@@ -89,13 +89,13 @@ public class V2TBSCertListGenerator
     }
 
     public void setThisUpdate(
-        DERUTCTime thisUpdate)
+        ASN1UTCTime thisUpdate)
     {
         this.thisUpdate = new Time(thisUpdate);
     }
 
     public void setNextUpdate(
-        DERUTCTime nextUpdate)
+        ASN1UTCTime nextUpdate)
     {
         this.nextUpdate = new Time(nextUpdate);
     }
@@ -118,7 +118,7 @@ public class V2TBSCertListGenerator
         crlentries.add(crlEntry);
     }
 
-    public void addCRLEntry(ASN1Integer userCertificate, DERUTCTime revocationDate, int reason)
+    public void addCRLEntry(ASN1Integer userCertificate, ASN1UTCTime revocationDate, int reason)
     {
         addCRLEntry(userCertificate, new Time(revocationDate), reason);
     }
@@ -128,7 +128,7 @@ public class V2TBSCertListGenerator
         addCRLEntry(userCertificate, revocationDate, reason, null);
     }
 
-    public void addCRLEntry(ASN1Integer userCertificate, Time revocationDate, int reason, DERGeneralizedTime invalidityDate)
+    public void addCRLEntry(ASN1Integer userCertificate, Time revocationDate, int reason, ASN1GeneralizedTime invalidityDate)
     {
         if (reason != 0)
         {
@@ -251,7 +251,7 @@ public class V2TBSCertListGenerator
 
         try
         {
-            v.add(X509Extension.reasonCode);
+            v.add(Extension.reasonCode);
             v.add(new DEROctetString(crlReason.getEncoded()));
         }
         catch (IOException e)
@@ -268,7 +268,7 @@ public class V2TBSCertListGenerator
 
         try
         {
-            v.add(X509Extension.invalidityDate);
+            v.add(Extension.invalidityDate);
             v.add(new DEROctetString(invalidityDate.getEncoded()));
         }
         catch (IOException e)

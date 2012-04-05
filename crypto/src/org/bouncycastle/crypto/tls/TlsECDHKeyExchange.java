@@ -7,7 +7,6 @@ import java.math.BigInteger;
 
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
@@ -62,7 +61,7 @@ class TlsECDHKeyExchange implements TlsKeyExchange
 
     public void processServerCertificate(Certificate serverCertificate) throws IOException
     {
-        X509CertificateStructure x509Cert = serverCertificate.certs[0];
+        org.bouncycastle.asn1.x509.Certificate x509Cert = serverCertificate.certs[0];
         SubjectPublicKeyInfo keyInfo = x509Cert.getSubjectPublicKeyInfo();
 
         try

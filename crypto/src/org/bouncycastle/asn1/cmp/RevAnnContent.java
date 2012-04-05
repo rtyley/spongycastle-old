@@ -1,10 +1,10 @@
 package org.bouncycastle.asn1.cmp;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.crmf.CertId;
 import org.bouncycastle.asn1.x509.Extensions;
@@ -14,16 +14,16 @@ public class RevAnnContent
 {
     private PKIStatus status;
     private CertId certId;
-    private DERGeneralizedTime willBeRevokedAt;
-    private DERGeneralizedTime badSinceDate;
+    private ASN1GeneralizedTime willBeRevokedAt;
+    private ASN1GeneralizedTime badSinceDate;
     private Extensions crlDetails;
     
     private RevAnnContent(ASN1Sequence seq)
     {
         status = PKIStatus.getInstance(seq.getObjectAt(0));
         certId = CertId.getInstance(seq.getObjectAt(1));
-        willBeRevokedAt = DERGeneralizedTime.getInstance(seq.getObjectAt(2));
-        badSinceDate = DERGeneralizedTime.getInstance(seq.getObjectAt(3));
+        willBeRevokedAt = ASN1GeneralizedTime.getInstance(seq.getObjectAt(2));
+        badSinceDate = ASN1GeneralizedTime.getInstance(seq.getObjectAt(3));
 
         if (seq.size() > 4)
         {
@@ -56,12 +56,12 @@ public class RevAnnContent
         return certId;
     }
 
-    public DERGeneralizedTime getWillBeRevokedAt()
+    public ASN1GeneralizedTime getWillBeRevokedAt()
     {
         return willBeRevokedAt;
     }
 
-    public DERGeneralizedTime getBadSinceDate()
+    public ASN1GeneralizedTime getBadSinceDate()
     {
         return badSinceDate;
     }

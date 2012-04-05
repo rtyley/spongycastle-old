@@ -3,7 +3,7 @@ package org.bouncycastle.ocsp;
 import java.text.ParseException;
 import java.util.Date;
 
-import org.bouncycastle.asn1.DERGeneralizedTime;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ocsp.RevokedInfo;
 import org.bouncycastle.asn1.x509.CRLReason;
 
@@ -25,7 +25,7 @@ public class RevokedStatus
         Date        revocationDate,
         int         reason)
     {
-        this.info = new RevokedInfo(new DERGeneralizedTime(revocationDate), CRLReason.lookup(reason));
+        this.info = new RevokedInfo(new ASN1GeneralizedTime(revocationDate), CRLReason.lookup(reason));
     }
 
     public Date getRevocationTime()

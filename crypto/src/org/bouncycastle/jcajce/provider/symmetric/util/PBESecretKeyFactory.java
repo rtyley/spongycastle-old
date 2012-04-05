@@ -6,7 +6,7 @@ import java.security.spec.KeySpec;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.PBEKeySpec;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.crypto.CipherParameters;
 
 public class PBESecretKeyFactory
@@ -21,7 +21,7 @@ public class PBESecretKeyFactory
 
     public PBESecretKeyFactory(
         String algorithm,
-        DERObjectIdentifier oid,
+        ASN1ObjectIdentifier oid,
         boolean forCipher,
         int scheme,
         int digest,

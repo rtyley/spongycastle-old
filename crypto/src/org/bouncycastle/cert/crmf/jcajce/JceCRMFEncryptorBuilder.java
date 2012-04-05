@@ -19,6 +19,7 @@ import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OutputEncryptor;
+import org.bouncycastle.operator.jcajce.JceGenericKey;
 
 public class JceCRMFEncryptorBuilder
 {
@@ -129,7 +130,7 @@ public class JceCRMFEncryptorBuilder
 
         public GenericKey getKey()
         {
-            return new GenericKey(encKey);
+            return new JceGenericKey(algorithmIdentifier, encKey);
         }
     }
 }

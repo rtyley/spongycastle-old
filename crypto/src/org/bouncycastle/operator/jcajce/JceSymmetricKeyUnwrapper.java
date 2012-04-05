@@ -51,7 +51,7 @@ public class JceSymmetricKeyUnwrapper
 
             keyCipher.init(Cipher.UNWRAP_MODE, secretKey);
 
-            return new GenericKey(keyCipher.unwrap(encryptedKey, helper.getKeyAlgorithmName(encryptedKeyAlgorithm.getAlgorithm()), Cipher.SECRET_KEY));
+            return new JceGenericKey(encryptedKeyAlgorithm, keyCipher.unwrap(encryptedKey, helper.getKeyAlgorithmName(encryptedKeyAlgorithm.getAlgorithm()), Cipher.SECRET_KEY));
         }
         catch (InvalidKeyException e)
         {

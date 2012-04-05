@@ -1,6 +1,7 @@
 package org.bouncycastle.asn1.ocsp;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -21,14 +22,14 @@ public class ResponseData
     
     private ASN1Integer          version;
     private ResponderID         responderID;
-    private DERGeneralizedTime  producedAt;
+    private ASN1GeneralizedTime  producedAt;
     private ASN1Sequence        responses;
     private Extensions      responseExtensions;
 
     public ResponseData(
         ASN1Integer          version,
         ResponderID         responderID,
-        DERGeneralizedTime  producedAt,
+        ASN1GeneralizedTime  producedAt,
         ASN1Sequence        responses,
         Extensions      responseExtensions)
     {
@@ -52,12 +53,12 @@ public class ResponseData
         ASN1Sequence        responses,
         X509Extensions responseExtensions)
     {
-        this(V1, responderID, producedAt, responses, Extensions.getInstance(responseExtensions));
+        this(V1, responderID, ASN1GeneralizedTime.getInstance(producedAt), responses, Extensions.getInstance(responseExtensions));
     }
 
     public ResponseData(
         ResponderID         responderID,
-        DERGeneralizedTime  producedAt,
+        ASN1GeneralizedTime  producedAt,
         ASN1Sequence        responses,
         Extensions      responseExtensions)
     {
@@ -91,7 +92,7 @@ public class ResponseData
         }
 
         this.responderID = ResponderID.getInstance(seq.getObjectAt(index++));
-        this.producedAt = (DERGeneralizedTime)seq.getObjectAt(index++);
+        this.producedAt = ASN1GeneralizedTime.getInstance(seq.getObjectAt(index++));
         this.responses = (ASN1Sequence)seq.getObjectAt(index++);
 
         if (seq.size() > index)
@@ -133,7 +134,7 @@ public class ResponseData
         return responderID;
     }
 
-    public DERGeneralizedTime getProducedAt()
+    public ASN1GeneralizedTime getProducedAt()
     {
         return producedAt;
     }

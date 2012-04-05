@@ -55,12 +55,12 @@ import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.DistributionPointName;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509LDAPCertStoreParameters;
 import org.bouncycastle.jce.exception.ExtCertPathValidatorException;
 import org.bouncycastle.util.Selector;
@@ -77,23 +77,23 @@ public class CertPathValidatorUtilities
 {
     protected static final PKIXCRLUtil CRL_UTIL = new PKIXCRLUtil();
 
-    protected static final String CERTIFICATE_POLICIES = X509Extensions.CertificatePolicies.getId();
-    protected static final String BASIC_CONSTRAINTS = X509Extensions.BasicConstraints.getId();
-    protected static final String POLICY_MAPPINGS = X509Extensions.PolicyMappings.getId();
-    protected static final String SUBJECT_ALTERNATIVE_NAME = X509Extensions.SubjectAlternativeName.getId();
-    protected static final String NAME_CONSTRAINTS = X509Extensions.NameConstraints.getId();
-    protected static final String KEY_USAGE = X509Extensions.KeyUsage.getId();
-    protected static final String INHIBIT_ANY_POLICY = X509Extensions.InhibitAnyPolicy.getId();
-    protected static final String ISSUING_DISTRIBUTION_POINT = X509Extensions.IssuingDistributionPoint.getId();
-    protected static final String DELTA_CRL_INDICATOR = X509Extensions.DeltaCRLIndicator.getId();
-    protected static final String POLICY_CONSTRAINTS = X509Extensions.PolicyConstraints.getId();
-    protected static final String FRESHEST_CRL = X509Extensions.FreshestCRL.getId();
-    protected static final String CRL_DISTRIBUTION_POINTS = X509Extensions.CRLDistributionPoints.getId();
-    protected static final String AUTHORITY_KEY_IDENTIFIER = X509Extensions.AuthorityKeyIdentifier.getId();
+    protected static final String CERTIFICATE_POLICIES = Extension.certificatePolicies.getId();
+    protected static final String BASIC_CONSTRAINTS = Extension.basicConstraints.getId();
+    protected static final String POLICY_MAPPINGS = Extension.policyMappings.getId();
+    protected static final String SUBJECT_ALTERNATIVE_NAME = Extension.subjectAlternativeName.getId();
+    protected static final String NAME_CONSTRAINTS = Extension.nameConstraints.getId();
+    protected static final String KEY_USAGE = Extension.keyUsage.getId();
+    protected static final String INHIBIT_ANY_POLICY = Extension.inhibitAnyPolicy.getId();
+    protected static final String ISSUING_DISTRIBUTION_POINT = Extension.issuingDistributionPoint.getId();
+    protected static final String DELTA_CRL_INDICATOR = Extension.deltaCRLIndicator.getId();
+    protected static final String POLICY_CONSTRAINTS = Extension.policyConstraints.getId();
+    protected static final String FRESHEST_CRL = Extension.freshestCRL.getId();
+    protected static final String CRL_DISTRIBUTION_POINTS = Extension.cRLDistributionPoints.getId();
+    protected static final String AUTHORITY_KEY_IDENTIFIER = Extension.authorityKeyIdentifier.getId();
 
     protected static final String ANY_POLICY = "2.5.29.32.0";
 
-    protected static final String CRL_NUMBER = X509Extensions.CRLNumber.getId();
+    protected static final String CRL_NUMBER = Extension.cRLNumber.getId();
 
     /*
     * key usage bits

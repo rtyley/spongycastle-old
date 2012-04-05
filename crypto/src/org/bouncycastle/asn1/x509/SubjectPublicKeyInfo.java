@@ -50,6 +50,7 @@ public class SubjectPublicKeyInfo
     public SubjectPublicKeyInfo(
         AlgorithmIdentifier algId,
         ASN1Encodable       publicKey)
+        throws IOException
     {
         this.keyData = new DERBitString(publicKey);
         this.algId = algId;

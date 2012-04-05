@@ -12,9 +12,9 @@ import java.util.Set;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Enumerated;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.CRLReason;
@@ -24,7 +24,6 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.TBSCertList;
 import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**
  * The following extensions are listed in RFC 2459 as relevant to CRL Entries
@@ -90,7 +89,7 @@ public class X509CRLEntryObject extends X509CRLEntry
             return null;
         }
 
-        byte[] ext = getExtensionValue(X509Extension.certificateIssuer.getId());
+        Extension ext = getExtension(Extension.certificateIssuer);
         if (ext == null)
         {
             return previousCertificateIssuer;
@@ -98,8 +97,7 @@ public class X509CRLEntryObject extends X509CRLEntry
 
         try
         {
-            GeneralName[] names = GeneralNames.getInstance(
-                    X509ExtensionUtil.fromExtensionValue(ext)).getNames();
+            GeneralName[] names = GeneralNames.getInstance(ext.getParsedValue()).getNames();
             for (int i = 0; i < names.length; i++)
             {
                 if (names[i].getTagNo() == GeneralName.directoryName)
@@ -109,7 +107,7 @@ public class X509CRLEntryObject extends X509CRLEntry
             }
             return null;
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             return null;
         }
@@ -167,24 +165,31 @@ public class X509CRLEntryObject extends X509CRLEntry
         return getExtensionOIDs(false);
     }
 
-    public byte[] getExtensionValue(String oid)
+    private Extension getExtension(ASN1ObjectIdentifier oid)
     {
         Extensions exts = c.getExtensions();
 
         if (exts != null)
         {
-            Extension ext = exts.getExtension(new ASN1ObjectIdentifier(oid));
+            return exts.getExtension(oid);
+        }
 
-            if (ext != null)
+        return null;
+    }
+
+    public byte[] getExtensionValue(String oid)
+    {
+        Extension ext = getExtension(new ASN1ObjectIdentifier(oid));
+
+        if (ext != null)
+        {
+            try
             {
-                try
-                {
-                    return ext.getExtnValue().getEncoded();
-                }
-                catch (Exception e)
-                {
-                    throw new RuntimeException("error encoding " + e.toString());
-                }
+                return ext.getExtnValue().getEncoded();
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException("error encoding " + e.toString());
             }
         }
 
@@ -265,7 +270,7 @@ public class X509CRLEntryObject extends X509CRLEntry
                         {
                             if (oid.equals(X509Extension.reasonCode))
                             {
-                                buf.append(CRLReason.getInstance(DEREnumerated.getInstance(dIn.readObject()))).append(nl);
+                                buf.append(CRLReason.getInstance(ASN1Enumerated.getInstance(dIn.readObject()))).append(nl);
                             }
                             else if (oid.equals(X509Extension.certificateIssuer))
                             {

@@ -8,7 +8,6 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.Extensions;
@@ -71,9 +70,9 @@ public class TimeStampReq
                 nonce = ASN1Integer.getInstance(seq.getObjectAt(opt));
             }
             // certReq
-            else if (seq.getObjectAt(opt) instanceof DERBoolean)
+            else if (seq.getObjectAt(opt) instanceof ASN1Boolean)
             {
-                certReq = DERBoolean.getInstance(seq.getObjectAt(opt));
+                certReq = ASN1Boolean.getInstance(seq.getObjectAt(opt));
             }
             // extensions
             else if (seq.getObjectAt(opt) instanceof ASN1TaggedObject)

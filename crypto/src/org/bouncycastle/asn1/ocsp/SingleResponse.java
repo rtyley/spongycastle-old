@@ -1,6 +1,7 @@
 package org.bouncycastle.asn1.ocsp;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -16,12 +17,12 @@ public class SingleResponse
 {
     private CertID              certID;
     private CertStatus          certStatus;
-    private DERGeneralizedTime  thisUpdate;
-    private DERGeneralizedTime  nextUpdate;
+    private ASN1GeneralizedTime  thisUpdate;
+    private ASN1GeneralizedTime  nextUpdate;
     private Extensions      singleExtensions;
 
     /**
-     * @depreacted use method taking Extensions
+     * @deprecated use method taking ASN1GeneralizedTime and Extensions
      * @param certID
      * @param certStatus
      * @param thisUpdate
@@ -38,12 +39,30 @@ public class SingleResponse
         this(certID, certStatus, thisUpdate, nextUpdate, Extensions.getInstance(singleExtensions));
     }
 
+    /**
+     * @deprecated use method taking ASN1GeneralizedTime and Extensions
+     * @param certID
+     * @param certStatus
+     * @param thisUpdate
+     * @param nextUpdate
+     * @param singleExtensions
+     */
     public SingleResponse(
         CertID              certID,
         CertStatus          certStatus,
-        DERGeneralizedTime  thisUpdate,
-        DERGeneralizedTime  nextUpdate,
-        Extensions      singleExtensions)
+        DERGeneralizedTime thisUpdate,
+        DERGeneralizedTime nextUpdate,
+        Extensions          singleExtensions)
+    {
+        this(certID, certStatus, ASN1GeneralizedTime.getInstance(thisUpdate), ASN1GeneralizedTime.getInstance(nextUpdate), Extensions.getInstance(singleExtensions));
+    }
+
+    public SingleResponse(
+        CertID              certID,
+        CertStatus          certStatus,
+        ASN1GeneralizedTime thisUpdate,
+        ASN1GeneralizedTime nextUpdate,
+        Extensions          singleExtensions)
     {
         this.certID = certID;
         this.certStatus = certStatus;
@@ -57,11 +76,11 @@ public class SingleResponse
     {
         this.certID = CertID.getInstance(seq.getObjectAt(0));
         this.certStatus = CertStatus.getInstance(seq.getObjectAt(1));
-        this.thisUpdate = (DERGeneralizedTime)seq.getObjectAt(2);
+        this.thisUpdate = ASN1GeneralizedTime.getInstance(seq.getObjectAt(2));
 
         if (seq.size() > 4)
         {
-            this.nextUpdate = DERGeneralizedTime.getInstance(
+            this.nextUpdate = ASN1GeneralizedTime.getInstance(
                                 (ASN1TaggedObject)seq.getObjectAt(3), true);
             this.singleExtensions = Extensions.getInstance(
                                 (ASN1TaggedObject)seq.getObjectAt(4), true);
@@ -72,7 +91,7 @@ public class SingleResponse
 
             if (o.getTagNo() == 0)
             {
-                this.nextUpdate = DERGeneralizedTime.getInstance(o, true);
+                this.nextUpdate = ASN1GeneralizedTime.getInstance(o, true);
             }
             else
             {
@@ -113,12 +132,12 @@ public class SingleResponse
         return certStatus;
     }
 
-    public DERGeneralizedTime getThisUpdate()
+    public ASN1GeneralizedTime getThisUpdate()
     {
         return thisUpdate;
     }
 
-    public DERGeneralizedTime getNextUpdate()
+    public ASN1GeneralizedTime getNextUpdate()
     {
         return nextUpdate;
     }

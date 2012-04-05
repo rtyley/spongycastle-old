@@ -1,30 +1,5 @@
 package org.bouncycastle.x509.util;
 
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.x509.CertificatePair;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
-import org.bouncycastle.jce.X509LDAPCertStoreParameters;
-import org.bouncycastle.jce.provider.X509AttrCertParser;
-import org.bouncycastle.jce.provider.X509CRLParser;
-import org.bouncycastle.jce.provider.X509CertPairParser;
-import org.bouncycastle.jce.provider.X509CertParser;
-import org.bouncycastle.util.StoreException;
-import org.bouncycastle.x509.X509AttributeCertStoreSelector;
-import org.bouncycastle.x509.X509AttributeCertificate;
-import org.bouncycastle.x509.X509CRLStoreSelector;
-import org.bouncycastle.x509.X509CertPairStoreSelector;
-import org.bouncycastle.x509.X509CertStoreSelector;
-import org.bouncycastle.x509.X509CertificatePair;
-
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.Principal;
@@ -41,6 +16,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+import javax.security.auth.x500.X500Principal;
+
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.asn1.x509.CertificatePair;
+import org.bouncycastle.jce.X509LDAPCertStoreParameters;
+import org.bouncycastle.jce.provider.X509AttrCertParser;
+import org.bouncycastle.jce.provider.X509CRLParser;
+import org.bouncycastle.jce.provider.X509CertPairParser;
+import org.bouncycastle.jce.provider.X509CertParser;
+import org.bouncycastle.util.StoreException;
+import org.bouncycastle.x509.X509AttributeCertStoreSelector;
+import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509CRLStoreSelector;
+import org.bouncycastle.x509.X509CertPairStoreSelector;
+import org.bouncycastle.x509.X509CertStoreSelector;
+import org.bouncycastle.x509.X509CertificatePair;
 
 /**
  * This is a general purpose implementation to get X.509 certificates, CRLs,
@@ -622,12 +623,12 @@ public class LDAPStoreHelper
                     byte[] forward = (byte[])list.get(i);
                     byte[] reverse = (byte[])list.get(i + 1);
                     pair = new X509CertificatePair(new CertificatePair(
-                        X509CertificateStructure
+                        Certificate
                             .getInstance(new ASN1InputStream(
                             forward).readObject()),
-                        X509CertificateStructure
+                        Certificate
                             .getInstance(new ASN1InputStream(
-                            reverse).readObject())));
+                                reverse).readObject())));
                     i++;
                 }
                 if (xselector.match((Object)pair))

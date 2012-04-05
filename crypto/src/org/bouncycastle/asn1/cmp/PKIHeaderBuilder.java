@@ -2,6 +2,7 @@ package org.bouncycastle.asn1.cmp;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -17,7 +18,7 @@ public class PKIHeaderBuilder
     private ASN1Integer pvno;
     private GeneralName sender;
     private GeneralName recipient;
-    private DERGeneralizedTime messageTime;
+    private ASN1GeneralizedTime messageTime;
     private AlgorithmIdentifier protectionAlg;
     private ASN1OctetString senderKID;       // KeyIdentifier
     private ASN1OctetString recipKID;        // KeyIdentifier
@@ -45,7 +46,17 @@ public class PKIHeaderBuilder
         this.recipient = recipient;
     }
 
+    /**
+     * @deprecated use ASN1GeneralizedTime
+     */
     public PKIHeaderBuilder setMessageTime(DERGeneralizedTime time)
+    {
+        messageTime = ASN1GeneralizedTime.getInstance(time);
+
+        return this;
+    }
+
+    public PKIHeaderBuilder setMessageTime(ASN1GeneralizedTime time)
     {
         messageTime = time;
 

@@ -1,10 +1,10 @@
 package org.bouncycastle.asn1.cms;
 
+import org.bouncycastle.asn1.ASN1Boolean;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERUTF8String;
@@ -12,13 +12,13 @@ import org.bouncycastle.asn1.DERUTF8String;
 public class MetaData
     extends ASN1Object
 {
-    private DERBoolean hashProtected;
+    private ASN1Boolean hashProtected;
     private DERUTF8String fileName;
     private DERIA5String  mediaType;
     private Attributes otherMetaData;
 
     public MetaData(
-        DERBoolean hashProtected,
+        ASN1Boolean hashProtected,
         DERUTF8String fileName,
         DERIA5String mediaType,
         Attributes otherMetaData)
@@ -31,7 +31,7 @@ public class MetaData
 
     private MetaData(ASN1Sequence seq)
     {
-        this.hashProtected = DERBoolean.getInstance(seq.getObjectAt(0));
+        this.hashProtected = ASN1Boolean.getInstance(seq.getObjectAt(0));
 
         int index = 1;
 

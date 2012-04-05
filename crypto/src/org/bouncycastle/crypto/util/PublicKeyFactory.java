@@ -6,11 +6,11 @@ import java.math.BigInteger;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.bouncycastle.asn1.oiw.ElGamalParameter;
@@ -127,7 +127,7 @@ public class PublicKeyFactory
         else if (algId.getAlgorithm().equals(PKCSObjectIdentifiers.dhKeyAgreement))
         {
             DHParameter params = DHParameter.getInstance(algId.getParameters());
-            DERInteger derY = (DERInteger)keyInfo.parsePublicKey();
+            ASN1Integer derY = (ASN1Integer)keyInfo.parsePublicKey();
 
             BigInteger lVal = params.getL();
             int l = lVal == null ? 0 : lVal.intValue();
@@ -138,7 +138,7 @@ public class PublicKeyFactory
         else if (algId.getAlgorithm().equals(OIWObjectIdentifiers.elGamalAlgorithm))
         {
             ElGamalParameter params = new ElGamalParameter((ASN1Sequence)algId.getParameters());
-            DERInteger derY = (DERInteger)keyInfo.parsePublicKey();
+            ASN1Integer derY = (ASN1Integer)keyInfo.parsePublicKey();
 
             return new ElGamalPublicKeyParameters(derY.getValue(), new ElGamalParameters(
                 params.getP(), params.getG()));
@@ -146,7 +146,7 @@ public class PublicKeyFactory
         else if (algId.getAlgorithm().equals(X9ObjectIdentifiers.id_dsa)
             || algId.getAlgorithm().equals(OIWObjectIdentifiers.dsaWithSHA1))
         {
-            DERInteger derY = (DERInteger)keyInfo.parsePublicKey();
+            ASN1Integer derY = (ASN1Integer)keyInfo.parsePublicKey();
             ASN1Encodable de = algId.getParameters();
 
             DSAParameters parameters = null;

@@ -46,9 +46,9 @@ import org.bouncycastle.asn1.DERTaggedObject;
 public class CertificatePair
     extends ASN1Object
 {
-    private X509CertificateStructure forward;
+    private Certificate forward;
 
-    private X509CertificateStructure reverse;
+    private Certificate reverse;
 
     public static CertificatePair getInstance(Object obj)
     {
@@ -95,11 +95,11 @@ public class CertificatePair
             ASN1TaggedObject o = ASN1TaggedObject.getInstance(e.nextElement());
             if (o.getTagNo() == 0)
             {
-                forward = X509CertificateStructure.getInstance(o, true);
+                forward = Certificate.getInstance(o, true);
             }
             else if (o.getTagNo() == 1)
             {
-                reverse = X509CertificateStructure.getInstance(o, true);
+                reverse = Certificate.getInstance(o, true);
             }
             else
             {
@@ -115,7 +115,7 @@ public class CertificatePair
      * @param forward Certificates issued to this CA.
      * @param reverse Certificates issued by this CA to other CAs.
      */
-    public CertificatePair(X509CertificateStructure forward, X509CertificateStructure reverse)
+    public CertificatePair(Certificate forward, Certificate reverse)
     {
         this.forward = forward;
         this.reverse = reverse;
@@ -154,7 +154,7 @@ public class CertificatePair
     /**
      * @return Returns the forward.
      */
-    public X509CertificateStructure getForward()
+    public Certificate getForward()
     {
         return forward;
     }
@@ -162,7 +162,7 @@ public class CertificatePair
     /**
      * @return Returns the reverse.
      */
-    public X509CertificateStructure getReverse()
+    public Certificate getReverse()
     {
         return reverse;
     }

@@ -14,6 +14,7 @@ import org.bouncycastle.cms.RecipientOperator;
 import org.bouncycastle.jcajce.io.MacOutputStream;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.MacCalculator;
+import org.bouncycastle.operator.jcajce.JceGenericKey;
 
 public class JceKeyAgreeAuthenticatedRecipient
     extends JceKeyAgreeRecipient
@@ -39,7 +40,7 @@ public class JceKeyAgreeAuthenticatedRecipient
 
             public GenericKey getKey()
             {
-                return new GenericKey(secretKey);
+                return new JceGenericKey(contentMacAlgorithm, secretKey);
             }
 
             public OutputStream getOutputStream()

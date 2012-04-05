@@ -15,10 +15,10 @@ import java.util.Iterator;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -86,13 +86,13 @@ public class X509V2AttributeCertificateGenerator
     public void setNotBefore(
         Date    date)
     {
-        acInfoGen.setStartDate(new DERGeneralizedTime(date));
+        acInfoGen.setStartDate(new ASN1GeneralizedTime(date));
     }
 
     public void setNotAfter(
         Date    date)
     {
-        acInfoGen.setEndDate(new DERGeneralizedTime(date));
+        acInfoGen.setEndDate(new ASN1GeneralizedTime(date));
     }
 
     /**

@@ -10,7 +10,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
+import org.bouncycastle.asn1.x509.Certificate;
 
 /**
  * ISIS-MTT-Optional: The certificate requested by the client by inserting the
@@ -53,7 +53,7 @@ public class RequestedCertificate
     public static final int publicKeyCertificate = 0;
     public static final int attributeCertificate = 1;
 
-    private X509CertificateStructure cert;
+    private Certificate cert;
     private byte[] publicKeyCert;
     private byte[] attributeCert;
 
@@ -66,7 +66,7 @@ public class RequestedCertificate
 
         if (obj instanceof ASN1Sequence)
         {
-            return new RequestedCertificate(X509CertificateStructure.getInstance(obj));
+            return new RequestedCertificate(Certificate.getInstance(obj));
         }
         if (obj instanceof ASN1TaggedObject)
         {
@@ -110,7 +110,7 @@ public class RequestedCertificate
      *
      * @param certificate          Given as Certificate
      */
-    public RequestedCertificate(X509CertificateStructure certificate)
+    public RequestedCertificate(Certificate certificate)
     {
         this.cert = certificate;
     }

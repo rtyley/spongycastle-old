@@ -115,24 +115,31 @@ public class BCGOST3410PublicKey
         {
             keyBytes[i] = keyEnc[keyEnc.length - 1 - i]; // must be little endian
         }
-        
-        if (gost3410Spec instanceof GOST3410ParameterSpec)
-        {   
-            if (gost3410Spec.getEncryptionParamSetOID() != null)
+
+        try
+        {
+            if (gost3410Spec instanceof GOST3410ParameterSpec)
             {
-                info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_94, new GOST3410PublicKeyAlgParameters(new ASN1ObjectIdentifier(gost3410Spec.getPublicKeyParamSetOID()), new ASN1ObjectIdentifier(gost3410Spec.getDigestParamSetOID()), new ASN1ObjectIdentifier(gost3410Spec.getEncryptionParamSetOID()))), new DEROctetString(keyBytes));
+                if (gost3410Spec.getEncryptionParamSetOID() != null)
+                {
+                    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_94, new GOST3410PublicKeyAlgParameters(new ASN1ObjectIdentifier(gost3410Spec.getPublicKeyParamSetOID()), new ASN1ObjectIdentifier(gost3410Spec.getDigestParamSetOID()), new ASN1ObjectIdentifier(gost3410Spec.getEncryptionParamSetOID()))), new DEROctetString(keyBytes));
+                }
+                else
+                {
+                    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_94, new GOST3410PublicKeyAlgParameters(new ASN1ObjectIdentifier(gost3410Spec.getPublicKeyParamSetOID()), new ASN1ObjectIdentifier(gost3410Spec.getDigestParamSetOID()))), new DEROctetString(keyBytes));
+                }
             }
             else
             {
-                info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_94, new GOST3410PublicKeyAlgParameters(new ASN1ObjectIdentifier(gost3410Spec.getPublicKeyParamSetOID()), new ASN1ObjectIdentifier(gost3410Spec.getDigestParamSetOID()))), new DEROctetString(keyBytes));
+                info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_94), new DEROctetString(keyBytes));
             }
-        }
-        else
-        {
-            info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(CryptoProObjectIdentifiers.gostR3410_94), new DEROctetString(keyBytes));
-        }
 
-        return KeyUtil.getEncodedSubjectPublicKeyInfo(info);
+            return KeyUtil.getEncodedSubjectPublicKeyInfo(info);
+        }
+        catch (IOException e)
+        {
+            return null;
+        }
     }
 
     public GOST3410Params getParameters()

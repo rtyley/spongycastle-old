@@ -16,7 +16,6 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.SignedData;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.x509.X509StreamParserSpi;
 import org.bouncycastle.x509.util.StreamParsingException;
 
@@ -49,7 +48,7 @@ public class X509CertParser
         }
 
         return new X509CertificateObject(
-                            X509CertificateStructure.getInstance(seq));
+                            org.bouncycastle.asn1.x509.Certificate.getInstance(seq));
     }
 
     private Certificate getCertificate()
@@ -64,7 +63,7 @@ public class X509CertParser
                 if (obj instanceof ASN1Sequence)
                 {
                    return new X509CertificateObject(
-                                    X509CertificateStructure.getInstance(obj));
+                                    org.bouncycastle.asn1.x509.Certificate.getInstance(obj));
                 }
             }
         }
@@ -81,7 +80,7 @@ public class X509CertParser
         if (seq != null)
         {
             return new X509CertificateObject(
-                            X509CertificateStructure.getInstance(seq));
+                            org.bouncycastle.asn1.x509.Certificate.getInstance(seq));
         }
 
         return null;

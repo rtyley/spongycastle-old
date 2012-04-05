@@ -48,7 +48,7 @@ public class PKCS12BagAttributeCarrierImpl
     }
 
     public ASN1Encodable getBagAttribute(
-        DERObjectIdentifier oid)
+        ASN1ObjectIdentifier oid)
     {
         return (ASN1Encodable)pkcs12Attributes.get(oid);
     }

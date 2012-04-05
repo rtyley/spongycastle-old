@@ -254,7 +254,7 @@ public class X509CertificateHolder
     {
         TBSCertificate tbsCert = x509Certificate.getTBSCertificate();
 
-        if (!tbsCert.getSignature().equals(x509Certificate.getSignatureAlgorithm()))
+        if (!CertUtils.isAlgIdEqual(tbsCert.getSignature(), x509Certificate.getSignatureAlgorithm()))
         {
             throw new CertException("signature invalid - algorithm identifier mismatch");
         }

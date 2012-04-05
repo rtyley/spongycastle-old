@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.Hashtable;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERGeneralizedTime;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERUTF8String;
@@ -303,7 +303,7 @@ public class BCStyle
             }
             else if (oid.equals(DATE_OF_BIRTH))  // accept time string as well as # (for compatibility)
             {
-                return new DERGeneralizedTime(value);
+                return new ASN1GeneralizedTime(value);
             }
             else if (oid.equals(C) || oid.equals(SN) || oid.equals(DN_QUALIFIER)
                 || oid.equals(TELEPHONE_NUMBER))

@@ -56,6 +56,7 @@ public interface PKCSObjectIdentifiers
 
     static final ASN1ObjectIdentifier    des_EDE3_CBC            = encryptionAlgorithm.branch("7");
     static final ASN1ObjectIdentifier    RC2_CBC                 = encryptionAlgorithm.branch("2");
+    static final ASN1ObjectIdentifier    rc4                     = encryptionAlgorithm.branch("4");
 
     //
     // object identifiers for digests

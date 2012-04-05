@@ -27,11 +27,11 @@ import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.TBSCertificate;
 import org.bouncycastle.asn1.x509.Time;
 import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.X509Principal;
@@ -512,7 +512,7 @@ public class X509V3CertificateGenerator
         v.add(sigAlgId);
         v.add(new DERBitString(signature));
 
-        return new X509CertificateObject(new X509CertificateStructure(new DERSequence(v)));
+        return new X509CertificateObject(Certificate.getInstance(new DERSequence(v)));
     }
 
     /**

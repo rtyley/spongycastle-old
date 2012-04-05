@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.DeflaterOutputStream;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.BERConstructedOctetString;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.BEROctetString;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.CompressedData;
 import org.bouncycastle.asn1.cms.ContentInfo;
@@ -57,8 +57,8 @@ public class CMSCompressedDataGenerator
 
             zOut.close();
 
-            comAlgId = new AlgorithmIdentifier(new DERObjectIdentifier(compressionOID));
-            comOcts = new BERConstructedOctetString(bOut.toByteArray());
+            comAlgId = new AlgorithmIdentifier(new ASN1ObjectIdentifier(compressionOID));
+            comOcts = new BEROctetString(bOut.toByteArray());
         }
         catch (IOException e)
         {
@@ -96,7 +96,7 @@ public class CMSCompressedDataGenerator
             zOut.close();
 
             comAlgId = compressor.getAlgorithmIdentifier();
-            comOcts = new BERConstructedOctetString(bOut.toByteArray());
+            comOcts = new BEROctetString(bOut.toByteArray());
         }
         catch (IOException e)
         {
