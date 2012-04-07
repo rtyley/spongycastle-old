@@ -105,7 +105,8 @@ public class RegressionTest
         new SRP6Test(),
         new SCryptTest(),
         new ResetTest(),
-        new NullTest()
+        new NullTest(),
+        new DSTU4145Test()
     };
 
     public static void main(
