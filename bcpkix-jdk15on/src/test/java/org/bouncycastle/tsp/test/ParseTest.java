@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.Security;
 
 import junit.framework.TestCase;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -238,6 +239,11 @@ public class ParseTest
       + "XbnyYRgWTI55A2jH6IsQQVHc5DaIcmbdI8iATaRTHY5eUeVuI+Q/3RMVBFAb5qRhM61Ddcrjq058"
       + "C0uiH9G2IB5QRyu6RsCUgrkeMTMBqlIBlnDBy+EgLouDU4Dehxy5uzEl5DBKZEewZpQZOTO/kAgL"
       + "WruAAg/Lj4r0f9vN12wRlHoS2UKDjrE1DnUBbrM=");
+
+    public void setUp()
+    {
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+    }
 
     /* (non-Javadoc)
      * @see org.bouncycastle.util.test.Test#getName()

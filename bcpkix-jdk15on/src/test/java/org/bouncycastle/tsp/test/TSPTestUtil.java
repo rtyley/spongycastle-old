@@ -2,12 +2,7 @@ package org.bouncycastle.tsp.test;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
@@ -56,6 +51,7 @@ public class TSPTestUtil
     {
         try
         {
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             rand = new SecureRandom();
 
             kpg = KeyPairGenerator.getInstance("RSA", "BC");

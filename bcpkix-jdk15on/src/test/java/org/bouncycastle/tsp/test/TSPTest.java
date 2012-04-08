@@ -6,6 +6,7 @@ import java.security.PrivateKey;
 import java.security.cert.CertStore;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -34,6 +35,7 @@ public class TSPTest
     public void testGeneral()
         throws Exception
     {
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             String signDN = "O=Bouncy Castle, C=AU";
             KeyPair signKP = TSPTestUtil.makeKeyPair();
             X509Certificate signCert = TSPTestUtil.makeCACertificate(signKP,

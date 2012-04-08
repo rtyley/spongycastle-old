@@ -2,10 +2,7 @@ package org.bouncycastle.cms.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.CertStore;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509CRL;
@@ -420,7 +417,8 @@ public class SignedDataTest
         if (!_initialised)
         {
             _initialised = true;
-            
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
             _origDN   = "O=Bouncy Castle, C=AU";
             _origKP   = CMSTestUtil.makeKeyPair();  
             _origCert = CMSTestUtil.makeCertificate(_origKP, _origDN, _origKP, _origDN);
