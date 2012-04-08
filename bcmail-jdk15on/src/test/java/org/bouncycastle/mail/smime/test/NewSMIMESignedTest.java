@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,6 +104,7 @@ public class NewSMIMESignedTest
 
     static
     {
+    	Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         try
         {
             msg      = SMIMETestUtil.makeMimeBodyPart("Hello world!\n");
