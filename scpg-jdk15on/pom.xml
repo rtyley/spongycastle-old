@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>bcpg-jdk15on</artifactId>
+    <artifactId>scpg-jdk15on</artifactId>
     <packaging>jar</packaging>
     <parent>
         <groupId>com.madgag</groupId>
-        <artifactId>bc-parent</artifactId>
+        <artifactId>sc-parent</artifactId>
         <version>1.47-SNAPSHOT</version>
     </parent>
     <name>Bouncy Castle OpenPGP API</name>
@@ -18,12 +18,12 @@
     <dependencies>
         <dependency>
             <groupId>com.madgag</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
+            <artifactId>scprov-jdk15on</artifactId>
             <version>1.47-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.madgag</groupId>
-            <artifactId>bc-bzip2</artifactId>
+            <artifactId>sc-bzip2</artifactId>
             <version>1.47-SNAPSHOT</version>
         </dependency>
     </dependencies>

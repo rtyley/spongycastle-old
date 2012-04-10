@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>bcpkix-jdk15on</artifactId>
+    <artifactId>scpkix-jdk15on</artifactId>
     <packaging>jar</packaging>
     <parent>
         <groupId>com.madgag</groupId>
-        <artifactId>bc-parent</artifactId>
+        <artifactId>sc-parent</artifactId>
         <version>1.47-SNAPSHOT</version>
     </parent>
     <name>Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs</name>
@@ -18,7 +18,7 @@
     <dependencies>
         <dependency>
             <groupId>com.madgag</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
+            <artifactId>scprov-jdk15on</artifactId>
             <version>1.47-SNAPSHOT</version>
         </dependency>
     </dependencies>

@@ -8,7 +8,7 @@
         <version>7</version>
     </parent>
     <groupId>com.madgag</groupId>
-    <artifactId>bc-parent</artifactId>
+    <artifactId>sc-parent</artifactId>
     <version>1.47-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Bouncy Castle parent POM project</name>
@@ -41,11 +41,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <modules>
-        <module>bcprov-jdk15on</module>
-        <module>bc-bzip2</module>
-        <module>bcpg-jdk15on</module>
-        <module>bcpkix-jdk15on</module>
-        <module>bcmail-jdk15on</module>
+        <module>scprov-jdk15on</module>
+        <module>sc-bzip2</module>
+        <module>scpg-jdk15on</module>
+        <module>scpkix-jdk15on</module>
+        <module>scmail-jdk15on</module>
     </modules>
     <dependencies>
         <dependency>
