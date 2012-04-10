@@ -105,7 +105,7 @@ public class ValidateSignedMail
             crls.add(crl);
         }
         CertStore certStore = CertStore.getInstance("Collection",
-                new CollectionCertStoreParameters(crls), "BC");
+                new CollectionCertStoreParameters(crls), "SC");
 
         // add crls and enable revocation checking
         param.addCertStore(certStore);
@@ -308,7 +308,7 @@ public class ValidateSignedMail
             InputStream in = new FileInputStream(certfile);
 
             CertificateFactory cf = CertificateFactory.getInstance("X.509",
-                    "BC");
+                    "SC");
             cert = (X509Certificate) cf.generateCertificate(in);
         }
         catch (Exception e)
@@ -328,7 +328,7 @@ public class ValidateSignedMail
             InputStream in = new FileInputStream(crlfile);
 
             CertificateFactory cf = CertificateFactory.getInstance("X.509",
-                    "BC");
+                    "SC");
             crl = (X509CRL) cf.generateCRL(in);
         }
         catch (Exception e)
@@ -343,7 +343,7 @@ public class ValidateSignedMail
     private static TrustAnchor getDummyTrustAnchor() throws Exception
     {
         X500Principal principal = new X500Principal("CN=Dummy Trust Anchor");
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", "SC");
         kpg.initialize(1024, new SecureRandom());
         PublicKey trustPubKey = kpg.generateKeyPair().getPublic();
         return new TrustAnchor(principal, trustPubKey, null);

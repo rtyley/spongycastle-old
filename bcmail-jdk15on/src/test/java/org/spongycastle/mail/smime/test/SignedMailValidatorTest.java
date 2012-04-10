@@ -217,14 +217,14 @@ public class SignedMailValidatorTest extends TestCase
         certList.add(signCert);
 
         CertStore certs = CertStore.getInstance("Collection",
-                        new CollectionCertStoreParameters(certList), "BC");
+                        new CollectionCertStoreParameters(certList), "SC");
 
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
 
         gen.addSigner(signKP.getPrivate(), signCert, SMIMESignedGenerator.DIGEST_SHA1);
         gen.addCertificatesAndCRLs(certs);
 
-        MimeMultipart signedMsg = gen.generate(baseMsg, "BC");
+        MimeMultipart signedMsg = gen.generate(baseMsg, "SC");
 
         Properties props = System.getProperties();
         Session session = Session.getDefaultInstance(props, null);
@@ -431,7 +431,7 @@ public class SignedMailValidatorTest extends TestCase
         X509Certificate cert = null;
         InputStream in = getClass().getResourceAsStream(certfile);
 
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "SC");
         cert = (X509Certificate) cf.generateCertificate(in);
         return cert;
     }
@@ -441,14 +441,14 @@ public class SignedMailValidatorTest extends TestCase
         X509CRL crl = null;
         InputStream in = this.getClass().getResourceAsStream(crlfile);
         
-        CertificateFactory cf = CertificateFactory.getInstance("x.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("x.509", "SC");
         crl = (X509CRL) cf.generateCRL(in);
         return crl;
     }
 
     public void setUp()
     {
-        if (Security.getProvider("BC") == null)
+        if (Security.getProvider("SC") == null)
         {
             Security
                     .addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());

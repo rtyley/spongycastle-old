@@ -17,7 +17,7 @@ public class RSA3CertTest
 {
     public void setUp()
     {
-        if (Security.getProvider("BC") == null)
+        if (Security.getProvider("SC") == null)
         {
             Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
         }
@@ -95,7 +95,7 @@ public class RSA3CertTest
     {
         X509Certificate  cert = loadCert(certName);
         byte[]           tbs = cert.getTBSCertificate();
-        Signature        sig = Signature.getInstance(cert.getSigAlgName(), "BC");
+        Signature        sig = Signature.getInstance(cert.getSigAlgName(), "SC");
         
         sig.initVerify(cert.getPublicKey());
         
@@ -108,7 +108,7 @@ public class RSA3CertTest
         String certName)
         throws Exception
     {
-        CertificateFactory rd = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory rd = CertificateFactory.getInstance("X.509", "SC");
         
         return (X509Certificate)rd.generateCertificate(getClass().getResourceAsStream(certName));
     }

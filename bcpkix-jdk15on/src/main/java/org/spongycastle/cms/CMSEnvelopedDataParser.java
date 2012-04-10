@@ -42,7 +42,7 @@ import org.spongycastle.cms.jcajce.JceAlgorithmIdentifierConverter;
  *      {
  *          RecipientInformation   recipient = (RecipientInformation)it.next();
  *
- *          CMSTypedStream recData = recipient.getContentStream(new JceKeyTransEnvelopedRecipient(privateKey).setProvider("BC"));
+ *          CMSTypedStream recData = recipient.getContentStream(new JceKeyTransEnvelopedRecipient(privateKey).setProvider("SC"));
  *          
  *          processDataStream(recData.getContentStream());
  *      }

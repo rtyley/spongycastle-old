@@ -35,13 +35,13 @@ import org.spongycastle.operator.OutputEncryptor;
  * <pre>
  *      CMSEnvelopedDataStreamGenerator edGen = new CMSEnvelopedDataStreamGenerator();
  *
- *      edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert).setProvider("BC"));
+ *      edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert).setProvider("SC"));
  *
  *      ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
  *      
  *      OutputStream out = edGen.open(
  *                              bOut, new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC)
- *                                              .setProvider("BC").build());
+ *                                              .setProvider("SC").build());
  *      out.write(data);
  *      
  *      out.close();

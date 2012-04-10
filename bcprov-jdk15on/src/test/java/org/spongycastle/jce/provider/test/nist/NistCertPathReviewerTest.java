@@ -574,16 +574,16 @@ public class NistCertPathReviewerTest
         
         certsAndCrls.add(endCert);
     
-        CertPath certPath = CertificateFactory.getInstance("X.509","BC").generateCertPath(certsAndCrls);
+        CertPath certPath = CertificateFactory.getInstance("X.509","SC").generateCertPath(certsAndCrls);
     
         for (int i = 0; i != crls.length; i++)
         {
             certsAndCrls.add(loadCrl(crls[i]));
         }
     
-        CertStore  store = CertStore.getInstance("Collection", new CollectionCertStoreParameters(certsAndCrls), "BC");
+        CertStore  store = CertStore.getInstance("Collection", new CollectionCertStoreParameters(certsAndCrls), "SC");
         
-        //CertPathValidator validator = CertPathValidator.getInstance("PKIX","BC");
+        //CertPathValidator validator = CertPathValidator.getInstance("PKIX","SC");
         PKIXCertPathReviewer reviewer;
         PKIXParameters    params = new PKIXParameters(trustedSet);
         
@@ -616,7 +616,7 @@ public class NistCertPathReviewerTest
         {
             InputStream in = new FileInputStream(getPkitsHome() + "/certs/" + certName + ".crt");
             
-            CertificateFactory fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory fact = CertificateFactory.getInstance("X.509", "SC");
             
             cert = (X509Certificate)fact.generateCertificate(in);
     
@@ -645,7 +645,7 @@ public class NistCertPathReviewerTest
         {
             InputStream in = new FileInputStream(getPkitsHome() + "/crls/" + crlName + ".crl");
             
-            CertificateFactory fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory fact = CertificateFactory.getInstance("X.509", "SC");
             
             crl = (X509CRL)fact.generateCRL(in);
             
@@ -695,7 +695,7 @@ public class NistCertPathReviewerTest
     
     public void setUp()
     {
-        if (Security.getProvider("BC") == null)
+        if (Security.getProvider("SC") == null)
         {
             Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
         }

@@ -64,7 +64,7 @@ public class AESSICTest
     public void performTest()
         throws Exception
     {
-        Cipher c = Cipher.getInstance("AES/SIC/NoPadding", "BC");
+        Cipher c = Cipher.getInstance("AES/SIC/NoPadding", "SC");
 
         //
         // NIST vectors
@@ -102,7 +102,7 @@ public class AESSICTest
         //
         // check CTR also recognised.
         //
-        c = Cipher.getInstance("AES/CTR/NoPadding", "BC");
+        c = Cipher.getInstance("AES/CTR/NoPadding", "SC");
 
         Key sk = new SecretKeySpec(Hex.decode("2B7E151628AED2A6ABF7158809CF4F3C"), "AES");
 
@@ -120,7 +120,7 @@ public class AESSICTest
         //
         // check partial block processing
         //
-        c = Cipher.getInstance("AES/CTR/NoPadding", "BC");
+        c = Cipher.getInstance("AES/CTR/NoPadding", "SC");
 
         sk = new SecretKeySpec(Hex.decode("2B7E151628AED2A6ABF7158809CF4F3C"), "AES");
 

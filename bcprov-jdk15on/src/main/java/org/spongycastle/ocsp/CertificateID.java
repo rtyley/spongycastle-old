@@ -66,7 +66,7 @@ public class CertificateID
         BigInteger      number)
         throws OCSPException
     {
-        this(hashAlgorithm, issuerCert, number, "BC");
+        this(hashAlgorithm, issuerCert, number, "SC");
     }
 
     public String getHashAlgOID()

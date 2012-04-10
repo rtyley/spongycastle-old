@@ -82,7 +82,7 @@ public class SignedFileProcessor
         PGPPublicKey                key = pgpRing.getPublicKey(ops.getKeyID());
         FileOutputStream            out = new FileOutputStream(p2.getFileName());
 
-        ops.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
+        ops.init(new JcaPGPContentVerifierBuilderProvider().setProvider("SC"), key);
             
         while ((ch = dIn.read()) >= 0)
         {
@@ -132,8 +132,8 @@ public class SignedFileProcessor
         }
 
         PGPSecretKey                pgpSec = PGPExampleUtil.readSecretKey(keyIn);
-        PGPPrivateKey               pgpPrivKey = pgpSec.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(pass));
-        PGPSignatureGenerator       sGen = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(pgpSec.getPublicKey().getAlgorithm(), PGPUtil.SHA1).setProvider("BC"));
+        PGPPrivateKey               pgpPrivKey = pgpSec.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("SC").build(pass));
+        PGPSignatureGenerator       sGen = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(pgpSec.getPublicKey().getAlgorithm(), PGPUtil.SHA1).setProvider("SC"));
         
         sGen.init(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
         

@@ -55,7 +55,7 @@ public class PubringDump
     {
         Security.addProvider(new BouncyCastleProvider());
         
-        PGPUtil.setDefaultProvider("BC");
+        PGPUtil.setDefaultProvider("SC");
 
         //
         // Read the public key rings

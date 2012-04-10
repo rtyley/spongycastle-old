@@ -31,7 +31,7 @@ public class CertStoreTest
     private void basicTest()
         throws Exception
     {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "SC");
 
         X509Certificate rootCert = (X509Certificate)cf
                 .generateCertificate(new ByteArrayInputStream(
@@ -56,7 +56,7 @@ public class CertStoreTest
         list.add(rootCrl);
         list.add(interCrl);
         CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
-        CertStore store = CertStore.getInstance("Collection", ccsp, "BC");
+        CertStore store = CertStore.getInstance("Collection", ccsp, "SC");
 
         // Searching for rootCert by subjectDN
         X509CertSelector targetConstraints = new X509CertSelector();
@@ -119,7 +119,7 @@ public class CertStoreTest
     private void orderTest()
         throws Exception
     {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "SC");
 
         X509Certificate rootCert = (X509Certificate)cf
                 .generateCertificate(new ByteArrayInputStream(
@@ -136,7 +136,7 @@ public class CertStoreTest
         list.add(interCert);
         list.add(finalCert);
         CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
-        CertStore store = CertStore.getInstance("Collection", ccsp, "BC");
+        CertStore store = CertStore.getInstance("Collection", ccsp, "SC");
 
         Iterator certs = store.getCertificates(null).iterator();
 
@@ -158,7 +158,7 @@ public class CertStoreTest
         list.add(interCert);
         list.add(rootCert);
         ccsp = new CollectionCertStoreParameters(list);
-        store = CertStore.getInstance("Collection", ccsp, "BC");
+        store = CertStore.getInstance("Collection", ccsp, "SC");
 
         certs = store.getCertificates(null).iterator();
 
@@ -187,7 +187,7 @@ public class CertStoreTest
         list.add(interCrl);
 
         ccsp = new CollectionCertStoreParameters(list);
-        store = CertStore.getInstance("Collection", ccsp, "BC");
+        store = CertStore.getInstance("Collection", ccsp, "SC");
 
         Iterator crls = store.getCRLs(null).iterator();
 
@@ -205,7 +205,7 @@ public class CertStoreTest
         list.add(interCrl);
         list.add(rootCrl);
         ccsp = new CollectionCertStoreParameters(list);
-        store = CertStore.getInstance("Collection", ccsp, "BC");
+        store = CertStore.getInstance("Collection", ccsp, "SC");
 
         crls = store.getCRLs(null).iterator();
 

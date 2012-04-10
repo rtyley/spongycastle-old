@@ -20,7 +20,7 @@ class CMSTestSetup extends TestSetup
 
     protected void tearDown()
     {
-        Security.removeProvider("BC");
+        Security.removeProvider("SC");
     }
 
 }

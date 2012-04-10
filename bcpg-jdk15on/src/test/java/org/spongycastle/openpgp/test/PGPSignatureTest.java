@@ -101,7 +101,7 @@ public class PGPSignatureTest
         //
         PGPSecretKeyRing pgpPriv = new PGPSecretKeyRing(rsaKeyRing);         
         PGPSecretKey secretKey = pgpPriv.getSecretKey();        
-        PGPPrivateKey pgpPrivKey = secretKey.extractPrivateKey(rsaPass, "BC");
+        PGPPrivateKey pgpPrivKey = secretKey.extractPrivateKey(rsaPass, "SC");
 
         try
         {
@@ -128,13 +128,13 @@ public class PGPSignatureTest
         //
         // certifications
         //
-        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1, "BC");
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.RSA_GENERAL, HashAlgorithmTags.SHA1, "SC");
         
         sGen.initSign(PGPSignature.KEY_REVOCATION, pgpPrivKey);
 
         PGPSignature sig = sGen.generateCertification(secretKey.getPublicKey());
         
-        sig.initVerify(secretKey.getPublicKey(), "BC");
+        sig.initVerify(secretKey.getPublicKey(), "SC");
         
         if (!sig.verifyCertification(secretKey.getPublicKey()))
         {
@@ -143,9 +143,9 @@ public class PGPSignatureTest
         
         PGPSecretKeyRing pgpDSAPriv = new PGPSecretKeyRing(dsaKeyRing);         
         PGPSecretKey secretDSAKey = pgpDSAPriv.getSecretKey();        
-        PGPPrivateKey pgpPrivDSAKey = secretDSAKey.extractPrivateKey(dsaPass, "BC");
+        PGPPrivateKey pgpPrivDSAKey = secretDSAKey.extractPrivateKey(dsaPass, "SC");
         
-        sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, "BC");
+        sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, "SC");
         
         sGen.initSign(PGPSignature.SUBKEY_BINDING, pgpPrivDSAKey);
 
@@ -169,7 +169,7 @@ public class PGPSignatureTest
         
         sig = ((PGPSignatureList) f.nextObject()).get(0);
         
-        sig.initVerify(secretDSAKey.getPublicKey(), "BC");
+        sig.initVerify(secretDSAKey.getPublicKey(), "SC");
         
         if (!sig.verifyCertification(secretDSAKey.getPublicKey(), secretKey.getPublicKey()))
         {
@@ -228,7 +228,7 @@ public class PGPSignatureTest
         //
         // no packets passed
         //
-        sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, "BC");
+        sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, "SC");
         
         sGen.initSign(PGPSignature.SUBKEY_BINDING, pgpPrivDSAKey);
 
@@ -237,7 +237,7 @@ public class PGPSignatureTest
 
         sig = sGen.generateCertification(TEST_USER_ID, secretKey.getPublicKey());
         
-        sig.initVerify(secretDSAKey.getPublicKey(), "BC");
+        sig.initVerify(secretDSAKey.getPublicKey(), "SC");
         
         if (!sig.verifyCertification(TEST_USER_ID, secretKey.getPublicKey()))
         {
@@ -272,7 +272,7 @@ public class PGPSignatureTest
         //
         // override hash packets
         //
-        sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, "BC");
+        sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.DSA, HashAlgorithmTags.SHA1, "SC");
         
         sGen.initSign(PGPSignature.SUBKEY_BINDING, pgpPrivDSAKey);
 
@@ -286,7 +286,7 @@ public class PGPSignatureTest
 
         sig = sGen.generateCertification(TEST_USER_ID, secretKey.getPublicKey());
         
-        sig.initVerify(secretDSAKey.getPublicKey(), "BC");
+        sig.initVerify(secretDSAKey.getPublicKey(), "SC");
         
         if (!sig.verifyCertification(TEST_USER_ID, secretKey.getPublicKey()))
         {
@@ -365,7 +365,7 @@ public class PGPSignatureTest
         //
         pgpPriv = new PGPSecretKeyRing(dsaKeyRing);         
         secretKey = pgpPriv.getSecretKey();        
-        pgpPrivKey = secretKey.extractPrivateKey(dsaPass, "BC");
+        pgpPrivKey = secretKey.extractPrivateKey(dsaPass, "SC");
         
         try
         {
@@ -531,7 +531,7 @@ public class PGPSignatureTest
     {            
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         ByteArrayInputStream  testIn = new ByteArrayInputStream(TEST_DATA);
-        PGPSignatureGenerator sGen = new PGPSignatureGenerator(encAlgorithm, hashAlgorithm, "BC");
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(encAlgorithm, hashAlgorithm, "SC");
         
         sGen.initSign(PGPSignature.BINARY_DOCUMENT, privKey);
         sGen.generateOnePassVersion(false).encode(bOut);
@@ -570,7 +570,7 @@ public class PGPSignatureTest
         byte[]         canonicalData)
         throws Exception
     {            
-        PGPSignatureGenerator sGen = new PGPSignatureGenerator(encAlgorithm, HashAlgorithmTags.SHA1, "BC");  
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(encAlgorithm, HashAlgorithmTags.SHA1, "SC");  
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         ByteArrayInputStream  testIn = new ByteArrayInputStream(data);
         Date                  creationTime = new Date();
@@ -627,7 +627,7 @@ public class PGPSignatureTest
     {
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
         ByteArrayInputStream    testIn = new ByteArrayInputStream(TEST_DATA);
-        PGPV3SignatureGenerator sGen = new PGPV3SignatureGenerator(encAlgorithm, hashAlgorithm, "BC");
+        PGPV3SignatureGenerator sGen = new PGPV3SignatureGenerator(encAlgorithm, hashAlgorithm, "SC");
         
         sGen.initSign(PGPSignature.BINARY_DOCUMENT, privKey);
         sGen.generateOnePassVersion(false).encode(bOut);
@@ -666,7 +666,7 @@ public class PGPSignatureTest
         byte[]         canonicalData)
         throws Exception
     {            
-        PGPV3SignatureGenerator sGen = new PGPV3SignatureGenerator(encAlgorithm, HashAlgorithmTags.SHA1, "BC");
+        PGPV3SignatureGenerator sGen = new PGPV3SignatureGenerator(encAlgorithm, HashAlgorithmTags.SHA1, "SC");
         ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
         ByteArrayInputStream    testIn = new ByteArrayInputStream(data);
         
@@ -718,7 +718,7 @@ public class PGPSignatureTest
         PGPLiteralData          p2 = (PGPLiteralData)pgpFact.nextObject();
         InputStream             dIn = p2.getInputStream();
     
-        ops.initVerify(pubKey, "BC");
+        ops.initVerify(pubKey, "SC");
         
         int ch;
 
@@ -750,7 +750,7 @@ public class PGPSignatureTest
             fail("Failed generated signature check - " + hashAlgorithm);
         }
         
-        sig.initVerify(pubKey, "BC");
+        sig.initVerify(pubKey, "SC");
         
         for (int i = 0; i != original.length; i++)
         {

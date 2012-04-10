@@ -55,22 +55,22 @@ public class TSPTestUtil
             Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
             rand = new SecureRandom();
 
-            kpg = KeyPairGenerator.getInstance("RSA", "BC");
+            kpg = KeyPairGenerator.getInstance("RSA", "SC");
             kpg.initialize(1024, rand);
 
-            desede128kg = KeyGenerator.getInstance("DESEDE", "BC");
+            desede128kg = KeyGenerator.getInstance("DESEDE", "SC");
             desede128kg.init(112, rand);
 
-            desede192kg = KeyGenerator.getInstance("DESEDE", "BC");
+            desede192kg = KeyGenerator.getInstance("DESEDE", "SC");
             desede192kg.init(168, rand);
 
-            rc240kg = KeyGenerator.getInstance("RC2", "BC");
+            rc240kg = KeyGenerator.getInstance("RC2", "SC");
             rc240kg.init(40, rand);
 
-            rc264kg = KeyGenerator.getInstance("RC2", "BC");
+            rc264kg = KeyGenerator.getInstance("RC2", "SC");
             rc264kg.init(64, rand);
 
-            rc2128kg = KeyGenerator.getInstance("RC2", "BC");
+            rc2128kg = KeyGenerator.getInstance("RC2", "SC");
             rc2128kg.init(128, rand);
 
             serialNumber = new BigInteger("1");

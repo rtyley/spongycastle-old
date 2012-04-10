@@ -151,7 +151,7 @@ public class ClearSignedFileProcessor
         PGPSignature               sig = p3.get(0);
 
         PGPPublicKey publicKey = pgpRings.getPublicKey(sig.getKeyID());
-        sig.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), publicKey);
+        sig.init(new JcaPGPContentVerifierBuilderProvider().setProvider("SC"), publicKey);
 
         //
         // read the input, making sure we ignore the last newline.
@@ -241,8 +241,8 @@ public class ClearSignedFileProcessor
         }
         
         PGPSecretKey                    pgpSecKey = PGPExampleUtil.readSecretKey(keyIn);
-        PGPPrivateKey                   pgpPrivKey = pgpSecKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(pass));
-        PGPSignatureGenerator           sGen = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(pgpSecKey.getPublicKey().getAlgorithm(), digest).setProvider("BC"));
+        PGPPrivateKey                   pgpPrivKey = pgpSecKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("SC").build(pass));
+        PGPSignatureGenerator           sGen = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(pgpSecKey.getPublicKey().getAlgorithm(), digest).setProvider("SC"));
         PGPSignatureSubpacketGenerator  spGen = new PGPSignatureSubpacketGenerator();
         
         sGen.init(PGPSignature.CANONICAL_TEXT_DOCUMENT, pgpPrivKey);

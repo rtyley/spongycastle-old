@@ -10,7 +10,7 @@ import org.spongycastle.util.test.SimpleTest;
 public class DigestTest
     extends SimpleTest
 {
-    final static String provider = "BC";
+    final static String provider = "SC";
 
     static private String[][] abcVectors =
     {

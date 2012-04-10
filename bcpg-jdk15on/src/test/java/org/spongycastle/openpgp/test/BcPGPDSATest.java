@@ -393,11 +393,11 @@ public class BcPGPDSATest
         throws Exception
     {
         String file = null;
-        KeyFactory fact = KeyFactory.getInstance("DSA", "BC");
+        KeyFactory fact = KeyFactory.getInstance("DSA", "SC");
         PGPPublicKey pubKey = null;
         PrivateKey privKey = null;
         
-        PGPUtil.setDefaultProvider("BC");
+        PGPUtil.setDefaultProvider("SC");
 
         //
         // Read the public key
@@ -582,7 +582,7 @@ public class BcPGPDSATest
         char []   passPhrase = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
         sKey = new PGPSecretKeyRing(testPrivKey2, new BcKeyFingerprintCalculator());
-        pgpPrivKey = sKey.getSecretKey().extractPrivateKey(passPhrase, "BC");
+        pgpPrivKey = sKey.getSecretKey().extractPrivateKey(passPhrase, "SC");
 
         byte[]    bytes = pgpPrivKey.getKey().getEncoded();
         
@@ -605,7 +605,7 @@ public class BcPGPDSATest
         //
         // use of PGPKeyPair
         //
-        KeyPairGenerator    kpg = KeyPairGenerator.getInstance("DSA", "BC");
+        KeyPairGenerator    kpg = KeyPairGenerator.getInstance("DSA", "SC");
         
         kpg.initialize(512);
         

@@ -87,8 +87,8 @@ public class GOST3410Test
                                new ECFieldElement.Fp(mod_p, new BigInteger("17614944419213781543809391949654080031942662045363639260709847859438286763994"))), // y
             spec);
 
-        Signature           sgr = Signature.getInstance("ECGOST3410", "BC");
-        KeyFactory          f = KeyFactory.getInstance("ECGOST3410", "BC");
+        Signature           sgr = Signature.getInstance("ECGOST3410", "SC");
+        KeyFactory          f = KeyFactory.getInstance("ECGOST3410", "SC");
         PrivateKey          sKey = f.generatePrivate(priKey);
         PublicKey           vKey = f.generatePublic(pubKey);
 
@@ -131,8 +131,8 @@ public class GOST3410Test
     private void generationTest()
         throws Exception
     {
-        Signature             s = Signature.getInstance("GOST3410", "BC");
-        KeyPairGenerator      g = KeyPairGenerator.getInstance("GOST3410", "BC");
+        Signature             s = Signature.getInstance("GOST3410", "SC");
+        KeyPairGenerator      g = KeyPairGenerator.getInstance("GOST3410", "SC");
         byte[]                data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
         GOST3410ParameterSpec gost3410P = new GOST3410ParameterSpec(CryptoProObjectIdentifiers.gostR3410_94_CryptoPro_A.getId());
 
@@ -149,7 +149,7 @@ public class GOST3410Test
 
         byte[]  sigBytes = s.sign();
 
-        s = Signature.getInstance("GOST3410", "BC");
+        s = Signature.getInstance("GOST3410", "SC");
 
         s.initVerify(vKey);
 
@@ -163,8 +163,8 @@ public class GOST3410Test
         //
         // default initialisation test
         //
-        s = Signature.getInstance("GOST3410", "BC");
-        g = KeyPairGenerator.getInstance("GOST3410", "BC");
+        s = Signature.getInstance("GOST3410", "SC");
+        g = KeyPairGenerator.getInstance("GOST3410", "SC");
 
         p = g.generateKeyPair();
 
@@ -177,7 +177,7 @@ public class GOST3410Test
 
         sigBytes = s.sign();
 
-        s = Signature.getInstance("GOST3410", "BC");
+        s = Signature.getInstance("GOST3410", "SC");
 
         s.initVerify(vKey);
 
@@ -191,7 +191,7 @@ public class GOST3410Test
         //
         // encoded test
         //
-        KeyFactory f = KeyFactory.getInstance("GOST3410", "BC");
+        KeyFactory f = KeyFactory.getInstance("GOST3410", "SC");
 
         X509EncodedKeySpec  x509s = new X509EncodedKeySpec(vKey.getEncoded());
         GOST3410PublicKey   k1 = (GOST3410PublicKey)f.generatePublic(x509s);
@@ -254,8 +254,8 @@ public class GOST3410Test
         //
         // ECGOST3410 generation test
         //
-        s = Signature.getInstance("ECGOST3410", "BC");
-        g = KeyPairGenerator.getInstance("ECGOST3410", "BC");
+        s = Signature.getInstance("ECGOST3410", "SC");
+        g = KeyPairGenerator.getInstance("ECGOST3410", "SC");
 
 //        BigInteger mod_p = new BigInteger("57896044618658097711785492504343953926634992332820282019728792003956564821041"); //p
 //
@@ -284,7 +284,7 @@ public class GOST3410Test
 
         sigBytes = s.sign();
 
-        s = Signature.getInstance("ECGOST3410", "BC");
+        s = Signature.getInstance("ECGOST3410", "SC");
 
         s.initVerify(vKey);
 
@@ -298,7 +298,7 @@ public class GOST3410Test
         //
         // encoded test
         //
-        f = KeyFactory.getInstance("ECGOST3410", "BC");
+        f = KeyFactory.getInstance("ECGOST3410", "SC");
 
         x509s = new X509EncodedKeySpec(vKey.getEncoded());
         ECPublicKey eck1 = (ECPublicKey)f.generatePublic(x509s);
@@ -382,7 +382,7 @@ public class GOST3410Test
         certGen.setPublicKey(vKey);
         certGen.setSignatureAlgorithm("GOST3411withGOST3410");
 
-        X509Certificate cert = certGen.generate(sKey, "BC");
+        X509Certificate cert = certGen.generate(sKey, "SC");
 
         ks.setKeyEntry("gost",sKey, "gost".toCharArray(), new Certificate[] { cert });
 
@@ -413,13 +413,13 @@ public class GOST3410Test
     private void parametersTest()
         throws Exception
     {
-//                AlgorithmParameterGenerator a = AlgorithmParameterGenerator.getInstance("GOST3410", "BC");
+//                AlgorithmParameterGenerator a = AlgorithmParameterGenerator.getInstance("GOST3410", "SC");
 //                a.init(512, random);
 //                AlgorithmParameters params = a.generateParameters();
 //
 //                byte[] encodeParams = params.getEncoded();
 //
-//                AlgorithmParameters a2 = AlgorithmParameters.getInstance("GOST3410", "BC");
+//                AlgorithmParameters a2 = AlgorithmParameters.getInstance("GOST3410", "SC");
 //                a2.init(encodeParams);
 //
 //                // a and a2 should be equivalent!
@@ -432,14 +432,14 @@ public class GOST3410Test
 
         GOST3410ParameterSpec gost3410P = new GOST3410ParameterSpec(CryptoProObjectIdentifiers.gostR3410_94_CryptoPro_B.getId());
 
-        KeyPairGenerator    g = KeyPairGenerator.getInstance("GOST3410", "BC");
+        KeyPairGenerator    g = KeyPairGenerator.getInstance("GOST3410", "SC");
         g.initialize(gost3410P, new SecureRandom());
         KeyPair p = g.generateKeyPair();
 
         PrivateKey  sKey = p.getPrivate();
         PublicKey   vKey = p.getPublic();
 
-        Signature           s = Signature.getInstance("GOST3410", "BC");
+        Signature           s = Signature.getInstance("GOST3410", "SC");
         byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
 
         s.initSign(sKey);
@@ -448,7 +448,7 @@ public class GOST3410Test
 
         byte[]  sigBytes = s.sign();
 
-        s = Signature.getInstance("GOST3410", "BC");
+        s = Signature.getInstance("GOST3410", "SC");
 
         s.initVerify(vKey);
 

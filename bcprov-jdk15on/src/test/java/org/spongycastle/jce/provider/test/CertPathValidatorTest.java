@@ -201,7 +201,7 @@ public class CertPathValidatorTest
     private void checkCircProcessing()
         throws Exception
     {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "SC");
 
         X509Certificate caCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(circCA));
         X509Certificate crlCaCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(circCRLCA));
@@ -223,12 +223,12 @@ public class CertPathValidatorTest
         List certchain = new ArrayList();
 
         certchain.add(crlCaCert);
-        CertPath cp = CertificateFactory.getInstance("X.509","BC").generateCertPath(certchain);
+        CertPath cp = CertificateFactory.getInstance("X.509","SC").generateCertPath(certchain);
 
         Set trust = new HashSet();
         trust.add(new TrustAnchor(caCert, null));
 
-        CertPathValidator cpv = CertPathValidator.getInstance("PKIX","BC");
+        CertPathValidator cpv = CertPathValidator.getInstance("PKIX","SC");
         //PKIXParameters param = new PKIXParameters(trust);
 
         PKIXBuilderParameters param = new PKIXBuilderParameters(trust, null);
@@ -245,7 +245,7 @@ public class CertPathValidatorTest
     public void performTest()
         throws Exception
     {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "SC");
 
             // initialise CertStore
         X509Certificate rootCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(CertPathTest.rootCertBin));
@@ -260,18 +260,18 @@ public class CertPathValidatorTest
         list.add(rootCrl);
         list.add(interCrl);
         CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(list);
-        CertStore store = CertStore.getInstance("Collection", ccsp, "BC");
+        CertStore store = CertStore.getInstance("Collection", ccsp, "SC");
         Calendar validDate = Calendar.getInstance();
         validDate.set(2008,8,4,14,49,10);
             //validating path
         List certchain = new ArrayList();
         certchain.add(finalCert);
         certchain.add(interCert);
-        CertPath cp = CertificateFactory.getInstance("X.509","BC").generateCertPath(certchain);
+        CertPath cp = CertificateFactory.getInstance("X.509","SC").generateCertPath(certchain);
         Set trust = new HashSet();
         trust.add(new TrustAnchor(rootCert, null));
 
-        CertPathValidator cpv = CertPathValidator.getInstance("PKIX","BC");
+        CertPathValidator cpv = CertPathValidator.getInstance("PKIX","SC");
         PKIXParameters param = new PKIXParameters(trust);
         param.addCertStore(store);
         param.setDate(validDate.getTime());
@@ -317,11 +317,11 @@ public class CertPathValidatorTest
             certchain = new ArrayList();
             certchain.add(finalCert);
             certchain.add(interCert);
-            cp = CertificateFactory.getInstance("X.509","BC").generateCertPath(certchain);
+            cp = CertificateFactory.getInstance("X.509","SC").generateCertPath(certchain);
             trust = new HashSet();
             trust.add(new TrustAnchor(rootCert, null));
 
-            cpv = CertPathValidator.getInstance("PKIX","BC");
+            cpv = CertPathValidator.getInstance("PKIX","SC");
             param = new PKIXParameters(trust);
             param.addCertStore(store);
             param.setRevocationEnabled(false);

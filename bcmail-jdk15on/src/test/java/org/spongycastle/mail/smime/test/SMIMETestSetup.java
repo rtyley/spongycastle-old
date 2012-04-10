@@ -44,7 +44,7 @@ class SMIMETestSetup extends TestSetup
     {
         CommandMap.setDefaultCommandMap(originalMap);
         originalMap = null;
-        Security.removeProvider("BC");
+        Security.removeProvider("SC");
     }
 
 

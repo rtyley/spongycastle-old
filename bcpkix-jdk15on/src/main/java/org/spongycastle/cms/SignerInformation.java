@@ -331,7 +331,7 @@ public class SignerInformation
 
             if (sigProvider != null)
             {
-                if (!sigProvider.getName().equalsIgnoreCase("BC"))
+                if (!sigProvider.getName().equalsIgnoreCase("SC"))
                 {
                     verifier = new JcaSignerInfoVerifierBuilder(new JcaDigestCalculatorProviderBuilder().build()).setProvider(sigProvider).build(key);
                 }

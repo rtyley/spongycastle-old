@@ -66,8 +66,8 @@ public class DoFinalTest
         
         try
         {
-            KeyGenerator    kGen = KeyGenerator.getInstance(baseAlgorithm, "BC");
-            Cipher          cipher = Cipher.getInstance(cipherName, "BC");
+            KeyGenerator    kGen = KeyGenerator.getInstance(baseAlgorithm, "SC");
+            Cipher          cipher = Cipher.getInstance(cipherName, "SC");
             Key             key = kGen.generateKey();
 
             cipher.init(Cipher.ENCRYPT_MODE, key);

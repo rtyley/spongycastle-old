@@ -45,7 +45,7 @@ public class CreateLargeEncryptedMail
         //
         // Open the key store
         //
-        KeyStore    ks = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore    ks = KeyStore.getInstance("PKCS12", "SC");
         String      keyAlias = ExampleUtils.findKeyAlias(ks, args[0], args[1].toCharArray());
 
         Certificate[]   chain = ks.getCertificateChain(keyAlias);
@@ -63,7 +63,7 @@ public class CreateLargeEncryptedMail
         // version 3 only.
         //
         /*
-        MessageDigest           dig = MessageDigest.getInstance("SHA1", "BC");
+        MessageDigest           dig = MessageDigest.getInstance("SHA1", "SC");
 
         dig.update(cert.getPublicKey().getEncoded());
               
@@ -79,7 +79,7 @@ public class CreateLargeEncryptedMail
         msg.setHeader("Content-Type", "application/octet-stream");
         msg.setHeader("Content-Transfer-Encoding", "binary");
 
-        MimeBodyPart mp = gen.generate(msg, SMIMEEnvelopedGenerator.RC2_CBC, "BC");
+        MimeBodyPart mp = gen.generate(msg, SMIMEEnvelopedGenerator.RC2_CBC, "SC");
         
         //
         // Get a Session object and create the mail message

@@ -51,7 +51,7 @@ public class TSPTest
             certList.add(signCert);
 
             CertStore certs = CertStore.getInstance("Collection",
-                    new CollectionCertStoreParameters(certList), "BC");
+                    new CollectionCertStoreParameters(certList), "SC");
             
             basicTest(origKP.getPrivate(), origCert, certs);     
             responseValidationTest(origKP.getPrivate(), origCert, certs);
@@ -82,13 +82,13 @@ public class TSPTest
 
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
-        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "SC");
 
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        tsToken.validate(cert, "BC");
+        tsToken.validate(cert, "SC");
 
         AttributeTable  table = tsToken.getSignedAttributes();
 
@@ -111,13 +111,13 @@ public class TSPTest
 
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
-        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "SC");
 
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        tsToken.validate(cert, "BC");
+        tsToken.validate(cert, "SC");
         
         //
         // check validation
@@ -180,7 +180,7 @@ public class TSPTest
 
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
-        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "SC");
 
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
@@ -220,7 +220,7 @@ public class TSPTest
 
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
-        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "SC");
 
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
@@ -260,7 +260,7 @@ public class TSPTest
 
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
-        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), null, "BC");
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), null, "SC");
 
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
@@ -303,7 +303,7 @@ public class TSPTest
 
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED, new HashSet());
 
-        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "SC");
 
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
@@ -349,7 +349,7 @@ public class TSPTest
 
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
-        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "SC");
         
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
@@ -361,14 +361,14 @@ public class TSPTest
         
         try
         {
-            tsToken.validate(cert, "BC");
+            tsToken.validate(cert, "SC");
         }
         catch (TSPValidationException e)
         {
             fail("certReq(false) verification of token failed.");
         }
 
-        CertStore   respCerts = tsToken.getCertificatesAndCRLs("Collection", "BC");
+        CertStore   respCerts = tsToken.getCertificatesAndCRLs("Collection", "SC");
         
         Collection  certsColl = respCerts.getCertificates(null);
         
@@ -393,7 +393,7 @@ public class TSPTest
         TimeStampRequestGenerator  reqGen = new TimeStampRequestGenerator();
         TimeStampRequest           request = reqGen.generate(TSPAlgorithms.SHA1, new byte[20], BigInteger.valueOf(100));
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
-        TimeStampResponse          tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+        TimeStampResponse          tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "SC");
 
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
@@ -427,13 +427,13 @@ public class TSPTest
 
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
-        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "SC");
 
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        tsToken.validate(cert, "BC");
+        tsToken.validate(cert, "SC");
         
         //
         // check validation
@@ -461,7 +461,7 @@ public class TSPTest
         //
         // test certReq
         //
-        CertStore store = tsToken.getCertificatesAndCRLs("Collection", "BC");
+        CertStore store = tsToken.getCertificatesAndCRLs("Collection", "SC");
         
         Collection certificates = store.getCertificates(null);
         
@@ -495,13 +495,13 @@ public class TSPTest
         
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
-        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "BC");
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("23"), new Date(), "SC");
 
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        tsToken.validate(cert, "BC");
+        tsToken.validate(cert, "SC");
         
         //
         // check validation
@@ -533,7 +533,7 @@ public class TSPTest
         //
         // test certReq
         //
-        CertStore store = tsToken.getCertificatesAndCRLs("Collection", "BC");
+        CertStore store = tsToken.getCertificatesAndCRLs("Collection", "SC");
         
         Collection certificates = store.getCertificates(null);
         
@@ -558,13 +558,13 @@ public class TSPTest
         
         TimeStampResponseGenerator tsRespGen = new TimeStampResponseGenerator(tsTokenGen, TSPAlgorithms.ALLOWED);
 
-        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("24"), new Date(), "BC");
+        TimeStampResponse tsResp = tsRespGen.generate(request, new BigInteger("24"), new Date(), "SC");
 
         tsResp = new TimeStampResponse(tsResp.getEncoded());
 
         TimeStampToken  tsToken = tsResp.getTimeStampToken();
 
-        tsToken.validate(cert, "BC");
+        tsToken.validate(cert, "SC");
         
         //
         // check validation
@@ -594,7 +594,7 @@ public class TSPTest
         //
         // test certReq
         //
-        CertStore store = tsToken.getCertificatesAndCRLs("Collection", "BC");
+        CertStore store = tsToken.getCertificatesAndCRLs("Collection", "SC");
         
         Collection certificates = store.getCertificates(null);
         

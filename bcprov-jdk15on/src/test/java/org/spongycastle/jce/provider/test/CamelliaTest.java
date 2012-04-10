@@ -58,8 +58,8 @@ public class CamelliaTest
 
         key = new SecretKeySpec(keyBytes, "Camellia");
 
-        in = Cipher.getInstance("Camellia/ECB/NoPadding", "BC");
-        out = Cipher.getInstance("Camellia/ECB/NoPadding", "BC");
+        in = Cipher.getInstance("Camellia/ECB/NoPadding", "SC");
+        out = Cipher.getInstance("Camellia/ECB/NoPadding", "SC");
 
         try
         {

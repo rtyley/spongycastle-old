@@ -28,7 +28,7 @@ import org.spongycastle.util.encoders.Base64;
 public class PGPUtil
     implements HashAlgorithmTags
 {
-    private    static String    defProvider = "BC";
+    private    static String    defProvider = "SC";
 
     /**
      * Return the provider that will be used by factory classes in situations

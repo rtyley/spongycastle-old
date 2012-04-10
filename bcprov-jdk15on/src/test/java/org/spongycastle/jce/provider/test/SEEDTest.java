@@ -50,8 +50,8 @@ public class SEEDTest
 
         key = new SecretKeySpec(keyBytes, "SEED");
 
-        in = Cipher.getInstance("SEED/ECB/NoPadding", "BC");
-        out = Cipher.getInstance("SEED/ECB/NoPadding", "BC");
+        in = Cipher.getInstance("SEED/ECB/NoPadding", "SC");
+        out = Cipher.getInstance("SEED/ECB/NoPadding", "SC");
 
         try
         {

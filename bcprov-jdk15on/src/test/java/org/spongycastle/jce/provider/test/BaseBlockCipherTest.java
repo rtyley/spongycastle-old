@@ -35,9 +35,9 @@ public abstract class BaseBlockCipherTest
 
         for (int i = 0; i != oids.length; i++)
         {
-            Cipher c1 = Cipher.getInstance(oids[i], "BC");
-            Cipher c2 = Cipher.getInstance(names[i], "BC");
-            KeyGenerator kg = KeyGenerator.getInstance(oids[i], "BC");
+            Cipher c1 = Cipher.getInstance(oids[i], "SC");
+            Cipher c2 = Cipher.getInstance(names[i], "SC");
+            KeyGenerator kg = KeyGenerator.getInstance(oids[i], "SC");
 
             SecretKey k = kg.generateKey();
 
@@ -73,9 +73,9 @@ public abstract class BaseBlockCipherTest
 
         for (int i = 0; i != oids.length; i++)
         {
-            Cipher c1 = Cipher.getInstance(oids[i], "BC");
-            Cipher c2 = Cipher.getInstance(name, "BC");
-            KeyGenerator kg = KeyGenerator.getInstance(oids[i], "BC");
+            Cipher c1 = Cipher.getInstance(oids[i], "SC");
+            Cipher c2 = Cipher.getInstance(name, "SC");
+            KeyGenerator kg = KeyGenerator.getInstance(oids[i], "SC");
 
             SecretKey k = kg.generateKey();
 
@@ -104,7 +104,7 @@ public abstract class BaseBlockCipherTest
         byte[]  out)
         throws Exception
     {
-        Cipher wrapper = Cipher.getInstance(wrappingAlgorithm, "BC");
+        Cipher wrapper = Cipher.getInstance(wrappingAlgorithm, "SC");
 
         wrapper.init(Cipher.WRAP_MODE, new SecretKeySpec(kek, algorithm));
 

@@ -59,8 +59,8 @@ public class GOST28147Test
 
         key = new SecretKeySpec(keyBytes, "GOST28147");
 
-        in = Cipher.getInstance("GOST28147/ECB/NoPadding", "BC");
-        out = Cipher.getInstance("GOST28147/ECB/NoPadding", "BC");
+        in = Cipher.getInstance("GOST28147/ECB/NoPadding", "SC");
+        out = Cipher.getInstance("GOST28147/ECB/NoPadding", "SC");
         out.init(Cipher.ENCRYPT_MODE, key);
         in.init(Cipher.DECRYPT_MODE, key);
 
@@ -126,8 +126,8 @@ public class GOST28147Test
 
         key = new SecretKeySpec(keyBytes, "GOST28147");
 
-        in = Cipher.getInstance("GOST28147/CFB8/NoPadding", "BC");
-        out = Cipher.getInstance("GOST28147/CFB8/NoPadding", "BC");
+        in = Cipher.getInstance("GOST28147/CFB8/NoPadding", "SC");
+        out = Cipher.getInstance("GOST28147/CFB8/NoPadding", "SC");
         byte[] iv = {1,2,3,4,5,6,7,8};
         
         out.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
@@ -197,9 +197,9 @@ public class GOST28147Test
             
             for (int i = 0; i != oids.length; i++)
             {
-                Cipher c1 = Cipher.getInstance(oids[i], "BC");
-                Cipher c2 = Cipher.getInstance(names[i], "BC");
-                KeyGenerator kg = KeyGenerator.getInstance(oids[i], "BC");
+                Cipher c1 = Cipher.getInstance(oids[i], "SC");
+                Cipher c2 = Cipher.getInstance(names[i], "SC");
+                KeyGenerator kg = KeyGenerator.getInstance(oids[i], "SC");
                 
                 SecretKey k = kg.generateKey();
                 

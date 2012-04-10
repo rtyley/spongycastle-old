@@ -84,7 +84,7 @@ public class DSATest
         
         byte[]  sigBytes = s.sign();
         
-        s = Signature.getInstance("DSA", "BC");
+        s = Signature.getInstance("DSA", "SC");
         
         s.initVerify(vKey);
         
@@ -119,7 +119,7 @@ public class DSATest
         //
         // key encoding test - BC decoding Sun keys
         //
-        KeyFactory          f = KeyFactory.getInstance("DSA", "BC");
+        KeyFactory          f = KeyFactory.getInstance("DSA", "SC");
         X509EncodedKeySpec  x509s = new X509EncodedKeySpec(vKey.getEncoded());
 
         DSAPublicKey        k1 = (DSAPublicKey)f.generatePublic(x509s);
@@ -153,13 +153,13 @@ public class DSATest
     {
         byte[] dummySha1 = Hex.decode("01020304050607080910111213141516");
 
-        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("DSA", "BC");
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("DSA", "SC");
 
         kpGen.initialize(512);
 
         KeyPair          kp = kpGen.generateKeyPair();
 
-        Signature        sig = Signature.getInstance("NONEwithDSA", "BC");
+        Signature        sig = Signature.getInstance("NONEwithDSA", "SC");
 
         sig.initSign(kp.getPrivate());
 
@@ -291,8 +291,8 @@ public class DSATest
                 curve.decodePoint(Hex.decode("025b6dc53bc61a2548ffb0f671472de6c9521a9d2d2534e65abfcbd5fe0c70")), // Q
                 spec);
         
-        Signature           sgr = Signature.getInstance("ECDSA", "BC");
-        KeyFactory          f = KeyFactory.getInstance("ECDSA", "BC");
+        Signature           sgr = Signature.getInstance("ECDSA", "SC");
+        KeyFactory          f = KeyFactory.getInstance("ECDSA", "SC");
         PrivateKey          sKey = f.generatePrivate(priKey);
         PublicKey           vKey = f.generatePublic(pubKey);
         
@@ -352,8 +352,8 @@ public class DSATest
                 curve.decodePoint(Hex.decode("025b6dc53bc61a2548ffb0f671472de6c9521a9d2d2534e65abfcbd5fe0c70")), // Q
                 spec);
 
-        Signature           sgr = Signature.getInstance("NONEwithECDSA", "BC");
-        KeyFactory          f = KeyFactory.getInstance("ECDSA", "BC");
+        Signature           sgr = Signature.getInstance("NONEwithECDSA", "SC");
+        KeyFactory          f = KeyFactory.getInstance("ECDSA", "SC");
         PrivateKey          sKey = f.generatePrivate(priKey);
         PublicKey           vKey = f.generatePublic(pubKey);
 
@@ -436,8 +436,8 @@ public class DSATest
             curve.decodePoint(Hex.decode("045894609CCECF9A92533F630DE713A958E96C97CCB8F5ABB5A688A238DEED6DC2D9D0C94EBFB7D526BA6A61764175B99CB6011E2047F9F067293F57F5")), // Q
             params);
     
-        Signature   sgr = Signature.getInstance("ECDSA", "BC");
-        KeyFactory  f = KeyFactory.getInstance("ECDSA", "BC");
+        Signature   sgr = Signature.getInstance("ECDSA", "SC");
+        KeyFactory  f = KeyFactory.getInstance("ECDSA", "SC");
         PrivateKey  sKey = f.generatePrivate(priKeySpec);
         PublicKey   vKey = f.generatePublic(pubKeySpec);
         byte[]      message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
@@ -504,8 +504,8 @@ public class DSATest
             curve.decodePoint(Hex.decode("045894609CCECF9A92533F630DE713A958E96C97CCB8F5ABB5A688A238DEED6DC2D9D0C94EBFB7D526BA6A61764175B99CB6011E2047F9F067293F57F5")), // Q
             params);
 
-        Signature   sgr = Signature.getInstance(algorithm, "BC");
-        KeyFactory  f = KeyFactory.getInstance("ECDSA", "BC");
+        Signature   sgr = Signature.getInstance(algorithm, "SC");
+        KeyFactory  f = KeyFactory.getInstance("ECDSA", "SC");
         PrivateKey  sKey = f.generatePrivate(priKeySpec);
         PublicKey   vKey = f.generatePublic(pubKeySpec);
         byte[]      message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
@@ -516,7 +516,7 @@ public class DSATest
 
         byte[]  sigBytes = sgr.sign();
 
-        sgr = Signature.getInstance(oid.getId(), "BC");
+        sgr = Signature.getInstance(oid.getId(), "SC");
 
         sgr.initVerify(vKey);
 
@@ -531,8 +531,8 @@ public class DSATest
     private void testGeneration()
         throws Exception
     {
-        Signature           s = Signature.getInstance("DSA", "BC");
-        KeyPairGenerator    g = KeyPairGenerator.getInstance("DSA", "BC");
+        Signature           s = Signature.getInstance("DSA", "SC");
+        KeyPairGenerator    g = KeyPairGenerator.getInstance("DSA", "SC");
         byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
 
 
@@ -584,7 +584,7 @@ public class DSATest
 
         byte[]  sigBytes = s.sign();
 
-        s = Signature.getInstance("DSA", "BC");
+        s = Signature.getInstance("DSA", "SC");
 
         s.initVerify(vKey);
 
@@ -619,8 +619,8 @@ public class DSATest
         //
         // ECDSA Fp generation test
         //
-        s = Signature.getInstance("ECDSA", "BC");
-        g = KeyPairGenerator.getInstance("ECDSA", "BC");
+        s = Signature.getInstance("ECDSA", "SC");
+        g = KeyPairGenerator.getInstance("ECDSA", "SC");
 
         ECCurve curve = new ECCurve.Fp(
             new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
@@ -645,7 +645,7 @@ public class DSATest
 
         sigBytes = s.sign();
 
-        s = Signature.getInstance("ECDSA", "BC");
+        s = Signature.getInstance("ECDSA", "SC");
 
         s.initVerify(vKey);
 
@@ -682,7 +682,7 @@ public class DSATest
 
         sigBytes = s.sign();
 
-        s = Signature.getInstance("ECDSA", "BC");
+        s = Signature.getInstance("ECDSA", "SC");
 
         s.initVerify(vKey);
 
@@ -708,8 +708,8 @@ public class DSATest
         //
         // ECDSA F2m generation test
         //
-        s = Signature.getInstance("ECDSA", "BC");
-        g = KeyPairGenerator.getInstance("ECDSA", "BC");
+        s = Signature.getInstance("ECDSA", "SC");
+        g = KeyPairGenerator.getInstance("ECDSA", "SC");
 
         curve = new ECCurve.F2m(
                 239, // m
@@ -736,7 +736,7 @@ public class DSATest
 
         sigBytes = s.sign();
 
-        s = Signature.getInstance("ECDSA", "BC");
+        s = Signature.getInstance("ECDSA", "SC");
 
         s.initVerify(vKey);
 
@@ -781,13 +781,13 @@ public class DSATest
     private void testParameters()
         throws Exception
     {
-        AlgorithmParameterGenerator a = AlgorithmParameterGenerator.getInstance("DSA", "BC");
+        AlgorithmParameterGenerator a = AlgorithmParameterGenerator.getInstance("DSA", "SC");
         a.init(512, random);
         AlgorithmParameters params = a.generateParameters();
         
         byte[] encodeParams = params.getEncoded();
         
-        AlgorithmParameters a2 = AlgorithmParameters.getInstance("DSA", "BC");
+        AlgorithmParameters a2 = AlgorithmParameters.getInstance("DSA", "SC");
         a2.init(encodeParams);
         
         // a and a2 should be equivalent!
@@ -800,14 +800,14 @@ public class DSATest
         
         DSAParameterSpec dsaP = (DSAParameterSpec)params.getParameterSpec(DSAParameterSpec.class);
         
-        KeyPairGenerator    g = KeyPairGenerator.getInstance("DSA", "BC");
+        KeyPairGenerator    g = KeyPairGenerator.getInstance("DSA", "SC");
         g.initialize(dsaP, new SecureRandom());
         KeyPair p = g.generateKeyPair();
         
         PrivateKey  sKey = p.getPrivate();
         PublicKey   vKey = p.getPublic();
         
-        Signature           s = Signature.getInstance("DSA", "BC");
+        Signature           s = Signature.getInstance("DSA", "SC");
         byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
         
         s.initSign(sKey);
@@ -816,7 +816,7 @@ public class DSATest
         
         byte[]  sigBytes = s.sign();
         
-        s = Signature.getInstance("DSA", "BC");
+        s = Signature.getInstance("DSA", "SC");
         
         s.initVerify(vKey);
         

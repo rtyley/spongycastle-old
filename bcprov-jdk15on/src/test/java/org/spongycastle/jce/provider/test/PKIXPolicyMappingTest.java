@@ -151,7 +151,7 @@ public class PKIXPolicyMappingTest
             params.setInitialPolicies(requirePolicies);
         }
         
-        CertPathBuilder cpb = CertPathBuilder.getInstance("PKIX","BC");  
+        CertPathBuilder cpb = CertPathBuilder.getInstance("PKIX","SC");  
 //      CertPathBuilder cpb = CertPathBuilder.getInstance("PKIX","SUN");  
         PKIXCertPathBuilderResult result = null;
         try
@@ -254,7 +254,7 @@ public class PKIXPolicyMappingTest
         //
         // set up the keys
         //
-        KeyFactory          fact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory          fact = KeyFactory.getInstance("RSA", "SC");
         PrivateKey          caPrivKey  = fact.generatePrivate(caPrivKeySpec);
         PublicKey           caPubKey   = fact.generatePublic(caPubKeySpec);
         PrivateKey          intPrivKey = fact.generatePrivate(intPrivKeySpec);

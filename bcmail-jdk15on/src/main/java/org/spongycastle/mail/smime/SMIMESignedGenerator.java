@@ -64,7 +64,7 @@ import org.spongycastle.x509.X509Store;
  *
  *      SMIMESignedGenerator gen = new SMIMESignedGenerator();
  *
- *      gen.addSignerInfoGenerator(new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").build("SHA1withRSA", signKP.getPrivate(), signCert));
+ *      gen.addSignerInfoGenerator(new JcaSimpleSignerInfoGeneratorBuilder().setProvider("SC").build("SHA1withRSA", signKP.getPrivate(), signCert));
  *
  *      gen.addCertificates(certs);
  *

@@ -44,7 +44,7 @@ class TestUtils
     public static KeyPair generateRSAKeyPair()
         throws Exception
     {
-        KeyPairGenerator  kpGen = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator  kpGen = KeyPairGenerator.getInstance("RSA", "SC");
     
         kpGen.initialize(1024, new SecureRandom());
     
@@ -64,7 +64,7 @@ class TestUtils
         certGen.setPublicKey(pair.getPublic());
         certGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
     
-        return certGen.generate(pair.getPrivate(), "BC");
+        return certGen.generate(pair.getPrivate(), "SC");
     }
     
     public static X509Certificate generateIntermediateCert(PublicKey intKey, PrivateKey caKey, X509Certificate caCert)
@@ -85,7 +85,7 @@ class TestUtils
         certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(0));
         certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyCertSign | KeyUsage.cRLSign));
 
-        return certGen.generate(caKey, "BC");
+        return certGen.generate(caKey, "SC");
     }
     
     public static X509Certificate generateEndEntityCert(PublicKey entityKey, PrivateKey caKey, X509Certificate caCert)
@@ -106,7 +106,7 @@ class TestUtils
         certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
         certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
 
-        return certGen.generate(caKey, "BC");
+        return certGen.generate(caKey, "SC");
     }
     
     public static X509CRL createCRL(
@@ -130,7 +130,7 @@ class TestUtils
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
         crlGen.addExtension(X509Extensions.CRLNumber, false, new CRLNumber(BigInteger.valueOf(1)));
         
-        return crlGen.generate(caKey, "BC");
+        return crlGen.generate(caKey, "SC");
     }
 
     public static X509Certificate createExceptionCertificate(boolean exceptionOnEncode)

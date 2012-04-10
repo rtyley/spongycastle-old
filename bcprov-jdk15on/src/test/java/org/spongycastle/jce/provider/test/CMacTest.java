@@ -58,7 +58,7 @@ public class CMacTest
     public void performTest()
         throws Exception
     {
-        Mac mac = Mac.getInstance("AESCMAC", "BC");
+        Mac mac = Mac.getInstance("AESCMAC", "SC");
 
         //128 bytes key
 
@@ -252,7 +252,7 @@ public class CMacTest
                 + " got " + new String(Hex.encode(out)));
         }
 
-        mac = Mac.getInstance("DESedeCMAC", "BC");
+        mac = Mac.getInstance("DESedeCMAC", "SC");
 
         //DESede
 

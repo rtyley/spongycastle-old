@@ -24,8 +24,8 @@ public class WrapTest
     {
         try
         {
-            Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding", "BC");
-            KeyPairGenerator fact = KeyPairGenerator.getInstance("RSA", "BC");
+            Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding", "SC");
+            KeyPairGenerator fact = KeyPairGenerator.getInstance("RSA", "SC");
             fact.initialize(512, new SecureRandom());
 
             KeyPair keyPair = fact.generateKeyPair();
@@ -33,7 +33,7 @@ public class WrapTest
             PrivateKey  priKey = keyPair.getPrivate();
             PublicKey   pubKey = keyPair.getPublic();
 
-            KeyGenerator keyGen = KeyGenerator.getInstance("DES", "BC");
+            KeyGenerator keyGen = KeyGenerator.getInstance("DES", "SC");
             Key wrapKey = keyGen.generateKey();
             cipher.init(Cipher.WRAP_MODE, wrapKey);
             byte[] wrappedKey = cipher.wrap(priKey);

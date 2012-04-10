@@ -41,9 +41,9 @@ import org.spongycastle.operator.OutputEncryptor;
  * <pre>
  *      SMIMEEnvelopedGenerator  fact = new SMIMEEnvelopedGenerator();
  *
- *      fact.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert).setProvider("BC"));
+ *      fact.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert).setProvider("SC"));
  *
- *      MimeBodyPart mp = fact.generate(content, new JceCMSContentEncryptorBuilder(CMSAlgorithm.RC2_CBC, 40).setProvider("BC").build());
+ *      MimeBodyPart mp = fact.generate(content, new JceCMSContentEncryptorBuilder(CMSAlgorithm.RC2_CBC, 40).setProvider("SC").build());
  * </pre>
  *
  * <b>Note:<b> Most clients expect the MimeBodyPart to be in a MimeMultipart

@@ -15,10 +15,10 @@ import org.spongycastle.util.Strings;
  * <p>
  * Examples:
  * <ul>
- * <li>ProviderConfigurationPermission("BC"); // enable all permissions</li>
- * <li>ProviderConfigurationPermission("BC", "threadLocalEcImplicitlyCa"); // enable thread local only</li>
- * <li>ProviderConfigurationPermission("BC", "ecImplicitlyCa"); // enable global setting only</li>
- * <li>ProviderConfigurationPermission("BC", "threadLocalEcImplicitlyCa, ecImplicitlyCa"); // enable both explicitly</li>
+ * <li>ProviderConfigurationPermission("SC"); // enable all permissions</li>
+ * <li>ProviderConfigurationPermission("SC", "threadLocalEcImplicitlyCa"); // enable thread local only</li>
+ * <li>ProviderConfigurationPermission("SC", "ecImplicitlyCa"); // enable global setting only</li>
+ * <li>ProviderConfigurationPermission("SC", "threadLocalEcImplicitlyCa, ecImplicitlyCa"); // enable both explicitly</li>
  * </ul>
  * <p>
  * Note: permission checks are only enforced if a security manager is present.

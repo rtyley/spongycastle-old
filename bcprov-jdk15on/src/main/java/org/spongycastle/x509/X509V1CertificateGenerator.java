@@ -179,8 +179,8 @@ public class X509V1CertificateGenerator
 
     /**
      * generate an X509 certificate, based on the current issuer and subject
-     * using the default provider "BC".
-     * @deprecated use generate(key, "BC")
+     * using the default provider "SC".
+     * @deprecated use generate(key, "SC")
      */
     public X509Certificate generateX509Certificate(
         PrivateKey      key)
@@ -188,7 +188,7 @@ public class X509V1CertificateGenerator
     {
         try
         {
-            return generateX509Certificate(key, "BC", null);
+            return generateX509Certificate(key, "SC", null);
         }
         catch (NoSuchProviderException e)
         {
@@ -198,8 +198,8 @@ public class X509V1CertificateGenerator
 
     /**
      * generate an X509 certificate, based on the current issuer and subject
-     * using the default provider "BC" and the passed in source of randomness
-     * @deprecated use generate(key, random, "BC")
+     * using the default provider "SC" and the passed in source of randomness
+     * @deprecated use generate(key, random, "SC")
      */
     public X509Certificate generateX509Certificate(
         PrivateKey      key,
@@ -208,7 +208,7 @@ public class X509V1CertificateGenerator
     {
         try
         {
-            return generateX509Certificate(key, "BC", random);
+            return generateX509Certificate(key, "SC", random);
         }
         catch (NoSuchProviderException e)
         {
@@ -269,7 +269,7 @@ public class X509V1CertificateGenerator
      * using the default provider.
      * <p>
      * <b>Note:</b> this differs from the deprecated method in that the default provider is
-     * used - not "BC".
+     * used - not "SC".
      * </p>
      */
     public X509Certificate generate(
@@ -284,7 +284,7 @@ public class X509V1CertificateGenerator
      * using the default provider and the passed in source of randomness
      * <p>
      * <b>Note:</b> this differs from the deprecated method in that the default provider is
-     * used - not "BC".
+     * used - not "SC".
      * </p>
      */
     public X509Certificate generate(

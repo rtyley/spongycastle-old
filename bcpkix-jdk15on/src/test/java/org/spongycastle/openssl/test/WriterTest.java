@@ -95,7 +95,7 @@ public class WriterTest
     public void performTest()
         throws Exception
     {
-        final String provider = "BC";
+        final String provider = "SC";
 
         KeyPairGenerator dsaKpg = KeyPairGenerator.getInstance("DSA", provider);
         dsaKpg.initialize(testDsaParams, random);
@@ -118,14 +118,14 @@ public class WriterTest
         doWriteReadTest(testEcDsaKey, provider);
         doWriteReadTests(testEcDsaKey, provider, algorithms);
 
-        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "BC");
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "SC");
 
         kpGen.initialize(239);
 
         PrivateKey privKey = kpGen.generateKeyPair().getPrivate();
 
         doWriteReadTest(privKey, provider);
-        doWriteReadTests(privKey, "BC", algorithms);
+        doWriteReadTests(privKey, "SC", algorithms);
 
         // override test
         PEMWriter pWrt = new PEMWriter(new OutputStreamWriter(new ByteArrayOutputStream()));

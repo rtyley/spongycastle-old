@@ -113,15 +113,15 @@ public class CMSTestUtil
 
             rand = new SecureRandom();
 
-            kpg  = KeyPairGenerator.getInstance("RSA", "BC");
+            kpg  = KeyPairGenerator.getInstance("RSA", "SC");
             kpg.initialize(1024, rand);
             
-            gostKpg  = KeyPairGenerator.getInstance("GOST3410", "BC");
+            gostKpg  = KeyPairGenerator.getInstance("GOST3410", "SC");
             GOST3410ParameterSpec gost3410P = new GOST3410ParameterSpec(CryptoProObjectIdentifiers.gostR3410_94_CryptoPro_A.getId());
             
             gostKpg.initialize(gost3410P, new SecureRandom());
             
-            dsaKpg = KeyPairGenerator.getInstance("DSA", "BC");
+            dsaKpg = KeyPairGenerator.getInstance("DSA", "SC");
             DSAParameterSpec dsaSpec = new DSAParameterSpec(
                         new BigInteger("7434410770759874867539421675728577177024889699586189000788950934679315164676852047058354758883833299702695428196962057871264685291775577130504050839126673"),
                         new BigInteger("1138656671590261728308283492178581223478058193247"),
@@ -129,35 +129,35 @@ public class CMSTestUtil
 
             dsaKpg.initialize(dsaSpec, new SecureRandom());
 
-            ecGostKpg = KeyPairGenerator.getInstance("ECGOST3410", "BC");
+            ecGostKpg = KeyPairGenerator.getInstance("ECGOST3410", "SC");
             ecGostKpg.initialize(ECGOST3410NamedCurveTable.getParameterSpec("GostR3410-2001-CryptoPro-A"), new SecureRandom());
 
-            ecDsaKpg = KeyPairGenerator.getInstance("ECDSA", "BC");
+            ecDsaKpg = KeyPairGenerator.getInstance("ECDSA", "SC");
             ecDsaKpg.initialize(239, new SecureRandom());
 
-            aes192kg = KeyGenerator.getInstance("AES", "BC");
+            aes192kg = KeyGenerator.getInstance("AES", "SC");
             aes192kg.init(192, rand);
 
-            desede128kg = KeyGenerator.getInstance("DESEDE", "BC");
+            desede128kg = KeyGenerator.getInstance("DESEDE", "SC");
             desede128kg.init(112, rand);
 
-            desede192kg = KeyGenerator.getInstance("DESEDE", "BC");
+            desede192kg = KeyGenerator.getInstance("DESEDE", "SC");
             desede192kg.init(168, rand);
 
-            rc240kg = KeyGenerator.getInstance("RC2", "BC");
+            rc240kg = KeyGenerator.getInstance("RC2", "SC");
             rc240kg.init(40, rand);
             
-            rc264kg = KeyGenerator.getInstance("RC2", "BC");
+            rc264kg = KeyGenerator.getInstance("RC2", "SC");
             rc264kg.init(64, rand);
             
-            rc2128kg = KeyGenerator.getInstance("RC2", "BC");
+            rc2128kg = KeyGenerator.getInstance("RC2", "SC");
             rc2128kg.init(128, rand);
 
-            aesKg = KeyGenerator.getInstance("AES", "BC");
+            aesKg = KeyGenerator.getInstance("AES", "SC");
 
-            seedKg = KeyGenerator.getInstance("SEED", "BC");
+            seedKg = KeyGenerator.getInstance("SEED", "SC");
 
-            camelliaKg = KeyGenerator.getInstance("Camellia", "BC");
+            camelliaKg = KeyGenerator.getInstance("Camellia", "SC");
             
             serialNumber = new BigInteger("1");
         }
@@ -193,7 +193,7 @@ public class CMSTestUtil
     public static X509AttributeCertificate getAttributeCertificate()
         throws Exception
     {
-        X509StreamParser parser = X509StreamParser.getInstance("AttributeCertificate", "BC");
+        X509StreamParser parser = X509StreamParser.getInstance("AttributeCertificate", "SC");
 
         parser.init(CMSTestUtil.attrCert);
 
@@ -409,7 +409,7 @@ public class CMSTestUtil
 
         crlGen.addExtension(X509Extension.authorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
 
-        return new JcaX509CRLConverter().setProvider("BC").getCRL(crlGen.build(new JcaContentSignerBuilder("SHA256WithRSAEncryption").setProvider("BC").build(pair.getPrivate())));
+        return new JcaX509CRLConverter().setProvider("SC").getCRL(crlGen.build(new JcaContentSignerBuilder("SHA256WithRSAEncryption").setProvider("SC").build(pair.getPrivate())));
     }
 
     /*  

@@ -81,7 +81,7 @@ public class PBEFileProcessor
 
         PGPPBEEncryptedData     pbe = (PGPPBEEncryptedData)enc.get(0);
 
-        InputStream clear = pbe.getDataStream(new JcePBEDataDecryptorFactoryBuilder(new JcaPGPDigestCalculatorProviderBuilder().setProvider("BC").build()).setProvider("BC").build(passPhrase));
+        InputStream clear = pbe.getDataStream(new JcePBEDataDecryptorFactoryBuilder(new JcaPGPDigestCalculatorProviderBuilder().setProvider("SC").build()).setProvider("SC").build(passPhrase));
         
         PGPObjectFactory        pgpFact = new PGPObjectFactory(clear);
 
@@ -157,9 +157,9 @@ public class PBEFileProcessor
             byte[] compressedData = PGPExampleUtil.compressFile(fileName, CompressionAlgorithmTags.ZIP);
 
             PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(new JcePGPDataEncryptorBuilder(PGPEncryptedData.CAST5)
-                .setWithIntegrityPacket(withIntegrityCheck).setSecureRandom(new SecureRandom()).setProvider("BC"));
+                .setWithIntegrityPacket(withIntegrityCheck).setSecureRandom(new SecureRandom()).setProvider("SC"));
 
-            encGen.addMethod(new JcePBEKeyEncryptionMethodGenerator(passPhrase).setProvider("BC"));
+            encGen.addMethod(new JcePBEKeyEncryptionMethodGenerator(passPhrase).setProvider("SC"));
 
             OutputStream encOut = encGen.open(out, compressedData.length);
 

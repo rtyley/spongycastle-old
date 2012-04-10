@@ -48,7 +48,7 @@ public final class BouncyCastleProvider extends Provider
 {
     private static String info = "BouncyCastle Security Provider v1.47";
 
-    public static String PROVIDER_NAME = "BC";
+    public static String PROVIDER_NAME = "SC";
 
     public static final ProviderConfiguration CONFIGURATION = new BouncyCastleProviderConfiguration();
 

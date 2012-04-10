@@ -749,7 +749,7 @@ public class BcPGPRSATest
         //
         PGPPublicKeyRing        pgpPub = new PGPPublicKeyRing(testPubKey, new BcKeyFingerprintCalculator());
 
-        pubKey = pgpPub.getPublicKey().getKey("BC");
+        pubKey = pgpPub.getPublicKey().getKey("SC");
 
         Iterator    it = pgpPub.getPublicKey().getUserIDs();
         
@@ -783,7 +783,7 @@ public class BcPGPRSATest
         // Read the public key
         //
         PGPPublicKeyRing     pgpPubV3 = new PGPPublicKeyRing(testPubKeyV3, new BcKeyFingerprintCalculator());
-        PublicKey            pubKeyV3 = pgpPub.getPublicKey().getKey("BC");
+        PublicKey            pubKeyV3 = pgpPub.getPublicKey().getKey("SC");
 
         //
         // write a V3 public key
@@ -840,7 +840,7 @@ public class BcPGPRSATest
         //
         // test encryption
         //
-        Cipher c = Cipher.getInstance("RSA", "BC");
+        Cipher c = Cipher.getInstance("RSA", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pubKey);
         

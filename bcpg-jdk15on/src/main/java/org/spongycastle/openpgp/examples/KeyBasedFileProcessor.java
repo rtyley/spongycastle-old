@@ -118,7 +118,7 @@ public class KeyBasedFileProcessor
                 throw new IllegalArgumentException("secret key for message not found.");
             }
     
-            InputStream         clear = pbe.getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(sKey));
+            InputStream         clear = pbe.getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("SC").build(sKey));
             
             PGPObjectFactory    plainFact = new PGPObjectFactory(clear);
             
@@ -216,9 +216,9 @@ public class KeyBasedFileProcessor
             byte[] bytes = PGPExampleUtil.compressFile(fileName, CompressionAlgorithmTags.ZIP);
 
             PGPEncryptedDataGenerator encGen = new PGPEncryptedDataGenerator(
-                new JcePGPDataEncryptorBuilder(PGPEncryptedData.CAST5).setWithIntegrityPacket(withIntegrityCheck).setSecureRandom(new SecureRandom()).setProvider("BC"));
+                new JcePGPDataEncryptorBuilder(PGPEncryptedData.CAST5).setWithIntegrityPacket(withIntegrityCheck).setSecureRandom(new SecureRandom()).setProvider("SC"));
 
-            encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(encKey).setProvider("BC"));
+            encGen.addMethod(new JcePublicKeyKeyEncryptionMethodGenerator(encKey).setProvider("SC"));
 
             OutputStream cOut = encGen.open(out, bytes.length);
 

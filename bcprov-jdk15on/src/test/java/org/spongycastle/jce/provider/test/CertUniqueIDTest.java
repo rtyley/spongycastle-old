@@ -60,7 +60,7 @@ public class CertUniqueIDTest
       PrivateKey          privKey;
       PublicKey           pubKey;
 
-      KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
+      KeyFactory  fact = KeyFactory.getInstance("RSA", "SC");
 
       privKey = fact.generatePrivate(privKeySpec);
       pubKey = fact.generatePublic(pubKeySpec);

@@ -14,7 +14,7 @@ public class SigNameTest
     private void checkName(String name)
         throws NoSuchProviderException, NoSuchAlgorithmException
     {
-        if (!name.equals(Signature.getInstance(name, "BC").getAlgorithm()))
+        if (!name.equals(Signature.getInstance(name, "SC").getAlgorithm()))
         {
             fail("name misatch on " + name);
         }

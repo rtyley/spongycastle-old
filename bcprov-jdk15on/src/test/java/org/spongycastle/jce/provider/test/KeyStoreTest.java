@@ -86,7 +86,7 @@ public class KeyStoreTest
                                 curve.decodePoint(Hex.decode("020ffa963cdca8816ccc33b8642bedf905c3d358573d3f27fbbd3b3cb9aaaf")), // G
                                 new BigInteger("883423532389192164791648750360308884807550341691627752275345424702807307")); // n
 
-        KeyPairGenerator    g = KeyPairGenerator.getInstance("ECDSA", "BC");
+        KeyPairGenerator    g = KeyPairGenerator.getInstance("ECDSA", "SC");
 
         g.initialize(ecSpec, new SecureRandom());
 
@@ -137,7 +137,7 @@ public class KeyStoreTest
             cert.verify(pubKey);
 
             ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getEncoded());
-            CertificateFactory      fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory      fact = CertificateFactory.getInstance("X.509", "SC");
 
             cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -148,7 +148,7 @@ public class KeyStoreTest
             fail("error generating cert - " + e.toString());
         }
 
-        KeyStore store = KeyStore.getInstance(storeName, "BC");
+        KeyStore store = KeyStore.getInstance(storeName, "SC");
 
         store.load(null, null);
 
@@ -166,7 +166,7 @@ public class KeyStoreTest
         //
         // start with a new key store
         //
-        store = KeyStore.getInstance(storeName, "BC");
+        store = KeyStore.getInstance(storeName, "SC");
 
         store.load(bIn, passwd);
 
@@ -179,13 +179,13 @@ public class KeyStoreTest
         // double public key encoding test
         //
         byte[]              pubEnc = pubKey.getEncoded();
-        KeyFactory          keyFac = KeyFactory.getInstance(pubKey.getAlgorithm(), "BC");
+        KeyFactory          keyFac = KeyFactory.getInstance(pubKey.getAlgorithm(), "SC");
         X509EncodedKeySpec  pubX509 = new X509EncodedKeySpec(pubEnc);
 
         pubKey = (PublicKey)keyFac.generatePublic(pubX509);
 
         pubEnc = pubKey.getEncoded();
-        keyFac = KeyFactory.getInstance(pubKey.getAlgorithm(), "BC");
+        keyFac = KeyFactory.getInstance(pubKey.getAlgorithm(), "SC");
         pubX509 = new X509EncodedKeySpec(pubEnc);
 
         pubKey = (PublicKey)keyFac.generatePublic(pubX509);
@@ -195,12 +195,12 @@ public class KeyStoreTest
         //
         byte[]              privEnc = privKey.getEncoded();
 
-        keyFac = KeyFactory.getInstance(privKey.getAlgorithm(), "BC");
+        keyFac = KeyFactory.getInstance(privKey.getAlgorithm(), "SC");
 
         PKCS8EncodedKeySpec privPKCS8 = new PKCS8EncodedKeySpec(privEnc);
         privKey = (PrivateKey)keyFac.generatePrivate(privPKCS8);
 
-        keyFac = KeyFactory.getInstance(privKey.getAlgorithm(), "BC");
+        keyFac = KeyFactory.getInstance(privKey.getAlgorithm(), "SC");
         privPKCS8 = new PKCS8EncodedKeySpec(privEnc);
         privKey = (PrivateKey)keyFac.generatePrivate(privPKCS8);
     }
@@ -209,11 +209,11 @@ public class KeyStoreTest
         String    storeName)
         throws Exception
     {
-        KeyStore store = KeyStore.getInstance(storeName, "BC");
+        KeyStore store = KeyStore.getInstance(storeName, "SC");
 
         store.load(null, null);
 
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "SC");
 
         gen.initialize(1024, new SecureRandom());
 
@@ -270,7 +270,7 @@ public class KeyStoreTest
             cert.verify(pubKey);
 
             ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getEncoded());
-            CertificateFactory      fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory      fact = CertificateFactory.getInstance("X.509", "SC");
 
             cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -295,7 +295,7 @@ public class KeyStoreTest
         //
         // start with a new key store
         //
-        store = KeyStore.getInstance(storeName, "BC");
+        store = KeyStore.getInstance(storeName, "SC");
 
         store.load(bIn, passwd);
 
@@ -324,10 +324,10 @@ public class KeyStoreTest
     private void oldStoreTest()
         throws Exception
     {
-        checkStore(KeyStore.getInstance("BKS", "BC"), v1BKS);
-        checkStore(KeyStore.getInstance("BKS", "BC"), v2BKS);
-        checkStore(KeyStore.getInstance("UBER", "BC"), v1UBER);
-        checkStore(KeyStore.getInstance("UBER", "BC"), v2UBER);
+        checkStore(KeyStore.getInstance("BKS", "SC"), v1BKS);
+        checkStore(KeyStore.getInstance("BKS", "SC"), v2BKS);
+        checkStore(KeyStore.getInstance("UBER", "SC"), v1UBER);
+        checkStore(KeyStore.getInstance("UBER", "SC"), v2UBER);
     }
 
     private void checkStore(KeyStore ks, byte[] data)
@@ -354,7 +354,7 @@ public class KeyStoreTest
     private void checkException()
         throws Exception
     {
-        KeyStore ks = KeyStore.getInstance("BKS", "BC");
+        KeyStore ks = KeyStore.getInstance("BKS", "SC");
 
         try
         {

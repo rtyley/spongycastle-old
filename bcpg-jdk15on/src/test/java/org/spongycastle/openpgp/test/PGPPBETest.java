@@ -66,7 +66,7 @@ public class PGPPBETest
         PGPEncryptedDataList     enc = (PGPEncryptedDataList)pgpF.nextObject();
         PGPPBEEncryptedData      pbe = (PGPPBEEncryptedData)enc.get(0);
 
-        InputStream clear = pbe.getDataStream(pass, "BC");
+        InputStream clear = pbe.getDataStream(pass, "SC");
         
         PGPObjectFactory         pgpFact = new PGPObjectFactory(clear);
         PGPCompressedData        cData = (PGPCompressedData)pgpFact.nextObject();
@@ -111,7 +111,7 @@ public class PGPPBETest
         PGPEncryptedDataList     enc = (PGPEncryptedDataList)pgpF.nextObject();
         PGPPBEEncryptedData      pbe = (PGPPBEEncryptedData)enc.get(0);
 
-        InputStream clear = pbe.getDataStream(pass, "BC");
+        InputStream clear = pbe.getDataStream(pass, "SC");
 
         PGPObjectFactory         pgpFact = new PGPObjectFactory(clear);
         PGPCompressedData        cData = (PGPCompressedData)pgpFact.nextObject();
@@ -191,7 +191,7 @@ public class PGPPBETest
         // encrypt - with stream close
         //
         ByteArrayOutputStream        cbOut = new ByteArrayOutputStream();
-        PGPEncryptedDataGenerator    cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, new SecureRandom(), "BC");
+        PGPEncryptedDataGenerator    cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, new SecureRandom(), "SC");
         
         cPk.addMethod(pass);
         
@@ -212,7 +212,7 @@ public class PGPPBETest
         // encrypt - with generator close
         //
         cbOut = new ByteArrayOutputStream();
-        cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, new SecureRandom(), "BC");
+        cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, new SecureRandom(), "SC");
 
         cPk.addMethod(pass);
 
@@ -256,7 +256,7 @@ public class PGPPBETest
         comOut.close();
 
         cbOut = new ByteArrayOutputStream();
-        cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, rand, "BC");
+        cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, rand, "SC");
         
         cPk.addMethod(pass);
         
@@ -276,7 +276,7 @@ public class PGPPBETest
         // with integrity packet
         //
         cbOut = new ByteArrayOutputStream();
-        cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, true, rand, "BC");
+        cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, true, rand, "SC");
         
         cPk.addMethod(pass);
         
@@ -310,7 +310,7 @@ public class PGPPBETest
 
         PGPPBEEncryptedData     pbe = (PGPPBEEncryptedData)enc.get(1);
 
-        InputStream clear = pbe.getDataStream("password".toCharArray(), "BC");
+        InputStream clear = pbe.getDataStream("password".toCharArray(), "SC");
 
         pgpFact = new PGPObjectFactory(clear);
 
@@ -355,7 +355,7 @@ public class PGPPBETest
         comOut.close();
         
         cbOut = new ByteArrayOutputStream();
-        cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, true, rand, "BC");
+        cPk = new PGPEncryptedDataGenerator(PGPEncryptedData.CAST5, true, rand, "SC");
 
         cPk.addMethod(pass);
 

@@ -61,7 +61,7 @@ import org.spongycastle.x509.X509Store;
  *      Iterator              certIt = certCollection.iterator();
  *      X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
  *  
- *      if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert)))
+ *      if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("SC").build(cert)))
  *      {
  *          verified++;
  *      }   

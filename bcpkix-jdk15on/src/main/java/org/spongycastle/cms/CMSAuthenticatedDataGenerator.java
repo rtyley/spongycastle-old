@@ -42,7 +42,7 @@ import org.spongycastle.util.io.TeeOutputStream;
  * <pre>
  *      CMSAuthenticatedDataGenerator  fact = new CMSAuthenticatedDataGenerator();
  *
- *      adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert).setProvider("BC"));
+ *      adGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert).setProvider("SC"));
  *
  *      CMSAuthenticatedData         data = fact.generate(new CMSProcessableByteArray(data),
  *                              new JceCMSMacCalculatorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider(BC).build()));

@@ -39,12 +39,12 @@ import org.spongycastle.operator.OutputEncryptor;
  *
  *       CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
  *
- *       edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert).setProvider("BC"));
+ *       edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(recipientCert).setProvider("SC"));
  *
  *       CMSEnvelopedData ed = edGen.generate(
  *                                       msg,
  *                                       new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC)
- *                                              .setProvider("BC").build());
+ *                                              .setProvider("SC").build());
  *
  * </pre>
  */

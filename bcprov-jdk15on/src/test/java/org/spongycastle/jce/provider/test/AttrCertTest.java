@@ -161,7 +161,7 @@ public class AttrCertTest
         throws Exception
     {
         X509AttributeCertificate attrCert = new X509V2AttributeCertificate(certWithBaseCertificateID);
-        CertificateFactory       fact = CertificateFactory.getInstance("X.509", "BC");   
+        CertificateFactory       fact = CertificateFactory.getInstance("X.509", "SC");   
         X509Certificate          cert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(holderCertWithBaseCertificateID));
         
         AttributeCertificateHolder holder = attrCert.getHolder();
@@ -253,7 +253,7 @@ public class AttrCertTest
     private void testGenerateWithCert()
         throws Exception
     {
-        CertificateFactory          fact = CertificateFactory.getInstance("X.509","BC");
+        CertificateFactory          fact = CertificateFactory.getInstance("X.509","SC");
         X509Certificate             iCert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(signCert));
         
         //
@@ -269,7 +269,7 @@ public class AttrCertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyFactory  kFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  kFact = KeyFactory.getInstance("RSA", "SC");
 
         privKey = kFact.generatePrivate(RSA_PRIVATE_KEY_SPEC);
         pubKey = kFact.generatePublic(pubKeySpec);
@@ -293,11 +293,11 @@ public class AttrCertTest
         gen.setSerialNumber(BigInteger.ONE);
         gen.setSignatureAlgorithm("SHA1WithRSAEncryption");
         
-        X509AttributeCertificate aCert = gen.generate(privKey, "BC");
+        X509AttributeCertificate aCert = gen.generate(privKey, "SC");
         
         aCert.checkValidity();
         
-        aCert.verify(pubKey, "BC");
+        aCert.verify(pubKey, "SC");
         
         AttributeCertificateHolder holder = aCert.getHolder();
         
@@ -362,7 +362,7 @@ public class AttrCertTest
     private void testGenerateWithPrincipal()
         throws Exception
     {
-        CertificateFactory          fact = CertificateFactory.getInstance("X.509","BC");
+        CertificateFactory          fact = CertificateFactory.getInstance("X.509","SC");
         X509Certificate             iCert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(signCert));
         
         //
@@ -378,7 +378,7 @@ public class AttrCertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
     
-        KeyFactory  kFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  kFact = KeyFactory.getInstance("RSA", "SC");
     
         privKey = kFact.generatePrivate(RSA_PRIVATE_KEY_SPEC);
         pubKey = kFact.generatePublic(pubKeySpec);
@@ -402,11 +402,11 @@ public class AttrCertTest
         gen.setSerialNumber(BigInteger.ONE);
         gen.setSignatureAlgorithm("SHA1WithRSAEncryption");
         
-        X509AttributeCertificate aCert = gen.generate(privKey, "BC");
+        X509AttributeCertificate aCert = gen.generate(privKey, "SC");
         
         aCert.checkValidity();
         
-        aCert.verify(pubKey, "BC");
+        aCert.verify(pubKey, "SC");
         
         AttributeCertificateHolder holder = aCert.getHolder();
         
@@ -444,10 +444,10 @@ public class AttrCertTest
         throws Exception
     {
         X509AttributeCertificate    aCert = new X509V2AttributeCertificate(attrCert);
-        CertificateFactory          fact = CertificateFactory.getInstance("X.509","BC");
+        CertificateFactory          fact = CertificateFactory.getInstance("X.509","SC");
         X509Certificate             sCert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(signCert));
         
-        aCert.verify(sCert.getPublicKey(), "BC");
+        aCert.verify(sCert.getPublicKey(), "SC");
         
         //
         // search test
@@ -477,7 +477,7 @@ public class AttrCertTest
         //
         aCert = new X509V2AttributeCertificate(aCert.getEncoded());
         
-        aCert.verify(sCert.getPublicKey(), "BC");
+        aCert.verify(sCert.getPublicKey(), "SC");
         
         X509AttributeCertificate saCert = new X509V2AttributeCertificate(new ByteArrayInputStream(aCert.getEncoded()));
         
@@ -503,7 +503,7 @@ public class AttrCertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyFactory  kFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  kFact = KeyFactory.getInstance("RSA", "SC");
 
         privKey = kFact.generatePrivate(privKeySpec);
         pubKey = kFact.generatePublic(pubKeySpec);
@@ -518,11 +518,11 @@ public class AttrCertTest
         gen.setSerialNumber(aCert.getSerialNumber());
         gen.setSignatureAlgorithm("SHA1WithRSAEncryption");
         
-        aCert = gen.generate(privKey, "BC");
+        aCert = gen.generate(privKey, "SC");
         
         aCert.checkValidity();
         
-        aCert.verify(pubKey, "BC");
+        aCert.verify(pubKey, "SC");
         
         // as the issuer is the same this should still work (even though it is not
         // technically correct
@@ -544,7 +544,7 @@ public class AttrCertTest
         //
         aCert = new X509V2AttributeCertificate(aCert.getEncoded());
         
-        aCert.verify(pubKey, "BC");
+        aCert.verify(pubKey, "SC");
         
         AttributeCertificateIssuer  issuer = aCert.getIssuer();
         
@@ -590,7 +590,7 @@ public class AttrCertTest
         
         gen.addExtension("2.2", false, new DEROctetString(new byte[20]));
         
-        aCert = gen.generate(privKey, "BC");
+        aCert = gen.generate(privKey, "SC");
         
         Set exts = aCert.getCriticalExtensionOIDs();
         

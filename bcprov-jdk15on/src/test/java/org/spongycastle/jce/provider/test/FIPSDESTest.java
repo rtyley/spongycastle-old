@@ -93,8 +93,8 @@ public class FIPSDESTest
 
             key = new SecretKeySpec(Hex.decode("0123456789abcdef"), "DES");
 
-            in = Cipher.getInstance(algorithm, "BC");
-            out = Cipher.getInstance(algorithm, "BC");
+            in = Cipher.getInstance(algorithm, "SC");
+            out = Cipher.getInstance(algorithm, "SC");
 
             if (algorithm.startsWith("DES/ECB"))
             {

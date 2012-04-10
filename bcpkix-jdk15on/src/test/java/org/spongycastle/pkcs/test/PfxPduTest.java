@@ -295,7 +295,7 @@ public class PfxPduTest
         //
         // now try reading our object
         //
-        KeyStore store = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore store = KeyStore.getInstance("PKCS12", "SC");
 
         store.load(new ByteArrayInputStream(pfx.toASN1Structure().getEncoded()), passwd);
 

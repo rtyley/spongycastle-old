@@ -252,7 +252,7 @@ public class OCSPTest
             fail("signed but shouldn't be");
         }
 
-        X509Certificate[] certs = req.getCerts("BC");
+        X509Certificate[] certs = req.getCerts("SC");
 
         if (certs != null)
         {
@@ -280,14 +280,14 @@ public class OCSPTest
 
         chain[0] = testCert;
 
-        req = gen.generate("SHA1withECDSA", signKP.getPrivate(), chain, "BC");
+        req = gen.generate("SHA1withECDSA", signKP.getPrivate(), chain, "SC");
 
         if (!req.isSigned())
         {
             fail("not signed but should be");
         }
 
-        if (!req.verify(signKP.getPublic(), "BC"))
+        if (!req.verify(signKP.getPublic(), "SC"))
         {
             fail("signature failed to verify");
         }
@@ -299,7 +299,7 @@ public class OCSPTest
             fail("Failed isFor test");
         }
 
-        certs = req.getCerts("BC");
+        certs = req.getCerts("SC");
 
         if (certs == null)
         {
@@ -318,7 +318,7 @@ public class OCSPTest
 
         OCSPReq newReq = new OCSPReq(reqEnc);
 
-        if (!newReq.verify(signKP.getPublic(), "BC"))
+        if (!newReq.verify(signKP.getPublic(), "SC"))
         {
             fail("newReq signature failed to verify");
         }
@@ -349,14 +349,14 @@ public class OCSPTest
 
         chain[0] = testCert;
 
-        req = gen.generate("SHA1withECDSA", signKP.getPrivate(), chain, "BC");
+        req = gen.generate("SHA1withECDSA", signKP.getPrivate(), chain, "SC");
 
         if (!req.isSigned())
         {
             fail("not signed but should be");
         }
 
-        if (!req.verify(signKP.getPublic(), "BC"))
+        if (!req.verify(signKP.getPublic(), "SC"))
         {
             fail("signature failed to verify");
         }
@@ -409,7 +409,7 @@ public class OCSPTest
 
         respGen.addResponse(id, CertificateStatus.GOOD);
 
-        BasicOCSPResp resp = respGen.generate("SHA1withECDSA", signKP.getPrivate(), chain, new Date(), "BC");
+        BasicOCSPResp resp = respGen.generate("SHA1withECDSA", signKP.getPrivate(), chain, new Date(), "SC");
     }
 
     private void testRSA()
@@ -442,7 +442,7 @@ public class OCSPTest
             fail("signed but shouldn't be");
         }
 
-        X509Certificate[] certs = req.getCerts("BC");
+        X509Certificate[] certs = req.getCerts("SC");
 
         if (certs != null)
         {
@@ -470,14 +470,14 @@ public class OCSPTest
 
         chain[0] = testCert;
 
-        req = gen.generate("SHA1withRSA", signKP.getPrivate(), chain, "BC");
+        req = gen.generate("SHA1withRSA", signKP.getPrivate(), chain, "SC");
 
         if (!req.isSigned())
         {
             fail("not signed but should be");
         }
 
-        if (!req.verify(signKP.getPublic(), "BC"))
+        if (!req.verify(signKP.getPublic(), "SC"))
         {
             fail("signature failed to verify");
         }
@@ -489,7 +489,7 @@ public class OCSPTest
             fail("Failed isFor test");
         }
 
-        certs = req.getCerts("BC");
+        certs = req.getCerts("SC");
 
         if (certs == null)
         {
@@ -508,7 +508,7 @@ public class OCSPTest
 
         OCSPReq newReq = new OCSPReq(reqEnc);
 
-        if (!newReq.verify(signKP.getPublic(), "BC"))
+        if (!newReq.verify(signKP.getPublic(), "SC"))
         {
             fail("newReq signature failed to verify");
         }
@@ -539,14 +539,14 @@ public class OCSPTest
 
         chain[0] = testCert;
 
-        req = gen.generate("SHA1withRSA", signKP.getPrivate(), chain, "BC");
+        req = gen.generate("SHA1withRSA", signKP.getPrivate(), chain, "SC");
 
         if (!req.isSigned())
         {
             fail("not signed but should be");
         }
 
-        if (!req.verify(signKP.getPublic(), "BC"))
+        if (!req.verify(signKP.getPublic(), "SC"))
         {
             fail("signature failed to verify");
         }
@@ -599,7 +599,7 @@ public class OCSPTest
 
         respGen.addResponse(id, CertificateStatus.GOOD);
 
-        BasicOCSPResp resp = respGen.generate("SHA1withRSA", signKP.getPrivate(), chain, new Date(), "BC");
+        BasicOCSPResp resp = respGen.generate("SHA1withRSA", signKP.getPrivate(), chain, new Date(), "SC");
         OCSPRespGenerator rGen = new OCSPRespGenerator();
 
         byte[] enc = rGen.generate(OCSPRespGenerator.SUCCESSFUL, resp).getEncoded();
@@ -609,8 +609,8 @@ public class OCSPTest
         throws Exception
     {
         OCSPReq ocspRequest = new OCSPReq(irregReq);
-        X509Certificate cert = ocspRequest.getCerts("BC")[0];
-        if (!ocspRequest.verify(cert.getPublicKey(), "BC"))
+        X509Certificate cert = ocspRequest.getCerts("SC")[0];
+        if (!ocspRequest.verify(cert.getPublicKey(), "SC"))
         {
             fail("extra version encoding test failed");
         }
@@ -651,7 +651,7 @@ public class OCSPTest
             fail("signed but shouldn't be");
         }
 
-        X509Certificate[] certs = req.getCerts("BC");
+        X509Certificate[] certs = req.getCerts("SC");
 
         if (certs != null)
         {
@@ -679,14 +679,14 @@ public class OCSPTest
 
         chain[0] = testCert;
 
-        req = gen.generate("SHA1withRSA", signKP.getPrivate(), chain, "BC");
+        req = gen.generate("SHA1withRSA", signKP.getPrivate(), chain, "SC");
 
         if (!req.isSigned())
         {
             fail("not signed but should be");
         }
 
-        if (!req.verify(signKP.getPublic(), "BC"))
+        if (!req.verify(signKP.getPublic(), "SC"))
         {
             fail("signature failed to verify");
         }
@@ -698,7 +698,7 @@ public class OCSPTest
             fail("Failed isFor test");
         }
 
-        certs = req.getCerts("BC");
+        certs = req.getCerts("SC");
 
         if (certs == null)
         {
@@ -717,7 +717,7 @@ public class OCSPTest
 
         OCSPReq newReq = new OCSPReq(reqEnc);
 
-        if (!newReq.verify(signKP.getPublic(), "BC"))
+        if (!newReq.verify(signKP.getPublic(), "SC"))
         {
             fail("newReq signature failed to verify");
         }
@@ -748,14 +748,14 @@ public class OCSPTest
 
         chain[0] = testCert;
 
-        req = gen.generate("SHA1withRSA", signKP.getPrivate(), chain, "BC");
+        req = gen.generate("SHA1withRSA", signKP.getPrivate(), chain, "SC");
 
         if (!req.isSigned())
         {
             fail("not signed but should be");
         }
 
-        if (!req.verify(signKP.getPublic(), "BC"))
+        if (!req.verify(signKP.getPublic(), "SC"))
         {
             fail("signature failed to verify");
         }
@@ -812,9 +812,9 @@ public class OCSPTest
         }
 
         BasicOCSPResp brep = (BasicOCSPResp)response.getResponseObject();
-        chain = brep.getCerts("BC");
+        chain = brep.getCerts("SC");
 
-        if (!brep.verify(chain[0].getPublicKey(), "BC"))
+        if (!brep.verify(chain[0].getPublicKey(), "SC"))
         {
             fail("response 1 failed to verify.");
         }
@@ -832,9 +832,9 @@ public class OCSPTest
         }
 
         brep = (BasicOCSPResp)response.getResponseObject();
-        chain = brep.getCerts("BC");
+        chain = brep.getCerts("SC");
 
-        if (!brep.verify(chain[0].getPublicKey(), "BC"))
+        if (!brep.verify(chain[0].getPublicKey(), "SC"))
         {
             fail("response 2 failed to verify.");
         }

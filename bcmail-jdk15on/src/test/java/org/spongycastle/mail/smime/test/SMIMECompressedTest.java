@@ -158,7 +158,7 @@ public class SMIMECompressedTest
         certList.add(signCert);
 
         CertStore      certs = CertStore.getInstance("Collection",
-                                       new CollectionCertStoreParameters(certList), "BC");
+                                       new CollectionCertStoreParameters(certList), "SC");
 
         ASN1EncodableVector         signedAttrs = new ASN1EncodableVector();
         SMIMECapabilityVector       caps = new SMIMECapabilityVector();
@@ -175,7 +175,7 @@ public class SMIMECompressedTest
 
         gen.addCertificatesAndCRLs(certs);
 
-        MimeMultipart smp = gen.generate(msg, "BC");
+        MimeMultipart smp = gen.generate(msg, "SC");
 
         MimeMessage bp2 = new MimeMessage((Session)null);                          
 
@@ -204,7 +204,7 @@ public class SMIMECompressedTest
         
         assertEquals(true, Arrays.areEqual(_msgBytes, _resBytes));
 
-        certs = s.getCertificatesAndCRLs("Collection", "BC");
+        certs = s.getCertificatesAndCRLs("Collection", "SC");
 
         SignerInformationStore  signers = s.getSignerInfos();
         Collection              c = signers.getSigners();
@@ -218,7 +218,7 @@ public class SMIMECompressedTest
             Iterator            certIt = certCollection.iterator();
             X509Certificate     cert = (X509Certificate)certIt.next();
 
-            assertEquals(true, signer.verify(cert, "BC"));
+            assertEquals(true, signer.verify(cert, "SC"));
         }
     }
 }

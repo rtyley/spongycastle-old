@@ -96,7 +96,7 @@ public class PKCS10CertRequestTest
     private void generationTest(int keySize, String keyName, String sigName, String provider)
         throws Exception
     {
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance(keyName, "BC");
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance(keyName, "SC");
 
         kpg.initialize(keySize);
 
@@ -149,7 +149,7 @@ public class PKCS10CertRequestTest
         throws Exception
     {
         ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec(curveOid.getId());
-        KeyPairGenerator ecGen = KeyPairGenerator.getInstance("ECDSA", "BC");
+        KeyPairGenerator ecGen = KeyPairGenerator.getInstance("ECDSA", "SC");
 
         ecGen.initialize(spec);
 
@@ -205,7 +205,7 @@ public class PKCS10CertRequestTest
             fail("ECDSA parameters incorrect.");
         }
         
-        Signature sig = Signature.getInstance(algorithm, "BC");
+        Signature sig = Signature.getInstance(algorithm, "SC");
         
         sig.initVerify(pubKey);
         
@@ -244,7 +244,7 @@ public class PKCS10CertRequestTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyFactory     fact = KeyFactory.getInstance("ECDSA", "BC");
+        KeyFactory     fact = KeyFactory.getInstance("ECDSA", "SC");
 
         privKey = fact.generatePrivate(privKeySpec);
         pubKey = fact.generatePublic(pubKeySpec);
@@ -290,7 +290,7 @@ public class PKCS10CertRequestTest
             fail("ECDSA parameters incorrect.");
         }
 
-        Signature sig = Signature.getInstance(algorithm, "BC");
+        Signature sig = Signature.getInstance(algorithm, "SC");
 
         sig.initVerify(pubKey);
 
@@ -306,7 +306,7 @@ public class PKCS10CertRequestTest
         throws Exception
     {
         String           algorithm = "GOST3411withECGOST3410";
-        KeyPairGenerator ecGostKpg = KeyPairGenerator.getInstance("ECGOST3410", "BC");
+        KeyPairGenerator ecGostKpg = KeyPairGenerator.getInstance("ECGOST3410", "SC");
 
         ecGostKpg.initialize(ECGOST3410NamedCurveTable.getParameterSpec("GostR3410-2001-CryptoPro-A"), new SecureRandom());
 
@@ -340,7 +340,7 @@ public class PKCS10CertRequestTest
             fail("ECGOST parameters incorrect.");
         }
 
-        Signature sig = Signature.getInstance(algorithm, "BC");
+        Signature sig = Signature.getInstance(algorithm, "SC");
 
         sig.initVerify(pubKey);
 
@@ -369,7 +369,7 @@ public class PKCS10CertRequestTest
             new BigInteger("1a8b38f398fa712049898d7fb79ee0a77668791299cdfa09efc0e507acb21ed74301ef5bfd48be455eaeb6e1678255827580a8e4e8e14151d1510a82a3f2e729",16),
             new BigInteger("27156aba4126d24a81f3a528cbfb27f56886f840a9f6e86e17a44b94fe9319584b8e22fdde1e5a2e3bd8aa5ba8d8584194eb2190acf832b847f13a3d24a79f4d",16));
 
-        KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  fact = KeyFactory.getInstance("RSA", "SC");
 
         PrivateKey privKey = fact.generatePrivate(privKeySpec);
         PublicKey pubKey = fact.generatePublic(pubKeySpec);
@@ -397,7 +397,7 @@ public class PKCS10CertRequestTest
             fail("PSS parameters incorrect.");
         }
 
-        Signature sig = Signature.getInstance(algorithm, "BC");
+        Signature sig = Signature.getInstance(algorithm, "SC");
 
         sig.initVerify(pubKey);
 
@@ -413,7 +413,7 @@ public class PKCS10CertRequestTest
     private void nullPointerTest()
         throws Exception
     {
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "SC");
         keyGen.initialize(1024, new SecureRandom());
         KeyPair pair = keyGen.generateKeyPair();
 
@@ -434,10 +434,10 @@ public class PKCS10CertRequestTest
         
         PKCS10CertificationRequest p1 = new PKCS10CertificationRequest(
             "SHA1WithRSA", new X509Principal("cn=csr"),
-            pair.getPublic(), new DERSet(attribute), pair.getPrivate(), "BC");
+            pair.getPublic(), new DERSet(attribute), pair.getPrivate(), "SC");
         PKCS10CertificationRequest p2 = new PKCS10CertificationRequest(
             "SHA1WithRSA", new X509Principal("cn=csr"),
-            pair.getPublic(), new DERSet(attribute), pair.getPrivate(), "BC");
+            pair.getPublic(), new DERSet(attribute), pair.getPrivate(), "SC");
 
         if (!p1.equals(p2))
         {
@@ -448,8 +448,8 @@ public class PKCS10CertRequestTest
     public void performTest()
         throws Exception
     {
-        generationTest(512, "RSA", "SHA1withRSA", "BC");       
-        generationTest(512, "GOST3410", "GOST3411withGOST3410", "BC");
+        generationTest(512, "RSA", "SHA1withRSA", "SC");       
+        generationTest(512, "GOST3410", "GOST3411withGOST3410", "SC");
         
         if (Security.getProvider("SunRsaSign") != null)
         {
@@ -492,7 +492,7 @@ public class PKCS10CertRequestTest
         }
 
         // elliptic curve openSSL
-        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "SC");
 
         ECCurve curve = new ECCurve.Fp(
             new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q

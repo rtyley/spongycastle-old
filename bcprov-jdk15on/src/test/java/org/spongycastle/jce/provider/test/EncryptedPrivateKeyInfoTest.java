@@ -30,7 +30,7 @@ public class EncryptedPrivateKeyInfoTest
     {
         try
         {
-            KeyPairGenerator fact = KeyPairGenerator.getInstance("RSA", "BC");
+            KeyPairGenerator fact = KeyPairGenerator.getInstance("RSA", "SC");
             fact.initialize(512, new SecureRandom());
 
             KeyPair keyPair = fact.generateKeyPair();
@@ -45,7 +45,7 @@ public class EncryptedPrivateKeyInfoTest
             int                 iterationCount = 100;
             PBEParameterSpec    defParams = new PBEParameterSpec(salt, iterationCount);
 
-            AlgorithmParameters params = AlgorithmParameters.getInstance(alg, "BC");
+            AlgorithmParameters params = AlgorithmParameters.getInstance(alg, "SC");
 
             params.init(defParams);
 
@@ -55,8 +55,8 @@ public class EncryptedPrivateKeyInfoTest
             char[]  password1 = { 'h', 'e', 'l', 'l', 'o' };
 
             PBEKeySpec          pbeSpec = new PBEKeySpec(password1);
-            SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(alg, "BC");
-            Cipher cipher = Cipher.getInstance(alg, "BC");
+            SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(alg, "SC");
+            Cipher cipher = Cipher.getInstance(alg, "SC");
 
             cipher.init(Cipher.WRAP_MODE, keyFact.generateSecret(pbeSpec), params);
 
@@ -75,7 +75,7 @@ public class EncryptedPrivateKeyInfoTest
 
             pbeSpec = new PBEKeySpec(password2);
 
-            cipher = Cipher.getInstance(pInfo.getAlgName(), "BC");
+            cipher = Cipher.getInstance(pInfo.getAlgName(), "SC");
 
             cipher.init(Cipher.DECRYPT_MODE, keyFact.generateSecret(pbeSpec), pInfo.getAlgParameters());
 
@@ -90,8 +90,8 @@ public class EncryptedPrivateKeyInfoTest
             // using Cipher parameters test
             //
             pbeSpec = new PBEKeySpec(password1);
-            keyFact = SecretKeyFactory.getInstance(alg, "BC");
-            cipher = Cipher.getInstance(alg, "BC");
+            keyFact = SecretKeyFactory.getInstance(alg, "SC");
+            cipher = Cipher.getInstance(alg, "SC");
 
             cipher.init(Cipher.WRAP_MODE, keyFact.generateSecret(pbeSpec), params);
 
@@ -108,7 +108,7 @@ public class EncryptedPrivateKeyInfoTest
             //
             pbeSpec = new PBEKeySpec(password2);
 
-            cipher = Cipher.getInstance(pInfo.getAlgName(), "BC");
+            cipher = Cipher.getInstance(pInfo.getAlgName(), "SC");
 
             cipher.init(Cipher.DECRYPT_MODE, keyFact.generateSecret(pbeSpec), pInfo.getAlgParameters());
 

@@ -235,8 +235,8 @@ public class X509V2CRLGenerator
 
     /**
      * generate an X509 CRL, based on the current issuer and subject
-     * using the default provider "BC".
-     * @deprecated use generate(key, "BC")
+     * using the default provider "SC".
+     * @deprecated use generate(key, "SC")
      */
     public X509CRL generateX509CRL(
         PrivateKey      key)
@@ -244,7 +244,7 @@ public class X509V2CRLGenerator
     {
         try
         {
-            return generateX509CRL(key, "BC", null);
+            return generateX509CRL(key, "SC", null);
         }
         catch (NoSuchProviderException e)
         {
@@ -254,9 +254,9 @@ public class X509V2CRLGenerator
 
     /**
      * generate an X509 CRL, based on the current issuer and subject
-     * using the default provider "BC" and an user defined SecureRandom object as
+     * using the default provider "SC" and an user defined SecureRandom object as
      * source of randomness.
-     * @deprecated use generate(key, random, "BC")
+     * @deprecated use generate(key, random, "SC")
      */
     public X509CRL generateX509CRL(
         PrivateKey      key,
@@ -265,7 +265,7 @@ public class X509V2CRLGenerator
     {
         try
         {
-            return generateX509CRL(key, "BC", random);
+            return generateX509CRL(key, "SC", random);
         }
         catch (NoSuchProviderException e)
         {
@@ -324,7 +324,7 @@ public class X509V2CRLGenerator
      * using the default provider.
      * <p>
      * <b>Note:</b> this differs from the deprecated method in that the default provider is
-     * used - not "BC".
+     * used - not "SC".
      * </p>
      */
     public X509CRL generate(
@@ -340,7 +340,7 @@ public class X509V2CRLGenerator
      * source of randomness.
      * <p>
      * <b>Note:</b> this differs from the deprecated method in that the default provider is
-     * used - not "BC".
+     * used - not "SC".
      * </p>
      */
     public X509CRL generate(

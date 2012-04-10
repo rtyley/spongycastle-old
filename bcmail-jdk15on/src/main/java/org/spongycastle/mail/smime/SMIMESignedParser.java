@@ -33,7 +33,7 @@ import org.spongycastle.operator.DigestCalculatorProvider;
  * matches the given signer...
  * <p>
  * <pre>
- *  CertStore               certs = s.getCertificates("Collection", "BC");
+ *  CertStore               certs = s.getCertificates("Collection", "SC");
  *  SignerInformationStore  signers = s.getSignerInfos();
  *  Collection              c = signers.getSigners();
  *  Iterator                it = c.iterator();

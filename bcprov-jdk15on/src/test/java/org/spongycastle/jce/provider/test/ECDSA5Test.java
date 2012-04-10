@@ -107,8 +107,8 @@ public class ECDSA5Test
             ECPointUtil.decodePoint(curve, Hex.decode("025b6dc53bc61a2548ffb0f671472de6c9521a9d2d2534e65abfcbd5fe0c70")), // Q
             spec);
 
-        Signature           sgr = Signature.getInstance("ECDSA", "BC");
-        KeyFactory          f = KeyFactory.getInstance("ECDSA", "BC");
+        Signature           sgr = Signature.getInstance("ECDSA", "SC");
+        KeyFactory          f = KeyFactory.getInstance("ECDSA", "SC");
         PrivateKey          sKey = f.generatePrivate(priKey);
         PublicKey           vKey = f.generatePublic(pubKey);
 
@@ -181,8 +181,8 @@ public class ECDSA5Test
             ECPointUtil.decodePoint(curve, Hex.decode("045894609CCECF9A92533F630DE713A958E96C97CCB8F5ABB5A688A238DEED6DC2D9D0C94EBFB7D526BA6A61764175B99CB6011E2047F9F067293F57F5")), // Q
             params);
     
-        Signature   sgr = Signature.getInstance("ECDSA", "BC");
-        KeyFactory  f = KeyFactory.getInstance("ECDSA", "BC");
+        Signature   sgr = Signature.getInstance("ECDSA", "SC");
+        KeyFactory  f = KeyFactory.getInstance("ECDSA", "SC");
         PrivateKey  sKey = f.generatePrivate(priKeySpec);
         PublicKey   vKey = f.generatePublic(pubKeySpec);
         byte[]      message = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
@@ -226,8 +226,8 @@ public class ECDSA5Test
         // ECDSA generation test
         //
         byte[]              data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
-        Signature s = Signature.getInstance("ECDSA", "BC");
-        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
+        Signature s = Signature.getInstance("ECDSA", "SC");
+        KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "SC");
 
         EllipticCurve curve = new EllipticCurve(
             new ECFieldFp(new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839")), // q
@@ -253,7 +253,7 @@ public class ECDSA5Test
 
         byte[] sigBytes = s.sign();
 
-        s = Signature.getInstance("ECDSA", "BC");
+        s = Signature.getInstance("ECDSA", "SC");
 
         s.initVerify(vKey);
 
@@ -329,13 +329,13 @@ public class ECDSA5Test
     private void testKeyConversion()
         throws Exception
     {
-        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "BC");
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "SC");
 
         kpGen.initialize(new ECGenParameterSpec("prime192v1"));
 
         KeyPair pair = kpGen.generateKeyPair();
 
-        PublicKey pubKey = ECKeyUtil.publicToExplicitParameters(pair.getPublic(), "BC");
+        PublicKey pubKey = ECKeyUtil.publicToExplicitParameters(pair.getPublic(), "SC");
 
         SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(ASN1Primitive.fromByteArray(pubKey.getEncoded()));
         X962Parameters params = X962Parameters.getInstance(info.getAlgorithmId().getParameters());
@@ -350,7 +350,7 @@ public class ECDSA5Test
             fail("public key conversion check failed");
         }
 
-        PrivateKey privKey = ECKeyUtil.privateToExplicitParameters(pair.getPrivate(), "BC");
+        PrivateKey privKey = ECKeyUtil.privateToExplicitParameters(pair.getPrivate(), "SC");
         PrivateKeyInfo privInfo = PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(privKey.getEncoded()));
         params = X962Parameters.getInstance(privInfo.getAlgorithmId().getParameters());
 
@@ -368,7 +368,7 @@ public class ECDSA5Test
     private void testKeyPairGenerationWithOIDs()
         throws Exception
     {
-        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "BC");
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "SC");
 
         kpGen.initialize(new ECGenParameterSpec(X9ObjectIdentifiers.prime192v1.getId()));
         kpGen.initialize(new ECGenParameterSpec(TeleTrusTObjectIdentifiers.brainpoolP160r1.getId()));

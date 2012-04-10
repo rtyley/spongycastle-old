@@ -268,7 +268,7 @@ public class OCSPTest
       + "ClrcOKZWKOWa14XJy/DJk6nlOiq5W2AglUt8JVOpa5oVdiNRIT2WoGnpqVV9"
       + "tUeoWog=");
 
-    private static final String BC = "BC";
+    private static final String BC = "SC";
 
     public String getName()
     {

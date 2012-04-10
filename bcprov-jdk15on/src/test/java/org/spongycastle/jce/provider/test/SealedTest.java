@@ -16,7 +16,7 @@ import org.spongycastle.util.test.TestResult;
 public class SealedTest
     implements Test
 {
-    final static String provider = "BC";
+    final static String provider = "SC";
 
     public String getName()
     {

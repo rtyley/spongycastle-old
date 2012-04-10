@@ -119,7 +119,7 @@ public class ReaderTest
         ECNamedCurveParameterSpec spec = (ECNamedCurveParameterSpec)pemRd.readObject();
 
         pair = (KeyPair)pemRd.readObject();
-        Signature sgr = Signature.getInstance("ECDSA", "BC");
+        Signature sgr = Signature.getInstance("ECDSA", "SC");
 
         sgr.initSign(pair.getPrivate());
 
@@ -151,13 +151,13 @@ public class ReaderTest
         //
         // writer/parser test
         //
-        KeyPairGenerator      kpGen = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator      kpGen = KeyPairGenerator.getInstance("RSA", "SC");
 
         pair = kpGen.generateKeyPair();
 
         keyPairTest("RSA", pair);
 
-        kpGen = KeyPairGenerator.getInstance("DSA", "BC");
+        kpGen = KeyPairGenerator.getInstance("DSA", "SC");
         kpGen.initialize(512, new SecureRandom());
         pair = kpGen.generateKeyPair();
 

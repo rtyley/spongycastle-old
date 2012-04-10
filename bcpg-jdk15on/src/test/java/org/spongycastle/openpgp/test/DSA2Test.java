@@ -37,7 +37,7 @@ public class DSA2Test
 
     public void setUp()
     {
-        if (Security.getProvider("BC") == null)
+        if (Security.getProvider("SC") == null)
         {
             Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
         }
@@ -141,9 +141,9 @@ public class DSA2Test
         String                data = "hello world!";
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         ByteArrayInputStream  testIn = new ByteArrayInputStream(data.getBytes());
-        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.DSA, digest, "BC");
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(PublicKeyAlgorithmTags.DSA, digest, "SC");
 
-        sGen.initSign(PGPSignature.BINARY_DOCUMENT, secRing.getSecretKey().extractPrivateKey("test".toCharArray(), "BC"));
+        sGen.initSign(PGPSignature.BINARY_DOCUMENT, secRing.getSecretKey().extractPrivateKey("test".toCharArray(), "SC"));
 
         BCPGOutputStream bcOut = new BCPGOutputStream(bOut);
 
@@ -185,7 +185,7 @@ public class DSA2Test
 
         InputStream             dIn = p2.getInputStream();
 
-        ops.initVerify(pubRing.getPublicKey(), "BC");
+        ops.initVerify(pubRing.getPublicKey(), "SC");
 
         while ((ch = dIn.read()) >= 0)
         {
@@ -220,7 +220,7 @@ public class DSA2Test
 
         InputStream dIn = p2.getInputStream();
 
-        ops.initVerify(publicKey.getPublicKey(), "BC");
+        ops.initVerify(publicKey.getPublicKey(), "SC");
 
         int ch;
         while ((ch = dIn.read()) >= 0)

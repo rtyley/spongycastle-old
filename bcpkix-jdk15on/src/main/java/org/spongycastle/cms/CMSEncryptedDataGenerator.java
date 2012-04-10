@@ -30,7 +30,7 @@ import org.spongycastle.operator.OutputEncryptor;
  *       CMSEncryptedData ed = edGen.generate(
  *                                       msg,
  *                                       new JceCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC)
- *                                              .setProvider("BC").build());
+ *                                              .setProvider("SC").build());
  *
  * </pre>
  */

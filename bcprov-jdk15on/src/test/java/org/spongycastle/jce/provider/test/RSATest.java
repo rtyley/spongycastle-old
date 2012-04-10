@@ -139,7 +139,7 @@ public class RSATest
         SecureRandom        rand = new FixedSecureRandom();
 
 
-        fact = KeyFactory.getInstance("RSA", "BC");
+        fact = KeyFactory.getInstance("RSA", "SC");
 
         PrivateKey  privKey = fact.generatePrivate(privKeySpec);
         PublicKey   pubKey = fact.generatePublic(pubKeySpec);
@@ -150,7 +150,7 @@ public class RSATest
         //
         // No Padding
         //
-        Cipher c = Cipher.getInstance("RSA", "BC");
+        Cipher c = Cipher.getInstance("RSA", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -173,7 +173,7 @@ public class RSATest
         //
         // No Padding - incremental
         //
-        c = Cipher.getInstance("RSA", "BC");
+        c = Cipher.getInstance("RSA", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -198,7 +198,7 @@ public class RSATest
         //
         // No Padding - incremental - explicit use of NONE in mode.
         //
-        c = Cipher.getInstance("RSA/NONE/NoPadding", "BC");
+        c = Cipher.getInstance("RSA/NONE/NoPadding", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -223,7 +223,7 @@ public class RSATest
         //
         // No Padding - maximum length
         //
-        c = Cipher.getInstance("RSA", "BC");
+        c = Cipher.getInstance("RSA", "SC");
 
         byte[]  modBytes = ((RSAPublicKey)pubKey).getModulus().toByteArray();
         byte[]  maxInput = new byte[modBytes.length - 1];
@@ -246,7 +246,7 @@ public class RSATest
         //
         // PKCS1 V 1.5
         //
-        c = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
+        c = Cipher.getInstance("RSA/ECB/PKCS1Padding", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -269,7 +269,7 @@ public class RSATest
         //
         // PKCS1 V 1.5 - NONE
         //
-        c = Cipher.getInstance("RSA/NONE/PKCS1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/PKCS1Padding", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -292,7 +292,7 @@ public class RSATest
         //
         // OAEP - SHA1
         //
-        c = Cipher.getInstance("RSA/NONE/OAEPPadding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPPadding", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -303,7 +303,7 @@ public class RSATest
             fail("OAEP test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
         }
 
-        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "SC");
         
         c.init(Cipher.DECRYPT_MODE, privKey);
 
@@ -328,7 +328,7 @@ public class RSATest
         //
         // OAEP - SHA224
         //
-        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA224AndMGF1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA224AndMGF1Padding", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pub2048Key, rand);
 
@@ -362,7 +362,7 @@ public class RSATest
         //
         // OAEP - SHA 256
         //
-        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pub2048Key, rand);
 
@@ -396,7 +396,7 @@ public class RSATest
         //
         // OAEP - SHA 384
         //
-        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA384AndMGF1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA384AndMGF1Padding", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pub2048Key, rand);
 
@@ -430,7 +430,7 @@ public class RSATest
         //
         // OAEP - MD5
         //
-        c = Cipher.getInstance("RSA/NONE/OAEPWithMD5AndMGF1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPWithMD5AndMGF1Padding", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
 
@@ -464,7 +464,7 @@ public class RSATest
         //
         // OAEP - SHA1 with default parameters
         //
-        c = Cipher.getInstance("RSA/NONE/OAEPPadding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPPadding", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, OAEPParameterSpec.DEFAULT, rand);
 
@@ -475,7 +475,7 @@ public class RSATest
             fail("OAEP test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
         }
 
-        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "SC");
         
         c.init(Cipher.DECRYPT_MODE, privKey);
 
@@ -496,7 +496,7 @@ public class RSATest
         //
         // OAEP - SHA1 with specified string
         //
-        c = Cipher.getInstance("RSA/NONE/OAEPPadding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPPadding", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, pubKey, new OAEPParameterSpec("SHA1", "MGF1", new MGF1ParameterSpec("SHA1"), new PSource.PSpecified(new byte[] { 1, 2, 3, 4, 5 })), rand);
 
@@ -518,7 +518,7 @@ public class RSATest
             fail("OAEP test failed on encrypt expected " + new String(Hex.encode(output[2])) + " got " + new String(Hex.encode(out)));
         }
 
-        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/OAEPWithSHA1AndMGF1Padding", "SC");
         
         c.init(Cipher.DECRYPT_MODE, privKey, oaepP);
 
@@ -536,7 +536,7 @@ public class RSATest
         PrivateKey  isoPrivKey = fact.generatePrivate(isoPrivKeySpec);
         PublicKey   isoPubKey = fact.generatePublic(isoPubKeySpec);
 
-        c = Cipher.getInstance("RSA/NONE/ISO9796-1Padding", "BC");
+        c = Cipher.getInstance("RSA/NONE/ISO9796-1Padding", "SC");
 
         c.init(Cipher.ENCRYPT_MODE, isoPrivKey);
 
@@ -561,7 +561,7 @@ public class RSATest
         // generation with parameters test.
         //
         KeyPairGenerator keyPairGen =
-                KeyPairGenerator.getInstance("RSA", "BC");
+                KeyPairGenerator.getInstance("RSA", "SC");
 
         //
         // 768 bit RSA with e = 2^16-1
@@ -592,7 +592,7 @@ public class RSATest
         //
         // comparison check
         //
-        KeyFactory keyFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory keyFact = KeyFactory.getInstance("RSA", "SC");
         
         RSAPrivateCrtKey crtKey = (RSAPrivateCrtKey)keyFact.translateKey(privKey);
         
@@ -690,7 +690,7 @@ public class RSATest
 
         byte[] enctext = sCipher.doFinal(data);
 
-        Cipher bcCipher = Cipher.getInstance("RSA/ECB/OAEPWith" + digest + "AndMGF1Padding", "BC");
+        Cipher bcCipher = Cipher.getInstance("RSA/ECB/OAEPWith" + digest + "AndMGF1Padding", "SC");
 
         bcCipher.init(Cipher.DECRYPT_MODE, privKey, new OAEPParameterSpec(digest, "MGF1", MGF1ParameterSpec.SHA1, PSource.PSpecified.DEFAULT));
 
@@ -721,16 +721,16 @@ public class RSATest
         byte[] sampleMessage = new byte[1000 + random.nextInt(100)];
         random.nextBytes(sampleMessage);
 
-        Signature normalSig = Signature.getInstance(sigName, "BC");
+        Signature normalSig = Signature.getInstance(sigName, "SC");
         normalSig.initSign(privKey);
         normalSig.update(sampleMessage);
         byte[] normalResult = normalSig.sign();
 
-        MessageDigest digest = MessageDigest.getInstance(digestOID.getId(), "BC");
+        MessageDigest digest = MessageDigest.getInstance(digestOID.getId(), "SC");
         byte[] hash = digest.digest(sampleMessage);
         byte[] digInfo = derEncode(digestOID, hash);
 
-        Signature rawSig = Signature.getInstance("RSA", "BC");
+        Signature rawSig = Signature.getInstance("RSA", "SC");
         rawSig.initSign(privKey);
         rawSig.update(digInfo);
         byte[] rawResult = rawSig.sign();

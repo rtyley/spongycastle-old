@@ -41,7 +41,7 @@ public class ReadEncryptedMail
         //
         // Open the key store
         //
-        KeyStore    ks = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore    ks = KeyStore.getInstance("PKCS12", "SC");
 
         ks.load(new FileInputStream(args[0]), args[1].toCharArray());
 
@@ -85,7 +85,7 @@ public class ReadEncryptedMail
         RecipientInformationStore   recipients = m.getRecipientInfos();
         RecipientInformation        recipient = recipients.get(recId);
 
-        MimeBodyPart        res = SMIMEUtil.toMimeBodyPart(recipient.getContent(new JceKeyTransEnvelopedRecipient((PrivateKey)ks.getKey(keyAlias, null)).setProvider("BC")));
+        MimeBodyPart        res = SMIMEUtil.toMimeBodyPart(recipient.getContent(new JceKeyTransEnvelopedRecipient((PrivateKey)ks.getKey(keyAlias, null)).setProvider("SC")));
 
         System.out.println("Message Contents");
         System.out.println("----------------");

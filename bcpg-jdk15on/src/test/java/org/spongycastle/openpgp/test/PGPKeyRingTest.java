@@ -1415,12 +1415,12 @@ public class PGPKeyRingTest
                 if (k.getKeyID() == -4049084404703773049L
                      || k.getKeyID() == -1413891222336124627L)
                 {
-                    k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(sec2pass1));
+                    k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("SC").build(sec2pass1));
                 }
                 else if (k.getKeyID() == -6498553574938125416L
                     || k.getKeyID() == 59034765524361024L)
                 {
-                    k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(sec2pass2));
+                    k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("SC").build(sec2pass2));
                 }
             }
             
@@ -1510,7 +1510,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                k.extractPrivateKey(sec3pass1, "BC");
+                k.extractPrivateKey(sec3pass1, "SC");
             }
             
             if (keyCount != 2)
@@ -1556,7 +1556,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                k.extractPrivateKey(sec3pass1, "BC");
+                k.extractPrivateKey(sec3pass1, "SC");
             }
 
             if (keyCount != 2)
@@ -1662,7 +1662,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(sec5pass1));
+                k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("SC").build(sec5pass1));
             }
             
             if (keyCount != 2)
@@ -1681,7 +1681,7 @@ public class PGPKeyRingTest
     {
         try
         {
-            Cipher.getInstance("IDEA", "BC");
+            Cipher.getInstance("IDEA", "SC");
 
             return false;
         }
@@ -1758,7 +1758,7 @@ public class PGPKeyRingTest
                 fail("wrong number of revocations in test7.");
             }
 
-            sig.initVerify(masterKey, "BC");
+            sig.initVerify(masterKey, "SC");
                                                                             
             if (!sig.verifyCertification(k))
             {
@@ -1839,7 +1839,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(sec8pass));
+                k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("SC").build(sec8pass));
             }
             
             if (keyCount != 2)
@@ -1885,7 +1885,7 @@ public class PGPKeyRingTest
 
                 PGPSecretKey    k = (PGPSecretKey)it.next();
 
-                PGPPrivateKey   pKey = k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(sec9pass));
+                PGPPrivateKey   pKey = k.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("SC").build(sec9pass));
                 if (keyCount == 1 && pKey != null)
                 {
                     fail("primary secret key found, null expected");
@@ -1948,7 +1948,7 @@ public class PGPKeyRingTest
         throws Exception
     {
         char[]              passPhrase = "hello".toCharArray();
-        KeyPairGenerator    dsaKpg = KeyPairGenerator.getInstance("DSA", "BC");
+        KeyPairGenerator    dsaKpg = KeyPairGenerator.getInstance("DSA", "SC");
     
         dsaKpg.initialize(512);
     
@@ -1958,7 +1958,7 @@ public class PGPKeyRingTest
         //
         KeyPair                    dsaKp = dsaKpg.generateKeyPair();
     
-        KeyPairGenerator    elgKpg = KeyPairGenerator.getInstance("ELGAMAL", "BC");
+        KeyPairGenerator    elgKpg = KeyPairGenerator.getInstance("ELGAMAL", "SC");
         BigInteger             g = new BigInteger("153d5d6172adb43045b68ae8e1de1070b6137005686d29d3d73a7749199681ee5b212c9b96bfdcfa5b20cd5e3fd2044895d609cf9b410b7a0f12ca1cb9a428cc", 16);
         BigInteger             p = new BigInteger("9494fec095f3b85ee286542b3836fc81a5dd0a0349b4c239dd38744d488cf8e31db8bcb7d33b41abb9e5a33cca9144b1cef332c94bf0573bf047a3aca98cdf3b", 16);
         
@@ -1974,13 +1974,13 @@ public class PGPKeyRingTest
         PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date());
     
         PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, dsaKeyPair,
-                "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+                "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "SC");
     
         keyRingGen.addSubKey(elgKeyPair);
     
         PGPSecretKeyRing       keyRing = keyRingGen.generateSecretKeyRing();
         
-        keyRing.getSecretKey().extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase));
+        keyRing.getSecretKey().extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("SC").build(passPhrase));
         
         PGPPublicKeyRing        pubRing = keyRingGen.generatePublicKeyRing();
         
@@ -2009,7 +2009,7 @@ public class PGPKeyRingTest
             if (sig.getKeyID() == vKey.getKeyID()
                 && sig.getSignatureType() == PGPSignature.SUBKEY_BINDING)
             {
-                sig.initVerify(vKey, "BC");
+                sig.initVerify(vKey, "SC");
 
                 if (!sig.verifyCertification(vKey, sKey))
                 {
@@ -2023,7 +2023,7 @@ public class PGPKeyRingTest
         throws Exception
     {
         char[]              passPhrase = "hello".toCharArray();
-        KeyPairGenerator    rsaKpg = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator    rsaKpg = KeyPairGenerator.getInstance("RSA", "SC");
 
         rsaKpg.initialize(512);
 
@@ -2036,11 +2036,11 @@ public class PGPKeyRingTest
         PGPKeyPair        rsaKeyPair2 = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, rsaKp, new Date());
 
         PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, rsaKeyPair1,
-                "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+                "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "SC");
         PGPSecretKeyRing       secRing1 = keyRingGen.generateSecretKeyRing();
         PGPPublicKeyRing       pubRing1 = keyRingGen.generatePublicKeyRing();
         keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, rsaKeyPair2,
-                "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+                "test", PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "SC");
         PGPSecretKeyRing       secRing2 = keyRingGen.generateSecretKeyRing();
         PGPPublicKeyRing       pubRing2 = keyRingGen.generatePublicKeyRing();
 
@@ -2075,7 +2075,7 @@ public class PGPKeyRingTest
         throws Exception
     {
         char[]              passPhrase = "hello".toCharArray();
-        KeyPairGenerator    dsaKpg = KeyPairGenerator.getInstance("DSA", "BC");
+        KeyPairGenerator    dsaKpg = KeyPairGenerator.getInstance("DSA", "SC");
     
         dsaKpg.initialize(512);
     
@@ -2085,7 +2085,7 @@ public class PGPKeyRingTest
         //
         KeyPair                    dsaKp = dsaKpg.generateKeyPair();
     
-        KeyPairGenerator    elgKpg = KeyPairGenerator.getInstance("ELGAMAL", "BC");
+        KeyPairGenerator    elgKpg = KeyPairGenerator.getInstance("ELGAMAL", "SC");
         BigInteger             g = new BigInteger("153d5d6172adb43045b68ae8e1de1070b6137005686d29d3d73a7749199681ee5b212c9b96bfdcfa5b20cd5e3fd2044895d609cf9b410b7a0f12ca1cb9a428cc", 16);
         BigInteger             p = new BigInteger("9494fec095f3b85ee286542b3836fc81a5dd0a0349b4c239dd38744d488cf8e31db8bcb7d33b41abb9e5a33cca9144b1cef332c94bf0573bf047a3aca98cdf3b", 16);
         
@@ -2101,13 +2101,13 @@ public class PGPKeyRingTest
         PGPKeyPair        elgKeyPair = new PGPKeyPair(PGPPublicKey.ELGAMAL_ENCRYPT, elgKp, new Date());
     
         PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, dsaKeyPair,
-                "test", PGPEncryptedData.AES_256, passPhrase, true, null, null, new SecureRandom(), "BC");
+                "test", PGPEncryptedData.AES_256, passPhrase, true, null, null, new SecureRandom(), "SC");
     
         keyRingGen.addSubKey(elgKeyPair);
     
         PGPSecretKeyRing       keyRing = keyRingGen.generateSecretKeyRing();
         
-        keyRing.getSecretKey().extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(passPhrase));
+        keyRing.getSecretKey().extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("SC").build(passPhrase));
 
         if (!keyRing.getSecretKey().getPublicKey().equals(keyRing.getPublicKey()))
         {
@@ -2152,7 +2152,7 @@ public class PGPKeyRingTest
             if (sig.getKeyID() == vKey.getKeyID()
                 && sig.getSignatureType() == PGPSignature.SUBKEY_BINDING)
             {
-                sig.initVerify(vKey, "BC");
+                sig.initVerify(vKey, "SC");
     
                 if (!sig.verifyCertification(vKey, sKey))
                 {
@@ -2204,7 +2204,7 @@ public class PGPKeyRingTest
                 pgpPriv = PGPSecretKeyRing.removeSecretKey(pgpPriv, pgpKey);
                 pgpKey = PGPSecretKey.copyWithNewPassword(
                                     pgpKey,
-                                    new JcePBESecretKeyDecryptorBuilder(new JcaPGPDigestCalculatorProviderBuilder().setProvider("BC").build()).setProvider("BC").build(rewrapPass),
+                                    new JcePBESecretKeyDecryptorBuilder(new JcaPGPDigestCalculatorProviderBuilder().setProvider("SC").build()).setProvider("SC").build(rewrapPass),
                                     null);
                 pgpPriv = PGPSecretKeyRing.insertSecretKey(pgpPriv, pgpKey);
             
@@ -2246,7 +2246,7 @@ public class PGPKeyRingTest
 
             if (sig.getSignatureType() == PGPSignature.POSITIVE_CERTIFICATION)
             {
-                sig.initVerify(pub, "BC");
+                sig.initVerify(pub, "SC");
 
                 if (!sig.verifyCertification(userID, pub))
                 {
@@ -2258,7 +2258,7 @@ public class PGPKeyRingTest
         //
         // this is quicker because we are using pregenerated parameters.
         //
-        KeyPairGenerator  rsaKpg = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator  rsaKpg = KeyPairGenerator.getInstance("RSA", "SC");
         KeyPair           rsaKp = rsaKpg.generateKeyPair();
         PGPKeyPair        rsaKeyPair1 = new PGPKeyPair(PGPPublicKey.RSA_GENERAL, rsaKp, new Date());
                           rsaKp = rsaKpg.generateKeyPair();
@@ -2266,7 +2266,7 @@ public class PGPKeyRingTest
         char[]            passPhrase = "passwd".toCharArray();
 
         PGPKeyRingGenerator    keyRingGen = new PGPKeyRingGenerator(PGPSignature.POSITIVE_CERTIFICATION, rsaKeyPair1,
-                userID, PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "BC");
+                userID, PGPEncryptedData.AES_256, passPhrase, null, null, new SecureRandom(), "SC");
 
         PGPPublicKeyRing       pubRing1 = keyRingGen.generatePublicKeyRing();
 
@@ -2278,7 +2278,7 @@ public class PGPKeyRingTest
 
             if (sig.getSignatureType() == PGPSignature.POSITIVE_CERTIFICATION)
             {
-                sig.initVerify(pub, "BC");
+                sig.initVerify(pub, "SC");
 
                 if (!sig.verifyCertification(userID, pub))
                 {

@@ -82,7 +82,7 @@ public class PEMReader
     public PEMReader(
         Reader reader)
     {
-        this(reader, null, "BC");
+        this(reader, null, "SC");
     }
 
     /**
@@ -95,7 +95,7 @@ public class PEMReader
         Reader reader,
         PasswordFinder pFinder)
     {
-        this(reader, pFinder, "BC");
+        this(reader, pFinder, "SC");
     }
 
     /**

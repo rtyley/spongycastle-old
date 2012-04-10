@@ -31,7 +31,7 @@ import org.spongycastle.cms.jcajce.JceAlgorithmIdentifierConverter;
  *      {
  *          RecipientInformation   recipient = (RecipientInformation)it.next();
  *
- *          byte[] recData = recipient.getContent(new JceKeyTransEnvelopedRecipient(privateKey).setProvider("BC"));
+ *          byte[] recData = recipient.getContent(new JceKeyTransEnvelopedRecipient(privateKey).setProvider("SC"));
  *
  *          processData(recData);
  *      }

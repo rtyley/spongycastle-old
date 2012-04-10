@@ -36,12 +36,12 @@ import org.spongycastle.util.io.TeeOutputStream;
  * <pre>
  *      CMSAuthenticatedDataStreamGenerator edGen = new CMSAuthenticatedDataStreamGenerator();
  *
- *      edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(cert).setProvider("BC"));
+ *      edGen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(cert).setProvider("SC"));
  *
  *      ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
  *
  *      OutputStream out = edGen.open(
- *                              bOut, new JceCMSMacCalculatorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider("BC").build());*
+ *                              bOut, new JceCMSMacCalculatorBuilder(CMSAlgorithm.DES_EDE3_CBC).setProvider("SC").build());*
  *      out.write(data);
  *
  *      out.close();

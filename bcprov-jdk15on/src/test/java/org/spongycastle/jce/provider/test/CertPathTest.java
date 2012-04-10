@@ -141,7 +141,7 @@ public class CertPathTest
         try
         {
             CertificateFactory cFac = CertificateFactory.getInstance("X.509",
-                    "BC");
+                    "SC");
             arr = os.toByteArray();
             is = new ByteArrayInputStream(arr);
             cFac.generateCertPath(is);
@@ -159,7 +159,7 @@ public class CertPathTest
         certCol.add(cf.generateCertificate(new ByteArrayInputStream(certC)));
         certCol.add(cf.generateCertificate(new ByteArrayInputStream(certD)));
 
-        CertPathBuilder pathBuilder = CertPathBuilder.getInstance("PKIX", "BC");
+        CertPathBuilder pathBuilder = CertPathBuilder.getInstance("PKIX", "SC");
         X509CertSelector select = new X509CertSelector();
         select.setSubject(((X509Certificate)certCol.get(0)).getSubjectX500Principal().getEncoded());
 
@@ -186,7 +186,7 @@ public class CertPathTest
     public void performTest()
         throws Exception
     {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "SC");
 
         X509Certificate rootCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(rootCertBin));
         X509Certificate interCert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(interCertBin));
@@ -239,7 +239,7 @@ public class CertPathTest
         //
         list = new ArrayList();
 
-        CertPath certPath = CertificateFactory.getInstance("X.509","BC").generateCertPath(list);
+        CertPath certPath = CertificateFactory.getInstance("X.509","SC").generateCertPath(list);
         if (certPath.getCertificates().size() != 0)
         {
             fail("list wrong size.");

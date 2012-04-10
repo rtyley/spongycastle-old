@@ -40,7 +40,7 @@ public class ReadLargeEncryptedMail
         //
         // Open the key store
         //
-        KeyStore    ks = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore    ks = KeyStore.getInstance("PKCS12", "SC");
         String      keyAlias = ExampleUtils.findKeyAlias(ks, args[0], args[1].toCharArray());
 
         //
@@ -64,7 +64,7 @@ public class ReadLargeEncryptedMail
         RecipientInformationStore   recipients = m.getRecipientInfos();
         RecipientInformation        recipient = recipients.get(recId);
 
-        MimeBodyPart        res = SMIMEUtil.toMimeBodyPart(recipient.getContentStream(new JceKeyTransEnvelopedRecipient((PrivateKey)ks.getKey(keyAlias, null)).setProvider("BC")));
+        MimeBodyPart        res = SMIMEUtil.toMimeBodyPart(recipient.getContentStream(new JceKeyTransEnvelopedRecipient((PrivateKey)ks.getKey(keyAlias, null)).setProvider("SC")));
 
         ExampleUtils.dumpContent(res, args[2]);
     }

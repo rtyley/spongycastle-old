@@ -24,11 +24,11 @@ import org.spongycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
  * For example:
  * <pre>
  *      CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
- *      ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider("BC").build(signKP.getPrivate());
+ *      ContentSigner sha1Signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider("SC").build(signKP.getPrivate());
  *
  *      gen.addSignerInfoGenerator(
  *                new JcaSignerInfoGeneratorBuilder(
- *                     new JcaDigestCalculatorProviderBuilder().setProvider("BC").build())
+ *                     new JcaDigestCalculatorProviderBuilder().setProvider("SC").build())
  *                     .build(sha1Signer, signCert));
  * </pre>
  * becomes:
@@ -37,7 +37,7 @@ import org.spongycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
  *
  *      gen.addSignerInfoGenerator(
  *                new JcaSimpleSignerInfoGeneratorBuilder()
- *                     .setProvider("BC")
+ *                     .setProvider("SC")
  *                     .build("SHA1withRSA", signKP.getPrivate(), signCert));
  * </pre>
  */

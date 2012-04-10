@@ -355,7 +355,7 @@ public class AttributeCertificateHolder
                 MessageDigest md = null;
                 try
                 {
-                    md = MessageDigest.getInstance(getDigestAlgorithm(), "BC");
+                    md = MessageDigest.getInstance(getDigestAlgorithm(), "SC");
 
                 }
                 catch (Exception e)

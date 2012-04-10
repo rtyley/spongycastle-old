@@ -83,7 +83,7 @@ public class CreateLargeSignedMail
             false,
             extUtils.createAuthorityKeyIdentifier(issPub));
 
-        return new JcaX509CertificateConverter().setProvider("BC").getCertificate(v3CertGen.build(new JcaContentSignerBuilder("MD5withRSA").setProvider("BC").build(issPriv)));
+        return new JcaX509CertificateConverter().setProvider("SC").getCertificate(v3CertGen.build(new JcaContentSignerBuilder("MD5withRSA").setProvider("SC").build(issPriv)));
     }
 
     public static void main(
@@ -93,7 +93,7 @@ public class CreateLargeSignedMail
         //
         // set up our certs
         //
-        KeyPairGenerator    kpg  = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator    kpg  = KeyPairGenerator.getInstance("RSA", "SC");
 
         kpg.initialize(1024, new SecureRandom());
 
@@ -156,7 +156,7 @@ public class CreateLargeSignedMail
         // will be generated as part of the signature. The encryption algorithm
         // used is taken from the key - in this RSA with PKCS1Padding
         //
-        gen.addSignerInfoGenerator(new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").setSignedAttributeGenerator(new AttributeTable(signedAttrs)).build("SHA1withRSA", origKP.getPrivate(), origCert));
+        gen.addSignerInfoGenerator(new JcaSimpleSignerInfoGeneratorBuilder().setProvider("SC").setSignedAttributeGenerator(new AttributeTable(signedAttrs)).build("SHA1withRSA", origKP.getPrivate(), origCert));
 
         //
         // add our pool of certs and cerls (if any) to go with the signature

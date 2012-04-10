@@ -660,7 +660,7 @@ public class GetInstanceTest
 
         v.add(new Integer(1));
         v.add(BigInteger.valueOf(2));
-        NoticeReference noticeReference = new NoticeReference("BC", v);
+        NoticeReference noticeReference = new NoticeReference("SC", v);
         doFullGetInstanceTest(SPUserNotice.class, new SPUserNotice(noticeReference, new DisplayText("hello world")));
         ContentHints.getInstance(null);
         ContentIdentifier.getInstance(null);

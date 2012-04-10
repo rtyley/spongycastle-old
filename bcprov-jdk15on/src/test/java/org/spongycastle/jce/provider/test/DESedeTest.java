@@ -134,7 +134,7 @@ public class DESedeTest
     {
         try
         {
-            Cipher wrapper = Cipher.getInstance("DESedeWrap", "BC");
+            Cipher wrapper = Cipher.getInstance("DESedeWrap", "SC");
 
             wrapper.init(Cipher.WRAP_MODE, new SecretKeySpec(kek, "DESEDE"), new IvParameterSpec(iv));
 
@@ -191,13 +191,13 @@ public class DESedeTest
 
         try
         {
-            keyGen = KeyGenerator.getInstance("DESEDE", "BC");
+            keyGen = KeyGenerator.getInstance("DESEDE", "SC");
             keyGen.init(strength, rand);
 
             key = keyGen.generateKey();
 
-            in = Cipher.getInstance("DESEDE/ECB/PKCS7Padding", "BC");
-            out = Cipher.getInstance("DESEDE/ECB/PKCS7Padding", "BC");
+            in = Cipher.getInstance("DESEDE/ECB/PKCS7Padding", "SC");
+            out = Cipher.getInstance("DESEDE/ECB/PKCS7Padding", "SC");
 
             out.init(Cipher.ENCRYPT_MODE, key, rand);
         }
@@ -279,7 +279,7 @@ public class DESedeTest
         //
         try
         {
-            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DESede", "BC");
+            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DESede", "SC");
             DESedeKeySpec keySpec = (DESedeKeySpec)keyFactory.getKeySpec((SecretKey)key, DESedeKeySpec.class);
 
             if (!equalArray(key.getEncoded(), keySpec.getKey(), 16))

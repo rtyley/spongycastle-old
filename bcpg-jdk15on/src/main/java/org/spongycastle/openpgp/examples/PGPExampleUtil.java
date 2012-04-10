@@ -54,7 +54,7 @@ class PGPExampleUtil
             return null;
         }
 
-        return pgpSecKey.extractPrivateKey(pass, "BC");
+        return pgpSecKey.extractPrivateKey(pass, "SC");
     }
 
     static PGPPublicKey readPublicKey(String fileName) throws IOException, PGPException

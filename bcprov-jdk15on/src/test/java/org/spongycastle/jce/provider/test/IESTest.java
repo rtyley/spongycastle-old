@@ -41,7 +41,7 @@ public class IESTest
     public void performTest()
         throws Exception
     {
-        KeyPairGenerator    g = KeyPairGenerator.getInstance("ECIES", "BC");
+        KeyPairGenerator    g = KeyPairGenerator.getInstance("ECIES", "SC");
 
         ECCurve curve = new ECCurve.Fp(
                 new BigInteger("883423532389192164791648750360308885314476597252960362792450860609699839"), // q
@@ -55,24 +55,24 @@ public class IESTest
 
         g.initialize(ecSpec, new SecureRandom());
 
-        Cipher c1 = Cipher.getInstance("ECIES", "BC");
-        Cipher c2 = Cipher.getInstance("ECIES", "BC");
+        Cipher c1 = Cipher.getInstance("ECIES", "SC");
+        Cipher c2 = Cipher.getInstance("ECIES", "SC");
         
         doTest(g, c1, c2);
 
-        g = KeyPairGenerator.getInstance("ECIES", "BC");
+        g = KeyPairGenerator.getInstance("ECIES", "SC");
 
         g.initialize(192, new SecureRandom());
 
         doTest(g, c1, c2);
 
-        g = KeyPairGenerator.getInstance("ECIES", "BC");
+        g = KeyPairGenerator.getInstance("ECIES", "SC");
 
         g.initialize(239, new SecureRandom());
 
         doTest(g, c1, c2);
 
-        g = KeyPairGenerator.getInstance("ECIES", "BC");
+        g = KeyPairGenerator.getInstance("ECIES", "SC");
 
         g.initialize(256, new SecureRandom());
 
@@ -82,10 +82,10 @@ public class IESTest
         
         DHParameterSpec             dhParams = new DHParameterSpec(p512, g512);
         
-        c1 = Cipher.getInstance("IES", "BC");
-        c2 = Cipher.getInstance("IES", "BC");
+        c1 = Cipher.getInstance("IES", "SC");
+        c2 = Cipher.getInstance("IES", "SC");
         
-        g = KeyPairGenerator.getInstance("DH", "BC");
+        g = KeyPairGenerator.getInstance("DH", "SC");
 
         g.initialize(dhParams);
         

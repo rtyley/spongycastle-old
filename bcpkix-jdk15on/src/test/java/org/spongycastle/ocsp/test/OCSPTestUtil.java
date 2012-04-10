@@ -44,12 +44,12 @@ public class OCSPTestUtil
         {
             rand = new SecureRandom();
 
-            kpg  = KeyPairGenerator.getInstance("RSA", "BC");
+            kpg  = KeyPairGenerator.getInstance("RSA", "SC");
             kpg.initialize(1024, rand);
 
             serialNumber = new BigInteger("1");
 
-            eckpg = KeyPairGenerator.getInstance("ECDSA", "BC");
+            eckpg = KeyPairGenerator.getInstance("ECDSA", "SC");
             eckpg.initialize(192, rand);
         }
         catch(Exception ex)

@@ -1194,7 +1194,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "SC");
 
             Certificate cert = fact.generateCertificate(bIn);
 
@@ -1219,7 +1219,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "SC");
 
             X509Certificate cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -1248,7 +1248,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "SC");
 
             X509Certificate cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -1280,7 +1280,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "SC");
 
             Certificate cert = fact.generateCertificate(bIn);
 
@@ -1337,7 +1337,7 @@ public class CertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  fact = KeyFactory.getInstance("RSA", "SC");
 
         privKey = fact.generatePrivate(privKeySpec);
         pubKey = fact.generatePublic(pubKeySpec);
@@ -1418,7 +1418,7 @@ public class CertTest
         }
 
         ByteArrayInputStream   bIn = new ByteArrayInputStream(cert.getEncoded());
-        CertificateFactory     certFact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory     certFact = CertificateFactory.getInstance("X.509", "SC");
 
         cert = (X509Certificate)certFact.generateCertificate(bIn);
 
@@ -1463,7 +1463,7 @@ public class CertTest
         cert.verify(cert.getPublicKey());
 
         bIn = new ByteArrayInputStream(cert.getEncoded());
-        certFact = CertificateFactory.getInstance("X.509", "BC");
+        certFact = CertificateFactory.getInstance("X.509", "SC");
 
         cert = (X509Certificate)certFact.generateCertificate(bIn);
 
@@ -2651,7 +2651,7 @@ public class CertTest
     private void testDirect()
         throws Exception
     {
-        KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore keyStore = KeyStore.getInstance("PKCS12", "SC");
 
         ByteArrayInputStream input = new ByteArrayInputStream(testCAp12);
 
@@ -2668,11 +2668,11 @@ public class CertTest
 
         JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder("SHA256WithRSAEncryption");
 
-        contentSignerBuilder.setProvider("BC");
+        contentSignerBuilder.setProvider("SC");
 
         X509CRLHolder cRLHolder = builder.build(contentSignerBuilder.build(privateKey));
 
-        if (!cRLHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(certificate)))
+        if (!cRLHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("SC").build(certificate)))
         {
             fail("CRL signature not valid");
         }
@@ -2686,7 +2686,7 @@ public class CertTest
 
         JcaX509CRLConverter converter = new JcaX509CRLConverter();
 
-        converter.setProvider("BC");
+        converter.setProvider("SC");
 
         X509CRL crl = converter.getCRL(cRLHolder);
 
@@ -2714,7 +2714,7 @@ public class CertTest
     private void testIndirect()
         throws Exception
     {
-        KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore keyStore = KeyStore.getInstance("PKCS12", "SC");
 
         ByteArrayInputStream input = new ByteArrayInputStream(testCAp12);
 
@@ -2739,11 +2739,11 @@ public class CertTest
 
         JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder("SHA256WithRSAEncryption");
 
-        contentSignerBuilder.setProvider("BC");
+        contentSignerBuilder.setProvider("SC");
 
         X509CRLHolder cRLHolder = builder.build(contentSignerBuilder.build(privateKey));
 
-        if (!cRLHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(certificate)))
+        if (!cRLHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("SC").build(certificate)))
         {
             fail("CRL signature not valid");
         }
@@ -2757,7 +2757,7 @@ public class CertTest
 
         JcaX509CRLConverter converter = new JcaX509CRLConverter();
 
-        converter.setProvider("BC");
+        converter.setProvider("SC");
 
         X509CRL crl = converter.getCRL(cRLHolder);
 
@@ -2785,7 +2785,7 @@ public class CertTest
     private void testIndirect2()
         throws Exception
     {
-        KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore keyStore = KeyStore.getInstance("PKCS12", "SC");
 
         ByteArrayInputStream input = new ByteArrayInputStream(testCAp12);
 
@@ -2815,11 +2815,11 @@ public class CertTest
 
         JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder("SHA256WithRSAEncryption");
 
-        contentSignerBuilder.setProvider("BC");
+        contentSignerBuilder.setProvider("SC");
 
         X509CRLHolder cRLHolder = builder.build(contentSignerBuilder.build(privateKey));
 
-        if (!cRLHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(certificate)))
+        if (!cRLHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("SC").build(certificate)))
         {
             fail("CRL signature not valid");
         }
@@ -2847,7 +2847,7 @@ public class CertTest
 
         JcaX509CRLConverter converter = new JcaX509CRLConverter();
 
-        converter.setProvider("BC");
+        converter.setProvider("SC");
 
         X509CRL crl = converter.getCRL(cRLHolder);
 
@@ -2871,7 +2871,7 @@ public class CertTest
     private void testMalformedIndirect()
         throws Exception
     {
-        KeyStore keyStore = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore keyStore = KeyStore.getInstance("PKCS12", "SC");
 
         ByteArrayInputStream input = new ByteArrayInputStream(testCAp12);
 
@@ -2894,11 +2894,11 @@ public class CertTest
 
         JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder("SHA256WithRSAEncryption");
 
-        contentSignerBuilder.setProvider("BC");
+        contentSignerBuilder.setProvider("SC");
 
         X509CRLHolder cRLHolder = builder.build(contentSignerBuilder.build(privateKey));
 
-        if (!cRLHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("BC").build(certificate)))
+        if (!cRLHolder.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider("SC").build(certificate)))
         {
             fail("CRL signature not valid");
         }
@@ -2912,7 +2912,7 @@ public class CertTest
 
         JcaX509CRLConverter converter = new JcaX509CRLConverter();
 
-        converter.setProvider("BC");
+        converter.setProvider("SC");
 
         X509CRL crl = converter.getCRL(cRLHolder);
 

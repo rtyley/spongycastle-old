@@ -102,7 +102,7 @@ public class AttrCertSelectorTest
 
     private X509AttributeCertificateHolder createAttrCert() throws Exception
     {
-        CertificateFactory fact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory fact = CertificateFactory.getInstance("X.509", "SC");
         X509Certificate iCert = (X509Certificate) fact
             .generateCertificate(new ByteArrayInputStream(holderCert));
         X509CertificateHolder iCertHolder = new JcaX509CertificateHolder(iCert);
@@ -119,7 +119,7 @@ public class AttrCertSelectorTest
         //
         PrivateKey privKey;
 
-        KeyFactory kFact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory kFact = KeyFactory.getInstance("RSA", "SC");
 
         privKey = kFact.generatePrivate(RSA_PRIVATE_KEY_SPEC);
 
@@ -188,7 +188,7 @@ public class AttrCertSelectorTest
         }
         sel.setIssuer(null);
 
-        CertificateFactory fact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory fact = CertificateFactory.getInstance("X.509", "SC");
         X509CertificateHolder iCert = new JcaX509CertificateHolder((X509Certificate) fact
             .generateCertificate(new ByteArrayInputStream(holderCert)));
         match = aCert.getHolder().match(iCert);

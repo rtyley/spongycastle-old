@@ -299,7 +299,7 @@ public class ParseTest
         
         try
         {
-            req.validate(TSPAlgorithms.ALLOWED, null, null, "BC");
+            req.validate(TSPAlgorithms.ALLOWED, null, null, "SC");
         }
         catch (Exception e)
         {
@@ -321,13 +321,13 @@ public class ParseTest
         TimeStampRequest  req = new TimeStampRequest(request);
         TimeStampResponse resp = new TimeStampResponse(response);
 
-        CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory  fact = CertificateFactory.getInstance("X.509", "SC");
                 
         X509Certificate cert = (X509Certificate)fact.generateCertificate(new ByteArrayInputStream(signingCert));
 
         resp.validate(req);
 
-        resp.getTimeStampToken().validate(cert, "BC");
+        resp.getTimeStampToken().validate(cert, "SC");
     }
     
     private void unacceptableResponseParse(
@@ -392,7 +392,7 @@ public class ParseTest
         Store store = response.getTimeStampToken().getCertificates();
         X509CertificateHolder cert = (X509CertificateHolder)store.getMatches(response.getTimeStampToken().getSID()).iterator().next();
 
-        response.getTimeStampToken().validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert));
+        response.getTimeStampToken().validate(new JcaSimpleSignerInfoVerifierBuilder().setProvider("SC").build(cert));
     }
 
     public void parse(

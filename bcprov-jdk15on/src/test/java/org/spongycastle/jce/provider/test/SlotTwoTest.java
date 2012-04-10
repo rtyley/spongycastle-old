@@ -24,10 +24,10 @@ public class SlotTwoTest
     public void performTest() 
         throws Exception
     {
-        Security.removeProvider("BC");
+        Security.removeProvider("SC");
         Security.insertProviderAt(new BouncyCastleProvider(), 2);
 
-        KeyGenerator keyGen = KeyGenerator.getInstance("DESede", "BC");
+        KeyGenerator keyGen = KeyGenerator.getInstance("DESede", "SC");
         
         keyGen.init(new SecureRandom());
 
@@ -40,7 +40,7 @@ public class SlotTwoTest
         testDesEde(key, "OFB", "PKCS7Padding");
         testDesEde(key, "CFB", "PKCS7Padding");
         
-        Security.removeProvider("BC");
+        Security.removeProvider("SC");
         Security.addProvider(new BouncyCastleProvider());
     }
 
@@ -50,10 +50,10 @@ public class SlotTwoTest
         String padding) 
         throws Exception
     {
-        Cipher encrypt = Cipher.getInstance("DESede/" + mode + "/" + padding, "BC");
+        Cipher encrypt = Cipher.getInstance("DESede/" + mode + "/" + padding, "SC");
         Cipher decrypt = Cipher.getInstance("DESede/" + mode + "/" + padding);
         
-        if (!decrypt.getProvider().getName().equals("BC"))
+        if (!decrypt.getProvider().getName().equals("SC"))
         {
             fail("BC provider not returned for DESede/" + mode + "/" + padding + " got " + decrypt.getProvider().getName());
         }

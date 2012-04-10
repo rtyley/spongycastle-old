@@ -47,7 +47,7 @@ import org.spongycastle.util.Arrays;
  *      {
  *          RecipientInformation   recipient = (RecipientInformation)it.next();
  *
- *          CMSTypedStream recData = recipient.getContentStream(new JceKeyTransAuthenticatedRecipient(privateKey).setProvider("BC"));
+ *          CMSTypedStream recData = recipient.getContentStream(new JceKeyTransAuthenticatedRecipient(privateKey).setProvider("SC"));
  *
  *          processDataStream(recData.getContentStream());
  *

@@ -60,7 +60,7 @@ public class NetscapeCertRequestTest
 
             //now try to generate one
             KeyPairGenerator kpg =
-                KeyPairGenerator.getInstance (nscr.getKeyAlgorithm().getObjectId ().getId(), "BC");
+                KeyPairGenerator.getInstance (nscr.getKeyAlgorithm().getObjectId ().getId(), "SC");
 
             kpg.initialize (1024);
 

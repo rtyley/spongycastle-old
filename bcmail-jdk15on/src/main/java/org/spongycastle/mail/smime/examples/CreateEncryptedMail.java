@@ -44,7 +44,7 @@ public class CreateEncryptedMail
         //
         // Open the key store
         //
-        KeyStore    ks = KeyStore.getInstance("PKCS12", "BC");
+        KeyStore    ks = KeyStore.getInstance("PKCS12", "SC");
 
         ks.load(new FileInputStream(args[0]), args[1].toCharArray());
 
@@ -82,7 +82,7 @@ public class CreateEncryptedMail
         // version 3 only.
         //
         /*
-        MessageDigest           dig = MessageDigest.getInstance("SHA1", "BC");
+        MessageDigest           dig = MessageDigest.getInstance("SHA1", "SC");
 
         dig.update(cert.getPublicKey().getEncoded());
               
@@ -96,7 +96,7 @@ public class CreateEncryptedMail
 
         msg.setText("Hello world!");
 
-        MimeBodyPart mp = gen.generate(msg, SMIMEEnvelopedGenerator.RC2_CBC, "BC");
+        MimeBodyPart mp = gen.generate(msg, SMIMEEnvelopedGenerator.RC2_CBC, "SC");
         //
         // Get a Session object and create the mail message
         //

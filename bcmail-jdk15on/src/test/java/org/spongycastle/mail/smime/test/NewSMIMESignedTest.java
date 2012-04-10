@@ -101,7 +101,7 @@ public class NewSMIMESignedTest
 
     KeyPair         dsaOrigKP;
     X509Certificate dsaOrigCert;
-    private static final String BC = "BC";
+    private static final String BC = "SC";
 
     static
     {
@@ -758,7 +758,7 @@ public class NewSMIMESignedTest
 
         SMIMESignedGenerator gen = new SMIMESignedGenerator();
 
-        gen.addSignerInfoGenerator(new JcaSimpleSignerInfoGeneratorBuilder().setProvider("BC").build("SHA1withDSA", dsaOrigKP.getPrivate(), dsaOrigCert));
+        gen.addSignerInfoGenerator(new JcaSimpleSignerInfoGeneratorBuilder().setProvider("SC").build("SHA1withDSA", dsaOrigKP.getPrivate(), dsaOrigCert));
         gen.addCertificates(certs);
 
         MimeMultipart smm = gen.generate(msg);

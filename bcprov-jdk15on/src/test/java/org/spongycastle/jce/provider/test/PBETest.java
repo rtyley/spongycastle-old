@@ -86,23 +86,23 @@ public class PBETest
 
             if (baseAlgorithm.equals("RC4"))
             {
-                c = Cipher.getInstance(baseAlgorithm, "BC");
+                c = Cipher.getInstance(baseAlgorithm, "SC");
 
                 c.init(Cipher.ENCRYPT_MODE, encKey);
             }
             else
             {
-                c = Cipher.getInstance(baseAlgorithm + "/CBC/PKCS7Padding", "BC");
+                c = Cipher.getInstance(baseAlgorithm + "/CBC/PKCS7Padding", "SC");
 
                 c.init(Cipher.ENCRYPT_MODE, encKey, new IvParameterSpec(params.getIV()));
             }
 
             byte[]          enc = c.doFinal(salt);
 
-            c = Cipher.getInstance(algorithm, "BC");
+            c = Cipher.getInstance(algorithm, "SC");
 
             PBEKeySpec          keySpec = new PBEKeySpec(password, salt, iCount);
-            SecretKeyFactory    fact = SecretKeyFactory.getInstance(algorithm, "BC");
+            SecretKeyFactory    fact = SecretKeyFactory.getInstance(algorithm, "SC");
 
             c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec));
 
@@ -168,23 +168,23 @@ public class PBETest
 
             if (baseAlgorithm.equals("RC4"))
             {
-                c = Cipher.getInstance(baseAlgorithm, "BC");
+                c = Cipher.getInstance(baseAlgorithm, "SC");
 
                 c.init(Cipher.ENCRYPT_MODE, encKey);
             }
             else
             {
-                c = Cipher.getInstance(baseAlgorithm + "/CBC/PKCS7Padding", "BC");
+                c = Cipher.getInstance(baseAlgorithm + "/CBC/PKCS7Padding", "SC");
 
                 c.init(Cipher.ENCRYPT_MODE, encKey, new IvParameterSpec(params.getIV()));
             }
 
             byte[]          enc = c.doFinal(salt);
 
-            c = Cipher.getInstance(algorithm, "BC");
+            c = Cipher.getInstance(algorithm, "SC");
 
             PBEKeySpec          keySpec = new PBEKeySpec(password, salt, iCount);
-            SecretKeyFactory    fact = SecretKeyFactory.getInstance(algorithm, "BC");
+            SecretKeyFactory    fact = SecretKeyFactory.getInstance(algorithm, "SC");
 
             c.init(Cipher.DECRYPT_MODE, fact.generateSecret(keySpec));
 
@@ -203,7 +203,7 @@ public class PBETest
             //
             // try using parameters
             //
-            c = Cipher.getInstance(algorithm, "BC");
+            c = Cipher.getInstance(algorithm, "SC");
 
             keySpec = new PBEKeySpec(password);
 
@@ -221,7 +221,7 @@ public class PBETest
             //
             // try using PBESpec
             //
-            c = Cipher.getInstance(algorithm, "BC");
+            c = Cipher.getInstance(algorithm, "SC");
 
             keySpec = new PBEKeySpec(password);
 
@@ -299,10 +299,10 @@ public class PBETest
         throws Exception
     {
         PBEKeySpec          pbeSpec = new PBEKeySpec(password);
-        SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(algorithm, "BC");
+        SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(algorithm, "SC");
         PBEParameterSpec    defParams = new PBEParameterSpec(salt, iterationCount);
 
-        Cipher cipher = Cipher.getInstance(algorithm, "BC");
+        Cipher cipher = Cipher.getInstance(algorithm, "SC");
 
         cipher.init(mode, keyFact.generateSecret(pbeSpec), defParams);
 
@@ -318,9 +318,9 @@ public class PBETest
         throws Exception
     {
         PBEKeySpec          pbeSpec = new PBEKeySpec(password, salt, iterationCount);
-        SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(algorithm, "BC");
+        SecretKeyFactory    keyFact = SecretKeyFactory.getInstance(algorithm, "SC");
 
-        Cipher cipher = Cipher.getInstance(algorithm, "BC");
+        Cipher cipher = Cipher.getInstance(algorithm, "SC");
 
         cipher.init(mode, keyFact.generateSecret(pbeSpec));
 
@@ -357,11 +357,11 @@ public class PBETest
 
         try
         {
-            SecretKeyFactory    fact = SecretKeyFactory.getInstance(hmacName, "BC");
+            SecretKeyFactory    fact = SecretKeyFactory.getInstance(hmacName, "SC");
 
             key = fact.generateSecret(new PBEKeySpec("hello".toCharArray()));
             
-            mac = Mac.getInstance(hmacName, "BC");
+            mac = Mac.getInstance(hmacName, "SC");
         }
         catch (Exception e)
         {
@@ -399,7 +399,7 @@ public class PBETest
         //
         // DES
         //
-        Cipher  cEnc = Cipher.getInstance("DES/CBC/PKCS7Padding", "BC");
+        Cipher  cEnc = Cipher.getInstance("DES/CBC/PKCS7Padding", "SC");
 
         cEnc.init(Cipher.ENCRYPT_MODE,
             new SecretKeySpec(Hex.decode("30e69252758e5346"), "DES"),
@@ -440,7 +440,7 @@ public class PBETest
         //
         // DESede
         //
-        cEnc = Cipher.getInstance("DESede/CBC/PKCS7Padding", "BC");
+        cEnc = Cipher.getInstance("DESede/CBC/PKCS7Padding", "SC");
 
         cEnc.init(Cipher.ENCRYPT_MODE,
             new SecretKeySpec(Hex.decode("732f2d33c801732b7206756cbd44f9c1c103ddd97c7cbe8e"), "DES"),
@@ -465,7 +465,7 @@ public class PBETest
         //
         // 40Bit RC2
         //
-        cEnc = Cipher.getInstance("RC2/CBC/PKCS7Padding", "BC");
+        cEnc = Cipher.getInstance("RC2/CBC/PKCS7Padding", "SC");
 
         cEnc.init(Cipher.ENCRYPT_MODE,
             new SecretKeySpec(Hex.decode("732f2d33c8"), "RC2"),
@@ -490,7 +490,7 @@ public class PBETest
         //
         // 128bit RC4
         //
-        cEnc = Cipher.getInstance("RC4", "BC");
+        cEnc = Cipher.getInstance("RC4", "SC");
 
         cEnc.init(Cipher.ENCRYPT_MODE,
             new SecretKeySpec(Hex.decode("732f2d33c801732b7206756cbd44f9c1"), "RC4"));

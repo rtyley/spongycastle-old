@@ -93,12 +93,12 @@ public class PSSTest
     
     public void performTest() throws Exception
     {
-        KeyFactory fact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory fact = KeyFactory.getInstance("RSA", "SC");
 
         PrivateKey  privKey = fact.generatePrivate(privKeySpec);
         PublicKey   pubKey = fact.generatePublic(pubKeySpec);
 
-        Signature s = Signature.getInstance("SHA1withRSA/PSS", "BC");
+        Signature s = Signature.getInstance("SHA1withRSA/PSS", "SC");
 
         s.initSign(privKey, new FixedRandom(slt1a));
         s.update(msg1a);
@@ -109,7 +109,7 @@ public class PSSTest
            fail("PSS Sign test expected " + new String(Hex.encode(sig1a)) + " got " + new String(Hex.encode(sig)));
         }
 
-        s = Signature.getInstance("SHA1withRSAandMGF1", "BC");
+        s = Signature.getInstance("SHA1withRSAandMGF1", "SC");
         
         s.initVerify(pubKey);
         s.update(msg1a);
@@ -118,7 +118,7 @@ public class PSSTest
             fail("SHA1 signature verification failed");
         }
 
-        s = Signature.getInstance("SHA1withRSAandMGF1", "BC");
+        s = Signature.getInstance("SHA1withRSAandMGF1", "SC");
         
         s.setParameter(PSSParameterSpec.DEFAULT);
         
@@ -135,7 +135,7 @@ public class PSSTest
             fail("failed default encoding test.");
         }
         
-        s = Signature.getInstance("SHA256withRSA/PSS", "BC");
+        s = Signature.getInstance("SHA256withRSA/PSS", "SC");
 
         s.initSign(privKey, new FixedRandom(slt1a));
         s.update(msg1a);
@@ -148,7 +148,7 @@ public class PSSTest
             fail("PSS Sign test expected " + new String(Hex.encode(sig1b)) + " got " + new String(Hex.encode(sig)));
         }
 
-        s = Signature.getInstance("SHA256withRSAandMGF1", "BC");
+        s = Signature.getInstance("SHA256withRSAandMGF1", "SC");
         
         s.setParameter(pss.getParameterSpec(PSSParameterSpec.class));
         
@@ -162,7 +162,7 @@ public class PSSTest
         //
         // 512 test -with zero salt length
         //
-        s = Signature.getInstance("SHA512withRSAandMGF1", "BC");
+        s = Signature.getInstance("SHA512withRSAandMGF1", "SC");
         
         s.setParameter(new PSSParameterSpec("SHA-512", "MGF1", new MGF1ParameterSpec("SHA-512"), 0, 1));
         s.initSign(privKey);
@@ -177,7 +177,7 @@ public class PSSTest
             fail("PSS Sign test expected " + new String(Hex.encode(sig1c)) + " got " + new String(Hex.encode(sig)));
         }
 
-        s = Signature.getInstance("SHA512withRSAandMGF1", "BC");
+        s = Signature.getInstance("SHA512withRSAandMGF1", "SC");
         
         s.setParameter(pss.getParameterSpec(PSSParameterSpec.class));
         
@@ -207,7 +207,7 @@ public class PSSTest
         byte[] sampleMessage = new byte[1000 + random.nextInt(100)];
         random.nextBytes(sampleMessage);
 
-        Signature normalSig = Signature.getInstance(sigName, "BC");
+        Signature normalSig = Signature.getInstance(sigName, "SC");
 
         PSSParameterSpec spec = (PSSParameterSpec)normalSig.getParameters().getParameterSpec(PSSParameterSpec.class);
 
@@ -220,10 +220,10 @@ public class PSSTest
         normalSig.update(sampleMessage);
         byte[] normalResult = normalSig.sign();
 
-        MessageDigest digest = MessageDigest.getInstance(digestOID.getId(), "BC");
+        MessageDigest digest = MessageDigest.getInstance(digestOID.getId(), "SC");
         byte[] hash = digest.digest(sampleMessage);
 
-        Signature rawSig = Signature.getInstance("RAWRSASSA-PSS", "BC");
+        Signature rawSig = Signature.getInstance("RAWRSASSA-PSS", "SC");
 
         // Need to init the params explicitly to avoid having a 'raw' variety of every PSS algorithm
         rawSig.setParameter(spec);

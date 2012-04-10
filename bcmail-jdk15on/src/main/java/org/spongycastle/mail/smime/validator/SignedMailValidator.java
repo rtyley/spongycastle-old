@@ -178,7 +178,7 @@ public class SignedMailValidator
             }
 
             // save certstore and signerInformationStore
-            certs = s.getCertificatesAndCRLs("Collection", "BC");
+            certs = s.getCertificatesAndCRLs("Collection", "SC");
             signers = s.getSignerInfos();
 
             // save "from" addresses from message
@@ -271,7 +271,7 @@ public class SignedMailValidator
                 boolean validSignature = false;
                 try
                 {
-                    validSignature = signer.verify(cert.getPublicKey(), "BC");
+                    validSignature = signer.verify(cert.getPublicKey(), "SC");
                     if (!validSignature)
                     {
                         ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
@@ -697,7 +697,7 @@ public class SignedMailValidator
                     {
                         try
                         {
-                            cert.verify(anchorCert.getPublicKey(), "BC");
+                            cert.verify(anchorCert.getPublicKey(), "SC");
                             trustAnchorFound = true;
                             taCert = anchorCert;
                             break;
@@ -715,7 +715,7 @@ public class SignedMailValidator
                     {
                         try
                         {
-                            cert.verify(anchor.getCAPublicKey(), "BC");
+                            cert.verify(anchor.getCAPublicKey(), "SC");
                             trustAnchorFound = true;
                             break;
                         }
@@ -808,7 +808,7 @@ public class SignedMailValidator
                 {
                     try
                     {
-                        cert.verify(taCert.getPublicKey(), "BC");
+                        cert.verify(taCert.getPublicKey(), "SC");
                         certSet.add(taCert);
                         userProvidedList.add(new Boolean(userProvided));
                     }
@@ -820,7 +820,7 @@ public class SignedMailValidator
             }
         }
         
-        CertPath certPath = CertificateFactory.getInstance("X.509", "BC").generateCertPath(new ArrayList(certSet));
+        CertPath certPath = CertificateFactory.getInstance("X.509", "SC").generateCertPath(new ArrayList(certSet));
         return new Object[] {certPath, userProvidedList};
     }
 

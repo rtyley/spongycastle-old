@@ -1063,7 +1063,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "SC");
 
             Certificate cert = fact.generateCertificate(bIn);
 
@@ -1088,7 +1088,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "SC");
 
             X509Certificate cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -1117,7 +1117,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "SC");
 
             X509Certificate cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -1149,7 +1149,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "SC");
 
             Certificate cert = fact.generateCertificate(bIn);
 
@@ -1194,7 +1194,7 @@ public class CertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  fact = KeyFactory.getInstance("RSA", "SC");
 
         privKey = fact.generatePrivate(privKeySpec);
         pubKey = fact.generatePublic(pubKeySpec);
@@ -1279,7 +1279,7 @@ public class CertTest
         ByteArrayInputStream   sbIn = new ByteArrayInputStream(cert.getEncoded());
         ASN1InputStream        sdIn = new ASN1InputStream(sbIn);
         ByteArrayInputStream   bIn = new ByteArrayInputStream(cert.getEncoded());
-        CertificateFactory     certFact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory     certFact = CertificateFactory.getInstance("X.509", "SC");
 
         cert = (X509Certificate)certFact.generateCertificate(bIn);
 
@@ -1327,7 +1327,7 @@ public class CertTest
         cert.verify(pubKey);
 
         bIn = new ByteArrayInputStream(cert.getEncoded());
-        certFact = CertificateFactory.getInstance("X.509", "BC");
+        certFact = CertificateFactory.getInstance("X.509", "SC");
 
         cert = (X509Certificate)certFact.generateCertificate(bIn);
 
@@ -1410,7 +1410,7 @@ public class CertTest
             cert.verify(pubKey);
 
             ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getEncoded());
-            CertificateFactory      fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory      fact = CertificateFactory.getInstance("X.509", "SC");
 
             cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -1443,7 +1443,7 @@ public class CertTest
             cert.verify(pubKey);
 
             ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getEncoded());
-            CertificateFactory      fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory      fact = CertificateFactory.getInstance("X.509", "SC");
 
             cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -1501,7 +1501,7 @@ public class CertTest
 
         try
         {
-            KeyFactory     fact = KeyFactory.getInstance("ECDSA", "BC");
+            KeyFactory     fact = KeyFactory.getInstance("ECDSA", "SC");
 
             privKey = fact.generatePrivate(privKeySpec);
             pubKey = fact.generatePublic(pubKeySpec);
@@ -1575,7 +1575,7 @@ public class CertTest
             cert.verify(pubKey);
 
             ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getEncoded());
-            CertificateFactory      fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory      fact = CertificateFactory.getInstance("X.509", "SC");
 
             cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -1586,14 +1586,14 @@ public class CertTest
             
             certGen.setPublicKey(pubKey);
             
-            cert = certGen.generate(privKey, "BC");
+            cert = certGen.generate(privKey, "SC");
 
             cert.checkValidity(new Date());
 
             cert.verify(pubKey);
 
             bIn = new ByteArrayInputStream(cert.getEncoded());
-            fact = CertificateFactory.getInstance("X.509", "BC");
+            fact = CertificateFactory.getInstance("X.509", "SC");
 
             cert = (X509Certificate)fact.generateCertificate(bIn);
             // System.out.println(cert);
@@ -1649,7 +1649,7 @@ public class CertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyFactory     fact = KeyFactory.getInstance("ECDSA", "BC");
+        KeyFactory     fact = KeyFactory.getInstance("ECDSA", "SC");
 
         privKey = fact.generatePrivate(privKeySpec);
         pubKey = fact.generatePublic(pubKeySpec);
@@ -1687,14 +1687,14 @@ public class CertTest
         certGen.setSignatureAlgorithm(algorithm);
 
 
-        X509Certificate cert = certGen.generate(privKey, "BC");
+        X509Certificate cert = certGen.generate(privKey, "SC");
 
         cert.checkValidity(new Date());
 
         cert.verify(pubKey);
 
         ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getEncoded());
-        CertificateFactory      certFact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory      certFact = CertificateFactory.getInstance("X.509", "SC");
 
         cert = (X509Certificate)certFact.generateCertificate(bIn);
 
@@ -1705,14 +1705,14 @@ public class CertTest
         
         certGen.setPublicKey(pubKey);
         
-        cert = certGen.generate(privKey, "BC");
+        cert = certGen.generate(privKey, "SC");
 
         cert.checkValidity(new Date());
 
         cert.verify(pubKey);
 
         bIn = new ByteArrayInputStream(cert.getEncoded());
-        certFact = CertificateFactory.getInstance("X.509", "BC");
+        certFact = CertificateFactory.getInstance("X.509", "SC");
 
         cert = (X509Certificate)certFact.generateCertificate(bIn);
         
@@ -1726,7 +1726,7 @@ public class CertTest
             fail("sig parameters present");
         }
         
-        Signature sig = Signature.getInstance(algorithm, "BC");
+        Signature sig = Signature.getInstance(algorithm, "SC");
         
         sig.initVerify(pubKey);
         
@@ -1750,7 +1750,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(bytes);
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "SC");
 
             CRL cert = fact.generateCRL(bIn);
 
@@ -1766,7 +1766,7 @@ public class CertTest
     public void checkCRLCreation1()
         throws Exception
     {
-        KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", "SC");
         X509V2CRLGenerator   crlGen = new X509V2CRLGenerator();
         Date                 now = new Date();
         KeyPair              pair = kpGen.generateKeyPair();
@@ -1781,7 +1781,7 @@ public class CertTest
         
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
         
-        X509CRL    crl = crlGen.generate(pair.getPrivate(), "BC");
+        X509CRL    crl = crlGen.generate(pair.getPrivate(), "SC");
         
         if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
         {
@@ -1834,7 +1834,7 @@ public class CertTest
     public void checkCRLCreation2()
         throws Exception
     {
-        KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", "SC");
         X509V2CRLGenerator   crlGen = new X509V2CRLGenerator();
         Date                 now = new Date();
         KeyPair              pair = kpGen.generateKeyPair();
@@ -1866,7 +1866,7 @@ public class CertTest
         
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
         
-        X509CRL    crl = crlGen.generate(pair.getPrivate(), "BC");
+        X509CRL    crl = crlGen.generate(pair.getPrivate(), "SC");
         
         if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
         {
@@ -1919,7 +1919,7 @@ public class CertTest
     public void checkCRLCreation3()
         throws Exception
     {
-        KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", "BC");
+        KeyPairGenerator     kpGen = KeyPairGenerator.getInstance("RSA", "SC");
         X509V2CRLGenerator   crlGen = new X509V2CRLGenerator();
         Date                 now = new Date();
         KeyPair              pair = kpGen.generateKeyPair();
@@ -1951,7 +1951,7 @@ public class CertTest
         
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
         
-        X509CRL    crl = crlGen.generate(pair.getPrivate(), "BC");
+        X509CRL    crl = crlGen.generate(pair.getPrivate(), "SC");
         
         if (!crl.getIssuerX500Principal().equals(new X500Principal("CN=Test CA")))
         {
@@ -2018,7 +2018,7 @@ public class CertTest
         
         crlGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(pair.getPublic()));
         
-        X509CRL    newCrl = crlGen.generate(pair.getPrivate(), "BC");
+        X509CRL    newCrl = crlGen.generate(pair.getPrivate(), "SC");
         
         int     count = 0;
         boolean oneFound = false;
@@ -2054,7 +2054,7 @@ public class CertTest
         //
         // check factory read back
         //
-        CertificateFactory cFact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cFact = CertificateFactory.getInstance("X.509", "SC");
 
         X509CRL readCrl = (X509CRL)cFact.generateCRL(new ByteArrayInputStream(newCrl.getEncoded()));
 
@@ -2083,7 +2083,7 @@ public class CertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
 
-        KeyPairGenerator    g = KeyPairGenerator.getInstance("GOST3410", "BC");
+        KeyPairGenerator    g = KeyPairGenerator.getInstance("GOST3410", "SC");
         GOST3410ParameterSpec gost3410P = new GOST3410ParameterSpec("GostR3410-94-CryptoPro-A");
 
         g.initialize(gost3410P, new SecureRandom());
@@ -2128,7 +2128,7 @@ public class CertTest
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("GOST3411withGOST3410");
 
-        X509Certificate cert = certGen.generate(privKey, "BC");
+        X509Certificate cert = certGen.generate(privKey, "SC");
 
         cert.checkValidity(new Date());
 
@@ -2143,7 +2143,7 @@ public class CertTest
         cert.verify(cert.getPublicKey());
         
         ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getEncoded());
-        CertificateFactory      fact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory      fact = CertificateFactory.getInstance("X.509", "SC");
 
         cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -2180,7 +2180,7 @@ public class CertTest
         PrivateKey          privKey;
         PublicKey           pubKey;
     
-        KeyFactory  fact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory  fact = KeyFactory.getInstance("RSA", "SC");
     
         privKey = fact.generatePrivate(privKeySpec);
         pubKey = fact.generatePublic(pubKeySpec);
@@ -2222,7 +2222,7 @@ public class CertTest
         certGen.addExtension("2.5.29.17", true,
             new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
     
-        X509Certificate baseCert = certGen.generate(privKey, "BC");
+        X509Certificate baseCert = certGen.generate(privKey, "SC");
         
         //
         // copy certificate
@@ -2240,7 +2240,7 @@ public class CertTest
         certGen.copyAndAddExtension(new DERObjectIdentifier("2.5.29.15"), true, baseCert);
         certGen.copyAndAddExtension("2.5.29.37", false, baseCert);
         
-        X509Certificate cert = certGen.generate(privKey, "BC");
+        X509Certificate cert = certGen.generate(privKey, "SC");
         
         cert.checkValidity(new Date());
     
@@ -2274,7 +2274,7 @@ public class CertTest
         {
             certGen.setPublicKey(dudPublicKey);
             
-            certGen.generate(privKey, "BC");
+            certGen.generate(privKey, "SC");
             
             fail("key without encoding not detected in v3");
         }
@@ -2298,7 +2298,7 @@ public class CertTest
                     + "DF6P14yRKUtX8akOP2TwStaSiVf/akYqfLFm3UGka5XbPj4rifrZ0/sOoZEEBvHQ"
                     + "e20sRA==";
         
-        CertificateFactory certFact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory certFact = CertificateFactory.getInstance("X.509", "SC");
         
         X509Certificate x509 = (X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(Base64.decode(cert)));
         try
@@ -2317,7 +2317,7 @@ public class CertTest
     private void pemTest()
         throws Exception
     {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "SC");
 
         Certificate cert = readPEMCert(cf, PEMData.CERTIFICATE_1);
         if (cert == null)
@@ -2367,7 +2367,7 @@ public class CertTest
 
         ContentInfo info = new ContentInfo(CMSObjectIdentifiers.signedData, sigData);
 
-        CertificateFactory cf = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory cf = CertificateFactory.getInstance("X.509", "SC");
 
         X509Certificate cert = (X509Certificate)cf.generateCertificate(new ByteArrayInputStream(info.getEncoded()));
         if (cert == null || !areEqual(cert.getEncoded(), certs.get(0).toASN1Primitive().getEncoded()))
@@ -2487,7 +2487,7 @@ public class CertTest
         certGen.addExtension("2.5.29.17", true,
             new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
 
-        X509Certificate baseCert = certGen.generate(privKey, "BC");
+        X509Certificate baseCert = certGen.generate(privKey, "SC");
 
         baseCert.verify(pubKey);
     }
@@ -2509,7 +2509,7 @@ public class CertTest
             new BigInteger("1a8b38f398fa712049898d7fb79ee0a77668791299cdfa09efc0e507acb21ed74301ef5bfd48be455eaeb6e1678255827580a8e4e8e14151d1510a82a3f2e729",16),
             new BigInteger("27156aba4126d24a81f3a528cbfb27f56886f840a9f6e86e17a44b94fe9319584b8e22fdde1e5a2e3bd8aa5ba8d8584194eb2190acf832b847f13a3d24a79f4d",16));
 
-        KeyFactory fact = KeyFactory.getInstance("RSA", "BC");
+        KeyFactory fact = KeyFactory.getInstance("RSA", "SC");
 
         return new KeyPair(fact.generatePublic(pubKeySpec), fact.generatePrivate(privKeySpec));
     }
@@ -2517,15 +2517,15 @@ public class CertTest
     private void rfc4491Test()
        throws Exception
     {
-        CertificateFactory certFact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory certFact = CertificateFactory.getInstance("X.509", "SC");
 
         X509Certificate x509 = (X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(gostRFC4491_94));
 
-        x509.verify(x509.getPublicKey(), "BC");
+        x509.verify(x509.getPublicKey(), "SC");
 
         x509 = (X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(gostRFC4491_2001));
 
-        x509.verify(x509.getPublicKey(), "BC");
+        x509.verify(x509.getPublicKey(), "SC");
     }
 
     private void testNullDerNullCert()
@@ -2544,7 +2544,7 @@ public class CertTest
         certGen.setSubjectDN(new X509Principal("CN=Test"));
         certGen.setPublicKey(pubKey);
         certGen.setSignatureAlgorithm("MD5WithRSAEncryption");
-        X509Certificate cert = certGen.generate(privKey, "BC");
+        X509Certificate cert = certGen.generate(privKey, "SC");
 
         X509CertificateStructure struct = X509CertificateStructure.getInstance(ASN1Primitive.fromByteArray(cert.getEncoded()));
 
@@ -2565,7 +2565,7 @@ public class CertTest
         {
             bIn = new ByteArrayInputStream(new DERSequence(v).getEncoded());
 
-            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "BC");
+            CertificateFactory  fact = CertificateFactory.getInstance("X.509", "SC");
 
             cert = (X509Certificate)fact.generateCertificate(bIn);
 
@@ -2580,7 +2580,7 @@ public class CertTest
     private void checkComparison(byte[] encCert)
         throws NoSuchProviderException, CertificateException
     {
-        CertificateFactory bcFact = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory bcFact = CertificateFactory.getInstance("X.509", "SC");
         CertificateFactory sunFact = CertificateFactory.getInstance("X.509", "SUN");
 
         X509Certificate bcCert = (X509Certificate)bcFact.generateCertificate(new ByteArrayInputStream(encCert));
@@ -2615,7 +2615,7 @@ public class CertTest
 
 
         // verify CRL with BC provider
-        CertificateFactory bcFac = CertificateFactory.getInstance("X.509", "BC");
+        CertificateFactory bcFac = CertificateFactory.getInstance("X.509", "SC");
 
         X509Certificate bcIssuer = (X509Certificate)
             bcFac.generateCertificate(new ByteArrayInputStream(certData));

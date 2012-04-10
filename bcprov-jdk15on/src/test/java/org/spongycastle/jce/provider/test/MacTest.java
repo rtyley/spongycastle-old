@@ -45,7 +45,7 @@ public class MacTest
     private void aliasTest(SecretKey key, String primary, String[] aliases)
         throws Exception
     {
-        Mac mac = Mac.getInstance(primary, "BC");
+        Mac mac = Mac.getInstance(primary, "SC");
 
         //
         // standard DAC - zero IV
@@ -58,7 +58,7 @@ public class MacTest
 
         for (int i = 0; i != aliases.length; i++)
         {
-            mac = Mac.getInstance(aliases[i], "BC");
+            mac = Mac.getInstance(aliases[i], "SC");
 
             mac.init(key);
 
@@ -79,7 +79,7 @@ public class MacTest
         byte[]              out;
         Mac                 mac;
 
-        mac = Mac.getInstance("DESMac", "BC");
+        mac = Mac.getInstance("DESMac", "SC");
 
         //
         // standard DAC - zero IV
@@ -112,7 +112,7 @@ public class MacTest
         //
         // CFB mac with IV - 8 bit CFB mode
         //
-        mac = Mac.getInstance("DESMac/CFB8", "BC");
+        mac = Mac.getInstance("DESMac/CFB8", "SC");
 
         mac.init(key, new IvParameterSpec(ivBytes));
 
@@ -130,7 +130,7 @@ public class MacTest
         //
         key = new SecretKeySpec(keyBytesISO9797, "DESEDE");
         
-        mac = Mac.getInstance("ISO9797ALG3", "BC");
+        mac = Mac.getInstance("ISO9797ALG3", "SC");
 
         mac.init(key);
 
@@ -148,7 +148,7 @@ public class MacTest
         //
         key = new SecretKeySpec(keyBytesISO9797, "DESEDE");
         
-        mac = Mac.getInstance("DESEDE64", "BC");
+        mac = Mac.getInstance("DESEDE64", "SC");
 
         mac.init(key);
 
