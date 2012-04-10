@@ -62,7 +62,7 @@ public class LocalizedMessageTest extends TestCase
         assertEquals("It's 1:12:00 PM GMT at Aug 17, 2006.", msg.getEntry(
                 "text", Locale.ENGLISH, TimeZone.getTimeZone("GMT")));
         assertEquals("Es ist 13.12 Uhr GMT am 17.08.2006.", msg.getEntry(
-                "text", Locale.GERMAN, TimeZone.getTimeZone("GMT")));
+                "text", Locale.GERMAN, TimeZone.getTimeZone("GMT")).replace(":","."));
         
         // test time with filter
         args = new Object[] { new TrustedInput(testDate) };
@@ -71,7 +71,7 @@ public class LocalizedMessageTest extends TestCase
         assertEquals("It's 1:12:00 PM GMT at Aug 17, 2006.", msg.getEntry(
                 "text", Locale.ENGLISH, TimeZone.getTimeZone("GMT")));
         assertEquals("Es ist 13.12 Uhr GMT am 17.08.2006.", msg.getEntry(
-                "text", Locale.GERMAN, TimeZone.getTimeZone("GMT")));
+                "text", Locale.GERMAN, TimeZone.getTimeZone("GMT")).replace(":","."));
         
         // test number
         args = new Object[] { new TrustedInput(new Float(0.2))  };
