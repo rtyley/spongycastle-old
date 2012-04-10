@@ -1,6 +1,8 @@
 package org.bouncycastle.cert.ocsp;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.bouncycastle.asn1.ASN1Exception;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -31,6 +33,13 @@ public class OCSPResp
 
     public OCSPResp(
         byte[]          resp)
+        throws IOException
+    {
+        this(new ByteArrayInputStream(resp));
+    }
+
+    public OCSPResp(
+        InputStream resp)
         throws IOException
     {
         this(new ASN1InputStream(resp));

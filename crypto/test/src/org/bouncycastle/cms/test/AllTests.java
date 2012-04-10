@@ -39,6 +39,9 @@ public class AllTests
         suite.addTest(Rfc4134Test.suite());
         suite.addTest(ConverterTest.suite());
 
+        suite.addTest(BcEnvelopedDataTest.suite());
+        suite.addTest(BcSignedDataTest.suite());
+
         try
         {
             Cipher.getInstance("RSA", "SunJCE");
