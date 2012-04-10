@@ -12,7 +12,13 @@
     <version>1.47-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Spongy Castle parent POM project</name>
-    <url>http://www.bouncycastle.org/java.html</url>
+    <description>
+        Spongy Castle is a package-rename (org.bouncycastle.* to org.spongycastle.*) of Bouncy Castle
+        intended for the Android platform. Android unfortunately ships with a stripped-down version of
+        Bouncy Castle, which prevents easy upgrades - Spongy Castle overcomes this and provides a full,
+        up-to-date version of the Bouncy Castle cryptographic libs.
+    </description>
+    <url>http://rtyley.github.com/spongycastle/</url>
     <licenses>
         <license>
             <name>Bouncy Castle Licence</name>
