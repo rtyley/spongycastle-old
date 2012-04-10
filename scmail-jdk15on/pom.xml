@@ -9,7 +9,7 @@
         <artifactId>sc-parent</artifactId>
         <version>1.47-SNAPSHOT</version>
     </parent>
-    <name>Bouncy Castle S/MIME API</name>
+    <name>Spongy Castle S/MIME API</name>
     <description>
         The Bouncy Castle Java S/MIME APIs for handling S/MIME protocols.
         This jar contains S/MIME APIs for JDK 1.5 to JDK 1.7. The APIs can be used in conjunction

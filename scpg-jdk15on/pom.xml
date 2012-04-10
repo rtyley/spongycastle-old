@@ -9,7 +9,7 @@
         <artifactId>sc-parent</artifactId>
         <version>1.47-SNAPSHOT</version>
     </parent>
-    <name>Bouncy Castle OpenPGP API</name>
+    <name>Spongy Castle OpenPGP API</name>
     <description>
         The Bouncy Castle Java API for handling the OpenPGP protocol. This jar contains the OpenPGP API for
         JDK 1.5 to JDK 1.7. The APIs can be used in conjunction with a JCE/JCA provider such as the one

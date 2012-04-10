@@ -9,7 +9,7 @@
         <artifactId>sc-parent</artifactId>
         <version>1.47-SNAPSHOT</version>
     </parent>
-    <name>Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs</name>
+    <name>Spongy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs</name>
     <description>
         The Bouncy Castle Java APIs for CMS, PKCS, EAC, TSP, CMP, CRMF, OCSP, and certificate generation.
         This jar contains APIs for JDK 1.5 to JDK 1.7. The APIs can be used in conjunction with a JCE/JCA

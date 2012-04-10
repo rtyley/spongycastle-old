@@ -9,7 +9,7 @@
         <artifactId>sc-parent</artifactId>
         <version>1.47-SNAPSHOT</version>
     </parent>
-    <name>Bouncy Castle Provider</name>
+    <name>Spongy Castle Provider</name>
     <description>
         The Bouncy Castle Crypto package is a Java implementation of cryptographic algorithms.
         This jar contains JCE provider and lightweight API for the Bouncy Castle Cryptography APIs

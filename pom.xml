@@ -11,7 +11,7 @@
     <artifactId>sc-parent</artifactId>
     <version>1.47-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Bouncy Castle parent POM project</name>
+    <name>Spongy Castle parent POM project</name>
     <url>http://www.bouncycastle.org/java.html</url>
     <licenses>
         <license>
