@@ -222,6 +222,8 @@ public class Salsa20Engine
      */    
     public static void salsaCore(int rounds, int[] input, int[] x)
     {
+        // TODO Exception if rounds odd?
+
         System.arraycopy(input, 0, x, 0, input.length);
 
 		for (int i = rounds; i > 0; i -= 2)
