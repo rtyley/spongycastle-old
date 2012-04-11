@@ -763,7 +763,7 @@ public class SignerInformation
 
         for (Iterator it = counterSigners.getSigners().iterator(); it.hasNext();)
         {
-            sigs.add(((SignerInformation)it.next()).toSignerInfo());
+            sigs.add(((SignerInformation)it.next()).toASN1Structure());
         }
 
         v.add(new Attribute(CMSAttributes.counterSignature, new DERSet(sigs)));

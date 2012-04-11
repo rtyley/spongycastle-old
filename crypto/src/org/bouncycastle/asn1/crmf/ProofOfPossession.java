@@ -33,7 +33,7 @@ public class ProofOfPossession
             break;
         case 2:
         case 3:
-            obj = POPOPrivKey.getInstance(tagged, false);
+            obj = POPOPrivKey.getInstance(tagged, true);
             break;
         default:
             throw new IllegalArgumentException("unknown tag: " + tagNo);

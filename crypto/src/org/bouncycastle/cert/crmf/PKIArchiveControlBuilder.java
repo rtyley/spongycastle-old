@@ -71,7 +71,7 @@ public class PKIArchiveControlBuilder
     {
         CMSEnvelopedData envContent = envGen.generate(keyContent, contentEncryptor);
 
-        EnvelopedData envD = EnvelopedData.getInstance(envContent.getContentInfo().getContent());
+        EnvelopedData envD = EnvelopedData.getInstance(envContent.toASN1Structure().getContent());
 
         return new PKIArchiveControl(new PKIArchiveOptions(new EncryptedKey(envD)));
     }

@@ -604,6 +604,7 @@ public class CMSSignedData
      * @param certsAndCrls the new certificates and CRLs to be used.
      * @return a new signed data object.
      * @exception CMSException if there is an error processing the CertStore
+     * @deprecated use method taking Store arguments.
      */
     public static CMSSignedData replaceCertificatesAndCRLs(
         CMSSignedData   signedData,

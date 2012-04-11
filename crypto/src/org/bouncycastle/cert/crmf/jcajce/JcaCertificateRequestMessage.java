@@ -21,6 +21,11 @@ public class JcaCertificateRequestMessage
 {
     private CRMFHelper helper = new CRMFHelper(new DefaultJcaJceHelper());
 
+    public JcaCertificateRequestMessage(byte[] certReqMsg)
+    {
+        this(CertReqMsg.getInstance(certReqMsg));
+    }
+
     public JcaCertificateRequestMessage(CertificateRequestMessage certReqMsg)
     {
         this(certReqMsg.toASN1Structure());

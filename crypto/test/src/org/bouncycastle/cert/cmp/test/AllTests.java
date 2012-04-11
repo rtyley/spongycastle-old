@@ -21,6 +21,10 @@ import org.bouncycastle.asn1.cmp.CertConfirmContent;
 import org.bouncycastle.asn1.cmp.CertRepMessage;
 import org.bouncycastle.asn1.cmp.PKIBody;
 import org.bouncycastle.asn1.cmp.PKIMessage;
+import org.bouncycastle.asn1.crmf.CertReqMessages;
+import org.bouncycastle.asn1.crmf.CertReqMsg;
+import org.bouncycastle.asn1.crmf.ProofOfPossession;
+import org.bouncycastle.asn1.crmf.SubsequentMessage;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.cert.CertException;
@@ -32,7 +36,9 @@ import org.bouncycastle.cert.cmp.CertificateStatus;
 import org.bouncycastle.cert.cmp.GeneralPKIMessage;
 import org.bouncycastle.cert.cmp.ProtectedPKIMessage;
 import org.bouncycastle.cert.cmp.ProtectedPKIMessageBuilder;
+import org.bouncycastle.cert.crmf.CertificateRequestMessageBuilder;
 import org.bouncycastle.cert.crmf.PKMACBuilder;
+import org.bouncycastle.cert.crmf.jcajce.JcaCertificateRequestMessageBuilder;
 import org.bouncycastle.cert.crmf.jcajce.JcePKMACValuesCalculator;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
@@ -183,6 +189,39 @@ public class AllTests
         ProtectedPKIMessage procMsg = new ProtectedPKIMessage(new GeneralPKIMessage(msg));
 
         assertTrue(procMsg.verify(new PKMACBuilder(new JcePKMACValuesCalculator().setProvider(BC)), "TopSecret1234".toCharArray()));
+    }
+
+    public void testSubsequentMessage()
+        throws Exception
+    {
+        KeyPairGenerator kGen = KeyPairGenerator.getInstance("RSA", BC);
+
+        kGen.initialize(512);
+
+        KeyPair kp = kGen.generateKeyPair();
+        X509CertificateHolder cert = makeV3Certificate(kp, "CN=Test", kp, "CN=Test");
+
+        ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").setProvider(BC).build(
+                    kp.getPrivate());
+
+        GeneralName user = new GeneralName(new X500Name("CN=Test"));
+
+        CertificateRequestMessageBuilder builder = new JcaCertificateRequestMessageBuilder(
+                    BigInteger.valueOf(1)).setPublicKey(kp.getPublic()).setProofOfPossessionSubsequentMessage(
+                    SubsequentMessage.encrCert);
+
+                ProtectedPKIMessage certRequestMsg = new ProtectedPKIMessageBuilder(user,
+                    user).setTransactionID(new byte[] { 1, 2, 3, 4, 5 }).setBody(
+                    new PKIBody(PKIBody.TYPE_KEY_UPDATE_REQ, new CertReqMessages(builder.build().toASN1Structure()))).addCMPCertificate(
+                    cert).build(signer);
+
+        ProtectedPKIMessage msg = new ProtectedPKIMessage(new GeneralPKIMessage(certRequestMsg.toASN1Structure().getEncoded()));
+
+        CertReqMessages reqMsgs = CertReqMessages.getInstance(msg.getBody().getContent());
+
+        CertReqMsg reqMsg = reqMsgs.toCertReqMsgArray()[0];
+
+        assertEquals(ProofOfPossession.TYPE_KEY_ENCIPHERMENT, reqMsg.getPopo().getType());
     }
 
     private static X509CertificateHolder makeV3Certificate(KeyPair subKP, String _subDN, KeyPair issKP, String _issDN)
