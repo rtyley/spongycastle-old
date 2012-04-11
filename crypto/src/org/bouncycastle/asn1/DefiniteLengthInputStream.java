@@ -17,7 +17,6 @@ class DefiniteLengthInputStream
     DefiniteLengthInputStream(
         InputStream in,
         int         length)
-        throws IOException
     {
         super(in, length);
 
