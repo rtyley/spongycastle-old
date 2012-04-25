@@ -2,6 +2,7 @@ package org.bouncycastle.openpgp.operator.jcajce;
 
 import java.io.OutputStream;
 import java.security.InvalidKeyException;
+import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Signature;
@@ -72,7 +73,13 @@ public class JcaPGPContentSignerBuilder
         return this;
     }
 
-    public PGPContentSigner build(final int signatureType, final PGPPrivateKey privateKey)
+    public PGPContentSigner build(final int signatureType, PGPPrivateKey privateKey)
+        throws PGPException
+    {
+        return build(signatureType, privateKey.getKeyID(), keyConverter.getPrivateKey(privateKey));
+    }
+
+    public PGPContentSigner build(final int signatureType, final long keyID, final PrivateKey privateKey)
         throws PGPException
     {
         final PGPDigestCalculator digestCalculator = digestCalculatorProviderBuilder.build().get(hashAlgorithm);
@@ -82,11 +89,11 @@ public class JcaPGPContentSignerBuilder
         {
             if (random != null)
             {
-                signature.initSign(keyConverter.getPrivateKey(privateKey), random);
+                signature.initSign(privateKey, random);
             }
             else
             {
-                signature.initSign(keyConverter.getPrivateKey(privateKey));
+                signature.initSign(privateKey);
             }
         }
         catch (InvalidKeyException e)
@@ -113,7 +120,7 @@ public class JcaPGPContentSignerBuilder
 
             public long getKeyID()
             {
-                return privateKey.getKeyID();
+                return keyID;
             }
 
             public OutputStream getOutputStream()
