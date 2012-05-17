@@ -8,10 +8,10 @@
         <version>7</version>
     </parent>
     <groupId>com.madgag</groupId>
-    <artifactId>bc-parent</artifactId>
+    <artifactId>sc-parent</artifactId>
     <version>1.47-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Bouncy Castle parent POM project</name>
+    <name>Spongy Castle parent POM project</name>
     <url>http://rtyley.github.com/spongycastle/</url>
     <description>
         Spongy Castle is a package-rename (org.bouncycastle.* to org.spongycastle.*) of Bouncy Castle
@@ -21,7 +21,7 @@
     </description>
     <licenses>
         <license>
-            <name>Bouncy Castle Licence</name>
+            <name>Spongy Castle Licence</name>
             <url>http://www.bouncycastle.org/licence.html</url>
             <distribution>repo</distribution>
         </license>
@@ -34,7 +34,7 @@
     <developers>
         <developer>
             <id>bouncy-castle-dev</id>
-            <name>Bouncy Castle contributors</name>
+            <name>Spongy Castle contributors</name>
             <url>http://www.bouncycastle.org/contributors.html</url>
         </developer>
         <developer>
@@ -47,12 +47,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <modules>
-        <module>bc-bzip2</module>
-        <module>bc-light-jdk15on</module>
-        <module>bcprov-jdk15on</module>
-        <module>bcpg-jdk15on</module>
-        <module>bcpkix-jdk15on</module>
-        <module>bcmail-jdk15on</module>
+        <module>sc-bzip2</module>
+        <module>sc-light-jdk15on</module>
+        <module>scprov-jdk15on</module>
+        <module>scpg-jdk15on</module>
+        <module>scpkix-jdk15on</module>
+        <module>scmail-jdk15on</module>
     </modules>
     <dependencies>
         <dependency>
