@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>bc-light-jdk15on</artifactId>
+    <packaging>jar</packaging>
+    <parent>
+        <groupId>com.madgag</groupId>
+        <artifactId>bc-parent</artifactId>
+        <version>1.47-SNAPSHOT</version>
+    </parent>
+    <name>Bouncy Castle core lightweight API</name>
+    <description>
+        The Bouncy Castle Crypto package is a Java implementation of cryptographic algorithms.
+
+        This jar contains the lightweight API for the Bouncy Castle Cryptography APIs
+        for JDK 1.5 to JDK 1.7.
+    </description>
+</project>
