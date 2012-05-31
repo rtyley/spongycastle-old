@@ -15,6 +15,11 @@ public class ASN1EncodableVector
         v.addElement(obj);
     }
 
+    public void addAll(ASN1EncodableVector other)
+    {
+    	v.addAll(other.v);
+    }
+
     public ASN1Encodable get(int i)
     {
         return (ASN1Encodable)v.elementAt(i);
