@@ -110,10 +110,6 @@ abstract public class ASN1Set
                 // in this case the parser returns a sequence, convert it
                 // into a set.
                 //
-
-
-                ASN1EncodableVector v = new ASN1EncodableVector();
-
                 if (obj.getObject() instanceof ASN1Sequence)
                 {
                     ASN1Sequence s = (ASN1Sequence)obj.getObject();
