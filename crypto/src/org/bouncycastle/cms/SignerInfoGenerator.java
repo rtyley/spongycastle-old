@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEROctetString;
@@ -118,6 +119,16 @@ public class SignerInfoGenerator
         this.sAttrGen = sAttrGen;
         this.unsAttrGen = unsAttrGen;
         this.sigEncAlgFinder = sigEncAlgFinder;
+    }
+
+    public SignerIdentifier getSID()
+    {
+    	return signerIdentifier;
+    }
+
+    public ASN1Integer getGeneratedVersion()
+    {
+    	return new ASN1Integer(signerIdentifier.isTagged() ? 3 : 1);
     }
 
     public boolean hasAssociatedCertificate()

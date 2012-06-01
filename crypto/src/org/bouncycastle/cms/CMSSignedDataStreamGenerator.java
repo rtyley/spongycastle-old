@@ -886,7 +886,7 @@ public class CMSSignedDataStreamGenerator
             return new ASN1Integer(3);
         }
 
-        if (checkForVersion3(_signers))
+        if (checkForVersion3(_signers, signerGens))
         {
             return new ASN1Integer(3);
         }
@@ -899,13 +899,23 @@ public class CMSSignedDataStreamGenerator
         return new ASN1Integer(1);
     }
 
-    private boolean checkForVersion3(List signerInfos)
+    private boolean checkForVersion3(List signerInfos, List signerInfoGens)
     {
         for (Iterator it = signerInfos.iterator(); it.hasNext();)
         {
             SignerInfo s = SignerInfo.getInstance(((SignerInformation)it.next()).toASN1Structure());
 
             if (s.getVersion().getValue().intValue() == 3)
+            {
+                return true;
+            }
+        }
+
+        for (Iterator it = signerInfoGens.iterator(); it.hasNext();)
+        {
+        	SignerInfoGenerator s = (SignerInfoGenerator)it.next();
+
+            if (s.getGeneratedVersion().getValue().intValue() == 3)
             {
                 return true;
             }
