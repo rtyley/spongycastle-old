@@ -21,6 +21,7 @@ public class KeyPairGeneratorSpi
     extends java.security.KeyPairGenerator
 {
     private static Hashtable params = new Hashtable();
+    private static Object    lock = new Object();
 
     DHKeyGenerationParameters param;
     DHBasicKeyPairGenerator engine = new DHBasicKeyPairGenerator();
@@ -63,7 +64,7 @@ public class KeyPairGeneratorSpi
     {
         if (!initialised)
         {
-            Integer paramStrength = new Integer(strength);
+            Integer paramStrength = Integer.valueOf(strength);
 
             if (params.containsKey(paramStrength))
             {
@@ -79,13 +80,26 @@ public class KeyPairGeneratorSpi
                 }
                 else
                 {
-                    DHParametersGenerator pGen = new DHParametersGenerator();
+                    synchronized (lock)
+                    {
+                        // we do the check again in case we were blocked by a generator for
+                        // our key size.
+                        if (params.containsKey(paramStrength))
+                        {
+                            param = (DHKeyGenerationParameters)params.get(paramStrength);
+                        }
+                        else
+                        {
 
-                    pGen.init(strength, certainty, random);
+                            DHParametersGenerator pGen = new DHParametersGenerator();
 
-                    param = new DHKeyGenerationParameters(random, pGen.generateParameters());
+                            pGen.init(strength, certainty, random);
 
-                    params.put(paramStrength, param);
+                            param = new DHKeyGenerationParameters(random, pGen.generateParameters());
+
+                            params.put(paramStrength, param);
+                        }
+                    }
                 }
             }
 
