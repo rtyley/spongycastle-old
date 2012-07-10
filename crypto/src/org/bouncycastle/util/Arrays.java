@@ -307,6 +307,18 @@ public final class Arrays
         return hc;
     }
 
+    public static int hashCode(int[][] ints)
+    {
+        int hc = 0;
+
+        for (int i = 0; i != ints.length; i++)
+        {
+            hc = hc * 257 + hashCode(ints[i]);
+        }
+
+        return hc;
+    }
+
     public static int hashCode(int[] data)
     {
         if (data == null)
@@ -321,6 +333,49 @@ public final class Arrays
         {
             hc *= 257;
             hc ^= data[i];
+        }
+
+        return hc;
+    }
+
+    public static int hashCode(short[][][] shorts)
+    {
+        int hc = 0;
+
+        for (int i = 0; i != shorts.length; i++)
+        {
+            hc = hc * 257 + hashCode(shorts[i]);
+        }
+
+        return hc;
+    }
+
+    public static int hashCode(short[][] shorts)
+    {
+        int hc = 0;
+
+        for (int i = 0; i != shorts.length; i++)
+        {
+            hc = hc * 257 + hashCode(shorts[i]);
+        }
+
+        return hc;
+    }
+
+    public static int hashCode(short[] data)
+    {
+        if (data == null)
+        {
+            return 0;
+        }
+
+        int i = data.length;
+        int hc = i + 1;
+
+        while (--i >= 0)
+        {
+            hc *= 257;
+            hc ^= (data[i] & 0xff);
         }
 
         return hc;

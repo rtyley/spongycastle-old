@@ -35,7 +35,7 @@ extends SimpleTest
 	{
 		RainbowParameters params = new RainbowParameters();
 
-		RainbowKeyPairGenerator rainbowKeyGen = new RainbowKeyPairGenerator(new SHA224Digest());
+		RainbowKeyPairGenerator rainbowKeyGen = new RainbowKeyPairGenerator();
 		RainbowKeyGenerationParameters genParam = new RainbowKeyGenerationParameters(keyRandom, params);
 
 		rainbowKeyGen.init(genParam);

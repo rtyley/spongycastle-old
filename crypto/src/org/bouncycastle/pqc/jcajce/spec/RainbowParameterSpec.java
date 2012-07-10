@@ -1,9 +1,20 @@
-package org.bouncycastle.pqc.crypto.rainbow;
+package org.bouncycastle.pqc.jcajce.spec;
 
-import org.bouncycastle.crypto.CipherParameters;
+import java.security.spec.AlgorithmParameterSpec;
 
-public class RainbowParameters
-    implements CipherParameters
+import org.bouncycastle.util.Arrays;
+
+/**
+ * This class provides methods for setting and getting the Rainbow-parameters
+ * like number of Vinegar-variables in the layers, number of layers and so on.
+ * <p/>
+ * More detailed information about the needed parameters for the Rainbow
+ * Signature Scheme is to be found in the paper of Jintai Ding, Dieter Schmidt:
+ * Rainbow, a New Multivariable Polynomial Signature Scheme. ACNS 2005: 164-175
+ * (http://dx.doi.org/10.1007/11496137_12)
+ */
+public class RainbowParameterSpec
+    implements AlgorithmParameterSpec
 {
 
     /**
@@ -22,7 +33,7 @@ public class RainbowParameters
       *
       * v5 = 33; (o5 = 0)
       */
-    private final int[] DEFAULT_VI = {6, 12, 17, 22, 33};
+    private static final int[] DEFAULT_VI = {6, 12, 17, 22, 33};
 
     private int[] vi;// set of vinegar vars per layer.
 
@@ -30,9 +41,9 @@ public class RainbowParameters
      * Default Constructor The elements of the array containing the number of
      * Vinegar variables in each layer are set to the default values here.
      */
-    public RainbowParameters()
+    public RainbowParameterSpec()
     {
-        this.vi = this.DEFAULT_VI;
+        this.vi = DEFAULT_VI;
     }
 
     /**
@@ -40,8 +51,9 @@ public class RainbowParameters
      *
      * @param vi The elements of the array containing the number of Vinegar
      *           variables per layer are set to the values of the input array.
+     * @throws IllegalArgumentException if the variables are invalid.
      */
-    public RainbowParameters(int[] vi)
+    public RainbowParameterSpec(int[] vi)
     {
         this.vi = vi;
         try
@@ -59,7 +71,7 @@ public class RainbowParameters
     {
         if (vi == null)
         {
-            throw new Exception("no layers defined.");
+            throw new IllegalArgumentException("no layers defined.");
         }
         if (vi.length > 1)
         {
@@ -67,14 +79,14 @@ public class RainbowParameters
             {
                 if (vi[i] >= vi[i + 1])
                 {
-                    throw new Exception(
+                    throw new IllegalArgumentException(
                         "v[i] has to be smaller than v[i+1]");
                 }
             }
         }
         else
         {
-            throw new Exception(
+            throw new IllegalArgumentException(
                 "Rainbow needs at least 1 layer, such that v1 < v2.");
         }
     }
@@ -94,7 +106,7 @@ public class RainbowParameters
      *
      * @return the number of the polynomials
      */
-    public int getDocLength()
+    public int getDocumentLength()
     {
         return vi[vi.length - 1] - vi[0];
     }
@@ -106,6 +118,6 @@ public class RainbowParameters
      */
     public int[] getVi()
     {
-        return this.vi;
+        return Arrays.clone(this.vi);
     }
 }

@@ -5,18 +5,21 @@ import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 public class RainbowKeyParameters 
     extends AsymmetricKeyParameter
 {
-	private RainbowParameters    params;
+    private int docLength;
 
 	public RainbowKeyParameters(
 			boolean         isPrivate,
-			RainbowParameters   params)
+            int             docLength)
 	{
 		super(isPrivate);
-		this.params = params;
-	}   
-
-	public RainbowParameters getParameters()
-	{
-		return params;
+        this.docLength = docLength;
 	}
+
+    /**
+     * @return the docLength
+     */
+    public int getDocLength()
+    {
+        return this.docLength;
+    }
 }

@@ -5,6 +5,11 @@ public class RuntimeOperatorException
 {
     private Throwable cause;
 
+    public RuntimeOperatorException(String msg)
+    {
+        super(msg);
+    }
+
     public RuntimeOperatorException(String msg, Throwable cause)
     {
         super(msg);

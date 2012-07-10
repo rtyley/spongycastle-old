@@ -1,30 +1,45 @@
-package org.bouncycastle.pqc.crypto.rainbow;
+package org.bouncycastle.pqc.jcajce.spec;
 
-public class RainbowPublicKeyParameters
-    extends RainbowKeyParameters
+
+import java.security.spec.KeySpec;
+
+/**
+ * This class provides a specification for a RainbowSignature public key.
+ *
+ * @see KeySpec
+ */
+public class RainbowPublicKeySpec
+    implements KeySpec
 {
     private short[][] coeffquadratic;
     private short[][] coeffsingular;
     private short[] coeffscalar;
+    private int docLength; // length of possible document to sign
 
     /**
      * Constructor
      *
      * @param docLength
-     * @param coeffQuadratic
+     * @param coeffquadratic
      * @param coeffSingular
      * @param coeffScalar
      */
-    public RainbowPublicKeyParameters(int docLength,
-                                      short[][] coeffQuadratic, short[][] coeffSingular,
-                                      short[] coeffScalar)
+    public RainbowPublicKeySpec(int docLength,
+                                short[][] coeffquadratic, short[][] coeffSingular,
+                                short[] coeffScalar)
     {
-        super(false, docLength);
-
-        this.coeffquadratic = coeffQuadratic;
+        this.docLength = docLength;
+        this.coeffquadratic = coeffquadratic;
         this.coeffsingular = coeffSingular;
         this.coeffscalar = coeffScalar;
+    }
 
+    /**
+     * @return the docLength
+     */
+    public int getDocLength()
+    {
+        return this.docLength;
     }
 
     /**

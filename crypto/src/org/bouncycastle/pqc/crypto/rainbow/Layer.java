@@ -4,6 +4,7 @@ import java.security.SecureRandom;
 
 import org.bouncycastle.pqc.crypto.rainbow.util.GF2Field;
 import org.bouncycastle.pqc.crypto.rainbow.util.RainbowUtil;
+import org.bouncycastle.util.Arrays;
 
 
 /**
@@ -23,8 +24,6 @@ import org.bouncycastle.pqc.crypto.rainbow.util.RainbowUtil;
  */
 public class Layer
 {
-
-    private int layerIndex; // num-th layer
     private int vi; // number of vinegars in this layer
     private int viNext; // number of vinegars in next layer
     private int oi; // number of oils in this layer
@@ -40,16 +39,38 @@ public class Layer
     private short[/* k */] coeff_eta;
 
     /**
-     * Constructor.
+     * Constructor
      *
-     * @param layerIndex index of layer (from 0...u-2)
      * @param vi         number of vinegar variables of this layer
      * @param viNext     number of vinegar variables of next layer. It's the same as
      *                   (num of oils) + (num of vinegars) of this layer.
+     * @param coeffAlpha alpha-coefficients in the polynomials of this layer
+     * @param coeffBeta  beta-coefficients in the polynomials of this layer
+     * @param coeffGamma gamma-coefficients in the polynomials of this layer
+     * @param coeffEta   eta-coefficients in the polynomials of this layer
      */
-    public Layer(int layerIndex, int vi, int viNext)
+    public Layer(byte vi, byte viNext, short[][][] coeffAlpha,
+                 short[][][] coeffBeta, short[][] coeffGamma, short[] coeffEta)
     {
-        this.layerIndex = layerIndex;
+        this.vi = vi & 0xff;
+        this.viNext = viNext & 0xff;
+        this.oi = this.viNext - this.vi;
+
+        // the secret coefficients of all polynomials in this layer
+        this.coeff_alpha = coeffAlpha;
+        this.coeff_beta = coeffBeta;
+        this.coeff_gamma = coeffGamma;
+        this.coeff_eta = coeffEta;
+    }
+
+    /**
+     * This function generates the coefficients of all polynomials in this layer
+     * at random using random generator.
+     *
+     * @param sr the random generator which is to be used
+     */
+    public Layer(int vi, int viNext, SecureRandom sr)
+    {
         this.vi = vi;
         this.viNext = viNext;
         this.oi = viNext - vi;
@@ -59,77 +80,7 @@ public class Layer
         this.coeff_beta = new short[this.oi][this.vi][this.vi];
         this.coeff_gamma = new short[this.oi][this.viNext];
         this.coeff_eta = new short[this.oi];
-    }
 
-    /**
-     * Constructor only used for printout of default examples
-     *
-     * @param coeff_alpha alpha-coefficients in the polynomials of this layer
-     * @param coeff_beta  beta-coefficients in the polynomials of this layer
-     * @param coeff_gamma gamma-coefficients in the polynomials of this layer
-     * @param coeff_eta   eta-coefficients in the polynomials of this layer
-     */
-    public Layer(short[][][] coeff_alpha, short[][][] coeff_beta,
-                 short[][] coeff_gamma, short[] coeff_eta)
-    {
-        this.layerIndex = coeff_alpha.length; // <-- why?
-        this.vi = coeff_beta[0].length;
-        // this.viNext = viNext;
-        this.oi = coeff_alpha[0].length;
-        this.coeff_alpha = coeff_alpha;
-        this.coeff_beta = coeff_beta;
-        this.coeff_gamma = coeff_gamma;
-        this.coeff_eta = coeff_eta;
-    }
-    /**
-     * Constructor.
-     *
-     * @param layerIndex
-     *            index of layer (from 0...u-2)
-     * @param vi
-     *            number of vinegar variables of this layer
-     * @param viNext
-     *            number of vinegar variables of next layer. It's the same as
-     *            (num of oils) + (num of vinegars) of this layer.
-     */
-
-
-    /**
-     * Constructor used by {@link RainbowPrivateKeySpec}.
-     *
-     * @param layerIndex index of layer (from 0...u-2)
-     * @param vi         number of vinegar variables of this layer
-     * @param viNext     number of vinegar variables of next layer. It's the same as
-     *                   (num of oils) + (num of vinegars) of this layer.
-     * @param coeffAlpha alpha-coefficients in the polynomials of this layer
-     * @param coeffBeta  beta-coefficients in the polynomials of this layer
-     * @param coeffGamma gamma-coefficients in the polynomials of this layer
-     * @param coeffEta   eta-coefficients in the polynomials of this layer
-     */
-    public Layer(int layerIndex, byte vi, byte viNext, byte[][][] coeffAlpha,
-                 byte[][][] coeffBeta, byte[][] coeffGamma, byte[] coeffEta)
-    {
-
-        this.layerIndex = layerIndex;
-        this.vi = vi & 0xff;
-        this.viNext = viNext & 0xff;
-        this.oi = this.viNext - this.vi;
-
-        // the secret coefficients of all polynomials in this layer
-        this.coeff_alpha = RainbowUtil.convertArray(coeffAlpha);
-        this.coeff_beta = RainbowUtil.convertArray(coeffBeta);
-        this.coeff_gamma = RainbowUtil.convertArray(coeffGamma);
-        this.coeff_eta = RainbowUtil.convertArray(coeffEta);
-    }
-
-    /**
-     * This function generates the coefficients of all polynomials in this layer
-     * at random using random generator.
-     *
-     * @param rg the random generator which is to be used
-     */
-    public void generateCoefficients(SecureRandom sr)
-    {
         int numOfPoly = this.oi; // number of polynomials per layer
 
         // Alpha coeffs
@@ -263,16 +214,6 @@ public class Layer
     }
 
     /**
-     * Getter for the index of the layer.
-     *
-     * @return the index of the current layer.
-     */
-    public int getLayerIndex()
-    {
-        return layerIndex;
-    }
-
-    /**
      * Getter for the number of vinegar variables of this layer.
      *
      * @return the number of vinegar variables of this layer.
@@ -357,16 +298,25 @@ public class Layer
         }
         Layer otherLayer = (Layer)other;
 
-        boolean eq = true;
-        eq &= layerIndex == otherLayer.getLayerIndex();
-        eq &= vi == otherLayer.getVi();
-        eq &= viNext == otherLayer.getViNext();
-        eq &= oi == otherLayer.getOi();
-        eq &= RainbowUtil.equals(coeff_alpha, otherLayer.getCoeffAlpha());
-        eq &= RainbowUtil.equals(coeff_beta, otherLayer.getCoeffBeta());
-        eq &= RainbowUtil.equals(coeff_gamma, otherLayer.getCoeffGamma());
-        eq &= RainbowUtil.equals(coeff_eta, otherLayer.getCoeffEta());
-        return eq;
+        return  vi == otherLayer.getVi()
+                && viNext == otherLayer.getViNext()
+                && oi == otherLayer.getOi()
+                && RainbowUtil.equals(coeff_alpha, otherLayer.getCoeffAlpha())
+                && RainbowUtil.equals(coeff_beta, otherLayer.getCoeffBeta())
+                && RainbowUtil.equals(coeff_gamma, otherLayer.getCoeffGamma())
+                && RainbowUtil.equals(coeff_eta, otherLayer.getCoeffEta());
     }
 
+    public int hashCode()
+    {
+        int hash = vi;
+        hash = hash * 37 + viNext;
+        hash = hash * 37 + oi;
+        hash = hash * 37 + Arrays.hashCode(coeff_alpha);
+        hash = hash * 37 + Arrays.hashCode(coeff_beta);
+        hash = hash * 37 + Arrays.hashCode(coeff_gamma);
+        hash = hash * 37 + Arrays.hashCode(coeff_eta);
+
+        return hash;
+    }
 }

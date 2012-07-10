@@ -59,7 +59,7 @@ public class RainbowSigner
             this.key = (RainbowPublicKeyParameters)param;
         }
 
-        this.signableDocumentLength = this.key.getParameters().getRainbowDocumentLength();
+        this.signableDocumentLength = this.key.getDocLength();
     }
 
 
@@ -78,10 +78,10 @@ public class RainbowSigner
         // tmp = Y - b1:
         short[] tmpVec = new short[msg.length];
 
-        tmpVec = cf.addVect(((RainbowPrivateKeyParameters)this.key).getb1(), msg);
+        tmpVec = cf.addVect(((RainbowPrivateKeyParameters)this.key).getB1(), msg);
 
         // Y_ = A1^{-1} * (Y - b1) :
-        short[] Y_ = cf.multiplyMatrix(((RainbowPrivateKeyParameters)this.key).getA1inv(), tmpVec);
+        short[] Y_ = cf.multiplyMatrix(((RainbowPrivateKeyParameters)this.key).getInvA1(), tmpVec);
 
         /* generates the vinegar vars of the first layer at random */
         for (int i = 0; i < layer[0].getVi(); i++)
@@ -110,7 +110,7 @@ public class RainbowSigner
         Layer[] layer = ((RainbowPrivateKeyParameters)this.key).getLayers();
         int numberOfLayers = layer.length;
 
-        x = new short[((RainbowPrivateKeyParameters)this.key).getA2inv().length]; // all variables
+        x = new short[((RainbowPrivateKeyParameters)this.key).getInvA2().length]; // all variables
 
         short[] Y_; // modified document
         short[] y_i; // part of Y_ each polynomial
@@ -168,8 +168,8 @@ public class RainbowSigner
                 }
 
                 /* apply the inverse of L2: (signature = A2^{-1}*(b2+x)) */
-                tmpVec = cf.addVect(((RainbowPrivateKeyParameters)this.key).getb2(), x);
-                signature = cf.multiplyMatrix(((RainbowPrivateKeyParameters)this.key).getA2inv(), tmpVec);
+                tmpVec = cf.addVect(((RainbowPrivateKeyParameters)this.key).getB2(), x);
+                signature = cf.multiplyMatrix(((RainbowPrivateKeyParameters)this.key).getInvA2(), tmpVec);
 
                 /* cast signature from short[] to byte[] */
                 for (int i = 0; i < S.length; i++)

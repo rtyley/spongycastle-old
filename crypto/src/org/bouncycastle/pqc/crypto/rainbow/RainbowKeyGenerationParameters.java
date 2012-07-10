@@ -7,14 +7,13 @@ import org.bouncycastle.crypto.KeyGenerationParameters;
 public class RainbowKeyGenerationParameters
     extends KeyGenerationParameters
 {
-
     private RainbowParameters params;
 
     public RainbowKeyGenerationParameters(
         SecureRandom random,
         RainbowParameters params)
     {
-        // XXX key size?
+        // TODO: key size?
         super(random, params.getVi()[params.getVi().length - 1] - params.getVi()[0]);
         this.params = params;
     }

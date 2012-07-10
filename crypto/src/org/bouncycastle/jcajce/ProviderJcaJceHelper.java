@@ -16,6 +16,7 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKeyFactory;
 
 public class ProviderJcaJceHelper
     implements JcaJceHelper
@@ -68,6 +69,12 @@ public class ProviderJcaJceHelper
         throws NoSuchAlgorithmException
     {
         return KeyFactory.getInstance(algorithm, provider);
+    }
+
+    public SecretKeyFactory createSecretKeyFactory(String algorithm)
+        throws NoSuchAlgorithmException
+    {
+        return SecretKeyFactory.getInstance(algorithm, provider);
     }
 
     public KeyPairGenerator createKeyPairGenerator(String algorithm)

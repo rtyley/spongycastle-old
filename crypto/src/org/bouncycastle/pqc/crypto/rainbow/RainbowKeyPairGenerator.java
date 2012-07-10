@@ -4,8 +4,6 @@ import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.ExtendedDigest;
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.pqc.crypto.rainbow.util.ComputeInField;
 import org.bouncycastle.pqc.crypto.rainbow.util.GF2Field;
@@ -46,21 +44,15 @@ public class RainbowKeyPairGenerator
     private short[][] pub_singular; // singular coefficients
     private short[] pub_scalar; // scalars
 
-    private Digest messDigest;
-
-
     // TODO
 
     /**
      * The standard constructor tries to generate the Rainbow algorithm identifier
      * with the corresponding OID.
      * <p/>
-     *
-     * @param digest     the digest itself
      */
-    public RainbowKeyPairGenerator(ExtendedDigest digest)
+    public RainbowKeyPairGenerator()
     {
-        this.messDigest = digest;
     }
 
 
@@ -83,11 +75,11 @@ public class RainbowKeyPairGenerator
         keygen();
 
         /* now marshall them to PrivateKey */
-        privKey = new RainbowPrivateKeyParameters(A1inv, b1, A2inv, b2, vi, layers, rainbowParams.getParameters());
+        privKey = new RainbowPrivateKeyParameters(A1inv, b1, A2inv, b2, vi, layers);
 
 
         /* marshall to PublicKey */
-        pubKey = new RainbowPublicKeyParameters(vi[vi.length - 1] - vi[0], pub_quadratic, pub_singular, pub_scalar, rainbowParams.getParameters());
+        pubKey = new RainbowPublicKeyParameters(vi[vi.length - 1] - vi[0], pub_quadratic, pub_singular, pub_scalar);
 
         return new AsymmetricCipherKeyPair(pubKey, privKey);
     }
@@ -112,7 +104,6 @@ public class RainbowKeyPairGenerator
     {
         RainbowKeyGenerationParameters rbKGParams = new RainbowKeyGenerationParameters(new SecureRandom(), new RainbowParameters());
         initialize(rbKGParams);
-
     }
 
     /**
@@ -216,8 +207,7 @@ public class RainbowKeyPairGenerator
         this.layers = new Layer[this.numOfLayers];
         for (int i = 0; i < this.numOfLayers; i++)
         {
-            layers[i] = new Layer(i, this.vi[i], this.vi[i + 1]);
-            layers[i].generateCoefficients(this.sr);
+            layers[i] = new Layer(this.vi[i], this.vi[i + 1], sr);
         }
     }
 
@@ -415,7 +405,6 @@ public class RainbowKeyPairGenerator
     public void init(KeyGenerationParameters param)
     {
         this.initialize(param);
-
     }
 
     public AsymmetricCipherKeyPair generateKeyPair()

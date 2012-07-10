@@ -1,33 +1,17 @@
-package org.bouncycastle.pqc.crypto.rainbow;
+package org.bouncycastle.pqc.jcajce.spec;
 
-public class RainbowPrivateKeyParameters
-    extends RainbowKeyParameters
+import java.security.spec.KeySpec;
+
+import org.bouncycastle.pqc.crypto.rainbow.Layer;
+
+/**
+ * This class provides a specification for a RainbowSignature private key.
+ *
+ * @see KeySpec
+ */
+public class RainbowPrivateKeySpec
+    implements KeySpec
 {
-    /**
-     * Constructor
-     *
-     * @param A1inv  the inverse of A1(the matrix part of the affine linear map L1)
-     *               (n-v1 x n-v1 matrix)
-     * @param b1     translation vector, part of the linear affine map L1
-     * @param A2inv  the inverse of A2(the matrix part of the affine linear map L2)
- *               (n x n matrix)
-     * @param b2     translation vector, part of the linear affine map L2
-     * @param vi     the number of Vinegar-variables per layer
-     * @param layers the polynomials with their coefficients of private map F
-     */
-    public RainbowPrivateKeyParameters(short[][] A1inv, short[] b1,
-                                       short[][] A2inv, short[] b2, int[] vi, Layer[] layers)
-    {
-        super(true, vi[vi.length - 1] - vi[0]);
-
-        this.A1inv = A1inv;
-        this.b1 = b1;
-        this.A2inv = A2inv;
-        this.b2 = b2;
-        this.vi = vi;
-        this.layers = layers;
-    }
-
     /*
       * invertible affine linear map L1
       */
@@ -54,6 +38,29 @@ public class RainbowPrivateKeyParameters
 
     // contains the polynomials with their coefficients of private map F
     private Layer[] layers;
+
+    /**
+     * Constructor
+     *
+     * @param A1inv  the inverse of A1(the matrix part of the affine linear map L1)
+     *               (n-v1 x n-v1 matrix)
+     * @param b1     translation vector, part of the linear affine map L1
+     * @param A2inv  the inverse of A2(the matrix part of the affine linear map L2)
+     *               (n x n matrix)
+     * @param b2     translation vector, part of the linear affine map L2
+     * @param vi     the number of Vinegar-variables per layer
+     * @param layers the polynomials with their coefficients of private map F
+     */
+    public RainbowPrivateKeySpec(short[][] A1inv, short[] b1,
+                                 short[][] A2inv, short[] b2, int[] vi, Layer[] layers)
+    {
+        this.A1inv = A1inv;
+        this.b1 = b1;
+        this.A2inv = A2inv;
+        this.b2 = b2;
+        this.vi = vi;
+        this.layers = layers;
+    }
 
     /**
      * Getter for the translation part of the private quadratic map L1.
@@ -114,4 +121,5 @@ public class RainbowPrivateKeyParameters
     {
         return vi;
     }
+
 }
