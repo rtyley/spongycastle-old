@@ -1,16 +1,15 @@
 package org.bouncycastle.pqc.jcajce.provider.rainbow;
 
-import java.io.IOException;
 import java.security.PublicKey;
 
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.pqc.asn1.PQCObjectIdentifiers;
 import org.bouncycastle.pqc.asn1.RainbowPublicKey;
 import org.bouncycastle.pqc.crypto.rainbow.RainbowParameters;
 import org.bouncycastle.pqc.crypto.rainbow.RainbowPublicKeyParameters;
 import org.bouncycastle.pqc.crypto.rainbow.util.RainbowUtil;
+import org.bouncycastle.pqc.jcajce.provider.util.KeyUtil;
 import org.bouncycastle.pqc.jcajce.spec.RainbowPublicKeySpec;
 import org.bouncycastle.util.Arrays;
 
@@ -156,17 +155,9 @@ public class BCRainbowPublicKey
 
     public byte[] getEncoded()
     {
-        try
-        {
-            RainbowPublicKey key = new RainbowPublicKey(docLength, coeffquadratic, coeffsingular, coeffscalar);
-            AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(PQCObjectIdentifiers.rainbow, DERNull.INSTANCE);
-            SubjectPublicKeyInfo subjectPublicKeyInfo = new SubjectPublicKeyInfo(algorithmIdentifier, key);
+        RainbowPublicKey key = new RainbowPublicKey(docLength, coeffquadratic, coeffsingular, coeffscalar);
+        AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(PQCObjectIdentifiers.rainbow, DERNull.INSTANCE);
 
-            return subjectPublicKeyInfo.getEncoded();
-        }
-        catch (IOException e)
-        {
-            return null;
-        }
+        return KeyUtil.getEncodedSubjectPublicKeyInfo(algorithmIdentifier, key);
     }
 }
