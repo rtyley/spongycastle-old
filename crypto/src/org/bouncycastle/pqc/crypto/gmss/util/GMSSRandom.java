@@ -33,14 +33,6 @@ public class GMSSRandom
      */
     public byte[] nextSeed(byte[] outseed)
     {
-
-        // byte array value "1"
-        byte[] one = new byte[outseed.length];
-        one[0] = 1;
-        for (int i = 1; i < outseed.length; i++)
-        {
-            one[i] = 0;
-        }
         // RAND <-- H(SEEDin)
         byte[] rand = new byte[outseed.length];
         messDigestTree.update(outseed, 0, outseed.length);
