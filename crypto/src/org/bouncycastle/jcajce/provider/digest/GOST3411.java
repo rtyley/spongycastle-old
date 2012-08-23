@@ -30,7 +30,7 @@ public class GOST3411
     }
 
     /**
-     * Tiger HMac
+     * GOST3411 HMac
      */
     public static class HashMac
         extends JCEMac
@@ -67,6 +67,7 @@ public class GOST3411
             provider.addAlgorithm("Alg.Alias.MessageDigest." + CryptoProObjectIdentifiers.gostR3411, "GOST3411");
 
             addHMACAlgorithm(provider, "GOST3411", PREFIX + "$HashMac", PREFIX + "$KeyGenerator");
+            addHMACAlias(provider, "GOST3411", CryptoProObjectIdentifiers.gostR3411);
         }
     }
 }

@@ -6,11 +6,14 @@ public interface CryptoProObjectIdentifiers
 {
     // GOST Algorithms OBJECT IDENTIFIERS :
     // { iso(1) member-body(2) ru(643) rans(2) cryptopro(2)}
-    static final String                 GOST_id              = "1.2.643.2.2";
+    static final ASN1ObjectIdentifier    GOST_id              = new ASN1ObjectIdentifier("1.2.643.2.2");
 
-    static final ASN1ObjectIdentifier    gostR3411          = new ASN1ObjectIdentifier(GOST_id+".9");
-    
+    static final ASN1ObjectIdentifier    gostR3411          = GOST_id.branch("9");
+    static final ASN1ObjectIdentifier    gostR3411Hmac      = GOST_id.branch("10");
+
     static final ASN1ObjectIdentifier    gostR28147_cbc     = new ASN1ObjectIdentifier(GOST_id+".21");
+
+    static final ASN1ObjectIdentifier    id_Gost28147_89_CryptoPro_A_ParamSet = GOST_id.branch("31.1");
 
     static final ASN1ObjectIdentifier    gostR3410_94       = new ASN1ObjectIdentifier(GOST_id+".20");
     static final ASN1ObjectIdentifier    gostR3410_2001     = new ASN1ObjectIdentifier(GOST_id+".19");

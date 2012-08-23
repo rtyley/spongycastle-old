@@ -54,13 +54,7 @@ public class DSTU4145Signer
 
     public BigInteger[] generateSignature(byte[] message)
     {
-        byte[] mRev = new byte[message.length];
-        for (int i = 0; i != mRev.length; i++)
-        {
-            mRev[i] = message[mRev.length - 1 - i];
-        }
-
-        ECFieldElement h = hash2FieldElement(key.getParameters().getCurve(), mRev);
+        ECFieldElement h = hash2FieldElement(key.getParameters().getCurve(), message);
         if (h.toBigInteger().signum() == 0)
         {
             h = key.getParameters().getCurve().fromBigInteger(BigInteger.ONE);
@@ -94,12 +88,6 @@ public class DSTU4145Signer
 
     public boolean verifySignature(byte[] message, BigInteger r, BigInteger s)
     {
-        byte[] mRev = new byte[message.length]; // conversion is little-endian
-        for (int i = 0; i != mRev.length; i++)
-        {
-            mRev[i] = message[mRev.length - 1 - i];
-        }
-
         if (r.signum() == 0 || s.signum() == 0)
         {
             return false;
@@ -109,7 +97,7 @@ public class DSTU4145Signer
             return false;
         }
 
-        ECFieldElement h = hash2FieldElement(key.getParameters().getCurve(), mRev);
+        ECFieldElement h = hash2FieldElement(key.getParameters().getCurve(), message);
         if (h.toBigInteger().signum() == 0)
         {
             h = key.getParameters().getCurve().fromBigInteger(BigInteger.ONE);
@@ -127,10 +115,24 @@ public class DSTU4145Signer
     {
         return new BigInteger(n.bitLength() - 1, random);
     }
+    
+    private static void reverseBytes(byte[] bytes)
+	{
+		byte tmp;
+		
+		for (int i=0; i<bytes.length/2; i++)
+		{
+			tmp=bytes[i];
+			bytes[i]=bytes[bytes.length-1-i];
+			bytes[bytes.length-1-i]=tmp;
+		}
+	}
 
     private static ECFieldElement hash2FieldElement(ECCurve curve, byte[] hash)
     {
-        BigInteger num = new BigInteger(1, hash);
+    	byte[] data = hash.clone();
+    	reverseBytes(data);
+    	BigInteger num = new BigInteger(1, data);
         while (num.bitLength() >= curve.getFieldSize())
         {
             num = num.clearBit(num.bitLength() - 1);
