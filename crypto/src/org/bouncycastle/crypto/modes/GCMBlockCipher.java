@@ -185,7 +185,16 @@ public class GCMBlockCipher
 
     public int getUpdateOutputSize(int len)
     {
-        return ((len + bufOff) / BLOCK_SIZE) * BLOCK_SIZE;
+	int totalData = len + bufOff;
+	if (!forEncryption)
+	{
+	    if (totalData < macSize)
+	    {
+		return 0;
+	    }
+	    totalData -= macSize;
+	}
+        return totalData - totalData % BLOCK_SIZE;
     }
 
     public int processByte(byte in, byte[] out, int outOff)
