@@ -150,14 +150,14 @@ public class CCMBlockCipher
 
     public int getOutputSize(int len)
     {
+	int totalData = len + data.size();
+
         if (forEncryption)
         {
-            return data.size() + len + macSize;
+             return totalData + macSize;
         }
-        else
-        {
-            return data.size() + len - macSize;
-        }
+
+        return totalData < macSize ? 0 : totalData - macSize;
     }
 
     public byte[] processPacket(byte[] in, int inOff, int inLen)

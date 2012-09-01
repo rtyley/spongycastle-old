@@ -173,12 +173,14 @@ public class GCMBlockCipher
 
     public int getOutputSize(int len)
     {
+	int totalData = len + bufOff;
+
         if (forEncryption)
         {
-             return len + bufOff + macSize;
+             return totalData + macSize;
         }
 
-        return len + bufOff - macSize;
+        return totalData < macSize ? 0 : totalData - macSize;
     }
 
     public int getUpdateOutputSize(int len)

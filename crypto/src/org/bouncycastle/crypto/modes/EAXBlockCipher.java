@@ -249,14 +249,14 @@ public class EAXBlockCipher
 
     public int getOutputSize(int len)
     {
+	int totalData = len + bufOff;
+
         if (forEncryption)
         {
-             return len + bufOff + macSize;
+             return totalData + macSize;
         }
-        else
-        {
-             return len + bufOff - macSize;
-        }
+
+        return totalData < macSize ? 0 : totalData - macSize;
     }
 
     private int process(byte b, byte[] out, int outOff)
