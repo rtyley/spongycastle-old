@@ -300,6 +300,7 @@ public class GCMTest
         }
 
         randomTests();
+        outputSizeTests();
     }    
 
     private void runTestCase(String[] testVector)
@@ -435,7 +436,7 @@ public class GCMTest
         byte[] K = new byte[kLength];
         srng.nextBytes(K);
 
-        int pLength = srng.nextInt() >>> 22;
+        int pLength = srng.nextInt() >>> 22;;
         byte[] P = new byte[pLength];
         srng.nextBytes(P);
 
@@ -451,12 +452,19 @@ public class GCMTest
         AEADParameters parameters = new AEADParameters(new KeyParameter(K), 16 * 8, IV, A);
         cipher.init(true, parameters);
         byte[] C = new byte[cipher.getOutputSize(P.length)];
+        int predicted = cipher.getUpdateOutputSize(P.length);
+
         int len = cipher.processBytes(P, 0, P.length, C, 0);
+
+        if (predicted != len)
+        {
+            fail("encryption reported incorrect update length in randomised test");
+        }
+        
         len += cipher.doFinal(C, len);
 
         if (C.length != len)
         {
-//            System.out.println("" + C.length + "/" + len);
             fail("encryption reported incorrect length in randomised test");
         }
 
@@ -471,7 +479,15 @@ public class GCMTest
 
         cipher.init(false, parameters);
         byte[] decP = new byte[cipher.getOutputSize(C.length)];
+        predicted = cipher.getUpdateOutputSize(C.length);
+        
         len = cipher.processBytes(C, 0, C.length, decP, 0);
+
+        if (predicted != len)
+        {
+            fail("decryption reported incorrect update length in randomised test");
+        }
+
         len += cipher.doFinal(decP, len);
 
         if (!areEqual(P, decP))
@@ -502,6 +518,46 @@ public class GCMTest
         if (!areEqual(encT, decT))
         {
             fail("decryption produced different mac from encryption");
+        }
+    }
+
+    private void outputSizeTests()
+    {
+        byte[] K = new byte[16];
+        byte[] A = null;
+        byte[] IV = new byte[16];
+
+        GCMBlockCipher cipher = new GCMBlockCipher(new AESFastEngine(), new BasicGCMMultiplier());
+        AEADParameters parameters = new AEADParameters(new KeyParameter(K), 16 * 8, IV, A);
+
+        cipher.init(true, parameters);
+
+        if (cipher.getUpdateOutputSize(0) != 0)
+        {
+            fail("incorrect getUpdateOutputSize for initial 0 bytes encryption");
+        }
+
+        if (cipher.getOutputSize(0) != 16)
+        {
+            fail("incorrect getOutputSize for initial 0 bytes encryption");
+        }
+
+        cipher.init(false, parameters);
+
+        if (cipher.getUpdateOutputSize(0) != 0)
+        {
+            fail("incorrect getUpdateOutputSize for initial 0 bytes decryption");
+        }
+
+        // NOTE: 0 bytes would be truncated data, but we want it to fail in the doFinal, not here
+        if (cipher.getOutputSize(0) != 0)
+        {
+            fail("fragile getOutputSize for initial 0 bytes decryption");
+        }
+
+        if (cipher.getOutputSize(16) != 0)
+        {
+            fail("incorrect getOutputSize for initial MAC-size bytes decryption");
         }
     }
 
