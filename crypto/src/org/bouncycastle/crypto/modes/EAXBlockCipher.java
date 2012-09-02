@@ -244,7 +244,16 @@ public class EAXBlockCipher
 
     public int getUpdateOutputSize(int len)
     {
-        return ((len + bufOff) / blockSize) * blockSize;
+	int totalData = len + bufOff;
+	if (!forEncryption)
+	{
+	    if (totalData < macSize)
+	    {
+		return 0;
+	    }
+	    totalData -= macSize;
+	}
+        return totalData - totalData % blockSize;
     }
 
     public int getOutputSize(int len)
