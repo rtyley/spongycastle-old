@@ -322,7 +322,7 @@ public class DERObjectIdentifier
 
         if (first == null)
         {
-            first = cache[idx1] = new ASN1ObjectIdentifier[129];
+            first = cache[idx1] = new ASN1ObjectIdentifier[128];
         }
 
         // in this case top bit is always zero
@@ -346,7 +346,7 @@ public class DERObjectIdentifier
             first = cache[idx1];
             if (first == null)
             {
-                first = cache[idx1] = new ASN1ObjectIdentifier[129];
+                first = cache[idx1] = new ASN1ObjectIdentifier[128];
             }
 
             possibleMatch = first[idx2];
@@ -362,7 +362,7 @@ public class DERObjectIdentifier
                 return possibleMatch;
             }
 
-            idx2 = idx2 + 1;
+            idx2 = (idx2 + 1) % 128;
             possibleMatch = first[idx2];
 
             if (possibleMatch == null)
