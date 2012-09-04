@@ -36,6 +36,11 @@ public class DERObjectIdentifier
             return (ASN1ObjectIdentifier)((ASN1Encodable)obj).toASN1Primitive();
         }
 
+        if (obj instanceof byte[])
+        {
+            return ASN1ObjectIdentifier.fromOctetString((byte[])obj);
+        }
+
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 
@@ -303,7 +308,7 @@ public class DERObjectIdentifier
         return periodAllowed;
     }
 
-    private static ASN1ObjectIdentifier[][] cache = new ASN1ObjectIdentifier[255][];
+    private static ASN1ObjectIdentifier[][] cache = new ASN1ObjectIdentifier[256][];
 
     static ASN1ObjectIdentifier fromOctetString(byte[] enc)
     {
@@ -317,10 +322,11 @@ public class DERObjectIdentifier
 
         if (first == null)
         {
-            first = cache[idx1] = new ASN1ObjectIdentifier[255];
+            first = cache[idx1] = new ASN1ObjectIdentifier[129];
         }
 
-        int idx2 = enc[enc.length - 1] & 0xff;
+        // in this case top bit is always zero
+        int idx2 = enc[enc.length - 1] & 0x7f;
 
         ASN1ObjectIdentifier possibleMatch = first[idx2];
 
@@ -340,7 +346,7 @@ public class DERObjectIdentifier
             first = cache[idx1];
             if (first == null)
             {
-                first = cache[idx1] = new ASN1ObjectIdentifier[255];
+                first = cache[idx1] = new ASN1ObjectIdentifier[129];
             }
 
             possibleMatch = first[idx2];
@@ -356,7 +362,7 @@ public class DERObjectIdentifier
                 return possibleMatch;
             }
 
-            idx2 = (idx2 + 1) % 256;
+            idx2 = idx2 + 1;
             possibleMatch = first[idx2];
 
             if (possibleMatch == null)
