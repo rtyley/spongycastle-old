@@ -310,6 +310,7 @@ public class DERObjectIdentifier
         {
             char ch = identifier.charAt(i);
 
+            // TODO Leading zeroes?
             if ('0' <= ch && ch <= '9')
             {
                 periodAllowed = true;
@@ -343,30 +344,30 @@ public class DERObjectIdentifier
         }
 
         int idx1 = enc[enc.length - 2] & 0xff;
-        ASN1ObjectIdentifier[] first = cache[idx1];
-
-        if (first == null)
-        {
-            first = cache[idx1] = new ASN1ObjectIdentifier[128];
-        }
-
         // in this case top bit is always zero
         int idx2 = enc[enc.length - 1] & 0x7f;
 
-        ASN1ObjectIdentifier possibleMatch = first[idx2];
+        ASN1ObjectIdentifier possibleMatch;
 
-        if (possibleMatch == null)
+        synchronized (cache)
         {
-            possibleMatch = first[idx2] = new ASN1ObjectIdentifier(enc);
-            return possibleMatch;
-        }
+            ASN1ObjectIdentifier[] first = cache[idx1];
+                if (first == null)
+            {
+                first = cache[idx1] = new ASN1ObjectIdentifier[128];
+            }
 
-        if (Arrays.areEqual(enc, possibleMatch.getBody()))
-        {
-            return possibleMatch;
-        }
-        else
-        {
+            possibleMatch = first[idx2];
+            if (possibleMatch == null)
+            {
+                return first[idx2] = new ASN1ObjectIdentifier(enc);
+            }
+
+            if (Arrays.areEqual(enc, possibleMatch.getBody()))
+            {
+                return possibleMatch;
+            }
+
             idx1 = (idx1 + 1) & 0xff;
             first = cache[idx1];
             if (first == null)
@@ -375,11 +376,9 @@ public class DERObjectIdentifier
             }
 
             possibleMatch = first[idx2];
-
             if (possibleMatch == null)
             {
-                possibleMatch = first[idx2] = new ASN1ObjectIdentifier(enc);
-                return possibleMatch;
+                return first[idx2] = new ASN1ObjectIdentifier(enc);
             }
 
             if (Arrays.areEqual(enc, possibleMatch.getBody()))
@@ -389,17 +388,15 @@ public class DERObjectIdentifier
 
             idx2 = (idx2 + 1) & 0x7f;
             possibleMatch = first[idx2];
-
             if (possibleMatch == null)
             {
-                possibleMatch = first[idx2] = new ASN1ObjectIdentifier(enc);
-                return possibleMatch;
+                return first[idx2] = new ASN1ObjectIdentifier(enc);
             }
+        }
 
-            if (Arrays.areEqual(enc, possibleMatch.getBody()))
-            {
-                return possibleMatch;
-            }
+        if (Arrays.areEqual(enc, possibleMatch.getBody()))
+        {
+            return possibleMatch;
         }
 
         return new ASN1ObjectIdentifier(enc);
