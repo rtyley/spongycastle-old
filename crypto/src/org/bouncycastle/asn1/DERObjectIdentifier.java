@@ -69,6 +69,8 @@ public class DERObjectIdentifier
         }
     }
 
+    private static final long LONG_LIMIT = (Long.MAX_VALUE >> 7) - 0x7f;
+
     DERObjectIdentifier(
         byte[]  bytes)
     {
@@ -81,32 +83,37 @@ public class DERObjectIdentifier
         {
             int b = bytes[i] & 0xff;
 
-            if (value < 0x80000000000000L) 
+            if (value <= LONG_LIMIT) 
             {
-                value = value * 128 + (b & 0x7f);
+                value += (b & 0x7f);
                 if ((b & 0x80) == 0)             // end of number reached
                 {
                     if (first)
                     {
-                        switch ((int)value / 40)
-                        {
-                        case 0:
-                            objId.append('0');
-                            break;
-                        case 1:
-                            objId.append('1');
+                	if (value < 40)
+                	{
+                	    objId.append('0');
+                	}
+                	else if (value < 80)
+                	{
+                	    objId.append('1');
                             value -= 40;
-                            break;
-                        default:
-                            objId.append('2');
+                	}
+                	else
+                	{
+                	    objId.append('2');
                             value -= 80;
-                        }
+                	}
                         first = false;
                     }
 
                     objId.append('.');
                     objId.append(value);
                     value = 0;
+                }
+                else
+                {
+                    value <<= 7;
                 }
             } 
             else 
@@ -115,19 +122,30 @@ public class DERObjectIdentifier
                 {
                     bigValue = BigInteger.valueOf(value);
                 }
-                bigValue = bigValue.shiftLeft(7);
                 bigValue = bigValue.or(BigInteger.valueOf(b & 0x7f));
                 if ((b & 0x80) == 0) 
                 {
+                    if (first)
+                    {
+            		objId.append('2');
+                    	bigValue = bigValue.subtract(BigInteger.valueOf(80));
+                        first = false;
+                    }
+
                     objId.append('.');
                     objId.append(bigValue);
                     bigValue = null;
                     value = 0;
                 }
+                else
+                {
+                    bigValue = bigValue.shiftLeft(7);
+                }
             }
         }
 
         this.identifier = objId.toString();
+        this.body = Arrays.clone(bytes);
     }
 
     public DERObjectIdentifier(
@@ -186,16 +204,23 @@ public class DERObjectIdentifier
 
     private void doOutput(ByteArrayOutputStream aOut)
     {
-        OIDTokenizer            tok = new OIDTokenizer(identifier);
-
-        writeField(aOut,
-                    Integer.parseInt(tok.nextToken()) * 40
-                    + Integer.parseInt(tok.nextToken()));
+        OIDTokenizer tok = new OIDTokenizer(identifier);
+        int first = Integer.parseInt(tok.nextToken()) * 40;
+        
+        String secondToken = tok.nextToken();
+        if (secondToken.length() <= 18)
+        {
+	    writeField(aOut, first + Long.parseLong(secondToken));
+        }
+        else
+        {
+	    writeField(aOut, new BigInteger(secondToken).add(BigInteger.valueOf(first)));
+        }
 
         while (tok.hasMoreTokens())
         {
             String token = tok.nextToken();
-            if (token.length() < 18)
+            if (token.length() <= 18)
             {
                 writeField(aOut, Long.parseLong(token));
             }
@@ -206,7 +231,7 @@ public class DERObjectIdentifier
         }
     }
 
-    protected byte[] getBody()
+    protected synchronized byte[] getBody()
     {
         if (body == null)
         {
@@ -342,7 +367,7 @@ public class DERObjectIdentifier
         }
         else
         {
-            idx1 = (idx1 + 1) % 256;
+            idx1 = (idx1 + 1) & 0xff;
             first = cache[idx1];
             if (first == null)
             {
@@ -362,7 +387,7 @@ public class DERObjectIdentifier
                 return possibleMatch;
             }
 
-            idx2 = (idx2 + 1) % 128;
+            idx2 = (idx2 + 1) & 0x7f;
             possibleMatch = first[idx2];
 
             if (possibleMatch == null)
