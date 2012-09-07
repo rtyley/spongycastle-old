@@ -204,7 +204,7 @@ public class CMSSignedDataStreamGenerator
         //
         // add the precalculated SignerInfo digest algorithms.
         //
-        for (Iterator it = _signers.iterator(); it.hasNext();)
+        for (Iterator it = signers.iterator(); it.hasNext();)
         {
             SignerInformation signer = (SignerInformation)it.next();
             digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
@@ -340,7 +340,7 @@ public class CMSSignedDataStreamGenerator
             return new DERInteger(3);
         }
 
-        if (checkForVersion3(_signers))
+        if (checkForVersion3(signers))
         {
             return new DERInteger(3);
         }
@@ -468,7 +468,7 @@ public class CMSSignedDataStreamGenerator
             // add the precalculated SignerInfo objects
             //
             {
-                Iterator it = _signers.iterator();
+                Iterator it = signers.iterator();
                 while (it.hasNext())
                 {
                     SignerInformation signer = (SignerInformation)it.next();
