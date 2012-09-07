@@ -44,7 +44,9 @@ public class SMIMEGenerator
     }
 
     /**
-     * set the content-transfer-encoding for the signature.
+     * set the content-transfer-encoding for the CMS block (enveloped data, signature, etc...)  in the message.
+     *
+     * @param  encoding the encoding to use, default "base64", use "binary" for a binary encoding.
      */
     public void setContentTransferEncoding(
         String  encoding)
