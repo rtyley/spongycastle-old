@@ -29,6 +29,7 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.DSAParameter;
+import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.util.Strings;
 import org.bouncycastle.util.io.pem.PemGenerationException;
@@ -197,6 +198,16 @@ public class MiscPEMGenerator
         {
             type = "CERTIFICATE REQUEST";
             encoding = ((PKCS10CertificationRequest)o).getEncoded();
+        }
+        else if (o instanceof X509AttributeCertificateHolder)
+        {
+            type = "ATTRIBUTE CERTIFICATE";
+            encoding = ((X509AttributeCertificateHolder)o).getEncoded();
+        }
+        else if (o instanceof org.bouncycastle.pkcs.PKCS10CertificationRequest)
+        {
+            type = "CERTIFICATE REQUEST";
+            encoding = ((org.bouncycastle.pkcs.PKCS10CertificationRequest)o).getEncoded();
         }
         else if (o instanceof ContentInfo)
         {

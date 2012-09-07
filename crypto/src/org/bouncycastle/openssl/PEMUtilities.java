@@ -25,7 +25,7 @@ import org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
 
-final class PEMUtilities
+public final class PEMUtilities
 {
     private static final Map KEYSIZES = new HashMap();
     private static final Set PKCS5_SCHEME_1 = new HashSet();
@@ -67,17 +67,17 @@ final class PEMUtilities
         return PKCS5_SCHEME_1.contains(algOid);
     }
 
-    static boolean isPKCS5Scheme2(ASN1ObjectIdentifier algOid)
+    public static boolean isPKCS5Scheme2(ASN1ObjectIdentifier algOid)
     {
         return PKCS5_SCHEME_2.contains(algOid);
     }
 
-    static boolean isPKCS12(DERObjectIdentifier algOid)
+    public static boolean isPKCS12(DERObjectIdentifier algOid)
     {
         return algOid.getId().startsWith(PKCSObjectIdentifiers.pkcs_12PbeIds.getId());
     }
 
-    static SecretKey generateSecretKeyForPKCS5Scheme2(String algorithm, char[] password, byte[] salt, int iterationCount)
+    public static SecretKey generateSecretKeyForPKCS5Scheme2(String algorithm, char[] password, byte[] salt, int iterationCount)
     {
         PBEParametersGenerator generator = new PKCS5S2ParametersGenerator();
 

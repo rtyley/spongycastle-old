@@ -48,14 +48,14 @@ import org.bouncycastle.asn1.pkcs.RSAPublicKey;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.pem.PemHeader;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemObjectParser;
 import org.bouncycastle.util.io.pem.PemReader;
-import org.bouncycastle.x509.X509V2AttributeCertificate;
 
 /**
  * Class for reading OpenSSL PEM encoded streams containing
@@ -613,7 +613,7 @@ public class PEMReader
         public Object parseObject(PemObject obj)
             throws IOException
         {
-            return new X509V2AttributeCertificate(obj.getContent());
+            return new X509AttributeCertificateHolder(obj.getContent());
         }
     }
 
@@ -722,7 +722,7 @@ public class PEMReader
                     PrivateKeyInfo pInfo = PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(cipher.doFinal(info.getEncryptedData())));
                     PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pInfo.getEncoded());
 
-                    KeyFactory keyFact = KeyFactory.getInstance(pInfo.getAlgorithmId().getAlgorithm().getId(), asymProvider);
+                    KeyFactory keyFact = KeyFactory.getInstance(pInfo.getPrivateKeyAlgorithm().getAlgorithm().getId(), asymProvider);
 
                     return keyFact.generatePrivate(keySpec);
                 }
@@ -742,7 +742,7 @@ public class PEMReader
                     PrivateKeyInfo pInfo = PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(cipher.doFinal(info.getEncryptedData())));
                     PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pInfo.getEncoded());
 
-                    KeyFactory keyFact = KeyFactory.getInstance(pInfo.getAlgorithmId().getAlgorithm().getId(), asymProvider);
+                    KeyFactory keyFact = KeyFactory.getInstance(pInfo.getPrivateKeyAlgorithm().getAlgorithm().getId(), asymProvider);
 
                     return keyFact.generatePrivate(keySpec);
                 }
@@ -780,7 +780,7 @@ public class PEMReader
                 PrivateKeyInfo info = PrivateKeyInfo.getInstance(ASN1Primitive.fromByteArray(obj.getContent()));
                 PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(obj.getContent());
 
-                KeyFactory keyFact = KeyFactory.getInstance(info.getAlgorithmId().getAlgorithm().getId(), provider);
+                KeyFactory keyFact = KeyFactory.getInstance(info.getPrivateKeyAlgorithm().getAlgorithm().getId(), provider);
 
                 return keyFact.generatePrivate(keySpec);
             }
