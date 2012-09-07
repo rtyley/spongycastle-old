@@ -54,6 +54,7 @@ import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.SimpleAttributeTableGenerator;
+import org.bouncycastle.cms.bc.BcCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.bc.BcRSAKeyTransRecipientInfoGenerator;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKEKEnvelopedRecipient;
@@ -576,6 +577,40 @@ public class NewEnvelopedDataTest
 
         assertEquals(ed.getEncryptionAlgOID(),
                                    CMSEnvelopedDataGenerator.AES128_CBC);
+
+        Collection  c = recipients.getRecipients();
+        Iterator    it = c.iterator();
+
+        if (it.hasNext())
+        {
+            RecipientInformation   recipient = (RecipientInformation)it.next();
+
+            byte[] recData = recipient.getContent(new JceKeyTransEnvelopedRecipient(_reciKP.getPrivate()).setProvider(BC));
+            assertEquals(true, Arrays.equals(data, recData));
+        }
+        else
+        {
+            fail("no recipient found");
+        }
+    }
+
+    public void testKeyTransDESEDE3Light()
+        throws Exception
+    {
+        byte[]          data     = new byte[] { 0, 1, 2, 3 };
+
+        CMSEnvelopedDataGenerator edGen = new CMSEnvelopedDataGenerator();
+
+        edGen.addRecipientInfoGenerator(new BcRSAKeyTransRecipientInfoGenerator(new JcaX509CertificateHolder(_reciCert)));
+
+        CMSEnvelopedData ed = edGen.generate(
+                              new CMSProcessableByteArray(data),
+                              new BcCMSContentEncryptorBuilder(CMSAlgorithm.DES_EDE3_CBC, 192).build());
+
+        RecipientInformationStore  recipients = ed.getRecipientInfos();
+
+        assertEquals(ed.getEncryptionAlgOID(),
+                                   CMSEnvelopedDataGenerator.DES_EDE3_CBC);
 
         Collection  c = recipients.getRecipients();
         Iterator    it = c.iterator();
