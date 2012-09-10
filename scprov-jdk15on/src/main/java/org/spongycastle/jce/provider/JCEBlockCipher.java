@@ -93,6 +93,9 @@ public class JCEBlockCipher
 
     private AlgorithmParameters engineParams;
 
+    // Work-around for bug in Android pre-ICS
+    private static final byte[]     EMPTY_BYTE_ARRAY = new byte[0];
+
     protected JCEBlockCipher(
         BlockCipher engine)
     {
@@ -629,7 +632,7 @@ public class JCEBlockCipher
 
                 if (len == 0)
                 {
-                    return null;
+                    return EMPTY_BYTE_ARRAY;
                 }
                 else if (len != out.length)
                 {
@@ -645,7 +648,7 @@ public class JCEBlockCipher
 
         cipher.processBytes(input, inputOffset, inputLen, null, 0);
 
-        return null;
+        return EMPTY_BYTE_ARRAY;
     }
 
     protected int engineUpdate(
