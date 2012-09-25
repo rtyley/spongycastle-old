@@ -8,6 +8,7 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 
@@ -73,9 +74,9 @@ public class SignedData
             // an interesting feature of SignedData is that there appear to be varying implementations...
             // for the moment we ignore anything which doesn't fit.
             //
-            if (o instanceof DERTaggedObject)
+            if (o instanceof ASN1TaggedObject)
             {
-                DERTaggedObject tagged = (DERTaggedObject)o;
+                ASN1TaggedObject tagged = (ASN1TaggedObject)o;
 
                 switch (tagged.getTagNo())
                 {
