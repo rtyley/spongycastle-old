@@ -65,7 +65,8 @@ public class PGPEncryptedDataGenerator
     private List            methods = new ArrayList();
     private int             defAlgorithm;
     private SecureRandom    rand;
-    private Provider        defProvider;
+
+    private static Provider        defProvider;
     
    /**
        * Base constructor.
