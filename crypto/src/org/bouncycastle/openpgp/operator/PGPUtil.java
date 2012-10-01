@@ -7,6 +7,7 @@ import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.bcpg.S2K;
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.util.Strings;
 
 /**
  * Basic utility class
@@ -70,13 +71,7 @@ class PGPUtil
             throw new PGPException("unknown symmetric algorithm: " + algorithm);
         }
 
-        byte[]           pBytes = new byte[passPhrase.length];
-
-        for (int i = 0; i != passPhrase.length; i++)
-        {
-            pBytes[i] = (byte)passPhrase[i];
-        }
-
+        byte[]    pBytes = Strings.toUTF8ByteArray(passPhrase);
         byte[]    keyBytes = new byte[(keySize + 7) / 8];
 
         int    generatedBytes = 0;
