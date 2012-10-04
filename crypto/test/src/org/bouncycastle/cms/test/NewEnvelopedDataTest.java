@@ -628,6 +628,12 @@ public class NewEnvelopedDataTest
         }
     }
 
+    public void testKeyTransDES()
+         throws Exception
+     {
+         tryKeyTrans(CMSAlgorithm.DES_CBC, CMSAlgorithm.DES_CBC, 8, DEROctetString.class);
+     }
+
    public void testKeyTransCAST5()
         throws Exception
     {

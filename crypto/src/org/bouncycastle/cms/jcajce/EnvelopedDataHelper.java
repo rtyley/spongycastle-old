@@ -53,6 +53,7 @@ class EnvelopedDataHelper
 
     static
     {
+        BASE_CIPHER_NAMES.put(CMSAlgorithm.DES_CBC,  "DES");
         BASE_CIPHER_NAMES.put(CMSAlgorithm.DES_EDE3_CBC,  "DESEDE");
         BASE_CIPHER_NAMES.put(CMSAlgorithm.AES128_CBC,  "AES");
         BASE_CIPHER_NAMES.put(CMSAlgorithm.AES192_CBC,  "AES");
@@ -64,6 +65,7 @@ class EnvelopedDataHelper
         BASE_CIPHER_NAMES.put(CMSAlgorithm.CAMELLIA256_CBC, "Camellia");
         BASE_CIPHER_NAMES.put(CMSAlgorithm.SEED_CBC, "SEED");
 
+        CIPHER_ALG_NAMES.put(CMSAlgorithm.DES_CBC,  "DES/CBC/PKCS5Padding");
         CIPHER_ALG_NAMES.put(CMSAlgorithm.DES_EDE3_CBC,  "DESEDE/CBC/PKCS5Padding");
         CIPHER_ALG_NAMES.put(CMSAlgorithm.AES128_CBC,  "AES/CBC/PKCS5Padding");
         CIPHER_ALG_NAMES.put(CMSAlgorithm.AES192_CBC,  "AES/CBC/PKCS5Padding");
@@ -325,7 +327,8 @@ class EnvelopedDataHelper
                     }
                     catch (NoSuchAlgorithmException e)
                     {
-                        if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
+                        if (encAlg.equals(CMSAlgorithm.DES_CBC.getId())
+                            || encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
                             || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
                             || encAlg.equals(CMSEnvelopedDataGenerator.AES128_CBC)
                             || encAlg.equals(CMSEnvelopedDataGenerator.AES192_CBC)
@@ -342,7 +345,8 @@ class EnvelopedDataHelper
                 }
                 else
                 {
-                    if (encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
+                    if (encAlg.equals(CMSAlgorithm.DES_CBC.getId())
+                        || encAlg.equals(CMSEnvelopedDataGenerator.DES_EDE3_CBC)
                         || encAlg.equals(CMSEnvelopedDataGenerator.IDEA_CBC)
                         || encAlg.equals(CMSEnvelopedDataGenerator.CAST5_CBC))
                     {

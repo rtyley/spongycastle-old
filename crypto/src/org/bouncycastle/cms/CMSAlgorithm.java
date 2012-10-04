@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 
 public class CMSAlgorithm
 {
+    public static final ASN1ObjectIdentifier  DES_CBC         = OIWObjectIdentifiers.desCBC;
     public static final ASN1ObjectIdentifier  DES_EDE3_CBC    = PKCSObjectIdentifiers.des_EDE3_CBC;
     public static final ASN1ObjectIdentifier  RC2_CBC         = PKCSObjectIdentifiers.RC2_CBC;
     public static final ASN1ObjectIdentifier  IDEA_CBC        = new ASN1ObjectIdentifier("1.3.6.1.4.1.188.7.1.1.2");
