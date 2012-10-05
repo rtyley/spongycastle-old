@@ -26,6 +26,7 @@ public class RegressionTest
         new DSATest(),
         new ImplicitlyCaTest(),
         new ECNRTest(),
+        new ECIESTest(),
         new ECDSA5Test(),
         new GOST3410Test(),
         new ElGamalTest(),
@@ -65,6 +66,7 @@ public class RegressionTest
         new SigNameTest(),
         new MQVTest(),
         new CMacTest(),
+        new DSTU4145Test(),
         new CRL5Test()
     };
 

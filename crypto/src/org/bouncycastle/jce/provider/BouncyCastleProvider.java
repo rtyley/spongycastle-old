@@ -234,10 +234,7 @@ public final class BouncyCastleProvider extends Provider
         // cipher engines
         //
         put("Alg.Alias.Cipher.PBEWithSHAAnd3KeyTripleDES",  "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");
-        
 
-        put("Cipher.ECIES", "org.bouncycastle.jce.provider.JCEIESCipher$ECIES");
-        put("Cipher.BrokenECIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenECIES");
         put("Cipher.IES", "org.bouncycastle.jce.provider.JCEIESCipher$IES");
         put("Cipher.BrokenIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenIES");
 

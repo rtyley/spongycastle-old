@@ -32,7 +32,7 @@ import org.bouncycastle.jce.spec.IESParameterSpec;
 
 public class JCEIESCipher extends CipherSpi
 {
-    private IESEngine               cipher;
+    private IESEngine cipher;
     private int                     state = -1;
     private ByteArrayOutputStream   buffer = new ByteArrayOutputStream();
     private AlgorithmParameters     engineParam = null;
@@ -47,7 +47,7 @@ public class JCEIESCipher extends CipherSpi
                                     };
 
     public JCEIESCipher(
-        IESEngine   engine)
+        IESEngine engine)
     {
         cipher = engine;
     }
@@ -374,19 +374,7 @@ public class JCEIESCipher extends CipherSpi
                    new HMac(new SHA1Digest())));
         }
     }
-    
-    static public class ECIES
-        extends JCEIESCipher
-    {
-        public ECIES()
-        {
-            super(new IESEngine(
-                   new ECDHBasicAgreement(),
-                   new KDF2BytesGenerator(new SHA1Digest()),
-                   new HMac(new SHA1Digest())));
-        }
-    }
-    
+
     static public class IES
         extends JCEIESCipher
     {

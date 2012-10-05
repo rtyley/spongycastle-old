@@ -5,22 +5,26 @@ import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.BufferedBlockCipher;
+import org.bouncycastle.crypto.KeyEncoder;
 import org.bouncycastle.crypto.KeyGenerationParameters;
 import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.engines.IESEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
+import org.bouncycastle.crypto.generators.EphemeralKeyPairGenerator;
 import org.bouncycastle.crypto.generators.KDF2BytesGenerator;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.IESParameters;
 import org.bouncycastle.crypto.params.IESWithCipherParameters;
+import org.bouncycastle.crypto.parsers.ECIESPublicKeyParser;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
@@ -67,11 +71,11 @@ public class ECIESTest
         //
         // stream test
         //
-        IESEngine      i1 = new IESEngine(
+        IESEngine i1 = new IESEngine(
                                    new ECDHBasicAgreement(),
                                    new KDF2BytesGenerator(new SHA1Digest()),
                                    new HMac(new SHA1Digest()));
-        IESEngine      i2 = new IESEngine(
+        IESEngine i2 = new IESEngine(
                                    new ECDHBasicAgreement(),
                                    new KDF2BytesGenerator(new SHA1Digest()),
                                    new HMac(new SHA1Digest()));
@@ -139,17 +143,119 @@ public class ECIESTest
         }
     }
 
+    private void doEphemeralTest()
+        throws Exception
+    {
+        ECCurve.Fp curve = new ECCurve.Fp(
+            new BigInteger("6277101735386680763835789423207666416083908700390324961279"), // q
+            new BigInteger("fffffffffffffffffffffffffffffffefffffffffffffffc", 16), // a
+            new BigInteger("64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1", 16)); // b
+
+        ECDomainParameters params = new ECDomainParameters(
+                curve,
+                curve.decodePoint(Hex.decode("03188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012")), // G
+                new BigInteger("6277101735386680763835789423176059013767194773182842284081")); // n
+
+        ECPrivateKeyParameters priKey = new ECPrivateKeyParameters(
+            new BigInteger("651056770906015076056810763456358567190100156695615665659"), // d
+            params);
+
+        ECPublicKeyParameters pubKey = new ECPublicKeyParameters(
+            curve.decodePoint(Hex.decode("0262b12d60690cdcf330babab6e69763b471f994dd702d16a5")), // Q
+            params);
+
+        AsymmetricCipherKeyPair  p1 = new AsymmetricCipherKeyPair(pubKey, priKey);
+        AsymmetricCipherKeyPair  p2 = new AsymmetricCipherKeyPair(pubKey, priKey);
+
+        // Generate the ephemeral key pair
+        ECKeyPairGenerator gen = new ECKeyPairGenerator();
+        gen.init(new ECKeyGenerationParameters(params, new SecureRandom()));
+
+        EphemeralKeyPairGenerator ephKeyGen = new EphemeralKeyPairGenerator(gen, new KeyEncoder()
+        {
+            public byte[] getEncoded(AsymmetricKeyParameter keyParameter)
+            {
+                return ((ECPublicKeyParameters)keyParameter).getQ().getEncoded();
+            }
+        });
+
+        //
+        // stream test
+        //
+        IESEngine i1 = new IESEngine(
+                                   new ECDHBasicAgreement(),
+                                   new KDF2BytesGenerator(new SHA1Digest()),
+                                   new HMac(new SHA1Digest()));
+        IESEngine i2 = new IESEngine(
+                                   new ECDHBasicAgreement(),
+                                   new KDF2BytesGenerator(new SHA1Digest()),
+                                   new HMac(new SHA1Digest()));
+
+        byte[]         d = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+        byte[]         e = new byte[] { 8, 7, 6, 5, 4, 3, 2, 1 };
+        IESParameters  p = new IESParameters(d, e, 64);
+
+        i1.init(p2.getPublic(), p, ephKeyGen);
+        i2.init(p2.getPrivate(), p, new ECIESPublicKeyParser(params));
+
+        byte[] message = Hex.decode("1234567890abcdef");
+
+        byte[]   out1 = i1.processBlock(message, 0, message.length);
+
+        byte[]   out2 = i2.processBlock(out1, 0, out1.length);
+
+        if (!areEqual(out2, message))
+        {
+            fail("stream cipher test failed");
+        }
+
+        //
+        // twofish with CBC
+        //
+        BufferedBlockCipher c1 = new PaddedBufferedBlockCipher(
+                                    new CBCBlockCipher(new TwofishEngine()));
+        BufferedBlockCipher c2 = new PaddedBufferedBlockCipher(
+                                    new CBCBlockCipher(new TwofishEngine()));
+        i1 = new IESEngine(
+                       new ECDHBasicAgreement(),
+                       new KDF2BytesGenerator(new SHA1Digest()),
+                       new HMac(new SHA1Digest()),
+                       c1);
+        i2 = new IESEngine(
+                       new ECDHBasicAgreement(),
+                       new KDF2BytesGenerator(new SHA1Digest()),
+                       new HMac(new SHA1Digest()),
+                       c2);
+        d = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+        e = new byte[] { 8, 7, 6, 5, 4, 3, 2, 1 };
+        p = new IESWithCipherParameters(d, e, 64, 128);
+
+        i1.init(p2.getPublic(), p, ephKeyGen);
+        i2.init(p2.getPrivate(), p, new ECIESPublicKeyParser(params));
+
+        message = Hex.decode("1234567890abcdef");
+
+        out1 = i1.processBlock(message, 0, message.length);
+
+        out2 = i2.processBlock(out1, 0, out1.length);
+
+        if (!areEqual(out2, message))
+        {
+            fail("twofish cipher test failed");
+        }
+    }
+
     private void doTest(AsymmetricCipherKeyPair p1, AsymmetricCipherKeyPair p2)
         throws Exception
     {
         //
         // stream test
         //
-        IESEngine      i1 = new IESEngine(
+        IESEngine i1 = new IESEngine(
                                    new ECDHBasicAgreement(),
                                    new KDF2BytesGenerator(new SHA1Digest()),
                                    new HMac(new SHA1Digest()));
-        IESEngine      i2 = new IESEngine(
+        IESEngine i2 = new IESEngine(
                                    new ECDHBasicAgreement(),
                                    new KDF2BytesGenerator(new SHA1Digest()),
                                    new HMac(new SHA1Digest()));
@@ -231,6 +337,8 @@ public class ECIESTest
         AsymmetricCipherKeyPair p2 = eGen.generateKeyPair();
 
         doTest(p1, p2);
+
+        doEphemeralTest();
     }
 
     public static void main(
