@@ -1,14 +1,24 @@
 package org.bouncycastle.crypto.modes.gcm;
 
 import org.bouncycastle.crypto.util.Pack;
+import org.bouncycastle.util.Arrays;
 
 public class Tables64kGCMMultiplier
     implements GCMMultiplier
 {
     private final int[][][] M = new int[16][256][];
 
+    private byte[] H;
+
     public void init(byte[] H)
     {
+        if (Arrays.areEqual(this.H, H))
+        {
+            return;
+        }
+
+        this.H = Arrays.clone(H);
+
         M[0][0] = new int[4];
         M[0][128] = GCMUtil.asInts(H);
         for (int j = 64; j >= 1; j >>= 1)

@@ -141,7 +141,12 @@ public class GCMBlockCipher
 
         this.H = new byte[BLOCK_SIZE];
         cipher.processBlock(ZEROES, 0, H, 0);
-        multiplier.init(H);
+
+        // if keyParam is null we're reusing the last key and the multiplier doesn't need re-init
+        if (keyParam != null)
+        {
+            multiplier.init(H);
+        }
 
         this.initS = gHASH(A);
 
