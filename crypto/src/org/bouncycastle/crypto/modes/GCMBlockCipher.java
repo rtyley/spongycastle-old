@@ -20,7 +20,6 @@ public class GCMBlockCipher
     implements AEADBlockCipher
 {
     private static final int BLOCK_SIZE = 16;
-    private static final byte[] ZEROES = new byte[BLOCK_SIZE];
 
     // not final due to a compiler bug 
     private BlockCipher   cipher;
@@ -30,9 +29,8 @@ public class GCMBlockCipher
     private boolean             forEncryption;
     private int                 macSize;
     private byte[]              nonce;
-    private byte[]              A;
+    private byte[]              initialAssociatedText;
     private byte[]              H;
-    private byte[]              initS;
     private byte[]              J0;
 
     // These fields are modified during processing
@@ -42,6 +40,10 @@ public class GCMBlockCipher
     private byte[]      counter;
     private int         bufOff;
     private long        totalLength;
+    private boolean     cipherInitialized;
+    private byte[]      atBlock;
+    private int         atBlockPos;
+    private long        atLength;
 
     public GCMBlockCipher(BlockCipher c)
     {
@@ -82,14 +84,14 @@ public class GCMBlockCipher
         this.forEncryption = forEncryption;
         this.macBlock = null;
 
-        KeyParameter        keyParam;
+        KeyParameter keyParam;
 
         if (params instanceof AEADParameters)
         {
             AEADParameters param = (AEADParameters)params;
 
             nonce = param.getNonce();
-            A = param.getAssociatedText();
+            initialAssociatedText = param.getAssociatedText();
 
             int macSizeBits = param.getMacSize();
             if (macSizeBits < 96 || macSizeBits > 128 || macSizeBits % 8 != 0)
@@ -105,7 +107,7 @@ public class GCMBlockCipher
             ParametersWithIV param = (ParametersWithIV)params;
 
             nonce = param.getIV();
-            A = null;
+            initialAssociatedText  = null;
             macSize = 16;
             keyParam = (KeyParameter)param.getParameters();
         }
@@ -122,53 +124,50 @@ public class GCMBlockCipher
             throw new IllegalArgumentException("IV must be at least 1 byte");
         }
 
-        if (A == null)
-        {
-            // Avoid lots of null checks
-            A = new byte[0];
-        }
+        // TODO This should be configurable by init parameters
+        // (but must be 16 if nonce length not 12) (BLOCK_SIZE?)
+//        this.tagLength = 16;
 
         // Cipher always used in forward mode
         // if keyParam is null we're reusing the last key.
         if (keyParam != null)
         {
             cipher.init(true, keyParam);
-        }
 
-        // TODO This should be configurable by init parameters
-        // (but must be 16 if nonce length not 12) (BLOCK_SIZE?)
-//        this.tagLength = 16;
+            this.H = new byte[BLOCK_SIZE];
+            cipher.processBlock(H, 0, H, 0);
 
-        this.H = new byte[BLOCK_SIZE];
-        cipher.processBlock(ZEROES, 0, H, 0);
-
-        // if keyParam is null we're reusing the last key and the multiplier doesn't need re-init
-        if (keyParam != null)
-        {
+            // GCMMultiplier tables don't change unless the key changes (and are expensive to init)
             multiplier.init(H);
         }
 
-        this.initS = gHASH(A);
+        this.J0 = new byte[BLOCK_SIZE];
 
         if (nonce.length == 12)
         {
-            this.J0 = new byte[16];
             System.arraycopy(nonce, 0, J0, 0, nonce.length);
-            this.J0[15] = 0x01;
+            this.J0[BLOCK_SIZE - 1] = 0x01;
         }
         else
         {
-            this.J0 = gHASH(nonce);
-            byte[] X = new byte[16];
+            gHASH(J0, nonce, nonce.length);
+            byte[] X = new byte[BLOCK_SIZE];
             packLength((long)nonce.length * 8, X, 8);
-            xor(this.J0, X);
-            multiplier.multiplyH(this.J0);
+            gHASHBlock(J0, X);
         }
 
-        this.S = Arrays.clone(initS);
+        this.S = new byte[BLOCK_SIZE];
+        this.atBlock = new byte[BLOCK_SIZE];
+        this.atBlockPos = 0;
+        this.atLength = 0;
         this.counter = Arrays.clone(J0);
         this.bufOff = 0;
         this.totalLength = 0;
+
+        if (initialAssociatedText != null)
+        {
+            processAADBytes(initialAssociatedText, 0, initialAssociatedText.length);
+        }
     }
 
     public byte[] getMac()
@@ -178,7 +177,7 @@ public class GCMBlockCipher
 
     public int getOutputSize(int len)
     {
-	int totalData = len + bufOff;
+        int totalData = len + bufOff;
 
         if (forEncryption)
         {
@@ -190,44 +189,126 @@ public class GCMBlockCipher
 
     public int getUpdateOutputSize(int len)
     {
-	int totalData = len + bufOff;
-	if (!forEncryption)
-	{
-	    if (totalData < macSize)
-	    {
-		return 0;
-	    }
-	    totalData -= macSize;
-	}
+        int totalData = len + bufOff;
+        if (!forEncryption)
+        {
+            if (totalData < macSize)
+            {
+                return 0;
+            }
+            totalData -= macSize;
+        }
         return totalData - totalData % BLOCK_SIZE;
+    }
+
+    public void processAADByte(byte in)
+    {
+        /*
+         *  TODO Lift this restriction by tracking separate hashes for the associated data and encrypted data
+         *  (see GCMReorderTest for example code on how to calculate the final hash from the separate ones). 
+         */
+        if (cipherInitialized)
+        {
+            throw new IllegalStateException("AAD data cannot be added after encryption/decription processing has begun.");
+        }
+
+        atBlock[atBlockPos] = in;
+        if (++atBlockPos == BLOCK_SIZE)
+        {
+            // Hash each block as it fills
+            gHASHBlock(S, atBlock);
+            atBlockPos = 0;
+            atLength += BLOCK_SIZE;
+        }
+    }
+
+    public void processAADBytes(byte[] in, int inOff, int len)
+    {
+        /*
+         *  TODO Lift this restriction by tracking separate hashes for the associated data and encrypted data
+         *  (see GCMReorderTest for example code on how to calculate the final hash from the separate ones). 
+         */
+        if (cipherInitialized)
+        {
+            throw new IllegalStateException("AAD data cannot be added after encryption/decription processing has begun.");
+        }
+
+        for (int i = 0; i < len; ++i)
+        {
+            atBlock[atBlockPos] = in[inOff + i];
+            if (++atBlockPos == BLOCK_SIZE)
+            {
+                // Hash each block as it fills
+                gHASHBlock(S, atBlock);
+                atBlockPos = 0;
+                atLength += BLOCK_SIZE;
+            }
+        }
+    }
+
+    private void initCipher()
+    {
+        if (cipherInitialized)
+        {
+            return;
+        }
+
+        cipherInitialized = true;
+
+        // Finish hash for partial AD block
+        if (atBlockPos > 0)
+        {
+            gHASHPartial(S, atBlock, 0, atBlockPos);
+            atLength += atBlockPos;
+        }
     }
 
     public int processByte(byte in, byte[] out, int outOff)
         throws DataLengthException
     {
-        return process(in, out, outOff);
+        initCipher();
+
+        bufBlock[bufOff] = in;
+        if (++bufOff == bufBlock.length)
+        {
+            gCTRBlock(bufBlock, out, outOff);
+            if (forEncryption)
+            {
+                bufOff = 0;
+            }
+            else
+            {
+                System.arraycopy(bufBlock, BLOCK_SIZE, bufBlock, 0, macSize);
+                bufOff = macSize;
+            }
+            return BLOCK_SIZE;
+        }
+
+        return 0;
     }
 
     public int processBytes(byte[] in, int inOff, int len, byte[] out, int outOff)
         throws DataLengthException
     {
+        initCipher();
+
         int resultLen = 0;
 
-        for (int i = 0; i != len; i++)
+        for (int i = 0; i < len; ++i)
         {
-//            resultLen += process(in[inOff + i], out, outOff + resultLen);
-            bufBlock[bufOff++] = in[inOff + i];
-
-            if (bufOff == bufBlock.length)
+            bufBlock[bufOff] = in[inOff + i];
+            if (++bufOff == bufBlock.length)
             {
-                gCTRBlock(bufBlock, BLOCK_SIZE, out, outOff + resultLen);
-                if (!forEncryption)
+                gCTRBlock(bufBlock, out, outOff + resultLen);
+                if (forEncryption)
+                {
+                    bufOff = 0;
+                }
+                else
                 {
                     System.arraycopy(bufBlock, BLOCK_SIZE, bufBlock, 0, macSize);
+                    bufOff = macSize;
                 }
-//              bufOff = 0;
-                bufOff = bufBlock.length - BLOCK_SIZE;
-//              return bufBlock.Length;
                 resultLen += BLOCK_SIZE;
             }
         }
@@ -235,30 +316,11 @@ public class GCMBlockCipher
         return resultLen;
     }
 
-    private int process(byte in, byte[] out, int outOff)
-        throws DataLengthException
-    {
-        bufBlock[bufOff++] = in;
-
-        if (bufOff == bufBlock.length)
-        {
-            gCTRBlock(bufBlock, BLOCK_SIZE, out, outOff);
-            if (!forEncryption)
-            {
-                System.arraycopy(bufBlock, BLOCK_SIZE, bufBlock, 0, macSize);
-            }
-//            bufOff = 0;
-            bufOff = bufBlock.length - BLOCK_SIZE;
-//            return bufBlock.length;
-            return BLOCK_SIZE;
-        }
-
-        return 0;
-    }
-
     public int doFinal(byte[] out, int outOff)
         throws IllegalStateException, InvalidCipherTextException
     {
+        initCipher();
+
         int extra = bufOff;
         if (!forEncryption)
         {
@@ -271,18 +333,15 @@ public class GCMBlockCipher
 
         if (extra > 0)
         {
-            byte[] tmp = new byte[BLOCK_SIZE];
-            System.arraycopy(bufBlock, 0, tmp, 0, extra);
-            gCTRBlock(tmp, extra, out, outOff);
+            gCTRPartial(bufBlock, 0, extra, out, outOff);
         }
 
         // Final gHASH
-        byte[] X = new byte[16];
-        packLength((long)A.length * 8, X, 0);
+        byte[] X = new byte[BLOCK_SIZE];
+        packLength(atLength * 8, X, 0);
         packLength(totalLength * 8, X, 8);
 
-        xor(S, X);
-        multiplier.multiplyH(S);
+        gHASHBlock(S, X);
 
         // TODO Fix this if tagLength becomes configurable
         // T = MSBt(GCTRk(J0,S))
@@ -326,7 +385,12 @@ public class GCMBlockCipher
     private void reset(
         boolean clearMac)
     {
-        S = Arrays.clone(initS);
+        cipher.reset();
+
+        S = new byte[BLOCK_SIZE];
+        atBlock = new byte[BLOCK_SIZE];
+        atBlockPos = 0;
+        atLength = 0;
         counter = Arrays.clone(J0);
         bufOff = 0;
         totalLength = 0;
@@ -341,12 +405,61 @@ public class GCMBlockCipher
             macBlock = null;
         }
 
-        cipher.reset();
+        cipherInitialized = false;
+
+        if (initialAssociatedText != null)
+        {
+            processAADBytes(initialAssociatedText, 0, initialAssociatedText.length);
+        }
     }
 
-    private void gCTRBlock(byte[] buf, int bufCount, byte[] out, int outOff)
+    private void gCTRBlock(byte[] block, byte[] out, int outOff)
     {
-//        inc(counter);
+        byte[] tmp = getNextCounterBlock();
+
+        xor(tmp, block);
+        System.arraycopy(tmp, 0, out, outOff, BLOCK_SIZE);
+
+        gHASHBlock(S, forEncryption ? tmp : block);
+
+        totalLength += BLOCK_SIZE;
+    }
+
+    private void gCTRPartial(byte[] buf, int off, int len, byte[] out, int outOff)
+    {
+        byte[] tmp = getNextCounterBlock();
+
+        xor(tmp, buf, off, len);
+        System.arraycopy(tmp, 0, out, outOff, len);
+
+        gHASHPartial(S, forEncryption ? tmp : buf, 0, len);
+
+        totalLength += len;
+    }
+
+    private void gHASH(byte[] Y, byte[] b, int len)
+    {
+        for (int pos = 0; pos < len; pos += BLOCK_SIZE)
+        {
+            int num = Math.min(len - pos, BLOCK_SIZE);
+            gHASHPartial(Y, b, pos, num);
+        }
+    }
+
+    private void gHASHBlock(byte[] Y, byte[] b)
+    {
+        xor(Y, b);
+        multiplier.multiplyH(Y);
+    }
+
+    private void gHASHPartial(byte[] Y, byte[] b, int off, int len)
+    {
+        xor(Y, b, off, len);
+        multiplier.multiplyH(Y);
+    }
+
+    private byte[] getNextCounterBlock()
+    {
         for (int i = 15; i >= 12; --i)
         {
             byte b = (byte)((counter[i] + 1) & 0xff);
@@ -360,72 +473,22 @@ public class GCMBlockCipher
 
         byte[] tmp = new byte[BLOCK_SIZE];
         cipher.processBlock(counter, 0, tmp, 0);
-
-        byte[] hashBytes;
-        if (forEncryption)
-        {
-            System.arraycopy(ZEROES, bufCount, tmp, bufCount, BLOCK_SIZE - bufCount);
-            hashBytes = tmp;
-        }
-        else
-        {
-            hashBytes = buf;
-        }
-
-        for (int i = bufCount - 1; i >= 0; --i)
-        {
-            tmp[i] ^= buf[i];
-            out[outOff + i] = tmp[i];
-        }
-
-//        gHASHBlock(hashBytes);
-        xor(S, hashBytes);
-        multiplier.multiplyH(S);
-
-        totalLength += bufCount;
+        return tmp;
     }
-
-    private byte[] gHASH(byte[] b)
-    {
-        byte[] Y = new byte[16];
-
-        for (int pos = 0; pos < b.length; pos += 16)
-        {
-            byte[] X = new byte[16];
-            int num = Math.min(b.length - pos, 16);
-            System.arraycopy(b, pos, X, 0, num);
-            xor(Y, X);
-            multiplier.multiplyH(Y);
-        }
-
-        return Y;
-    }
-
-//    private void gHASHBlock(byte[] block)
-//    {
-//        xor(S, block);
-//        multiplier.multiplyH(S);
-//    }
-
-//    private static void inc(byte[] block)
-//    {
-//        for (int i = 15; i >= 12; --i)
-//        {
-//            byte b = (byte)((block[i] + 1) & 0xff);
-//            block[i] = b;
-//
-//            if (b != 0)
-//            {
-//                break;
-//            }
-//        }
-//    }
 
     private static void xor(byte[] block, byte[] val)
     {
         for (int i = 15; i >= 0; --i)
         {
             block[i] ^= val[i];
+        }
+    }
+
+    private static void xor(byte[] block, byte[] val, int off, int len)
+    {
+        while (--len >= 0)
+        {
+            block[len] ^= val[off + len];
         }
     }
 

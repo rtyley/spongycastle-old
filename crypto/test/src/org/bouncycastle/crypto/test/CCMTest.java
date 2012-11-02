@@ -5,7 +5,6 @@ import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.modes.CCMBlockCipher;
 import org.bouncycastle.crypto.params.AEADParameters;
-import org.bouncycastle.crypto.params.CCMParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.Strings;
@@ -87,7 +86,7 @@ public class CCMTest
         
         try
         {
-            ccm.init(false, new CCMParameters(new KeyParameter(K1), 32, N2, A2));
+            ccm.init(false, new AEADParameters(new KeyParameter(K1), 32, N2, A2));
             
             ccm.processPacket(C2, 0, C2.length);
             
@@ -133,9 +132,41 @@ public class CCMTest
         byte[] c)
         throws InvalidCipherTextException
     {
-        ccm.init(true, new AEADParameters(new KeyParameter(k), macSize, n, a));
+        byte[] fa = new byte[a.length / 2];
+        byte[] la = new byte[a.length - (a.length / 2)];
+        System.arraycopy(a, 0, fa, 0, fa.length);
+        System.arraycopy(a, fa.length, la, 0, la.length);
+
+        checkVectors(count, ccm, "all initial associated data", k, macSize, n, a, null, p, t, c);
+        checkVectors(count, ccm, "subsequent associated data", k, macSize, n, null, a, p, t, c);
+        checkVectors(count, ccm, "split associated data", k, macSize, n, fa, la, p, t, c);
+//      checkVectors(count, ccm, "reuse key", null, macSize, n, fa, la, p, t, c);
+    }
+
+    private void checkVectors(
+        int count,
+        CCMBlockCipher ccm,
+        String additionalDataType,
+        byte[] k,
+        int macSize,
+        byte[] n,
+        byte[] a,
+        byte[] sa,
+        byte[] p,
+        byte[] t,
+        byte[] c)
+        throws InvalidCipherTextException
+    {
+        KeyParameter keyParam = (k == null) ? null : new KeyParameter(k);
+
+        ccm.init(true, new AEADParameters(keyParam, macSize, n, a));
 
         byte[] enc = new byte[c.length];
+
+        if (sa != null)
+        {
+            ccm.processAADBytes(sa, 0, sa.length);
+        }
 
         int len = ccm.processBytes(p, 0, p.length, enc, 0);
 
@@ -143,12 +174,17 @@ public class CCMTest
 
         if (!areEqual(c, enc))
         {
-            fail("encrypted stream fails to match in test " + count);
+            fail("encrypted stream fails to match in test " + count + " with " + additionalDataType);
         }
 
-        ccm.init(false, new AEADParameters(new KeyParameter(k), macSize, n, a));
+        ccm.init(false, new AEADParameters(keyParam, macSize, n, a));
 
         byte[] tmp = new byte[enc.length];
+
+        if (sa != null)
+        {
+            ccm.processAADBytes(sa, 0, sa.length);
+        }
 
         len = ccm.processBytes(enc, 0, enc.length, tmp, 0);
 
@@ -160,12 +196,12 @@ public class CCMTest
 
         if (!areEqual(p, dec))
         {
-            fail("decrypted stream fails to match in test " + count);
+            fail("decrypted stream fails to match in test " + count + " with " + additionalDataType);
         }
 
         if (!areEqual(t, ccm.getMac()))
         {
-            fail("MAC fails to match in test " + count);
+            fail("MAC fails to match in test " + count + " with " + additionalDataType);
         }
     }
 

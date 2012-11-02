@@ -328,30 +328,61 @@ public class GCMTest
         byte[] T = new byte[macLength];
         System.arraycopy(t, 0, T, 0, T.length);
 
-        AEADParameters parameters = new AEADParameters(new KeyParameter(K), T.length * 8, IV, A);
-
         // Default multiplier
-        runTestCase(null, null, parameters, testName, P, C, T);
+        runTestCase(null, null, testName, K, IV, A, P, C, T);
 
-        runTestCase(new BasicGCMMultiplier(), new BasicGCMMultiplier(), parameters, testName, P, C, T);
-        runTestCase(new Tables8kGCMMultiplier(), new Tables8kGCMMultiplier(), parameters, testName, P, C, T);
-        runTestCase(new Tables64kGCMMultiplier(), new Tables64kGCMMultiplier(), parameters, testName, P, C, T);
+        runTestCase(new BasicGCMMultiplier(), new BasicGCMMultiplier(), testName, K, IV, A, P, C, T);
+        runTestCase(new Tables8kGCMMultiplier(), new Tables8kGCMMultiplier(), testName, K, IV, A, P, C, T);
+        runTestCase(new Tables64kGCMMultiplier(), new Tables64kGCMMultiplier(), testName, K, IV, A, P, C, T);
     }
-
+    
     private void runTestCase(
         GCMMultiplier   encM,
         GCMMultiplier   decM,
-        AEADParameters  parameters,
         String          testName,
+        byte[]          K,
+        byte[]          IV,
+        byte[]          A,
         byte[]          P,
         byte[]          C,
         byte[]          T)
         throws InvalidCipherTextException
     {
+        byte[] fa = new byte[A.length / 2];
+        byte[] la = new byte[A.length - (A.length / 2)];
+        System.arraycopy(A, 0, fa, 0, fa.length);
+        System.arraycopy(A, fa.length, la, 0, la.length);
+
+        runTestCase(encM, decM, testName + " all initial associated data", K, IV, A, null, P, C, T);
+        runTestCase(encM, decM, testName + " all subsequent associated data", K, IV, null, A, P, C, T);
+        runTestCase(encM, decM, testName + " split associated data", K, IV, fa, la, P, C, T);
+    }
+
+    private void runTestCase(
+        GCMMultiplier   encM,
+        GCMMultiplier   decM,
+        String          testName,
+        byte[]          K,
+        byte[]          IV,
+        byte[]          A,
+        byte[]          SA,
+        byte[]          P,
+        byte[]          C,
+        byte[]          T)
+        throws InvalidCipherTextException
+    {
+        AEADParameters parameters = new AEADParameters(new KeyParameter(K), T.length * 8, IV, A);
         GCMBlockCipher encCipher = initCipher(encM, true, parameters);
         GCMBlockCipher decCipher = initCipher(decM, false, parameters);
-        checkTestCase(encCipher, decCipher, testName, P, C, T);
-        checkTestCase(encCipher, decCipher, testName + " (reused)", P, C, T);
+        checkTestCase(encCipher, decCipher, testName, SA, P, C, T);
+        checkTestCase(encCipher, decCipher, testName + " (reused)", SA, P, C, T);
+
+        // Key reuse
+        AEADParameters keyReuseParams = new AEADParameters(null, parameters.getMacSize(), parameters.getNonce(), parameters.getAssociatedText());
+        encCipher.init(true, keyReuseParams);
+        decCipher.init(false, keyReuseParams);
+        checkTestCase(encCipher, decCipher, testName + " (key reuse)", SA, P, C, T);
+        checkTestCase(encCipher, decCipher, testName + " (key reuse)", SA, P, C, T);
     }
 
     private GCMBlockCipher initCipher(GCMMultiplier m, boolean forEncryption, AEADParameters parameters)
@@ -365,12 +396,17 @@ public class GCMTest
         GCMBlockCipher  encCipher,
         GCMBlockCipher  decCipher,
         String          testName,
+        byte[]          SA,
         byte[]          P,
         byte[]          C,
         byte[]          T)
         throws InvalidCipherTextException
     {
         byte[] enc = new byte[encCipher.getOutputSize(P.length)];
+        if (SA != null)
+        {
+            encCipher.processAADBytes(SA, 0, SA.length);
+        }
         int len = encCipher.processBytes(P, 0, P.length, enc, 0);
         len += encCipher.doFinal(enc, len);
 
@@ -403,6 +439,10 @@ public class GCMTest
         }
 
         byte[] dec = new byte[decCipher.getOutputSize(enc.length)];
+        if (SA != null)
+        {
+            decCipher.processAADBytes(SA, 0, SA.length);
+        }
         len = decCipher.processBytes(enc, 0, enc.length, dec, 0);
         len += decCipher.doFinal(dec, len);
         mac = decCipher.getMac();

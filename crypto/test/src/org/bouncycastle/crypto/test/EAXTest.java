@@ -7,7 +7,6 @@ import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.modes.AEADBlockCipher;
 import org.bouncycastle.crypto.modes.EAXBlockCipher;
 import org.bouncycastle.crypto.params.AEADParameters;
-import org.bouncycastle.crypto.params.CCMParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.Strings;
@@ -127,7 +126,7 @@ public class EAXTest
 
         try
         {
-            eax.init(false, new CCMParameters(new KeyParameter(K1), 32, N2, A2));
+            eax.init(false, new AEADParameters(new KeyParameter(K1), 32, N2, A2));
 
             byte[] enc = new byte[C2.length]; 
             int len = eax.processBytes(C2, 0, C2.length, enc, 0);
@@ -166,6 +165,29 @@ public class EAXTest
         byte[] c)
         throws InvalidCipherTextException
     {
+        byte[] fa = new byte[a.length / 2];
+        byte[] la = new byte[a.length - (a.length / 2)];
+        System.arraycopy(a, 0, fa, 0, fa.length);
+        System.arraycopy(a, fa.length, la, 0, la.length);
+
+        checkVectors(count, "all initial associated data", k, macSize, n, a, null, p, t, c);
+        checkVectors(count, "subsequent associated data", k, macSize, n, null, a, p, t, c);
+        checkVectors(count, "split associated data", k, macSize, n, fa, la, p, t, c);
+    }
+
+    private void checkVectors(
+        int count,
+        String additionalDataType,
+        byte[] k,
+        int macSize,
+        byte[] n,
+        byte[] a,
+        byte[] sa,
+        byte[] p,
+        byte[] t,
+        byte[] c)
+        throws InvalidCipherTextException
+    {
         EAXBlockCipher encEax = new EAXBlockCipher(new AESFastEngine());
         EAXBlockCipher decEax = new EAXBlockCipher(new AESFastEngine());
 
@@ -173,22 +195,24 @@ public class EAXTest
         encEax.init(true, parameters);
         decEax.init(false, parameters);
 
-        runCheckVectors(count, encEax, decEax, p, t, c);
-        runCheckVectors(count, encEax, decEax, p, t, c);
+        runCheckVectors(count, encEax, decEax, additionalDataType, sa, p, t, c);
+        runCheckVectors(count, encEax, decEax, additionalDataType, sa, p, t, c);
 
         // key reuse test
         parameters = new AEADParameters(null, macSize, n, a);
         encEax.init(true, parameters);
         decEax.init(false, parameters);
 
-        runCheckVectors(count, encEax, decEax, p, t, c);
-        runCheckVectors(count, encEax, decEax, p, t, c);
+        runCheckVectors(count, encEax, decEax, additionalDataType, sa, p, t, c);
+        runCheckVectors(count, encEax, decEax, additionalDataType, sa, p, t, c);
     }
 
     private void runCheckVectors(
         int count,
         EAXBlockCipher encEax,
         EAXBlockCipher decEax,
+        String additionalDataType,
+        byte[] sa,
         byte[] p,
         byte[] t,
         byte[] c)
@@ -196,16 +220,26 @@ public class EAXTest
     {
         byte[] enc = new byte[c.length];
 
+        if (sa != null)
+        {
+            encEax.processAADBytes(sa, 0, sa.length);
+        }
+
         int len = encEax.processBytes(p, 0, p.length, enc, 0);
 
         len += encEax.doFinal(enc, len);
 
         if (!areEqual(c, enc))
         {
-            fail("encrypted stream fails to match in test " + count);
+            fail("encrypted stream fails to match in test " + count + " with " + additionalDataType);
         }
 
         byte[] tmp = new byte[enc.length];
+
+        if (sa != null)
+        {
+            decEax.processAADBytes(sa, 0, sa.length);
+        }
 
         len = decEax.processBytes(enc, 0, enc.length, tmp, 0);
 
@@ -217,12 +251,12 @@ public class EAXTest
 
         if (!areEqual(p, dec))
         {
-            fail("decrypted stream fails to match in test " + count);
+            fail("decrypted stream fails to match in test " + count + " with " + additionalDataType);
         }
 
         if (!areEqual(t, decEax.getMac()))
         {
-            fail("MAC fails to match in test " + count);
+            fail("MAC fails to match in test " + count + " with " + additionalDataType);
         }
     }
 

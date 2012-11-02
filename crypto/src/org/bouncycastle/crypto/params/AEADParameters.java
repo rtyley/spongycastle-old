@@ -16,7 +16,19 @@ public class AEADParameters
      * @param key key to be used by underlying cipher
      * @param macSize macSize in bits
      * @param nonce nonce to be used
-     * @param associatedText associated text, if any
+     */
+   public AEADParameters(KeyParameter key, int macSize, byte[] nonce)
+    {
+       this(key, macSize, nonce, null);
+    }
+
+    /**
+     * Base constructor.
+     *
+     * @param key key to be used by underlying cipher
+     * @param macSize macSize in bits
+     * @param nonce nonce to be used
+     * @param associatedText initial associated text, if any
      */
     public AEADParameters(KeyParameter key, int macSize, byte[] nonce, byte[] associatedText)
     {

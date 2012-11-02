@@ -1,5 +1,8 @@
 package org.bouncycastle.crypto.params;
 
+/**
+ * @deprecated use AEADParameters
+ */
 public class CCMParameters
     extends AEADParameters
 {
