@@ -19,4 +19,9 @@ public interface PQCObjectIdentifiers
     public static final ASN1ObjectIdentifier gmssWithSha256 = gmss.branch("3");
     public static final ASN1ObjectIdentifier gmssWithSha384 = gmss.branch("4");
     public static final ASN1ObjectIdentifier gmssWithSha512 = gmss.branch("5");
+
+    public static final ASN1ObjectIdentifier mcEliece = new ASN1ObjectIdentifier("1.3.6.1.4.1.8301.3.1.3.4.1");
+
+    public static final ASN1ObjectIdentifier mcElieceCca2 = new ASN1ObjectIdentifier("1.3.6.1.4.1.8301.3.1.3.4.2");
+
 }

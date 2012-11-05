@@ -115,7 +115,6 @@ public class ECIESTest
     	
         byte[] message = Hex.decode("0102030405060708090a0b0c0d0e0f10111213141516");
         byte[] out1, out2;
-   
 
         // Generate static key pair
         KeyPair     KeyPair = g.generateKeyPair();

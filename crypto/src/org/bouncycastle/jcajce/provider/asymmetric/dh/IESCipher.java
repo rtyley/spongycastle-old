@@ -1,4 +1,4 @@
-package org.bouncycastle.jcajce.provider.asymmetric.ec;
+package org.bouncycastle.jcajce.provider.asymmetric.dh;
 
 import java.io.ByteArrayOutputStream;
 import java.security.AlgorithmParameters;
@@ -17,31 +17,31 @@ import javax.crypto.CipherSpi;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
+import javax.crypto.interfaces.DHKey;
+import javax.crypto.interfaces.DHPrivateKey;
+import javax.crypto.interfaces.DHPublicKey;
 
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.KeyEncoder;
-import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
+import org.bouncycastle.crypto.agreement.DHBasicAgreement;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.DESedeEngine;
 import org.bouncycastle.crypto.engines.IESEngine;
-import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
+import org.bouncycastle.crypto.generators.DHKeyPairGenerator;
 import org.bouncycastle.crypto.generators.EphemeralKeyPairGenerator;
 import org.bouncycastle.crypto.generators.KDF2BytesGenerator;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.params.ECDomainParameters;
-import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
-import org.bouncycastle.crypto.params.ECKeyParameters;
-import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
+import org.bouncycastle.crypto.params.DHKeyParameters;
+import org.bouncycastle.crypto.params.DHParameters;
+import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.IESParameters;
 import org.bouncycastle.crypto.params.IESWithCipherParameters;
-import org.bouncycastle.crypto.parsers.ECIESPublicKeyParser;
+import org.bouncycastle.crypto.parsers.DHIESPublicKeyParser;
 import org.bouncycastle.jcajce.provider.asymmetric.util.IESUtil;
-import org.bouncycastle.jce.interfaces.ECKey;
-import org.bouncycastle.jce.interfaces.ECPrivateKey;
-import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.IESParameterSpec;
 import org.bouncycastle.util.Strings;
@@ -50,14 +50,14 @@ import org.bouncycastle.util.Strings;
 public class IESCipher
     extends CipherSpi
 {
-	private IESEngine engine;
+	private IESEngine               engine;
 	private int                     state = -1;
 	private ByteArrayOutputStream   buffer = new ByteArrayOutputStream();
 	private AlgorithmParameters     engineParam = null;  
-	private IESParameterSpec        engineSpec = null;
+	private IESParameterSpec        engineSpec = null;  	
 	private AsymmetricKeyParameter	key;
-	private SecureRandom			random;
-	private boolean                 dhaesMode = false;
+	private SecureRandom			random;				
+    private boolean                 dhaesMode = false;
 
 	public IESCipher(IESEngine engine)
 	{
@@ -80,13 +80,13 @@ public class IESCipher
 
 	public int engineGetKeySize(Key key) 
 	{
-		if (key instanceof ECKey)
+		if (key instanceof DHKey)
 		{
-			return ((ECKey) key).getParameters().getCurve().getFieldSize();
+			return ((DHKey) key).getParams().getP().bitLength();
 		}
 		else
 		{
-			throw new IllegalArgumentException("not an EC key");
+			throw new IllegalArgumentException("not a DH key");
 		}
 	}
 
@@ -95,7 +95,6 @@ public class IESCipher
 	{
 		return null;
 	}
-
 
 	public AlgorithmParameters engineGetParameters() 
 	{
@@ -114,25 +113,24 @@ public class IESCipher
 	}
 
 
-	public void engineSetMode(String mode) 
-			throws NoSuchAlgorithmException 
-	{
-		String modeName = Strings.toUpperCase(mode);
+    public void engineSetMode(String mode)
+   	    throws NoSuchAlgorithmException
+   	{
+   		String modeName = Strings.toUpperCase(mode);
 
-		if (modeName.equals("NONE"))
-		{
+   		if (modeName.equals("NONE"))
+   		{
             dhaesMode = false;
-		}
-		else if (modeName.equals("DHAES"))
-		{
-			dhaesMode = true;
-		}
-		else
-		{
-			throw new IllegalArgumentException("can't support mode " + mode);
-		}
-	}
-
+   		}
+   		else if (modeName.equals("DHAES"))
+   		{
+   			dhaesMode = true;
+   		}
+   		else
+   		{
+   			throw new IllegalArgumentException("can't support mode " + mode);
+   		}
+   	}
 
 	public int engineGetOutputSize(int inputLen)    
 	{	
@@ -142,7 +140,7 @@ public class IESCipher
 
 		if (key != null)
 		{
-			len2 = 1 + 2*(((ECKey) key).getParameters().getCurve().getFieldSize()+7)/8;
+			len2 = ((DHKey) key).getParams().getP().bitLength()/8+1;
 		}
 		else
 		{
@@ -162,9 +160,9 @@ public class IESCipher
 			len3 = engine.getCipher().getOutputSize(inputLen - len1 -len2);	
 		}
 		else
-        {
+		{
 			throw new IllegalStateException("cipher not initialised");
-        }
+		}
 
 		if (state == Cipher.ENCRYPT_MODE || state == Cipher.WRAP_MODE)
 		{
@@ -176,34 +174,33 @@ public class IESCipher
 		}
 		else
 		{
-			throw new IllegalStateException("cipher not initialised");
+			throw new IllegalStateException("IESCipher not initialised");
 		}
 
 	}
 
-	public void engineSetPadding(String padding)
-			throws NoSuchPaddingException
-	{
-        String paddingName = Strings.toUpperCase(padding);
+    public void engineSetPadding(String padding)
+   			throws NoSuchPaddingException
+   	{
+           String paddingName = Strings.toUpperCase(padding);
 
-        // TDOD: make this meaningful...
-        if (paddingName.equals("NOPADDING"))
-        {
+           // TDOD: make this meaningful...
+           if (paddingName.equals("NOPADDING"))
+           {
 
-        }
-        else if (paddingName.equals("PKCS5PADDING") || paddingName.equals("PKCS7PADDING"))
-        {
+           }
+           else if (paddingName.equals("PKCS5PADDING") || paddingName.equals("PKCS7PADDING"))
+           {
 
-        }
-        else
-        {
-            throw new NoSuchPaddingException("padding not available with IESCipher");
-        }
-	}
-
+           }
+           else
+           {
+               throw new NoSuchPaddingException("padding not available with IESCipher");
+           }
+   	}
 
 	// Initialisation methods
-
+	
 	public void engineInit(
 			int						opmode,
 			Key						key,
@@ -225,22 +222,21 @@ public class IESCipher
 
 		engineParam = params;    
 		engineInit(opmode, key, paramSpec, random);
-
 	}
 
-
+	
 	public void engineInit(
 			int						opmode,
-			Key						key,
+			Key		       			key,
 			AlgorithmParameterSpec	engineSpec,
 			SecureRandom 			random)
 					throws InvalidAlgorithmParameterException, InvalidKeyException
 	{
 		// Use default parameters (including cipher key size) if none are specified
-        if (engineSpec == null)
-        {
+		if (engineSpec == null)
+		{
             this.engineSpec = IESUtil.guessParameterSpec(engine);
-        }
+		}
 		else if (engineSpec instanceof IESParameterSpec)
 		{
 			this.engineSpec = (IESParameterSpec)engineSpec;
@@ -253,31 +249,30 @@ public class IESCipher
 		// Parse the recipient's key
 		if (opmode == Cipher.ENCRYPT_MODE || opmode == Cipher.WRAP_MODE)
 		{
-			if (key instanceof ECPublicKey)
+			if (key instanceof DHPublicKey)
 			{
-				this.key = ECUtil.generatePublicKeyParameter((PublicKey) key);
+				this.key = DHUtil.generatePublicKeyParameter((PublicKey) key);
 			}
 			else
 			{
-				throw new InvalidKeyException("must be passed recipient's public EC key for encryption");
+				throw new InvalidKeyException("must be passed recipient's public DH key for encryption");
 			}
 		}
 		else if (opmode == Cipher.DECRYPT_MODE || opmode == Cipher.UNWRAP_MODE)
 		{
-			if (key instanceof ECPrivateKey)
+			if (key instanceof DHPrivateKey)
 			{
-				this.key = ECUtil.generatePrivateKeyParameter((PrivateKey) key);
+				this.key = DHUtil.generatePrivateKeyParameter((PrivateKey) key);
 			}
 			else
 			{
-				throw new InvalidKeyException("must be passed recipient's private EC key for decryption");
+				throw new InvalidKeyException("must be passed recipient's private DH key for decryption");
 			}
 		}
 		else
 		{
 			throw new InvalidKeyException("must be passed EC key");   
 		}
-
 
 		this.random = random;
 		this.state = opmode;
@@ -303,9 +298,9 @@ public class IESCipher
 
 	}
 
-
-	// Update methods - buffer the input
 	
+	// Update methods - buffer the input
+
 	public byte[] engineUpdate(
 			byte[]  input,
 			int     inputOffset,
@@ -334,14 +329,14 @@ public class IESCipher
 			byte[]  input,
 			int     inputOffset,
 			int     inputLen) 
-	throws IllegalBlockSizeException, BadPaddingException
+					throws IllegalBlockSizeException, BadPaddingException
 	{
 		if (inputLen != 0)
 		{
 			buffer.write(input, inputOffset, inputLen);
 		}
 
-		final byte[] in = buffer.toByteArray();
+		byte[] in = buffer.toByteArray();
 		buffer.reset();
 
 		// Convert parameters for use in IESEngine
@@ -350,21 +345,33 @@ public class IESCipher
 				engineSpec.getMacKeySize(),
 				engineSpec.getCipherKeySize());
 
-		final ECDomainParameters ecParams = ((ECKeyParameters)key).getParameters();
+		DHParameters dhParams = ((DHKeyParameters) key).getParameters();
 
-		final byte[] V;
+		byte[] V;
 
 		if (state == Cipher.ENCRYPT_MODE || state == Cipher.WRAP_MODE)
 		{
-			// Generate the ephemeral key pair
-			ECKeyPairGenerator gen = new ECKeyPairGenerator();
-			gen.init(new ECKeyGenerationParameters(ecParams,random));
+            // Generate the ephemeral key pair
+            DHKeyPairGenerator gen = new DHKeyPairGenerator();
+			gen.init(new DHKeyGenerationParameters(random, dhParams));
 
             EphemeralKeyPairGenerator kGen = new EphemeralKeyPairGenerator(gen, new KeyEncoder()
             {
                 public byte[] getEncoded(AsymmetricKeyParameter keyParameter)
                 {
-                    return ((ECPublicKeyParameters)keyParameter).getQ().getEncoded();
+                    byte[] V = new byte[((DHKeyParameters)keyParameter).getParameters().getP().bitLength()/8 + 1];
+                    byte[] Vtmp = ((DHPublicKeyParameters)keyParameter).getY().toByteArray();
+
+                    if (Vtmp.length > V.length)
+                    {
+                        throw new IllegalArgumentException("Senders's public key longer than expected.");
+                    }
+                    else
+                    {
+                        System.arraycopy(Vtmp, 0, V, V.length - Vtmp.length, Vtmp.length);
+                    }
+
+                    return V;
                 }
             });
 
@@ -376,17 +383,16 @@ public class IESCipher
 				return engine.processBlock(in, 0, in.length);
 			}
 			catch (Exception e)
-			{
+			{            e.printStackTrace();
 				throw new BadPaddingException(e.getMessage());
 			}
-
 		}
 		else if (state == Cipher.DECRYPT_MODE || state == Cipher.UNWRAP_MODE)
 		{
-			// Decrypt the buffer
-			try 
-			{   			
-				engine.init(key, params, new ECIESPublicKeyParser(ecParams));
+            // Decrypt the buffer
+			try
+			{
+				engine.init(key, params, new DHIESPublicKeyParser(((DHKeyParameters)key).getParameters()));
 
 				return engine.processBlock(in, 0, in.length);
 			}
@@ -397,7 +403,7 @@ public class IESCipher
 		}
 		else
 		{
-			throw new IllegalStateException("cipher not initialised");
+			throw new IllegalStateException("IESCipher not initialised");
 		}
 
 	}
@@ -415,6 +421,7 @@ public class IESCipher
 		byte[] buf = engineDoFinal(input, inputOffset, inputLength);
 		System.arraycopy(buf, 0, output, outputOffset, buf.length);
 		return buf.length;
+
 	}
 
 
@@ -422,35 +429,35 @@ public class IESCipher
 	 * Classes that inherit from us
 	 */
 
-	static public class ECIES
+	static public class IES
 	extends IESCipher
 	{
-		public ECIES()
+		public IES()
 		{
-			super(new IESEngine(new ECDHBasicAgreement(),
+			super(new IESEngine(new DHBasicAgreement(), 
 					new KDF2BytesGenerator(new SHA1Digest()),
 					new HMac(new SHA1Digest())));
 		}
 	}
 
-    static public class ECIESwithDESede
-   	extends IESCipher
-   	{
-   		public ECIESwithDESede()
-   		{
-   			super(new IESEngine(new ECDHBasicAgreement(),
-   					new KDF2BytesGenerator(new SHA1Digest()),
-   					new HMac(new SHA1Digest()),
-   					new PaddedBufferedBlockCipher(new DESedeEngine())));
-   		}
-   	}
+    static public class IESwithDESede
+    	extends IESCipher
+    {
+        public IESwithDESede()
+        {
+            super(new IESEngine(new DHBasicAgreement(),
+                    new KDF2BytesGenerator(new SHA1Digest()),
+                    new HMac(new SHA1Digest()),
+                    new PaddedBufferedBlockCipher(new DESedeEngine())));
+        }
+    }
 
-	static public class ECIESwithAES
+	static public class IESwithAES
 	extends IESCipher
 	{
-		public ECIESwithAES()
+		public IESwithAES()
 		{
-			super(new IESEngine(new ECDHBasicAgreement(),
+			super(new IESEngine(new DHBasicAgreement(), 
 					new KDF2BytesGenerator(new SHA1Digest()),
 					new HMac(new SHA1Digest()),
 					new PaddedBufferedBlockCipher(new AESEngine())));

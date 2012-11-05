@@ -31,6 +31,12 @@ public class DH
             provider.addAlgorithm("Alg.Alias.AlgorithmParameterGenerator.DIFFIEHELLMAN", "DH");
 
             provider.addAlgorithm("AlgorithmParameterGenerator.DH", PREFIX + "AlgorithmParameterGeneratorSpi");
+            
+            provider.addAlgorithm("Cipher.DHIES", PREFIX + "IESCipher$IES");
+            provider.addAlgorithm("Cipher.DHIESwithAES", PREFIX + "IESCipher$IESwithAES");
+            provider.addAlgorithm("Cipher.DHIESWITHAES", PREFIX + "IESCipher$IESwithAES");
+            provider.addAlgorithm("Cipher.DHIESWITHDESEDE", PREFIX + "IESCipher$IESwithDESede");
+            provider.addAlgorithm("KeyPairGenerator.IES", PREFIX + "KeyPairGeneratorSpi");
         }
     }
 }

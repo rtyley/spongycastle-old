@@ -198,7 +198,7 @@ public class IESEngine
             kdf.generateBytes(K, 0, K.length);
             System.arraycopy(K, 0, K1, 0, K1.length);
             System.arraycopy(K, K1.length, K2, 0, K2.length);
-
+             System.err.println(K1.length);
             cipher.init(true, new KeyParameter(K1));
             C = new byte[cipher.getOutputSize(inLen)];
             len = cipher.processBytes(in, inOff, inLen, C, 0);

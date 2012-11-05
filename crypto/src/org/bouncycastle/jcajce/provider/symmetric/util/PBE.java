@@ -7,6 +7,7 @@ import javax.crypto.spec.PBEParameterSpec;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.PBEParametersGenerator;
+import org.bouncycastle.crypto.digests.GOST3411Digest;
 import org.bouncycastle.crypto.digests.MD2Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
@@ -32,6 +33,7 @@ public interface PBE
     static final int        TIGER       = 3;
     static final int        SHA256      = 4;
     static final int        MD2         = 5;
+    static final int        GOST3411    = 6;
 
     static final int        PKCS5S1     = 0;
     static final int        PKCS5S2     = 1;
@@ -91,6 +93,9 @@ public interface PBE
                     break;
                 case SHA256:
                     generator = new PKCS12ParametersGenerator(new SHA256Digest());
+                    break;
+                case GOST3411:
+                    generator = new PKCS12ParametersGenerator(new GOST3411Digest());
                     break;
                 default:
                     throw new IllegalStateException("unknown digest scheme for PBE encryption.");
