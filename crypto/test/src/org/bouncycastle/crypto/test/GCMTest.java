@@ -476,15 +476,19 @@ public class GCMTest
         byte[] K = new byte[kLength];
         srng.nextBytes(K);
 
-        int pLength = srng.nextInt() >>> 22;;
+        int pLength = srng.nextInt() >>> 16;
         byte[] P = new byte[pLength];
         srng.nextBytes(P);
 
-        int aLength = srng.nextInt() >>> 22;
+        int aLength = srng.nextInt() >>> 24;
         byte[] A = new byte[aLength];
         srng.nextBytes(A);
 
-        int ivLength = 1 + (srng.nextInt() >>> 22);
+        int saLength = srng.nextInt() >>> 24;
+        byte[] SA = new byte[saLength];
+        srng.nextBytes(SA);
+
+        int ivLength = 1 + (srng.nextInt() >>> 24);
         byte[] IV = new byte[ivLength];
         srng.nextBytes(IV);
 
@@ -494,7 +498,10 @@ public class GCMTest
         byte[] C = new byte[cipher.getOutputSize(P.length)];
         int predicted = cipher.getUpdateOutputSize(P.length);
 
+        int split = srng.nextInt(SA.length + 1);
+        cipher.processAADBytes(SA, 0, split);
         int len = cipher.processBytes(P, 0, P.length, C, 0);
+        cipher.processAADBytes(SA, split, SA.length - split);
 
         if (predicted != len)
         {
@@ -521,7 +528,10 @@ public class GCMTest
         byte[] decP = new byte[cipher.getOutputSize(C.length)];
         predicted = cipher.getUpdateOutputSize(C.length);
         
+        split = srng.nextInt(SA.length + 1);
+        cipher.processAADBytes(SA, 0, split);
         len = cipher.processBytes(C, 0, C.length, decP, 0);
+        cipher.processAADBytes(SA, split, SA.length - split);
 
         if (predicted != len)
         {
@@ -546,7 +556,12 @@ public class GCMTest
         //
         cipher.init(false, new AEADParameters(null, parameters.getMacSize(), parameters.getNonce(), parameters.getAssociatedText()));
         decP = new byte[cipher.getOutputSize(C.length)];
+
+        split = srng.nextInt(SA.length + 1);
+        cipher.processAADBytes(SA, 0, split);
         len = cipher.processBytes(C, 0, C.length, decP, 0);
+        cipher.processAADBytes(SA, split, SA.length - split);
+
         len += cipher.doFinal(decP, len);
 
         if (!areEqual(P, decP))

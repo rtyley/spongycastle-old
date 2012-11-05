@@ -1,29 +1,24 @@
 package org.bouncycastle.crypto.modes.gcm;
 
+import java.util.ArrayList;
+
 import org.bouncycastle.util.Arrays;
 
 public class Tables1kGCMExponentiator implements GCMExponentiator
 {
     // A lookup table of the power-of-two powers of 'x'
     // - lookupPowX2[i] = x^(2^i)
-    private final byte[][] lookupPowX2 = new byte[64][];
-
-    private int highestIndex = -1;
+    private ArrayList lookupPowX2;
 
     public void init(byte[] x)
     {
-        if (Arrays.areEqual(x, lookupPowX2[0]))
+        if (lookupPowX2 != null && Arrays.areEqual(x, (byte[])lookupPowX2.get(0)))
         {
             return;
         }
 
-        for (int i = 1; i <= highestIndex; ++i)
-        {
-            lookupPowX2[i] = null;
-        }
-
-        lookupPowX2[0] = Arrays.clone(x);
-        highestIndex = 0;
+        lookupPowX2 = new ArrayList(8);
+        lookupPowX2.add(Arrays.clone(x));
     }
 
     public void exponentiateX(long pow, byte[] output)
@@ -38,7 +33,7 @@ public class Tables1kGCMExponentiator implements GCMExponentiator
             {
                 if ((pow & 1L) != 0)
                 {
-                    GCMUtil.multiply(y, lookupPowX2[bit]);
+                    GCMUtil.multiply(y, (byte[])lookupPowX2.get(bit));
                 }
                 ++bit;
                 pow >>>= 1;
@@ -51,11 +46,17 @@ public class Tables1kGCMExponentiator implements GCMExponentiator
 
     private void ensureAvailable(int bit)
     {
-        while (highestIndex < bit)
+        int count = lookupPowX2.size();
+        if (count <= bit)
         {
-          byte[] tmp = Arrays.clone(lookupPowX2[highestIndex]);
-          GCMUtil.multiply(tmp, tmp);
-          lookupPowX2[++highestIndex] = tmp;
+            byte[] tmp = (byte[])lookupPowX2.get(count - 1);
+            do
+            {
+                tmp = Arrays.clone(tmp);
+                GCMUtil.multiply(tmp, tmp);
+                lookupPowX2.add(tmp);
+            }
+            while (++count <= bit);
         }
     }
 }
