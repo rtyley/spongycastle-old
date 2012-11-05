@@ -19,6 +19,13 @@ abstract class GCMUtil
         return tmp;
     }
 
+    static byte[] asBytes(int[] ns)
+    {
+        byte[] output = new byte[16];
+        Pack.intToBigEndian(ns, output, 0);
+        return output;
+    }
+
     static int[] asInts(byte[] bs)
     {
         int[] output = new int[4];
@@ -216,6 +223,14 @@ abstract class GCMUtil
         for (int i = 15; i >= 0; --i)
         {
             block[i] ^= val[i];
+        }
+    }
+
+    static void xor(byte[] block, byte[] val, int off, int len)
+    {
+        while (len-- > 0)
+        {
+            block[len] ^= val[off + len];
         }
     }
 
