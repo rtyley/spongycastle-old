@@ -93,7 +93,7 @@ public class CBCBlockCipher
         {
             reset();
 
-            // if it;s null key is to be reused.
+            // if it's null, key is to be reused.
             if (params != null)
             {
                 cipher.init(encrypting, params);
