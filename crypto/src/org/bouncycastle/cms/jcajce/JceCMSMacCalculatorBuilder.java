@@ -66,10 +66,10 @@ public class JceCMSMacCalculatorBuilder
     public MacCalculator build()
         throws CMSException
     {
-        return new CMSOutputEncryptor(macOID, keySize, random);
+        return new CMSMacCalculator(macOID, keySize, random);
     }
 
-    private class CMSOutputEncryptor
+    private class CMSMacCalculator
         implements MacCalculator
     {
         private SecretKey encKey;
@@ -77,7 +77,7 @@ public class JceCMSMacCalculatorBuilder
         private Mac mac;
         private SecureRandom random;
 
-        CMSOutputEncryptor(ASN1ObjectIdentifier macOID, int keySize, SecureRandom random)
+        CMSMacCalculator(ASN1ObjectIdentifier macOID, int keySize, SecureRandom random)
             throws CMSException
         {
             KeyGenerator keyGen = helper.createKeyGenerator(macOID);
