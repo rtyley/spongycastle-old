@@ -103,7 +103,7 @@ public class CMac implements Mac
         return cipher.getAlgorithmName();
     }
 
-    private byte[] doubleLu(byte[] in)
+    private static byte[] doubleLu(byte[] in)
     {
         int FirstBit = (in[0] & 0xFF) >> 7;
         byte[] ret = new byte[in.length];
@@ -121,17 +121,18 @@ public class CMac implements Mac
 
     public void init(CipherParameters params)
     {
+        if (params != null)
+        {
+            cipher.init(true, params);
+    
+            //initializes the L, Lu, Lu2 numbers
+            L = new byte[ZEROES.length];
+            cipher.processBlock(ZEROES, 0, L, 0);
+            Lu = doubleLu(L);
+            Lu2 = doubleLu(Lu);
+        }
+
         reset();
-
-        cipher.init(true, params);
-
-        //initializes the L, Lu, Lu2 numbers
-        L = new byte[ZEROES.length];
-        cipher.processBlock(ZEROES, 0, L, 0);
-        Lu = doubleLu(L);
-        Lu2 = doubleLu(Lu);
-
-        cipher.init(true, params);
     }
 
     public int getMacSize()
