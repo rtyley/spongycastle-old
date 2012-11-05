@@ -3,31 +3,30 @@ package org.bouncycastle.crypto.modes.gcm;
 import org.bouncycastle.crypto.util.Pack;
 import org.bouncycastle.util.Arrays;
 
-public class Tables64kGCMMultiplier
-    implements GCMMultiplier
+public class Tables64kGCMMultiplier implements GCMMultiplier
 {
-    private final int[][][] M = new int[16][256][];
-
     private byte[] H;
+    private int[][][] M;
 
     public void init(byte[] H)
     {
-        if (Arrays.areEqual(this.H, H))
+        if (M == null)
+        {
+            M = new int[16][256][4];
+        }
+        else if (Arrays.areEqual(this.H, H))
         {
             return;
         }
 
         this.H = Arrays.clone(H);
 
-        M[0][0] = new int[4];
-        M[0][128] = GCMUtil.asInts(H);
+        // M[0][0] is ZEROES;
+        GCMUtil.asInts(H, M[0][128]);
+
         for (int j = 64; j >= 1; j >>= 1)
         {
-            int[] tmp = new int[4];
-            System.arraycopy(M[0][j + j], 0, tmp, 0, 4);
-
-            GCMUtil.multiplyP(tmp);
-            M[0][j] = tmp;
+            GCMUtil.multiplyP(M[0][j + j], M[0][j]);
         }
 
         int i = 0;
@@ -37,11 +36,7 @@ public class Tables64kGCMMultiplier
             {
                 for (int k = 1; k < j; ++k)
                 {
-                    int[] tmp = new int[4];
-                    System.arraycopy(M[i][j], 0, tmp, 0, 4);
-
-                    GCMUtil.xor(tmp, M[i][k]);
-                    M[i][j + k] = tmp;
+                    GCMUtil.xor(M[i][j], M[i][k], M[i][j + k]);
                 }
             }
 
@@ -50,14 +45,10 @@ public class Tables64kGCMMultiplier
                 return;
             }
 
-            M[i][0] = new int[4];
+            // M[i][0] is ZEROES;
             for (int j = 128; j > 0; j >>= 1)
             {
-                int[] tmp = new int[4];
-                System.arraycopy(M[i - 1][j], 0, tmp, 0, 4);
-
-                GCMUtil.multiplyP8(tmp);
-                M[i][j] = tmp;
+                GCMUtil.multiplyP8(M[i - 1][j], M[i][j]);
             }
         }
     }
