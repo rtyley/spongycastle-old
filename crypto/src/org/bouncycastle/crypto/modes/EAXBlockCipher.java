@@ -104,7 +104,7 @@ public class EAXBlockCipher
             ParametersWithIV param = (ParametersWithIV)params;
 
             nonce = param.getIV();
-            initialAssociatedText = new byte[0];
+            initialAssociatedText = null;
             macSize = mac.getMacSize() / 2;
             keyParam = param.getParameters();
         }
@@ -297,25 +297,25 @@ public class EAXBlockCipher
 
     public int getUpdateOutputSize(int len)
     {
-	int totalData = len + bufOff;
-	if (!forEncryption)
-	{
-	    if (totalData < macSize)
-	    {
-		return 0;
-	    }
-	    totalData -= macSize;
-	}
+    	int totalData = len + bufOff;
+    	if (!forEncryption)
+    	{
+    	    if (totalData < macSize)
+    	    {
+    	        return 0;
+    	    }
+    	    totalData -= macSize;
+    	}
         return totalData - totalData % blockSize;
     }
 
     public int getOutputSize(int len)
     {
-	int totalData = len + bufOff;
+        int totalData = len + bufOff;
 
         if (forEncryption)
         {
-             return totalData + macSize;
+            return totalData + macSize;
         }
 
         return totalData < macSize ? 0 : totalData - macSize;
@@ -327,6 +327,9 @@ public class EAXBlockCipher
 
         if (bufOff == bufBlock.length)
         {
+            // TODO Could move the processByte(s) calls to here
+//            initCipher();
+
             int size;
 
             if (forEncryption)
@@ -353,14 +356,13 @@ public class EAXBlockCipher
 
     private boolean verifyMac(byte[] mac, int off)
     {
+        int nonEqual = 0;
+
         for (int i = 0; i < macSize; i++)
         {
-            if (macBlock[i] != mac[off + i])
-            {
-                return false;
-            }
+            nonEqual |= (macBlock[i] ^ mac[off + i]);
         }
 
-        return true;
+        return nonEqual == 0;
     }
 }
