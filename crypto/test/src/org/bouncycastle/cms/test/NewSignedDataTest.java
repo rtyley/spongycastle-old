@@ -412,6 +412,32 @@ public class NewSignedDataTest
         + "aWduaW5nIENBAgEzMAkGBSsOAwIaBQAwCwYHKoZIzjgEAQUABC8wLQIVAIGV"
         + "khm+kbV4a/+EP45PHcq0hIViAhR4M9os6IrJnoEDS3Y3l7O6zrSosA==");
 
+    private static final byte[] rawGost = Base64.decode(
+        "MIIEBwYJKoZIhvcNAQcCoIID+DCCA/QCAQExDDAKBgYqhQMCAgkFADAfBgkq"
+      + "hkiG9w0BBwGgEgQQU29tZSBEYXRhIEhFUkUhIaCCAuYwggLiMIICkaADAgEC"
+      + "AgopoLG9AAIAArWeMAgGBiqFAwICAzBlMSAwHgYJKoZIhvcNAQkBFhFpbmZv"
+      + "QGNyeXB0b3Byby5ydTELMAkGA1UEBhMCUlUxEzARBgNVBAoTCkNSWVBUTy1Q"
+      + "Uk8xHzAdBgNVBAMTFlRlc3QgQ2VudGVyIENSWVBUTy1QUk8wHhcNMTIxMDE1"
+      + "MTEwNDIzWhcNMTQxMDA0MDcwOTQxWjAhMRIwEAYDVQQDDAl0ZXN0IGdvc3Qx"
+      + "CzAJBgNVBAYTAlJVMGMwHAYGKoUDAgITMBIGByqFAwICJAAGByqFAwICHgED"
+      + "QwAEQPz/F99AG8wyMQz5uK3vJ3MdHk7ZyFzM4Ofnq8nAmDgI5/Nuzcu791/0"
+      + "hRd+1i+fArRsiPMdQXOF0E7bEMHwWfWjggFjMIIBXzAOBgNVHQ8BAf8EBAMC"
+      + "BPAwEwYDVR0lBAwwCgYIKwYBBQUHAwIwHQYDVR0OBBYEFO353ZD7sLCx6rVR"
+      + "2o/IsSxuE1gAMB8GA1UdIwQYMBaAFG2PXgXZX6yRF5QelZoFMDg3ehAqMFUG"
+      + "A1UdHwROMEwwSqBIoEaGRGh0dHA6Ly93d3cuY3J5cHRvcHJvLnJ1L0NlcnRF"
+      + "bnJvbGwvVGVzdCUyMENlbnRlciUyMENSWVBUTy1QUk8oMikuY3JsMIGgBggr"
+      + "BgEFBQcBAQSBkzCBkDAzBggrBgEFBQcwAYYnaHR0cDovL3d3dy5jcnlwdG9w"
+      + "cm8ucnUvb2NzcG5jL29jc3Auc3JmMFkGCCsGAQUFBzAChk1odHRwOi8vd3d3"
+      + "LmNyeXB0b3Byby5ydS9DZXJ0RW5yb2xsL3BraS1zaXRlX1Rlc3QlMjBDZW50"
+      + "ZXIlMjBDUllQVE8tUFJPKDIpLmNydDAIBgYqhQMCAgMDQQBAR4mr69a62d3l"
+      + "yK/UZ4Yz/Yi3jqURtbnJR2gugdzkG5pYHRwC41BbDaa1ItP+1gDp4s78+EiK"
+      + "AJc17CHGZTz3MYHVMIHSAgEBMHMwZTEgMB4GCSqGSIb3DQEJARYRaW5mb0Bj"
+      + "cnlwdG9wcm8ucnUxCzAJBgNVBAYTAlJVMRMwEQYDVQQKEwpDUllQVE8tUFJP"
+      + "MR8wHQYDVQQDExZUZXN0IENlbnRlciBDUllQVE8tUFJPAgopoLG9AAIAArWe"
+      + "MAoGBiqFAwICCQUAMAoGBiqFAwICEwUABED0Gs9zP9lSz/2/e3BUSpzCI3dx"
+      + "39gfl/pFVkx4p5N/GW5o4gHIST9OhDSmdxwpMSK+39YSRD4R0Ue0faOqWEsj"
+      + "AAAAAAAAAAAAAAAAAAAAAA==");
+
     /*
      *
      *  INFRASTRUCTURE
@@ -1081,6 +1107,29 @@ public class NewSignedDataTest
         throws Exception
     {
         encapsulatedTest(_signEcGostKP, _signEcGostCert, "GOST3411withECGOST3410");
+    }
+
+    public void testGostNoAttributesEncapsulated()
+        throws Exception
+    {
+        CMSSignedData data = new CMSSignedData(rawGost);
+
+        Store                   certStore = data.getCertificates();
+        SignerInformationStore  signers = data.getSignerInfos();
+
+        Collection              c = signers.getSigners();
+        Iterator                it = c.iterator();
+
+        while (it.hasNext())
+        {
+            SignerInformation   signer = (SignerInformation)it.next();
+            Collection          certCollection = certStore.getMatches(signer.getSID());
+
+            Iterator        certIt = certCollection.iterator();
+            X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
+
+            assertEquals(true, signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert)));
+        }
     }
 
     public void testSHA1WithRSACounterSignature()
