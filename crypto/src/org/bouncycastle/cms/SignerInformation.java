@@ -21,6 +21,7 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -143,7 +144,7 @@ public class SignerInformation
      */
     public String getDigestAlgOID()
     {
-        return digestAlgorithm.getObjectId().getId();
+        return digestAlgorithm.getAlgorithm().getId();
     }
 
     /**
@@ -179,7 +180,7 @@ public class SignerInformation
      */
     public String getEncryptionAlgOID()
     {
-        return encryptionAlgorithm.getObjectId().getId();
+        return encryptionAlgorithm.getAlgorithm().getId();
     }
 
     /**
@@ -536,7 +537,7 @@ public class SignerInformation
 
                     if (encName.equals("RSA"))
                     {
-                        DigestInfo digInfo = new DigestInfo(digestAlgorithm, resultDigest);
+                        DigestInfo digInfo = new DigestInfo(new AlgorithmIdentifier(digestAlgorithm.getAlgorithm(), DERNull.INSTANCE), resultDigest);
 
                         return rawVerifier.verify(digInfo.getEncoded(ASN1Encoding.DER), this.getSignature());
                     }

@@ -438,6 +438,39 @@ public class NewSignedDataTest
       + "39gfl/pFVkx4p5N/GW5o4gHIST9OhDSmdxwpMSK+39YSRD4R0Ue0faOqWEsj"
       + "AAAAAAAAAAAAAAAAAAAAAA==");
 
+    private static final byte[] noAttrEncData = Base64.decode(
+       "MIIFjwYJKoZIhvcNAQcCoIIFgDCCBXwCAQExDTALBglghkgBZQMEAgEwgdAG"
+     + "CSqGSIb3DQEHAaCBwgSBv01JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHlw"
+     + "ZTogYXBwbGljYXRpb24vb2N0ZXQtc3RyZWFtCkNvbnRlbnQtVHJhbnNmZXIt"
+     + "RW5jb2Rpbmc6IGJpbmFyeQpDb250ZW50LURpc3Bvc2l0aW9uOiBhdHRhY2ht"
+     + "ZW50OyBmaWxlbmFtZT1kb2MuYmluCgpUaGlzIGlzIGEgdmVyeSBodWdlIHNl"
+     + "Y3JldCwgbWFkZSB3aXRoIG9wZW5zc2wKCgoKoIIDNDCCAzAwggKZoAMCAQIC"
+     + "AQEwDQYJKoZIhvcNAQEFBQAwgawxCzAJBgNVBAYTAkFUMRAwDgYDVQQIEwdB"
+     + "dXN0cmlhMQ8wDQYDVQQHEwZWaWVubmExFTATBgNVBAoTDFRpYW5pIFNwaXJp"
+     + "dDEUMBIGA1UECxMLSlVuaXQgdGVzdHMxGjAYBgNVBAMTEU1hc3NpbWlsaWFu"
+     + "byBNYXNpMTEwLwYJKoZIhvcNAQkBFiJtYXNzaW1pbGlhbm8ubWFzaUB0aWFu"
+     + "aS1zcGlyaXQuY29tMCAXDTEyMDEwMjA5MDAzNVoYDzIxOTEwNjA4MDkwMDM1"
+     + "WjCBjzELMAkGA1UEBhMCQVQxEDAOBgNVBAgTB0F1c3RyaWExFTATBgNVBAoT"
+     + "DFRpYW5pIFNwaXJpdDEUMBIGA1UECxMLSlVuaXQgVGVzdHMxDjAMBgNVBAMT"
+     + "BWNlcnQxMTEwLwYJKoZIhvcNAQkBFiJtYXNzaW1pbGlhbm8ubWFzaUB0aWFu"
+     + "aS1zcGlyaXQuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDYHz8n"
+     + "soeWpILn+5tK8XgJc3k5n0h0MOlRXLbZZVB7yuxKMBIZwl8kqqnehfqxX+hr"
+     + "b2MXSCgKEstnVunJVPUGuNxnQ8Z0R9p1o/9gR0KTXmoJ+Epx5wdEofk4Phsi"
+     + "MxjC8FVvt3sSnzal1/m0/9KntrPWksefumGm5XD3W43e5wIDAQABo3sweTAJ"
+     + "BgNVHRMEAjAAMCwGCWCGSAGG+EIBDQQfFh1PcGVuU1NMIEdlbmVyYXRlZCBD"
+     + "ZXJ0aWZpY2F0ZTAdBgNVHQ4EFgQU8mTZGl0EFv6aHo3bup144d6wYW8wHwYD"
+     + "VR0jBBgwFoAUdHG2RdrchT0PFcUBiIiYcy5hAA4wDQYJKoZIhvcNAQEFBQAD"
+     + "gYEATcc52eo73zEA4wmbyPv0lRrmyAxrHvZGIHiKpM8bP38WUB39lgmS8J0S"
+     + "1ioj21bosiakGj/gXnxlk8M8O+mm4zzpYjy8gqGXiUt20+j3bm7MJYM8ePcq"
+     + "dG/kReNuLUbRgIA6b0T4o+0WCELhrd9IlTk5IBKjHIjsP/GR1h0t//kxggFb"
+     + "MIIBVwIBATCBsjCBrDELMAkGA1UEBhMCQVQxEDAOBgNVBAgTB0F1c3RyaWEx"
+     + "DzANBgNVBAcTBlZpZW5uYTEVMBMGA1UEChMMVGlhbmkgU3Bpcml0MRQwEgYD"
+     + "VQQLEwtKVW5pdCB0ZXN0czEaMBgGA1UEAxMRTWFzc2ltaWxpYW5vIE1hc2kx"
+     + "MTAvBgkqhkiG9w0BCQEWIm1hc3NpbWlsaWFuby5tYXNpQHRpYW5pLXNwaXJp"
+     + "dC5jb20CAQEwCwYJYIZIAWUDBAIBMA0GCSqGSIb3DQEBAQUABIGAEthqA7FK"
+     + "V1i+MzzS4zz4DxT4lwUYkWfHaDtZADUyTD5lnP3Pf+t/ScpBEGkEtI7hDqOO"
+     + "zE0WfkBshTx5B/uxDibc/jqjQpSYSz5cvBTgpocIalbqsErOkDYF1QP6UgaV"
+     + "ZoVGwvGYIuIrFgWqgk08NsPHVVjYseTEhUDwkI1KSxU=");
     /*
      *
      *  INFRASTRUCTURE
@@ -1762,6 +1795,37 @@ public class NewSignedDataTest
         testSample("PSSSignData.data", "PSSSignDataSHA1.sig");
         testSample("PSSSignData.data", "PSSSignDataSHA256.sig");
         testSample("PSSSignData.data", "PSSSignDataSHA512.sig");
+    }
+
+    public void testNoAttrEncapsulatedSample()
+        throws Exception
+    {
+        CMSSignedData s = new CMSSignedData(noAttrEncData);
+
+        Store certStore = s.getCertificates();
+
+        assertNotNull(certStore);
+
+        SignerInformationStore signers = s.getSignerInfos();
+
+        assertNotNull(signers);
+
+        Collection c = signers.getSigners();
+
+        Iterator it = c.iterator();
+
+        while (it.hasNext())
+        {
+            SignerInformation signer = (SignerInformation)it.next();
+            Collection certCollection = certStore.getMatches(signer.getSID());
+            Iterator certIt = certCollection.iterator();
+            X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
+
+            if (!signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(BC).build(cert)))
+            {
+                fail("Verification FAILED! ");
+            }
+        }
     }
 
     public void testCounterSig()
