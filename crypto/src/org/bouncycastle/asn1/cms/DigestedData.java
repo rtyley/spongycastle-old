@@ -3,45 +3,50 @@ package org.bouncycastle.asn1.cms;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequence;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 
 /** 
- * RFC 3274 - CMS Compressed Data.
+ * RFC 3274 - CMS Digest Data.
  * <pre>
- * CompressedData ::= SEQUENCE {
- *  version CMSVersion,
- *  compressionAlgorithm CompressionAlgorithmIdentifier,
- *  encapContentInfo EncapsulatedContentInfo
- * }
+ * DigestedData ::= SEQUENCE {
+ *               version CMSVersion,
+ *               digestAlgorithm DigestAlgorithmIdentifier,
+ *               encapContentInfo EncapsulatedContentInfo,
+ *               digest Digest }
  * </pre>
  */
-public class CompressedData
+public class DigestedData
     extends ASN1Object
 {
     private ASN1Integer           version;
-    private AlgorithmIdentifier  compressionAlgorithm;
+    private AlgorithmIdentifier  digestAlgorithm;
     private ContentInfo          encapContentInfo;
+    private ASN1OctetString      digest;
 
-    public CompressedData(
-        AlgorithmIdentifier compressionAlgorithm,
-        ContentInfo         encapContentInfo)
+    public DigestedData(
+        AlgorithmIdentifier digestAlgorithm,
+        ContentInfo encapContentInfo,
+        byte[]      digest)
     {
         this.version = new ASN1Integer(0);
-        this.compressionAlgorithm = compressionAlgorithm;
+        this.digestAlgorithm = digestAlgorithm;
         this.encapContentInfo = encapContentInfo;
+        this.digest = new DEROctetString(digest);
     }
-    
-    private CompressedData(
+
+    private DigestedData(
         ASN1Sequence seq)
     {
         this.version = (ASN1Integer)seq.getObjectAt(0);
-        this.compressionAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
+        this.digestAlgorithm = AlgorithmIdentifier.getInstance(seq.getObjectAt(1));
         this.encapContentInfo = ContentInfo.getInstance(seq.getObjectAt(2));
-
+        this.digest = ASN1OctetString.getInstance(seq.getObjectAt(3));
     }
 
     /**
@@ -53,7 +58,7 @@ public class CompressedData
      * @exception IllegalArgumentException if the object held by the
      *          tagged object cannot be converted.
      */
-    public static CompressedData getInstance(
+    public static DigestedData getInstance(
         ASN1TaggedObject _ato,
         boolean _explicit)
     {
@@ -66,19 +71,19 @@ public class CompressedData
      * @param obj the object we want converted.
      * @exception IllegalArgumentException if the object cannot be converted.
      */
-    public static CompressedData getInstance(
+    public static DigestedData getInstance(
         Object obj)
     {
-        if (obj instanceof CompressedData)
+        if (obj instanceof DigestedData)
         {
-            return (CompressedData)obj;
+            return (DigestedData)obj;
         }
-
+        
         if (obj != null)
         {
-            return new CompressedData(ASN1Sequence.getInstance(obj));
+            return new DigestedData(ASN1Sequence.getInstance(obj));
         }
-
+        
         return null;
     }
 
@@ -87,9 +92,9 @@ public class CompressedData
         return version;
     }
 
-    public AlgorithmIdentifier getCompressionAlgorithmIdentifier()
+    public AlgorithmIdentifier getDigestAlgorithm()
     {
-        return compressionAlgorithm;
+        return digestAlgorithm;
     }
 
     public ContentInfo getEncapContentInfo()
@@ -102,9 +107,15 @@ public class CompressedData
         ASN1EncodableVector v = new ASN1EncodableVector();
 
         v.add(version);
-        v.add(compressionAlgorithm);
+        v.add(digestAlgorithm);
         v.add(encapContentInfo);
+        v.add(digest);
 
         return new BERSequence(v);
+    }
+
+    public byte[] getDigest()
+    {
+        return digest.getOctets();
     }
 }
