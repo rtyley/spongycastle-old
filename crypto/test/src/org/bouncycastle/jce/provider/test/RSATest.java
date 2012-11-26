@@ -656,6 +656,15 @@ public class RSATest
         rawModeTest("SHA1withRSA", X509ObjectIdentifiers.id_SHA1, priv2048Key, pub2048Key, random);
         rawModeTest("MD5withRSA", PKCSObjectIdentifiers.md5, priv2048Key, pub2048Key, random);
         rawModeTest("RIPEMD128withRSA", TeleTrusTObjectIdentifiers.ripemd128, priv2048Key, pub2048Key, random);
+
+        // init reset test
+        c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
+
+        out = c.update(new byte[40]);
+
+        c.init(Cipher.ENCRYPT_MODE, pubKey, rand);
+
+        out = c.update(new byte[40]);
     }
 
     private void oaepCompatibilityTest(String digest, PrivateKey privKey, PublicKey pubKey)
