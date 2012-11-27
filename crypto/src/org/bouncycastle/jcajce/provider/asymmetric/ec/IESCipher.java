@@ -42,6 +42,7 @@ import org.bouncycastle.jcajce.provider.asymmetric.util.IESUtil;
 import org.bouncycastle.jce.interfaces.ECKey;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.jce.interfaces.IESKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.IESParameterSpec;
 import org.bouncycastle.util.Strings;
@@ -58,6 +59,7 @@ public class IESCipher
 	private AsymmetricKeyParameter	key;
 	private SecureRandom			random;
 	private boolean                 dhaesMode = false;
+    private AsymmetricKeyParameter otherKeyParameter = null;
 
 	public IESCipher(IESEngine engine)
 	{
@@ -100,15 +102,17 @@ public class IESCipher
 	public AlgorithmParameters engineGetParameters() 
 	{
 		if (engineParam == null && engineSpec != null)
-			try
-		{
-				engineParam = AlgorithmParameters.getInstance("IES", BouncyCastleProvider.PROVIDER_NAME);
-				engineParam.init(engineSpec);
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e.toString());
-		}
+        {
+            try
+            {
+                    engineParam = AlgorithmParameters.getInstance("IES", BouncyCastleProvider.PROVIDER_NAME);
+                    engineParam.init(engineSpec);
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e.toString());
+            }
+        }
 
 		return engineParam;
 	}
@@ -236,6 +240,8 @@ public class IESCipher
 			SecureRandom 			random)
 					throws InvalidAlgorithmParameterException, InvalidKeyException
 	{
+        otherKeyParameter = null;
+
 		// Use default parameters (including cipher key size) if none are specified
         if (engineSpec == null)
         {
@@ -257,6 +263,13 @@ public class IESCipher
 			{
 				this.key = ECUtil.generatePublicKeyParameter((PublicKey) key);
 			}
+            else if (key instanceof IESKey)
+            {
+                IESKey ieKey = (IESKey)key;
+
+                this.key = ECUtil.generatePublicKeyParameter(ieKey.getPublic());
+                this.otherKeyParameter = ECUtil.generatePrivateKeyParameter(ieKey.getPrivate());
+            }
 			else
 			{
 				throw new InvalidKeyException("must be passed recipient's public EC key for encryption");
@@ -266,8 +279,15 @@ public class IESCipher
 		{
 			if (key instanceof ECPrivateKey)
 			{
-				this.key = ECUtil.generatePrivateKeyParameter((PrivateKey) key);
+				this.key = ECUtil.generatePrivateKeyParameter((PrivateKey)key);
 			}
+            else if (key instanceof IESKey)
+            {
+                IESKey ieKey = (IESKey)key;
+
+                this.otherKeyParameter = ECUtil.generatePublicKeyParameter(ieKey.getPublic());
+                this.key = ECUtil.generatePrivateKeyParameter(ieKey.getPrivate());
+            }
 			else
 			{
 				throw new InvalidKeyException("must be passed recipient's private EC key for decryption");
@@ -290,7 +310,7 @@ public class IESCipher
 			int                 opmode,
 			Key                 key,
 			SecureRandom        random) 
-					throws InvalidKeyException
+			throws InvalidKeyException
 	{    
 		try
 		{
@@ -354,6 +374,26 @@ public class IESCipher
 
 		final byte[] V;
 
+        if (otherKeyParameter != null)
+        {
+            try
+            {
+                if (state == Cipher.ENCRYPT_MODE || state == Cipher.WRAP_MODE)
+                {
+                    engine.init(true, otherKeyParameter, key, params);
+                }
+                else
+                {
+                    engine.init(false, key, otherKeyParameter, params);
+                }
+                return engine.processBlock(in, 0, in.length);
+            }
+            catch (Exception e)
+            {
+                throw new BadPaddingException(e.getMessage());
+            }
+        }
+
 		if (state == Cipher.ENCRYPT_MODE || state == Cipher.WRAP_MODE)
 		{
 			// Generate the ephemeral key pair
@@ -401,7 +441,6 @@ public class IESCipher
 		}
 
 	}
-
 
 	public int engineDoFinal(
 			byte[] 		input, 

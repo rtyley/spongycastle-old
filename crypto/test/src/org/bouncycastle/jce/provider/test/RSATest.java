@@ -671,7 +671,7 @@ public class RSATest
         throws Exception
     {
         if (Security.getProvider("SunJCE") == null || Security.getProvider("SunRsaSign") == null)
-        {   System.out.println("return");
+        {
             return;
         }
 

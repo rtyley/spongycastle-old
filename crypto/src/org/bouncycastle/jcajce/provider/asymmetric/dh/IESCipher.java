@@ -42,6 +42,7 @@ import org.bouncycastle.crypto.params.IESParameters;
 import org.bouncycastle.crypto.params.IESWithCipherParameters;
 import org.bouncycastle.crypto.parsers.DHIESPublicKeyParser;
 import org.bouncycastle.jcajce.provider.asymmetric.util.IESUtil;
+import org.bouncycastle.jce.interfaces.IESKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.IESParameterSpec;
 import org.bouncycastle.util.Strings;
@@ -58,6 +59,7 @@ public class IESCipher
 	private AsymmetricKeyParameter	key;
 	private SecureRandom			random;				
     private boolean                 dhaesMode = false;
+    private AsymmetricKeyParameter otherKeyParameter = null;
 
 	public IESCipher(IESEngine engine)
 	{
@@ -210,15 +212,17 @@ public class IESCipher
 	{
 		AlgorithmParameterSpec  paramSpec = null;
 
-		if (params != null)     
+		if (params != null)
+        {
 			try
-		{
-				paramSpec = params.getParameterSpec(IESParameterSpec.class);
-		}
-		catch (Exception e)
-		{
-			throw new InvalidAlgorithmParameterException("cannot recognise parameters: " + e.toString(), e); 
-		}
+            {
+                    paramSpec = params.getParameterSpec(IESParameterSpec.class);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidAlgorithmParameterException("cannot recognise parameters: " + e.toString(), e);
+            }
+        }
 
 		engineParam = params;    
 		engineInit(opmode, key, paramSpec, random);
@@ -253,6 +257,13 @@ public class IESCipher
 			{
 				this.key = DHUtil.generatePublicKeyParameter((PublicKey) key);
 			}
+            else if (key instanceof IESKey)
+            {
+                IESKey ieKey = (IESKey)key;
+
+                this.key = DHUtil.generatePublicKeyParameter(ieKey.getPublic());
+                this.otherKeyParameter = DHUtil.generatePrivateKeyParameter(ieKey.getPrivate());
+            }
 			else
 			{
 				throw new InvalidKeyException("must be passed recipient's public DH key for encryption");
@@ -264,6 +275,13 @@ public class IESCipher
 			{
 				this.key = DHUtil.generatePrivateKeyParameter((PrivateKey) key);
 			}
+            else if (key instanceof IESKey)
+            {
+                IESKey ieKey = (IESKey)key;
+
+                this.otherKeyParameter = DHUtil.generatePublicKeyParameter(ieKey.getPublic());
+                this.key = DHUtil.generatePrivateKeyParameter(ieKey.getPrivate());
+            }
 			else
 			{
 				throw new InvalidKeyException("must be passed recipient's private DH key for decryption");
@@ -348,6 +366,25 @@ public class IESCipher
 		DHParameters dhParams = ((DHKeyParameters) key).getParameters();
 
 		byte[] V;
+        if (otherKeyParameter != null)
+        {
+            try
+            {
+                if (state == Cipher.ENCRYPT_MODE || state == Cipher.WRAP_MODE)
+                {
+                    engine.init(true, otherKeyParameter, key, params);
+                }
+                else
+                {
+                    engine.init(false, key, otherKeyParameter, params);
+                }
+                return engine.processBlock(in, 0, in.length);
+            }
+            catch (Exception e)
+            {
+                throw new BadPaddingException(e.getMessage());
+            }
+        }
 
 		if (state == Cipher.ENCRYPT_MODE || state == Cipher.WRAP_MODE)
 		{
