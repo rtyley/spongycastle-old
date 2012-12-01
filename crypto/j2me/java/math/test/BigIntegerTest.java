@@ -153,6 +153,37 @@ public class BigIntegerTest
         }
     }
 
+    private void testDivideAndRemainder()
+    {
+        SecureRandom random = new SecureRandom();
+
+        BigInteger n = new BigInteger(48, random);
+        BigInteger[] qr = n.divideAndRemainder(n);
+        if (!qr[0].equals(one) || !qr[1].equals(zero))
+        {
+            fail("testDivideAndRemainder - expected: 1/0 got: " + qr[0] + "/" + qr[1]);
+        }
+        qr = n.divideAndRemainder(one);
+        if (!qr[0].equals(n) || !qr[1].equals(zero))
+        {
+            fail("testDivideAndRemainder - expected: " + n + "/0 got: " + qr[0] + "/" + qr[1]);
+        }
+
+        for (int rep = 0; rep < 10; ++rep)
+        {
+            BigInteger a = new BigInteger(100 - rep, 0, random);
+            BigInteger b = new BigInteger(100 + rep, 0, random);
+            BigInteger c = new BigInteger(10 + rep, 0, random);
+            BigInteger d = a.multiply(b).add(c);
+            BigInteger[] es = d.divideAndRemainder(a);
+
+            if (!es[0].equals(b) || !es[1].equals(c))
+            {
+                fail("testDivideAndRemainder - expected: " + b + "/" + c + " got: " + qr[0] + "/" + qr[1]);
+            }
+        }
+    }
+
     private void testNegate()
     {
         if (!zero.equals(zero.negate()))
@@ -236,6 +267,33 @@ public class BigIntegerTest
         }
     }
 
+    public void testToString()
+    {
+        SecureRandom random = new SecureRandom();
+        int trials = 256;
+
+        BigInteger[] tests = new BigInteger[trials];
+        for (int i = 0; i < trials; ++i)
+        {
+            int len = random.nextInt(i + 1);
+            tests[i] = new BigInteger(len, random);
+        }
+
+        for (int radix = Character.MIN_RADIX; radix <= Character.MAX_RADIX; ++radix)
+        {
+            for (int i = 0; i < trials; ++i)
+            {
+                BigInteger n1 = tests[i];
+                String s = n1.toString(radix);
+                BigInteger n2 = new BigInteger(s, radix);
+                if (!n1.equals(n2))
+                {
+                    fail("testToStringRadix - radix:" + radix + ", n1:" + n1.toString(16) + ", n2:" + n2.toString(16));
+                }
+            }
+        }
+    }
+
     private void xorTest()
     {
         BigInteger value = VALUE1.xor(VALUE2);
@@ -286,6 +344,13 @@ public class BigIntegerTest
         flipBitTest();
         
         setBitTest();
+
+        testDivideAndRemainder();
+        testNegate();
+        testNot();
+        testOr();
+        testPow();
+        testToString();
         
         xorTest();
         

@@ -3,6 +3,8 @@ package java.math;
 import java.util.Random;
 import java.util.Stack;
 
+import org.bouncycastle.util.Arrays;
+
 public class BigInteger
 {
     // The primes b/w 2 and ~2^10
@@ -129,8 +131,8 @@ public class BigInteger
     private int[] magnitude; // array of ints with [0] being the most significant
     private int nBits = -1; // cache bitCount() value
     private int nBitLength = -1; // cache bitLength() value
-    private long mQuote = -1L; // -m^(-1) mod b, b = 2^32 (see Montgomery mult.)
-    
+    private int mQuote = 0; // -m^(-1) mod b, b = 2^32 (see Montgomery mult.), 0 when uninitialised
+
     private BigInteger()
     {
     }
@@ -533,7 +535,7 @@ public class BigInteger
 
             this.magnitude = makeMagnitude(b, 1);
             this.nBits = -1;
-            this.mQuote = -1L;
+            this.mQuote = 0;
 
             if (certainty < 1)
                 break;
@@ -548,7 +550,7 @@ public class BigInteger
                     int n = 33 + (rnd.nextInt() >>> 1) % (bitLength - 2);
                     this.magnitude[this.magnitude.length - (n >>> 5)] ^= (1 << (n & 31));
                     this.magnitude[this.magnitude.length - 1] ^= (rnd.nextInt() << 1);
-                    this.mQuote = -1L;
+                    this.mQuote = 0;
 
                     if (this.isProbablePrime(certainty))
                         return;
@@ -1019,13 +1021,12 @@ public class BigInteger
         else if (xyCmp == 0)
         {
             count = new int[1];
-
             count[0] = 1;
+            Arrays.fill(x, 0);
         }
         else
         {
             count = new int[1];
-
             count[0] = 0;
         }
 
@@ -1428,7 +1429,7 @@ public class BigInteger
         long mQ = 0;
         if (useMonty)
         {
-            mQ = m.getMQuote();
+            mQ = m.getMQuote() & IMASK;
 
             // tmp = this * R mod m
             BigInteger tmp = this.shiftLeft(32 * m.magnitude.length).mod(m);
@@ -1681,86 +1682,30 @@ public class BigInteger
         return x;
     }
 
-    private long _extEuclid(long a, long b, long[] uOut)
-    {
-        long res;
-
-        long u1 = 1;
-        long u3 = a;
-        long v1 = 0;
-        long v3 = b;
-
-        while (v3 > 0)
-        {
-            long q, tn;
-
-            q = u3 / v3;
-
-            tn = u1 - (v1 * q);
-            u1 = v1;
-            v1 = tn;
-
-            tn = u3 - (v3 * q);
-            u3 = v3;
-            v3 = tn;
-        }
-
-        uOut[0] = u1;
-
-        res = (u3 - (u1 * a)) / b;
-        uOut[1] = res;
-
-        return u3;
-    }
-
-    private long _modInverse(long v, long m)
-        throws ArithmeticException
-    {
-        if (m < 0)
-        {
-            throw new ArithmeticException("Modulus must be positive");
-        }
-
-        long[]  x = new long[2];
-
-        long gcd = _extEuclid(v, m, x);
-
-        if (gcd != 1)
-        {
-            throw new ArithmeticException("Numbers not relatively prime.");
-        }
-
-        if (x[0] < 0)
-        {
-            x[0] = x[0] + m;
-        }
-
-        return x[0];
-    }
-
     /**
      * Calculate mQuote = -m^(-1) mod b with b = 2^32 (32 = word size)
      */
-    private long getMQuote()
+    private int getMQuote()
     {
-        if (mQuote != -1L)
-        { // allready calculated
-            return mQuote;
-        }
-        if ((magnitude[magnitude.length - 1] & 1) == 0)
+        if (mQuote != 0)
         {
-            return -1L; // not for even numbers
+            return mQuote; // already calculated
         }
 
-/*
-        byte[] bytes = {1, 0, 0, 0, 0};
-        BigInteger b = new BigInteger(1, bytes); // 2^32
-        mQuote = this.negate().mod(b).modInverse(b).longValue();
-*/
-        long v = (((~this.magnitude[this.magnitude.length - 1]) | 1) & 0xffffffffL);
-        mQuote = _modInverse(v, 0x100000000L);
+//        assert this.sign > 0;
 
-        return mQuote;
+        int d = -magnitude[magnitude.length - 1];
+
+//        assert (d & 1) != 0;
+
+        // Newton-Raphson division (roughly)
+        int x = d;
+        x *= 2 - d * x;
+        x *= 2 - d * x;
+        x *= 2 - d * x;
+        x *= 2 - d * x;
+//        assert d * x == 1;
+        return mQuote = x;
     }
 
     /**
@@ -2613,75 +2558,133 @@ public class BigInteger
         {
             return "null";
         }
-        else if (sign == 0)
+        if (sign == 0)
+        {
+            return "0";
+        }
+        if (rdx < Character.MIN_RADIX || rdx > Character.MAX_RADIX)
+        {
+            rdx = 10;
+        }
+
+        
+        // NOTE: This *should* be unnecessary, since the magnitude *should* never have leading zero digits
+        int firstNonZero = 0;
+        while (firstNonZero < magnitude.length)
+        {
+            if (magnitude[firstNonZero] != 0)
+            {
+                break;
+            }
+            ++firstNonZero;
+        }
+
+        if (firstNonZero == magnitude.length)
         {
             return "0";
         }
 
+
         StringBuffer sb = new StringBuffer();
-        String h;
-
-        if (rdx == 16)
+        if (sign == -1)
         {
-            for (int i = 0; i < magnitude.length; i++)
-            {
-                h = "0000000" + Integer.toHexString(magnitude[i]);
-                h = h.substring(h.length() - 8);
-                sb.append(h);
-            }
+            sb.append('-');
         }
-        else if (rdx == 2)
-        {
-            sb.append('1');
 
-            for (int i = bitLength() - 2; i >= 0; --i)
-            {
-                sb.append(testBit(i) ? '1' : '0');
-            }
-        }
-        else
+        switch (rdx)
         {
-            // This is algorithm 1a from chapter 4.4 in Seminumerical Algorithms, slow but it works
-            Stack S = new Stack();
-            BigInteger base = new BigInteger(Integer.toString(rdx, rdx), rdx);
-            // The sign is handled separatly.
-            // Notice however that for this to work, radix 16 _MUST_ be a special case,
-            // unless we want to enter a recursion well. In their infinite wisdom, why did not 
-            // the Sun engineers made a c'tor for BigIntegers taking a BigInteger as parameter?
-            // (Answer: Becuase Sun's BigIntger is clonable, something bouncycastle's isn't.)
-//            BigInteger u = new BigInteger(this.abs().toString(16), 16);
+        case 2:
+        {
+            int pos = firstNonZero;
+            sb.append(Integer.toBinaryString(magnitude[pos]));
+            while (++pos < magnitude.length)
+            {
+                appendZeroExtendedString(sb, Integer.toBinaryString(magnitude[pos]), 32);
+            }
+            break;
+        }
+        case 8:
+        {
+            int mask = (1 << 30) - 1;
             BigInteger u = this.abs();
-            BigInteger b;
-
-            // For speed, maye these test should look directly a u.magnitude.length?
-            while (!u.equals(BigInteger.ZERO))
+            int bits = u.bitLength();
+            Stack S = new Stack();
+            while (bits > 30)
             {
-                b = u.mod(base);
-                if (b.equals(BigInteger.ZERO))
-                    S.push("0");
-                else
-                    S.push(Integer.toString(b.magnitude[0], rdx));
-                u = u.divide(base);
+                S.push(Integer.toOctalString(u.intValue() & mask));
+                u = u.shiftRight(30);
+                bits -= 30;
             }
-            // Then pop the stack
+            sb.append(Integer.toOctalString(u.intValue()));
             while (!S.empty())
             {
-                sb.append((String) S.pop());
+                appendZeroExtendedString(sb, (String)S.pop(), 10);
             }
+            break;
+        }
+        case 16:
+        {
+            int pos = firstNonZero;
+            sb.append(Integer.toHexString(magnitude[pos]));
+            while (++pos < magnitude.length)
+            {
+                appendZeroExtendedString(sb, Integer.toHexString(magnitude[pos]), 8);
+            }
+            break;
+        }
+        default:
+        {
+            // Based on algorithm 1a from chapter 4.4 in Seminumerical Algorithms (Knuth)
+
+            // Work out the largest power of 'rdx' that is a positive 32-bit integer
+            // TODO possibly cache power/exponent against radix?
+            int limit = Integer.MAX_VALUE / rdx;
+            int power = rdx;
+            int exponent = 1;
+            while (power <= limit)
+            {
+                power *= rdx;
+                ++exponent;
+            }
+
+            BigInteger bigPower = BigInteger.valueOf(power);
+
+            Stack S = new Stack();
+
+            BigInteger q = this.abs();
+            while (q.compareTo(bigPower) >= 0)
+            {
+                BigInteger[] qr = q.divideAndRemainder(bigPower);
+                q = qr[0];
+                BigInteger r = qr[1];
+                if (r.sign == 0)
+                {
+                    S.push("");
+                }
+                else
+                {
+                    S.push(Integer.toString(r.magnitude[0], rdx));
+                }
+            }
+            sb.append(Integer.toString(q.magnitude[0], rdx));
+            while (!S.empty())
+            {
+                appendZeroExtendedString(sb, (String)S.pop(), exponent);
+            }
+            break;
+        }
         }
 
-        String s = sb.toString();
+        return sb.toString();
+    }
 
-        // Strip leading zeros.
-        while (s.length() > 1 && s.charAt(0) == '0')
-            s = s.substring(1);
-
-        if (s.length() == 0)
-            s = "0";
-        else if (sign == -1)
-            s = "-" + s;
-
-        return s;
+    private static void appendZeroExtendedString(StringBuffer sb, String s, int minLength)
+    {
+        for (int len = s.length(); len < minLength; ++len)
+        {
+            sb.append('0');
+        }
+        sb.append(s);
     }
 
     public static BigInteger valueOf(long val)

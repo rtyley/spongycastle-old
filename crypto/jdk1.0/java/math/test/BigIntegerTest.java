@@ -12,6 +12,12 @@ public class BigIntegerTest
     private static BigInteger VALUE1 = new BigInteger("1234");
     private static BigInteger VALUE2 = new BigInteger("1234567890");
     private static BigInteger VALUE3 = new BigInteger("12345678901234567890123");
+
+    private static BigInteger zero = BigInteger.ZERO;
+    private static BigInteger one = BigInteger.ONE;
+    private static BigInteger two = BigInteger.valueOf(2);
+
+
     
     public String getName()
     {
@@ -146,7 +152,148 @@ public class BigIntegerTest
             fail("setBit - expected: " + result + " got: " + value);
         }
     }
-    
+
+    private void testDivideAndRemainder()
+    {
+        SecureRandom random = new SecureRandom();
+
+        BigInteger n = new BigInteger(48, random);
+        BigInteger[] qr = n.divideAndRemainder(n);
+        if (!qr[0].equals(one) || !qr[1].equals(zero))
+        {
+            fail("testDivideAndRemainder - expected: 1/0 got: " + qr[0] + "/" + qr[1]);
+        }
+        qr = n.divideAndRemainder(one);
+        if (!qr[0].equals(n) || !qr[1].equals(zero))
+        {
+            fail("testDivideAndRemainder - expected: " + n + "/0 got: " + qr[0] + "/" + qr[1]);
+        }
+
+        for (int rep = 0; rep < 10; ++rep)
+        {
+            BigInteger a = new BigInteger(100 - rep, 0, random);
+            BigInteger b = new BigInteger(100 + rep, 0, random);
+            BigInteger c = new BigInteger(10 + rep, 0, random);
+            BigInteger d = a.multiply(b).add(c);
+            BigInteger[] es = d.divideAndRemainder(a);
+
+            if (!es[0].equals(b) || !es[1].equals(c))
+            {
+                fail("testDivideAndRemainder - expected: " + b + "/" + c + " got: " + qr[0] + "/" + qr[1]);
+            }
+        }
+    }
+
+    private void testNegate()
+    {
+        if (!zero.equals(zero.negate()))
+        {
+            fail("zero - negate falied");
+        }
+        if (!one.equals(one.negate().negate()))
+        {
+            fail("one - negate falied");
+        }
+        if (!two.equals(two.negate().negate()))
+        {
+            fail("two - negate falied");
+        }
+    }
+
+    private void testNot()
+    {
+        for (int i = -10; i <= 10; ++i)
+        {
+            if(!BigInteger.valueOf(~i).equals(
+                     BigInteger.valueOf(i).not()))
+            {
+                fail("Problem: ~" + i + " should be " + ~i);
+            }
+        }
+    }
+
+    private void testOr()
+    {
+        for (int i = -10; i <= 10; ++i)
+        {
+            for (int j = -10; j <= 10; ++j)
+            {
+                if (!BigInteger.valueOf(i | j).equals(
+                    BigInteger.valueOf(i).or(BigInteger.valueOf(j))))
+                {
+                    fail("Problem: " + i + " OR " + j + " should be " + (i | j));
+                }
+            }
+        }
+    }
+
+    public void testPow()
+    {
+        if (!one.equals(zero.pow(0)))
+        {
+            fail("one pow equals failed");
+        }
+        if (!zero.equals(zero.pow(123)))
+        {
+            fail("zero pow equals failed");
+        }
+        if (!one.equals(one.pow(0)))
+        {
+            fail("one one equals failed");
+        }
+        if (!one.equals(one.pow(123)))
+        {
+            fail("1 123 equals failed");
+        }
+
+        BigInteger n = new BigInteger("1234567890987654321");
+        BigInteger result = one;
+
+        for (int i = 0; i < 10; ++i)
+        {
+            try
+            {
+                BigInteger.valueOf(i).pow(-1);
+                fail("expected ArithmeticException");
+            }
+            catch (ArithmeticException e) {}
+
+            if (!result.equals(n.pow(i)))
+            {
+                fail("mod pow equals failed");
+            }
+
+            result = result.multiply(n);
+        }
+    }
+
+    public void testToString()
+    {
+        SecureRandom random = new SecureRandom();
+        int trials = 256;
+
+        BigInteger[] tests = new BigInteger[trials];
+        for (int i = 0; i < trials; ++i)
+        {
+            int len = random.nextInt(i + 1);
+            tests[i] = new BigInteger(len, random);
+        }
+
+        for (int radix = Character.MIN_RADIX; radix <= Character.MAX_RADIX; ++radix)
+        {
+            for (int i = 0; i < trials; ++i)
+            {
+                BigInteger n1 = tests[i];
+                String s = n1.toString(radix);
+                BigInteger n2 = new BigInteger(s, radix);
+                if (!n1.equals(n2))
+                {
+                    fail("testToStringRadix - radix:" + radix + ", n1:" + n1.toString(16) + ", n2:" + n2.toString(16));
+                }
+            }
+        }
+    }
+
     private void xorTest()
     {
         BigInteger value = VALUE1.xor(VALUE2);
@@ -197,6 +344,13 @@ public class BigIntegerTest
         flipBitTest();
         
         setBitTest();
+
+        testDivideAndRemainder();
+        testNegate();
+        testNot();
+        testOr();
+        testPow();
+        testToString();
         
         xorTest();
         
