@@ -46,12 +46,15 @@ public class DSA
             provider.addAlgorithm("Alg.Alias.Signature.DSAWITHSHA1", "DSA");
             provider.addAlgorithm("Alg.Alias.Signature.SHA1WithDSA", "DSA");
             provider.addAlgorithm("Alg.Alias.Signature.DSAWithSHA1", "DSA");
+
             provider.addAlgorithm("Alg.Alias.Signature.1.2.840.10040.4.3", "DSA");
 
             AsymmetricKeyInfoConverter keyFact = new KeyFactorySpi();
 
             for (int i = 0; i != DSAUtil.dsaOids.length; i++)
             {
+                provider.addAlgorithm("Alg.Alias.Signature." + DSAUtil.dsaOids[i], "DSA");
+
                 registerOid(provider, DSAUtil.dsaOids[i], "DSA", keyFact);
                 registerOidAlgorithmParameters(provider, DSAUtil.dsaOids[i], "DSA");
             }
