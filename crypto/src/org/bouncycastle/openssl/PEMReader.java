@@ -142,9 +142,9 @@ public class PEMReader
         parsers.put("EC PARAMETERS", new ECNamedCurveSpecParser());
         parsers.put("PUBLIC KEY", new PublicKeyParser(asymProvider));
         parsers.put("RSA PUBLIC KEY", new RSAPublicKeyParser(asymProvider));
-        parsers.put("RSA PRIVATE KEY", new RSAKeyPairParser(asymProvider));
-        parsers.put("DSA PRIVATE KEY", new DSAKeyPairParser(asymProvider));
-        parsers.put("EC PRIVATE KEY", new ECDSAKeyPairParser(asymProvider));
+        parsers.put("RSA PRIVATE KEY", new RSAKeyPairParser(symProvider, asymProvider));
+        parsers.put("DSA PRIVATE KEY", new DSAKeyPairParser(symProvider, asymProvider));
+        parsers.put("EC PRIVATE KEY", new ECDSAKeyPairParser(symProvider, asymProvider));
         parsers.put("ENCRYPTED PRIVATE KEY", new EncryptedPrivateKeyParser(symProvider, asymProvider));
         parsers.put("PRIVATE KEY", new PrivateKeyParser(asymProvider));
     }
@@ -173,11 +173,11 @@ public class PEMReader
     private abstract class KeyPairParser
         implements PemObjectParser
     {
-        protected String provider;
+        protected String symProvider;
 
-        public KeyPairParser(String provider)
+        public KeyPairParser(String symProvider)
         {
-            this.provider = provider;
+            this.symProvider = symProvider;
         }
 
         /**
@@ -228,7 +228,7 @@ public class PEMReader
                 String dekAlgName = tknz.nextToken();
                 byte[] iv = Hex.decode(tknz.nextToken());
 
-                keyBytes = PEMUtilities.crypt(false, provider, keyBytes, password, dekAlgName, iv);
+                keyBytes = PEMUtilities.crypt(false, symProvider, keyBytes, password, dekAlgName, iv);
             }
 
             try
@@ -263,9 +263,13 @@ public class PEMReader
     private class DSAKeyPairParser
         extends KeyPairParser
     {
-        public DSAKeyPairParser(String provider)
+    	private String asymProvider; 
+    	
+        public DSAKeyPairParser(String symProvider, String asymProvider)
         {
-            super(provider);
+            super(symProvider);
+            
+            this.asymProvider = asymProvider;
         }
 
         public Object parseObject(PemObject obj)
@@ -294,7 +298,7 @@ public class PEMReader
                     y.getValue(), p.getValue(),
                     q.getValue(), g.getValue());
 
-                KeyFactory fact = KeyFactory.getInstance("DSA", provider);
+                KeyFactory fact = KeyFactory.getInstance("DSA", asymProvider);
 
                 return new KeyPair(
                     fact.generatePublic(pubSpec),
@@ -315,9 +319,13 @@ public class PEMReader
     private class ECDSAKeyPairParser
         extends KeyPairParser
     {
-        public ECDSAKeyPairParser(String provider)
+    	private String asymProvider;
+    	
+        public ECDSAKeyPairParser(String symProvider, String asymProvider)
         {
-            super(provider);
+            super(symProvider);
+            
+            this.asymProvider = asymProvider;
         }
 
         public Object parseObject(PemObject obj)
@@ -336,7 +344,7 @@ public class PEMReader
                 X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubInfo.getEncoded());
 
 
-                KeyFactory fact = KeyFactory.getInstance("ECDSA", provider);
+                KeyFactory fact = KeyFactory.getInstance("ECDSA", asymProvider);
 
 
                 return new KeyPair(
@@ -358,9 +366,13 @@ public class PEMReader
     private class RSAKeyPairParser
         extends KeyPairParser
     {
-        public RSAKeyPairParser(String provider)
+    	private String asymProvider;
+    	
+        public RSAKeyPairParser(String symProvider, String asymProvider)
         {
-            super(provider);
+            super(symProvider);
+            
+            this.asymProvider = asymProvider;
         }
 
         public Object parseObject(PemObject obj)
@@ -385,7 +397,7 @@ public class PEMReader
                     keyStruct.getExponent1(), keyStruct.getExponent2(),
                     keyStruct.getCoefficient());
 
-                KeyFactory fact = KeyFactory.getInstance("RSA", provider);
+                KeyFactory fact = KeyFactory.getInstance("RSA", asymProvider);
 
                 return new KeyPair(
                     fact.generatePublic(pubSpec),
