@@ -39,7 +39,6 @@ public class McEliecePKCSCipherSpi
         this.cipher = cipher;
     }
 
-    @Override
     protected void initCipherEncrypt(Key key, AlgorithmParameterSpec params,
                                      SecureRandom sr)
         throws InvalidKeyException,
@@ -56,7 +55,6 @@ public class McEliecePKCSCipherSpi
         this.cipherTextSize = cipher.cipherTextSize;
     }
 
-    @Override
     protected void initCipherDecrypt(Key key, AlgorithmParameterSpec params)
         throws InvalidKeyException, InvalidAlgorithmParameterException
     {
@@ -69,7 +67,6 @@ public class McEliecePKCSCipherSpi
         this.cipherTextSize = cipher.cipherTextSize;
     }
 
-    @Override
     protected byte[] messageEncrypt(byte[] input)
         throws IllegalBlockSizeException, BadPaddingException
     {
@@ -85,7 +82,6 @@ public class McEliecePKCSCipherSpi
         return output;
     }
 
-    @Override
     protected byte[] messageDecrypt(byte[] input)
         throws IllegalBlockSizeException, BadPaddingException
     {
@@ -101,13 +97,11 @@ public class McEliecePKCSCipherSpi
         return output;
     }
 
-    @Override
     public String getName()
     {
         return "McEliecePKCS";
     }
 
-    @Override
     public int getKeySize(Key key)
         throws InvalidKeyException
     {
@@ -128,20 +122,10 @@ public class McEliecePKCSCipherSpi
 
     //////////////////////////////////////////////////////////////////////////////////
 
-    static public class stdMcEliecePKCS
+    static public class McEliecePKCS
         extends McEliecePKCSCipherSpi
     {
-        public stdMcEliecePKCS()
-        {
-            super(new SHA1Digest(), new McEliecePKCSCipher());
-        }
-    }
-
-    static public class McEliecePKCS1
-        extends McEliecePKCSCipherSpi
-    {
-
-        public McEliecePKCS1()
+        public McEliecePKCS()
         {
             super(new SHA1Digest(), new McEliecePKCSCipher());
         }

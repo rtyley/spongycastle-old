@@ -62,7 +62,6 @@ public class McElieceKobaraImaiCipherSpi
      * @param inLen length of the input
      * @return the processed byte array.
      */
-    @Override
     public byte[] update(byte[] input, int inOff, int inLen)
     {
         buf.write(input, inOff, inLen);
@@ -83,7 +82,6 @@ public class McElieceKobaraImaiCipherSpi
      * been requested, but the decrypted data is not bounded by
      * the appropriate padding bytes
      */
-    @Override
     public byte[] doFinal(byte[] input, int inOff, int inLen)
         throws BadPaddingException
     {
@@ -119,19 +117,16 @@ public class McElieceKobaraImaiCipherSpi
         return null;
     }
 
-    @Override
     protected int encryptOutputSize(int inLen)
     {
         return 0;
     }
 
-    @Override
     protected int decryptOutputSize(int inLen)
     {
         return 0;
     }
 
-    @Override
     protected void initCipherEncrypt(Key key, AlgorithmParameterSpec params,
                                      SecureRandom sr)
         throws InvalidKeyException,
@@ -147,7 +142,6 @@ public class McElieceKobaraImaiCipherSpi
         cipher.init(true, param);
     }
 
-    @Override
     protected void initCipherDecrypt(Key key, AlgorithmParameterSpec params)
         throws InvalidKeyException, InvalidAlgorithmParameterException
     {
@@ -160,13 +154,11 @@ public class McElieceKobaraImaiCipherSpi
         cipher.init(false, param);
     }
 
-    @Override
     public String getName()
     {
         return "McElieceKobaraImaiCipher";
     }
 
-    @Override
     public int getKeySize(Key key)
         throws InvalidKeyException
     {
@@ -266,20 +258,10 @@ public class McElieceKobaraImaiCipherSpi
     }
 
 
-    static public class stdMcElieceKobaraImai
+    static public class McElieceKobaraImai
         extends McElieceKobaraImaiCipherSpi
     {
-        public stdMcElieceKobaraImai()
-        {
-            super(new SHA1Digest(), new McElieceKobaraImaiCipher());
-        }
-    }
-
-    static public class McElieceKobaraImai1
-        extends McElieceKobaraImaiCipherSpi
-    {
-
-        public McElieceKobaraImai1()
+        public McElieceKobaraImai()
         {
             super(new SHA1Digest(), new McElieceKobaraImaiCipher());
         }

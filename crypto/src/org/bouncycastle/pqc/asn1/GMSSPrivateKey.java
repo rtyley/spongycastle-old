@@ -1357,7 +1357,6 @@ public class GMSSPrivateKey
     }
 
 
-    @Override
     public ASN1Primitive toASN1Primitive()
     {
         return this.primitive;

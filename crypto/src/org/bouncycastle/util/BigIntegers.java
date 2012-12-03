@@ -35,6 +35,51 @@ public final class BigIntegers
     }
 
     /**
+     * Return the passed in value as an unsigned byte array.
+     *
+     * @param value value to be converted.
+     * @return a byte array without a leading zero byte if present in the signed encoding.
+     */
+    public static byte[] asUnsignedByteArray(
+        int        length,
+        BigInteger value)
+    {
+        byte[] bytes = value.toByteArray();
+
+        if (bytes[0] == 0)
+        {
+            if (bytes.length - 1 > length)
+            {
+                throw new IllegalArgumentException("standard length exceeded for value");
+            }
+
+            byte[] tmp = new byte[length];
+
+            System.arraycopy(bytes, 1, tmp, tmp.length - (bytes.length - 1), tmp.length);
+
+            return tmp;
+        }
+        else
+        {
+            if (bytes.length == length)
+            {
+                return bytes;
+            }
+
+            if (bytes.length > length)
+            {
+                throw new IllegalArgumentException("standard length exceeded for value");
+            }
+
+            byte[] tmp = new byte[length];
+
+            System.arraycopy(bytes, 0, tmp, tmp.length - bytes.length - 1, tmp.length);
+
+            return tmp;
+        }
+    }
+
+    /**
      * Return a random BigInteger not less than 'min' and not greater than 'max'
      * 
      * @param min the least value that may be generated

@@ -23,7 +23,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Random;
 
 import junit.framework.TestCase;
-import org.bouncycastle.pqc.jcajce.provider.BCPQCProvider;
+import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 import org.bouncycastle.pqc.jcajce.spec.RainbowParameterSpec;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -56,9 +56,9 @@ public class RainbowSignatureTest
 
     public void setUp()
     {
-        if (Security.getProvider(BCPQCProvider.PROVIDER_NAME) == null)
+        if (Security.getProvider(BouncyCastlePQCProvider.PROVIDER_NAME) == null)
         {
-            Security.addProvider(new BCPQCProvider());
+            Security.addProvider(new BouncyCastlePQCProvider());
         }
     }
 
@@ -248,9 +248,9 @@ public class RainbowSignatureTest
     public void testRainbowWithSHA224()
         throws Exception
     {
-        kpg = KeyPairGenerator.getInstance("Rainbow", BCPQCProvider.PROVIDER_NAME);
-        sig = Signature.getInstance("SHA224WITHRainbow", BCPQCProvider.PROVIDER_NAME);
-        sigVerify = Signature.getInstance("SHA224WITHRainbow", BCPQCProvider.PROVIDER_NAME);
+        kpg = KeyPairGenerator.getInstance("Rainbow", BouncyCastlePQCProvider.PROVIDER_NAME);
+        sig = Signature.getInstance("SHA224WITHRainbow", BouncyCastlePQCProvider.PROVIDER_NAME);
+        sigVerify = Signature.getInstance("SHA224WITHRainbow", BouncyCastlePQCProvider.PROVIDER_NAME);
         performSignVerifyTest(1, 1, 28);
     }
 

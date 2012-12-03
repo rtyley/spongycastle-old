@@ -93,8 +93,6 @@ public class DSTU4145BinaryField
      * j INTEGER,
      * l INTEGER}
      */
-
-    @Override
     public ASN1Primitive toASN1Primitive()
     {
 

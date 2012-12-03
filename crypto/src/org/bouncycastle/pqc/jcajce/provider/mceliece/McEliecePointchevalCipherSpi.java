@@ -56,7 +56,6 @@ public class McEliecePointchevalCipherSpi
      * @param inLen length of the input
      * @return the processed byte array.
      */
-    @Override
     public byte[] update(byte[] input, int inOff, int inLen)
     {
         buf.write(input, inOff, inLen);
@@ -75,7 +74,6 @@ public class McEliecePointchevalCipherSpi
      * @return the new buffer with the result
      * @throws BadPaddingException on deryption errors.
      */
-    @Override
     public byte[] doFinal(byte[] input, int inOff, int inLen)
         throws BadPaddingException
     {
@@ -111,19 +109,16 @@ public class McEliecePointchevalCipherSpi
         return null;
     }
 
-    @Override
     protected int encryptOutputSize(int inLen)
     {
         return 0;
     }
 
-    @Override
     protected int decryptOutputSize(int inLen)
     {
         return 0;
     }
 
-    @Override
     protected void initCipherEncrypt(Key key, AlgorithmParameterSpec params,
                                      SecureRandom sr)
         throws InvalidKeyException,
@@ -137,7 +132,6 @@ public class McEliecePointchevalCipherSpi
         cipher.init(true, param);
     }
 
-    @Override
     protected void initCipherDecrypt(Key key, AlgorithmParameterSpec params)
         throws InvalidKeyException, InvalidAlgorithmParameterException
     {
@@ -148,14 +142,12 @@ public class McEliecePointchevalCipherSpi
         cipher.init(false, param);
     }
 
-    @Override
     public String getName()
     {
         return "McEliecePointchevalCipher";
     }
 
 
-    @Override
     public int getKeySize(Key key)
         throws InvalidKeyException
     {
@@ -206,20 +198,10 @@ public class McEliecePointchevalCipherSpi
 
     //////////////////////////////////////////////////////////////////////////////////77
 
-    static public class stdMcEliecePointcheval
+    static public class McEliecePointcheval
         extends McEliecePointchevalCipherSpi
     {
-        public stdMcEliecePointcheval()
-        {
-            super(new SHA1Digest(), new McEliecePointchevalCipher());
-        }
-    }
-
-    static public class McEliecePointcheval1
-        extends McEliecePointchevalCipherSpi
-    {
-
-        public McEliecePointcheval1()
+        public McEliecePointcheval()
         {
             super(new SHA1Digest(), new McEliecePointchevalCipher());
         }

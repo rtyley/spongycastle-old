@@ -37,7 +37,6 @@ public class McElieceCCA2PublicKey
         keySpec = new McElieceCCA2PublicKeySpec(oid, n, t, matrixG);
     }
 
-    @Override
     public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();

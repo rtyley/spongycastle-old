@@ -317,28 +317,24 @@ public class McElieceKeyFactorySpi
         }
     }
 
-    @Override
     protected PublicKey engineGeneratePublic(KeySpec keySpec)
         throws InvalidKeySpecException
     {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    @Override
     protected PrivateKey engineGeneratePrivate(KeySpec keySpec)
         throws InvalidKeySpecException
     {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    @Override
-    protected <T extends KeySpec> T engineGetKeySpec(Key key, Class<T> tClass)
+    protected KeySpec engineGetKeySpec(Key key, Class tClass)
         throws InvalidKeySpecException
     {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    @Override
     protected Key engineTranslateKey(Key key)
         throws InvalidKeyException
     {

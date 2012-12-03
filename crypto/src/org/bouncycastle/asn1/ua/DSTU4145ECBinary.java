@@ -122,8 +122,6 @@ public class DSTU4145ECBinary
      * n	INTEGER,
      * bp	OCTET STRING}
      */
-
-    @Override
     public ASN1Primitive toASN1Primitive()
     {
 

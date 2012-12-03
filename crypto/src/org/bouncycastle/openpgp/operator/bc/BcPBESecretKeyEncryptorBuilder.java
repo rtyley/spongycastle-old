@@ -14,16 +14,48 @@ public class BcPBESecretKeyEncryptorBuilder
     private int encAlgorithm;
     private PGPDigestCalculator s2kDigestCalculator;
     private SecureRandom random;
+    private int s2kCount = 0x60;
 
     public BcPBESecretKeyEncryptorBuilder(int encAlgorithm)
     {
         this(encAlgorithm, new SHA1PGPDigestCalculator());
     }
 
+    /**
+     * Create an SecretKeyEncryptorBuilder with the S2K count different to the default of 0x60.
+     *
+     * @param encAlgorithm encryption algorithm to use.
+     * @param s2kCount iteration count to use for S2K function.
+     */
+    public BcPBESecretKeyEncryptorBuilder(int encAlgorithm, int s2kCount)
+    {
+        this(encAlgorithm, new SHA1PGPDigestCalculator(), s2kCount);
+    }
+
     public BcPBESecretKeyEncryptorBuilder(int encAlgorithm, PGPDigestCalculator s2kDigestCalculator)
+    {
+        this(encAlgorithm, s2kDigestCalculator, 0x60);
+    }
+
+    /**
+     * Create an SecretKeyEncryptorBuilder with the S2k count different to the default of 0x60, and the S2K digest
+     * different from SHA-1.
+     *
+     * @param encAlgorithm encryption algorithm to use.
+     * @param s2kDigestCalculator digest calculator to use.
+     * @param s2kCount iteration count to use for S2K function.
+     */
+    public BcPBESecretKeyEncryptorBuilder(int encAlgorithm, PGPDigestCalculator s2kDigestCalculator, int s2kCount)
     {
         this.encAlgorithm = encAlgorithm;
         this.s2kDigestCalculator = s2kDigestCalculator;
+
+        if (s2kCount < 0 || s2kCount > 0xff)
+        {
+            throw new IllegalArgumentException("s2KCount value outside of range 0 to 255.");
+        }
+
+        this.s2kCount = s2kCount;
     }
 
     /**
@@ -46,7 +78,7 @@ public class BcPBESecretKeyEncryptorBuilder
             this.random = new SecureRandom();
         }
 
-        return new PBESecretKeyEncryptor(encAlgorithm, s2kDigestCalculator, this.random, passPhrase)
+        return new PBESecretKeyEncryptor(encAlgorithm, s2kDigestCalculator, s2kCount, this.random, passPhrase)
         {
             private byte[] iv;
 

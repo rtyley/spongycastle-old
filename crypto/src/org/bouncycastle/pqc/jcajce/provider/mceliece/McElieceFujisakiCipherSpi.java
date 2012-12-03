@@ -75,7 +75,6 @@ public class McElieceFujisakiCipherSpi
      * @return the new buffer with the result
      * @throws BadPaddingException on deryption errors.
      */
-    @Override
     public byte[] doFinal(byte[] input, int inOff, int inLen)
         throws BadPaddingException
     {
@@ -112,19 +111,16 @@ public class McElieceFujisakiCipherSpi
     }
 
 
-    @Override
     protected int encryptOutputSize(int inLen)
     {
         return 0;
     }
 
-    @Override
     protected int decryptOutputSize(int inLen)
     {
         return 0;
     }
 
-    @Override
     protected void initCipherEncrypt(Key key, AlgorithmParameterSpec params,
                                      SecureRandom sr)
         throws InvalidKeyException,
@@ -140,7 +136,6 @@ public class McElieceFujisakiCipherSpi
 
     }
 
-    @Override
     protected void initCipherDecrypt(Key key, AlgorithmParameterSpec params)
         throws InvalidKeyException, InvalidAlgorithmParameterException
     {
@@ -152,13 +147,11 @@ public class McElieceFujisakiCipherSpi
         cipher.init(false, param);
     }
 
-    @Override
     public String getName()
     {
         return "McElieceFujisakiCipher";
     }
 
-    @Override
     public int getKeySize(Key key)
         throws InvalidKeyException
     {
@@ -211,20 +204,10 @@ public class McElieceFujisakiCipherSpi
 
     //////////////////////////////////////////////////////////////////////////////////
 
-    static public class stdMcElieceFujisaki
+    static public class McElieceFujisaki
         extends McElieceFujisakiCipherSpi
     {
-        public stdMcElieceFujisaki()
-        {
-            super(new SHA1Digest(), new McElieceFujisakiCipher());
-        }
-    }
-
-    static public class McElieceFujisaki1
-        extends McElieceFujisakiCipherSpi
-    {
-
-        public McElieceFujisaki1()
+        public McElieceFujisaki()
         {
             super(new SHA1Digest(), new McElieceFujisakiCipher());
         }

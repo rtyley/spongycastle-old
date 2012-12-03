@@ -35,7 +35,6 @@ public class McEliecePublicKey extends ASN1Object{
 
 	}
 
-	@Override
 	public ASN1Primitive toASN1Primitive() {
 		ASN1EncodableVector v = new ASN1EncodableVector();
 		// encode <oidString>

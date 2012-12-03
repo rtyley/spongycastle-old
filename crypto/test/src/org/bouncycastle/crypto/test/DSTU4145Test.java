@@ -27,7 +27,6 @@ public class DSTU4145Test
         runTest(new DSTU4145Test());
     }
 
-    @Override
     public String getName()
     {
         return "DSTU4145";
@@ -225,7 +224,6 @@ public class DSTU4145Test
         }
     }
 
-    @Override
     public void performTest()
         throws Exception
     {

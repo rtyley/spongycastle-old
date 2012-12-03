@@ -38,7 +38,6 @@ public class DSTU4145PublicKey
         return null;
     }
 
-    @Override
     public ASN1Primitive toASN1Primitive()
     {
         return pubKey;

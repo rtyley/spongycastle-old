@@ -18,7 +18,6 @@ public class McElieceCCA2PrivateKey
 {
 
     private McElieceCCA2PrivateKeySpec keySpec;
-    ;
 
     public McElieceCCA2PrivateKey(McElieceCCA2PrivateKeySpec keySpec)
     {
@@ -54,7 +53,6 @@ public class McElieceCCA2PrivateKey
 
     }
 
-    @Override
     public ASN1Primitive toASN1Primitive()
     {
 

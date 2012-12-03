@@ -17,7 +17,7 @@ import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;
 import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;
 import org.bouncycastle.jcajce.provider.util.AsymmetricKeyInfoConverter;
 
-public class BCPQCProvider
+public class BouncyCastlePQCProvider
     extends Provider
     implements ConfigurableProvider
 {
@@ -36,7 +36,7 @@ public class BCPQCProvider
     private static final String ALGORITHM_PACKAGE = "org.bouncycastle.pqc.jcajce.provider.";
     private static final String[] ALGORITHMS =
         {
-            "Rainbow"
+            "Rainbow", "McEliece"
         };
 
     /**
@@ -44,7 +44,7 @@ public class BCPQCProvider
      * using runtime registration of the provider using the
      * <code>Security.addProvider()</code> mechanism.
      */
-    public BCPQCProvider()
+    public BouncyCastlePQCProvider()
     {
         super(PROVIDER_NAME, 1.475, info);
 

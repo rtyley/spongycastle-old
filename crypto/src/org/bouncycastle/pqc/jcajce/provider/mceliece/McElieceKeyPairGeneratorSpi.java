@@ -17,8 +17,8 @@ import org.bouncycastle.pqc.crypto.mceliece.McElieceKeyPairGenerator;
 import org.bouncycastle.pqc.crypto.mceliece.McElieceParameters;
 import org.bouncycastle.pqc.crypto.mceliece.McEliecePrivateKeyParameters;
 import org.bouncycastle.pqc.crypto.mceliece.McEliecePublicKeyParameters;
+import org.bouncycastle.pqc.jcajce.spec.ECCKeyGenParameterSpec;
 import org.bouncycastle.pqc.jcajce.spec.McElieceCCA2ParameterSpec;
-import org.bouncycastle.pqc.jcajce.spec.McElieceKeyGenParameterSpec;
 
 public abstract class McElieceKeyPairGeneratorSpi
     extends KeyPairGenerator
@@ -52,19 +52,17 @@ public abstract class McElieceKeyPairGeneratorSpi
             super(s);
         }
 
-        @Override
         public void initialize(AlgorithmParameterSpec params)
             throws InvalidAlgorithmParameterException
         {
             kpg = new McElieceCCA2KeyPairGenerator();
             super.initialize(params);
-            McElieceKeyGenParameterSpec ecc = (McElieceKeyGenParameterSpec)params;
+            ECCKeyGenParameterSpec ecc = (ECCKeyGenParameterSpec)params;
 
             McElieceCCA2KeyGenerationParameters mccca2KGParams = new McElieceCCA2KeyGenerationParameters(new SecureRandom(), new McElieceCCA2Parameters(ecc.getM(), ecc.getT()));
             kpg.init(mccca2KGParams);
         }
 
-        @Override
         public void initialize(int keySize, SecureRandom random)
         {
             McElieceCCA2ParameterSpec paramSpec = new McElieceCCA2ParameterSpec();
@@ -79,7 +77,6 @@ public abstract class McElieceKeyPairGeneratorSpi
             }
         }
 
-        @Override
         public KeyPair generateKeyPair()
         {
             AsymmetricCipherKeyPair generateKeyPair = kpg.generateKeyPair();
@@ -110,22 +107,20 @@ public abstract class McElieceKeyPairGeneratorSpi
             super("McEliece");
         }
 
-        @Override
         public void initialize(AlgorithmParameterSpec params)
             throws InvalidAlgorithmParameterException
         {
             kpg = new McElieceKeyPairGenerator();
             super.initialize(params);
-            McElieceKeyGenParameterSpec ecc = (McElieceKeyGenParameterSpec)params;
+            ECCKeyGenParameterSpec ecc = (ECCKeyGenParameterSpec)params;
 
             McElieceKeyGenerationParameters mccKGParams = new McElieceKeyGenerationParameters(new SecureRandom(), new McElieceParameters(ecc.getM(), ecc.getT()));
             kpg.init(mccKGParams);
         }
 
-        @Override
         public void initialize(int keySize, SecureRandom random)
         {
-            McElieceKeyGenParameterSpec paramSpec = new McElieceKeyGenParameterSpec();
+            ECCKeyGenParameterSpec paramSpec = new ECCKeyGenParameterSpec();
 
             // call the initializer with the chosen parameters
             try
@@ -137,7 +132,6 @@ public abstract class McElieceKeyPairGeneratorSpi
             }
         }
 
-        @Override
         public KeyPair generateKeyPair()
         {
             AsymmetricCipherKeyPair generateKeyPair = kpg.generateKeyPair();

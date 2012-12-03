@@ -131,7 +131,6 @@ public class RainbowPublicKey
         return RainbowUtil.convertArray(coeffScalar);
     }
 
-    @Override
     public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();

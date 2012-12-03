@@ -60,7 +60,6 @@ public class McEliecePrivateKey
 
     }
 
-    @Override
     public ASN1Primitive toASN1Primitive()
     {
 

@@ -14,13 +14,29 @@ public abstract class PBEKeyEncryptionMethodGenerator
     private PGPDigestCalculator s2kDigestCalculator;
     private S2K s2k;
     private SecureRandom random;
+    private int s2kCount;
 
     protected PBEKeyEncryptionMethodGenerator(
         char[] passPhrase,
         PGPDigestCalculator s2kDigestCalculator)
     {
+        this(passPhrase, s2kDigestCalculator, 0x60);
+    }
+
+    protected PBEKeyEncryptionMethodGenerator(
+        char[] passPhrase,
+        PGPDigestCalculator s2kDigestCalculator,
+        int s2kCount)
+    {
         this.passPhrase = passPhrase;
         this.s2kDigestCalculator = s2kDigestCalculator;
+
+        if (s2kCount < 0 || s2kCount > 0xff)
+        {
+            throw new IllegalArgumentException("s2kCount value outside of range 0 to 255.");
+        }
+
+        this.s2kCount = s2kCount;
     }
 
     public PBEKeyEncryptionMethodGenerator setSecureRandom(SecureRandom random)
@@ -44,7 +60,7 @@ public abstract class PBEKeyEncryptionMethodGenerator
 
             random.nextBytes(iv);
 
-            s2k = new S2K(s2kDigestCalculator.getAlgorithm(), iv, 0x60);
+            s2k = new S2K(s2kDigestCalculator.getAlgorithm(), iv, s2kCount);
         }
 
         return PGPUtil.makeKeyFromPassPhrase(s2kDigestCalculator, encAlgorithm, s2k, passPhrase);
@@ -70,6 +86,6 @@ public abstract class PBEKeyEncryptionMethodGenerator
         return new SymmetricKeyEncSessionPacket(encAlgorithm, s2k, encryptSessionInfo(encAlgorithm, key, nSessionInfo));
     }
 
-    abstract protected byte[] encryptSessionInfo(int encAlgorithm, byte[] key, byte[] sessionInfo)
+    abstract protected byte[]  encryptSessionInfo(int encAlgorithm, byte[] key, byte[] sessionInfo)
         throws PGPException;
 }
