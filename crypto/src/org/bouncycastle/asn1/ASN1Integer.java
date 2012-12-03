@@ -15,7 +15,7 @@ public class ASN1Integer
         super(value);
     }
 
-    public ASN1Integer(int value)
+    public ASN1Integer(long value)
     {
         super(value);
     }

@@ -50,6 +50,27 @@ public class OptionalValidity
         return null;
     }
 
+    public OptionalValidity(Time notBefore, Time notAfter)
+    {
+        if (notBefore == null && notAfter == null)
+        {
+            throw new IllegalArgumentException("at least one of notBefore/notAfter must not be null.");
+        }
+
+        this.notBefore = notBefore;
+        this.notAfter = notAfter;
+    }
+
+    public Time getNotBefore()
+    {
+        return notBefore;
+    }
+
+    public Time getNotAfter()
+    {
+        return notAfter;
+    }
+
     /**
      * <pre>
      * OptionalValidity ::= SEQUENCE {

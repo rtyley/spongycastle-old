@@ -56,6 +56,18 @@ public class OOBCertHash
         return null;
     }
 
+    public OOBCertHash(AlgorithmIdentifier hashAlg, CertId certId, byte[] hashVal)
+    {
+        this(hashAlg, certId, new DERBitString(hashVal));
+    }
+
+    public OOBCertHash(AlgorithmIdentifier hashAlg, CertId certId, DERBitString hashVal)
+    {
+        this.hashAlg = hashAlg;
+        this.certId = certId;
+        this.hashVal = hashVal;
+    }
+
     public AlgorithmIdentifier getHashAlg()
     {
         return hashAlg;
@@ -64,6 +76,11 @@ public class OOBCertHash
     public CertId getCertId()
     {
         return certId;
+    }
+
+    public DERBitString getHashVal()
+    {
+        return hashVal;
     }
 
     /**

@@ -56,7 +56,7 @@ public class DERInteger
     }
 
     public DERInteger(
-        int         value)
+        long         value)
     {
         bytes = BigInteger.valueOf(value).toByteArray();
     }
