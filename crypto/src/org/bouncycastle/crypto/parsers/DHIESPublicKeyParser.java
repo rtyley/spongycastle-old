@@ -22,10 +22,10 @@ public class DHIESPublicKeyParser
     public AsymmetricKeyParameter readKey(InputStream stream)
         throws IOException
     {
-        byte[] V = new byte[dhParams.getP().bitLength()/8 + 1];
+        byte[] V = new byte[(dhParams.getP().bitLength() + 7) / 8];
 
         stream.read(V, 0, V.length);
 
-        return new DHPublicKeyParameters(new BigInteger(1,V), dhParams);
+        return new DHPublicKeyParameters(new BigInteger(1, V), dhParams);
     }
 }

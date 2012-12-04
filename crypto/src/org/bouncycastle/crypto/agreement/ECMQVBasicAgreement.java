@@ -24,6 +24,11 @@ public class ECMQVBasicAgreement
         this.privParams = (MQVPrivateParameters)key;
     }
 
+    public int getFieldSize()
+    {
+        return (privParams.getStaticPrivateKey().getParameters().getCurve().getFieldSize() + 7) / 8;
+    }
+
     public BigInteger calculateAgreement(CipherParameters pubKey)
     {
         MQVPublicParameters pubParams = (MQVPublicParameters)pubKey;

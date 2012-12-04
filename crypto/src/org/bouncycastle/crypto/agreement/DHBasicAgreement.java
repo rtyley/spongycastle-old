@@ -4,10 +4,10 @@ import java.math.BigInteger;
 
 import org.bouncycastle.crypto.BasicAgreement;
 import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.params.DHParameters;
-import org.bouncycastle.crypto.params.DHPublicKeyParameters;
-import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.params.DHParameters;
+import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
+import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 
 /**
@@ -45,6 +45,11 @@ public class DHBasicAgreement
 
         this.key = (DHPrivateKeyParameters)kParam;
         this.dhParams = key.getParameters();
+    }
+
+    public int getFieldSize()
+    {
+        return (key.getParameters().getP().bitLength() + 7) / 8;
     }
 
     /**

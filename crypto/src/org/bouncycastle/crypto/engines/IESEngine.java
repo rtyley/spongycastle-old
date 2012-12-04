@@ -394,7 +394,7 @@ public class IESEngine
         // Compute the common value and convert to byte array. 
         agree.init(privParam);
         BigInteger z = agree.calculateAgreement(pubParam);
-        byte[] Z = BigIntegers.asUnsignedByteArray(z);
+        byte[] Z = BigIntegers.asUnsignedByteArray(agree.getFieldSize(), z);
 
         // Create input to KDF.  
         byte[] VZ = null;

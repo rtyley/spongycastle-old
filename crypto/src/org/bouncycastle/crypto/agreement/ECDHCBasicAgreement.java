@@ -2,13 +2,12 @@ package org.bouncycastle.crypto.agreement;
 
 import java.math.BigInteger;
 
-import org.bouncycastle.math.ec.ECPoint;
-
 import org.bouncycastle.crypto.BasicAgreement;
 import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.math.ec.ECPoint;
 
 /**
  * P1363 7.2.2 ECSVDP-DHC
@@ -38,6 +37,11 @@ public class ECDHCBasicAgreement
         CipherParameters key)
     {
         this.key = (ECPrivateKeyParameters)key;
+    }
+
+    public int getFieldSize()
+    {
+        return (key.getParameters().getCurve().getFieldSize() + 7) / 8;
     }
 
     public BigInteger calculateAgreement(

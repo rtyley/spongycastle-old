@@ -11,11 +11,16 @@ public interface BasicAgreement
     /**
      * initialise the agreement engine.
      */
-    public void init(CipherParameters param);
+    void init(CipherParameters param);
+
+    /**
+     * return the field size for the agreement algorithm in bytes.
+     */
+    int getFieldSize();
 
     /**
      * given a public key from a given party calculate the next
      * message in the agreement sequence. 
      */
-    public BigInteger calculateAgreement(CipherParameters pubKey);
+    BigInteger calculateAgreement(CipherParameters pubKey);
 }

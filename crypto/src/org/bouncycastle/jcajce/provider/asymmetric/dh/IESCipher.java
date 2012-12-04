@@ -45,6 +45,7 @@ import org.bouncycastle.jcajce.provider.asymmetric.util.IESUtil;
 import org.bouncycastle.jce.interfaces.IESKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.IESParameterSpec;
+import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.Strings;
 
 
@@ -396,8 +397,8 @@ public class IESCipher
             {
                 public byte[] getEncoded(AsymmetricKeyParameter keyParameter)
                 {
-                    byte[] V = new byte[((DHKeyParameters)keyParameter).getParameters().getP().bitLength()/8 + 1];
-                    byte[] Vtmp = ((DHPublicKeyParameters)keyParameter).getY().toByteArray();
+                    byte[] V = new byte[(((DHKeyParameters)keyParameter).getParameters().getP().bitLength() + 7) / 8];
+                    byte[] Vtmp = BigIntegers.asUnsignedByteArray(((DHPublicKeyParameters)keyParameter).getY());
 
                     if (Vtmp.length > V.length)
                     {
