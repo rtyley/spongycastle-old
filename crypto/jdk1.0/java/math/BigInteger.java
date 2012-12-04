@@ -1,4 +1,4 @@
-package java.math;
+package java.math.BigInteger;
 
 import java.util.Random;
 import java.util.Stack;
@@ -2603,22 +2603,45 @@ public class BigInteger
             }
             break;
         }
+        case 4:
+        {
+            int pos = firstNonZero;
+            int mag = magnitude[pos];
+            if (mag < 0)
+            {
+                sb.append(Integer.toString(mag >>> 30, 4));
+                mag &= (1 << 30) - 1;
+                appendZeroExtendedString(sb, Integer.toString(mag, 4), 15);
+            }
+            else
+            {
+                sb.append(Integer.toString(mag, 4));
+            }
+            int mask = (1 << 16) - 1;
+            while (++pos < magnitude.length)
+            {
+                mag = magnitude[pos];
+                appendZeroExtendedString(sb, Integer.toString(mag >>> 16, 4), 8);
+                appendZeroExtendedString(sb, Integer.toString(mag & mask, 4), 8);
+            }
+            break;
+        }
         case 8:
         {
-            int mask = (1 << 30) - 1;
+            long mask = (1L << 63) - 1;
             BigInteger u = this.abs();
             int bits = u.bitLength();
             Stack S = new Stack();
-            while (bits > 30)
+            while (bits > 63)
             {
-                S.push(Integer.toOctalString(u.intValue() & mask));
-                u = u.shiftRight(30);
-                bits -= 30;
+                S.push(Long.toOctalString(u.longValue() & mask));
+                u = u.shiftRight(63);
+                bits -= 63;
             }
-            sb.append(Integer.toOctalString(u.intValue()));
+            sb.append(Long.toOctalString(u.longValue()));
             while (!S.empty())
             {
-                appendZeroExtendedString(sb, (String)S.pop(), 10);
+                appendZeroExtendedString(sb, (String)S.pop(), 21);
             }
             break;
         }
@@ -2638,8 +2661,8 @@ public class BigInteger
 
             // Work out the largest power of 'rdx' that is a positive 32-bit integer
             // TODO possibly cache power/exponent against radix?
-            int limit = Integer.MAX_VALUE / rdx;
-            int power = rdx;
+            long limit = Long.MAX_VALUE / rdx;
+            long power = rdx;
             int exponent = 1;
             while (power <= limit)
             {
@@ -2648,25 +2671,17 @@ public class BigInteger
             }
 
             BigInteger bigPower = BigInteger.valueOf(power);
+            BigInteger q = this.abs();
 
             Stack S = new Stack();
-
-            BigInteger q = this.abs();
             while (q.compareTo(bigPower) >= 0)
             {
                 BigInteger[] qr = q.divideAndRemainder(bigPower);
+                S.push(Long.toString(qr[1].longValue(), rdx));
                 q = qr[0];
-                BigInteger r = qr[1];
-                if (r.sign == 0)
-                {
-                    S.push("");
-                }
-                else
-                {
-                    S.push(Integer.toString(r.magnitude[0], rdx));
-                }
             }
-            sb.append(Integer.toString(q.magnitude[0], rdx));
+
+            sb.append(Long.toString(q.longValue(), rdx));
             while (!S.empty())
             {
                 appendZeroExtendedString(sb, (String)S.pop(), exponent);
