@@ -2657,9 +2657,16 @@ public class BigInteger
         }
         default:
         {
+            BigInteger q = this.abs();
+            if (q.bitLength() < 64)
+            {
+                sb.append(Long.toString(q.longValue(), rdx));
+                break;
+            }
+
             // Based on algorithm 1a from chapter 4.4 in Seminumerical Algorithms (Knuth)
 
-            // Work out the largest power of 'rdx' that is a positive 32-bit integer
+            // Work out the largest power of 'rdx' that is a positive 64-bit integer
             // TODO possibly cache power/exponent against radix?
             long limit = Long.MAX_VALUE / rdx;
             long power = rdx;
@@ -2671,7 +2678,6 @@ public class BigInteger
             }
 
             BigInteger bigPower = BigInteger.valueOf(power);
-            BigInteger q = this.abs();
 
             Stack S = new Stack();
             while (q.compareTo(bigPower) >= 0)
