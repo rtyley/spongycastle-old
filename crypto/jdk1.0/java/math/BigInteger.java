@@ -1,4 +1,4 @@
-package java.math.BigInteger;
+package java.math;
 
 import java.util.Random;
 import java.util.Stack;
@@ -7,7 +7,7 @@ import org.bouncycastle.util.Arrays;
 
 public class BigInteger
 {
-    // The primes b/w 2 and ~2^10
+    // The first few odd primes
     /*
             3   5   7   11  13  17  19  23  29
         31  37  41  43  47  53  59  61  67  71
@@ -25,8 +25,12 @@ public class BigInteger
         739 743 751 757 761 769 773 787 797 809
         811 821 823 827 829 839 853 857 859 863
         877 881 883 887 907 911 919 929 937 941
-        947 953 967 971 977 983 991 997
-        1009 1013 1019 1021 1031
+        947 953 967 971 977 983 991 997 1009
+        1013 1019 1021 1031 1033 1039 1049 1051
+        1061 1063 1069 1087 1091 1093 1097 1103
+        1109 1117 1123 1129 1151 1153 1163 1171
+        1181 1187 1193 1201 1213 1217 1223 1229
+        1231 1237 1249 1259 1277 1279 1283 1289
     */
 
     // Each list has a product < 2^31
@@ -94,6 +98,20 @@ public class BigInteger
 
         new int[]{ 997, 1009, 1013 },
         new int[]{ 1019, 1021, 1031 },
+        new int[]{ 1033, 1039, 1049 },
+        new int[]{ 1051, 1061, 1063 },
+        new int[]{ 1069, 1087, 1091 },
+
+        new int[]{ 1093, 1097, 1103 },
+        new int[]{ 1109, 1117, 1123 },
+        new int[]{ 1129, 1151, 1153 },
+        new int[]{ 1163, 1171, 1181 },
+        new int[]{ 1187, 1193, 1201 },
+
+        new int[]{ 1213, 1217, 1223 },
+        new int[]{ 1229, 1231, 1237 },
+        new int[]{ 1249, 1259, 1277 },
+        new int[]{ 1279, 1283, 1289 },
     };
 
     private static int[] primeProducts;
@@ -1313,13 +1331,19 @@ public class BigInteger
 
     public BigInteger modInverse(BigInteger m) throws ArithmeticException
     {
-        if (m.sign != 1)
+        if (m.sign < 1)
         {
             throw new ArithmeticException("Modulus must be positive");
         }
 
+        if (m.quickPow2Check())
+        {
+            return modInversePow2(m);
+        }
+
+        BigInteger d = this.remainder(m);
         BigInteger x = new BigInteger();
-        BigInteger gcd = BigInteger.extEuclid(this, m, x, null);
+        BigInteger gcd = BigInteger.extEuclid(d, m, x, null);
 
         if (!gcd.equals(BigInteger.ONE))
         {
@@ -1332,6 +1356,72 @@ public class BigInteger
         }
 
         return x;
+    }
+
+    private BigInteger modInversePow2(BigInteger m)
+    {
+//        assert m.signum() > 0;
+//        assert m.bitCount() == 1;
+
+        if (!testBit(0))
+        {
+            throw new ArithmeticException("Numbers not relatively prime.");
+        }
+
+        int pow = m.bitLength() - 1;
+
+        if (pow <= 64)
+        {
+            long inv = modInverse64(longValue());
+            if (pow < 64)
+            {
+                inv &= (m.longValue() - 1);
+            }
+            return BigInteger.valueOf(inv);
+        }
+
+        BigInteger d = this.remainder(m);
+        BigInteger x = d;
+        int bitsCorrect = 3;
+
+        while (bitsCorrect < pow)
+        {
+            BigInteger t = x.multiply(d).remainder(m);
+            x = x.multiply(TWO.subtract(t)).remainder(m);
+            bitsCorrect <<= 1;
+        }
+
+        if (x.sign < 0)
+        {
+            x = x.add(m);
+        }
+
+        return x;
+    }
+
+    private int modInverse32(int d)
+    {
+        // Newton-Raphson division (roughly)
+        int x = d;        // d.x == 1 mod 2**3
+        x *= 2 - d * x;   // d.x == 1 mod 2**6
+        x *= 2 - d * x;   // d.x == 1 mod 2**12
+        x *= 2 - d * x;   // d.x == 1 mod 2**24
+        x *= 2 - d * x;   // d.x == 1 mod 2**48
+//        assert d * x == 1;
+        return  x;
+    }
+
+    private long modInverse64(long d)
+    {
+        // Newton-Raphson division (roughly)
+        long x = d;       // d.x == 1 mod 2**3
+        x *= 2 - d * x;   // d.x == 1 mod 2**6
+        x *= 2 - d * x;   // d.x == 1 mod 2**12
+        x *= 2 - d * x;   // d.x == 1 mod 2**24
+        x *= 2 - d * x;   // d.x == 1 mod 2**48
+        x *= 2 - d * x;   // d.x == 1 mod 2**96
+//        assert d * x == 1L;
+        return  x;
     }
 
     /**
@@ -1698,14 +1788,7 @@ public class BigInteger
 
 //        assert (d & 1) != 0;
 
-        // Newton-Raphson division (roughly)
-        int x = d;
-        x *= 2 - d * x;
-        x *= 2 - d * x;
-        x *= 2 - d * x;
-        x *= 2 - d * x;
-//        assert d * x == 1;
-        return mQuote = x;
+        return mQuote = modInverse32(d);
     }
 
     /**
@@ -2013,10 +2096,10 @@ public class BigInteger
 
         System.arraycopy(this.magnitude, this.magnitude.length - numWords, result, 0, numWords);
 
-        int hiBits = n % 32;
-        if (hiBits != 0)
+        int excessBits = (numWords << 5) - n;
+        if (excessBits > 0)
         {
-            result[0] &= ~(-1 << hiBits);
+            result[0] &= (-1 >>> excessBits);
         }
 
         return result;

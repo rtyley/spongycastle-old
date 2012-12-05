@@ -1,7 +1,5 @@
 package java.math.test;
 
-import java.math.BigInteger;
-
 import java.security.SecureRandom;
 import org.bouncycastle.util.test.*;
 
@@ -184,6 +182,42 @@ public class BigIntegerTest
         }
     }
 
+    private void testModInverse()
+    {
+        SecureRandom random = new SecureRandom();
+
+        for (int i = 0; i < 10; ++i)
+        {
+            BigInteger p = BigInteger.probablePrime(64, random);
+            BigInteger q = new BigInteger(63, random).add(one);
+            BigInteger inv = q.modInverse(p);
+            BigInteger inv2 = inv.modInverse(p);
+
+            if (!q.equals(inv2))
+            {
+                fail("testModInverse failed symmetry test");
+            }
+            BigInteger check = q.multiply(inv).mod(p); 
+            if (!one.equals(check))
+            {
+                fail("testModInverse - expected: 1  got: " + check);
+            }
+        }
+
+        // ModInverse for powers of 2
+        for (int i = 1; i <= 128; ++i)
+        {
+            BigInteger m = one.shiftLeft(i);
+            BigInteger d = new BigInteger(i, random).setBit(0);
+            BigInteger x = d.modInverse(m);
+            BigInteger check = x.multiply(d).mod(m);
+            if (!one.equals(check))
+            {
+                fail("testModInverse - expected: 1  got: " + check);
+            }
+        }
+    }
+
     private void testNegate()
     {
         if (!zero.equals(zero.negate()))
@@ -346,6 +380,7 @@ public class BigIntegerTest
         setBitTest();
 
         testDivideAndRemainder();
+        testModInverse();
         testNegate();
         testNot();
         testOr();
