@@ -14,6 +14,7 @@ public class AllTests
     {
         TestSuite suite = new TestSuite("util tests");
         suite.addTestSuite(IPTest.class);
+        suite.addTestSuite(BigIntegersTest.class);
         return suite;
     }
 }
