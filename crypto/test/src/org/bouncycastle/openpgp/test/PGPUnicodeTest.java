@@ -125,7 +125,7 @@ public class PGPUnicodeTest
             // XXX The password text file must not have the UTF-8 BOM !
             // Ref: http://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom
 
-			FileInputStream passwordFile = new FileInputStream("testdata/passphrase_cyr.txt");
+			FileInputStream passwordFile = new FileInputStream(getDataHome() + "passphrase_cyr.txt");
 			Reader reader = new InputStreamReader(passwordFile, Charset.forName("UTF-8"));
 			BufferedReader in = new BufferedReader(reader);
 			String passphrase = in.readLine();
