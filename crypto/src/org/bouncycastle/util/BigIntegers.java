@@ -55,7 +55,7 @@ public final class BigIntegers
 
             byte[] tmp = new byte[length];
 
-            System.arraycopy(bytes, 1, tmp, tmp.length - (bytes.length - 1), tmp.length);
+            System.arraycopy(bytes, 1, tmp, tmp.length - (bytes.length - 1), bytes.length - 1);
 
             return tmp;
         }
