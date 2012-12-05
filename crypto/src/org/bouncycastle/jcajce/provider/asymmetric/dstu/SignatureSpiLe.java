@@ -21,7 +21,6 @@ public class SignatureSpiLe
         }
     }
 
-    @Override
     protected byte[] engineSign()
         throws SignatureException
     {
@@ -37,7 +36,6 @@ public class SignatureSpiLe
         }
     }
 
-    @Override
     protected boolean engineVerify(
         byte[] sigBytes)
         throws SignatureException

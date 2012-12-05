@@ -86,7 +86,7 @@ public class RainbowKeyFactorySpi
             }
             catch (Exception e)
             {
-                throw new InvalidKeySpecException(e);
+                throw new InvalidKeySpecException(e.toString());
             }
         }
 
@@ -138,7 +138,7 @@ public class RainbowKeyFactorySpi
             }
             catch (Exception e)
             {
-                throw new InvalidKeySpecException(e);
+                throw new InvalidKeySpecException(e.toString());
             }
         }
 

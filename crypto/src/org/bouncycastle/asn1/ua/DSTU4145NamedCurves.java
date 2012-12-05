@@ -82,7 +82,7 @@ public class DSTU4145NamedCurves
     public static ECDomainParameters getByOID(ASN1ObjectIdentifier oid)
     {
         String oidStr = oid.getId();
-        if (oidStr.contains(oidBase))
+        if (oidStr.startsWith(oidBase))
         {
             int index = Integer.parseInt(oidStr.substring(oidStr.length() - 1));
             return params[index];

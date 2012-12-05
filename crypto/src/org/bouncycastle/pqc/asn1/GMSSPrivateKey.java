@@ -12,6 +12,7 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.pqc.crypto.gmss.GMSSLeaf;
 import org.bouncycastle.pqc.crypto.gmss.GMSSParameters;
@@ -660,24 +661,10 @@ public class GMSSPrivateKey
                           GMSSLeaf[] upperLeaf, GMSSLeaf[] upperTreehashLeaf,
                           int[] minTreehash, byte[][] nextRoot, GMSSRootCalc[] nextNextRoot,
                           byte[][] currentRootSig, GMSSRootSig[] nextRootSig,
-                          GMSSParameters gmssParameterset, Class<? extends Digest> algNames)
+                          GMSSParameters gmssParameterset, AlgorithmIdentifier digestAlg)
     {
-
-        String[] names = null;
-        try
-        {
-            names = new String[]{algNames.newInstance().getAlgorithmName()};
-//			names = new String[]{"SHA1"};
-            this.primitive = encode(index, currentSeed, nextNextSeed, currentAuthPath, nextAuthPath, keep, currentTreehash, nextTreehash, currentStack, nextStack, currentRetain, nextRetain, nextNextLeaf, upperLeaf, upperTreehashLeaf, minTreehash, nextRoot, nextNextRoot, currentRootSig, nextRootSig, gmssParameterset, names);
-        }
-        catch (InstantiationException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IllegalAccessException e)
-        {
-            e.printStackTrace();
-        }
+        AlgorithmIdentifier[] names = new AlgorithmIdentifier[] { digestAlg };
+        this.primitive = encode(index, currentSeed, nextNextSeed, currentAuthPath, nextAuthPath, keep, currentTreehash, nextTreehash, currentStack, nextStack, currentRetain, nextRetain, nextNextLeaf, upperLeaf, upperTreehashLeaf, minTreehash, nextRoot, nextNextRoot, currentRootSig, nextRootSig, gmssParameterset, names);
     }
 
 
@@ -710,8 +697,7 @@ public class GMSSPrivateKey
      * @param nextRootSig       array of signatures of the roots of the next subtree
      *                          (SIG+)
      * @param gmssParameterset  the GMSS Parameterset
-     * @param algNames          An array of strings, containing the name of the used hash
-     *                          function and the name of the corresponding provider
+     * @param algorithms        An array of algorithm identifiers, containing the hash function details
      */
     private ASN1Primitive encode(int[] index, byte[][] currentSeeds,
                                 byte[][] nextNextSeeds, byte[][][] currentAuthPaths,
@@ -723,7 +709,7 @@ public class GMSSPrivateKey
                                 GMSSLeaf[] upperTreehashLeaf, int[] minTreehash, byte[][] nextRoot,
                                 GMSSRootCalc[] nextNextRoot, byte[][] currentRootSig,
                                 GMSSRootSig[] nextRootSig, GMSSParameters gmssParameterset,
-                                String[] algNames)
+                                AlgorithmIdentifier[] algorithms)
     {
 
         ASN1EncodableVector result = new ASN1EncodableVector();
@@ -786,16 +772,12 @@ public class GMSSPrivateKey
         ASN1EncodableVector seqOfStat = new ASN1EncodableVector();
         ASN1EncodableVector seqOfByte = new ASN1EncodableVector();
         ASN1EncodableVector seqOfInt = new ASN1EncodableVector();
-        ASN1EncodableVector seqOfString = new ASN1EncodableVector();
 
         for (int i = 0; i < currentTreehash.length; i++)
         {
             for (int j = 0; j < currentTreehash[i].length; j++)
             {
-                seqOfString.add(new DERIA5String(algNames[0]));
-                seqOfString.add(new DERIA5String(""));
-                seqOfStat.add(new DERSequence(seqOfString));
-                seqOfString = new ASN1EncodableVector();
+                seqOfStat.add(new DERSequence(algorithms[0]));
 
                 int tailLength = currentTreehash[i][j].getStatInt()[1];
 
@@ -846,16 +828,12 @@ public class GMSSPrivateKey
         seqOfStat = new ASN1EncodableVector();
         seqOfByte = new ASN1EncodableVector();
         seqOfInt = new ASN1EncodableVector();
-        seqOfString = new ASN1EncodableVector();
 
         for (int i = 0; i < nextTreehash.length; i++)
         {
             for (int j = 0; j < nextTreehash[i].length; j++)
             {
-                seqOfString.add(new DERIA5String(algNames[0]));
-                seqOfString.add(new DERIA5String(""));
-                seqOfStat.add(new DERSequence(seqOfString));
-                seqOfString = new ASN1EncodableVector();
+                seqOfStat.add(new DERSequence(algorithms[0]));
 
                 int tailLength = nextTreehash[i][j].getStatInt()[1];
 
@@ -991,14 +969,10 @@ public class GMSSPrivateKey
         seqOfStat = new ASN1EncodableVector();
         seqOfByte = new ASN1EncodableVector();
         seqOfInt = new ASN1EncodableVector();
-        seqOfString = new ASN1EncodableVector();
 
         for (int i = 0; i < nextNextLeaf.length; i++)
         {
-            seqOfString.add(new DERIA5String(algNames[0]));
-            seqOfString.add(new DERIA5String(""));
-            seqOfStat.add(new DERSequence(seqOfString));
-            seqOfString = new ASN1EncodableVector();
+            seqOfStat.add(new DERSequence(algorithms[0]));
 
             byte[][] tempByte = nextNextLeaf[i].getStatByte();
             seqOfByte.add(new DEROctetString(tempByte[0]));
@@ -1026,14 +1000,10 @@ public class GMSSPrivateKey
         seqOfStat = new ASN1EncodableVector();
         seqOfByte = new ASN1EncodableVector();
         seqOfInt = new ASN1EncodableVector();
-        seqOfString = new ASN1EncodableVector();
 
         for (int i = 0; i < upperLeaf.length; i++)
         {
-            seqOfString.add(new DERIA5String(algNames[0]));
-            seqOfString.add(new DERIA5String(""));
-            seqOfStat.add(new DERSequence(seqOfString));
-            seqOfString = new ASN1EncodableVector();
+            seqOfStat.add(new DERSequence(algorithms[0]));
 
             byte[][] tempByte = upperLeaf[i].getStatByte();
             seqOfByte.add(new DEROctetString(tempByte[0]));
@@ -1061,14 +1031,10 @@ public class GMSSPrivateKey
         seqOfStat = new ASN1EncodableVector();
         seqOfByte = new ASN1EncodableVector();
         seqOfInt = new ASN1EncodableVector();
-        seqOfString = new ASN1EncodableVector();
 
         for (int i = 0; i < upperTreehashLeaf.length; i++)
         {
-            seqOfString.add(new DERIA5String(algNames[0]));
-            seqOfString.add(new DERIA5String(""));
-            seqOfStat.add(new DERSequence(seqOfString));
-            seqOfString = new ASN1EncodableVector();
+            seqOfStat.add(new DERSequence(algorithms[0]));
 
             byte[][] tempByte = upperTreehashLeaf[i].getStatByte();
             seqOfByte.add(new DEROctetString(tempByte[0]));
@@ -1118,9 +1084,7 @@ public class GMSSPrivateKey
 
         for (int i = 0; i < nextNextRoot.length; i++)
         {
-            seqOfnnRStrings.add(new DERIA5String(algNames[0]));
-            seqOfnnRStrings.add(new DERIA5String(""));
-            seqOfnnRStats.add(new DERSequence(seqOfnnRStrings));
+            seqOfnnRStats.add(new DERSequence(algorithms[0]));
             seqOfnnRStrings = new ASN1EncodableVector();
 
             int heightOfTree = nextNextRoot[i].getStatInt()[0];
@@ -1169,16 +1133,12 @@ public class GMSSPrivateKey
             seqOfStat = new ASN1EncodableVector();
             seqOfByte = new ASN1EncodableVector();
             seqOfInt = new ASN1EncodableVector();
-            seqOfString = new ASN1EncodableVector();
 
             if (nextNextRoot[i].getTreehash() != null)
             {
                 for (int j = 0; j < nextNextRoot[i].getTreehash().length; j++)
                 {
-                    seqOfString.add(new DERIA5String(algNames[0]));
-                    seqOfString.add(new DERIA5String(""));
-                    seqOfStat.add(new DERSequence(seqOfString));
-                    seqOfString = new ASN1EncodableVector();
+                    seqOfStat.add(new DERSequence(algorithms[0]));
 
                     tailLength = nextNextRoot[i].getTreehash()[j].getStatInt()[1];
 
@@ -1267,9 +1227,7 @@ public class GMSSPrivateKey
 
         for (int i = 0; i < nextRootSig.length; i++)
         {
-            seqOfnRSStrings.add(new DERIA5String(algNames[0]));
-            seqOfnRSStrings.add(new DERIA5String(""));
-            seqOfnRSStats.add(new DERSequence(seqOfnRSStrings));
+            seqOfnRSStats.add(new DERSequence(algorithms[0]));
             seqOfnRSStrings = new ASN1EncodableVector();
 
             seqOfnRSBytes.add(new DEROctetString(
@@ -1327,19 +1285,11 @@ public class GMSSPrivateKey
         // --- Encode <names>.
         ASN1EncodableVector namesPart = new ASN1EncodableVector();
 
-        for (int i = 0; i < algNames.length; i++)
+        for (int i = 0; i < algorithms.length; i++)
         {
-            String name = algNames[i];
-            if (name != null)
-            {
-                namesPart.add(new DERIA5String(algNames[i]));
-            }
-            else
-            {
-                namesPart.add(new DERIA5String(""));
-            }
-
+            namesPart.add(algorithms[i]);
         }
+
         result.add(new DERSequence(namesPart));
         return new DERSequence(result);
 

@@ -73,7 +73,7 @@ public class McElieceCCA2KeyFactorySpi
             }
             catch (IOException e)
             {
-                throw new InvalidKeySpecException(e);
+                throw new InvalidKeySpecException(e.toString());
             }
 
 
@@ -145,7 +145,7 @@ public class McElieceCCA2KeyFactorySpi
             }
             catch (IOException e)
             {
-                throw new InvalidKeySpecException("Unable to decode PKCS8EncodedKeySpec", e);
+                throw new InvalidKeySpecException("Unable to decode PKCS8EncodedKeySpec: " + e);
             }
 
             try

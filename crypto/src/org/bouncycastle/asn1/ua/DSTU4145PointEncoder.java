@@ -8,6 +8,7 @@ import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.Arrays;
 
 /**
  * DSTU4145 encodes points somewhat differently than X9.62
@@ -125,7 +126,7 @@ public abstract class DSTU4145PointEncoder
         BigInteger k = BigInteger.valueOf(bytes[bytes.length - 1] & 0x1);
         if (!trace(curve.fromBigInteger(new BigInteger(1, bytes))).equals(curve.getA().toBigInteger()))
         {
-            bytes = bytes.clone();
+            bytes = Arrays.clone(bytes);
             bytes[bytes.length - 1] ^= 0x01;
         }
         ECCurve.F2m c = (ECCurve.F2m)curve;

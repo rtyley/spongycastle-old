@@ -224,7 +224,7 @@ public class IESCipher
 		}
 		catch (Exception e)
 		{
-			throw new InvalidAlgorithmParameterException("cannot recognise parameters: " + e.toString(), e); 
+			throw new InvalidAlgorithmParameterException("cannot recognise parameters: " + e.toString());
 		}
 
 		engineParam = params;    

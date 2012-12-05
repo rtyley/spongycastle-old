@@ -2,6 +2,7 @@ package org.bouncycastle.pqc.crypto.gmss;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.pqc.crypto.gmss.util.GMSSRandom;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 
 
@@ -220,7 +221,7 @@ public class GMSSLeaf
      */
     public byte[] getLeaf()
     {
-        return leaf.clone();
+        return Arrays.clone(leaf);
     }
 
     /**

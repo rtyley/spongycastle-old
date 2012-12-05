@@ -97,7 +97,14 @@ public class BCRainbowPublicKey
      */
     public short[][] getCoeffSingular()
     {
-        return coeffsingular.clone();
+        short[][] copy = new short[coeffsingular.length][];
+
+        for (int i = 0; i != coeffsingular.length; i++)
+        {
+            copy[i] = Arrays.clone(coeffsingular[i]);
+        }
+
+        return copy;
     }
 
 
@@ -106,7 +113,7 @@ public class BCRainbowPublicKey
      */
     public short[] getCoeffScalar()
     {
-        return coeffscalar.clone();
+        return Arrays.clone(coeffscalar);
     }
 
     /**

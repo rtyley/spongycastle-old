@@ -1,10 +1,12 @@
 package org.bouncycastle.openpgp.test;
 
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.Security;
-import java.util.Scanner;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -122,15 +124,13 @@ public class PGPUnicodeTest
 
             // XXX The password text file must not have the UTF-8 BOM !
             // Ref: http://stackoverflow.com/questions/2223882/whats-different-between-utf-8-and-utf-8-without-bom
-            Scanner scanner = new Scanner(new File(getDataHome() + "passphrase_cyr.txt"), "UTF-8");
-            String passphrase = scanner.next();
-            scanner.close();
-//			FileInputStream passwordFile = new FileInputStream("testdata/passphrase_cyr.txt");
-//			Reader reader = new InputStreamReader(passwordFile, Charset.forName("UTF-8"));
-//			BufferedReader in = new BufferedReader(reader);
-//			String passphrase = in.readLine();
-//			in.close();
-//			passwordFile.close();
+
+			FileInputStream passwordFile = new FileInputStream("testdata/passphrase_cyr.txt");
+			Reader reader = new InputStreamReader(passwordFile, Charset.forName("UTF-8"));
+			BufferedReader in = new BufferedReader(reader);
+			String passphrase = in.readLine();
+			in.close();
+			passwordFile.close();
 
             test_key(keyId, passphrase);
 

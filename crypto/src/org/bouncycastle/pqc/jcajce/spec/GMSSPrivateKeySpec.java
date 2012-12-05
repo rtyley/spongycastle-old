@@ -9,12 +9,11 @@ import org.bouncycastle.pqc.crypto.gmss.GMSSParameters;
 import org.bouncycastle.pqc.crypto.gmss.GMSSRootCalc;
 import org.bouncycastle.pqc.crypto.gmss.GMSSRootSig;
 import org.bouncycastle.pqc.crypto.gmss.Treehash;
+import org.bouncycastle.util.Arrays;
 
 
 /**
  * This class provides a specification for a GMSS private key.
- *
- * @see org.bouncycastle.pqc.jcajce.provider.JDKGMSSPrivateKey.GMSSPrivateKey
  */
 public class GMSSPrivateKeySpec
     implements KeySpec
@@ -53,9 +52,6 @@ public class GMSSPrivateKeySpec
     private byte[][] currentRootSig;
     private GMSSRootSig[] nextRootSig;
 
-    private Class<? extends Digest> digestClass;
-
-
     /**
      * @param index             tree indices
      * @param currentSeed       seed for the generation of private OTS keys for the
@@ -83,8 +79,6 @@ public class GMSSPrivateKeySpec
      * @param nextRootSig       array of signatures of the roots of the next subtree
      *                          (SIG+)
      * @param gmssParameterset  the GMSS Parameterset
-     * @param digestClass       An array of strings, containing the name of the used hash
-     *                          function and the name of the corresponding provider
      */
     public GMSSPrivateKeySpec(int[] index, byte[][] currentSeed,
                               byte[][] nextNextSeed, byte[][][] currentAuthPath,
@@ -95,7 +89,7 @@ public class GMSSPrivateKeySpec
                               GMSSLeaf[] upperLeaf, GMSSLeaf[] upperTreehashLeaf,
                               int[] minTreehash, byte[][] nextRoot, GMSSRootCalc[] nextNextRoot,
                               byte[][] currentRootSig, GMSSRootSig[] nextRootSig,
-                              GMSSParameters gmssParameterset, Class<? extends Digest> algNames)
+                              GMSSParameters gmssParameterset)
     {
         this.index = index;
         this.currentSeed = currentSeed;
@@ -118,92 +112,91 @@ public class GMSSPrivateKeySpec
         this.currentRootSig = currentRootSig;
         this.nextRootSig = nextRootSig;
         this.gmssPS = gmssParameterset;
-        this.digestClass = algNames;
     }
 
     public int[] getIndex()
     {
-        return index.clone();
+        return Arrays.clone(index);
     }
 
     public byte[][] getCurrentSeed()
     {
-        return currentSeed.clone();
+        return clone(currentSeed);
     }
 
     public byte[][] getNextNextSeed()
     {
-        return nextNextSeed.clone();
+        return clone(nextNextSeed);
     }
 
     public byte[][][] getCurrentAuthPath()
     {
-        return currentAuthPath.clone();
+        return clone(currentAuthPath);
     }
 
     public byte[][][] getNextAuthPath()
     {
-        return nextAuthPath.clone();
+        return clone(nextAuthPath);
     }
 
     public Treehash[][] getCurrentTreehash()
     {
-        return currentTreehash.clone();
+        return clone(currentTreehash);
     }
 
     public Treehash[][] getNextTreehash()
     {
-        return nextTreehash.clone();
+        return clone(nextTreehash);
     }
 
     public byte[][][] getKeep()
     {
-        return keep.clone();
+        return clone(keep);
     }
 
     public Vector[] getCurrentStack()
     {
-        return currentStack.clone();
+        return clone(currentStack);
     }
 
     public Vector[] getNextStack()
     {
-        return nextStack.clone();
+        return clone(nextStack);
     }
 
     public Vector[][] getCurrentRetain()
     {
-        return currentRetain.clone();
+        return clone(currentRetain);
     }
 
     public Vector[][] getNextRetain()
     {
-        return nextRetain.clone();
+        return clone(nextRetain);
     }
 
     public GMSSLeaf[] getNextNextLeaf()
     {
-        return nextNextLeaf.clone();
+        return clone(nextNextLeaf);
     }
 
     public GMSSLeaf[] getUpperLeaf()
     {
-        return upperLeaf.clone();
+        return clone(upperLeaf);
     }
 
     public GMSSLeaf[] getUpperTreehashLeaf()
     {
-        return upperTreehashLeaf.clone();
+        return clone(upperTreehashLeaf);
     }
 
     public int[] getMinTreehash()
     {
-        return minTreehash.clone();
+        return Arrays.clone(minTreehash);
     }
 
     public GMSSRootSig[] getNextRootSig()
     {
-        return nextRootSig.clone();
+        return clone(nextRootSig);
     }
 
     public GMSSParameters getGmssPS()
@@ -213,23 +206,148 @@ public class GMSSPrivateKeySpec
 
     public byte[][] getNextRoot()
     {
-        return nextRoot.clone();
+        return clone(nextRoot);
     }
 
     public GMSSRootCalc[] getNextNextRoot()
     {
-        return nextNextRoot.clone();
+        return clone(nextNextRoot);
     }
 
     public byte[][] getCurrentRootSig()
     {
-        return currentRootSig.clone();
+        return clone(currentRootSig);
     }
 
-    public Class<? extends Digest> getAlgNames()
+    private static GMSSLeaf[] clone(GMSSLeaf[] data)
     {
-        return digestClass;
+        if (data == null)
+        {
+            return null;
+        }
+        GMSSLeaf[] copy = new GMSSLeaf[data.length];
+
+        System.arraycopy(data, 0, copy, 0, data.length);
+
+        return copy;
     }
 
+    private static GMSSRootCalc[] clone(GMSSRootCalc[] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+        GMSSRootCalc[] copy = new GMSSRootCalc[data.length];
 
+        System.arraycopy(data, 0, copy, 0, data.length);
+
+        return copy;
+    }
+
+    private static GMSSRootSig[] clone(GMSSRootSig[] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+        GMSSRootSig[] copy = new GMSSRootSig[data.length];
+
+        System.arraycopy(data, 0, copy, 0, data.length);
+
+        return copy;
+    }
+
+    private static byte[][] clone(byte[][] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+        byte[][] copy = new byte[data.length][];
+
+        for (int i = 0; i != data.length; i++)
+        {
+            copy[i] = Arrays.clone(data[i]);
+        }
+
+        return copy;
+    }
+
+    private static byte[][][] clone(byte[][][] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+        byte[][][] copy = new byte[data.length][][];
+
+        for (int i = 0; i != data.length; i++)
+        {
+            copy[i] = clone(data[i]);
+        }
+
+        return copy;
+    }
+
+    private static Treehash[] clone(Treehash[] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+        Treehash[] copy = new Treehash[data.length];
+
+        System.arraycopy(data, 0, copy, 0, data.length);
+
+        return copy;
+    }
+
+    private static Treehash[][] clone(Treehash[][] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+        Treehash[][] copy = new Treehash[data.length][];
+
+        for (int i = 0; i != data.length; i++)
+        {
+            copy[i] = clone(data[i]);
+        }
+
+        return copy;
+    }
+
+    private static Vector[] clone(Vector[] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+        Vector[] copy = new Vector[data.length];
+
+        for (int i = 0; i != data.length; i++)
+        {
+            copy[i] = new Vector(data[i]);
+        }
+
+        return copy;
+    }
+
+    private static Vector[][] clone(Vector[][] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+        Vector[][] copy = new Vector[data.length][];
+
+        for (int i = 0; i != data.length; i++)
+        {
+            copy[i] = clone(data[i]);
+        }
+
+        return copy;
+    }
 }

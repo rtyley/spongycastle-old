@@ -32,6 +32,8 @@
                 <exclude name="**/NTRU*.java" />
                 <exclude name="**/IndexGenerator.java" />
                 <exclude name="**/ntru/**/*.java" />
+                <exclude name="**/asymmetric/DSTU*.java" />
+                <exclude name="**/asymmetric/dstu/*.java" />
             </fileset>
             <fileset dir="test/src">
                 <exclude name="**/ECDSA5Test.java" />

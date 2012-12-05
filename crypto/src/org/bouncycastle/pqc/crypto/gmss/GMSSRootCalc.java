@@ -3,6 +3,7 @@ package org.bouncycastle.pqc.crypto.gmss;
 import java.util.Vector;
 
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 
 
@@ -167,10 +168,10 @@ public class GMSSRootCalc
         }
 
         // decode treeH
-        this.treehash = treeH.clone();
+        this.treehash = GMSSUtils.clone(treeH);
 
         // decode ret
-        this.retain = ret.clone();
+        this.retain = GMSSUtils.clone(ret);
     }
 
     /**
@@ -429,7 +430,7 @@ public class GMSSRootCalc
      */
     public byte[][] getAuthPath()
     {
-        return AuthPath.clone();
+        return GMSSUtils.clone(AuthPath);
     }
 
     /**
@@ -439,7 +440,7 @@ public class GMSSRootCalc
      */
     public Treehash[] getTreehash()
     {
-        return treehash.clone();
+        return GMSSUtils.clone(treehash);
     }
 
     /**
@@ -449,7 +450,7 @@ public class GMSSRootCalc
      */
     public Vector[] getRetain()
     {
-        return retain.clone();
+        return GMSSUtils.clone(retain);
     }
 
     /**
@@ -459,7 +460,7 @@ public class GMSSRootCalc
      */
     public byte[] getRoot()
     {
-        return root.clone();
+        return Arrays.clone(root);
     }
 
     /**
@@ -469,7 +470,7 @@ public class GMSSRootCalc
      */
     public Vector getStack()
     {
-        return tailStack;
+        return new Vector(tailStack);
     }
 
     /**

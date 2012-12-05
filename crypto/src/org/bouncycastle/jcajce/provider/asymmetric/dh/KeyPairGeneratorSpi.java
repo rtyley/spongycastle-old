@@ -64,7 +64,7 @@ public class KeyPairGeneratorSpi
     {
         if (!initialised)
         {
-            Integer paramStrength = Integer.valueOf(strength);
+            Integer paramStrength = new Integer(strength);
 
             if (params.containsKey(paramStrength))
             {

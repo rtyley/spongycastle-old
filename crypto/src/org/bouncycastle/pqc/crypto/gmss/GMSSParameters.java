@@ -2,6 +2,8 @@ package org.bouncycastle.pqc.crypto.gmss;
 
 import java.security.InvalidParameterException;
 
+import org.bouncycastle.util.Arrays;
+
 /**
  * This class provides a specification for the GMSS parameters that are used by
  * the GMSSKeyPairGenerator and GMSSSignature classes.
@@ -76,9 +78,9 @@ public class GMSSParameters
 
         if (valid)
         {
-            this.heightOfTrees = heightOfTrees.clone();
-            this.winternitzParameter = winternitzParameter.clone();
-            this.K = K.clone();
+            this.heightOfTrees = Arrays.clone(heightOfTrees);
+            this.winternitzParameter = Arrays.clone(winternitzParameter);
+            this.K = Arrays.clone(K);
         }
         else
         {
@@ -129,7 +131,7 @@ public class GMSSParameters
      */
     public int[] getHeightOfTrees()
     {
-        return heightOfTrees.clone();
+        return Arrays.clone(heightOfTrees);
     }
 
     /**
@@ -141,7 +143,7 @@ public class GMSSParameters
      */
     public int[] getWinternitzParameter()
     {
-        return winternitzParameter.clone();
+        return Arrays.clone(winternitzParameter);
     }
 
     /**
@@ -151,6 +153,6 @@ public class GMSSParameters
      */
     public int[] getK()
     {
-        return K.clone();
+        return Arrays.clone(K);
     }
 }

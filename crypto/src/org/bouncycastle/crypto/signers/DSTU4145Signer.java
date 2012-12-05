@@ -13,6 +13,7 @@ import org.bouncycastle.math.ec.ECAlgorithms;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.Arrays;
 
 /**
  * DSTU 4145-2002
@@ -130,7 +131,7 @@ public class DSTU4145Signer
 
     private static ECFieldElement hash2FieldElement(ECCurve curve, byte[] hash)
     {
-    	byte[] data = hash.clone();
+    	byte[] data = Arrays.clone(hash);
     	reverseBytes(data);
     	BigInteger num = new BigInteger(1, data);
         while (num.bitLength() >= curve.getFieldSize())

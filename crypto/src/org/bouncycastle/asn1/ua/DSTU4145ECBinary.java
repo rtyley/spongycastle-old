@@ -15,6 +15,7 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x9.X9IntegerConverter;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.util.Arrays;
 
 public class DSTU4145ECBinary
     extends ASN1Object
@@ -100,7 +101,7 @@ public class DSTU4145ECBinary
 
     public byte[] getB()
     {
-        return b.getOctets().clone();
+        return Arrays.clone(b.getOctets());
     }
 
     public BigInteger getN()
@@ -110,7 +111,7 @@ public class DSTU4145ECBinary
 
     public byte[] getG()
     {
-        return bp.getOctets().clone();
+        return Arrays.clone(bp.getOctets());
     }
 
     /**

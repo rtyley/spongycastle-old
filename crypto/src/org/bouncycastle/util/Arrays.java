@@ -426,6 +426,19 @@ public final class Arrays
         return copy;
     }
 
+    public static short[] clone(short[] data)
+    {
+        if (data == null)
+        {
+            return null;
+        }
+        short[] copy = new short[data.length];
+
+        System.arraycopy(data, 0, copy, 0, data.length);
+
+        return copy;
+    }
+
     public static BigInteger[] clone(BigInteger[] data)
     {
         if (data == null)
