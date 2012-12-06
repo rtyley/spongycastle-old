@@ -120,16 +120,38 @@ public class BigInteger
 
     private static final int[] ZERO_MAGNITUDE = new int[0];
 
-    public static final BigInteger ZERO = new BigInteger(0, ZERO_MAGNITUDE);
-    public static final BigInteger ONE = valueOf(1);
-    private static final BigInteger TWO = valueOf(2);
-    private static final BigInteger THREE = valueOf(3);
+    private static final BigInteger[] SMALL_CONSTANTS = new BigInteger[17];
+    public static final BigInteger ZERO;
+    public static final BigInteger ONE;
+    public static final BigInteger TWO;
+    public static final BigInteger THREE;
+    public static final BigInteger TEN;
 
     static
     {
+        ZERO = new BigInteger(0, ZERO_MAGNITUDE);
         ZERO.nBits = 0; ZERO.nBitLength = 0;
-        ONE.nBits = 1;  ONE.nBitLength = 1;
-        TWO.nBits = 1;  TWO.nBitLength = 2;
+
+        SMALL_CONSTANTS[0] = ZERO;
+        int numBits = 0;
+        for (int i = 1; i < SMALL_CONSTANTS.length; ++i)
+        {
+            SMALL_CONSTANTS[i] = createValueOf(i);
+
+            // Check for a power of two
+            if ((i & -i) == i)
+            {
+                SMALL_CONSTANTS[i].nBits = 1;
+                ++numBits;
+            }
+
+            SMALL_CONSTANTS[i].nBitLength = numBits;
+        }
+
+        ONE = SMALL_CONSTANTS[1];
+        TWO = SMALL_CONSTANTS[2];
+        THREE = SMALL_CONSTANTS[3];
+        TEN = SMALL_CONSTANTS[10];
 
         primeProducts = new int[primeLists.length];
 
@@ -469,7 +491,8 @@ public class BigInteger
         nextRndBytes(rnd, b);
 
         // strip off any excess bits in the MSB
-        b[0] &= rndMask[8 * nBytes - numBits];
+        int xBits = BITS_PER_BYTE * nBytes - numBits;
+        b[0] &= (byte)(255 >>> xBits);
 
         this.magnitude = makeMagnitude(b, 1);
         this.sign = this.magnitude.length < 1 ? 0 : 1;
@@ -512,8 +535,6 @@ public class BigInteger
         }
     }
 
-    private static final byte[] rndMask = {(byte)255, 127, 63, 31, 15, 7, 3, 1};
-
     public BigInteger(int bitLength, int certainty, Random rnd) throws ArithmeticException
     {
         if (bitLength < 2)
@@ -534,7 +555,7 @@ public class BigInteger
 
         int nBytes = (bitLength + 7) / BITS_PER_BYTE;
         int xBits = BITS_PER_BYTE * nBytes - bitLength;
-        byte mask = rndMask[xBits];
+        byte mask = (byte)(255 >>> xBits);
 
         byte[] b = new byte[nBytes];
 
@@ -1891,15 +1912,30 @@ public class BigInteger
 
     public BigInteger pow(int exp) throws ArithmeticException
     {
-        if (exp < 0)
-            throw new ArithmeticException("Negative exponent");
-        if (sign == 0)
-            return (exp == 0 ? BigInteger.ONE : this);
+        if (exp <= 0)
+        {
+            if (exp < 0)
+                throw new ArithmeticException("Negative exponent");
 
-        BigInteger y, 
-        z;
-        y = BigInteger.ONE;
-        z = this;
+            return ONE;
+        }
+
+        if (sign == 0)
+        {
+            return this;
+        }
+
+        if (quickPow2Check())
+        {
+            long powOf2 = (long)exp * (bitLength() - 1);
+            if (powOf2 > Integer.MAX_VALUE)
+            {
+                throw new ArithmeticException("Result too large");
+            }
+            return ONE.shiftLeft((int)powOf2); 
+        }
+
+        BigInteger y = BigInteger.ONE, z = this;
 
         while (exp != 0)
         {
@@ -2614,22 +2650,6 @@ public class BigInteger
         return new BigInteger(this.sign, mag);
     }
 
-    private int[] createResult(int wordNum)
-    {
-        int[] result;
-        if (magnitude.length < wordNum + 1)
-        {
-            result = new int[wordNum + 1];
-        }
-        else
-        {
-            result = new int[magnitude.length];
-        }
-        
-        System.arraycopy(magnitude, 0, result, result.length - magnitude.length, magnitude.length);
-        return result;
-    }
-        
     public String toString()
     {
         return toString(10);
@@ -2793,11 +2813,16 @@ public class BigInteger
 
     public static BigInteger valueOf(long val)
     {
-        if (val == 0)
+        if (val >= 0 && val < SMALL_CONSTANTS.length)
         {
-            return BigInteger.ZERO;
+            return SMALL_CONSTANTS[(int)val];
         }
 
+        return createValueOf(val);
+    }
+
+    private static BigInteger createValueOf(long val)
+    {
         if (val < 0)
         {
             if (val == Long.MIN_VALUE)

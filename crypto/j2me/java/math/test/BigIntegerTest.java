@@ -1,8 +1,8 @@
 package java.math.test;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import org.bouncycastle.util.test.*;
-
 
 public class BigIntegerTest
     extends SimpleTest
@@ -15,8 +15,6 @@ public class BigIntegerTest
     private static BigInteger one = BigInteger.ONE;
     private static BigInteger two = BigInteger.valueOf(2);
 
-
-    
     public String getName()
     {
         return "BigInteger";
@@ -278,6 +276,15 @@ public class BigIntegerTest
         if (!one.equals(one.pow(123)))
         {
             fail("1 123 equals failed");
+        }
+
+        if (!two.pow(147).equals(one.shiftLeft(147)))
+        {
+            fail("2 pow failed");
+        }
+        if (!one.shiftLeft(7).pow(11).equals(one.shiftLeft(77)))
+        {
+            fail("pow 2 pow failed");
         }
 
         BigInteger n = new BigInteger("1234567890987654321");
