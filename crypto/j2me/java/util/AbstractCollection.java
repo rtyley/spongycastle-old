@@ -242,20 +242,20 @@ public abstract class AbstractCollection
 
     public String toString()
     {
-        String ret = "[";
+        StringBuffer ret = new StringBuffer("[");
         Iterator it = iterator();
         if (it.hasNext())
         {
-            ret += String.valueOf(it.next());
+            ret.append(String.valueOf(it.next()));
         }
         while (it.hasNext())
         {
-            ret += ", ";
-            ret += String.valueOf(it.next());
+            ret.append(", ");
+            ret.append(String.valueOf(it.next()));
 
         }
-        ret += "]";
-        return ret;
+        ret.append("]");
+        return ret.toString();
     }
 
 }

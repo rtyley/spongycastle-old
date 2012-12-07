@@ -2737,11 +2737,11 @@ public class BigInteger
             Stack S = new Stack();
             while (bits > 63)
             {
-                S.push(Long.toOctalString(u.longValue() & mask));
+                S.push(Long.toString((u.longValue() & mask),8));
                 u = u.shiftRight(63);
                 bits -= 63;
             }
-            sb.append(Long.toOctalString(u.longValue()));
+            sb.append(Long.toString(u.longValue(), 8));
             while (!S.empty())
             {
                 appendZeroExtendedString(sb, (String)S.pop(), 21);

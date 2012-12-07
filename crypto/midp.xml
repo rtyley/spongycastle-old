@@ -10,8 +10,8 @@
   
   $RCSfile: midp.xml,v $
   $Author: bouncy $
-  $Date: 2011-02-17 02:22:06 $
-  $Revision: 1.11 $
+  $Date: 2012-12-07 07:24:41 $
+  $Revision: 1.12 $
 -->
 
 <project name="midp" default="init" basedir=".">
@@ -34,7 +34,8 @@
 
 	<!-- ** Private properties -->
 	<property name="midp.root" value="${user.j2me.home}" />
-	<property name="midp.classes" value="${midp.root}/lib/midpapi.zip" />
+	<property name="midp.classes" value="${midp.root}/lib/midp_2.1.jar" />
+	<property name="cldc.classes" value="${midp.root}/lib/cldc_1.1.jar" />
 	<property name="midp.preverify" value="preverify" />
 
 	<property name="midp.emulator" value="emulator" />
@@ -58,6 +59,7 @@
 	<path id="compile.cp">
 		<pathelement location="${master.classes}" />
 		<pathelement location="${midp.classes}" />
+		<pathelement location="${cldc.classes}" />
 	</path>
 
 	<property name="midp.classpath" refid="compile.cp" />
@@ -67,6 +69,7 @@
 	<!-- compile -->
 	<patternset id="j2me.java-compatibility" >
 		<include name="java/**/*.java" />
+		<exclude name="java/**/*Test.java" />
 	</patternset>
 
 	<target name="local-clean" >
@@ -101,20 +104,35 @@
             <fileset dir="${master.src}" >
                 <include name="**/asn1/**/*.java" />
                 <include name="**/crypto/**/*.java" />
+                <include name="**/cert/*.java" />
+                <include name="**/cert/crmf/*.java" />
+                <include name="**/cert/selector/*.java" />
+                <include name="**/cms/**/*.java" />
+                <include name="**/operator/**/*.java" />
                 <include name="**/math/**/*.java" />
                 <include name="**/util/encoders/*.java" />
                 <include name="**/util/test/*.java" />
-                <include name="**/util/Arrays.java" />
-                <include name="**/util/PublicKeyFactory.java" />
-                <include name="**/util/BigIntegers.java" />
-                <include name="**/util/IPAddress.java" />
-                <include name="**/util/Strings.java" />
+                <include name="**/util/*.java" />
                 <include name="**/util/io/StreamOverflowException.java" />
+                <include name="**/util/io/Tee*.java" />
                 <include name="**/util/io/Streams.java" />
                 <include name="**/encoders/*.java" />
 
-                <exclude name="**/crypto/examples/*.java" />
+                <exclude name="**/math/ntru/**/*.java" />
+                <exclude name="**/math/ntru/*.java" />
+                <exclude name="**/crypto/**/*NTRU*.java" />
+                <exclude name="**/crypto/engines/IndexGenerator.java" />
+                
+		<exclude name="**/crypto/examples/*.java" />
+                <exclude name="**/jcajce/**/*.java" />
+                <exclude name="**/bcpg/*.java" />
+                <exclude name="**/openpgp/*.java" />
+                <exclude name="**/cms/CMSAuthenticated*.java" />
+                <exclude name="**/cms/CMSCompressed*.java" />
+                <exclude name="**/cms/CMSProcessableFile.java" />
+                <exclude name="**/cms/*PBE*.java" />
                 <exclude name="**/util/Dump.java" />
+                <exclude name="**/smime/util/*.java" />
                 <exclude name="**/x509/util/Stream*.java" />
                 <exclude name="**/x509/X509Stream*.java" />
             </fileset>
@@ -127,21 +145,21 @@
                 <include name="**/crypto/**/*.java" />
                 <include name="**/math/**/*.java" />
 
+                <exclude name="**/jcajce/**/*.java" />
+                <exclude name="**/bcpg/*.java" />
+                <exclude name="**/openpgp/*.java" />
                 <exclude name="**/AllTests.java" /> 
                 <exclude name="**/tls/test/*.java" /> 
-                <exclude name="**/asn1/test/ASN1SequenceParserTest.java" /> 
-                <exclude name="**/asn1/test/BiometricDataUnitTest.java" /> 
-                <exclude name="**/asn1/test/EqualsAndHashCodeTest.java" /> 
-                <exclude name="**/asn1/test/GenerationTest.java" /> 
-                <exclude name="**/asn1/test/*TimeTest.java" /> 
-                <exclude name="**/asn1/test/OctetStringTest.java" /> 
-                <exclude name="**/asn1/test/ParseTest.java" /> 
-                <exclude name="**/asn1/test/SMIMETest.java" /> 
+                <exclude name="**/asn1/test/*.java" /> 
+                <exclude name="**/crypto/engines/test/*.java" /> 
+                <exclude name="**/*NTRU*.java" /> 
+                <exclude name="**/ntru/**/*.java" /> 
                 <exclude name="**/crypto/test/AESVectorFileTest.java" />
                 <exclude name="**/crypto/test/EAXTest.java" />
                 <exclude name="**/crypto/test/GCMReorderTest.java" />
                 <exclude name="**/crypto/test/HCFamilyVecTest.java" />
                 <exclude name="**/crypto/test/RSABlindedTest.java" />
+                <exclude name="**/crypto/test/SCryptTest.java" />
                 <exclude name="**/util/encoders/test/*.java" />
                 <exclude name="**/math/ec/test/*.java" />
             </fileset>

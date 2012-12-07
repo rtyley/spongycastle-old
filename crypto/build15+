@@ -6,10 +6,13 @@
 # otherwise it just creates the docs and class files.
 #
 
-JDKPATH=/opt/jdk1.5.0   # JDK 1.5 location
-JAVA_MAIL_HOME=/opt/javamail
-JAVA_ACTIVATION_HOME=/opt/jaf
-JUNIT_HOME=/opt/junit
+if [ "${JDKPATH}" = "" ] 
+then
+	JDKPATH=/opt/jdk1.5.0   # JDK 1.5 location
+	JAVA_MAIL_HOME=/opt/javamail
+	JAVA_ACTIVATION_HOME=/opt/jaf
+	JUNIT_HOME=/opt/junit
+fi
 
 JAVA_HOME=$JDKPATH
 export JAVA_HOME
