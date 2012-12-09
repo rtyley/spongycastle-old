@@ -24,21 +24,16 @@ public class Tables1kGCMExponentiator implements GCMExponentiator
     public void exponentiateX(long pow, byte[] output)
     {
         byte[] y = GCMUtil.oneAsBytes();
-        if (pow > 0)
+        int bit = 0;
+        while (pow > 0)
         {
-            int bit = 0;
-            ensureAvailable(63 - numberOfLeadingZeros(pow));
-
-            do
+            if ((pow & 1L) != 0)
             {
-                if ((pow & 1L) != 0)
-                {
-                    GCMUtil.multiply(y, (byte[])lookupPowX2.get(bit));
-                }
-                ++bit;
-                pow >>>= 1;
+                ensureAvailable(bit);
+                GCMUtil.multiply(y, (byte[])lookupPowX2.get(bit));
             }
-            while (pow > 0);
+            ++bit;
+            pow >>>= 1;
         }
 
         System.arraycopy(y, 0, output, 0, 16);
@@ -58,42 +53,5 @@ public class Tables1kGCMExponentiator implements GCMExponentiator
             }
             while (++count <= bit);
         }
-    }
-
-    private int numberOfLeadingZeros(long v)
-    {
-        if (v == 0)
-        {
-            return 64;
-        }
-        int n = 1;
-        int x = (int)(v >>> 32);
-        if (x == 0)
-        {
-            n += 32;
-            x = (int)v;
-        }
-        if (x >>> 16 == 0)
-        {
-            n += 16;
-            x <<= 16;
-        }
-        if (x >>> 24 == 0)
-        {
-            n += 8;
-            x <<= 8;
-        }
-        if (x >>> 28 == 0)
-        {
-            n += 4;
-            x <<= 4;
-        }
-        if (x >>> 30 == 0)
-        {
-            n += 2;
-            x <<= 2;
-        }
-        n -= x >>> 31;
-        return n;
     }
 }
