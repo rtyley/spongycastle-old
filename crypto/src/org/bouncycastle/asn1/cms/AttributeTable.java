@@ -44,6 +44,12 @@ public class AttributeTable
     }
 
     public AttributeTable(
+        Attribute    attr)
+    {
+        addAttribute(attr.getAttrType(), attr);
+    }
+
+    public AttributeTable(
         Attributes    attrs)
     {
         this(ASN1Set.getInstance(attrs.toASN1Primitive()));
