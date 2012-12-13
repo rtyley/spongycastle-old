@@ -27,6 +27,18 @@ public class DERNumericString
             return (DERNumericString)obj;
         }
 
+        if (obj instanceof byte[])
+        {
+            try
+            {
+                return (DERNumericString)fromByteArray((byte[])obj);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("encoding error in getInstance: " + e.toString());
+            }
+        }
+
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 

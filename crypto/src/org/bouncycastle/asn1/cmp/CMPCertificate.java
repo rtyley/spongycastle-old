@@ -41,7 +41,7 @@ public class CMPCertificate
             return (CMPCertificate)o;
         }
 
-        if (o instanceof ASN1Sequence)
+        if (o instanceof ASN1Sequence || o instanceof byte[])
         {
             return new CMPCertificate(Certificate.getInstance(o));
         }

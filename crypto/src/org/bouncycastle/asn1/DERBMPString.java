@@ -27,6 +27,18 @@ public class DERBMPString
             return (DERBMPString)obj;
         }
 
+        if (obj instanceof byte[])
+        {
+            try
+            {
+                return (DERBMPString)fromByteArray((byte[])obj);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("encoding error in getInstance: " + e.toString());
+            }
+        }
+
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 

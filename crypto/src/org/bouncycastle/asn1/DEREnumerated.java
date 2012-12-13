@@ -28,6 +28,18 @@ public class DEREnumerated
             return new ASN1Enumerated(((DEREnumerated)obj).getValue());
         }
 
+        if (obj instanceof byte[])
+        {
+            try
+            {
+                return (ASN1Enumerated)fromByteArray((byte[])obj);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("encoding error in getInstance: " + e.toString());
+            }
+        }
+
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 

@@ -31,7 +31,7 @@ public class PKIFreeText
         }
         else if (obj != null)
         {
-            return new PKIFreeText((ASN1Sequence)obj);
+            return new PKIFreeText(ASN1Sequence.getInstance(obj));
         }
 
         return null;

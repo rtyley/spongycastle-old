@@ -27,6 +27,18 @@ public class DERUTF8String
             return (DERUTF8String)obj;
         }
 
+        if (obj instanceof byte[])
+        {
+            try
+            {
+                return (DERUTF8String)fromByteArray((byte[])obj);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("encoding error in getInstance: " + e.toString());
+            }
+        }
+
         throw new IllegalArgumentException("illegal object in getInstance: "
                 + obj.getClass().getName());
     }

@@ -40,7 +40,7 @@ public class SPUserNotice
         while (e.hasMoreElements())
         {
             ASN1Encodable object = (ASN1Encodable)e.nextElement();
-            if (object instanceof ASN1String)
+            if (object instanceof DisplayText || object instanceof ASN1String)
             {
                 explicitText = DisplayText.getInstance(object);
             }
@@ -50,7 +50,7 @@ public class SPUserNotice
             }
             else
             {
-                throw new IllegalArgumentException("Invalid element in 'SPUserNotice'.");
+                throw new IllegalArgumentException("Invalid element in 'SPUserNotice': " + object.getClass().getName());
             }
         }
     }

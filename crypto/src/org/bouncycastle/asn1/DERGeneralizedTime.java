@@ -36,6 +36,18 @@ public class DERGeneralizedTime
             return new ASN1GeneralizedTime(((DERGeneralizedTime)obj).time);
         }
 
+        if (obj instanceof byte[])
+        {
+            try
+            {
+                return (ASN1GeneralizedTime)fromByteArray((byte[])obj);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("encoding error in getInstance: " + e.toString());
+            }
+        }
+
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 

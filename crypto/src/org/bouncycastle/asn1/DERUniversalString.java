@@ -28,6 +28,18 @@ public class DERUniversalString
             return (DERUniversalString)obj;
         }
 
+        if (obj instanceof byte[])
+        {
+            try
+            {
+                return (DERUniversalString)fromByteArray((byte[])obj);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("encoding error getInstance: " + e.toString());
+            }
+        }
+
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 

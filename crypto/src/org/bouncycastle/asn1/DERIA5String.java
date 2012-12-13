@@ -27,6 +27,18 @@ public class DERIA5String
             return (DERIA5String)obj;
         }
 
+        if (obj instanceof byte[])
+        {
+            try
+            {
+                return (DERIA5String)fromByteArray((byte[])obj);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("encoding error in getInstance: " + e.toString());
+            }
+        }
+
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 

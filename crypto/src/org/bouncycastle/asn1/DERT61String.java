@@ -27,6 +27,18 @@ public class DERT61String
             return (DERT61String)obj;
         }
 
+        if (obj instanceof byte[])
+        {
+            try
+            {
+                return (DERT61String)fromByteArray((byte[])obj);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("encoding error in getInstance: " + e.toString());
+            }
+        }
+
         throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
     }
 

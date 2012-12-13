@@ -399,7 +399,7 @@ public class GetInstanceTest
             fail(clazz.getName() + " equality failed");
         }
 
-        o2 = (ASN1Object)m.invoke(clazz, o1);
+        o2 = (ASN1Object)m.invoke(clazz, o1.getEncoded());
         if (!o1.equals(o2) || !clazz.isInstance(o2))
         {
             fail(clazz.getName() + " encoded equality failed");
