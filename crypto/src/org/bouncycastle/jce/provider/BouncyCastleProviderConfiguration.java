@@ -26,7 +26,7 @@ class BouncyCastleProviderConfiguration
     private ThreadLocal dhThreadSpec = new ThreadLocal();
 
     private volatile ECParameterSpec ecImplicitCaParams;
-    private volatile DHParameterSpec dhDefaultParams;
+    private volatile Object dhDefaultParams;
 
     void setParameter(String parameterName, Object parameter)
     {
@@ -77,16 +77,16 @@ class BouncyCastleProviderConfiguration
         }
         else if (parameterName.equals(ConfigurableProvider.THREAD_LOCAL_DH_DEFAULT_PARAMS))
         {
-            DHParameterSpec dhSpec;
+            Object dhSpec;
 
             if (securityManager != null)
             {
                 securityManager.checkPermission(BC_DH_LOCAL_PERMISSION);
             }
 
-            if (parameter instanceof DHParameterSpec || parameter == null)
+            if (parameter instanceof DHParameterSpec || parameter instanceof DHParameterSpec[] || parameter == null)
             {
-                dhSpec = (DHParameterSpec)parameter;
+                dhSpec = parameter;
             }
             else
             {
@@ -109,13 +109,13 @@ class BouncyCastleProviderConfiguration
                 securityManager.checkPermission(BC_DH_PERMISSION);
             }
 
-            if (parameter instanceof DHParameterSpec || parameter == null)
+            if (parameter instanceof DHParameterSpec || parameter instanceof DHParameterSpec[] || parameter == null)
             {
-                dhDefaultParams = (DHParameterSpec)parameter;
+                dhDefaultParams = parameter;
             }
             else
             {
-                throw new IllegalArgumentException("not a valid DHParameterSpec");
+                throw new IllegalArgumentException("not a valid DHParameterSpec or DHParameterSpec[]");
             }
         }
     }
@@ -132,15 +132,36 @@ class BouncyCastleProviderConfiguration
         return ecImplicitCaParams;
     }
 
-    public DHParameterSpec getDHDefaultParameters()
+    public DHParameterSpec getDHDefaultParameters(int keySize)
     {
-        DHParameterSpec spec = (DHParameterSpec)dhThreadSpec.get();
-
-        if (spec != null)
+        Object params = dhThreadSpec.get();
+        if (params == null)
         {
-            return spec;
+            params = dhDefaultParams;
         }
 
-        return dhDefaultParams;
+        if (params instanceof DHParameterSpec)
+        {
+            DHParameterSpec spec = (DHParameterSpec)params;
+
+            if (spec.getP().bitLength() == keySize)
+            {
+                return spec;
+            }
+        }
+        else if (params instanceof DHParameterSpec[])
+        {
+            DHParameterSpec[] specs = (DHParameterSpec[])params;
+
+            for (int i = 0; i != specs.length; i++)
+            {
+                if (specs[i].getP().bitLength() == keySize)
+                {
+                    return specs[i];
+                }
+            }
+        }
+
+        return null;
     }
 }

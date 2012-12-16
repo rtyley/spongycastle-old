@@ -415,7 +415,7 @@ public class DHTest
 
         new BouncyCastleProvider().setParameter(ConfigurableProvider.DH_DEFAULT_PARAMS, dhParams);
 
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algName, "BC");
+    KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algName, "BC");
 
         keyGen.initialize(dhParams.getP().bitLength());
 
@@ -761,6 +761,108 @@ public class DHTest
         }
     }
 
+    private void testConfig()
+    {
+        ConfigurableProvider prov = new BouncyCastleProvider();
+
+        DHParameterSpec dhSpec512 = new DHParameterSpec(
+            new BigInteger("fca682ce8e12caba26efccf7110e526db078b05edecbcd1eb4a208f3ae1617ae01f35b91a47e6df63413c5e12ed0899bcd132acd50d99151bdc43ee737592e17", 16),
+            new BigInteger("678471b27a9cf44ee91a49c5147db1a9aaf244f05a434d6486931d2d14271b9e35030b71fd73da179069b32e2935630e1c2062354d0da20a6c416e50be794ca4", 16),
+            384);
+
+        DHParameterSpec dhSpec768 = new DHParameterSpec(
+             new BigInteger("e9e642599d355f37c97ffd3567120b8e25c9cd43e927b3a9670fbec5d890141922d2c3b3ad2480093799869d1e846aab49fab0ad26d2ce6a22219d470bce7d777d4a21fbe9c270b57f607002f3cef8393694cf45ee3688c11a8c56ab127a3daf", 16),
+             new BigInteger("30470ad5a005fb14ce2d9dcd87e38bc7d1b1c5facbaecbe95f190aa7a31d23c4dbbcbe06174544401a5b2c020965d8c2bd2171d3668445771f74ba084d2029d83c1c158547f3a9f1a2715be23d51ae4d3e5a1f6a7064f316933a346d3f529252", 16),
+             384);
+
+        DHParameterSpec dhSpec1024 = new DHParameterSpec(
+                    new BigInteger("f7e1a085d69b3ddecbbcab5c36b857b97994afbbfa3aea82f9574c0b3d0782675159578ebad4594fe67107108180b449167123e84c281613b7cf09328cc8a6e13c167a8b547c8d28e0a3ae1e2bb3a675916ea37f0bfa213562f1fb627a01243bcca4f1bea8519089a883dfe15ae59f06928b665e807b552564014c3bfecf492a", 16),
+                    new BigInteger("fd7f53811d75122952df4a9c2eece4e7f611b7523cef4400c31e3f80b6512669455d402251fb593d8d58fabfc5f5ba30f6cb9b556cd7813b801d346ff26660b76b9950a5a49f9fe8047b1022c24fbba9d7feb7c61bf83b57e7c6a8a6150f04fb83f6d3c51ec3023554135a169132f675f3ae2b61d72aeff22203199dd14801c7", 16),
+                    512);
+
+        prov.setParameter(ConfigurableProvider.DH_DEFAULT_PARAMS, dhSpec512);
+
+        if (!dhSpec512.equals(BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(512)))
+        {
+            fail("config mismatch");
+        }
+
+        if (BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(768) != null)
+        {
+            fail("config found when none expected");
+        }
+
+        prov.setParameter(ConfigurableProvider.DH_DEFAULT_PARAMS, new DHParameterSpec[] { dhSpec512, dhSpec768, dhSpec1024 });
+
+        if (!dhSpec512.equals(BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(512)))
+        {
+            fail("512 config mismatch");
+        }
+
+        if (!dhSpec768.equals(BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(768)))
+        {
+            fail("768 config mismatch");
+        }
+
+        if (!dhSpec1024.equals(BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(1024)))
+        {
+            fail("1024 config mismatch");
+        }
+
+        prov.setParameter(ConfigurableProvider.DH_DEFAULT_PARAMS, null);
+
+        if (BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(512) != null)
+        {
+            fail("config found for 512 when none expected");
+        }
+
+        if (BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(768) != null)
+        {
+            fail("config found for 768 when none expected");
+        }
+
+        prov.setParameter(ConfigurableProvider.THREAD_LOCAL_DH_DEFAULT_PARAMS, dhSpec512);
+
+        if (!dhSpec512.equals(BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(512)))
+        {
+            fail("config mismatch");
+        }
+
+        if (BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(768) != null)
+        {
+            fail("config found when none expected");
+        }
+
+        prov.setParameter(ConfigurableProvider.THREAD_LOCAL_DH_DEFAULT_PARAMS, new DHParameterSpec[] { dhSpec512, dhSpec768, dhSpec1024 });
+
+        if (!dhSpec512.equals(BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(512)))
+        {
+            fail("512 config mismatch");
+        }
+
+        if (!dhSpec768.equals(BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(768)))
+        {
+            fail("768 config mismatch");
+        }
+
+        if (!dhSpec1024.equals(BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(1024)))
+        {
+            fail("1024 config mismatch");
+        }
+
+        prov.setParameter(ConfigurableProvider.THREAD_LOCAL_DH_DEFAULT_PARAMS, null);
+
+        if (BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(512) != null)
+        {
+            fail("config found for 512 when none expected");
+        }
+
+        if (BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(768) != null)
+        {
+            fail("config found for 768 when none expected");
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -780,6 +882,7 @@ public class DHTest
         testExceptions();
         testDESAndDESede(g768, p768);
         testInitialise();
+        testConfig();
     }
 
     public static void main(

@@ -72,9 +72,9 @@ public class KeyPairGeneratorSpi
             }
             else
             {
-                DHParameterSpec dhParams = BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters();
+                DHParameterSpec dhParams = BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(strength);
 
-                if (dhParams != null && dhParams.getP().bitLength() == strength)
+                if (dhParams != null)
                 {
                     param = new DHKeyGenerationParameters(random, new DHParameters(dhParams.getP(), dhParams.getG(), null, dhParams.getL()));
                 }

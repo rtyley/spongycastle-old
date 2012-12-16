@@ -71,9 +71,9 @@ public class KeyPairGeneratorSpi
     {
         if (!initialised)
         {
-            DHParameterSpec dhParams = BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters();
+            DHParameterSpec dhParams = BouncyCastleProvider.CONFIGURATION.getDHDefaultParameters(strength);
 
-            if (dhParams != null && dhParams.getP().bitLength() == strength)
+            if (dhParams != null)
             {
                 param = new ElGamalKeyGenerationParameters(random, new ElGamalParameters(dhParams.getP(), dhParams.getG(), dhParams.getL()));
             }

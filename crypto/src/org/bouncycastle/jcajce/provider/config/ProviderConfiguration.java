@@ -8,5 +8,5 @@ public interface ProviderConfiguration
 {
     ECParameterSpec getEcImplicitlyCa();
 
-    DHParameterSpec getDHDefaultParameters();
+    DHParameterSpec getDHDefaultParameters(int keySize);
 }
