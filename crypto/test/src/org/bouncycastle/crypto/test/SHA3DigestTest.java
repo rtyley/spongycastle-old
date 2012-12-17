@@ -4,32 +4,36 @@ import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA3Digest;
 
 /**
- * standard vector test for SHA-512 from FIPS Draft 180-2.
- *
- * Note, the first two vectors are _not_ from the draft, the last three are.
+ * Tiger Digest Test
  */
 public class SHA3DigestTest
     extends DigestTest
 {
-    private static String[] messages =
-    {
+    final static String[] messages = {
         "",
-        "a",
         "abc",
-        "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu"
+        "Tiger",
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-",
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvw",
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ=abcdefghijklmnopqrstuvwxyz+0123456789",
+        "Tiger - A Fast New Hash Function, by Ross Anderson and Eli Biham, proceedings of Fast Software Encryption 3, Cambridge, 1996.",
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-"
     };
-    
-    private static String[] digests =
-    {
-        "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
-        "1f40fc92da241694750979ee6cf582f2d5d7d28e18335de05abc54d0560e0f5302860c652bf08d560252aa5e74210546f369fbbbce8c12cfc7957b2652fe9a75",
-        "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f",
-        "8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909"   
-    };
-    
-    // 1 million 'a'
-    static private String  million_a_digest = "e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b";
 
+    final static String[] digests = {
+        "3293AC630C13F0245F92BBB1766E16167A4E58492DDE73F3",
+        "2AAB1484E8C158F2BFB8C5FF41B57A525129131C957B5F93",
+        "DD00230799F5009FEC6DEBC838BB6A27DF2B9D6F110C7937",
+        "F71C8583902AFB879EDFE610F82C0D4786A3A534504486B5",
+        "38F41D9D9A710A10C3727AC0DEEAA270727D9F926EC10139",
+        "48CEEB6308B87D46E95D656112CDF18D97915F9765658957",
+        "631ABDD103EB9A3D245B6DFD4D77B257FC7439501D1568DD",
+        "C54034E5B43EB8005848A7E0AE6AAC76E4FF590AE715FD25",
+        "C54034E5B43EB8005848A7E0AE6AAC76E4FF590AE715FD25"
+    };
+
+    final static String hash64k = "FDF4F5B35139F48E710E421BE5AF411DE1A8AAC333F26204";
+    
     SHA3DigestTest()
     {
         super(new SHA3Digest(), messages, digests);
@@ -39,7 +43,7 @@ public class SHA3DigestTest
     {
         super.performTest();
         
-        millionATest(million_a_digest);
+        sixtyFourKTest(hash64k);
     }
 
     protected Digest cloneDigest(Digest digest)

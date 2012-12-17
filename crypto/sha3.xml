@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="crypto1.5" default="build" basedir=".">
+
+    <property name="bc.javac.source" value="1.5" />
+    <property name="bc.javac.target" value="1.5" />
+    <property name="build.dir" value="build" />
+    <property name="jdk.name" value="jdk1.5" />
+    <property name="artifacts.dir" value="${build.dir}/artifacts/${jdk.name}" />
+    <property name="src.dir" value="${build.dir}/${jdk.name}" />
+    <property name="target.prefix" value="jdk15on" />
+    <property name="javadoc.args" value="-breakiterator" />
+
+    <target name="init">
+        <mkdir dir="${src.dir}" />
+        <mkdir dir="${artifacts.dir}" />
+        <mkdir dir="${artifacts.dir}/reports" />
+        <mkdir dir="${artifacts.dir}/reports/xml" />
+        <mkdir dir="${artifacts.dir}/reports/html" />
+        <mkdir dir="${artifacts.dir}/jars" />
+        <mkdir dir="${artifacts.dir}/checkstyle" />
+        <copy todir="${src.dir}">
+            <fileset dir="src" includes="**/*.java" />
+            <fileset dir="src" includes="**/*.html" />
+            <fileset dir="src" includes="**/*.properties" />
+            <fileset dir="test/src" includes="**/*.java" />
+            <fileset dir="test/src" includes="**/*.html" />
+            <fileset dir="test/src" includes="**/*.pem" />
+            <fileset dir="test/src" includes="**/*.properties" />
+            <fileset dir="test/data" includes="**/*.message" />
+            <fileset dir="test/data" includes="**/*.eml" />
+            <fileset dir="test/data" includes="**/*.sig" />
+            <fileset dir="test/data" includes="**/*.data" />
+            <fileset dir="test/data" includes="**/*.pem" />
+            <fileset dir="test/data" includes="**/*.p7m" />
+            <fileset dir="test/data" includes="**/*.crt" />
+            <fileset dir="test/data" includes="**/*.crl" />
+            <fileset dir="test/data" includes="**/*.der" />
+            <fileset dir="test/data" includes="**/*.csr" />
+            <fileset dir="test/data" includes="**/*.cer" />
+            <fileset dir="test/data" includes="**/*.cvcert" />
+        </copy>
+    </target>
+    
+    <target name="build" depends="init">
+        <ant antfile="bc+-build.xml" dir="." />
+        <ant antfile="bc+-build.xml" dir="." target="javadoc-lw" />
+        <ant antfile="bc+-build.xml" dir="." target="javadoc-libraries" />
+    </target>
+
+    <target name="build-lw" depends="init">
+        <ant antfile="bc+-build.xml" dir="." target="build-lw" />
+        <ant antfile="bc+-build.xml" dir="." target="javadoc-lw" />
+    </target>
+
+    <target name="build-test" depends="init">
+        <ant antfile="bc+-build.xml" dir="." target="build-test" />
+    </target>
+
+    <target name="test" depends="build-test">
+        <ant antfile="bc+-build.xml" dir="." target="test" />
+    </target>
+
+    <target name="test-lw" depends="build-test">
+        <ant antfile="bc+-build.xml" dir="." target="test-lw" />
+    </target>
+
+    <target name="zip-src">
+        <ant antfile="bc+-build.xml" dir="." target="zip-src" />
+    </target>
+</project>
