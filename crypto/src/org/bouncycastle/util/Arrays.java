@@ -238,7 +238,17 @@ public final class Arrays
             array[i] = value;
         }
     }
-    
+
+    public static void fill(
+        char[] array,
+        char value)
+    {
+        for (int i = 0; i < array.length; i++)
+        {
+            array[i] = value;
+        }
+    }
+
     public static void fill(
         long[] array,
         long value)
@@ -455,6 +465,22 @@ public final class Arrays
     public static byte[] copyOf(byte[] data, int newLength)
     {
         byte[] tmp = new byte[newLength];
+
+        if (newLength < data.length)
+        {
+            System.arraycopy(data, 0, tmp, 0, newLength);
+        }
+        else
+        {
+            System.arraycopy(data, 0, tmp, 0, data.length);
+        }
+
+        return tmp;
+    }
+
+    public static char[] copyOf(char[] data, int newLength)
+    {
+        char[] tmp = new char[newLength];
 
         if (newLength < data.length)
         {
