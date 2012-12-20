@@ -267,80 +267,7 @@ public class RFC4519Style
 
     protected boolean rdnAreEqual(RDN rdn1, RDN rdn2)
     {
-        if (rdn1.isMultiValued())
-        {
-            if (rdn2.isMultiValued())
-            {
-                AttributeTypeAndValue[] atvs1 = rdn1.getTypesAndValues();
-                AttributeTypeAndValue[] atvs2 = rdn2.getTypesAndValues();
-
-                if (atvs1.length != atvs2.length)
-                {
-                    return false;
-                }
-
-                for (int i = 0; i != atvs1.length; i++)
-                {
-                    if (!atvAreEqual(atvs1[i], atvs2[i]))
-                    {
-                        return false;
-                    }
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if (!rdn2.isMultiValued())
-            {
-                return atvAreEqual(rdn1.getFirst(), rdn2.getFirst());
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private boolean atvAreEqual(AttributeTypeAndValue atv1, AttributeTypeAndValue atv2)
-    {
-        if (atv1 == atv2)
-        {
-            return true;
-        }
-
-        if (atv1 == null)
-        {
-            return false;
-        }
-
-        if (atv2 == null)
-        {
-            return false;
-        }
-
-        ASN1ObjectIdentifier o1 = atv1.getType();
-        ASN1ObjectIdentifier o2 = atv2.getType();
-
-        if (!o1.equals(o2))
-        {
-            return false;
-        }
-
-        String v1 = IETFUtils.canonicalize(IETFUtils.valueToString(atv1.getValue()));
-        String v2 = IETFUtils.canonicalize(IETFUtils.valueToString(atv2.getValue()));
-
-        if (!v1.equals(v2))
-        {
-            return false;
-        }
-
-        return true;
+        return IETFUtils.rDNAreEqual(rdn1, rdn2);
     }
 
     // parse backwards
@@ -413,29 +340,7 @@ public class RFC4519Style
                 buf.append(',');
             }
 
-            if (rdns[i].isMultiValued())
-            {
-                AttributeTypeAndValue[] atv = rdns[i].getTypesAndValues();
-                boolean firstAtv = true;
-
-                for (int j = 0; j != atv.length; j++)
-                {
-                    if (firstAtv)
-                    {
-                        firstAtv = false;
-                    }
-                    else
-                    {
-                        buf.append('+');
-                    }
-
-                    IETFUtils.appendTypeAndValue(buf, atv[j], DefaultSymbols);
-                }
-            }
-            else
-            {
-                IETFUtils.appendTypeAndValue(buf, rdns[i].getFirst(), DefaultSymbols);
-            }
+            IETFUtils.appendRDN(buf, rdns[i], DefaultSymbols);
         }
 
         return buf.toString();
