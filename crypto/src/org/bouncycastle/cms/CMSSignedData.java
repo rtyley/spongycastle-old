@@ -2,6 +2,7 @@ package org.bouncycastle.cms;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
@@ -74,7 +75,7 @@ public class CMSSignedData
     
     SignedData              signedData;
     ContentInfo             contentInfo;
-    CMSProcessable          signedContent;
+    CMSTypedData            signedContent;
     SignerInformationStore  signerInfoStore;
     X509Store               attributeStore;
     X509Store               certificateStore;
@@ -144,11 +145,36 @@ public class CMSSignedData
     }
 
     public CMSSignedData(
-        CMSProcessable  signedContent,
+        final CMSProcessable  signedContent,
         ContentInfo     sigData)
         throws CMSException
     {
-        this.signedContent = signedContent;
+        if (signedContent instanceof CMSTypedData)
+        {
+            this.signedContent = (CMSTypedData)signedContent;
+        }
+        else
+        {
+            this.signedContent = new CMSTypedData()
+            {
+                public ASN1ObjectIdentifier getContentType()
+                {
+                    return signedData.getEncapContentInfo().getContentType();
+                }
+
+                public void write(OutputStream out)
+                    throws IOException, CMSException
+                {
+                    signedContent.write(out);
+                }
+
+                public Object getContent()
+                {
+                    return signedContent.getContent();
+                }
+            };
+        }
+
         this.contentInfo = sigData;
         this.signedData = getSignedData();
     }
@@ -176,7 +202,7 @@ public class CMSSignedData
         //
         if (signedData.getEncapContentInfo().getContent() != null)
         {
-            this.signedContent = new CMSProcessableByteArray(
+            this.signedContent = new CMSProcessableByteArray(signedData.getEncapContentInfo().getContentType(),
                     ((ASN1OctetString)(signedData.getEncapContentInfo()
                                                 .getContent())).getOctets());
         }
@@ -498,7 +524,7 @@ public class CMSSignedData
         return signedData.getEncapContentInfo().getContentType().getId();
     }
     
-    public CMSProcessable getSignedContent()
+    public CMSTypedData getSignedContent()
     {
         return signedContent;
     }
