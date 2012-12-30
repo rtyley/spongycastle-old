@@ -452,9 +452,10 @@ public class SHA3Digest implements ExtendedDigest {
     public int doFinal(byte[] out, int outOff) {
         finish();
 
-        //unpackWord(a, out, outOff);
-        //unpackWord(b, out, outOff + 8);
-        //unpackWord(c, out, outOff + 16);
+        // for (int i=0;i<_state.length;i++) {
+        for (int i=0; i < 16; i++) {
+            unpackWord(_state[i], out, outOff + (8*i));
+        }
 
         reset();
 
@@ -484,7 +485,7 @@ public class SHA3Digest implements ExtendedDigest {
 
     @Override
     public int getByteLength() {
-        return 0;
+        return 8;
     }
 
 }
