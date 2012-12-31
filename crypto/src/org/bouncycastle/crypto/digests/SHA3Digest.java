@@ -483,9 +483,13 @@ public class SHA3Digest implements ExtendedDigest {
         _byteCount = 0;
     }
 
-    @Override
-    public int getByteLength() {
-        return 8;
+    /**
+     * Return the size of block that the compression function is applied to in bytes.
+     *
+     * @return internal byte length of a block.
+     */
+    public int getByteLength()
+    {
+        return _x.length * 8;
     }
-
 }
