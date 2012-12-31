@@ -43,7 +43,12 @@ public class BasicConstraints
 
         return null;
     }
-    
+
+    public static BasicConstraints fromExtensions(Extensions extensions)
+    {
+        return BasicConstraints.getInstance(extensions.getExtensionParsedValue(Extension.basicConstraints));
+    }
+
     private BasicConstraints(
         ASN1Sequence   seq)
     {

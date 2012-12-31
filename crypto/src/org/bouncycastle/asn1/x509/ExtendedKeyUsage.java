@@ -46,6 +46,11 @@ public class ExtendedKeyUsage
         return null;
     }
 
+    public static ExtendedKeyUsage fromExtensions(Extensions extensions)
+    {
+        return ExtendedKeyUsage.getInstance(extensions.getExtensionParsedValue(Extension.extendedKeyUsage));
+    }
+
     public ExtendedKeyUsage(
         KeyPurposeId  usage)
     {

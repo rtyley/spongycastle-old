@@ -49,7 +49,12 @@ public class KeyUsage
 
         return null;
     }
-    
+
+    public static KeyUsage fromExtensions(Extensions extensions)
+    {
+        return KeyUsage.getInstance(extensions.getExtensionParsedValue(Extension.keyUsage));
+    }
+
     /**
      * Basic constructor.
      * 

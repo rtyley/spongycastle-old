@@ -59,6 +59,11 @@ public class AuthorityKeyIdentifier
         return null;
     }
 
+    public static AuthorityKeyIdentifier fromExtensions(Extensions extensions)
+    {
+         return AuthorityKeyIdentifier.getInstance(extensions.getExtensionParsedValue(Extension.authorityKeyIdentifier));
+    }
+
     protected AuthorityKeyIdentifier(
         ASN1Sequence   seq)
     {

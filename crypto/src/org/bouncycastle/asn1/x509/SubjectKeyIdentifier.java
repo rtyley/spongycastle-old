@@ -41,6 +41,11 @@ public class SubjectKeyIdentifier
         return null;
     }
 
+    public static SubjectKeyIdentifier fromExtensions(Extensions extensions)
+    {
+        return SubjectKeyIdentifier.getInstance(extensions.getExtensionParsedValue(Extension.subjectKeyIdentifier));
+    }
+
     public SubjectKeyIdentifier(
         byte[] keyid)
     {

@@ -254,10 +254,20 @@ public class CertificateTest
                     if (oid.equals(Extension.subjectKeyIdentifier))
                     {
                         SubjectKeyIdentifier si = SubjectKeyIdentifier.getInstance(extIn.readObject());
+
+                        if (!si.equals(SubjectKeyIdentifier.fromExtensions(ext)))
+                        {
+                            fail("SubjectKeyIdentifier not matched");
+                        }
                     }
                     else if (oid.equals(Extension.keyUsage))
                     {
                         KeyUsage ku = KeyUsage.getInstance(extIn.readObject());
+
+                        if (!ku.equals(KeyUsage.fromExtensions(ext)))
+                        {
+                            fail("KeyUsage not matched");
+                        }
                     }
                     else if (oid.equals(Extension.extendedKeyUsage))
                     {
@@ -267,6 +277,11 @@ public class CertificateTest
                         for (int i = 0; i != sq.size(); i++)
                         {
                             ASN1ObjectIdentifier    p = ASN1ObjectIdentifier.getInstance(KeyPurposeId.getInstance(sq.getObjectAt(i)));
+                        }
+
+                        if (!ku.equals(ExtendedKeyUsage.fromExtensions(ext)))
+                        {
+                            fail("ExtendedKeyUsage not matched");
                         }
                     }
                     else if (oid.equals(Extension.subjectAlternativeName))
@@ -311,10 +326,20 @@ public class CertificateTest
                     else if (oid.equals(Extension.authorityKeyIdentifier))
                     {
                         AuthorityKeyIdentifier    auth = AuthorityKeyIdentifier.getInstance(extIn.readObject());
+
+                        if (!auth.equals(AuthorityKeyIdentifier.fromExtensions(ext)))
+                        {
+                            fail("AuthorityKeyIdentifier not matched");
+                        }
                     }
                     else if (oid.equals(Extension.basicConstraints))
                     {
                         BasicConstraints    bc = BasicConstraints.getInstance(extIn.readObject());
+
+                        if (!bc.equals(BasicConstraints.fromExtensions(ext)))
+                        {
+                            fail("BasicConstraints not matched");
+                        }
                     }
                     else
                     {

@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1Boolean;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -108,6 +109,24 @@ public class Extensions
         ASN1ObjectIdentifier oid)
     {
         return (Extension)extensions.get(oid);
+    }
+
+    /**
+     * return the parsed value of the extension represented by the object identifier
+     * passed in.
+     *
+     * @return the parsed value of the extension if it's present, null otherwise.
+     */
+    public ASN1Encodable getExtensionParsedValue(ASN1ObjectIdentifier oid)
+    {
+        Extension ext = this.getExtension(oid);
+
+        if (ext != null)
+        {
+            return ext.getParsedValue();
+        }
+
+        return null;
     }
 
     /**
