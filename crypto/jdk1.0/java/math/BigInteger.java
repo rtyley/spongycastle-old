@@ -1537,10 +1537,10 @@ public class BigInteger
         // Montgomery exponentiation is only possible if the modulus is odd,
         // but AFAIK, this is always the case for crypto algo's
         boolean useMonty = ((m.magnitude[m.magnitude.length - 1] & 1) == 1);
-        long mQ = 0;
+        int mQ = 0;
         if (useMonty)
         {
-            mQ = m.getMQuote() & IMASK;
+            mQ = m.getMQuote();
 
             // tmp = this * R mod m
             BigInteger tmp = this.shiftLeft(32 * m.magnitude.length).mod(m);
@@ -1825,11 +1825,10 @@ public class BigInteger
      * <br>
      * NOTE: the indices of x, y, m, a different in HAC and in Java
      */
-    private void multiplyMonty(int[] a, int[] x, int[] y, int[] m, long mQuote)
-    // mQuote = -m^(-1) mod b
+    private void multiplyMonty(int[] a, int[] x, int[] y, int[] m, int mDash)
+        // mDash = -m^(-1) mod b
     {
         int n = m.length;
-        int nMinus1 = n - 1;
         long y_0 = y[n - 1] & IMASK;
 
         // 1. a = 0 (Notation: a = (a_{n} a_{n-1} ... a_{0})_{b} )
@@ -1841,25 +1840,31 @@ public class BigInteger
         // 2. for i from 0 to (n - 1) do the following:
         for (int i = n; i > 0; i--)
         {
-
+            long a0 = a[n] & IMASK;
             long x_i = x[i - 1] & IMASK;
 
-            // 2.1 u = ((a[0] + (x[i] * y[0]) * mQuote) mod b
-            long u = ((((a[n] & IMASK) + ((x_i * y_0) & IMASK)) & IMASK) * mQuote) & IMASK;
+            long prod1 = x_i * y_0;
+            long carry = (prod1 & IMASK) + a0;
+
+            // 2.1 u = ((a[0] + (x[i] * y[0]) * mDash) mod b
+            long u = ((int)carry * mDash) & IMASK;
 
             // 2.2 a = (a + x_i * y + u * m) / b
-            long prod1 = x_i * y_0;
             long prod2 = u * (m[n - 1] & IMASK);
-            long tmp = (a[n] & IMASK) + (prod1 & IMASK) + (prod2 & IMASK);
-            long carry = (prod1 >>> 32) + (prod2 >>> 32) + (tmp >>> 32);
-            for (int j = nMinus1; j > 0; j--)
+            carry += (prod2 & IMASK);
+//            assert (int)carry == 0;
+            carry = (carry >>> 32) + (prod1 >>> 32) + (prod2 >>> 32);
+
+            for (int j = n - 2; j >= 0; j--)
             {
-                prod1 = x_i * (y[j - 1] & IMASK);
-                prod2 = u * (m[j - 1] & IMASK);
-                tmp = (a[j] & IMASK) + (prod1 & IMASK) + (prod2 & IMASK) + (carry & IMASK);
-                carry = (carry >>> 32) + (prod1 >>> 32) + (prod2 >>> 32) + (tmp >>> 32);
-                a[j + 1] = (int)tmp; // division by b
+                prod1 = x_i * (y[j] & IMASK);
+                prod2 = u * (m[j] & IMASK);
+
+                carry += (prod1 & IMASK) + (prod2 & IMASK) + (a[j + 1] & IMASK);
+                a[j + 2] = (int)carry;
+                carry = (carry >>> 32) + (prod1 >>> 32) + (prod2 >>> 32);
             }
+
             carry += (a[0] & IMASK);
             a[1] = (int)carry;
             a[0] = (int)(carry >>> 32);
@@ -2737,11 +2742,11 @@ public class BigInteger
             Stack S = new Stack();
             while (bits > 63)
             {
-                S.push(Long.toOctalString(u.longValue() & mask));
+                S.push(Long.toString((u.longValue() & mask),8));
                 u = u.shiftRight(63);
                 bits -= 63;
             }
-            sb.append(Long.toOctalString(u.longValue()));
+            sb.append(Long.toString(u.longValue(), 8));
             while (!S.empty())
             {
                 appendZeroExtendedString(sb, (String)S.pop(), 21);
