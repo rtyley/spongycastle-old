@@ -7,8 +7,10 @@ import java.security.PublicKey;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cryptopro.ECGOST3410NamedCurves;
 import org.bouncycastle.asn1.nist.NISTNamedCurves;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.teletrust.TeleTrusTNamedCurves;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
@@ -128,6 +130,30 @@ public class ECUtil
                 EC5Util.convertPoint(pubKey.getParams(), pubKey.getW(), false),
                             new ECDomainParameters(s.getCurve(), s.getG(), s.getN(), s.getH(), s.getSeed()));
         }
+        else
+        {
+            // see if we can build a key from key.getEncoded()
+            try
+            {
+                byte[] bytes = key.getEncoded();
+
+                if (bytes == null)
+                {
+                    throw new InvalidKeyException("no encoding for EC public key");
+                }
+
+                PublicKey publicKey = BouncyCastleProvider.getPublicKey(SubjectPublicKeyInfo.getInstance(bytes));
+
+                if (publicKey instanceof java.security.interfaces.ECPublicKey)
+                {
+                    return ECUtil.generatePublicKeyParameter(publicKey);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new InvalidKeyException("cannot identify EC public key: " + e.toString());
+            }
+        }
 
         throw new InvalidKeyException("cannot identify EC public key.");
     }
@@ -150,7 +176,39 @@ public class ECUtil
                             k.getD(),
                             new ECDomainParameters(s.getCurve(), s.getG(), s.getN(), s.getH(), s.getSeed()));
         }
-                        
+        else if (key instanceof java.security.interfaces.ECPrivateKey)
+        {
+            java.security.interfaces.ECPrivateKey privKey = (java.security.interfaces.ECPrivateKey)key;
+            ECParameterSpec s = EC5Util.convertSpec(privKey.getParams(), false);
+            return new ECPrivateKeyParameters(
+                            privKey.getS(),
+                            new ECDomainParameters(s.getCurve(), s.getG(), s.getN(), s.getH(), s.getSeed()));
+        }
+        else
+        {
+            // see if we can build a key from key.getEncoded()
+            try
+            {
+                byte[] bytes = key.getEncoded();
+
+                if (bytes == null)
+                {
+                    throw new InvalidKeyException("no encoding for EC private key");
+                }
+
+                PrivateKey privateKey = BouncyCastleProvider.getPrivateKey(PrivateKeyInfo.getInstance(bytes));
+
+                if (privateKey instanceof java.security.interfaces.ECPrivateKey)
+                {
+                    return ECUtil.generatePrivateKeyParameter(privateKey);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new InvalidKeyException("cannot identify EC private key: " + e.toString());
+            }
+        }
+
         throw new InvalidKeyException("can't identify EC private key.");
     }
 

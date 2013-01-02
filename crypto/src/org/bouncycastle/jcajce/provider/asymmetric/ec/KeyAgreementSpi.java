@@ -123,7 +123,7 @@ public class KeyAgreementSpi
         }
         else
         {
-            if (!(key instanceof ECPublicKey))
+            if (!(key instanceof PublicKey))
             {
                 throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
                     + getSimpleName(ECPublicKey.class) + " for doPhase");
@@ -248,7 +248,7 @@ public class KeyAgreementSpi
         }
         else
         {
-            if (!(key instanceof ECPrivateKey))
+            if (!(key instanceof PrivateKey))
             {
                 throw new InvalidKeyException(kaAlgorithm + " key agreement requires "
                     + getSimpleName(ECPrivateKey.class) + " for initialisation");

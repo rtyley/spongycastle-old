@@ -334,9 +334,9 @@ public abstract class BaseWrapCipher
         else if (wrappedKeyAlgorithm.equals("") && wrappedKeyType == Cipher.PRIVATE_KEY)
         {
             /*
-                 * The caller doesn't know the algorithm as it is part of
-                 * the encrypted data.
-                 */
+             * The caller doesn't know the algorithm as it is part of
+             * the encrypted data.
+             */
             try
             {
                 PrivateKeyInfo       in = PrivateKeyInfo.getInstance(encoded);

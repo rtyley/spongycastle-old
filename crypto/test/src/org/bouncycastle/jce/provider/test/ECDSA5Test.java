@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -365,6 +366,289 @@ public class ECDSA5Test
         }
     }
 
+    private void testAdaptiveKeyConversion()
+        throws Exception
+    {
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("ECDSA", "BC");
+
+        kpGen.initialize(new ECGenParameterSpec("prime192v1"));
+
+        KeyPair pair = kpGen.generateKeyPair();
+
+        final PrivateKey privKey = pair.getPrivate();
+        final PublicKey  pubKey = pair.getPublic();
+
+        Signature s = Signature.getInstance("ECDSA", "BC");
+
+        // raw interface tests
+        s.initSign(new PrivateKey()
+        {
+            public String getAlgorithm()
+            {
+                return privKey.getAlgorithm();
+            }
+
+            public String getFormat()
+            {
+                return privKey.getFormat();
+            }
+
+            public byte[] getEncoded()
+            {
+                return privKey.getEncoded();
+            }
+        });
+
+        s.initVerify(new PublicKey()
+        {
+            public String getAlgorithm()
+            {
+                return pubKey.getAlgorithm();
+            }
+
+            public String getFormat()
+            {
+                return pubKey.getFormat();
+            }
+
+            public byte[] getEncoded()
+            {
+                return pubKey.getEncoded();
+            }
+        });
+
+
+        s.initSign(new ECPrivateKey()
+        {
+            public String getAlgorithm()
+            {
+                return privKey.getAlgorithm();
+            }
+
+            public String getFormat()
+            {
+                return privKey.getFormat();
+            }
+
+            public byte[] getEncoded()
+            {
+                return privKey.getEncoded();
+            }
+
+            public BigInteger getS()
+            {
+                return ((ECPrivateKey)privKey).getS();
+            }
+
+            public ECParameterSpec getParams()
+            {
+                return ((ECPrivateKey)privKey).getParams();
+            }
+        });
+
+        s.initVerify(new ECPublicKey()
+        {
+            public String getAlgorithm()
+            {
+                return pubKey.getAlgorithm();
+            }
+
+            public String getFormat()
+            {
+                return pubKey.getFormat();
+            }
+
+            public byte[] getEncoded()
+            {
+                return pubKey.getEncoded();
+            }
+
+            public ECPoint getW()
+            {
+                return ((ECPublicKey)pubKey).getW();
+            }
+
+            public ECParameterSpec getParams()
+            {
+                return ((ECPublicKey)pubKey).getParams();
+            }
+        });
+
+        try
+        {
+            s.initSign(new PrivateKey()
+            {
+                public String getAlgorithm()
+                {
+                    return privKey.getAlgorithm();
+                }
+
+                public String getFormat()
+                {
+                    return privKey.getFormat();
+                }
+
+                public byte[] getEncoded()
+                {
+                    return null;
+                }
+            });
+
+            fail("no exception thrown!!!");
+        }
+        catch (InvalidKeyException e)
+        {
+            // ignore
+        }
+
+        try
+        {
+            s.initVerify(new PublicKey()
+            {
+                public String getAlgorithm()
+                {
+                    return pubKey.getAlgorithm();
+                }
+
+                public String getFormat()
+                {
+                    return pubKey.getFormat();
+                }
+
+                public byte[] getEncoded()
+                {
+                    return null;
+                }
+            });
+
+            fail("no exception thrown!!!");
+        }
+        catch (InvalidKeyException e)
+        {
+            // ignore
+        }
+
+        // try bogus encoding
+        try
+        {
+            s.initSign(new PrivateKey()
+            {
+                public String getAlgorithm()
+                {
+                    return privKey.getAlgorithm();
+                }
+
+                public String getFormat()
+                {
+                    return privKey.getFormat();
+                }
+
+                public byte[] getEncoded()
+                {
+                    return new byte[20];
+                }
+            });
+
+            fail("no exception thrown!!!");
+        }
+        catch (InvalidKeyException e)
+        {
+            // ignore
+        }
+
+        try
+        {
+            s.initVerify(new PublicKey()
+            {
+                public String getAlgorithm()
+                {
+                    return pubKey.getAlgorithm();
+                }
+
+                public String getFormat()
+                {
+                    return pubKey.getFormat();
+                }
+
+                public byte[] getEncoded()
+                {
+                    return new byte[20];
+                }
+            });
+
+            fail("no exception thrown!!!");
+        }
+        catch (InvalidKeyException e)
+        {
+            // ignore
+        }
+
+        // try encoding of wrong key
+        kpGen = KeyPairGenerator.getInstance("RSA", "BC");
+
+        kpGen.initialize(512);
+
+        pair = kpGen.generateKeyPair();
+
+        final PrivateKey privRsa = pair.getPrivate();
+        final PublicKey  pubRsa = pair.getPublic();
+
+        try
+        {
+            s.initSign(new PrivateKey()
+            {
+                public String getAlgorithm()
+                {
+                    return privRsa.getAlgorithm();
+                }
+
+                public String getFormat()
+                {
+                    return privRsa.getFormat();
+                }
+
+                public byte[] getEncoded()
+                {
+                    return privRsa.getEncoded();
+                }
+            });
+
+            fail("no exception thrown!!!");
+
+        }
+        catch (InvalidKeyException e)
+        {
+            // ignore
+        }
+
+        try
+        {
+            s.initVerify(new PublicKey()
+            {
+                public String getAlgorithm()
+                {
+                    return pubRsa.getAlgorithm();
+                }
+
+                public String getFormat()
+                {
+                    return pubRsa.getFormat();
+                }
+
+                public byte[] getEncoded()
+                {
+                    return pubRsa.getEncoded();
+                }
+            });
+
+            fail("no exception thrown!!!");
+        }
+        catch (InvalidKeyException e)
+        {
+            // ignore
+        }
+    }
+
     private void testKeyPairGenerationWithOIDs()
         throws Exception
     {
@@ -428,6 +712,7 @@ public class ECDSA5Test
         throws Exception
     {
         testKeyConversion();
+        testAdaptiveKeyConversion();
         decodeTest();
         testECDSA239bitPrime();
         testECDSA239bitBinary();
