@@ -9,7 +9,8 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
  * Implements the Segmented Integer Counter (SIC) mode on top of a simple
  * block cipher. This mode is also known as CTR mode.
  */
-public class SICBlockCipher implements BlockCipher
+public class SICBlockCipher
+    implements BlockCipher
 {
     private final BlockCipher     cipher;
     private final int             blockSize;
@@ -94,22 +95,10 @@ public class SICBlockCipher implements BlockCipher
           out[outOff + i] = (byte)(counterOut[i] ^ in[inOff + i]);
         }
 
-        int    carry = 1;
-        
-        for (int i = counter.length - 1; i >= 0; i--)
+        // increment counter by 1.
+        for (int i = counter.length - 1; i >= 0 && ++counter[i] == 0; i--)
         {
-            int    x = (counter[i] & 0xff) + carry;
-            
-            if (x > 0xff)
-            {
-                carry = 1;
-            }
-            else
-            {
-                carry = 0;
-            }
-            
-            counter[i] = (byte)x;
+            ; // do nothing - pre-increment and test for 0 in counter does the job.
         }
 
         return counter.length;
