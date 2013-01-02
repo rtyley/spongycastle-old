@@ -18,6 +18,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.cms.CMSCompressedDataStreamGenerator;
+import org.bouncycastle.cms.CMSDigestedData;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
 import org.bouncycastle.cms.CMSTypedStream;
@@ -25,11 +26,30 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.cms.jcajce.JcaX509CertSelectorConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.encoders.Base64;
 
 public class MiscDataStreamTest
     extends TestCase
 {
     private static final String BC = BouncyCastleProvider.PROVIDER_NAME;
+
+    private static byte[] data = Base64.decode(
+        "TUlNRS1WZXJzaW9uOiAxLjAKQ29udGVudC1UeXBlOiBhcHBsaWNhdGlvbi9v" +
+        "Y3RldC1zdHJlYW0KQ29udGVudC1UcmFuc2Zlci1FbmNvZGluZzogYmluYXJ5" +
+        "CkNvbnRlbnQtRGlzcG9zaXRpb246IGF0dGFjaG1lbnQ7IGZpbGVuYW1lPWRv" +
+        "Yy5iaW4KClRoaXMgaXMgYSB2ZXJ5IGh1Z2Ugc2VjcmV0LCBtYWRlIHdpdGgg" +
+        "b3BlbnNzbAoKCgo=");
+
+    private static byte[] digestedData = Base64.decode(
+        "MIIBGAYJKoZIhvcNAQcFoIIBCTCCAQUCAQAwCwYJYIZIAWUDBAIBMIHQBgkq"
+      + "hkiG9w0BBwGggcIEgb9NSU1FLVZlcnNpb246IDEuMApDb250ZW50LVR5cGU6"
+      + "IGFwcGxpY2F0aW9uL29jdGV0LXN0cmVhbQpDb250ZW50LVRyYW5zZmVyLUVu"
+      + "Y29kaW5nOiBiaW5hcnkKQ29udGVudC1EaXNwb3NpdGlvbjogYXR0YWNobWVu"
+      + "dDsgZmlsZW5hbWU9ZG9jLmJpbgoKVGhpcyBpcyBhIHZlcnkgaHVnZSBzZWNy"
+      + "ZXQsIG1hZGUgd2l0aCBvcGVuc3NsCgoKCgQgHLG72tSYW0LgcxOA474iwdCv"
+      + "KyhnaV4RloWTAvkq+do=");
 
     private static final String TEST_MESSAGE = "Hello World!";
     private static String          _signDN;
@@ -207,6 +227,16 @@ public class MiscDataStreamTest
         MessageDigest md = MessageDigest.getInstance("SHA1", BC);
 
         verifySignatures(sp, md.digest(cDataOut.toByteArray()));
+    }
+
+    public void testDigestedData()
+        throws Exception
+    {
+        CMSDigestedData digData = new CMSDigestedData(digestedData);
+
+        assertTrue(Arrays.areEqual(data, (byte[])digData.getDigestedContent().getContent()));
+
+        assertTrue(digData.verify(new JcaDigestCalculatorProviderBuilder().setProvider(BC).build()));
     }
 
     public static Test suite()

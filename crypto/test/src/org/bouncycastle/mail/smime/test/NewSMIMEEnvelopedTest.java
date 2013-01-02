@@ -3,9 +3,11 @@ package org.bouncycastle.mail.smime.test;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -38,6 +40,8 @@ import org.bouncycastle.mail.smime.SMIMEEnvelopedGenerator;
 import org.bouncycastle.mail.smime.SMIMEEnvelopedParser;
 import org.bouncycastle.mail.smime.SMIMEUtil;
 import org.bouncycastle.mail.smime.util.FileBackedMimeBodyPart;
+import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.util.encoders.Base64;
 
 public class NewSMIMEEnvelopedTest 
     extends TestCase
@@ -56,6 +60,16 @@ public class NewSMIMEEnvelopedTest
     private static X509Certificate _reciCert2;
 
     private static boolean         _initialised = false;
+
+    private static final byte[] testMessage = Base64.decode(
+        "TUlNRS1WZXJzaW9uOiAxLjANCkNvbnRlbnQtVHlwZTogbXVsdGlwYXJ0L21peGVkOyANCglib3VuZGFye" +
+        "T0iLS0tLT1fUGFydF8wXzI2MDM5NjM4Ni4xMzUyOTA0NzUwMTMyIg0KQ29udGVudC1MYW5ndWFnZTogZW" +
+        "4NCkNvbnRlbnQtRGVzY3JpcHRpb246IEEgbWFpbCBmb2xsb3dpbmcgdGhlIERJUkVDVCBwcm9qZWN0IHN" +
+        "wZWNpZmljYXRpb25zDQoNCi0tLS0tLT1fUGFydF8wXzI2MDM5NjM4Ni4xMzUyOTA0NzUwMTMyDQpDb250" +
+        "ZW50LVR5cGU6IHRleHQvcGxhaW47IG5hbWU9bnVsbDsgY2hhcnNldD11cy1hc2NpaQ0KQ29udGVudC1Uc" +
+        "mFuc2Zlci1FbmNvZGluZzogN2JpdA0KQ29udGVudC1EaXNwb3NpdGlvbjogaW5saW5lOyBmaWxlbmFtZT" +
+        "1udWxsDQoNCkNpYW8gZnJvbSB2aWVubmENCi0tLS0tLT1fUGFydF8wXzI2MDM5NjM4Ni4xMzUyOTA0NzU" +
+        "wMTMyLS0NCg==");
 
     private static void init()
         throws Exception
@@ -113,6 +127,12 @@ public class NewSMIMEEnvelopedTest
         throws Exception
     {
         return (X509Certificate)CertificateFactory.getInstance("X.509", BC).generateCertificate(getClass().getResourceAsStream(name));
+    }
+
+    private PrivateKey loadKey(String name)
+        throws Exception
+    {
+        return ((KeyPair)(new PEMReader(new InputStreamReader(getClass().getResourceAsStream(name)))).readObject()).getPrivate();
     }
 
     public void testHeaders()
@@ -274,6 +294,60 @@ public class NewSMIMEEnvelopedTest
         RecipientInformationStore store = env.getRecipientInfos();
 
         assertNotNull(store.get(new JceKeyTransRecipientId(loadCert("dotnet_enc_cert.pem"))));
+    }
+
+    public void testAES128()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("test128.message");
+
+        SMIMEEnveloped env = new SMIMEEnveloped(message);
+
+        RecipientInformationStore store = env.getRecipientInfos();
+
+        RecipientInformation recipInfo = store.get(new JceKeyTransRecipientId(loadCert("cert.pem")));
+
+        assertNotNull(recipInfo);
+
+        byte[] content = recipInfo.getContent(new JceKeyTransEnvelopedRecipient(loadKey("key.pem")));
+
+        assertTrue(org.bouncycastle.util.Arrays.areEqual(testMessage, content));
+    }
+
+    public void testAES192()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("test192.message");
+
+        SMIMEEnveloped env = new SMIMEEnveloped(message);
+
+        RecipientInformationStore store = env.getRecipientInfos();
+
+        RecipientInformation recipInfo = store.get(new JceKeyTransRecipientId(loadCert("cert.pem")));
+
+        assertNotNull(recipInfo);
+
+        byte[] content = recipInfo.getContent(new JceKeyTransEnvelopedRecipient(loadKey("key.pem")));
+
+        assertTrue(org.bouncycastle.util.Arrays.areEqual(testMessage, content));
+    }
+
+    public void testAES256()
+        throws Exception
+    {
+        MimeMessage message = loadMessage("test256.message");
+
+        SMIMEEnveloped env = new SMIMEEnveloped(message);
+
+        RecipientInformationStore store = env.getRecipientInfos();
+
+        RecipientInformation recipInfo = store.get(new JceKeyTransRecipientId(loadCert("cert.pem")));
+
+        assertNotNull(recipInfo);
+
+        byte[] content = recipInfo.getContent(new JceKeyTransEnvelopedRecipient(loadKey("key.pem")));
+
+        assertTrue(org.bouncycastle.util.Arrays.areEqual(testMessage, content));
     }
 
     public void testCapEncrypt()
