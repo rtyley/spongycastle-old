@@ -2199,7 +2199,7 @@ public class RFC3280CertPathUtilities
         }
         if (!criticalExtensions.isEmpty())
         {
-            throw new ExtCertPathValidatorException("Certificate has unsupported critical extension.", null, certPath,
+            throw new ExtCertPathValidatorException("Certificate has unsupported critical extension: " + criticalExtensions, null, certPath,
                 index);
         }
     }
@@ -2380,7 +2380,7 @@ public class RFC3280CertPathUtilities
 
         if (!criticalExtensions.isEmpty())
         {
-            throw new ExtCertPathValidatorException("Certificate has unsupported critical extension", null, certPath,
+            throw new ExtCertPathValidatorException("Certificate has unsupported critical extension: " + criticalExtensions, null, certPath,
                 index);
         }
     }
