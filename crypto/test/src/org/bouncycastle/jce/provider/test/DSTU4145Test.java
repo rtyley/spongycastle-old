@@ -23,14 +23,12 @@ public class DSTU4145Test
     extends SimpleTest
 {
 
-    @Override
     public String getName()
     {
 
         return "DSTU4145";
     }
 
-    @Override
     public void performTest()
         throws Exception
     {
