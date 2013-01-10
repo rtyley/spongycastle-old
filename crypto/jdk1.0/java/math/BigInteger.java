@@ -1677,10 +1677,8 @@ public class BigInteger
 
         if (useMonty)
         {
-            // Return y * R^(-1) mod m by doing y * 1 * R^(-1) mod m
-            zero(zVal);
-            zVal[zVal.length - 1] = 1;
-            multiplyMonty(yAccum, yVal, zVal, m.magnitude, mQ, false);
+            // Return y * R^(-1) mod m
+            montgomeryReduce(yVal, m.magnitude, mQ);
         }
 
         BigInteger result = new BigInteger(1, yVal);
@@ -1817,6 +1815,40 @@ public class BigInteger
 //        assert (d & 1) != 0;
 
         return mQuote = modInverse32(d);
+    }
+
+    private void montgomeryReduce(int[] x, int[] m, int mDash) // mDash = -m^(-1) mod b
+    {
+        // NOTE: Not a general purpose reduction (which would allow x up to twice the bitlength of m)
+//        assert x.length == m.length;
+
+        int n = m.length;
+
+        for (int i = n - 1; i >= 0; --i)
+        {
+            int x0 = x[n - 1];
+
+            long t = (x0 * mDash) & IMASK;
+
+            long carry = t * (m[n - 1] & IMASK) + (x0 & IMASK);
+//          assert (int)carry == 0;
+            carry >>>= 32;
+
+            for (int j = n - 2; j >= 0; --j)
+            {
+                carry += t * (m[j] & IMASK) + (x[j] & IMASK);
+                x[j + 1] = (int)carry;
+                carry >>>= 32;
+            }
+
+            x[0] = (int)carry;
+//            assert carry >>> 32 == 0;
+        }
+
+        if (compareTo(0, x, 0, m) >= 0)
+        {
+            subtract(0, x, 0, m);
+        }
     }
 
     /**
