@@ -1261,6 +1261,10 @@ public class BigInteger
         BigInteger r = nMinusOne.shiftRight(s);
 
         Random random = new Random();
+
+        BigInteger montRadix = ONE.shiftLeft(32 * n.magnitude.length).remainder(n);
+        BigInteger minusMontRadix = null;
+
         do
         {
             BigInteger a;
@@ -1271,21 +1275,27 @@ public class BigInteger
             }
             while (a.compareTo(ONE) <= 0 || a.compareTo(nMinusOne) >= 0);
 
-            BigInteger y = a.modPow(r, n);
+            // NOTE: We avoid conversion to/from Montgomery form and check for R/-R as result instead
+            BigInteger y = a.modPow(r, n, false);
 
-            if (!y.equals(ONE))
+            if (!y.equals(montRadix))
             {
+                if (minusMontRadix == null)
+                {
+                    minusMontRadix = n.subtract(montRadix);
+                }
+
                 int j = 0;
-                while (!y.equals(nMinusOne))
+                while (!y.equals(minusMontRadix))
                 {
                     if (++j == s)
                     {
                         return false;
                     }
 
-                    y = y.modPow(TWO, n);
+                    y = y.modPow(TWO, n, false);
 
-                    if (y.equals(ONE))
+                    if (y.equals(montRadix))
                     {
                         return false;
                     }
@@ -1511,6 +1521,11 @@ public class BigInteger
 
     public BigInteger modPow(BigInteger exponent, BigInteger m) throws ArithmeticException
     {
+        return modPow(exponent, m, true);
+    }
+
+    private BigInteger modPow(BigInteger exponent, BigInteger m, boolean convert) throws ArithmeticException
+    {
         if (m.sign < 1)
         {
             throw new ArithmeticException("Modulus must be positive");
@@ -1549,7 +1564,11 @@ public class BigInteger
             smallMontyModulus = m.bitLength() + 2 <= powR;
 
             // tmp = this * R mod m
-            BigInteger tmp = this.shiftLeft(powR).mod(m);
+            BigInteger tmp = this;
+            if (convert)
+            {
+                tmp = tmp.shiftLeft(powR).mod(m);
+            }
 
             zVal = tmp.magnitude;
 
@@ -1677,8 +1696,15 @@ public class BigInteger
 
         if (useMonty)
         {
-            // Return y * R^(-1) mod m
-            montgomeryReduce(yVal, m.magnitude, mQ);
+            if (convert)
+            {
+                // Return y * R^(-1) mod m
+                montgomeryReduce(yVal, m.magnitude, mQ);
+            }
+            else if (smallMontyModulus && compareTo(0, yVal, 0, m.magnitude) >= 0)
+            {
+                subtract(0, yVal, 0, m.magnitude);
+            }
         }
 
         BigInteger result = new BigInteger(1, yVal);
