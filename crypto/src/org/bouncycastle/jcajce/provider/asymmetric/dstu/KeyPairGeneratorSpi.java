@@ -154,12 +154,14 @@ public class KeyPairGeneratorSpi
     {
         if (!initialised)
         {
-            throw new IllegalStateException("EC Key Pair Generator not initialised");
+            throw new IllegalStateException("DSTU Key Pair Generator not initialised");
         }
 
         AsymmetricCipherKeyPair pair = engine.generateKeyPair();
         ECPublicKeyParameters pub = (ECPublicKeyParameters)pair.getPublic();
         ECPrivateKeyParameters priv = (ECPrivateKeyParameters)pair.getPrivate();
+
+        pub = new ECPublicKeyParameters(pub.getQ().negate(), pub.getParameters());
 
         if (ecParams instanceof ECParameterSpec)
         {
