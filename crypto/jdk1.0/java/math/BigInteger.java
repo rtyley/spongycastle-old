@@ -1644,10 +1644,7 @@ public class BigInteger
             {
                 if (useMonty)
                 {
-                    // Montgomery square algo doesn't exist, and a normal
-                    // square followed by a Montgomery reduction proved to
-                    // be almost as heavy as a Montgomery mulitply.
-                    multiplyMonty(yAccum, yVal, yVal, m.magnitude, mQ, smallMontyModulus);
+                    squareMonty(yAccum, yVal, m.magnitude, mQ, smallMontyModulus);
                 }
                 else
                 {
@@ -1681,7 +1678,7 @@ public class BigInteger
             {
                 if (useMonty)
                 {
-                    multiplyMonty(yAccum, yVal, yVal, m.magnitude, mQ, smallMontyModulus);
+                    squareMonty(yAccum, yVal, m.magnitude, mQ, smallMontyModulus);
                 }
                 else
                 {
@@ -1942,6 +1939,86 @@ public class BigInteger
         }
 
         // put the result in x
+        System.arraycopy(a, 1, x, 0, n);
+    }
+
+    private void squareMonty(int[] a, int[] x, int[] m, int mDash, boolean smallMontyModulus) // mDash = -m^(-1) mod b
+    {
+        int n = m.length;
+
+        long x0 = x[n - 1] & IMASK;
+
+        {
+            long carry = x0 * x0;
+            long u = ((int)carry * mDash) & IMASK;
+
+            long prod1, prod2 = u * (m[n - 1] & IMASK);
+            carry += (prod2 & IMASK);
+//            assert (int)carry == 0;
+            carry = (carry >>> 32) + (prod2 >>> 32);
+//            assert carry <= (IMASK << 1);
+
+            for (int j = n - 2; j >= 0; --j)
+            {
+                prod1 = x0 * (x[j] & IMASK);
+                prod2 = u * (m[j] & IMASK);
+
+                carry += ((prod1 & IMASK) << 1) + (prod2 & IMASK);
+                a[j + 2] = (int)carry;
+                carry = (carry >>> 32) + ((prod1 >>> 32) << 1) + (prod2 >>> 32);
+            }
+
+            a[1] = (int)carry;
+            a[0] = (int)(carry >>> 32);
+        }
+
+        for (int i = n - 2; i >= 0; --i)
+        {
+            int a0 = a[n];
+            long u = (a0 * mDash) & IMASK;
+
+            long carry = u * (m[n - 1] & IMASK) + (a0 & IMASK);
+//            assert (int)carry == 0;
+            carry >>>= 32;
+
+            for (int j = n - 2; j > i; --j)
+            {
+                carry += u * (m[j] & IMASK) + (a[j + 1] & IMASK);
+                a[j + 2] = (int)carry;
+                carry >>>= 32;
+            }
+
+            long xi = x[i] & IMASK;
+
+            {
+                long prod1 = xi * xi;
+                long prod2 = u * (m[i] & IMASK);
+
+                carry += (prod1 & IMASK) + (prod2 & IMASK) + (a[i + 1] & IMASK);
+                a[i + 2] = (int)carry;
+                carry = (carry >>> 32) + (prod1 >>> 32) + (prod2 >>> 32);
+            }
+
+            for (int j = i - 1; j >= 0; --j)
+            {
+                long prod1 = xi * (x[j] & IMASK);
+                long prod2 = u * (m[j] & IMASK);
+
+                carry += ((prod1 & IMASK) << 1) + (prod2 & IMASK) + (a[j + 1] & IMASK);
+                a[j + 2] = (int)carry;
+                carry = (carry >>> 32) + ((prod1 >>> 32) << 1) + (prod2 >>> 32);
+            }
+
+            carry += (a[0] & IMASK);
+            a[1] = (int)carry;
+            a[0] = (int)(carry >>> 32);
+        }
+
+        if (!smallMontyModulus && compareTo(0, a, 0, m) >= 0)
+        {
+            subtract(0, a, 0, m);
+        }
+
         System.arraycopy(a, 1, x, 0, n);
     }
 
