@@ -1536,24 +1536,31 @@ public class BigInteger
 
         // Montgomery exponentiation is only possible if the modulus is odd,
         // but AFAIK, this is always the case for crypto algo's
-        boolean useMonty = ((m.magnitude[m.magnitude.length - 1] & 1) == 1);
+        int n = m.magnitude.length;
+        boolean useMonty = ((m.magnitude[n - 1] & 1) == 1);
+        boolean smallMontyModulus = false;
         int mQ = 0;
+
         if (useMonty)
         {
             mQ = m.getMQuote();
 
+            int powR = 32 * n;
+            smallMontyModulus = m.bitLength() + 2 <= powR;
+
             // tmp = this * R mod m
-            BigInteger tmp = this.shiftLeft(32 * m.magnitude.length).mod(m);
+            BigInteger tmp = this.shiftLeft(powR).mod(m);
+
             zVal = tmp.magnitude;
 
-            useMonty = (zVal.length <= m.magnitude.length);
+            useMonty = (zVal.length <= n);
 
             if (useMonty)
             {
-                yAccum = new int[m.magnitude.length + 1];
-                if (zVal.length < m.magnitude.length)
+                yAccum = new int[n + 1];
+                if (zVal.length < n)
                 {
-                    int[] longZ = new int[m.magnitude.length];
+                    int[] longZ = new int[n];
                     System.arraycopy(zVal, 0, longZ, longZ.length - zVal.length, zVal.length);
                     zVal = longZ;  
                 }
@@ -1562,10 +1569,10 @@ public class BigInteger
 
         if (!useMonty)
         {
-            if (magnitude.length <= m.magnitude.length)
+            if (magnitude.length <= n)
             {
-                //zAccum = new int[m.magnitude.length * 2];
-                zVal = new int[m.magnitude.length];
+                //zAccum = new int[n * 2];
+                zVal = new int[n];
 
                 System.arraycopy(magnitude, 0, zVal, zVal.length - magnitude.length,
                         magnitude.length);
@@ -1577,17 +1584,17 @@ public class BigInteger
                 //
                 BigInteger tmp = this.remainder(m);
 
-                //zAccum = new int[m.magnitude.length * 2];
-                zVal = new int[m.magnitude.length];
+                //zAccum = new int[n * 2];
+                zVal = new int[n];
 
                 System.arraycopy(tmp.magnitude, 0, zVal, zVal.length - tmp.magnitude.length,
                         tmp.magnitude.length);
             }
 
-            yAccum = new int[m.magnitude.length * 2];
+            yAccum = new int[n * 2];
         }
 
-        yVal = new int[m.magnitude.length];
+        yVal = new int[n];
 
         //
         // from LSW to MSW
@@ -1621,7 +1628,7 @@ public class BigInteger
                     // Montgomery square algo doesn't exist, and a normal
                     // square followed by a Montgomery reduction proved to
                     // be almost as heavy as a Montgomery mulitply.
-                    multiplyMonty(yAccum, yVal, yVal, m.magnitude, mQ);
+                    multiplyMonty(yAccum, yVal, yVal, m.magnitude, mQ, smallMontyModulus);
                 }
                 else
                 {
@@ -1636,7 +1643,7 @@ public class BigInteger
                 {
                     if (useMonty)
                     {
-                        multiplyMonty(yAccum, yVal, zVal, m.magnitude, mQ);
+                        multiplyMonty(yAccum, yVal, zVal, m.magnitude, mQ, smallMontyModulus);
                     }
                     else
                     {
@@ -1655,7 +1662,7 @@ public class BigInteger
             {
                 if (useMonty)
                 {
-                    multiplyMonty(yAccum, yVal, yVal, m.magnitude, mQ);
+                    multiplyMonty(yAccum, yVal, yVal, m.magnitude, mQ, smallMontyModulus);
                 }
                 else
                 {
@@ -1673,7 +1680,7 @@ public class BigInteger
             // Return y * R^(-1) mod m by doing y * 1 * R^(-1) mod m
             zero(zVal);
             zVal[zVal.length - 1] = 1;
-            multiplyMonty(yAccum, yVal, zVal, m.magnitude, mQ);
+            multiplyMonty(yAccum, yVal, zVal, m.magnitude, mQ, false);
         }
 
         BigInteger result = new BigInteger(1, yVal);
@@ -1825,7 +1832,7 @@ public class BigInteger
      * <br>
      * NOTE: the indices of x, y, m, a different in HAC and in Java
      */
-    private void multiplyMonty(int[] a, int[] x, int[] y, int[] m, int mDash)
+    private void multiplyMonty(int[] a, int[] x, int[] y, int[] m, int mDash, boolean smallMontyModulus)
         // mDash = -m^(-1) mod b
     {
         int n = m.length;
@@ -1871,7 +1878,7 @@ public class BigInteger
         }
 
         // 3. if x >= m the x = x - m
-        if (compareTo(0, a, 0, m) >= 0)
+        if (!smallMontyModulus && compareTo(0, a, 0, m) >= 0)
         {
             subtract(0, a, 0, m);
         }
