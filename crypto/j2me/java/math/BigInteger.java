@@ -1191,21 +1191,18 @@ public class BigInteger
 
     public int intValue()
     {
-        if (magnitude.length == 0)
+        if (sign == 0)
         {
             return 0;
         }
 
-        if (sign < 0)
-        {
-            return -magnitude[magnitude.length - 1];
-        }
-        else
-        {
-            return magnitude[magnitude.length - 1];
-        }
+        int n = magnitude.length;
+
+        int val = magnitude[n - 1];
+
+        return sign < 0 ? -val : val;
     }
-    
+
     public byte byteValue()
     {
         return (byte)intValue();
@@ -1311,31 +1308,20 @@ public class BigInteger
 
     public long longValue()
     {
-        long val = 0;
-
-        if (magnitude.length == 0)
+        if (sign == 0)
         {
             return 0;
         }
 
-        if (magnitude.length > 1)
+        int n = magnitude.length;
+
+        long val = magnitude[n - 1] & IMASK;
+        if (n > 1)
         {
-            val = ((long)magnitude[magnitude.length - 2] << 32)
-                    | (magnitude[magnitude.length - 1] & IMASK);
-        }
-        else
-        {
-            val = (magnitude[magnitude.length - 1] & IMASK);
+            val |= (magnitude[n - 2] & IMASK) << 32;
         }
 
-        if (sign < 0)
-        {
-            return -val;
-        }
-        else
-        {
-            return val;
-        }
+        return sign < 0 ? -val : val;
     }
 
     public BigInteger max(BigInteger val)
