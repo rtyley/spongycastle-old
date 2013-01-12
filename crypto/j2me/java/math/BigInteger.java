@@ -803,47 +803,43 @@ public class BigInteger
         5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5,
         6, 6, 7, 6, 7, 7, 8};
 
-    private int bitLength(int indx, int[] mag)
+    private static int calcBitLength(int sign, int indx, int[] mag)
     {
-        int bitLength;
-
         if (mag.length == 0)
         {
             return 0;
         }
-        else
+
+        while (indx != mag.length && mag[indx] == 0)
         {
-            while (indx != mag.length && mag[indx] == 0)
+            indx++;
+        }
+
+        if (indx == mag.length)
+        {
+            return 0;
+        }
+
+        // bit length for everything after the first int
+        int bitLength = 32 * ((mag.length - indx) - 1);
+
+        // and determine bitlength of first int
+        bitLength += bitLen(mag[indx]);
+
+        if (sign < 0)
+        {
+            // Check if magnitude is a power of two
+            boolean pow2 = ((bitCounts[mag[indx] & 0xff])
+                    + (bitCounts[(mag[indx] >> 8) & 0xff])
+                    + (bitCounts[(mag[indx] >> 16) & 0xff])
+                    + (bitCounts[(mag[indx] >> 24) & 0xff])) == 1;
+
+            for (int i = indx + 1; i < mag.length && pow2; i++)
             {
-                indx++;
+                pow2 = (mag[i] == 0);
             }
 
-            if (indx == mag.length)
-            {
-                return 0;
-            }
-
-            // bit length for everything after the first int
-            bitLength = 32 * ((mag.length - indx) - 1);
-
-            // and determine bitlength of first int
-            bitLength += bitLen(mag[indx]);
-
-            if (sign < 0)
-            {
-                // Check if magnitude is a power of two
-                boolean pow2 = ((bitCounts[mag[indx] & 0xff])
-                        + (bitCounts[(mag[indx] >> 8) & 0xff])
-                        + (bitCounts[(mag[indx] >> 16) & 0xff])
-                        + (bitCounts[(mag[indx] >> 24) & 0xff])) == 1;
-
-                for (int i = indx + 1; i < mag.length && pow2; i++)
-                {
-                    pow2 = (mag[i] == 0);
-                }
-
-                bitLength -= (pow2 ? 1 : 0);
-            }
+            bitLength -= (pow2 ? 1 : 0);
         }
 
         return bitLength;
@@ -859,7 +855,7 @@ public class BigInteger
             }
             else
             {
-                nBitLength = bitLength(0, magnitude);
+                nBitLength = calcBitLength(sign, 0, magnitude);
             }
         }
 
@@ -901,7 +897,7 @@ public class BigInteger
      * unsigned comparison on two arrays - note the arrays may
      * start with leading zeros.
      */
-    private int compareTo(int xIndx, int[] x, int yIndx, int[] y)
+    private static int compareTo(int xIndx, int[] x, int yIndx, int[] y)
     {
         while (xIndx != x.length && x[xIndx] == 0)
         {
@@ -916,7 +912,7 @@ public class BigInteger
         return compareNoLeadingZeroes(xIndx, x, yIndx, y);
     }
 
-    private int compareNoLeadingZeroes(int xIndx, int[] x, int yIndx, int[] y)
+    private static int compareNoLeadingZeroes(int xIndx, int[] x, int yIndx, int[] y)
     {
         int diff = (x.length - y.length) - (xIndx - yIndx);
 
@@ -966,7 +962,7 @@ public class BigInteger
         {
             int[] c;
 
-            int shift = bitLength(0, x) - bitLength(0, y);
+            int shift = calcBitLength(1, 0, x) - calcBitLength(1, 0, y);
 
             if (shift > 1)
             {
@@ -1019,7 +1015,7 @@ public class BigInteger
                         xStart++;
                     }
 
-                    shift = bitLength(cStart, c) - bitLength(xStart, x);
+                    shift = calcBitLength(1, cStart, c) - calcBitLength(1, xStart, x);
 
                     if (shift == 0)
                     {
@@ -1416,7 +1412,7 @@ public class BigInteger
         return x;
     }
 
-    private int modInverse32(int d)
+    private static int modInverse32(int d)
     {
         // Newton-Raphson division (roughly)
         int x = d;        // d.x == 1 mod 2**3
@@ -1428,7 +1424,7 @@ public class BigInteger
         return  x;
     }
 
-    private long modInverse64(long d)
+    private static long modInverse64(long d)
     {
         // Newton-Raphson division (roughly)
         long x = d;       // d.x == 1 mod 2**3
@@ -1497,7 +1493,7 @@ public class BigInteger
     /**
      * zero out the array x
      */
-    private void zero(int[] x)
+    private static void zero(int[] x)
     {
         for (int i = 0; i != x.length; i++)
         {
@@ -1576,7 +1572,6 @@ public class BigInteger
         {
             if (magnitude.length <= n)
             {
-                //zAccum = new int[n * 2];
                 zVal = new int[n];
 
                 System.arraycopy(magnitude, 0, zVal, zVal.length - magnitude.length,
@@ -1589,7 +1584,6 @@ public class BigInteger
                 //
                 BigInteger tmp = this.remainder(m);
 
-                //zAccum = new int[n * 2];
                 zVal = new int[n];
 
                 System.arraycopy(tmp.magnitude, 0, zVal, zVal.length - tmp.magnitude.length,
@@ -1634,10 +1628,7 @@ public class BigInteger
                 }
                 else
                 {
-                    square(yAccum, yVal);
-                    remainder(yAccum, m.magnitude);
-                    System.arraycopy(yAccum, yAccum.length - yVal.length, yVal, 0, yVal.length);
-                    zero(yAccum);
+                    squareMod(yAccum, yVal, m.magnitude);
                 }
                 bits++;
 
@@ -1649,11 +1640,7 @@ public class BigInteger
                     }
                     else
                     {
-                        multiply(yAccum, yVal, zVal);
-                        remainder(yAccum, m.magnitude);
-                        System.arraycopy(yAccum, yAccum.length - yVal.length, yVal, 0,
-                                yVal.length);
-                        zero(yAccum);
+                        multiplyMod(yAccum, yVal, zVal, m.magnitude);
                     }
                 }
 
@@ -1668,10 +1655,7 @@ public class BigInteger
                 }
                 else
                 {
-                    square(yAccum, yVal);
-                    remainder(yAccum, m.magnitude);
-                    System.arraycopy(yAccum, yAccum.length - yVal.length, yVal, 0, yVal.length);
-                    zero(yAccum);
+                    squareMod(yAccum, yVal, m.magnitude);
                 }
                 bits++;
             }
@@ -1697,10 +1681,28 @@ public class BigInteger
             :   result.modInverse(m);
     }
 
+    private static void squareMod(int[] yAccum, int[] yVal, int[] m)
+    {
+        int n = m.length;
+        square(yAccum, yVal);
+        remainder(yAccum, m);
+        System.arraycopy(yAccum, n, yVal, 0, n);
+        zero(yAccum);
+    }
+
+    private static void multiplyMod(int[] yAccum, int[] yVal, int[] zVal, int[] m)
+    {
+        int n = m.length;
+        multiply(yAccum, yVal, zVal);
+        remainder(yAccum, m);
+        System.arraycopy(yAccum, n, yVal, 0, n);
+        zero(yAccum);
+    }
+
     /**
      * return w with w = x * x - w is assumed to have enough space.
      */
-    private int[] square(int[] w, int[] x)
+    private static int[] square(int[] w, int[] x)
     {
         // Note: this method allows w to be only (2 * x.Length - 1) words if result will fit
 //        if (w.length != 2 * x.length)
@@ -1765,7 +1767,7 @@ public class BigInteger
     /**
      * return x with x = y * z - x is assumed to have enough space.
      */
-    private int[] multiply(int[] x, int[] y, int[] z)
+    private static int[] multiply(int[] x, int[] y, int[] z)
     {
         int i = z.length;
 
@@ -1826,7 +1828,7 @@ public class BigInteger
         return mQuote = modInverse32(d);
     }
 
-    private void montgomeryReduce(int[] x, int[] m, int mDash) // mDash = -m^(-1) mod b
+    private static void montgomeryReduce(int[] x, int[] m, int mDash) // mDash = -m^(-1) mod b
     {
         // NOTE: Not a general purpose reduction (which would allow x up to twice the bitlength of m)
 //        assert x.length == m.length;
@@ -1873,7 +1875,7 @@ public class BigInteger
      * <br>
      * NOTE: the indices of x, y, m, a different in HAC and in Java
      */
-    private void multiplyMonty(int[] a, int[] x, int[] y, int[] m, int mDash, boolean smallMontyModulus)
+    private static void multiplyMonty(int[] a, int[] x, int[] y, int[] m, int mDash, boolean smallMontyModulus)
         // mDash = -m^(-1) mod b
     {
         int n = m.length;
@@ -1928,7 +1930,7 @@ public class BigInteger
         System.arraycopy(a, 1, x, 0, n);
     }
 
-    private void squareMonty(int[] a, int[] x, int[] m, int mDash, boolean smallMontyModulus) // mDash = -m^(-1) mod b
+    private static void squareMonty(int[] a, int[] x, int[] m, int mDash, boolean smallMontyModulus) // mDash = -m^(-1) mod b
     {
         int n = m.length;
 
@@ -2107,7 +2109,7 @@ public class BigInteger
     /**
      * return x = x % y - done in place (y value preserved)
      */
-    private int[] remainder(int[] x, int[] y)
+    private static int[] remainder(int[] x, int[] y)
     {
         int xStart = 0;
         while (xStart < x.length && x[xStart] == 0)
@@ -2125,8 +2127,8 @@ public class BigInteger
 
         if (xyCmp > 0)
         {
-            int yBitLength = bitLength(yStart, y);
-            int xBitLength = bitLength(xStart, x);
+            int yBitLength = calcBitLength(1, yStart, y);
+            int xBitLength = calcBitLength(1, xStart, x);
             int shift = xBitLength - yBitLength;
 
             int[] c;
@@ -2277,7 +2279,7 @@ public class BigInteger
     /**
      * do a left shift - this returns a new array.
      */
-    private int[] shiftLeft(int[] mag, int n)
+    private static int[] shiftLeft(int[] mag, int n)
     {
         int nInts = n >>> 5;
         int nBits = n & 0x1f;
@@ -2448,7 +2450,7 @@ public class BigInteger
     /**
      * returns x = x - y - we assume x is >= y
      */
-    private int[] subtract(int xStart, int[] x, int yStart, int[] y)
+    private static int[] subtract(int xStart, int[] x, int yStart, int[] y)
     {
         int iT = x.length;
         int iV = y.length;
