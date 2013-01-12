@@ -2,6 +2,7 @@ package java.math;
 
 import java.util.Random;
 import java.util.Stack;
+import java.util.Vector;
 
 import org.bouncycastle.util.Arrays;
 
@@ -126,6 +127,12 @@ public class BigInteger
     public static final BigInteger TWO;
     public static final BigInteger THREE;
     public static final BigInteger TEN;
+
+    /*
+     * These thresholds take into account only the expected savings in multiplications.
+     * Some squares will also be saved on average, but we offset these against the extra storage costs.
+     */
+    private static final int[] EXP_WINDOW_THRESHOLDS = { 7, 25, 81, 241, 673, 1793, 4609, Integer.MAX_VALUE };
 
     static
     {
@@ -1269,7 +1276,7 @@ public class BigInteger
             while (a.compareTo(ONE) <= 0 || a.compareTo(nMinusOne) >= 0);
 
             // NOTE: We avoid conversion to/from Montgomery form and check for R/-R as result instead
-            BigInteger y = a.modPow(r, n, false);
+            BigInteger y = modPowOdd(a, r, n, false);
 
             if (!y.equals(montRadix))
             {
@@ -1286,7 +1293,7 @@ public class BigInteger
                         return false;
                     }
 
-                    y = y.modPow(TWO, n, false);
+                    y = modPowOdd(y, TWO, n, false);
 
                     if (y.equals(montRadix))
                     {
@@ -1501,12 +1508,7 @@ public class BigInteger
         }
     }
 
-    public BigInteger modPow(BigInteger exponent, BigInteger m) throws ArithmeticException
-    {
-        return modPow(exponent, m, true);
-    }
-
-    private BigInteger modPow(BigInteger exponent, BigInteger m, boolean convert) throws ArithmeticException
+    public BigInteger modPow(BigInteger e, BigInteger m)
     {
         if (m.sign < 1)
         {
@@ -1519,166 +1521,277 @@ public class BigInteger
         }
 
         // Zero exponent check
-        if (exponent.sign == 0)
+        if (e.sign == 0)
         {
             return ONE;
         }
 
         if (sign == 0)
-            return ZERO;
-
-        int[] zVal = null;
-        int[] yAccum = null;
-        int[] yVal;
-
-        // Montgomery exponentiation is only possible if the modulus is odd,
-        // but AFAIK, this is always the case for crypto algo's
-        int n = m.magnitude.length;
-        boolean useMonty = ((m.magnitude[n - 1] & 1) == 1);
-        boolean smallMontyModulus = false;
-        int mQ = 0;
-
-        if (useMonty)
         {
-            mQ = m.getMQuote();
-
-            int powR = 32 * n;
-            smallMontyModulus = m.bitLength() + 2 <= powR;
-
-            // tmp = this * R mod m
-            BigInteger tmp = this;
-            if (convert)
-            {
-                tmp = tmp.shiftLeft(powR).mod(m);
-            }
-
-            zVal = tmp.magnitude;
-
-            useMonty = (zVal.length <= n);
-
-            if (useMonty)
-            {
-                yAccum = new int[n + 1];
-                if (zVal.length < n)
-                {
-                    int[] longZ = new int[n];
-                    System.arraycopy(zVal, 0, longZ, longZ.length - zVal.length, zVal.length);
-                    zVal = longZ;  
-                }
-            }
+            return ZERO;
         }
 
-        if (!useMonty)
+        boolean negExp = e.sign < 0;
+        if (negExp)
         {
-            if (magnitude.length <= n)
-            {
-                zVal = new int[n];
+            e = e.negate();
+        }
 
-                System.arraycopy(magnitude, 0, zVal, zVal.length - magnitude.length,
-                        magnitude.length);
+        BigInteger result = this.mod(m);
+        if (!e.equals(ONE))
+        {
+            if ((m.magnitude[m.magnitude.length - 1] & 1) == 0)
+            {
+                result = modPowEven(result, e, m);
             }
             else
             {
-                //
-                // in normal practice we'll never see this...
-                //
-                BigInteger tmp = this.remainder(m);
-
-                zVal = new int[n];
-
-                System.arraycopy(tmp.magnitude, 0, zVal, zVal.length - tmp.magnitude.length,
-                        tmp.magnitude.length);
+                result = modPowOdd(result, e, m, true);
             }
-
-            yAccum = new int[n * 2];
         }
 
-        yVal = new int[n];
-
-        //
-        // from LSW to MSW
-        //
-        for (int i = 0; i < exponent.magnitude.length; i++)
+        if (negExp)
         {
-            int v = exponent.magnitude[i];
-            int bits = 0;
+            result = result.modInverse(m);
+        }
 
-            if (i == 0)
+        return result;
+    }
+
+    // TODO Implement using Barret modular reduction
+    private static BigInteger modPowEven(BigInteger b, BigInteger e, BigInteger m)
+    {
+        int n = m.magnitude.length;
+
+        int[] yAccum = new int[n * 2];
+
+        int[] zVal = b.magnitude;
+        assert zVal.length <= n;
+        if (zVal.length < n)
+        {
+            int[] tmp = new int[n];
+            System.arraycopy(zVal, 0, tmp, n - zVal.length, zVal.length);
+            zVal = tmp;  
+        }
+
+        // Sliding window from MSW to LSW
+        int extraBits = 0, expLength = e.bitLength();
+        while (expLength > EXP_WINDOW_THRESHOLDS[extraBits])
+        {
+            ++extraBits;
+        }
+
+        int numPowers = 1 << extraBits;
+        int[][] oddPowers = new int[numPowers][];
+        oddPowers[0] = zVal;
+
+        int[] zSquared = Arrays.clone(zVal);
+        squareMod(yAccum, zSquared, m.magnitude);
+
+        for (int i = 1; i < numPowers; ++i)
+        {
+            oddPowers[i] = Arrays.clone(oddPowers[i - 1]);
+            multiplyMod(yAccum, oddPowers[i], zSquared, m.magnitude);
+        }
+
+        Vector windowList = getWindowList(e.magnitude, extraBits);
+//        assert windowList.size() > 0;
+
+        int[] window = (int[])windowList.get(0);
+        int mult = window[0], lastZeroes = window[1];
+
+        int[] yVal;
+        if (mult == 1)
+        {
+            yVal = zSquared;
+            --lastZeroes;
+        }
+        else
+        {
+            yVal = Arrays.clone(oddPowers[mult >> 1]);
+        }
+
+        for (int i = 1; i < windowList.size(); ++i)
+        {
+            window = (int[])windowList.get(i);
+            mult = window[0];
+
+            int bits = lastZeroes + bitLen(mult);
+            for (int j = 0; j < bits; ++j)
             {
-                while (v > 0)
-                {
-                    v <<= 1;
-                    bits++;
-                }
-
-                //
-                // first time in initialise y
-                //
-                System.arraycopy(zVal, 0, yVal, 0, zVal.length);
-
-                v <<= 1;
-                bits++;
+                squareMod(yAccum, yVal, m.magnitude);
             }
 
-            while (v != 0)
+            multiplyMod(yAccum, yVal, oddPowers[mult >> 1], m.magnitude);
+
+            lastZeroes = window[1];
+        }
+
+        for (int i = 0; i < lastZeroes; ++i)
+        {
+            squareMod(yAccum, yVal, m.magnitude);
+        }
+
+        return new BigInteger(1, yVal);
+    }
+
+    // Uses Montgomery reduction
+    private static BigInteger modPowOdd(BigInteger b, BigInteger e, BigInteger m, boolean convert)
+    {
+        int n = m.magnitude.length;
+
+        boolean smallMontyModulus = false;
+        int mDash = m.getMQuote();
+
+        int powR = 32 * n;
+        smallMontyModulus = m.bitLength() + 2 <= powR;
+
+        // tmp = this * R mod m
+        if (convert)
+        {
+            b = b.shiftLeft(powR).remainder(m);
+        }
+
+        int[] yAccum = new int[n + 1];
+
+        int[] zVal = b.magnitude;
+//        assert zVal.length <= n;
+        if (zVal.length < n)
+        {
+            int[] tmp = new int[n];
+            System.arraycopy(zVal, 0, tmp, n - zVal.length, zVal.length);
+            zVal = tmp;  
+        }
+
+        // Sliding window from MSW to LSW
+        int extraBits = 0, expLength = e.bitLength();
+        while (expLength > EXP_WINDOW_THRESHOLDS[extraBits])
+        {
+            ++extraBits;
+        }
+
+        int numPowers = 1 << extraBits;
+        int[][] oddPowers = new int[numPowers][];
+        oddPowers[0] = zVal;
+
+        int[] zSquared = Arrays.clone(zVal);
+        squareMonty(yAccum, zSquared, m.magnitude, mDash, smallMontyModulus);
+
+        for (int i = 1; i < numPowers; ++i)
+        {
+            oddPowers[i] = Arrays.clone(oddPowers[i - 1]);
+            multiplyMonty(yAccum, oddPowers[i], zSquared, m.magnitude, mDash, smallMontyModulus);
+        }
+
+        Vector windowList = getWindowList(e.magnitude, extraBits);
+//        assert windowList.size() > 0;
+
+        int[] window = (int[])windowList.get(0);
+        int mult = window[0], lastZeroes = window[1];
+
+        int[] yVal;
+        if (mult == 1)
+        {
+            yVal = zSquared;
+            --lastZeroes;
+        }
+        else
+        {
+            yVal = Arrays.clone(oddPowers[mult >> 1]);
+        }
+
+        for (int i = 1; i < windowList.size(); ++i)
+        {
+            window = (int[])windowList.get(i);
+            mult = window[0];
+
+            int bits = lastZeroes + bitLen(mult);
+            for (int j = 0; j < bits; ++j)
             {
-                if (useMonty)
+                squareMonty(yAccum, yVal, m.magnitude, mDash, smallMontyModulus);
+            }
+
+            multiplyMonty(yAccum, yVal, oddPowers[mult >> 1], m.magnitude, mDash, smallMontyModulus);
+
+            lastZeroes = window[1];
+        }
+
+        for (int i = 0; i < lastZeroes; ++i)
+        {
+            squareMonty(yAccum, yVal, m.magnitude, mDash, smallMontyModulus);
+        }
+
+        if (convert)
+        {
+            // Return y * R^(-1) mod m
+            montgomeryReduce(yVal, m.magnitude, mDash);
+        }
+        else if (smallMontyModulus && compareTo(0, yVal, 0, m.magnitude) >= 0)
+        {
+            subtract(0, yVal, 0, m.magnitude);
+        }
+
+        return new BigInteger(1, yVal);
+    }
+
+    private static Vector getWindowList(int[] mag, int extraBits)
+    {
+        Vector result = new Vector();
+
+        int v = mag[0];
+//        assert v != 0;
+
+        int bits = 33 - bitLen(v);
+        v <<= bits;
+
+        int mult = 1, multLimit = 1 << extraBits;
+        int zeroes = 0;
+
+        int i = 0;
+        for (; ; )
+        {
+            for (; bits < 32; ++bits)
+            {
+                if (mult < multLimit)
                 {
-                    squareMonty(yAccum, yVal, m.magnitude, mQ, smallMontyModulus);
+                    mult = (mult << 1) | (v >>> 31);
+                }
+                else if (v < 0)
+                {
+                    addWindowEntry(result, mult, zeroes);
+                    mult = 1;
+                    zeroes = 0;
                 }
                 else
                 {
-                    squareMod(yAccum, yVal, m.magnitude);
-                }
-                bits++;
-
-                if (v < 0)
-                {
-                    if (useMonty)
-                    {
-                        multiplyMonty(yAccum, yVal, zVal, m.magnitude, mQ, smallMontyModulus);
-                    }
-                    else
-                    {
-                        multiplyMod(yAccum, yVal, zVal, m.magnitude);
-                    }
+                    ++zeroes;
                 }
 
                 v <<= 1;
             }
 
-            while (bits < 32)
+            if (++i == mag.length)
             {
-                if (useMonty)
-                {
-                    squareMonty(yAccum, yVal, m.magnitude, mQ, smallMontyModulus);
-                }
-                else
-                {
-                    squareMod(yAccum, yVal, m.magnitude);
-                }
-                bits++;
+                addWindowEntry(result, mult, zeroes);
+                break;
             }
+
+            v = mag[i];
+            bits = 0;
         }
 
-        if (useMonty)
+        return result;
+    }
+
+    private static void addWindowEntry(Vector windowList, int mult, int zeroes)
+    {
+        while ((mult & 1) == 0)
         {
-            if (convert)
-            {
-                // Return y * R^(-1) mod m
-                montgomeryReduce(yVal, m.magnitude, mQ);
-            }
-            else if (smallMontyModulus && compareTo(0, yVal, 0, m.magnitude) >= 0)
-            {
-                subtract(0, yVal, 0, m.magnitude);
-            }
+            mult >>>= 1;
+            ++zeroes;
         }
 
-        BigInteger result = new BigInteger(1, yVal);
-
-        return exponent.sign > 0
-            ?   result
-            :   result.modInverse(m);
+        windowList.add(new int[] { mult, zeroes });
     }
 
     private static void squareMod(int[] yAccum, int[] yVal, int[] m)
