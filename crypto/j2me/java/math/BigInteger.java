@@ -128,14 +128,71 @@ public class BigInteger
     public static final BigInteger THREE;
     public static final BigInteger TEN;
 
+    private final static byte[] bitCounts =
+    {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
+    };
+
+    private final static byte[] bitLengths =
+    {
+        0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
+        5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+        6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+        6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
+    };
+
     /*
-     * These thresholds take into account only the expected savings in multiplications.
+     * These are the threshold bit-lengths (of an exponent) where we increase the window size.
+     * These were calculated according to the expected savings in multiplications.
      * Some squares will also be saved on average, but we offset these against the extra storage costs.
      */
     private static final int[] EXP_WINDOW_THRESHOLDS = { 7, 25, 81, 241, 673, 1793, 4609, Integer.MAX_VALUE };
 
     static
     {
+        /*
+         *  Avoid using large windows in VMs with little memory.
+         *  Window size limited to 2 below 256kB, then increased by one for every doubling,
+         *  i.e. at 512kB, 1MB, 2MB, etc...
+         */
+        long totalMemory = Runtime.getRuntime().totalMemory();
+        if (totalMemory <= Integer.MAX_VALUE)
+        {
+            int mem = (int)totalMemory;
+            int maxExpThreshold = 1 + bitLen(mem >> 18);
+            if (maxExpThreshold < EXP_WINDOW_THRESHOLDS.length)
+            {
+                EXP_WINDOW_THRESHOLDS[maxExpThreshold] = Integer.MAX_VALUE;
+            }
+        }
+
         ZERO = new BigInteger(0, ZERO_MAGNITUDE);
         ZERO.nBits = 0; ZERO.nBitLength = 0;
 
@@ -799,17 +856,6 @@ public class BigInteger
         return nBits;
     }
 
-    private final static byte[] bitCounts = {0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1,
-        2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4,
-        4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3,
-        4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5,
-        3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2,
-        3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3,
-        3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6,
-        7, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6,
-        5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5,
-        6, 6, 7, 6, 7, 7, 8};
-
     private static int calcBitLength(int sign, int indx, int[] mag)
     {
         if (mag.length == 0)
@@ -870,24 +916,26 @@ public class BigInteger
     }
 
     //
-    // bitLen(val) is the number of bits in val.
+    // bitLen(value) is the number of bits in value.
     //
-    static int bitLen(int w)
+    private static int bitLen(int w)
     {
-        // Binary search - decision tree (5 tests, rarely 6)
-        return (w < 1 << 15 ? (w < 1 << 7
-                ? (w < 1 << 3 ? (w < 1 << 1
-                        ? (w < 1 << 0 ? (w < 0 ? 32 : 0) : 1)
-                        : (w < 1 << 2 ? 2 : 3)) : (w < 1 << 5
-                        ? (w < 1 << 4 ? 4 : 5)
-                        : (w < 1 << 6 ? 6 : 7)))
-                : (w < 1 << 11
-                        ? (w < 1 << 9 ? (w < 1 << 8 ? 8 : 9) : (w < 1 << 10 ? 10 : 11))
-                        : (w < 1 << 13 ? (w < 1 << 12 ? 12 : 13) : (w < 1 << 14 ? 14 : 15)))) : (w < 1 << 23 ? (w < 1 << 19
-                ? (w < 1 << 17 ? (w < 1 << 16 ? 16 : 17) : (w < 1 << 18 ? 18 : 19))
-                : (w < 1 << 21 ? (w < 1 << 20 ? 20 : 21) : (w < 1 << 22 ? 22 : 23))) : (w < 1 << 27
-                ? (w < 1 << 25 ? (w < 1 << 24 ? 24 : 25) : (w < 1 << 26 ? 26 : 27))
-                : (w < 1 << 29 ? (w < 1 << 28 ? 28 : 29) : (w < 1 << 30 ? 30 : 31)))));
+        int t = w >>> 24;
+        if (t != 0)
+        {
+            return 24 + bitLengths[t];
+        }
+        t = w >>> 16;
+        if (t != 0)
+        {
+            return 16 + bitLengths[t];
+        }
+        t = w >>> 8;
+        if (t != 0)
+        {
+            return 8 + bitLengths[t];
+        }
+        return bitLengths[w];
     }
 
     private boolean quickPow2Check()
@@ -1142,15 +1190,22 @@ public class BigInteger
             return false;
         BigInteger biggie = (BigInteger)val;
 
-        if (biggie.sign != sign || biggie.magnitude.length != magnitude.length)
-            return false;
+        return sign == biggie.sign && isEqualMagnitude(biggie);
+    }
 
+    private boolean isEqualMagnitude(BigInteger x)
+    {
+        if (magnitude.length != x.magnitude.length)
+        {
+            return false;
+        }
         for (int i = 0; i < magnitude.length; i++)
         {
-            if (biggie.magnitude[i] != magnitude[i])
+            if (magnitude[i] != x.magnitude[i])
+            {
                 return false;
+            }
         }
-
         return true;
     }
 
@@ -1256,14 +1311,15 @@ public class BigInteger
         //
         // let n = 1 + 2^kq
         //
-        BigInteger nMinusOne = n.subtract(ONE);
-        int s = nMinusOne.getLowestSetBit();
-        BigInteger r = nMinusOne.shiftRight(s);
+        int s = n.getLowestSetBitMaskFirst(-1 << 1);
+        BigInteger r = n.shiftRight(s);
 
         Random random = new Random();
 
+        // NOTE: Avoid conversion to/from Montgomery form and check for R/-R as result instead
+
         BigInteger montRadix = ONE.shiftLeft(32 * n.magnitude.length).remainder(n);
-        BigInteger minusMontRadix = null;
+        BigInteger minusMontRadix = n.subtract(montRadix);
 
         do
         {
@@ -1273,18 +1329,13 @@ public class BigInteger
             {
                 a = new BigInteger(n.bitLength(), random);
             }
-            while (a.compareTo(ONE) <= 0 || a.compareTo(nMinusOne) >= 0);
+            while (a.sign == 0 || a.compareTo(n) >= 0
+                || a.isEqualMagnitude(montRadix) || a.isEqualMagnitude(minusMontRadix));
 
-            // NOTE: We avoid conversion to/from Montgomery form and check for R/-R as result instead
             BigInteger y = modPowOdd(a, r, n, false);
 
             if (!y.equals(montRadix))
             {
-                if (minusMontRadix == null)
-                {
-                    minusMontRadix = n.subtract(montRadix);
-                }
-
                 int j = 0;
                 while (!y.equals(minusMontRadix))
                 {
@@ -1566,7 +1617,7 @@ public class BigInteger
         int[] yAccum = new int[n * 2];
 
         int[] zVal = b.magnitude;
-        assert zVal.length <= n;
+//        assert zVal.length <= n;
         if (zVal.length < n)
         {
             int[] tmp = new int[n];
@@ -1594,11 +1645,11 @@ public class BigInteger
             multiplyMod(yAccum, oddPowers[i], zSquared, m.magnitude);
         }
 
-        Vector windowList = getWindowList(e.magnitude, extraBits);
+        int[] windowList = getWindowList(e.magnitude, extraBits);
 //        assert windowList.size() > 0;
 
-        int[] window = (int[])windowList.get(0);
-        int mult = window[0], lastZeroes = window[1];
+        int window = windowList[0];
+        int mult = window & 0xFF, lastZeroes = window >>> 8;
 
         int[] yVal;
         if (mult == 1)
@@ -1611,12 +1662,12 @@ public class BigInteger
             yVal = Arrays.clone(oddPowers[mult >> 1]);
         }
 
-        for (int i = 1; i < windowList.size(); ++i)
+        int windowPos = 1;
+        while ((window = windowList[windowPos++]) != -1)
         {
-            window = (int[])windowList.get(i);
-            mult = window[0];
+            mult = window & 0xFF;
 
-            int bits = lastZeroes + bitLen(mult);
+            int bits = lastZeroes + bitLengths[mult];
             for (int j = 0; j < bits; ++j)
             {
                 squareMod(yAccum, yVal, m.magnitude);
@@ -1624,7 +1675,7 @@ public class BigInteger
 
             multiplyMod(yAccum, yVal, oddPowers[mult >> 1], m.magnitude);
 
-            lastZeroes = window[1];
+            lastZeroes = window >>> 8;
         }
 
         for (int i = 0; i < lastZeroes; ++i)
@@ -1639,12 +1690,9 @@ public class BigInteger
     private static BigInteger modPowOdd(BigInteger b, BigInteger e, BigInteger m, boolean convert)
     {
         int n = m.magnitude.length;
-
-        boolean smallMontyModulus = false;
-        int mDash = m.getMQuote();
-
         int powR = 32 * n;
-        smallMontyModulus = m.bitLength() + 2 <= powR;
+        boolean smallMontyModulus = m.bitLength() + 2 <= powR;
+        int mDash = m.getMQuote();
 
         // tmp = this * R mod m
         if (convert)
@@ -1683,11 +1731,11 @@ public class BigInteger
             multiplyMonty(yAccum, oddPowers[i], zSquared, m.magnitude, mDash, smallMontyModulus);
         }
 
-        Vector windowList = getWindowList(e.magnitude, extraBits);
+        int[] windowList = getWindowList(e.magnitude, extraBits);
 //        assert windowList.size() > 0;
 
-        int[] window = (int[])windowList.get(0);
-        int mult = window[0], lastZeroes = window[1];
+        int window = windowList[0];
+        int mult = window & 0xFF, lastZeroes = window >>> 8;
 
         int[] yVal;
         if (mult == 1)
@@ -1700,12 +1748,12 @@ public class BigInteger
             yVal = Arrays.clone(oddPowers[mult >> 1]);
         }
 
-        for (int i = 1; i < windowList.size(); ++i)
+        int windowPos = 1;
+        while ((window = windowList[windowPos++]) != -1)
         {
-            window = (int[])windowList.get(i);
-            mult = window[0];
+            mult = window & 0xFF;
 
-            int bits = lastZeroes + bitLen(mult);
+            int bits = lastZeroes + bitLengths[mult];
             for (int j = 0; j < bits; ++j)
             {
                 squareMonty(yAccum, yVal, m.magnitude, mDash, smallMontyModulus);
@@ -1713,7 +1761,7 @@ public class BigInteger
 
             multiplyMonty(yAccum, yVal, oddPowers[mult >> 1], m.magnitude, mDash, smallMontyModulus);
 
-            lastZeroes = window[1];
+            lastZeroes = window >>> 8;
         }
 
         for (int i = 0; i < lastZeroes; ++i)
@@ -1734,15 +1782,18 @@ public class BigInteger
         return new BigInteger(1, yVal);
     }
 
-    private static Vector getWindowList(int[] mag, int extraBits)
+    private static int[] getWindowList(int[] mag, int extraBits)
     {
-        Vector result = new Vector();
-
         int v = mag[0];
 //        assert v != 0;
+        int leadingBits = bitLen(v);
 
-        int bits = 33 - bitLen(v);
-        v <<= bits;
+        int resultSize = (((mag.length - 1) << 5) + leadingBits) / (1 + extraBits) + 2;
+        int[] result = new int[resultSize];
+        int resultPos = 0;
+
+        int bitPos = 33 - leadingBits;
+        v <<= bitPos;
 
         int mult = 1, multLimit = 1 << extraBits;
         int zeroes = 0;
@@ -1750,7 +1801,7 @@ public class BigInteger
         int i = 0;
         for (; ; )
         {
-            for (; bits < 32; ++bits)
+            for (; bitPos < 32; ++bitPos)
             {
                 if (mult < multLimit)
                 {
@@ -1758,7 +1809,7 @@ public class BigInteger
                 }
                 else if (v < 0)
                 {
-                    addWindowEntry(result, mult, zeroes);
+                    result[resultPos++] = createWindowEntry(mult, zeroes);
                     mult = 1;
                     zeroes = 0;
                 }
@@ -1772,18 +1823,19 @@ public class BigInteger
 
             if (++i == mag.length)
             {
-                addWindowEntry(result, mult, zeroes);
+                result[resultPos++] = createWindowEntry(mult, zeroes);
                 break;
             }
 
             v = mag[i];
-            bits = 0;
+            bitPos = 0;
         }
 
+        result[resultPos] = -1;
         return result;
     }
 
-    private static void addWindowEntry(Vector windowList, int mult, int zeroes)
+    private static int createWindowEntry(int mult, int zeroes)
     {
         while ((mult & 1) == 0)
         {
@@ -1791,7 +1843,7 @@ public class BigInteger
             ++zeroes;
         }
 
-        windowList.add(new int[] { mult, zeroes });
+        return mult | (zeroes << 8);
     }
 
     private static void squareMod(int[] yAccum, int[] yVal, int[] m)
@@ -3099,37 +3151,35 @@ public class BigInteger
             return -1;
         }
 
-        int w = magnitude.length;
+        return getLowestSetBitMaskFirst(-1);
+    }
 
-        while (--w > 0)
+    private int getLowestSetBitMaskFirst(int firstWordMask)
+    {
+        int w = magnitude.length, offset = 0;
+
+        int word = magnitude[--w] & firstWordMask;
+//        assert magnitude[0] != 0;
+
+        while (word == 0)
         {
-            if (magnitude[w] != 0)
-            {
-                break;
-            }
+            word = magnitude[--w];
+            offset += 32;
         }
 
-        int word = magnitude[w];
-
-        int b = (word & 0x0000FFFF) == 0
-            ?   (word & 0x00FF0000) == 0
-                ?   7
-                :   15
-            :   (word & 0x000000FF) == 0
-                ?   23
-                :   31;
-
-        while (b > 0)
+        while ((word & 0xFF) == 0)
         {
-            if ((word << b) == 0x80000000)
-            {
-                break;
-            }
-
-            b--;
+            word >>>= 8;
+            offset += 8;
         }
 
-        return ((magnitude.length - w) * 32 - (b + 1));
+        while ((word & 1) == 0)
+        {
+            word >>>= 1;
+            ++offset;
+        }
+
+        return offset;
     }
 
     public boolean testBit(int n) 
