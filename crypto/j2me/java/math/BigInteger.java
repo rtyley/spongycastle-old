@@ -2,7 +2,6 @@ package java.math;
 
 import java.util.Random;
 import java.util.Stack;
-import java.util.Vector;
 
 import org.bouncycastle.util.Arrays;
 
@@ -1712,10 +1711,17 @@ public class BigInteger
         }
 
         // Sliding window from MSW to LSW
-        int extraBits = 0, expLength = e.bitLength();
-        while (expLength > EXP_WINDOW_THRESHOLDS[extraBits])
+
+        int extraBits = 0;
+
+        // Filter the common case of small RSA exponents with few bits set
+        if (e.magnitude.length > 1 || e.bitCount() > 2)
         {
-            ++extraBits;
+            int expLength = e.bitLength();
+            while (expLength > EXP_WINDOW_THRESHOLDS[extraBits])
+            {
+                ++extraBits;
+            }
         }
 
         int numPowers = 1 << extraBits;
