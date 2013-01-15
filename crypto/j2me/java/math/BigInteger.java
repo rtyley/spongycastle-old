@@ -1331,7 +1331,7 @@ public class BigInteger
             while (a.sign == 0 || a.compareTo(n) >= 0
                 || a.isEqualMagnitude(montRadix) || a.isEqualMagnitude(minusMontRadix));
 
-            BigInteger y = modPowOdd(a, r, n, false);
+            BigInteger y = modPowMonty(a, r, n, false);
 
             if (!y.equals(montRadix))
             {
@@ -1343,7 +1343,7 @@ public class BigInteger
                         return false;
                     }
 
-                    y = modPowOdd(y, TWO, n, false);
+                    y = modPowMonty(y, TWO, n, false);
 
                     if (y.equals(montRadix))
                     {
@@ -1570,7 +1570,6 @@ public class BigInteger
             return ZERO;
         }
 
-        // Zero exponent check
         if (e.sign == 0)
         {
             return ONE;
@@ -1592,11 +1591,11 @@ public class BigInteger
         {
             if ((m.magnitude[m.magnitude.length - 1] & 1) == 0)
             {
-                result = modPowEven(result, e, m);
+                result = modPowBarrett(result, e, m);
             }
             else
             {
-                result = modPowOdd(result, e, m, true);
+                result = modPowMonty(result, e, m, true);
             }
         }
 
@@ -1608,21 +1607,11 @@ public class BigInteger
         return result;
     }
 
-    // TODO Implement using Barret modular reduction
-    private static BigInteger modPowEven(BigInteger b, BigInteger e, BigInteger m)
+    private static BigInteger modPowBarrett(BigInteger b, BigInteger e, BigInteger m)
     {
-        int n = m.magnitude.length;
-
-        int[] yAccum = new int[n * 2];
-
-        int[] zVal = b.magnitude;
-//        assert zVal.length <= n;
-        if (zVal.length < n)
-        {
-            int[] tmp = new int[n];
-            System.arraycopy(zVal, 0, tmp, n - zVal.length, zVal.length);
-            zVal = tmp;  
-        }
+        int k = m.magnitude.length;
+        BigInteger mr = ONE.shiftLeft((k + 1) << 5);
+        BigInteger yu = ONE.shiftLeft(k << 6).divide(m);
 
         // Sliding window from MSW to LSW
         int extraBits = 0, expLength = e.bitLength();
@@ -1632,33 +1621,31 @@ public class BigInteger
         }
 
         int numPowers = 1 << extraBits;
-        int[][] oddPowers = new int[numPowers][];
-        oddPowers[0] = zVal;
+        BigInteger[] oddPowers = new BigInteger[numPowers];
+        oddPowers[0] = b;
 
-        int[] zSquared = Arrays.clone(zVal);
-        squareMod(yAccum, zSquared, m.magnitude);
+        BigInteger b2 = reduceBarrett(b.square(), m, mr, yu);
 
         for (int i = 1; i < numPowers; ++i)
         {
-            oddPowers[i] = Arrays.clone(oddPowers[i - 1]);
-            multiplyMod(yAccum, oddPowers[i], zSquared, m.magnitude);
+            oddPowers[i] = reduceBarrett(oddPowers[i - 1].multiply(b2), m, mr, yu);
         }
 
         int[] windowList = getWindowList(e.magnitude, extraBits);
-//        assert windowList.size() > 0;
+//      assert windowList.size() > 0;
 
         int window = windowList[0];
         int mult = window & 0xFF, lastZeroes = window >>> 8;
 
-        int[] yVal;
+        BigInteger y;
         if (mult == 1)
         {
-            yVal = zSquared;
+            y = b2;
             --lastZeroes;
         }
         else
         {
-            yVal = Arrays.clone(oddPowers[mult >> 1]);
+            y = oddPowers[mult >>> 1];
         }
 
         int windowPos = 1;
@@ -1669,24 +1656,58 @@ public class BigInteger
             int bits = lastZeroes + bitLengths[mult];
             for (int j = 0; j < bits; ++j)
             {
-                squareMod(yAccum, yVal, m.magnitude);
+                y = reduceBarrett(y.square(), m, mr, yu);
             }
 
-            multiplyMod(yAccum, yVal, oddPowers[mult >> 1], m.magnitude);
+            y = reduceBarrett(y.multiply(oddPowers[mult >>> 1]), m, mr, yu);
 
             lastZeroes = window >>> 8;
         }
 
         for (int i = 0; i < lastZeroes; ++i)
         {
-            squareMod(yAccum, yVal, m.magnitude);
+            y = reduceBarrett(y.square(), m, mr, yu);
         }
 
-        return new BigInteger(1, yVal);
+        return y;
     }
 
-    // Uses Montgomery reduction
-    private static BigInteger modPowOdd(BigInteger b, BigInteger e, BigInteger m, boolean convert)
+    private static BigInteger reduceBarrett(BigInteger x, BigInteger m, BigInteger mr, BigInteger yu)
+    {
+        int xLen = x.bitLength(), mLen = m.bitLength();
+        if (xLen < mLen)
+        {
+            return x;
+        }
+
+        if (xLen - mLen > 1)
+        {
+            int k = m.magnitude.length;
+
+            BigInteger q1 = x.divideWords(k - 1);
+            BigInteger q2 = q1.multiply(yu); // TODO Only need partial multiplication here
+            BigInteger q3 = q2.divideWords(k + 1);
+
+            BigInteger r1 = x.remainderWords(k + 1);
+            BigInteger r2 = q3.multiply(m); // TODO Only need partial multiplication here
+            BigInteger r3 = r2.remainderWords(k + 1);
+
+            x = r1.subtract(r3);
+            if (x.sign < 0)
+            {
+                x = x.add(mr);
+            }
+        }
+
+        while (x.compareTo(m) >= 0)
+        {
+            x = x.subtract(m);
+        }
+
+        return x;
+    }
+
+    private static BigInteger modPowMonty(BigInteger b, BigInteger e, BigInteger m, boolean convert)
     {
         int n = m.magnitude.length;
         int powR = 32 * n;
@@ -1751,7 +1772,7 @@ public class BigInteger
         }
         else
         {
-            yVal = Arrays.clone(oddPowers[mult >> 1]);
+            yVal = Arrays.clone(oddPowers[mult >>> 1]);
         }
 
         int windowPos = 1;
@@ -1765,7 +1786,7 @@ public class BigInteger
                 squareMonty(yAccum, yVal, m.magnitude, mDash, smallMontyModulus);
             }
 
-            multiplyMonty(yAccum, yVal, oddPowers[mult >> 1], m.magnitude, mDash, smallMontyModulus);
+            multiplyMonty(yAccum, yVal, oddPowers[mult >>> 1], m.magnitude, mDash, smallMontyModulus);
 
             lastZeroes = window >>> 8;
         }
@@ -1778,7 +1799,7 @@ public class BigInteger
         if (convert)
         {
             // Return y * R^(-1) mod m
-            montgomeryReduce(yVal, m.magnitude, mDash);
+            reduceMonty(yVal, m.magnitude, mDash);
         }
         else if (smallMontyModulus && compareTo(0, yVal, 0, m.magnitude) >= 0)
         {
@@ -1850,24 +1871,6 @@ public class BigInteger
         }
 
         return mult | (zeroes << 8);
-    }
-
-    private static void squareMod(int[] yAccum, int[] yVal, int[] m)
-    {
-        int n = m.length;
-        square(yAccum, yVal);
-        remainder(yAccum, m);
-        System.arraycopy(yAccum, n, yVal, 0, n);
-        zero(yAccum);
-    }
-
-    private static void multiplyMod(int[] yAccum, int[] yVal, int[] zVal, int[] m)
-    {
-        int n = m.length;
-        multiply(yAccum, yVal, zVal);
-        remainder(yAccum, m);
-        System.arraycopy(yAccum, n, yVal, 0, n);
-        zero(yAccum);
     }
 
     /**
@@ -1999,7 +2002,7 @@ public class BigInteger
         return mQuote = modInverse32(d);
     }
 
-    private static void montgomeryReduce(int[] x, int[] m, int mDash) // mDash = -m^(-1) mod b
+    private static void reduceMonty(int[] x, int[] m, int mDash) // mDash = -m^(-1) mod b
     {
         // NOTE: Not a general purpose reduction (which would allow x up to twice the bitlength of m)
 //        assert x.length == m.length;
@@ -2183,22 +2186,51 @@ public class BigInteger
 
     public BigInteger multiply(BigInteger val)
     {
-        if (sign == 0 || val.sign == 0)
-            return BigInteger.ZERO;
+        if (val == this)
+            return square();
 
-        int resLength = (this.bitLength() + val.bitLength()) / 32 + 1;
+        if ((sign & val.sign) == 0)
+            return ZERO;
+
+        if (val.quickPow2Check()) // val is power of two
+        {
+            BigInteger result = this.shiftLeft(val.abs().bitLength() - 1);
+            return val.sign > 0 ? result : result.negate();
+        }
+
+        if (this.quickPow2Check()) // this is power of two
+        {
+            BigInteger result = val.shiftLeft(this.abs().bitLength() - 1);
+            return this.sign > 0 ? result : result.negate();
+        }
+
+        int resLength = magnitude.length + val.magnitude.length;
         int[] res = new int[resLength];
 
-        if (val == this)
-        {
-            square(res, this.magnitude);
-        }
-        else
-        {
-            multiply(res, this.magnitude, val.magnitude);
-        }
+        multiply(res, this.magnitude, val.magnitude);
 
-        return new BigInteger(sign * val.sign, res);
+        int resSign = sign ^ val.sign ^ 1;
+        return new BigInteger(resSign, res);
+    }
+
+    public BigInteger square()
+    {
+        if (sign == 0)
+        {
+            return ZERO;
+        }
+        if (this.quickPow2Check())
+        {
+            return shiftLeft(abs().bitLength() - 1);
+        }
+        int resLength = magnitude.length << 1;
+        if ((magnitude[0] >>> 16) == 0)
+        {
+            --resLength;
+        }
+        int[] res = new int[resLength];
+        square(res, magnitude);
+        return new BigInteger(1, res);
     }
 
     public BigInteger negate()
@@ -2208,7 +2240,7 @@ public class BigInteger
             return this;
         }
 
-        return new BigInteger( -sign, magnitude);
+        return new BigInteger(-sign, magnitude);
     }
 
     public BigInteger not()
@@ -2446,7 +2478,33 @@ public class BigInteger
 
         return result;
     }
-    
+
+    private BigInteger divideWords(int w)
+    {
+//        assert w >= 0;
+        int n = magnitude.length;
+        if (w >= n)
+        {
+            return ZERO;
+        }
+        int[] mag = new int[n - w];
+        System.arraycopy(magnitude, 0, mag, 0, n - w);
+        return new BigInteger(sign, mag);
+    }
+
+    private BigInteger remainderWords(int w)
+    {
+//        assert w >= 0;
+        int n = magnitude.length;
+        if (w >= n)
+        {
+            return this;
+        }
+        int[] mag = new int[w];
+        System.arraycopy(magnitude, n - w, mag, 0, w);
+        return new BigInteger(sign, mag);
+    }
+
     /**
      * do a left shift - this returns a new array.
      */
@@ -2491,6 +2549,19 @@ public class BigInteger
         }
 
         return newMag;
+    }
+
+    private static int shiftLeftOneInPlace(int[] x, int carry)
+    {
+//        assert carry == 0 || carry == 1;
+        int pos = x.length;
+        while (--pos >= 0)
+        {
+            int val = x[pos];
+            x[pos] = (val << 1) | carry;
+            carry = val >>> 31;
+        }
+        return carry;
     }
 
     public BigInteger shiftLeft(int n)
