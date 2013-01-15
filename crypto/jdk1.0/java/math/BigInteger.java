@@ -1884,34 +1884,27 @@ public class BigInteger
 //            throw new IllegalArgumentException("no I don't think so...");
 //        }
 
-        long u1, u2, c;
+        long c;
 
         int wBase = w.length - 1;
 
-        for (int i = x.length - 1; i != 0; i--)
+        for (int i = x.length - 1; i != 0; --i)
         {
-            long v = (x[i] & IMASK);
+            long v = x[i] & IMASK;
 
-            u1 = v * v;
-            u2 = u1 >>> 32;
-            u1 = u1 & IMASK;
+            c = v * v + (w[wBase] & IMASK);
+            w[wBase] = (int)c;
+            c >>>= 32;
 
-            u1 += (w[wBase] & IMASK);
-
-            w[wBase] = (int)u1;
-            c = u2 + (u1 >> 32);
-
-            for (int j = i - 1; j >= 0; j--)
+            for (int j = i - 1; j >= 0; --j)
             {
-                --wBase;
-                u1 = (x[j] & IMASK) * v;
-                u2 = u1 >>> 31; // multiply by 2!
-                u1 = (u1 & 0x7fffffff) << 1; // multiply by 2!
-                u1 += (w[wBase] & IMASK) + c;
+                long prod = v * (x[j] & IMASK);
 
-                w[wBase] = (int)u1;
-                c = u2 + (u1 >>> 32);
+                c += (w[--wBase] & IMASK) + ((prod << 1) & IMASK);
+                w[wBase] = (int)c;
+                c = (c >>> 32) + (prod >>> 31);
             }
+
             c += w[--wBase] & IMASK;
             w[wBase] = (int)c;
 
@@ -1922,17 +1915,14 @@ public class BigInteger
             wBase += i;
         }
 
-        u1 = (x[0] & IMASK);
-        u1 = u1 * u1;
-        u2 = u1 >>> 32;
-        u1 = u1 & IMASK;
+        c = x[0] & IMASK;
 
-        u1 += (w[wBase] & IMASK);
+        c = c * c + (w[wBase] & IMASK);
+        w[wBase] = (int)c;
 
-        w[wBase] = (int)u1;
         if (--wBase >= 0)
         {
-            w[wBase] = (int)(u2 + (u1 >> 32) + w[wBase]);
+            w[wBase] += (int)(c >> 32);
         }
 
         return w;
@@ -2125,9 +2115,9 @@ public class BigInteger
                 prod1 = x0 * (x[j] & IMASK);
                 prod2 = u * (m[j] & IMASK);
 
-                carry += ((prod1 & IMASK) << 1) + (prod2 & IMASK);
+                carry += ((prod1 << 1) & IMASK) + (prod2 & IMASK);
                 a[j + 2] = (int)carry;
-                carry = (carry >>> 32) + ((prod1 >>> 32) << 1) + (prod2 >>> 32);
+                carry = (carry >>> 32) + (prod1 >>> 31) + (prod2 >>> 32);
             }
 
             a[1] = (int)carry;
@@ -2166,9 +2156,9 @@ public class BigInteger
                 long prod1 = xi * (x[j] & IMASK);
                 long prod2 = u * (m[j] & IMASK);
 
-                carry += ((prod1 & IMASK) << 1) + (prod2 & IMASK) + (a[j + 1] & IMASK);
+                carry += ((prod1 << 1) & IMASK) + (prod2 & IMASK) + (a[j + 1] & IMASK);
                 a[j + 2] = (int)carry;
-                carry = (carry >>> 32) + ((prod1 >>> 32) << 1) + (prod2 >>> 32);
+                carry = (carry >>> 32) + (prod1 >>> 31) + (prod2 >>> 32);
             }
 
             carry += (a[0] & IMASK);
