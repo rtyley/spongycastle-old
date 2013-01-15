@@ -10,18 +10,27 @@ import org.bouncycastle.asn1.DERSequence;
 public class PollRepContent
     extends ASN1Object
 {
-    private ASN1Integer certReqId;
-    private ASN1Integer checkAfter;
-    private PKIFreeText reason;
+    private ASN1Integer[] certReqId;
+    private ASN1Integer[] checkAfter;
+    private PKIFreeText[] reason;
 
     private PollRepContent(ASN1Sequence seq)
     {
-        certReqId = ASN1Integer.getInstance(seq.getObjectAt(0));
-        checkAfter = ASN1Integer.getInstance(seq.getObjectAt(1));
+        certReqId = new ASN1Integer[seq.size()];
+        checkAfter = new ASN1Integer[seq.size()];
+        reason = new PKIFreeText[seq.size()];
 
-        if (seq.size() > 2)
+        for (int i = 0; i != seq.size(); i++)
         {
-            reason = PKIFreeText.getInstance(seq.getObjectAt(2));
+            ASN1Sequence s = ASN1Sequence.getInstance(seq.getObjectAt(i));
+
+            certReqId[i] = ASN1Integer.getInstance(s.getObjectAt(0));
+            checkAfter[i] = ASN1Integer.getInstance(s.getObjectAt(1));
+
+            if (s.size() > 2)
+            {
+                reason[i] = PKIFreeText.getInstance(s.getObjectAt(2));
+            }
         }
     }
 
@@ -40,19 +49,40 @@ public class PollRepContent
         return null;
     }
 
-    public ASN1Integer getCertReqId()
+    public PollRepContent(ASN1Integer certReqId, ASN1Integer checkAfter)
     {
-        return certReqId;
+        this(certReqId, checkAfter, null);
     }
 
-    public ASN1Integer getCheckAfter()
+    public PollRepContent(ASN1Integer certReqId, ASN1Integer checkAfter, PKIFreeText reason)
     {
-        return checkAfter;
+        this.certReqId = new ASN1Integer[1];
+        this.checkAfter = new ASN1Integer[1];
+        this.reason = new PKIFreeText[1];
+
+        this.certReqId[0] = certReqId;
+        this.checkAfter[0] = checkAfter;
+        this.reason[0] = reason;
     }
 
-    public PKIFreeText getReason()
+    public int size()
     {
-        return reason;
+        return certReqId.length;
+    }
+
+    public ASN1Integer getCertReqId(int index)
+    {
+        return certReqId[index];
+    }
+
+    public ASN1Integer getCheckAfter(int index)
+    {
+        return checkAfter[index];
+    }
+
+    public PKIFreeText getReason(int index)
+    {
+        return reason[index];
     }
 
     /**
@@ -67,16 +97,23 @@ public class PollRepContent
      */
     public ASN1Primitive toASN1Primitive()
     {
-        ASN1EncodableVector v = new ASN1EncodableVector();
+        ASN1EncodableVector outer = new ASN1EncodableVector();
 
-        v.add(certReqId);
-        v.add(checkAfter);
-
-        if (reason != null)
+        for (int i = 0; i != certReqId.length; i++)
         {
-            v.add(reason);
+            ASN1EncodableVector v = new ASN1EncodableVector();
+
+            v.add(certReqId[i]);
+            v.add(checkAfter[i]);
+
+            if (reason[i] != null)
+            {
+                v.add(reason[i]);
+            }
+
+            outer.add(new DERSequence(v));
         }
         
-        return new DERSequence(v);
+        return new DERSequence(outer);
     }
 }

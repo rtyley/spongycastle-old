@@ -4,6 +4,7 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.DERSequence;
 
 public class PollReqContent
     extends ASN1Object
@@ -28,6 +29,16 @@ public class PollReqContent
         }
 
         return null;
+    }
+
+    /**
+     * Create a pollReqContent for a single certReqId.
+     *
+     * @param certReqId the certificate request ID.
+     */
+    public PollReqContent(ASN1Integer certReqId)
+    {
+        this(new DERSequence(new DERSequence(certReqId)));
     }
 
     public ASN1Integer[][] getCertReqIds()
