@@ -4,11 +4,17 @@ import java.util.Vector;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.style.BCStyle;
 
 public class X500NameBuilder
 {
     private X500NameStyle template;
     private Vector rdns = new Vector();
+
+    public X500NameBuilder()
+    {
+        this(BCStyle.INSTANCE);
+    }
 
     public X500NameBuilder(X500NameStyle template)
     {
