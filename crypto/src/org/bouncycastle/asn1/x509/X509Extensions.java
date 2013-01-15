@@ -289,6 +289,7 @@ public class X509Extensions
      * Constructor from a table of extensions with ordering.
      * <p>
      * It's is assumed the table contains OID/String pairs.
+     * @deprecated use Extensions
      */
     public X509Extensions(
         Vector      ordering,
@@ -326,6 +327,7 @@ public class X509Extensions
      * 
      * @param objectIDs a vector of the object identifiers.
      * @param values a vector of the extension values.
+     * @deprecated use Extensions
      */
     public X509Extensions(
         Vector      objectIDs,

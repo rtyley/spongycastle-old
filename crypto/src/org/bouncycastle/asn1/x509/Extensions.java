@@ -76,6 +76,18 @@ public class Extensions
 
     /**
      * Base Constructor
+     *
+     * @param extension a single extension.
+     */
+    public Extensions(
+        Extension extension)
+    {
+        this.ordering.addElement(extension.getExtnId());
+        this.extensions.put(extension.getExtnId(), extension);
+    }
+
+    /**
+     * Base Constructor
      * 
      * @param extensions an array of extensions.
      */
