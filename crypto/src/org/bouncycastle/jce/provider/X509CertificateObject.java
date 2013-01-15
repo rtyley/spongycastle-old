@@ -3,6 +3,8 @@ package org.bouncycastle.jce.provider;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -20,6 +22,7 @@ import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -36,19 +39,23 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.misc.MiscObjectIdentifiers;
 import org.bouncycastle.asn1.misc.NetscapeCertType;
 import org.bouncycastle.asn1.misc.NetscapeRevocationURL;
 import org.bouncycastle.asn1.misc.VerisignCzagExtension;
 import org.bouncycastle.asn1.util.ASN1Dump;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.RFC4519Style;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.Extensions;
+import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrierImpl;
 import org.bouncycastle.jce.X509Principal;
@@ -387,6 +394,18 @@ public class X509CertificateObject
         }
 
         return -1;
+    }
+
+    public Collection getSubjectAlternativeNames()
+        throws CertificateParsingException
+    {
+        return getAlternativeNames(getExtensionBytes(Extension.subjectAlternativeName.getId()));
+    }
+
+    public Collection getIssuerAlternativeNames()
+        throws CertificateParsingException
+    {
+        return getAlternativeNames(getExtensionBytes(Extension.issuerAlternativeName.getId()));
     }
 
     public Set getCriticalExtensionOIDs() 
@@ -812,5 +831,70 @@ public class X509CertificateObject
         }
         
         return id1.getParameters().equals(id2.getParameters());
+    }
+
+    private static Collection getAlternativeNames(byte[] extVal)
+        throws CertificateParsingException
+    {
+        if (extVal == null)
+        {
+            return null;
+        }
+        try
+        {
+            Collection temp = new ArrayList();
+            Enumeration it = ASN1Sequence.getInstance(extVal).getObjects();
+            while (it.hasMoreElements())
+            {
+                GeneralName genName = GeneralName.getInstance(it.nextElement());
+                List list = new ArrayList();
+                list.add(Integer.valueOf(genName.getTagNo()));
+                switch (genName.getTagNo())
+                {
+                case GeneralName.ediPartyName:
+                case GeneralName.x400Address:
+                case GeneralName.otherName:
+                    list.add(genName.getEncoded());
+                    break;
+                case GeneralName.directoryName:
+                    list.add(X500Name.getInstance(RFC4519Style.INSTANCE, genName.getName()).toString());
+                    break;
+                case GeneralName.dNSName:
+                case GeneralName.rfc822Name:
+                case GeneralName.uniformResourceIdentifier:
+                    list.add(((ASN1String)genName.getName()).getString());
+                    break;
+                case GeneralName.registeredID:
+                    list.add(ASN1ObjectIdentifier.getInstance(genName.getName()).getId());
+                    break;
+                case GeneralName.iPAddress:
+                    byte[] addrBytes = DEROctetString.getInstance(genName.getName()).getOctets();
+                    final String addr;
+                    try
+                    {
+                        addr = InetAddress.getByAddress(addrBytes).getHostAddress();
+                    }
+                    catch (UnknownHostException e)
+                    {
+                        continue;
+                    }
+                    list.add(addr);
+                    break;
+                default:
+                    throw new IOException("Bad tag number: " + genName.getTagNo());
+                }
+
+                temp.add(list);
+            }
+            if (temp.size() == 0)
+            {
+                return null;
+            }
+            return Collections.unmodifiableCollection(temp);
+        }
+        catch (Exception e)
+        {
+            throw new CertificateParsingException(e.getMessage());
+        }
     }
 }

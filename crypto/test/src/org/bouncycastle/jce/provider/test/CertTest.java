@@ -49,9 +49,11 @@ import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.CRLReason;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
@@ -2596,10 +2598,44 @@ public class CertTest
             new X509KeyUsage(X509KeyUsage.encipherOnly));
         certGen.addExtension("2.5.29.37", true,
             new DERSequence(KeyPurposeId.anyExtendedKeyUsage));
-        certGen.addExtension("2.5.29.17", true,
+        certGen.addExtension(Extension.subjectAlternativeName.getId(), true,
             new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
+        certGen.addExtension(Extension.issuerAlternativeName, false,
+            new GeneralNames(new GeneralName(GeneralName.directoryName, new X500Name("O=Test, OU=Testing, C=AU"))));
 
         X509Certificate baseCert = certGen.generate(privKey, "BC");
+
+        Collection names = baseCert.getSubjectAlternativeNames();
+
+        if (names.size() != 1)
+        {
+            fail("subject alt names size incorrect");
+        }
+
+        List name = (List)names.iterator().next();
+        if(!name.get(0).equals(GeneralName.rfc822Name))
+        {
+            fail("subject alt name type incorrect");
+        }
+
+        names = baseCert.getIssuerAlternativeNames();
+
+        if (names.size() != 1)
+        {
+            fail("issuer alt names size incorrect");
+        }
+
+        name = (List)names.iterator().next();
+        if(!name.get(0).equals(GeneralName.directoryName))
+        {
+            fail("issuer alt name type incorrect");
+        }
+
+        // check IETF output (reverse of default BC)
+        if (!name.get(1).equals("c=AU,ou=Testing,o=Test"))
+        {
+            fail("issuer alt name dir string incorrect");
+        }
 
         baseCert.verify(pubKey);
     }
