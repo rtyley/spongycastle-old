@@ -1,6 +1,7 @@
 package org.bouncycastle.asn1.x509;
 
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
@@ -32,6 +33,11 @@ public class GeneralNames
         boolean          explicit)
     {
         return getInstance(ASN1Sequence.getInstance(obj, explicit));
+    }
+
+    public static GeneralNames fromExtensions(Extensions extensions, ASN1ObjectIdentifier extOID)
+    {
+        return GeneralNames.getInstance(extensions.getExtensionParsedValue(extOID));
     }
 
     /**
