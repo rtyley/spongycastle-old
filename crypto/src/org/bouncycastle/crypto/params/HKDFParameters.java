@@ -23,7 +23,7 @@ public class HKDFParameters
                 "IKM (input keying material) should not be null");
         }
 
-        this.ikm = ikm.clone();
+        this.ikm = Arrays.clone(ikm);
 
         this.skipExpand = skip;
 
@@ -33,7 +33,7 @@ public class HKDFParameters
         }
         else
         {
-            this.salt = salt.clone();
+            this.salt = Arrays.clone(salt);
         }
 
         if (info == null)
@@ -42,7 +42,7 @@ public class HKDFParameters
         }
         else
         {
-            this.info = info.clone();
+            this.info = Arrays.clone(info);
         }
     }
 
