@@ -273,7 +273,7 @@ public class X509CertificateObject
      */
     public String getSigAlgOID()
     {
-        return c.getSignatureAlgorithm().getObjectId().getId();
+        return c.getSignatureAlgorithm().getAlgorithm().getId();
     }
 
     /**
@@ -805,7 +805,7 @@ public class X509CertificateObject
 
     private boolean isAlgIdEqual(AlgorithmIdentifier id1, AlgorithmIdentifier id2)
     {
-        if (!id1.getObjectId().equals(id2.getObjectId()))
+        if (!id1.getAlgorithm().equals(id2.getAlgorithm()))
         {
             return false;
         }
