@@ -65,12 +65,12 @@ public class HexEncoder
         return length * 2;
     }
 
-    private boolean ignore(
+    private static boolean ignore(
         char    c)
     {
-        return (c == '\n' || c =='\r' || c == '\t' || c == ' ');
+        return c == '\n' || c =='\r' || c == '\t' || c == ' ';
     }
-    
+
     /**
      * decode the Hex encoded byte data writing it to the given output stream,
      * whitespace characters will be ignored.

@@ -219,9 +219,7 @@ private static final int[] Tinv0 =
      0x9ce4b4d8, 0x90c15664, 0x6184cb7b, 0x70b632d5, 0x745c6c48, 
      0x4257b8d0};
 
-    private int shift(
-        int     r,
-        int     shift)
+    private static int shift(int r, int shift)
     {
         return (r >>> shift) | (r << -shift);
     }
@@ -232,7 +230,7 @@ private static final int[] Tinv0 =
     private static final int m2 = 0x7f7f7f7f;
     private static final int m3 = 0x0000001b;
 
-    private int FFmulX(int x)
+    private static int FFmulX(int x)
     {
         return (((x & m2) << 1) ^ (((x & m1) >>> 7) * m3));
     }
@@ -247,7 +245,7 @@ private static final int[] Tinv0 =
 
     */
 
-    private int inv_mcol(int x)
+    private static int inv_mcol(int x)
     {
         int f2 = FFmulX(x);
         int f4 = FFmulX(f2);
@@ -257,7 +255,7 @@ private static final int[] Tinv0 =
         return f2 ^ f4 ^ f8 ^ shift(f2 ^ f9, 8) ^ shift(f4 ^ f9, 16) ^ shift(f9, 24);
     }
 
-    private int subWord(int x)
+    private static int subWord(int x)
     {
         return (S[x&255]&255 | ((S[(x>>8)&255]&255)<<8) | ((S[(x>>16)&255]&255)<<16) | S[(x>>24)&255]<<24);
     }

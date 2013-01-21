@@ -110,9 +110,7 @@ public class AESLightEngine
          0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a,
          0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91 };
 
-    private int shift(
-        int     r,
-        int     shift)
+    private static int shift(int r, int shift)
     {
         return (r >>> shift) | (r << -shift);
     }
@@ -123,7 +121,7 @@ public class AESLightEngine
     private static final int m2 = 0x7f7f7f7f;
     private static final int m3 = 0x0000001b;
 
-    private int FFmulX(int x)
+    private static int FFmulX(int x)
     {
         return (((x & m2) << 1) ^ (((x & m1) >>> 7) * m3));
     }
@@ -138,13 +136,13 @@ public class AESLightEngine
 
     */
 
-    private int mcol(int x)
+    private static int mcol(int x)
     {
         int f2 = FFmulX(x);
         return f2 ^ shift(x ^ f2, 8) ^ shift(x, 16) ^ shift(x, 24);
     }
 
-    private int inv_mcol(int x)
+    private static int inv_mcol(int x)
     {
         int f2 = FFmulX(x);
         int f4 = FFmulX(f2);
@@ -155,7 +153,7 @@ public class AESLightEngine
     }
 
 
-    private int subWord(int x)
+    private static int subWord(int x)
     {
         return (S[x&255]&255 | ((S[(x>>8)&255]&255)<<8) | ((S[(x>>16)&255]&255)<<16) | S[(x>>24)&255]<<24);
     }
