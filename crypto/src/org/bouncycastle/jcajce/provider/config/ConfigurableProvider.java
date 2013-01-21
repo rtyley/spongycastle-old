@@ -36,6 +36,4 @@ public interface ConfigurableProvider
     boolean hasAlgorithm(String type, String name);
 
     void addKeyInfoConverter(ASN1ObjectIdentifier oid, AsymmetricKeyInfoConverter keyInfoConverter);
-
-    AsymmetricKeyInfoConverter getConverter(ASN1ObjectIdentifier oid);
 }

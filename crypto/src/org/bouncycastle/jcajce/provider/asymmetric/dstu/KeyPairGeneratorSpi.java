@@ -11,6 +11,7 @@ import java.security.spec.ECGenParameterSpec;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ua.DSTU4145NamedCurves;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.generators.DSTU4145KeyPairGenerator;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
@@ -28,7 +29,7 @@ public class KeyPairGeneratorSpi
     extends java.security.KeyPairGenerator
 {
     Object ecParams = null;
-    ECKeyPairGenerator engine = new ECKeyPairGenerator();
+    ECKeyPairGenerator engine = new DSTU4145KeyPairGenerator();
 
     String algorithm = "DSTU4145";
     ECKeyGenerationParameters param;
@@ -160,8 +161,6 @@ public class KeyPairGeneratorSpi
         AsymmetricCipherKeyPair pair = engine.generateKeyPair();
         ECPublicKeyParameters pub = (ECPublicKeyParameters)pair.getPublic();
         ECPrivateKeyParameters priv = (ECPrivateKeyParameters)pair.getPrivate();
-
-        pub = new ECPublicKeyParameters(pub.getQ().negate(), pub.getParameters());
 
         if (ecParams instanceof ECParameterSpec)
         {

@@ -516,11 +516,6 @@ e.printStackTrace();
         keyInfoConverters.put(oid, keyInfoConverter);
     }
 
-    public AsymmetricKeyInfoConverter getConverter(ASN1ObjectIdentifier oid)
-    {
-        return (AsymmetricKeyInfoConverter)keyInfoConverters.get(oid);
-    }
-
     public static PublicKey getPublicKey(SubjectPublicKeyInfo publicKeyInfo)
         throws IOException
     {

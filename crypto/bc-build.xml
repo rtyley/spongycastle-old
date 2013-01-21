@@ -661,7 +661,6 @@
                  <include name="org/bouncycastle/jce/**/test/*.java" />
                  <include name="org/bouncycastle/jce/**/test/*/*.java" />
                  <include name="org/bouncycastle/x509/**/test/*.java" />
-                 <include name="org/bouncycastle/openssl/**/test/*.java" />
                  <include name="org/bouncycastle/ocsp/**/test/*.java" />
              </fileset>
         </copy>
@@ -671,13 +670,12 @@
                 <package name="org.bouncycastle.asn1.*" />
                 <package name="org.bouncycastle.crypto.*" />
                 <package name="org.bouncycastle.jce.*" />
-                <package name="org.bouncycastle.openssl.*" />
                 <package name="org.bouncycastle.mozilla.*" />
                 <package name="org.bouncycastle.x509.*" />
                 <package name="org.bouncycastle.ocsp.*" />
                 <package name="org.bouncycastle.util.*" />
                 <group title="JCE Utility and Extension Packages" packages="org.bouncycastle.jce*" />
-                <group title="OCSP and OpenSSL PEM Support Packages" packages="org.bouncycastle.ocsp*:org.bouncycastle.openssl*" />
+                <group title="OCSP Support Packages" packages="org.bouncycastle.ocsp*" />
                 <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
                 <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
                 <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
