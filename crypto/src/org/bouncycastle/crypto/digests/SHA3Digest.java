@@ -142,8 +142,110 @@ public class SHA3Digest {
     private void iota(long[] A, int indexRound) {
         A[(((0)%5)+5*((0)%5))] ^= _keccakRoundConstants[indexRound];
     }
+
+    private boolean LFSR86540(char[] lfsr) {
+        boolean result = ((lfsr[0]) & 0x01) != 0;
+        if (((lfsr[0]) & 0x80) != 0) {
+            lfsr[0] = (char)((char)((lfsr[0]) << 1) ^ 0x71);
+        } else {
+            lfsr[0] <<= 1;
+        }
+        return result;
+    }
     
+    private void keccakInitialiseRoundConstants() {
+        char lfsrState[] = { 0x01 };
+        int bitPosition;
+        
+        for (int i=0; i<24; i++) {
+            _keccakRoundConstants[i] = 0;
+            for (int j=0; j<7; j++) {
+                bitPosition = (1<<j) -1 ;
+                if (LFSR86540(lfsrState)) {
+                    _keccakRoundConstants[i] ^= (long) 1 << bitPosition;
+                }
+            }
+        }
+    }
     
+    private void keccakInitialiseRhoOffsets() {
+        _keccakRhoOffsets[(((0) %5) + 5*((0)%5))] = 0;
+        int x = 1;
+        int y = 0;
+        
+        for (int t=0; t<24; t++) {
+            int p = (((x)%5) + 5*((y)%5));
+            _keccakRhoOffsets[p] = ((t+1)*(t+2)/2) % 64;
+            int newX = (0*x + 1*y) %5;
+            int newY = (2*x + 3*y) %5;
+            x = newX;
+            y = newY;
+        }
+    }
+    
+    private void keccakInitialise() {
+        keccakInitialiseRoundConstants();
+        keccakInitialiseRhoOffsets();
+    }
+    
+    private void displayRoundConstants() {
+        for (int i=0; i< 24; i++) {
+            System.out.printf("RC[%02i][0][0] = ", i);
+            System.out.printf("%08X", (_keccakRoundConstants[i] >> 32));
+            System.out.printf("%08X", (_keccakRoundConstants[i] & 0xFFFFFFFF));
+            System.out.println();
+        }
+        System.out.println();
+    }
+    
+    private void displayRhoOffsets() {
+        for (int y=0; y<5; y++) {
+            for (int x=0; x<5; x++) {
+                System.out.printf("RhoOffset[%i][%i] = ", x,y);
+                int p = (((x)%5)+5*((y%5)));
+                System.out.printf("%2i\n", _keccakRhoOffsets[p]);
+            }
+        }
+        System.out.println();
+    }
+    
+    private void keccakInitializeState(char[] u8state) {
+        for (int i=0; i< (1600/8) ; i++) {
+            u8state[i] = 0;
+        }
+    }
+    
+    private void keccakAbsorb576bits(char[] u8state, char[] u8data) {
+        keccakPermutationAfterXor(u8state, u8data, 72);
+    }
+    
+    private void keccakAbsorb832bits(char[] u8state, char[] u8data) {
+        keccakPermutationAfterXor(u8state, u8data, 104);        
+    }
+    
+    private void keccakAbsorb1088bits(char[] u8state, char[] u8data) {
+        keccakPermutationAfterXor(u8state, u8data, 136);        
+    }
+
+    private void keccakAbsorb1152bits(char[] u8state, char[] u8data) {
+        keccakPermutationAfterXor(u8state, u8data, 144);        
+    }
+
+    private void keccakAbsorb1344bits(char[] u8state, char[] u8data) {
+        keccakPermutationAfterXor(u8state, u8data, 168);        
+    }
+
+    private void keccakAbsorb(char[] u8state, char[] u8data, int laneCount) {
+        keccakPermutationAfterXor(u8state, u8data, laneCount*8);        
+    }
+    
+    private void keccakExtract1024bits(final char[] u8state, char[] u8data) {
+        System.arraycopy(u8state, 0, u8data, 0, 128);
+    }
+    
+    private void keccakExtract(final char[] u8state, char[] u8data, int laneCount) {
+        System.arraycopy(u8state, 0, u8data, 0, laneCount * 8);
+    }
     private void displayStateAsBytes(int i, String comment, char[] u8state) {
         System.out.println("displayStateAsBytes");
     }
