@@ -48,14 +48,14 @@ import org.bouncycastle.asn1.pkcs.RSAPublicKey;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.pem.PemHeader;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemObjectParser;
 import org.bouncycastle.util.io.pem.PemReader;
+import org.bouncycastle.x509.X509V2AttributeCertificate;
 
 /**
  * Class for reading OpenSSL PEM encoded streams containing
@@ -625,7 +625,7 @@ public class PEMReader
         public Object parseObject(PemObject obj)
             throws IOException
         {
-            return new X509AttributeCertificateHolder(obj.getContent());
+            return new X509V2AttributeCertificate(obj.getContent());
         }
     }
 
