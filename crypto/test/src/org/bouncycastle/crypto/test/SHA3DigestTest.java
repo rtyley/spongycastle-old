@@ -27,7 +27,8 @@ public class SHA3DigestTest
         "0bbe6afae0d7e89054085c1cc47b1689772c89a41796891e197d1ca1b76f288154933ded",
         "82558a209b960ddeb531e6dcb281885b2400ca160472462486e79f071e88a3330a8a303d",
         "94049e1ad7ef5d5b0df2b880489e7ab09ec937c3bfc1b04470e503e1ac7b1133c18f86da",
-        "a9cb5a75b5b81b7528301e72553ed6770214fa963956e790528afe420de33c074e6f4220"
+        "a9cb5a75b5b81b7528301e72553ed6770214fa963956e790528afe420de33c074e6f4220",
+        "eadaf5ba2ad6a2f6f338fce0e1efdad2a61bb38f6be6068b01093977acf99e97a5d5827c"
     };
 
     final static String[] digests224 = {
@@ -35,7 +36,8 @@ public class SHA3DigestTest
         "310aee6b30c47350576ac2873fa89fd190cdc488442f3ef654cf23fe",
         "c59d4eaeac728671c635ff645014e2afa935bebffdb5fbd207ffdeab",
         "f621e11c142fbf35fa8c22841c3a812ba1e0151be4f38d80b9f1ff53",
-        "68b5fc8c87193155bba68a2485377e809ee4f81a85ef023b9e64add0"
+        "68b5fc8c87193155bba68a2485377e809ee4f81a85ef023b9e64add0",
+        "c42e4aee858e1a8ad2976896b9d23dd187f64436ee15969afdbc68c5"
     };
 
     final static String[] digests256 = {
@@ -43,7 +45,8 @@ public class SHA3DigestTest
         "4d741b6f1eb29cb2a9b9911c82f56fa8d73b04959d3d9d222895df6c0b28aa15",
         "578951e24efd62a3d63a86f7cd19aaa53c898fe287d2552133220370240b572d",
         "0047a916daa1f92130d870b542e22d3108444f5a7e4429f05762fb647e6ed9ed",
-        "db368762253ede6d4f1db87e0b799b96e554eae005747a2ea687456ca8bcbd03"
+        "db368762253ede6d4f1db87e0b799b96e554eae005747a2ea687456ca8bcbd03",
+        "5f313c39963dcf792b5470d4ade9f3a356a3e4021748690a958372e2b06f82a4"
     };
 
     final static String[] digests384 = {
@@ -51,7 +54,8 @@ public class SHA3DigestTest
         "283990fa9d5fb731d786c5bbee94ea4db4910f18c62c03d173fc0a5e494422e8a0b3da7574dae7fa0baf005e504063b3",
         "9ad8e17325408eddb6edee6147f13856ad819bb7532668b605a24a2d958f88bd5c169e56dc4b2f89ffd325f6006d820b",
         "c704cfe7a1a53208ca9526cd24251e0acdc252ecd978eee05acd16425cfb404ea81f5a9e2e5e97784d63ee6a0618a398",
-        "d4fe8586fd8f858dd2e4dee0bafc19b4c12b4e2a856054abc4b14927354931675cdcaf942267f204ea706c19f7beefc4"
+        "d4fe8586fd8f858dd2e4dee0bafc19b4c12b4e2a856054abc4b14927354931675cdcaf942267f204ea706c19f7beefc4",
+        "9b7168b4494a80a86408e6b9dc4e5a1837c85dd8ff452ed410f2832959c08c8c0d040a892eb9a755776372d4a8732315"
     };
 
     final static String[] digests512 = {
@@ -59,7 +63,8 @@ public class SHA3DigestTest
         "d135bb84d0439dbac432247ee573a23ea7d3c9deb2a968eb31d47c4fb45f1ef4422d6c531b5b9bd6f449ebcc449ea94d0a8f05f62130fda612da53c79659f609",
         "ab7192d2b11f51c7dd744e7b3441febf397ca07bf812cceae122ca4ded6387889064f8db9230f173f6d1ab6e24b6e50f065b039f799f5592360a6558eb52d760",
         "34341ead153aa1d1fdcf6cf624c2b4f6894b6fd16dc38bd4ec971ac0385ad54fafcb2e0ed86a1e509456f4246fdcb02c3172824cd649d9ad54c51f7fb49ea67c",
-        "dc44d4f4d36b07ab5fc04016cbe53548e5a7778671c58a43cb379fd00c06719b8073141fc22191ffc3db5f8b8983ae8341fa37f18c1c969664393aa5ceade64e"
+        "dc44d4f4d36b07ab5fc04016cbe53548e5a7778671c58a43cb379fd00c06719b8073141fc22191ffc3db5f8b8983ae8341fa37f18c1c969664393aa5ceade64e",
+        "3e122edaf37398231cfaca4c7c216c9d66d5b899ec1d7ac617c40c7261906a45fc01617a021e5da3bd8d4182695b5cb785a28237cbb167590e34718e56d8aab8"
     };
 
     // test vectors from  http://www.di-mgt.com.au/hmac_sha3_testvectors.html
@@ -160,6 +165,8 @@ public class SHA3DigestTest
     final static byte[]       trunc384 = Hex.decode("fa9aea2bc1e181e47cbb8c3df243814d");
     final static byte[]       trunc512 = Hex.decode("04c929fead434bba190dacfa554ce3f5");
 
+    final static byte[]       xtremeData = Hex.decode("61626364656667686263646566676869636465666768696a6465666768696a6b65666768696a6b6c666768696a6b6c6d6768696a6b6c6d6e68696a6b6c6d6e6f");
+
     SHA3DigestTest()
     {
     }
@@ -245,6 +252,24 @@ public class SHA3DigestTest
         {
             fail("sha3 mismatch on " + digest.getAlgorithmName() + " 64k chunked alpha");
         }
+
+        //
+        // extremely long data test
+        //
+//        for (int i = 0; i != 16384; i++)
+//        {
+//            for (int j = 0; j != 1024; j++)
+//            {
+//                digest.update(xtremeData, 0, xtremeData.length);
+//            }
+//        }
+//
+//        digest.doFinal(hash, 0);
+//
+//        if (!Arrays.areEqual(Hex.decode(expected[messages.length + 2]), hash))
+//        {
+//            fail("sha3 mismatch on " + digest.getAlgorithmName() + " extreme data test");
+//        }
     }
 
     private void testMac(Digest digest, byte[][] keys, String[] data, String[] expected, byte[] truncExpected)

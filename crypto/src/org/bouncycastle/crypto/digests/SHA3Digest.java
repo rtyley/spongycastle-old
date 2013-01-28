@@ -452,29 +452,27 @@ public class SHA3Digest
         }
     }
 
+    long[] C = new long[5], D = new long[5];
 
     private void theta(long[] A)
     {
-        int x, y;
-        long[] C = new long[5], D = new long[5];
-
-        for (x = 0; x < 5; x++)
+        for (int x = 0; x < 5; x++)
         {
             C[x] = 0;
-            for (y = 0; y < 5; y++)
+            for (int y = 0; y < 5; y++)
             {
                 C[x] ^= A[(((x) % 5) + 5 * ((y) % 5))];
             }
         }
-        for (x = 0; x < 5; x++)
+        for (int x = 0; x < 5; x++)
         {
             D[x] = ((((C[(x + 1) % 5]) << 1) ^ ((C[(x + 1) % 5]) >>> (64 - 1)))) ^ C[(x + 4) % 5];
         }
-        for (x = 0; x < 5; x++)
+        for (int x = 0; x < 5; x++)
         {
-            for (y = 0; y < 5; y++)
+            for (int y = 0; y < 5; y++)
             {
-                A[(((x) % 5) + 5 * ((y) % 5))] ^= D[x];
+                A[x + 5 * y] ^= D[x];
             }
         }
     }
@@ -487,46 +485,40 @@ public class SHA3Digest
         {
             for (y = 0; y < 5; y++)
             {
-                A[(((x) % 5) + 5 * ((y) % 5))] = ((KeccakRhoOffsets[(((x) % 5) + 5 * ((y) % 5))] != 0) ? (((A[(((x) % 5) + 5 * ((y) % 5))]) << KeccakRhoOffsets[(((x) % 5) + 5 * ((y) % 5))]) ^ ((A[(((x) % 5) + 5 * ((y) % 5))]) >>> (64 - KeccakRhoOffsets[(((x) % 5) + 5 * ((y) % 5))]))) : A[(((x) % 5) + 5 * ((y) % 5))]);
+                int index = x + 5 * y;
+                A[index] = ((KeccakRhoOffsets[index] != 0) ? (((A[index]) << KeccakRhoOffsets[index]) ^ ((A[index]) >>> (64 - KeccakRhoOffsets[index]))) : A[index]);
             }
         }
     }
+
+    long[] tempA = new long[25];
 
     private void pi(long[] A)
     {
-        int x, y;
-        long[] tempA = new long[25];
+        System.arraycopy(A, 0, tempA, 0, tempA.length);
 
-        for (x = 0; x < 5; x++)
+        for (int x = 0; x < 5; x++)
         {
-            for (y = 0; y < 5; y++)
+            for (int y = 0; y < 5; y++)
             {
-                tempA[(((x) % 5) + 5 * ((y) % 5))] = A[(((x) % 5) + 5 * ((y) % 5))];
-            }
-        }
-        for (x = 0; x < 5; x++)
-        {
-            for (y = 0; y < 5; y++)
-            {
-                A[(((0 * x + 1 * y) % 5) + 5 * ((2 * x + 3 * y) % 5))] = tempA[(((x) % 5) + 5 * ((y) % 5))];
+                A[(((0 * x + 1 * y) % 5) + 5 * ((2 * x + 3 * y) % 5))] = tempA[x + 5 * y];
             }
         }
     }
 
+    long[] chiC = new long[5];
+
     private void chi(long[] A)
     {
-        int x, y;
-        long[] C = new long[5];
-
-        for (y = 0; y < 5; y++)
+        for (int y = 0; y < 5; y++)
         {
-            for (x = 0; x < 5; x++)
+            for (int x = 0; x < 5; x++)
             {
-                C[x] = A[(((x) % 5) + 5 * ((y) % 5))] ^ ((~A[(((x + 1) % 5) + 5 * ((y) % 5))]) & A[(((x + 2) % 5) + 5 * ((y) % 5))]);
+                chiC[x] = A[x + 5 * y] ^ ((~A[(((x + 1) % 5) + 5 * ((y) % 5))]) & A[(((x + 2) % 5) + 5 * ((y) % 5))]);
             }
-            for (x = 0; x < 5; x++)
+            for (int x = 0; x < 5; x++)
             {
-                A[(((x) % 5) + 5 * ((y) % 5))] = C[x];
+                A[x + 5 * y] = chiC[x];
             }
         }
     }
@@ -551,10 +543,5 @@ public class SHA3Digest
     private void KeccakExtract(byte[] state, byte[] data, int laneCount)
     {
         System.arraycopy(state, 0, data, 0, laneCount * 8);
-    }
-
-    public static class spongeState
-    {
-
     }
 }
