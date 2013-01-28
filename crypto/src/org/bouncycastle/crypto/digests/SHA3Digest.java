@@ -373,27 +373,25 @@ public class SHA3Digest
 
     private void fromBytesToWords(long[] stateAsWords, byte[] state)
     {
-        int i, j;
-
-        for (i = 0; i < (1600 / 64); i++)
+        for (int i = 0; i < (1600 / 64); i++)
         {
             stateAsWords[i] = 0;
-            for (j = 0; j < (64 / 8); j++)
+            int index = i * (64 / 8);
+            for (int j = 0; j < (64 / 8); j++)
             {
-                stateAsWords[i] |= ((long)state[i * (64 / 8) + j] & 0xff) << ((8 * j));
+                stateAsWords[i] |= ((long)state[index + j] & 0xff) << ((8 * j));
             }
         }
     }
 
     private void fromWordsToBytes(byte[] state, long[] stateAsWords)
     {
-        int i, j;
-
-        for (i = 0; i < (1600 / 64); i++)
+        for (int i = 0; i < (1600 / 64); i++)
         {
-            for (j = 0; j < (64 / 8); j++)
+            int index = i * (64 / 8);
+            for (int j = 0; j < (64 / 8); j++)
             {
-                state[i * (64 / 8) + j] = (byte)((stateAsWords[i] >>> ((8 * j))) & 0xFF);
+                state[index + j] = (byte)((stateAsWords[i] >>> ((8 * j))) & 0xFF);
             }
         }
     }
