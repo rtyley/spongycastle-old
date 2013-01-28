@@ -1,263 +1,143 @@
 package org.bouncycastle.crypto.digests;
 
 import org.bouncycastle.crypto.ExtendedDigest;
+import org.bouncycastle.util.Arrays;
 
 /**
- * implementation of SHA-3 based on Keccak-simple.c from http://keccak.noekeon.org/
- * 
+ * implementation of SHA-3 based on following KeccakNISTInterface.c from http://keccak.noekeon.org/
+ * <p/>
  * Following the naming conventions used in the C source code to enable easy review of the implementation.
  */
-public class SHA3Digest {
+public class SHA3Digest
+    implements ExtendedDigest
+{
+    private static long[] KeccakRoundConstants = keccakInitializeRoundConstants();
 
-    private long[]   _keccakRoundConstants = new long[24];
-    private int[]    _keccakRhoOffsets = new int[25];
-    
-    private void fromBytestoWords(long[] stateAsWords, final char[] state) {
-        
-        for (int i=0;i<(1600/64);i++) {
-            stateAsWords[i] = 0;
-            for (int j=0; j<(64/8); j++) {
-                stateAsWords[i] |= (long)(state[i*(64/8)+j]) << (8*j);
-            }
-        }
-    }
-    
-    private void fromWordsToBytes(char[] state, final long[] stateAsWords) {
-                
-        for (int i=0;i<(1600/64); i++) {
-            for (int j=0; j<(64/8); j++) {
-                state[i*(64/8)+j] = (char)((stateAsWords[i] >> (8*j)) & 0xFF);
-            }
-        }
-    }
-    
-    private void keccakPermutation(char[] u8state) {
-        displayStateAsBytes(1, "Input of permutation", u8state);
-        
-        // convert to state as words first, not done in the C version due to char[] shenanigans
-        stateAsWords(u8state, u64State);
-        keccakPermutationOnWords(u64State)
-        statsAsBytes(u64State, u8state);
-        
-        displayStateAsBytes(1, "state after permutation", u8state);
-    }
-    
-    private void keccakPermutationAfterXor(char[] state, final char[] data, final int dataLengthInBytes) {
-        
-        for (int i=0; i< dataLengthInBytes;i++) {
-            state[i] ^= data[i];
-        }
-        keccakPermutation(state);
-    }
-    
-    private void keccakPermutationOnWords(long[] u64state) {
-        int i;
-        
-        displayStateAs64bitWords(3, "Same with lanes as 64-bit words", u64state);
-        
-        for (int i=0; i<24; i++) {
-            displayRoundNumber(3, i);
-            
-            theta(u64state);
-            displayStateAs64bitWords(i, "After theta", u64state);
-            
-            rho(u64state);
-            displayStateAs64bitWords(i, "After rho", u64state);
-            
-            pi(u64state);
-            displayStateAs64bitWords(i, "After pi", u64state);
-            
-            chi(u64state);
-            displayStateAs64bitWords(i, "After chi", u64state);
-            
-            iota(u64state, i);
-            displayStateAs64bitWords(i, "After iota", u64state);
-        }
-    }
-    
-    // A is the u64state
-    private void theta(long[] A) {
-        long[] C = new long[5];
-        long[] D = new long[5];
-        
-        for (int x=0; x<5; x++) {
-            C[x] = 0;
-            for (int y=0; y<5; y++) {
-                C[x] ^= A[(((x)%5)+5*((y)%5))];
-            }
-        }
-        
-        for (int x=0; x<5; x++) {
-            // wtf 1 != 0 !!
-            int p = (x+1)%5;
-            D[x] = ((1 != 0) ? ((((long)C[p]) << 1) ^ (((long)C[p]) >> (64-1))) : C[p]) ^ C[(x+4)%5];
-        }
-        
-        for (int x=0; x<5; x++) {
-            for (int y=0; y<5; y++) {
-                A[(((x)%5)+5*((y)%5))] ^= D[x];
-            }
-        }
-    }
-    
-    private void rho(long[] A) {
-        for (int x=0; x<5; x++) {
-            for (int y=0; y<5; y++) {
-                int p = (((x)%5)+5*((y)%5));
-                A[p] = ((_keccakRhoOffsets[p] != 0) ? ((((long)A[p]) << _keccakRhoOffsets[p]) ^ (((long)A[p]) >> (64-_keccakRhoOffsets[p]))) : A[p]);
-            }
-        }
-    }
-    
-    private void pi(long[] A) {
-        long[] tempA = new long[25];
-        
-        for (int x=0; x<5; x++) {
-            for (int y=0; y<5; y++) {
-                int p = (((x)%5)+5*((y)%5));
-                tempA[p] = A[p];
-            }
-        }
-        
-        for (int x=0; x<5; x++) {
-            for (int y=0; y<5; y++) {
-                A[(((0*x+1*y)%5)+5*((2*x+3*y)%5))] = tempA[(((x)%5)+5*((y)%5))];
-            }
-        }
-    }
-    
-    private void chi(long[] A) {
-        long[] C = new long[5];
-        
-        for (int y=0; y<5; y++) {
-            for (int x=0; x<5; x++) {
-                C[x] = A[(((x)%5)+5*((y)%5))] ^ ((~A[(((x+1)%5)+5*((y)%5))]) & A[(((x+2)%5)+5*((y)%5))]);
-            }
-            for (int x=0; x<5; x++) {
-                A[(((x)%5)+5*((y)%5))] = C[x];
-            }
-        }
-    }
-    
-    private void iota(long[] A, int indexRound) {
-        A[(((0)%5)+5*((0)%5))] ^= _keccakRoundConstants[indexRound];
-    }
+    private static int[] KeccakRhoOffsets = keccakInitializeRhoOffsets();
 
-    private boolean LFSR86540(char[] lfsr) {
-        boolean result = ((lfsr[0]) & 0x01) != 0;
-        if (((lfsr[0]) & 0x80) != 0) {
-            lfsr[0] = (char)((char)((lfsr[0]) << 1) ^ 0x71);
-        } else {
-            lfsr[0] <<= 1;
-        }
-        return result;
-    }
-    
-    private void keccakInitialiseRoundConstants() {
-        char lfsrState[] = { 0x01 };
-        int bitPosition;
-        
-        for (int i=0; i<24; i++) {
-            _keccakRoundConstants[i] = 0;
-            for (int j=0; j<7; j++) {
-                bitPosition = (1<<j) -1 ;
-                if (LFSR86540(lfsrState)) {
-                    _keccakRoundConstants[i] ^= (long) 1 << bitPosition;
+    private static long[] keccakInitializeRoundConstants()
+    {
+        long[] keccakRoundConstants = new long[24];
+        byte[] LFSRstate = new byte[1];
+
+        LFSRstate[0] = 0x01;
+        int i, j, bitPosition;
+
+        for (i = 0; i < 24; i++)
+        {
+            keccakRoundConstants[i] = 0;
+            for (j = 0; j < 7; j++)
+            {
+                bitPosition = (1 << j) - 1;
+                if (LFSR86540(LFSRstate))
+                {
+                    keccakRoundConstants[i] ^= 1L << bitPosition;
                 }
             }
         }
+
+        return keccakRoundConstants;
     }
-    
-    private void keccakInitialiseRhoOffsets() {
-        _keccakRhoOffsets[(((0) %5) + 5*((0)%5))] = 0;
-        int x = 1;
-        int y = 0;
-        
-        for (int t=0; t<24; t++) {
-            int p = (((x)%5) + 5*((y)%5));
-            _keccakRhoOffsets[p] = ((t+1)*(t+2)/2) % 64;
-            int newX = (0*x + 1*y) %5;
-            int newY = (2*x + 3*y) %5;
+
+    private static boolean LFSR86540(byte[] LFSR)
+    {
+        boolean result = (((LFSR[0]) & 0x01) != 0);
+        if (((LFSR[0]) & 0x80) != 0)
+        {
+            LFSR[0] = (byte)(((LFSR[0]) << 1) ^ 0x71);
+        }
+        else
+        {
+            LFSR[0] <<= 1;
+        }
+
+        return result;
+    }
+
+    private static int[] keccakInitializeRhoOffsets()
+    {
+        int[] keccakRhoOffsets = new int[25];
+        int x, y, t, newX, newY;
+
+        keccakRhoOffsets[(((0) % 5) + 5 * ((0) % 5))] = 0;
+        x = 1;
+        y = 0;
+        for (t = 0; t < 24; t++)
+        {
+            keccakRhoOffsets[(((x) % 5) + 5 * ((y) % 5))] = ((t + 1) * (t + 2) / 2) % 64;
+            newX = (0 * x + 1 * y) % 5;
+            newY = (2 * x + 3 * y) % 5;
             x = newX;
             y = newY;
         }
+
+        return keccakRhoOffsets;
     }
-    
-    private void keccakInitialise() {
-        keccakInitialiseRoundConstants();
-        keccakInitialiseRhoOffsets();
-    }
-    
-    private void displayRoundConstants() {
-        for (int i=0; i< 24; i++) {
-            System.out.printf("RC[%02i][0][0] = ", i);
-            System.out.printf("%08X", (_keccakRoundConstants[i] >> 32));
-            System.out.printf("%08X", (_keccakRoundConstants[i] & 0xFFFFFFFF));
-            System.out.println();
-        }
-        System.out.println();
-    }
-    
-    private void displayRhoOffsets() {
-        for (int y=0; y<5; y++) {
-            for (int x=0; x<5; x++) {
-                System.out.printf("RhoOffset[%i][%i] = ", x,y);
-                int p = (((x)%5)+5*((y%5)));
-                System.out.printf("%2i\n", _keccakRhoOffsets[p]);
-            }
-        }
-        System.out.println();
-    }
-    
-    private void keccakInitializeState(char[] u8state) {
-        for (int i=0; i< (1600/8) ; i++) {
-            u8state[i] = 0;
+
+    private byte[] state = new byte[(1600 / 8)];
+    private byte[] dataQueue = new byte[(1536 / 8)];
+    private int rate;
+    private int capacity;
+    private int bitsInQueue;
+    private int fixedOutputLength;
+    private boolean squeezing;
+    private int bitsAvailableForSqueezing;
+    private byte[] chunk;
+    private byte[] oneByte;
+
+    private void clearDataQueueSection(int off, int len)
+    {
+        for (int i = off; i != off + len; i++)
+        {
+            dataQueue[i] = 0;
         }
     }
-    
-    private void keccakAbsorb576bits(char[] u8state, char[] u8data) {
-        keccakPermutationAfterXor(u8state, u8data, 72);
-    }
-    
-    private void keccakAbsorb832bits(char[] u8state, char[] u8data) {
-        keccakPermutationAfterXor(u8state, u8data, 104);        
-    }
-    
-    private void keccakAbsorb1088bits(char[] u8state, char[] u8data) {
-        keccakPermutationAfterXor(u8state, u8data, 136);        
+
+    public SHA3Digest()
+    {
+        init(0);
     }
 
-    private void keccakAbsorb1152bits(char[] u8state, char[] u8data) {
-        keccakPermutationAfterXor(u8state, u8data, 144);        
+    public SHA3Digest(int bitLength)
+    {
+        init(bitLength);
     }
 
-    private void keccakAbsorb1344bits(char[] u8state, char[] u8data) {
-        keccakPermutationAfterXor(u8state, u8data, 168);        
+    public String getAlgorithmName()
+    {
+        return "SHA3-" + fixedOutputLength;
     }
 
-    private void keccakAbsorb(char[] u8state, char[] u8data, int laneCount) {
-        keccakPermutationAfterXor(u8state, u8data, laneCount*8);        
-    }
-    
-    private void keccakExtract1024bits(final char[] u8state, char[] u8data) {
-        System.arraycopy(u8state, 0, u8data, 0, 128);
-    }
-    
-    private void keccakExtract(final char[] u8state, char[] u8data, int laneCount) {
-        System.arraycopy(u8state, 0, u8data, 0, laneCount * 8);
-    }
-    private void displayStateAsBytes(int i, String comment, char[] u8state) {
-        System.out.println("displayStateAsBytes");
-    }
-    
-    private void displayStateAs64bitWords(int i, String comment, long[] u64state) {
-        System.out.println("displayStateAs64bitWords");
-    }
-    
-    private void displayRoundNumber(int i, int roundNumber) {
-        System.out.println("displayRoundNumber");
+    public int getDigestSize()
+    {
+        return fixedOutputLength / 8;
     }
 
+    public void update(byte in)
+    {
+        oneByte[0] = in;
+
+        doUpdate(oneByte, 0, 8L);
+    }
+
+    public void update(byte[] in, int inOff, int len)
+    {
+        doUpdate(in, inOff, len * 8L);
+    }
+
+    public int doFinal(byte[] out, int outOff)
+    {
+        doFinal(out);
+
+        reset();
+
+        return getDigestSize();
+    }
+
+    public void reset()
+    {
+        init(fixedOutputLength);
+    }
 
     /**
      * Return the size of block that the compression function is applied to in bytes.
@@ -266,6 +146,415 @@ public class SHA3Digest {
      */
     public int getByteLength()
     {
-        return _x.length * 8;
+        return rate / 8;
+    }
+
+    private void init(int bitLength)
+    {
+        switch (bitLength)
+        {
+        case 0:
+        case 288:
+            initSponge(1024, 576);
+            break;
+        case 224:
+            initSponge(1152, 448);
+            break;
+        case 256:
+            initSponge(1088, 512);
+            break;
+        case 384:
+            initSponge(832, 768);
+            break;
+        case 512:
+            initSponge(576, 1024);
+            break;
+        default:
+            throw new IllegalArgumentException("bitLength must be one of 224, 256, 384, or 512.");
+        }
+    }
+
+    private void doUpdate(byte[] data, int off, long databitlen)
+    {
+        if ((databitlen % 8) == 0)
+        {
+            absorb(data, off, databitlen);
+        }
+        else
+        {
+            absorb(data, off, databitlen - (databitlen % 8));
+
+            byte[] lastByte = new byte[1];
+
+            lastByte[0] = (byte)(data[off + (int)(databitlen / 8)] >> (8 - (databitlen % 8)));
+            absorb(lastByte, off, databitlen % 8);
+        }
+    }
+
+    private void doFinal(byte[] hashval)
+    {
+        squeeze(hashval, fixedOutputLength);
+    }
+
+    private void initSponge(int rate, int capacity)
+    {
+        if (rate + capacity != 1600)
+        {
+            throw new IllegalStateException("rate + capacity != 1600");
+        }
+        if ((rate <= 0) || (rate >= 1600) || ((rate % 64) != 0))
+        {
+            throw new IllegalStateException("invalid rate value");
+        }
+
+        this.rate = rate;
+        this.capacity = capacity;
+        this.fixedOutputLength = 0;
+        Arrays.fill(this.state, (byte)0);
+        Arrays.fill(this.dataQueue, (byte)0);
+        this.bitsInQueue = 0;
+        this.squeezing = false;
+        this.bitsAvailableForSqueezing = 0;
+        this.fixedOutputLength = capacity / 2;
+        this.chunk = new byte[rate / 8];
+        this.oneByte = new byte[1];
+    }
+
+    private void absorbQueue()
+    {
+        KeccakAbsorb(state, dataQueue, rate / 8);
+
+        bitsInQueue = 0;
+    }
+
+    private void absorb(byte[] data, int off, long databitlen)
+    {
+        long i, j, wholeBlocks;
+
+        if ((bitsInQueue % 8) != 0)
+        {
+            throw new IllegalStateException("attempt to absorb with odd length queue.");
+        }
+        if (squeezing)
+        {
+            throw new IllegalStateException("attempt to absorb while squeezing.");
+        }
+
+        i = 0;
+        while (i < databitlen)
+        {
+            if ((bitsInQueue == 0) && (databitlen >= rate) && (i <= (databitlen - rate)))
+            {
+                wholeBlocks = (databitlen - i) / rate;
+
+                for (j = 0; j < wholeBlocks; j++)
+                {
+                    System.arraycopy(data, (int)(off + (i / 8) + (j * chunk.length)), chunk, 0, chunk.length);
+
+//                            displayIntermediateValues.displayBytes(1, "Block to be absorbed", curData, rate / 8);
+
+                    KeccakAbsorb(state, chunk, chunk.length);
+                }
+
+                i += wholeBlocks * rate;
+            }
+            else
+            {
+                int partialBlock = (int)(databitlen - i);
+                if (partialBlock + bitsInQueue > rate)
+                {
+                    partialBlock = rate - bitsInQueue;
+                }
+                int partialByte = partialBlock % 8;
+                partialBlock -= partialByte;
+                System.arraycopy(data, off + (int)(i / 8), dataQueue, bitsInQueue / 8, partialBlock / 8);
+
+                bitsInQueue += partialBlock;
+                i += partialBlock;
+                if (bitsInQueue == rate)
+                {
+                    absorbQueue();
+                }
+                if (partialByte > 0)
+                {
+                    int mask = (1 << partialByte) - 1;
+                    dataQueue[bitsInQueue / 8] = (byte)(data[off + ((int)(i / 8))] & mask);
+                    bitsInQueue += partialByte;
+                    i += partialByte;
+                }
+            }
+        }
+    }
+
+    private void padAndSwitchToSqueezingPhase()
+    {
+        if (bitsInQueue + 1 == rate)
+        {
+            dataQueue[bitsInQueue / 8] |= 1 << (bitsInQueue % 8);
+            absorbQueue();
+            clearDataQueueSection(0, rate / 8);
+        }
+        else
+        {
+            clearDataQueueSection((bitsInQueue + 7) / 8, rate / 8 - (bitsInQueue + 7) / 8);
+            dataQueue[bitsInQueue / 8] |= 1 << (bitsInQueue % 8);
+        }
+        dataQueue[(rate - 1) / 8] |= 1 << ((rate - 1) % 8);
+        absorbQueue();
+
+
+//            displayIntermediateValues.displayText(1, "--- Switching to squeezing phase ---");
+
+
+        if (rate == 1024)
+        {
+            KeccakExtract1024bits(state, dataQueue);
+            bitsAvailableForSqueezing = 1024;
+        }
+        else
+
+        {
+            KeccakExtract(state, dataQueue, rate / 64);
+            bitsAvailableForSqueezing = rate;
+        }
+
+//            displayIntermediateValues.displayBytes(1, "Block available for squeezing", dataQueue, bitsAvailableForSqueezing / 8);
+
+        squeezing = true;
+    }
+
+    private void squeeze(byte[] output, long outputLength)
+    {
+        long i;
+        int partialBlock;
+
+        if (!squeezing)
+        {
+            padAndSwitchToSqueezingPhase();
+        }
+        if ((outputLength % 8) != 0)
+        {
+            throw new IllegalStateException("outputLength not a multiple of 8");
+        }
+
+        i = 0;
+        while (i < outputLength)
+        {
+            if (bitsAvailableForSqueezing == 0)
+            {
+                keccakPermutation(state);
+
+                if (rate == 1024)
+                {
+                    KeccakExtract1024bits(state, dataQueue);
+                    bitsAvailableForSqueezing = 1024;
+                }
+                else
+
+                {
+                    KeccakExtract(state, dataQueue, rate / 64);
+                    bitsAvailableForSqueezing = rate;
+                }
+
+//                    displayIntermediateValues.displayBytes(1, "Block available for squeezing", dataQueue, bitsAvailableForSqueezing / 8);
+
+            }
+            partialBlock = bitsAvailableForSqueezing;
+            if ((long)partialBlock > outputLength - i)
+            {
+                partialBlock = (int)(outputLength - i);
+            }
+
+            System.arraycopy(dataQueue, (rate - bitsAvailableForSqueezing) / 8, output, (int)(i / 8), partialBlock / 8);
+            bitsAvailableForSqueezing -= partialBlock;
+            i += partialBlock;
+        }
+    }
+
+    private void fromBytesToWords(long[] stateAsWords, byte[] state)
+    {
+        int i, j;
+
+        for (i = 0; i < (1600 / 64); i++)
+        {
+            stateAsWords[i] = 0;
+            for (j = 0; j < (64 / 8); j++)
+            {
+                stateAsWords[i] |= ((long)state[i * (64 / 8) + j] & 0xff) << ((8 * j));
+            }
+        }
+    }
+
+    private void fromWordsToBytes(byte[] state, long[] stateAsWords)
+    {
+        int i, j;
+
+        for (i = 0; i < (1600 / 64); i++)
+        {
+            for (j = 0; j < (64 / 8); j++)
+            {
+                state[i * (64 / 8) + j] = (byte)((stateAsWords[i] >>> ((8 * j))) & 0xFF);
+            }
+        }
+    }
+
+    private void keccakPermutation(byte[] state)
+    {
+        long[] longState = new long[state.length / 8];
+
+        fromBytesToWords(longState, state);
+
+//        displayIntermediateValues.displayStateAsBytes(1, "Input of permutation", longState);
+
+        keccakPermutationOnWords(longState);
+
+//        displayIntermediateValues.displayStateAsBytes(1, "State after permutation", longState);
+
+        fromWordsToBytes(state, longState);
+    }
+
+    private void keccakPermutationAfterXor(byte[] state, byte[] data, int dataLengthInBytes)
+    {
+        int i;
+
+        for (i = 0; i < dataLengthInBytes; i++)
+        {
+            state[i] ^= data[i];
+        }
+
+        keccakPermutation(state);
+    }
+
+    private void keccakPermutationOnWords(long[] state)
+    {
+        int i;
+
+//        displayIntermediateValues.displayStateAs64bitWords(3, "Same, with lanes as 64-bit words", state);
+
+        for (i = 0; i < 24; i++)
+        {
+//            displayIntermediateValues.displayRoundNumber(3, i);
+
+            theta(state);
+//            displayIntermediateValues.displayStateAs64bitWords(3, "After theta", state);
+
+            rho(state);
+//            displayIntermediateValues.displayStateAs64bitWords(3, "After rho", state);
+
+            pi(state);
+//            displayIntermediateValues.displayStateAs64bitWords(3, "After pi", state);
+
+            chi(state);
+//            displayIntermediateValues.displayStateAs64bitWords(3, "After chi", state);
+
+            iota(state, i);
+//            displayIntermediateValues.displayStateAs64bitWords(3, "After iota", state);
+        }
+    }
+
+
+    private void theta(long[] A)
+    {
+        int x, y;
+        long[] C = new long[5], D = new long[5];
+
+        for (x = 0; x < 5; x++)
+        {
+            C[x] = 0;
+            for (y = 0; y < 5; y++)
+            {
+                C[x] ^= A[(((x) % 5) + 5 * ((y) % 5))];
+            }
+        }
+        for (x = 0; x < 5; x++)
+        {
+            D[x] = ((((C[(x + 1) % 5]) << 1) ^ ((C[(x + 1) % 5]) >>> (64 - 1)))) ^ C[(x + 4) % 5];
+        }
+        for (x = 0; x < 5; x++)
+        {
+            for (y = 0; y < 5; y++)
+            {
+                A[(((x) % 5) + 5 * ((y) % 5))] ^= D[x];
+            }
+        }
+    }
+
+    private void rho(long[] A)
+    {
+        int x, y;
+
+        for (x = 0; x < 5; x++)
+        {
+            for (y = 0; y < 5; y++)
+            {
+                A[(((x) % 5) + 5 * ((y) % 5))] = ((KeccakRhoOffsets[(((x) % 5) + 5 * ((y) % 5))] != 0) ? (((A[(((x) % 5) + 5 * ((y) % 5))]) << KeccakRhoOffsets[(((x) % 5) + 5 * ((y) % 5))]) ^ ((A[(((x) % 5) + 5 * ((y) % 5))]) >>> (64 - KeccakRhoOffsets[(((x) % 5) + 5 * ((y) % 5))]))) : A[(((x) % 5) + 5 * ((y) % 5))]);
+            }
+        }
+    }
+
+    private void pi(long[] A)
+    {
+        int x, y;
+        long[] tempA = new long[25];
+
+        for (x = 0; x < 5; x++)
+        {
+            for (y = 0; y < 5; y++)
+            {
+                tempA[(((x) % 5) + 5 * ((y) % 5))] = A[(((x) % 5) + 5 * ((y) % 5))];
+            }
+        }
+        for (x = 0; x < 5; x++)
+        {
+            for (y = 0; y < 5; y++)
+            {
+                A[(((0 * x + 1 * y) % 5) + 5 * ((2 * x + 3 * y) % 5))] = tempA[(((x) % 5) + 5 * ((y) % 5))];
+            }
+        }
+    }
+
+    private void chi(long[] A)
+    {
+        int x, y;
+        long[] C = new long[5];
+
+        for (y = 0; y < 5; y++)
+        {
+            for (x = 0; x < 5; x++)
+            {
+                C[x] = A[(((x) % 5) + 5 * ((y) % 5))] ^ ((~A[(((x + 1) % 5) + 5 * ((y) % 5))]) & A[(((x + 2) % 5) + 5 * ((y) % 5))]);
+            }
+            for (x = 0; x < 5; x++)
+            {
+                A[(((x) % 5) + 5 * ((y) % 5))] = C[x];
+            }
+        }
+    }
+
+    private void iota(long[] A, int indexRound)
+    {
+        A[(((0) % 5) + 5 * ((0) % 5))] ^= KeccakRoundConstants[indexRound];
+    }
+
+    private void KeccakAbsorb(byte[] state, byte[] data, int dataInBytes)
+    {
+        keccakPermutationAfterXor(state, data, dataInBytes);
+    }
+
+
+    private void KeccakExtract1024bits(byte[] state, byte[] data)
+    {
+        System.arraycopy(state, 0, data, 0, 128);
+    }
+
+
+    private void KeccakExtract(byte[] state, byte[] data, int laneCount)
+    {
+        System.arraycopy(state, 0, data, 0, laneCount * 8);
+    }
+
+    public static class spongeState
+    {
+
     }
 }

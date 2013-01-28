@@ -81,6 +81,7 @@ public class RegressionTest
         new KDF1GeneratorTest(),
         new KDF2GeneratorTest(),
         new MGF1GeneratorTest(),
+        new HKDFGeneratorTest(),
         new DHKEKGeneratorTest(),
         new ECDHKEKGeneratorTest(),
         new ShortenedDigestTest(),
