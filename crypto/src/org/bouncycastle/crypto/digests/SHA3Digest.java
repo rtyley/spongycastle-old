@@ -507,7 +507,7 @@ public class SHA3Digest
         {
             for (int x = 0; x < 5; x++)
             {
-                chiC[x] = A[x + 5 * y] ^ ((~A[(((x + 1) % 5) + 5 * ((y) % 5))]) & A[(((x + 2) % 5) + 5 * ((y) % 5))]);
+                chiC[x] = A[x + 5 * y] ^ ((~A[(((x + 1) % 5) + 5 * y)]) & A[(((x + 2) % 5) + 5 * y)]);
             }
             for (int x = 0; x < 5; x++)
             {
