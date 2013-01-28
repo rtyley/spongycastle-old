@@ -450,7 +450,7 @@ public class SHA3Digest
         }
     }
 
-    long[] C = new long[5], D = new long[5];
+    long[] C = new long[5];
 
     private void theta(long[] A)
     {
@@ -459,29 +459,24 @@ public class SHA3Digest
             C[x] = 0;
             for (int y = 0; y < 5; y++)
             {
-                C[x] ^= A[(((x) % 5) + 5 * ((y) % 5))];
+                C[x] ^= A[x + 5 * y];
             }
         }
         for (int x = 0; x < 5; x++)
         {
-            D[x] = ((((C[(x + 1) % 5]) << 1) ^ ((C[(x + 1) % 5]) >>> (64 - 1)))) ^ C[(x + 4) % 5];
-        }
-        for (int x = 0; x < 5; x++)
-        {
+            long dX = ((((C[(x + 1) % 5]) << 1) ^ ((C[(x + 1) % 5]) >>> (64 - 1)))) ^ C[(x + 4) % 5];
             for (int y = 0; y < 5; y++)
             {
-                A[x + 5 * y] ^= D[x];
+                A[x + 5 * y] ^= dX;
             }
         }
     }
 
     private void rho(long[] A)
     {
-        int x, y;
-
-        for (x = 0; x < 5; x++)
+        for (int x = 0; x < 5; x++)
         {
-            for (y = 0; y < 5; y++)
+            for (int y = 0; y < 5; y++)
             {
                 int index = x + 5 * y;
                 A[index] = ((KeccakRhoOffsets[index] != 0) ? (((A[index]) << KeccakRhoOffsets[index]) ^ ((A[index]) >>> (64 - KeccakRhoOffsets[index]))) : A[index]);
@@ -499,7 +494,7 @@ public class SHA3Digest
         {
             for (int y = 0; y < 5; y++)
             {
-                A[(((0 * x + 1 * y) % 5) + 5 * ((2 * x + 3 * y) % 5))] = tempA[x + 5 * y];
+                A[y + 5 * ((2 * x + 3 * y) % 5)] = tempA[x + 5 * y];
             }
         }
     }
