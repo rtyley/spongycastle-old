@@ -77,7 +77,6 @@ public class SHA3Digest
     private byte[] state = new byte[(1600 / 8)];
     private byte[] dataQueue = new byte[(1536 / 8)];
     private int rate;
-    private int capacity;
     private int bitsInQueue;
     private int fixedOutputLength;
     private boolean squeezing;
@@ -101,6 +100,18 @@ public class SHA3Digest
     public SHA3Digest(int bitLength)
     {
         init(bitLength);
+    }
+
+    public SHA3Digest(SHA3Digest source) {
+        System.arraycopy(source.state, 0, this.state, 0, source.state.length);
+        System.arraycopy(source.dataQueue, 0, this.dataQueue, 0, source.dataQueue.length);
+        this.rate = source.rate;
+        this.bitsInQueue = source.bitsInQueue;
+        this.fixedOutputLength = source.fixedOutputLength;
+        this.squeezing = source.squeezing;
+        this.bitsAvailableForSqueezing = source.bitsAvailableForSqueezing;
+        System.arraycopy(source.chunk, 0, this.chunk, 0, source.chunk.length);
+        System.arraycopy(source.oneByte, 0, this.oneByte, 0, source.oneByte.length);
     }
 
     public String getAlgorithmName()
@@ -208,7 +219,8 @@ public class SHA3Digest
         }
 
         this.rate = rate;
-        this.capacity = capacity;
+        // this is never read, need to check to see why we want to save it
+        //  this.capacity = capacity;
         this.fixedOutputLength = 0;
         Arrays.fill(this.state, (byte)0);
         Arrays.fill(this.dataQueue, (byte)0);
@@ -521,20 +533,20 @@ public class SHA3Digest
         A[(((0) % 5) + 5 * ((0) % 5))] ^= KeccakRoundConstants[indexRound];
     }
 
-    private void KeccakAbsorb(byte[] state, byte[] data, int dataInBytes)
+    private void KeccakAbsorb(byte[] byteState, byte[] data, int dataInBytes)
     {
-        keccakPermutationAfterXor(state, data, dataInBytes);
+        keccakPermutationAfterXor(byteState, data, dataInBytes);
     }
 
 
-    private void KeccakExtract1024bits(byte[] state, byte[] data)
+    private void KeccakExtract1024bits(byte[] byteState, byte[] data)
     {
-        System.arraycopy(state, 0, data, 0, 128);
+        System.arraycopy(byteState, 0, data, 0, 128);
     }
 
 
-    private void KeccakExtract(byte[] state, byte[] data, int laneCount)
+    private void KeccakExtract(byte[] byteState, byte[] data, int laneCount)
     {
-        System.arraycopy(state, 0, data, 0, laneCount * 8);
+        System.arraycopy(byteState, 0, data, 0, laneCount * 8);
     }
 }

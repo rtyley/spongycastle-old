@@ -256,6 +256,7 @@ public class SHA3DigestTest
         //
         // extremely long data test
         //
+//        System.out.println("Starting very long");
 //        for (int i = 0; i != 16384; i++)
 //        {
 //            for (int j = 0; j != 1024; j++)
@@ -270,6 +271,7 @@ public class SHA3DigestTest
 //        {
 //            fail("sha3 mismatch on " + digest.getAlgorithmName() + " extreme data test");
 //        }
+//        System.out.println("Done");
     }
 
     private void testMac(Digest digest, byte[][] keys, String[] data, String[] expected, byte[] truncExpected)
