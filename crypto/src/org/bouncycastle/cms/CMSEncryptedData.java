@@ -37,12 +37,19 @@ public class CMSEncryptedData
     public CMSTypedStream getContentStream(InputDecryptorProvider inputDecryptorProvider)
         throws CMSException
     {
-        EncryptedContentInfo encContentInfo = encryptedData.getEncryptedContentInfo();
-        InputDecryptor decrytor = inputDecryptorProvider.get(encContentInfo.getContentEncryptionAlgorithm());
+        try
+        {
+            EncryptedContentInfo encContentInfo = encryptedData.getEncryptedContentInfo();
+            InputDecryptor decrytor = inputDecryptorProvider.get(encContentInfo.getContentEncryptionAlgorithm());
 
-        ByteArrayInputStream encIn = new ByteArrayInputStream(encContentInfo.getEncryptedContent().getOctets());
+            ByteArrayInputStream encIn = new ByteArrayInputStream(encContentInfo.getEncryptedContent().getOctets());
 
-        return new CMSTypedStream(encContentInfo.getContentType(), decrytor.getInputStream(encIn));
+            return new CMSTypedStream(encContentInfo.getContentType(), decrytor.getInputStream(encIn));
+        }
+        catch (Exception e)
+        {
+            throw new CMSException("unable to create stream: " + e.getMessage(), e);
+        }
     }
 
     /**

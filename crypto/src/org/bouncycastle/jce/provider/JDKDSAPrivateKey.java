@@ -56,7 +56,7 @@ public class JDKDSAPrivateKey
         PrivateKeyInfo  info)
         throws IOException
     {
-        DSAParameter    params = new DSAParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
+        DSAParameter    params = DSAParameter.getInstance(info.getPrivateKeyAlgorithm().getParameters());
         DERInteger      derX = ASN1Integer.getInstance(info.parsePrivateKey());
 
         this.x = derX.getValue();

@@ -97,7 +97,7 @@ public class AlgorithmParametersSpi
     {
         try
         {
-            DSAParameter dsaP = new DSAParameter((ASN1Sequence)ASN1Primitive.fromByteArray(params));
+            DSAParameter dsaP = DSAParameter.getInstance(ASN1Primitive.fromByteArray(params));
 
             currentSpec = new DSAParameterSpec(dsaP.getP(), dsaP.getQ(), dsaP.getG());
         }

@@ -26,17 +26,17 @@ public class DSAParameter
     public static DSAParameter getInstance(
         Object obj)
     {
-        if(obj == null || obj instanceof DSAParameter) 
+        if (obj instanceof DSAParameter)
         {
             return (DSAParameter)obj;
         }
         
-        if(obj instanceof ASN1Sequence) 
+        if(obj != null)
         {
-            return new DSAParameter((ASN1Sequence)obj);
+            return new DSAParameter(ASN1Sequence.getInstance(obj));
         }
         
-        throw new IllegalArgumentException("Invalid DSAParameter: " + obj.getClass().getName());
+        return null;
     }
 
     public DSAParameter(
@@ -49,7 +49,7 @@ public class DSAParameter
         this.g = new ASN1Integer(g);
     }
 
-    public DSAParameter(
+    private DSAParameter(
         ASN1Sequence  seq)
     {
         if (seq.size() != 3)

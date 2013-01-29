@@ -74,9 +74,9 @@ public class JDKDSAPublicKey
 
         this.y = derY.getValue();
 
-        if (isNotNull(info.getAlgorithmId().getParameters()))
+        if (isNotNull(info.getAlgorithm().getParameters()))
         {
-            DSAParameter params = new DSAParameter((ASN1Sequence)info.getAlgorithmId().getParameters());
+            DSAParameter params = DSAParameter.getInstance(info.getAlgorithm().getParameters());
             
             this.dsaSpec = new DSAParameterSpec(params.getP(), params.getQ(), params.getG());
         }

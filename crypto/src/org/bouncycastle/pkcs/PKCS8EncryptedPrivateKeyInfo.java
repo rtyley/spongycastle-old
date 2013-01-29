@@ -35,12 +35,12 @@ public class PKCS8EncryptedPrivateKeyInfo
     public PrivateKeyInfo decryptPrivateKeyInfo(InputDecryptorProvider inputDecryptorProvider)
         throws PKCSException
     {
-        InputDecryptor decrytor = inputDecryptorProvider.get(encryptedPrivateKeyInfo.getEncryptionAlgorithm());
-
-        ByteArrayInputStream encIn = new ByteArrayInputStream(encryptedPrivateKeyInfo.getEncryptedData());
-
         try
         {
+            InputDecryptor decrytor = inputDecryptorProvider.get(encryptedPrivateKeyInfo.getEncryptionAlgorithm());
+
+            ByteArrayInputStream encIn = new ByteArrayInputStream(encryptedPrivateKeyInfo.getEncryptedData());
+
             return PrivateKeyInfo.getInstance(Streams.readAll(decrytor.getInputStream(encIn)));
         }
         catch (Exception e)
