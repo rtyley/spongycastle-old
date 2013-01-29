@@ -108,11 +108,10 @@ public class SHA3Digest
         this.rate = source.rate;
         this.bitsInQueue = source.bitsInQueue;
         this.fixedOutputLength = source.fixedOutputLength;
-        init(this.fixedOutputLength);
         this.squeezing = source.squeezing;
         this.bitsAvailableForSqueezing = source.bitsAvailableForSqueezing;
-        System.arraycopy(source.chunk, 0, this.chunk, 0, source.chunk.length);
-        System.arraycopy(source.oneByte, 0, this.oneByte, 0, source.oneByte.length);
+        this.chunk = Arrays.clone(source.chunk);
+        this.oneByte = Arrays.clone(source.oneByte);
     }
 
     public String getAlgorithmName()
