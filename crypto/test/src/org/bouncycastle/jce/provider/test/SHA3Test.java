@@ -4,6 +4,7 @@ import java.security.MessageDigest;
 import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
 public class SHA3Test
@@ -24,16 +25,20 @@ public class SHA3Test
         return "SHA3";
     }
 
-    void test(String algorithm)
+    void test(String algorithm, byte[] message, String expected)
         throws Exception
     {
-        byte[] message = "".getBytes();
-
         MessageDigest digest = MessageDigest.getInstance(algorithm, provider);
 
         byte[] result = digest.digest(message);
         byte[] result2 = digest.digest(message);
 
+        // test zero results valid
+        if (!MessageDigest.isEqual(result, Hex.decode(expected)))
+        {
+            fail("null result not equal for " + algorithm);
+        }
+        
         // test one digest the same message with the same instance
         if (!MessageDigest.isEqual(result, result2))
         {
@@ -92,6 +97,7 @@ public class SHA3Test
         {
             fail("Result object 5 not equal");
         }
+        
     }
 
     public void performTest()
@@ -99,13 +105,21 @@ public class SHA3Test
     {
         for (int i = 0; i != nullVectors.length; i++)
         {
-            test(nullVectors[i][0]);
+            test(nullVectors[i][0], "".getBytes(), nullVectors[i][1]);
         }
     }
 
     public static void main(String[] args)
     {
         Security.addProvider(new BouncyCastleProvider());
+        
+//        Provider p[] = Security.getProviders();
+//        for (int i = 0; i < p.length; i++) {
+//            System.out.println(p[i]);
+//            for (Enumeration e = p[i].keys(); e.hasMoreElements();) {
+//                System.out.println("\t" + e.nextElement());
+//            }
+//        }                
 
         runTest(new SHA3Test());
     }
