@@ -1,9 +1,7 @@
 package org.bouncycastle.openssl;
 
-import java.io.IOException;
-
 public class PasswordException
-    extends IOException
+    extends PEMException
 {
     public PasswordException(String msg)
     {

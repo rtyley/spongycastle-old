@@ -1,9 +1,7 @@
 package org.bouncycastle.openssl;
 
-import java.io.IOException;
-
 public class EncryptionException
-    extends IOException
+    extends PEMException
 {
     private Throwable cause;
 

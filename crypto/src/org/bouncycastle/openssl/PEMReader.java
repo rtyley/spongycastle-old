@@ -65,6 +65,7 @@ import org.bouncycastle.x509.X509V2AttributeCertificate;
  * Certificates will be returned using the appropriate java.security type (KeyPair, PublicKey, X509Certificate,
  * or X509CRL). In the case of a Certificate Request a PKCS10CertificationRequest will be returned.
  * </p>
+ * @deprecated use PEMParser
  */
 public class PEMReader
     extends PemReader
@@ -78,6 +79,7 @@ public class PEMReader
      * Create a new PEMReader
      *
      * @param reader the Reader
+     * @deprecated  use PEMParser
      */
     public PEMReader(
         Reader reader)
@@ -90,6 +92,7 @@ public class PEMReader
      *
      * @param reader  the Reader
      * @param pFinder the password finder
+     * @deprecated  use PEMParser
      */
     public PEMReader(
         Reader reader,
@@ -104,6 +107,7 @@ public class PEMReader
      * @param reader   the Reader
      * @param pFinder  the password finder
      * @param provider the cryptography provider to use
+     * @deprecated  use PEMParser
      */
     public PEMReader(
         Reader reader,
@@ -121,6 +125,7 @@ public class PEMReader
      * @param pFinder  the password finder
      * @param symProvider  provider to use for symmetric operations
      * @param asymProvider provider to use for asymmetric (public/private key) operations
+     * @deprecated  use PEMParser
      */
     public PEMReader(
         Reader reader,
