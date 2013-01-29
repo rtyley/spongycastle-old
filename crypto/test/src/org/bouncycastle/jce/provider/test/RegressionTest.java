@@ -68,7 +68,8 @@ public class RegressionTest
         new MQVTest(),
         new CMacTest(),
         new DSTU4145Test(),
-        new CRL5Test()
+        new CRL5Test(),
+        new SHA3Test()
     };
 
     public static void main(

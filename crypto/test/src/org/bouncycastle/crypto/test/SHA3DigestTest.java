@@ -2,7 +2,6 @@ package org.bouncycastle.crypto.test;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.Mac;
-import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.digests.SHA3Digest;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
@@ -23,12 +22,12 @@ public class SHA3DigestTest
     };
 
     final static String[] digests288 = { // the default settings
-        "6753e3380c09e385d0339eb6b050a68f66cfd60a73476e6fd6adeb72f5edd7c6f04a5d01",
-        "0bbe6afae0d7e89054085c1cc47b1689772c89a41796891e197d1ca1b76f288154933ded",
-        "82558a209b960ddeb531e6dcb281885b2400ca160472462486e79f071e88a3330a8a303d",
-        "94049e1ad7ef5d5b0df2b880489e7ab09ec937c3bfc1b04470e503e1ac7b1133c18f86da",
-        "a9cb5a75b5b81b7528301e72553ed6770214fa963956e790528afe420de33c074e6f4220",
-        "eadaf5ba2ad6a2f6f338fce0e1efdad2a61bb38f6be6068b01093977acf99e97a5d5827c"
+        "6753e3380c09e385d0339eb6b050a68f66cfd60a73476e6fd6adeb72f5edd7c6f04a5d01",  // message[0]    
+        "0bbe6afae0d7e89054085c1cc47b1689772c89a41796891e197d1ca1b76f288154933ded",  // message[1]
+        "82558a209b960ddeb531e6dcb281885b2400ca160472462486e79f071e88a3330a8a303d",  // message[2]
+        "94049e1ad7ef5d5b0df2b880489e7ab09ec937c3bfc1b04470e503e1ac7b1133c18f86da",  // 64k a-test
+        "a9cb5a75b5b81b7528301e72553ed6770214fa963956e790528afe420de33c074e6f4220",  // random alphabet test
+        "eadaf5ba2ad6a2f6f338fce0e1efdad2a61bb38f6be6068b01093977acf99e97a5d5827c"   // extremely long data test
     };
 
     final static String[] digests224 = {
@@ -331,7 +330,7 @@ public class SHA3DigestTest
 
     protected Digest cloneDigest(Digest digest)
     {
-        return new SHA1Digest((SHA1Digest)digest);
+        return new SHA3Digest((SHA3Digest)digest);
     }
     
     public static void main(
