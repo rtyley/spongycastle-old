@@ -4,11 +4,20 @@ import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherSpi;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
@@ -16,7 +25,9 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.RC2ParameterSpec;
 import javax.crypto.spec.RC5ParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
@@ -339,7 +350,8 @@ public class JCEStreamCipher
     protected byte[] engineDoFinal(
         byte[]  input,
         int     inputOffset,
-        int     inputLen) 
+        int     inputLen)
+        throws BadPaddingException, IllegalBlockSizeException
     {
         if (inputLen != 0)
         {
@@ -360,7 +372,8 @@ public class JCEStreamCipher
         int     inputOffset,
         int     inputLen,
         byte[]  output,
-        int     outputOffset) 
+        int     outputOffset)
+        throws BadPaddingException
     {
         if (inputLen != 0)
         {
@@ -371,6 +384,108 @@ public class JCEStreamCipher
         
         return inputLen;
     }
+
+    protected byte[] engineWrap(
+         Key     key)
+     throws IllegalBlockSizeException, InvalidKeyException
+     {
+         byte[] encoded = key.getEncoded();
+         if (encoded == null)
+         {
+             throw new InvalidKeyException("Cannot wrap key, null encoding.");
+         }
+
+         try
+         {
+             return engineDoFinal(encoded, 0, encoded.length);
+         }
+         catch (BadPaddingException e)
+         {
+             throw new IllegalBlockSizeException(e.getMessage());
+         }
+     }
+
+     protected Key engineUnwrap(
+         byte[] wrappedKey,
+         String wrappedKeyAlgorithm,
+         int wrappedKeyType)
+         throws InvalidKeyException
+     {
+         byte[] encoded;
+         try
+         {
+             encoded = engineDoFinal(wrappedKey, 0, wrappedKey.length);
+         }
+         catch (BadPaddingException e)
+         {
+             throw new InvalidKeyException(e.getMessage());
+         }
+         catch (IllegalBlockSizeException e2)
+         {
+             throw new InvalidKeyException(e2.getMessage());
+         }
+
+         if (wrappedKeyType == Cipher.SECRET_KEY)
+         {
+             return new SecretKeySpec(encoded, wrappedKeyAlgorithm);
+         }
+         else if (wrappedKeyAlgorithm.equals("") && wrappedKeyType == Cipher.PRIVATE_KEY)
+         {
+             /*
+              * The caller doesn't know the algorithm as it is part of
+              * the encrypted data.
+              */
+             try
+             {
+                 PrivateKeyInfo in = PrivateKeyInfo.getInstance(encoded);
+
+                 PrivateKey privKey = BouncyCastleProvider.getPrivateKey(in);
+
+                 if (privKey != null)
+                 {
+                     return privKey;
+                 }
+                 else
+                 {
+                     throw new InvalidKeyException("algorithm " + in.getPrivateKeyAlgorithm().getAlgorithm() + " not supported");
+                 }
+             }
+             catch (Exception e)
+             {
+                 throw new InvalidKeyException("Invalid key encoding.");
+             }
+         }
+         else
+         {
+             try
+             {
+                 KeyFactory kf = KeyFactory.getInstance(wrappedKeyAlgorithm, BouncyCastleProvider.PROVIDER_NAME);
+
+                 if (wrappedKeyType == Cipher.PUBLIC_KEY)
+                 {
+                     return kf.generatePublic(new X509EncodedKeySpec(encoded));
+                 }
+                 else if (wrappedKeyType == Cipher.PRIVATE_KEY)
+                 {
+                     return kf.generatePrivate(new PKCS8EncodedKeySpec(encoded));
+                 }
+             }
+             catch (NoSuchProviderException e)
+             {
+                 throw new InvalidKeyException("Unknown key type " + e.getMessage());
+             }
+             catch (NoSuchAlgorithmException e)
+             {
+                 throw new InvalidKeyException("Unknown key type " + e.getMessage());
+             }
+             catch (InvalidKeySpecException e2)
+             {
+                 throw new InvalidKeyException("Unknown key type " + e2.getMessage());
+             }
+
+             throw new InvalidKeyException("Unknown key type " + wrappedKeyType);
+         }
+     }
 
     /*
      * The ciphers that inherit from us.

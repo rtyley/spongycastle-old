@@ -1,10 +1,12 @@
 package org.bouncycastle.jce.provider.test;
 
 import java.security.AlgorithmParameters;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.InvalidParameterSpecException;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -23,6 +25,7 @@ import org.bouncycastle.crypto.generators.PKCS12ParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
@@ -108,7 +111,7 @@ public class PBETest
 
             byte[]          dec = c.doFinal(enc);
 
-            if (!arrayEquals(salt, dec))
+            if (!Arrays.areEqual(salt, dec))
             {
                 fail("" + algorithm + "failed encryption/decryption test");
             }
@@ -190,7 +193,7 @@ public class PBETest
 
             byte[]          dec = c.doFinal(enc);
 
-            if (!arrayEquals(salt, dec))
+            if (!Arrays.areEqual(salt, dec))
             {
                 fail("" + algorithm + "failed encryption/decryption test");
             }
@@ -213,7 +216,7 @@ public class PBETest
 
             dec = c.doFinal(enc);
 
-            if (!arrayEquals(salt, dec))
+            if (!Arrays.areEqual(salt, dec))
             {
                 fail("" + algorithm + "failed encryption/decryption test");
             }
@@ -231,7 +234,7 @@ public class PBETest
 
             dec = c.doFinal(enc);
 
-            if (!arrayEquals(salt, dec))
+            if (!Arrays.areEqual(salt, dec))
             {
                 fail("" + algorithm + "failed encryption/decryption test");
             }
@@ -243,7 +246,7 @@ public class PBETest
             AlgorithmParameters param = c.getParameters();
             PBEParameterSpec spec = (PBEParameterSpec)param.getParameterSpec(PBEParameterSpec.class);
 
-            if (!arrayEquals(salt, spec.getSalt()))
+            if (!Arrays.areEqual(salt, spec.getSalt()))
             {
                 fail("" + algorithm + "failed salt test");
             }
@@ -326,26 +329,6 @@ public class PBETest
 
         return cipher;
     }
-    
-    private boolean arrayEquals(
-        byte[]  a,
-        byte[]  b)
-    {
-        if (a.length != b.length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i != a.length; i++)
-        {
-            if (a[i] != b[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
 
     public void testPBEHMac(
         String  hmacName,
@@ -385,12 +368,49 @@ public class PBETest
 
         out = mac.doFinal();
 
-        if (!arrayEquals(out, output))
+        if (!Arrays.areEqual(out, output))
         {
             fail("Failed - expected " + new String(Hex.encode(output)) + " got " + new String(Hex.encode(out)));
         }
     }
-    
+
+
+    private void testCipherNameWithWrap(String name, String simpleName)
+        throws Exception
+    {
+        KeyGenerator kg = KeyGenerator.getInstance("AES");
+        kg.init(new SecureRandom());
+        SecretKey key = kg.generateKey();
+
+        byte[] salt = {
+        	            (byte)0xc7, (byte)0x73, (byte)0x21, (byte)0x8c,
+        	            (byte)0x7e, (byte)0xc8, (byte)0xee, (byte)0x99
+                        };
+        char[] password = { 'p','a','s','s','w','o','r','d' };
+
+        PBEParameterSpec pbeParamSpec = new PBEParameterSpec(salt, 20);
+        PBEKeySpec pbeKeySpec = new PBEKeySpec(password);
+        SecretKeyFactory keyFac =
+        SecretKeyFactory.getInstance(name);
+        SecretKey pbeKey = keyFac.generateSecret(pbeKeySpec);
+        Cipher pbeEncryptCipher = Cipher.getInstance(name, "BC");
+
+        pbeEncryptCipher.init(Cipher.WRAP_MODE, pbeKey, pbeParamSpec);
+
+        byte[] symKeyBytes = pbeEncryptCipher.wrap(key);
+
+        Cipher simpleCipher = Cipher.getInstance(simpleName, "BC");
+
+        simpleCipher.init(Cipher.UNWRAP_MODE, pbeKey, pbeParamSpec);
+
+        SecretKey unwrappedKey = (SecretKey)simpleCipher.unwrap(symKeyBytes, "AES", Cipher.SECRET_KEY);
+
+        if (!Arrays.areEqual(unwrappedKey.getEncoded(), key.getEncoded()))
+        {
+            fail("key mismatch on unwrapping");
+        }
+    }
+
     public void performTest()
         throws Exception
     {
@@ -418,7 +438,7 @@ public class PBETest
 
         byte[]  in = cDec.doFinal(out);
 
-        if (!arrayEquals(input, in))
+        if (!Arrays.areEqual(input, in))
         {
             fail("DES failed");
         }
@@ -432,7 +452,7 @@ public class PBETest
 
         in = cDec.doFinal(out);
         
-        if (!arrayEquals(input, in))
+        if (!Arrays.areEqual(input, in))
         {
             fail("DES failed without param");
         }
@@ -457,7 +477,7 @@ public class PBETest
 
         in = cDec.doFinal(out);
 
-        if (!arrayEquals(input, in))
+        if (!Arrays.areEqual(input, in))
         {
             fail("DESede failed");
         }
@@ -482,7 +502,7 @@ public class PBETest
 
         in = cDec.doFinal(out);
 
-        if (!arrayEquals(input, in))
+        if (!Arrays.areEqual(input, in))
         {
             fail("RC2 failed");
         }
@@ -506,7 +526,7 @@ public class PBETest
 
         in = cDec.doFinal(out);
 
-        if (!arrayEquals(input, in))
+        if (!Arrays.areEqual(input, in))
         {
             fail("RC4 failed");
         }
@@ -520,7 +540,7 @@ public class PBETest
 
         in = cDec.doFinal(out);
         
-        if (!arrayEquals(input, in))
+        if (!Arrays.areEqual(input, in))
         {
             fail("RC4 failed without param");
         }
@@ -537,6 +557,10 @@ public class PBETest
 
         testPBEHMac("PBEWithHMacSHA1", hMac1);
         testPBEHMac("PBEWithHMacRIPEMD160", hMac2);
+
+        testCipherNameWithWrap("PBEWITHSHA256AND128BITAES-CBC-BC", "AES/CBC/PKCS5Padding");
+        testCipherNameWithWrap("PBEWITHSHAAND40BITRC4", "RC4");
+        testCipherNameWithWrap("PBEWITHSHAAND128BITRC4", "RC4");
     }
 
     public String getName()
