@@ -70,6 +70,7 @@ import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.jce.spec.GOST3410ParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.util.Integers;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.Streams;
@@ -2613,7 +2614,7 @@ public class CertTest
         }
 
         List name = (List)names.iterator().next();
-        if(!name.get(0).equals(GeneralName.rfc822Name))
+        if(!name.get(0).equals(Integers.valueOf(GeneralName.rfc822Name)))
         {
             fail("subject alt name type incorrect");
         }
@@ -2626,7 +2627,7 @@ public class CertTest
         }
 
         name = (List)names.iterator().next();
-        if(!name.get(0).equals(GeneralName.directoryName))
+        if(!name.get(0).equals(Integers.valueOf(GeneralName.directoryName)))
         {
             fail("issuer alt name type incorrect");
         }

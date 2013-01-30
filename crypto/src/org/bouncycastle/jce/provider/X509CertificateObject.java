@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.print.attribute.IntegerSyntax;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
@@ -61,6 +62,7 @@ import org.bouncycastle.jcajce.provider.asymmetric.util.PKCS12BagAttributeCarrie
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
 import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Integers;
 import org.bouncycastle.util.encoders.Hex;
 
 public class X509CertificateObject
@@ -848,7 +850,7 @@ public class X509CertificateObject
             {
                 GeneralName genName = GeneralName.getInstance(it.nextElement());
                 List list = new ArrayList();
-                list.add(Integer.valueOf(genName.getTagNo()));
+                list.add(Integers.valueOf(genName.getTagNo()));
                 switch (genName.getTagNo())
                 {
                 case GeneralName.ediPartyName:
