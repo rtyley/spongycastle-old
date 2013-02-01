@@ -201,10 +201,20 @@ public class PKCS1Encoding
         }
 
         byte type = block[0];
-        
-        if (type != 1 && type != 2)
+
+        if (forPrivateKey)
         {
-            throw new InvalidCipherTextException("unknown block type");
+            if (type != 2)
+            {
+                throw new InvalidCipherTextException("unknown block type");
+            }
+        }
+        else
+        {
+            if (type != 1)
+            {
+                throw new InvalidCipherTextException("unknown block type");
+            }
         }
 
         if (useStrictLength && block.length != engine.getOutputBlockSize())
