@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.print.attribute.IntegerSyntax;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Encodable;
@@ -886,7 +885,7 @@ public class X509CertificateObject
                     throw new IOException("Bad tag number: " + genName.getTagNo());
                 }
 
-                temp.add(list);
+                temp.add(Collections.unmodifiableList(list));
             }
             if (temp.size() == 0)
             {
