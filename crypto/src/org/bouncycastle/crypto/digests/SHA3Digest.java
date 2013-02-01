@@ -138,7 +138,7 @@ public class SHA3Digest
 
     public int doFinal(byte[] out, int outOff)
     {
-        doFinal(out);
+        squeeze(out, outOff, fixedOutputLength);
 
         reset();
 
@@ -200,11 +200,6 @@ public class SHA3Digest
             lastByte[0] = (byte)(data[off + (int)(databitlen / 8)] >> (8 - (databitlen % 8)));
             absorb(lastByte, off, databitlen % 8);
         }
-    }
-
-    private void doFinal(byte[] hashval)
-    {
-        squeeze(hashval, fixedOutputLength);
     }
 
     private void initSponge(int rate, int capacity)
@@ -335,7 +330,7 @@ public class SHA3Digest
         squeezing = true;
     }
 
-    private void squeeze(byte[] output, long outputLength)
+    private void squeeze(byte[] output, int offset, long outputLength)
     {
         long i;
         int partialBlock;
@@ -377,7 +372,7 @@ public class SHA3Digest
                 partialBlock = (int)(outputLength - i);
             }
 
-            System.arraycopy(dataQueue, (rate - bitsAvailableForSqueezing) / 8, output, (int)(i / 8), partialBlock / 8);
+            System.arraycopy(dataQueue, (rate - bitsAvailableForSqueezing) / 8, output, offset + (int)(i / 8), partialBlock / 8);
             bitsAvailableForSqueezing -= partialBlock;
             i += partialBlock;
         }

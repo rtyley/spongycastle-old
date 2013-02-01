@@ -10,7 +10,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.test.SimpleTest;
 
 /**
- * Tiger Digest Test
+ * SHA3 Digest Test
  */
 public class SHA3DigestTest
     extends SimpleTest
@@ -252,6 +252,8 @@ public class SHA3DigestTest
             fail("sha3 mismatch on " + digest.getAlgorithmName() + " 64k chunked alpha");
         }
 
+        testDigestDoFinal(digest);
+        
         //
         // extremely long data test
         //
@@ -271,6 +273,26 @@ public class SHA3DigestTest
 //            fail("sha3 mismatch on " + digest.getAlgorithmName() + " extreme data test");
 //        }
 //        System.out.println("Done");
+    }
+
+    private void testDigestDoFinal(Digest digest)
+    {
+        byte[] hash = new byte[digest.getDigestSize()];
+        digest.doFinal(hash, 0);
+
+        for (int i = 0; i <= digest.getDigestSize(); ++i)
+        {
+            byte[] cmp = new byte[2 * digest.getDigestSize()];
+            System.arraycopy(hash, 0, cmp, i, hash.length);
+
+            byte[] buf = new byte[2 * digest.getDigestSize()];
+            digest.doFinal(buf, i);
+
+            if (!Arrays.areEqual(cmp, buf))
+            {
+                fail("sha3 offset doFinal on " + digest.getAlgorithmName());
+            }
+        }
     }
 
     private void testMac(Digest digest, byte[][] keys, String[] data, String[] expected, byte[] truncExpected)
