@@ -273,7 +273,7 @@ public class BCMcElieceCCA2PrivateKey
         PrivateKeyInfo pki;
         try
         {
-            AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(this.getOID(), new DERNull());
+            AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(this.getOID(), DERNull.INSTANCE);
             pki = new PrivateKeyInfo(algorithmIdentifier, privateKey);
         }
         catch (IOException e)

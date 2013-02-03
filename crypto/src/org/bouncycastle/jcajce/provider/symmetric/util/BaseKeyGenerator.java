@@ -56,6 +56,10 @@ public class BaseKeyGenerator
     {
         try
         {
+            if (random == null)
+            {
+                random = new SecureRandom();
+            }
             engine.init(new KeyGenerationParameters(random, keySize));
             uninitialised = false;
         }

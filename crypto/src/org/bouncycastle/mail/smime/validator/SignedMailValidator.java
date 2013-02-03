@@ -60,6 +60,7 @@ import org.bouncycastle.i18n.filter.UntrustedInput;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.mail.smime.SMIMESigned;
+import org.bouncycastle.util.Integers;
 import org.bouncycastle.x509.CertPathReviewerException;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
 
@@ -472,7 +473,7 @@ public class SignedMailValidator
         {
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                     "SignedMailValidator.shortSigningKey",
-                    new Object[] { new Integer(keyLenght) });
+                    new Object[]{Integers.valueOf(keyLenght)});
             notifications.add(msg);
         }
         

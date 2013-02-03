@@ -192,7 +192,7 @@ public class OCSPReqGenerator
                 throw new OCSPException("exception processing TBSRequest: " + e, e);
             }
 
-            AlgorithmIdentifier sigAlgId = new AlgorithmIdentifier(signingAlgorithm, new DERNull());
+            AlgorithmIdentifier sigAlgId = new AlgorithmIdentifier(signingAlgorithm, DERNull.INSTANCE);
 
             if (chain != null && chain.length > 0)
             {

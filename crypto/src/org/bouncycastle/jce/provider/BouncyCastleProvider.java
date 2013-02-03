@@ -455,7 +455,6 @@ public final class BouncyCastleProvider extends Provider
                 }
                 catch (Exception e)
                 {   // this should never ever happen!!
-e.printStackTrace();
                     throw new InternalError("cannot create instance of "
                         + packageName + names[i] + "$Mappings : " + e);
                 }

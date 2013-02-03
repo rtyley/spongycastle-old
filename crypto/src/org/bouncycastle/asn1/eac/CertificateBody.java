@@ -277,9 +277,9 @@ public class CertificateBody
             }
         }
         catch (IOException e)
-        {          e.printStackTrace();
+        {
             return null;
-        }        System.err.println("returning null");
+        }
         return null;
     }
 

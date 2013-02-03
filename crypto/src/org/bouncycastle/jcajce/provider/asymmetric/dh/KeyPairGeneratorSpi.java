@@ -16,6 +16,7 @@ import org.bouncycastle.crypto.params.DHParameters;
 import org.bouncycastle.crypto.params.DHPrivateKeyParameters;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.Integers;
 
 public class KeyPairGeneratorSpi
     extends java.security.KeyPairGenerator
@@ -64,7 +65,7 @@ public class KeyPairGeneratorSpi
     {
         if (!initialised)
         {
-            Integer paramStrength = new Integer(strength);
+            Integer paramStrength = Integers.valueOf(strength);
 
             if (params.containsKey(paramStrength))
             {

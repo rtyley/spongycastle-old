@@ -286,6 +286,7 @@ import org.bouncycastle.asn1.x9.DHPublicKey;
 import org.bouncycastle.asn1.x9.DHValidationParms;
 import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.util.Integers;
 import org.bouncycastle.util.encoders.Base64;
 
 public class GetInstanceTest
@@ -658,7 +659,7 @@ public class GetInstanceTest
         SPuri.getInstance(null);
         Vector v = new Vector();
 
-        v.add(new Integer(1));
+        v.add(Integers.valueOf(1));
         v.add(BigInteger.valueOf(2));
         NoticeReference noticeReference = new NoticeReference("BC", v);
         doFullGetInstanceTest(SPUserNotice.class, new SPUserNotice(noticeReference, new DisplayText("hello world")));

@@ -37,7 +37,7 @@ public class EncryptedPrivateKeyInfo
     public static EncryptedPrivateKeyInfo getInstance(
         Object  obj)
     {
-        if (obj instanceof EncryptedData)
+        if (obj instanceof EncryptedPrivateKeyInfo)
         {
             return (EncryptedPrivateKeyInfo)obj;
         }

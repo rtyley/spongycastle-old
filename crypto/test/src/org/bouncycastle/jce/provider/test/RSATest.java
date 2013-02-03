@@ -318,8 +318,8 @@ public class RSATest
         
         if (!areEqual(oaepP.getEncoded(), 
                 new RSAESOAEPparams(
-                        new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull()), 
-                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull())),
+                        new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE), 
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE)),
                         new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
         {
             fail("OAEP test failed default sha-1 parameters");
@@ -352,8 +352,8 @@ public class RSATest
         
         if (!areEqual(oaepP.getEncoded(), 
                 new RSAESOAEPparams(
-                        new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, new DERNull()), 
-                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, new DERNull())),
+                        new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, DERNull.INSTANCE), 
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, DERNull.INSTANCE)),
                         new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
         {
             fail("OAEP test failed default sha-224 parameters");
@@ -386,8 +386,8 @@ public class RSATest
         
         if (!areEqual(oaepP.getEncoded(), 
                 new RSAESOAEPparams(
-                        new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, new DERNull()), 
-                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, new DERNull())),
+                        new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE), 
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE)),
                         new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
         {
             fail("OAEP test failed default sha-256 parameters");
@@ -420,8 +420,8 @@ public class RSATest
         
         if (!areEqual(oaepP.getEncoded(), 
                 new RSAESOAEPparams(
-                        new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, new DERNull()), 
-                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, new DERNull())),
+                        new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, DERNull.INSTANCE), 
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, DERNull.INSTANCE)),
                         new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
         {
             fail("OAEP test failed default sha-384 parameters");
@@ -454,8 +454,8 @@ public class RSATest
         
         if (!areEqual(oaepP.getEncoded(), 
                 new RSAESOAEPparams(
-                        new AlgorithmIdentifier(PKCSObjectIdentifiers.md5, new DERNull()), 
-                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(PKCSObjectIdentifiers.md5, new DERNull())),
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.md5, DERNull.INSTANCE), 
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(PKCSObjectIdentifiers.md5, DERNull.INSTANCE)),
                         new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[0]))).getEncoded()))
         {
             fail("OAEP test failed default md5 parameters");
@@ -506,8 +506,8 @@ public class RSATest
         
         if (!areEqual(oaepP.getEncoded(), 
                 new RSAESOAEPparams(
-                        new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull()), 
-                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull())),
+                        new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE), 
+                        new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1, new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE)),
                         new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified, new DEROctetString(new byte[] { 1, 2, 3, 4, 5 }))).getEncoded()))
         {
             fail("OAEP test failed changed sha-1 parameters");

@@ -83,7 +83,7 @@ public class JceSymmetricKeyWrapper
         if (algorithm.startsWith("DES"))
         {
             return new AlgorithmIdentifier(new ASN1ObjectIdentifier(
-                    "1.2.840.113549.1.9.16.3.6"), new DERNull());
+                    "1.2.840.113549.1.9.16.3.6"), DERNull.INSTANCE);
         }
         else if (algorithm.startsWith("RC2"))
         {

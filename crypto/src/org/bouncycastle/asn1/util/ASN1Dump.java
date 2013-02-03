@@ -77,7 +77,7 @@ public class ASN1Dump
             {
                 Object  o = e.nextElement();
 
-                if (o == null || o.equals(new DERNull()))
+                if (o == null || o.equals(DERNull.INSTANCE))
                 {
                     buf.append(tab);
                     buf.append("NULL");

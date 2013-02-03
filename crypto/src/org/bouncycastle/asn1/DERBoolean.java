@@ -38,12 +38,21 @@ public class DERBoolean
     }
 
     /**
-     * return a DERBoolean from the passed in boolean.
+     * return a ASN1Boolean from the passed in boolean.
      */
     public static ASN1Boolean getInstance(
         boolean  value)
     {
         return (value ? TRUE : FALSE);
+    }
+
+    /**
+     * return a ASN1Boolean from the passed in boolean.
+     */
+    public static ASN1Boolean getInstance(
+        int value)
+    {
+        return (value != 0 ? TRUE : FALSE);
     }
 
     /**
@@ -93,6 +102,10 @@ public class DERBoolean
         }
     }
 
+    /**
+     * @deprecated use getInstance(boolean) method.
+     * @param value
+     */
     public DERBoolean(
         boolean     value)
     {

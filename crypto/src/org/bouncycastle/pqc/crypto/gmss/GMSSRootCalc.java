@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Integers;
 import org.bouncycastle.util.encoders.Hex;
 
 
@@ -148,7 +149,7 @@ public class GMSSRootCalc
         this.heightOfNodes = new Vector();
         for (int i = 0; i < tailLength; i++)
         {
-            this.heightOfNodes.addElement(new Integer(statInt[8 + heightOfTree
+            this.heightOfNodes.addElement(Integers.valueOf(statInt[8 + heightOfTree
                 + i]));
         }
 
@@ -308,7 +309,7 @@ public class GMSSRootCalc
         if (index[0] == 0)
         {
             tailStack.addElement(leaf);
-            heightOfNodes.addElement(new Integer(0));
+            heightOfNodes.addElement(Integers.valueOf(0));
         }
         else
         {
@@ -378,7 +379,7 @@ public class GMSSRootCalc
             }
             // push help element to the stack
             tailStack.addElement(help);
-            heightOfNodes.addElement(new Integer(helpHeight));
+            heightOfNodes.addElement(Integers.valueOf(helpHeight));
 
             // is the root calculation finished?
             if (helpHeight == heightOfTree)

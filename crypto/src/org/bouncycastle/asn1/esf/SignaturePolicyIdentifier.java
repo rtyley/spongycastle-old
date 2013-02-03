@@ -66,7 +66,7 @@ public class SignaturePolicyIdentifier
     {
         if (isSignaturePolicyImplied)
         {
-            return new DERNull();
+            return DERNull.INSTANCE;
         }
         else
         {

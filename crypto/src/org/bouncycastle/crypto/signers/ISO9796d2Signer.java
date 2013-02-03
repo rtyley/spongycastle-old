@@ -10,6 +10,7 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.SignerWithRecovery;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Integers;
 
 /**
  * ISO9796-2 - mechanism using a hash function with recovery (scheme 1)
@@ -30,15 +31,15 @@ public class ISO9796d2Signer
 
     static
     {
-        trailerMap.put("RIPEMD128", new Integer(TRAILER_RIPEMD128));
-        trailerMap.put("RIPEMD160", new Integer(TRAILER_RIPEMD160));
+        trailerMap.put("RIPEMD128", Integers.valueOf(TRAILER_RIPEMD128));
+        trailerMap.put("RIPEMD160", Integers.valueOf(TRAILER_RIPEMD160));
 
-        trailerMap.put("SHA-1", new Integer(TRAILER_SHA1));
-        trailerMap.put("SHA-256", new Integer(TRAILER_SHA256));
-        trailerMap.put("SHA-384", new Integer(TRAILER_SHA384));
-        trailerMap.put("SHA-512", new Integer(TRAILER_SHA512));
+        trailerMap.put("SHA-1", Integers.valueOf(TRAILER_SHA1));
+        trailerMap.put("SHA-256", Integers.valueOf(TRAILER_SHA256));
+        trailerMap.put("SHA-384", Integers.valueOf(TRAILER_SHA384));
+        trailerMap.put("SHA-512", Integers.valueOf(TRAILER_SHA512));
 
-        trailerMap.put("Whirlpool", new Integer(TRAILER_WHIRLPOOL));
+        trailerMap.put("Whirlpool", Integers.valueOf(TRAILER_WHIRLPOOL));
     }
 
     private Digest                      digest;

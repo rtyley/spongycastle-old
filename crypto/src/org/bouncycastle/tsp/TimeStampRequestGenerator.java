@@ -129,7 +129,7 @@ public class TimeStampRequestGenerator
 
         ASN1ObjectIdentifier digestAlgOID = new ASN1ObjectIdentifier(digestAlgorithmOID);
 
-        AlgorithmIdentifier algID = new AlgorithmIdentifier(digestAlgOID, new DERNull());
+        AlgorithmIdentifier algID = new AlgorithmIdentifier(digestAlgOID, DERNull.INSTANCE);
         MessageImprint messageImprint = new MessageImprint(algID, digest);
 
         Extensions  ext = null;

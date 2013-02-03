@@ -135,7 +135,7 @@ class OCSPUtil
         }
         else
         {
-            return new AlgorithmIdentifier(sigOid, new DERNull());
+            return new AlgorithmIdentifier(sigOid, DERNull.INSTANCE);
         }
     }
     

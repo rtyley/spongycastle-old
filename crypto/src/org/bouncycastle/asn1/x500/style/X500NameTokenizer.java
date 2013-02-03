@@ -10,7 +10,7 @@ class X500NameTokenizer
 {
     private String          value;
     private int             index;
-    private char            seperator;
+    private char            separator;
     private StringBuffer    buf = new StringBuffer();
 
     public X500NameTokenizer(
@@ -21,11 +21,11 @@ class X500NameTokenizer
     
     public X500NameTokenizer(
         String  oid,
-        char    seperator)
+        char    separator)
     {
         this.value = oid;
         this.index = -1;
-        this.seperator = seperator;
+        this.separator = separator;
     }
 
     public boolean hasMoreTokens()
@@ -58,6 +58,14 @@ class X500NameTokenizer
                 }
                 else
                 {
+                    if (c == '#' && buf.charAt(buf.length() - 1) == '=')
+                    {
+                        buf.append('\\');
+                    }
+                    else if (c == '+' && separator != '+')
+                    {
+                        buf.append('\\');
+                    }
                     buf.append(c);
                 }
                 escaped = false;
@@ -70,7 +78,7 @@ class X500NameTokenizer
                     {
                         buf.append('\\');
                     }
-                    else if (c == '+' && seperator != '+')
+                    else if (c == '+' && separator != '+')
                     {
                         buf.append('\\');
                     }
@@ -81,7 +89,7 @@ class X500NameTokenizer
                 {
                     escaped = true;
                 }
-                else if (c == seperator)
+                else if (c == separator)
                 {
                     break;
                 }

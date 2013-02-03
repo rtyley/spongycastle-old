@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.pqc.crypto.gmss.util.GMSSRandom;
+import org.bouncycastle.util.Integers;
 import org.bouncycastle.util.encoders.Hex;
 
 
@@ -122,7 +123,7 @@ public class Treehash
         this.heightOfNodes = new Vector();
         for (int i = 0; i < tailLength; i++)
         {
-            this.heightOfNodes.addElement(new Integer(statInt[6 + i]));
+            this.heightOfNodes.addElement(Integers.valueOf(statInt[6 + i]));
         }
 
         // decode statByte
@@ -265,7 +266,7 @@ public class Treehash
 
             // push the new node on the stack
             this.tailStack.addElement(help);
-            this.heightOfNodes.addElement(new Integer(helpHeight));
+            this.heightOfNodes.addElement(Integers.valueOf(helpHeight));
             this.tailLength++;
 
             // finally check whether the top node on stack and the first node

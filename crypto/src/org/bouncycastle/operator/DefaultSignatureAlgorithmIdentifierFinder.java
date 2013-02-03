@@ -116,19 +116,19 @@ public class DefaultSignatureAlgorithmIdentifierFinder
         //
         // explicit params
         //
-        AlgorithmIdentifier sha1AlgId = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull());
+        AlgorithmIdentifier sha1AlgId = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE);
         params.put("SHA1WITHRSAANDMGF1", createPSSParams(sha1AlgId, 20));
 
-        AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, new DERNull());
+        AlgorithmIdentifier sha224AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha224, DERNull.INSTANCE);
         params.put("SHA224WITHRSAANDMGF1", createPSSParams(sha224AlgId, 28));
 
-        AlgorithmIdentifier sha256AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, new DERNull());
+        AlgorithmIdentifier sha256AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha256, DERNull.INSTANCE);
         params.put("SHA256WITHRSAANDMGF1", createPSSParams(sha256AlgId, 32));
 
-        AlgorithmIdentifier sha384AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, new DERNull());
+        AlgorithmIdentifier sha384AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha384, DERNull.INSTANCE);
         params.put("SHA384WITHRSAANDMGF1", createPSSParams(sha384AlgId, 48));
 
-        AlgorithmIdentifier sha512AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512, new DERNull());
+        AlgorithmIdentifier sha512AlgId = new AlgorithmIdentifier(NISTObjectIdentifiers.id_sha512, DERNull.INSTANCE);
         params.put("SHA512WITHRSAANDMGF1", createPSSParams(sha512AlgId, 64));
 
         //
@@ -177,7 +177,7 @@ public class DefaultSignatureAlgorithmIdentifierFinder
 
         if (pkcs15RsaEncryption.contains(sigOID))
         {
-            encAlgId = new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, new DERNull());
+            encAlgId = new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE);
         }
         else
         {
@@ -190,7 +190,7 @@ public class DefaultSignatureAlgorithmIdentifierFinder
         }
         else
         {
-            digAlgId = new AlgorithmIdentifier((ASN1ObjectIdentifier)digestOids.get(sigOID), new DERNull());
+            digAlgId = new AlgorithmIdentifier((ASN1ObjectIdentifier)digestOids.get(sigOID), DERNull.INSTANCE);
         }
 
         return sigAlgId;

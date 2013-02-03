@@ -4,6 +4,6 @@ public class Integers
 {
     public static Integer valueOf(int value)
     {
-        return new Integer(value);
+        return Integer.valueOf(value);
     }
 }

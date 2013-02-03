@@ -24,6 +24,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jcajce.JcaJceHelper;
 import org.bouncycastle.openssl.EncryptionException;
 import org.bouncycastle.openssl.PEMException;
+import org.bouncycastle.util.Integers;
 
 class PEMUtilities
 {
@@ -46,10 +47,10 @@ class PEMUtilities
         PKCS5_SCHEME_2.add(NISTObjectIdentifiers.id_aes192_CBC);
         PKCS5_SCHEME_2.add(NISTObjectIdentifiers.id_aes256_CBC);
 
-        KEYSIZES.put(PKCSObjectIdentifiers.des_EDE3_CBC.getId(), new Integer(192));
-        KEYSIZES.put(NISTObjectIdentifiers.id_aes128_CBC.getId(), new Integer(128));
-        KEYSIZES.put(NISTObjectIdentifiers.id_aes192_CBC.getId(), new Integer(192));
-        KEYSIZES.put(NISTObjectIdentifiers.id_aes256_CBC.getId(), new Integer(256));
+        KEYSIZES.put(PKCSObjectIdentifiers.des_EDE3_CBC.getId(), Integers.valueOf(192));
+        KEYSIZES.put(NISTObjectIdentifiers.id_aes128_CBC.getId(), Integers.valueOf(128));
+        KEYSIZES.put(NISTObjectIdentifiers.id_aes192_CBC.getId(), Integers.valueOf(192));
+        KEYSIZES.put(NISTObjectIdentifiers.id_aes256_CBC.getId(), Integers.valueOf(256));
     }
 
     static int getKeySize(String algorithm)

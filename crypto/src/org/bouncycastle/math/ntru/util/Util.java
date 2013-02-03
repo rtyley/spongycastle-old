@@ -11,6 +11,7 @@ import org.bouncycastle.math.ntru.euclid.IntEuclidean;
 import org.bouncycastle.math.ntru.polynomial.DenseTernaryPolynomial;
 import org.bouncycastle.math.ntru.polynomial.SparseTernaryPolynomial;
 import org.bouncycastle.math.ntru.polynomial.TernaryPolynomial;
+import org.bouncycastle.util.Integers;
 
 public class Util
 {
@@ -89,9 +90,9 @@ public class Util
      */
     public static int[] generateRandomTernary(int N, int numOnes, int numNegOnes, SecureRandom random)
     {
-        Integer one = new Integer(1);
-        Integer minusOne = new Integer(-1);
-        Integer zero = new Integer(0);
+        Integer one = Integers.valueOf(1);
+        Integer minusOne = Integers.valueOf(-1);
+        Integer zero = Integers.valueOf(0);
 
         List list = new ArrayList();
         for (int i = 0; i < numOnes; i++)

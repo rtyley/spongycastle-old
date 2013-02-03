@@ -21,7 +21,7 @@ class SHA1PGPDigestCalculator
         }
         catch (NoSuchAlgorithmException e)
         {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            throw new IllegalStateException("cannot find SHA-1: " + e.getMessage());
         }
     }
 

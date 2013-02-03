@@ -720,7 +720,7 @@ public class BaseBlockCipher
             throw new ShortBufferException(e.getMessage());
         }
         catch (DataLengthException e)
-        {         e.printStackTrace();
+        {
             throw new IllegalBlockSizeException(e.getMessage());
         }
         catch (InvalidCipherTextException e)

@@ -9,6 +9,7 @@ import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERApplicationSpecific;
+import org.bouncycastle.util.Integers;
 
 /**
  * an Iso7816CertificateHolderAuthorization structure.
@@ -42,13 +43,13 @@ public class CertificateHolderAuthorization
 
     static
     {
-        RightsDecodeMap.put(new Integer(RADG4), "RADG4");
-        RightsDecodeMap.put(new Integer(RADG3), "RADG3");
+        RightsDecodeMap.put(Integers.valueOf(RADG4), "RADG4");
+        RightsDecodeMap.put(Integers.valueOf(RADG3), "RADG3");
 
-        AuthorizationRole.put(new Integer(CVCA), "CVCA");
-        AuthorizationRole.put(new Integer(DV_DOMESTIC), "DV_DOMESTIC");
-        AuthorizationRole.put(new Integer(DV_FOREIGN), "DV_FOREIGN");
-        AuthorizationRole.put(new Integer(IS), "IS");
+        AuthorizationRole.put(Integers.valueOf(CVCA), "CVCA");
+        AuthorizationRole.put(Integers.valueOf(DV_DOMESTIC), "DV_DOMESTIC");
+        AuthorizationRole.put(Integers.valueOf(DV_FOREIGN), "DV_FOREIGN");
+        AuthorizationRole.put(Integers.valueOf(IS), "IS");
 
         /*
           for (int i : RightsDecodeMap.keySet())
@@ -61,7 +62,7 @@ public class CertificateHolderAuthorization
 
     public static String GetRoleDescription(int i)
     {
-        return (String)AuthorizationRole.get(new Integer(i));
+        return (String)AuthorizationRole.get(Integers.valueOf(i));
     }
 
     public static int GetFlag(String description)

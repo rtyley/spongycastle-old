@@ -260,11 +260,6 @@ public class JDKPKCS12KeyStore
                 chainCerts.remove(new CertId(c.getPublicKey()));
             }
         }
-
-        if (c == null && k == null)
-        {
-            throw new KeyStoreException("no such entry as " + alias);
-        }
     }
 
     /**
@@ -439,6 +434,14 @@ public class JDKPKCS12KeyStore
     
     public Date engineGetCreationDate(String alias) 
     {
+        if (alias == null)
+        {
+            throw new NullPointerException("alias == null");
+        }
+        if (keys.get(alias) == null && certs.get(alias) == null)
+        {
+            return null;
+        }
         return new Date();
     }
 
@@ -497,6 +500,11 @@ public class JDKPKCS12KeyStore
         Certificate[]   chain) 
         throws KeyStoreException
     {
+        if (!(key instanceof PrivateKey))
+        {
+            throw new KeyStoreException("PKCS12 does not support non-PrivateKeys");
+        }
+
         if ((key instanceof PrivateKey) && (chain == null))
         {
             throw new KeyStoreException("no certificate chain for private key");
@@ -508,11 +516,14 @@ public class JDKPKCS12KeyStore
         }
 
         keys.put(alias, key);
-        certs.put(alias, chain[0]);
-
-        for (int i = 0; i != chain.length; i++)
+        if (chain != null)
         {
-            chainCerts.put(new CertId(chain[i].getPublicKey()), chain[i]);
+            certs.put(alias, chain[0]);
+
+            for (int i = 0; i != chain.length; i++)
+            {
+                chainCerts.put(new CertId(chain[i].getPublicKey()), chain[i]);
+            }
         }
     }
 
@@ -1489,7 +1500,7 @@ public class JDKPKCS12KeyStore
         {
             byte[] res = calculatePbeMac(id_SHA1, mSalt, itCount, password, false, data);
 
-            AlgorithmIdentifier     algId = new AlgorithmIdentifier(id_SHA1, new DERNull());
+            AlgorithmIdentifier     algId = new AlgorithmIdentifier(id_SHA1, DERNull.INSTANCE);
             DigestInfo              dInfo = new DigestInfo(algId, res);
 
             mData = new MacData(dInfo, mSalt, itCount);
@@ -1580,7 +1591,7 @@ public class JDKPKCS12KeyStore
 
         public void put(String key, Object value)
         {
-            String lower = Strings.toLowerCase(key);
+            String lower = (key == null) ? null : Strings.toLowerCase(key);
             String k = (String)keys.get(lower);
             if (k != null)
             {
@@ -1598,7 +1609,7 @@ public class JDKPKCS12KeyStore
 
         public Object remove(String alias)
         {
-            String k = (String)keys.remove(Strings.toLowerCase(alias));
+            String k = (String)keys.remove(alias == null ? null : Strings.toLowerCase(alias));
             if (k == null)
             {
                 return null;
@@ -1609,7 +1620,7 @@ public class JDKPKCS12KeyStore
 
         public Object get(String alias)
         {
-            String k = (String)keys.get(Strings.toLowerCase(alias));
+            String k = (String)keys.get(alias == null ? null : Strings.toLowerCase(alias));
             if (k == null)
             {
                 return null;

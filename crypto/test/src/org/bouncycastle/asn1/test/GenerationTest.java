@@ -95,9 +95,9 @@ public class GenerationTest
         gen.setIssuer(new X500Name("CN=AU,O=Bouncy Castle"));
         gen.setSubject(new X500Name("CN=AU,O=Bouncy Castle,OU=Test 1"));
 
-        gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption, new DERNull()));
+        gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption, DERNull.INSTANCE));
 
-        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, new DERNull()),
+        SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE),
                                                      new RSAPublicKeyStructure(BigInteger.valueOf(1), BigInteger.valueOf(2)));
 
         gen.setSubjectPublicKeyInfo(info);
@@ -159,7 +159,7 @@ public class GenerationTest
         gen.setIssuer(new X500Name("CN=AU,O=Bouncy Castle"));
         gen.setSubject(new X500Name("CN=AU,O=Bouncy Castle,OU=Test 2"));
 
-        gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption, new DERNull()));
+        gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption, DERNull.INSTANCE));
 
         SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(BigInteger.valueOf(1), BigInteger.valueOf(2))), new ASN1Integer(3));
 
@@ -225,7 +225,7 @@ public class GenerationTest
 
         gen.setIssuer(new X500Name("CN=AU,O=Bouncy Castle"));
 
-        gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption, new DERNull()));
+        gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption, DERNull.INSTANCE));
 
         SubjectPublicKeyInfo    info = new SubjectPublicKeyInfo(new AlgorithmIdentifier(OIWObjectIdentifiers.elGamalAlgorithm, new ElGamalParameter(BigInteger.valueOf(1), BigInteger.valueOf(2))), new ASN1Integer(3));
 
@@ -299,7 +299,7 @@ public class GenerationTest
 
         gen.setThisUpdate(new Time(new Date(500)));
 
-        gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.sha1WithRSAEncryption, new DERNull()));
+        gen.setSignature(new AlgorithmIdentifier(PKCSObjectIdentifiers.sha1WithRSAEncryption, DERNull.INSTANCE));
 
         //
         // extensions

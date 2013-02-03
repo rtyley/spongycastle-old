@@ -28,6 +28,7 @@ import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.Integers;
 
 public abstract class KeyPairGeneratorSpi
     extends java.security.KeyPairGenerator
@@ -55,13 +56,13 @@ public abstract class KeyPairGeneratorSpi
         static {
             ecParameters = new Hashtable();
 
-            ecParameters.put(new Integer(192), new ECGenParameterSpec("prime192v1")); // a.k.a P-192
-            ecParameters.put(new Integer(239), new ECGenParameterSpec("prime239v1"));
-            ecParameters.put(new Integer(256), new ECGenParameterSpec("prime256v1")); // a.k.a P-256
+            ecParameters.put(Integers.valueOf(192), new ECGenParameterSpec("prime192v1")); // a.k.a P-192
+            ecParameters.put(Integers.valueOf(239), new ECGenParameterSpec("prime239v1"));
+            ecParameters.put(Integers.valueOf(256), new ECGenParameterSpec("prime256v1")); // a.k.a P-256
 
-            ecParameters.put(new Integer(224), new ECGenParameterSpec("P-224"));
-            ecParameters.put(new Integer(384), new ECGenParameterSpec("P-384"));
-            ecParameters.put(new Integer(521), new ECGenParameterSpec("P-521"));
+            ecParameters.put(Integers.valueOf(224), new ECGenParameterSpec("P-224"));
+            ecParameters.put(Integers.valueOf(384), new ECGenParameterSpec("P-384"));
+            ecParameters.put(Integers.valueOf(521), new ECGenParameterSpec("P-521"));
         }
 
         public EC()
@@ -86,7 +87,7 @@ public abstract class KeyPairGeneratorSpi
         {
             this.strength = strength;
             this.random = random;
-            ECGenParameterSpec ecParams = (ECGenParameterSpec)ecParameters.get(new Integer(strength));
+            ECGenParameterSpec ecParams = (ECGenParameterSpec)ecParameters.get(Integers.valueOf(strength));
 
             if (ecParams != null)
             {

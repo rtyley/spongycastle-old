@@ -21,7 +21,7 @@ public class CertStatus
     public CertStatus()
     {
         tagNo = 0;
-        value = new DERNull();
+        value = DERNull.INSTANCE;
     }
 
     public CertStatus(
@@ -47,13 +47,13 @@ public class CertStatus
         switch (choice.getTagNo())
         {
         case 0:
-            value = new DERNull();
+            value = DERNull.INSTANCE;
             break;
         case 1:
             value = RevokedInfo.getInstance(choice, false);
             break;
         case 2:
-            value = new DERNull();
+            value = DERNull.INSTANCE;
         }
     }
 

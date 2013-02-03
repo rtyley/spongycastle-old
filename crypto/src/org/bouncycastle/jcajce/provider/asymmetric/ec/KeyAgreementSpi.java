@@ -37,6 +37,7 @@ import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.interfaces.MQVPrivateKey;
 import org.bouncycastle.jce.interfaces.MQVPublicKey;
+import org.bouncycastle.util.Integers;
 
 /**
  * Diffie-Hellman key agreement using elliptic curve keys, ala IEEE P1363
@@ -52,9 +53,9 @@ public class KeyAgreementSpi
 
     static
     {
-        Integer i128 = new Integer(128);
-        Integer i192 = new Integer(192);
-        Integer i256 = new Integer(256);
+        Integer i128 = Integers.valueOf(128);
+        Integer i192 = Integers.valueOf(192);
+        Integer i256 = Integers.valueOf(256);
 
         algorithms.put(NISTObjectIdentifiers.id_aes128_CBC.getId(), i128);
         algorithms.put(NISTObjectIdentifiers.id_aes192_CBC.getId(), i192);

@@ -410,7 +410,7 @@ public class X509Extensions
 
             if (ext.isCritical())
             {
-                v.add(new DERBoolean(true));
+                v.add(DERBoolean.TRUE);
             }
 
             v.add(ext.getValue());

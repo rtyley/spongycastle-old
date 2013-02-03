@@ -18,6 +18,7 @@ import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.util.Integers;
 
 
 public class X509ExtensionUtil
@@ -62,7 +63,7 @@ public class X509ExtensionUtil
             {
                 GeneralName genName = GeneralName.getInstance(it.nextElement());
                 List list = new ArrayList();
-                list.add(new Integer(genName.getTagNo()));
+                list.add(Integers.valueOf(genName.getTagNo()));
                 switch (genName.getTagNo())
                 {
                 case GeneralName.ediPartyName:

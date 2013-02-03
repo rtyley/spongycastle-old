@@ -14,6 +14,7 @@ import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralSubtree;
 import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Integers;
 import org.bouncycastle.util.Strings;
 
 public class PKIXNameConstraintValidator
@@ -1537,7 +1538,7 @@ public class PKIXNameConstraintValidator
         for (int i = 0; i != permitted.length; i++)
         {
             GeneralSubtree subtree = permitted[i];
-            Integer tagNo = new Integer(subtree.getBase().getTagNo());
+            Integer tagNo = Integers.valueOf(subtree.getBase().getTagNo());
             if (subtreesMap.get(tagNo) == null)
             {
                 subtreesMap.put(tagNo, new HashSet());

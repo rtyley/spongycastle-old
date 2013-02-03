@@ -205,7 +205,7 @@ public class BCMcEliecePublicKey
     public byte[] getEncoded()
     {
         McEliecePublicKey key = new McEliecePublicKey(new McEliecePublicKeySpec(oid, n, t, g));
-        AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(this.getOID(), new DERNull());
+        AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(this.getOID(), DERNull.INSTANCE);
 
         try
         {

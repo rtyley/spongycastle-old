@@ -8,6 +8,9 @@ import java.io.IOException;
 public abstract class ASN1Null
     extends ASN1Primitive
 {
+    /**
+     * @deprecated use DERNull.INSTANCE
+     */
     public ASN1Null()
     {
     }

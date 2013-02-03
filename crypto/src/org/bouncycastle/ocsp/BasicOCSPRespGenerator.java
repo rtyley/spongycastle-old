@@ -68,7 +68,7 @@ public class BasicOCSPRespGenerator
             }
             else if (certStatus instanceof UnknownStatus)
             {
-                this.certStatus = new CertStatus(2, new DERNull());
+                this.certStatus = new CertStatus(2, DERNull.INSTANCE);
             }
             else 
             {

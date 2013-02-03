@@ -56,7 +56,7 @@ public class ECDHKEKGenerator
         // ECC-CMS-SharedInfo
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        v.add(new AlgorithmIdentifier(algorithm, new DERNull()));
+        v.add(new AlgorithmIdentifier(algorithm, DERNull.INSTANCE));
         v.add(new DERTaggedObject(true, 2, new DEROctetString(integerToBytes(keySize))));
 
         try

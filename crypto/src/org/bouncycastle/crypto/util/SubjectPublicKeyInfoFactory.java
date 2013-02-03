@@ -31,7 +31,7 @@ public class SubjectPublicKeyInfoFactory
         {
             RSAKeyParameters pub = (RSAKeyParameters)publicKey;
 
-            return new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, new DERNull()), new RSAPublicKey(pub.getModulus(), pub.getExponent()));
+            return new SubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), new RSAPublicKey(pub.getModulus(), pub.getExponent()));
         }
         else if (publicKey instanceof DSAPublicKeyParameters)
         {

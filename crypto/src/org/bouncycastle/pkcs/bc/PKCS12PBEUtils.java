@@ -26,6 +26,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.MacCalculator;
+import org.bouncycastle.util.Integers;
 
 class PKCS12PBEUtils
 {
@@ -35,12 +36,12 @@ class PKCS12PBEUtils
 
     static
     {
-        keySizes.put(PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4, new Integer(128));
-        keySizes.put(PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC4, new Integer(40));
-        keySizes.put(PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC, new Integer(192));
-        keySizes.put(PKCSObjectIdentifiers.pbeWithSHAAnd2_KeyTripleDES_CBC, new Integer(128));
-        keySizes.put(PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC2_CBC, new Integer(128));
-        keySizes.put(PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC2_CBC, new Integer(40));
+        keySizes.put(PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4, Integers.valueOf(128));
+        keySizes.put(PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC4, Integers.valueOf(40));
+        keySizes.put(PKCSObjectIdentifiers.pbeWithSHAAnd3_KeyTripleDES_CBC, Integers.valueOf(192));
+        keySizes.put(PKCSObjectIdentifiers.pbeWithSHAAnd2_KeyTripleDES_CBC, Integers.valueOf(128));
+        keySizes.put(PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC2_CBC, Integers.valueOf(128));
+        keySizes.put(PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC2_CBC, Integers.valueOf(40));
 
         noIvAlgs.add(PKCSObjectIdentifiers.pbeWithSHAAnd128BitRC4);
         noIvAlgs.add(PKCSObjectIdentifiers.pbeWithSHAAnd40BitRC4);

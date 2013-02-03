@@ -75,6 +75,7 @@ import org.bouncycastle.jce.provider.CertPathValidatorUtilities;
 import org.bouncycastle.jce.provider.PKIXNameConstraintValidator;
 import org.bouncycastle.jce.provider.PKIXNameConstraintValidatorException;
 import org.bouncycastle.jce.provider.PKIXPolicyNode;
+import org.bouncycastle.util.Integers;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 /**
@@ -679,7 +680,7 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
         }
 
         ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.totalPathLength",
-                new Object[] {new Integer(totalPathLength)});
+                new Object[]{Integers.valueOf(totalPathLength)});
         
         addNotification(msg);
     }
@@ -714,16 +715,16 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 // conflicting trust anchors                
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                         "CertPathReviewer.conflictingTrustAnchors",
-                        new Object[] {new Integer(trustColl.size()),
-                                      new UntrustedInput(cert.getIssuerX500Principal())});
+                        new Object[]{Integers.valueOf(trustColl.size()),
+                            new UntrustedInput(cert.getIssuerX500Principal())});
                 addError(msg);
             }
             else if (trustColl.isEmpty())
             {
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                         "CertPathReviewer.noTrustAnchorFound",
-                        new Object[] {new UntrustedInput(cert.getIssuerX500Principal()),
-                                      new Integer(pkixParams.getTrustAnchors().size())});
+                        new Object[]{new UntrustedInput(cert.getIssuerX500Principal()),
+                            Integers.valueOf(pkixParams.getTrustAnchors().size())});
                 addError(msg);
             }
             else
@@ -1962,9 +1963,9 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                     else
                     {
                         msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.QcLimitValueNum",
-                                new Object[] {new Integer(limit.getCurrency().getNumeric()),
-                                              new TrustedInput(new Double(value)),
-                                              limit});
+                                new Object[]{Integers.valueOf(limit.getCurrency().getNumeric()),
+                                    new TrustedInput(new Double(value)),
+                                    limit});
                     }
                     addNotification(msg,index);
                 }
@@ -2068,9 +2069,9 @@ public class PKIXCertPathReviewer extends CertPathValidatorUtilities
                 int numbOfCrls = nonMatchingCrlNames.size();
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                         "CertPathReviewer.noCrlInCertstore",
-                        new Object[] {new UntrustedInput(crlselect.getIssuerNames()),
-                                      new UntrustedInput(nonMatchingCrlNames),
-                                      new Integer(numbOfCrls)});
+                        new Object[]{new UntrustedInput(crlselect.getIssuerNames()),
+                            new UntrustedInput(nonMatchingCrlNames),
+                            Integers.valueOf(numbOfCrls)});
                 addNotification(msg,index);
             }
 

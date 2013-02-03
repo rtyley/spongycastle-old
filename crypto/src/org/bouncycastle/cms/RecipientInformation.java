@@ -190,7 +190,7 @@ public abstract class RecipientInformation
                     }
                     catch (IOException e)
                     {
-                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                        throw new IllegalStateException("unable to drain input: " + e.getMessage());
                     }
                 }
                 resultMac = operator.getMac();

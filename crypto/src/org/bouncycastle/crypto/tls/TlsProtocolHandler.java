@@ -14,13 +14,14 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.crypto.prng.ThreadedSeedGenerator;
 import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Integers;
 
 /**
  * An implementation of all high level protocols in TLS 1.0.
  */
 public class TlsProtocolHandler
 {
-    private static final Integer EXT_RenegotiationInfo = new Integer(ExtensionType.renegotiation_info);
+    private static final Integer EXT_RenegotiationInfo = Integers.valueOf(ExtensionType.renegotiation_info);
 
     /*
      * Our Connection states
@@ -357,7 +358,7 @@ public class TlsProtocolHandler
                             ByteArrayInputStream ext = new ByteArrayInputStream(extBytes);
                             while (ext.available() > 0)
                             {
-                                Integer extType = new Integer(TlsUtils.readUint16(ext));
+                                Integer extType = Integers.valueOf(TlsUtils.readUint16(ext));
                                 byte[] extValue = TlsUtils.readOpaque16(ext);
 
                                 /*

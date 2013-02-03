@@ -82,12 +82,12 @@ public class DERT61String
     public DERT61String(
         String   string)
     {
-        this.string = Strings.toByteArray(string);
+        this.string = Strings.toUTF8ByteArray(string);
     }
 
     public String getString()
     {
-        return Strings.fromByteArray(string);
+        return Strings.fromUTF8ByteArray(string);
     }
 
     public String toString()

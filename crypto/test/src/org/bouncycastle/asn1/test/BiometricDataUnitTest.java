@@ -36,7 +36,7 @@ public class BiometricDataUnitTest
         throws Exception
     {
         TypeOfBiometricData dataType = new TypeOfBiometricData(TypeOfBiometricData.HANDWRITTEN_SIGNATURE);
-        AlgorithmIdentifier hashAlgorithm = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, new DERNull());
+        AlgorithmIdentifier hashAlgorithm = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1, DERNull.INSTANCE);
         ASN1OctetString     dataHash = new DEROctetString(generateHash());
         BiometricData       bd = new BiometricData(dataType, hashAlgorithm, dataHash);
 
