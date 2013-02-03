@@ -201,7 +201,7 @@ public class BufferedBlockCipher
         {
             if ((outOff + length) > out.length)
             {
-                throw new DataLengthException("output buffer too short");
+                throw new OutputLengthException("output buffer too short");
             }
         }
 
@@ -265,7 +265,7 @@ public class BufferedBlockCipher
 
             if (outOff + bufOff > out.length)
             {
-                throw new DataLengthException("output buffer too short for doFinal()");
+                throw new OutputLengthException("output buffer too short for doFinal()");
             }
 
             if (bufOff != 0)

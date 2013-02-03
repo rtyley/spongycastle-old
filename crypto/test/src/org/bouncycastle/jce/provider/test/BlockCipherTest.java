@@ -751,6 +751,38 @@ public class BlockCipherTest
 
         try
         {
+            byte[] rawDESKey = { (byte)128, (byte)131, (byte)133, (byte)134,
+                    (byte)137, (byte)138, (byte)140, (byte)143 };
+
+            SecretKeySpec cipherKey = new SecretKeySpec(rawDESKey, "DES");
+            Cipher ecipher = Cipher.getInstance("DES/ECB/PKCS5Padding", "BC");
+            ecipher.init(Cipher.ENCRYPT_MODE, cipherKey);
+
+            byte[] cipherText = new byte[0];
+            try
+            {
+                // According specification Method enginedoFinal(byte[] input,
+                // int inputOffset, int inputLen, byte[] output, int
+                // outputOffset)
+                // throws ShortBufferException - if the given output buffer is
+                // too
+                // small to hold the result
+                ecipher.doFinal(new byte[20], 0, 20, cipherText);
+
+                fail("failed exception test - no ShortBufferException thrown");
+            }
+            catch (ShortBufferException e)
+            {
+                // ignore
+            }
+        }
+        catch (Exception e)
+        {
+            fail("unexpected exception.", e);
+        }
+
+        try
+        {
             KeyGenerator keyGen = KeyGenerator.getInstance("DES", "BC");
 
             keyGen.init((SecureRandom)null);

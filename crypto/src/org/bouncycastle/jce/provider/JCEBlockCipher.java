@@ -34,6 +34,7 @@ import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.crypto.OutputLengthException;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.engines.RC2Engine;
@@ -717,19 +718,23 @@ public class JCEBlockCipher
         int     inputOffset,
         int     inputLen,
         byte[]  output,
-        int     outputOffset) 
-        throws IllegalBlockSizeException, BadPaddingException
+        int     outputOffset)
+        throws IllegalBlockSizeException, BadPaddingException, ShortBufferException
     {
-        int     len = 0;
-
-        if (inputLen != 0)
-        {
-                len = cipher.processBytes(input, inputOffset, inputLen, output, outputOffset);
-        }
-
         try
         {
+            int     len = 0;
+
+            if (inputLen != 0)
+            {
+                    len = cipher.processBytes(input, inputOffset, inputLen, output, outputOffset);
+            }
+
             return (len + cipher.doFinal(output, outputOffset + len));
+        }
+        catch (OutputLengthException e)
+        {
+            throw new ShortBufferException(e.getMessage());
         }
         catch (DataLengthException e)
         {

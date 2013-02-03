@@ -264,7 +264,7 @@ public abstract class BaseWrapCipher
         int     inputLen,
         byte[]  output,
         int     outputOffset)
-        throws IllegalBlockSizeException, BadPaddingException
+        throws IllegalBlockSizeException, BadPaddingException, ShortBufferException
     {
         return 0;
     }
@@ -300,7 +300,7 @@ public abstract class BaseWrapCipher
         byte[]  wrappedKey,
         String  wrappedKeyAlgorithm,
         int     wrappedKeyType)
-    throws InvalidKeyException
+    throws InvalidKeyException, NoSuchAlgorithmException
     {
         byte[] encoded;
         try
@@ -373,10 +373,6 @@ public abstract class BaseWrapCipher
                 }
             }
             catch (NoSuchProviderException e)
-            {
-                throw new InvalidKeyException("Unknown key type " + e.getMessage());
-            }
-            catch (NoSuchAlgorithmException e)
             {
                 throw new InvalidKeyException("Unknown key type " + e.getMessage());
             }
