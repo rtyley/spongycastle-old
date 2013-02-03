@@ -2,12 +2,20 @@ package org.bouncycastle.jce.provider.test;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.Signature;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -25,7 +33,6 @@ public class DSTU4145Test
 
     public String getName()
     {
-
         return "DSTU4145";
     }
 
@@ -34,24 +41,77 @@ public class DSTU4145Test
     {
 
         DSTU4145Test();
-        //generationTest();
+        generationTest();
         //parametersTest();
 
     }
 
     public static void main(String[] args)
     {
-
         Security.addProvider(new BouncyCastleProvider());
         runTest(new DSTU4145Test());
+    }
+    
+    static final BigInteger r = new BigInteger("00f2702989366e9569d5092b83ac17f918bf040c487a", 16);
+    static final BigInteger s = new BigInteger("01dd460039db3be70392d7012f2a492d3e59091ab7a6", 16);
+    
+    private void generationTest() throws Exception
+    {
+    	ECCurve.F2m curve = new ECCurve.F2m(173, 1, 2, 10, BigInteger.ZERO, new BigInteger("108576C80499DB2FC16EDDF6853BBB278F6B6FB437D9", 16));
+
+        ECParameterSpec spec = new ECParameterSpec(
+            curve,
+            curve.createPoint(new BigInteger("BE6628EC3E67A91A4E470894FBA72B52C515F8AEE9", 16), new BigInteger("D9DEEDF655CF5412313C11CA566CDC71F4DA57DB45C", 16), false),
+            new BigInteger("800000000000000000000189B4E67606E3825BB2831", 16));
+        
+        SecureRandom k = new FixedSecureRandom(Hex.decode("00137449348C1249971759D99C252FFE1E14D8B31F00"));
+        SecureRandom keyRand = new FixedSecureRandom(Hex.decode("0000955CD7E344303D1034E66933DC21C8044D42ADB8"));
+        
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSTU4145", "BC");
+        keyGen.initialize(spec, keyRand);
+        KeyPair pair = keyGen.generateKeyPair();
+        
+        Signature sgr = Signature.getInstance("DSTU4145", "BC");
+
+        sgr.initSign(pair.getPrivate(), k);
+
+        byte[] message = new byte[]{(byte)'a', (byte)'b', (byte)'c'};
+
+        sgr.update(message);
+
+        byte[] sigBytes = sgr.sign();
+
+        sgr.initVerify(pair.getPublic());
+
+        sgr.update(message);
+
+        if (!sgr.verify(sigBytes))
+        {
+            fail("DSTU4145 verification failed");
+        }
+
+        BigInteger[] sig = decode(sigBytes);
+
+        if (!r.equals(sig[0]))
+        {
+            fail(
+                ": r component wrong." + System.getProperty("line.separator")
+                    + " expecting: " + r + System.getProperty("line.separator")
+                    + " got      : " + sig[0].toString(16));
+        }
+
+        if (!s.equals(sig[1]))
+        {
+            fail(
+                ": s component wrong." + System.getProperty("line.separator")
+                    + " expecting: " + s + System.getProperty("line.separator")
+                    + " got      : " + sig[1].toString(16));
+        }
     }
 
     private void DSTU4145Test()
         throws Exception
     {
-
-        BigInteger r = new BigInteger("00f2702989366e9569d5092b83ac17f918bf040c487a", 16);
-        BigInteger s = new BigInteger("01dd460039db3be70392d7012f2a492d3e59091ab7a6", 16);
 
         SecureRandom k = new FixedSecureRandom(Hex.decode("00137449348C1249971759D99C252FFE1E14D8B31F00"));
 
