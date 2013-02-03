@@ -2803,10 +2803,21 @@ public class CertTest
         checkSelfSignedCertificate(16, gost341094A);
         checkSelfSignedCertificate(17, gost341094B);
         checkSelfSignedCertificate(18, gost34102001A);
-        checkSelfSignedCertificate(19, uaczo1);
-        checkSelfSignedCertificate(20, uaczo2);
-        checkSelfSignedCertificate(21, uaczo3);
-        checkSelfSignedCertificate(22, uaczo4);
+
+        try
+        {
+            checkSelfSignedCertificate(19, uaczo1);
+            checkSelfSignedCertificate(20, uaczo2);
+            checkSelfSignedCertificate(21, uaczo3);
+            checkSelfSignedCertificate(22, uaczo4);
+        }
+        catch (Exception e)
+        {
+            if (e instanceof NoSuchAlgorithmException)
+            {
+                // ignore - only valid for jdk1.5+
+            }
+        }
 
         checkCRL(1, crl1);
 
