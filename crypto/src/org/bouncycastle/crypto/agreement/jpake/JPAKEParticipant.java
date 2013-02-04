@@ -6,7 +6,6 @@ import java.security.SecureRandom;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.examples.JPAKEExample;
 import org.bouncycastle.util.Arrays;
 
 /**
