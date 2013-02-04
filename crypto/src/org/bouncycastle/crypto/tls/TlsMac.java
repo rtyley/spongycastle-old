@@ -127,4 +127,37 @@ public class TlsMac
         mac.doFinal(result, 0);
         return result;
     }
+
+    public byte[] calculateMacConstantTime(short type, byte[] message, int offset, int len, int fullLength, byte[] dummyData)
+    {
+        // Actual MAC only calculated on 'len' bytes
+        byte[] result = calculateMac(type, message, offset, len);
+
+        ProtocolVersion serverVersion = context.getServerVersion();
+        boolean isTls = serverVersion.getFullVersion() >= ProtocolVersion.TLSv10.getFullVersion();
+
+        // ...but ensure a constant number of complete digest blocks are processed (per 'fullLength')
+        if (isTls)
+        {
+            // TODO Currently all TLS digests use a block size of 64, a suffix (length field) of 8, and padding (1+)
+            int db = 64, ds = 8;
+
+            int L1 = 13 + fullLength;
+            int L2 = 13 + len;
+
+            // How many extra full blocks do we need to calculate?
+            int extra = ((L1 + ds) / db) - ((L2 + ds) / db);
+
+            while (--extra >= 0)
+            {
+                mac.update(dummyData, 0, db);
+            }
+    
+            // One more byte in case the implementation is "lazy" about processing blocks
+            mac.update(dummyData[0]);
+            mac.reset();
+        }
+
+        return result;
+    }
 }
