@@ -25,6 +25,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.util.Integers;
 
 public abstract class KeyPairGeneratorSpi
     extends java.security.KeyPairGenerator
@@ -52,12 +53,12 @@ public abstract class KeyPairGeneratorSpi
         static {
             ecParameters = new Hashtable();
 
-            ecParameters.put(new Integer(192),
-                    ECNamedCurveTable.getParameterSpec("prime192v1"));
-            ecParameters.put(new Integer(239),
-                    ECNamedCurveTable.getParameterSpec("prime239v1"));
-            ecParameters.put(new Integer(256),
-                    ECNamedCurveTable.getParameterSpec("prime256v1"));
+            ecParameters.put(Integers.valueOf(192),
+                ECNamedCurveTable.getParameterSpec("prime192v1"));
+            ecParameters.put(Integers.valueOf(239),
+                ECNamedCurveTable.getParameterSpec("prime239v1"));
+            ecParameters.put(Integers.valueOf(256),
+                ECNamedCurveTable.getParameterSpec("prime256v1"));
         }
 
         public EC()
@@ -82,7 +83,7 @@ public abstract class KeyPairGeneratorSpi
         {
             this.strength = strength;
             this.random = random;
-            this.ecParams = (ECParameterSpec)ecParameters.get(new Integer(strength));
+            this.ecParams = (ECParameterSpec)ecParameters.get(Integers.valueOf(strength));
 
             if (ecParams != null)
             {

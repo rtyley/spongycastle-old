@@ -66,6 +66,7 @@ import org.bouncycastle.jce.X509LDAPCertStoreParameters;
 import org.bouncycastle.jce.exception.ExtCertPathValidatorException;
 import org.bouncycastle.util.Selector;
 import org.bouncycastle.util.StoreException;
+import org.bouncycastle.util.Integers;
 import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
 import org.bouncycastle.x509.ExtendedPKIXParameters;
 import org.bouncycastle.x509.X509AttributeCertStoreSelector;
@@ -248,7 +249,7 @@ public class CertPathValidatorUtilities
             {
                 // look for URI
                 List list = (List)it.next();
-                if (list.get(0).equals(new Integer(GeneralName.uniformResourceIdentifier)))
+                if (list.get(0).equals(Integers.valueOf(GeneralName.uniformResourceIdentifier)))
                 {
                     // found
                     String temp = (String)list.get(1);
