@@ -20,6 +20,7 @@ import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OutputEncryptor;
+import org.bouncycastle.util.Integers;
 
 public class JceCMSContentEncryptorBuilder
 {
@@ -27,13 +28,13 @@ public class JceCMSContentEncryptorBuilder
 
     static
     {
-        keySizes.put(CMSAlgorithm.AES128_CBC, new Integer(128));
-        keySizes.put(CMSAlgorithm.AES192_CBC, new Integer(192));
-        keySizes.put(CMSAlgorithm.AES256_CBC, new Integer(256));
+        keySizes.put(CMSAlgorithm.AES128_CBC, Integers.valueOf(128));
+        keySizes.put(CMSAlgorithm.AES192_CBC, Integers.valueOf(192));
+        keySizes.put(CMSAlgorithm.AES256_CBC, Integers.valueOf(256));
 
-        keySizes.put(CMSAlgorithm.CAMELLIA128_CBC, new Integer(128));
-        keySizes.put(CMSAlgorithm.CAMELLIA192_CBC, new Integer(192));
-        keySizes.put(CMSAlgorithm.CAMELLIA256_CBC, new Integer(256));
+        keySizes.put(CMSAlgorithm.CAMELLIA128_CBC, Integers.valueOf(128));
+        keySizes.put(CMSAlgorithm.CAMELLIA192_CBC, Integers.valueOf(192));
+        keySizes.put(CMSAlgorithm.CAMELLIA256_CBC, Integers.valueOf(256));
     }
 
     private static int getKeySize(ASN1ObjectIdentifier oid)
