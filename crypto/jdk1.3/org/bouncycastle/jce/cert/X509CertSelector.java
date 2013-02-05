@@ -585,8 +585,15 @@ public class X509CertSelector implements CertSelector
      */
     public void setSubjectPublicKeyAlgID(String oid) throws IOException
     {
-        CertUtil.parseOID(oid);
-        subjectKeyAlgID = new ASN1ObjectIdentifier(oid);
+        if (oid != null)
+        {
+            CertUtil.parseOID(oid);
+            subjectKeyAlgID = new ASN1ObjectIdentifier(oid);
+        }
+        else
+        {
+            subjectKeyAlgID = null;
+        }
     }
 
     /**

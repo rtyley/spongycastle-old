@@ -17,6 +17,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import org.bouncycastle.jce.cert.CertificateFactory;
 import org.bouncycastle.jce.cert.PKIXBuilderParameters;
+import org.bouncycastle.jce.cert.PKIXBuilderParameters;
 import org.bouncycastle.jce.cert.PKIXCertPathBuilderResult;
 import org.bouncycastle.jce.cert.PKIXCertPathValidatorResult;
 import org.bouncycastle.jce.cert.TrustAnchor;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
 import org.bouncycastle.jce.PrincipalUtil;
 
 /**
@@ -52,12 +54,25 @@ public class PKIXCertPathBuilderSpi
         CertPathParameters params)
         throws CertPathBuilderException, InvalidAlgorithmParameterException 
     {
-        if (!(params instanceof PKIXBuilderParameters))
+        if (!(params instanceof PKIXBuilderParameters)
+            && !(params instanceof ExtendedPKIXBuilderParameters))
         {
-            throw new InvalidAlgorithmParameterException("params must be a PKIXBuilderParameters instance");
+            throw new InvalidAlgorithmParameterException(
+                "Parameters must be an instance of "
+                    + PKIXBuilderParameters.class.getName() + " or "
+                    + ExtendedPKIXBuilderParameters.class.getName() + ".");
         }
 
-        PKIXBuilderParameters pkixParams = (PKIXBuilderParameters)params;
+        ExtendedPKIXBuilderParameters pkixParams = null;
+        if (params instanceof ExtendedPKIXBuilderParameters)
+        {
+            pkixParams = (ExtendedPKIXBuilderParameters) params;
+        }
+        else
+        {
+            pkixParams = (ExtendedPKIXBuilderParameters) ExtendedPKIXBuilderParameters
+                .getInstance((PKIXBuilderParameters) params);
+        }
 
         Collection targets;
         Iterator targetIter;

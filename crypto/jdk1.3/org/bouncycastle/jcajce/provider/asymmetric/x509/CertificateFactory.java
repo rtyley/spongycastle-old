@@ -7,7 +7,7 @@ import java.security.cert.CRL;
 import java.security.cert.CRLException;
 import org.bouncycastle.jce.cert.CertPath;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactorySpi;
+import org.bouncycastle.jce.cert.CertificateFactorySpi;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
