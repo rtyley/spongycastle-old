@@ -414,7 +414,6 @@ public class ParserTest
         {
             if (e.getCause() != null && !e.getCause().getMessage().endsWith(message))
             {
-               e.printStackTrace();
                fail("issue " + index + " exception thrown, but wrong message");
             }
             else if (e.getCause() == null && !e.getMessage().equals(message))
