@@ -49,6 +49,7 @@
                 <exclude name="**/crypto/engines/test/BitStringTest.java" />
                 <exclude name="**/crypto/engines/test/AllTests.java" />
                 <exclude name="**/crypto/signers/test/AllTests.java" />
+                <exclude name="**/jce/**/DSTU*.java" />
             </fileset>
             <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.html" />
