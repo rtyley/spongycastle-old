@@ -44,6 +44,8 @@
                 <exclude name="**/NTRU*.java" />
                 <exclude name="**/IndexGenerator.java" />
                 <exclude name="**/ntru/**/*.java" />
+                <exclude name="**/asymmetric/DSTU*.java" />
+                <exclude name="**/asymmetric/dstu/*.java" />
             </fileset>
             <fileset dir="test/src">
                 <exclude name="**/MQVTest.java" />
@@ -67,6 +69,9 @@
                 <exclude name="**/crypto/engines/test/BitStringTest.java" />
                 <exclude name="**/crypto/engines/test/AllTests.java" />
                 <exclude name="**/crypto/signers/test/AllTests.java" />
+                <exclude name="**/BcCertTest.java" />
+                <exclude name="**/provider/test/DSTU4145Test.java" />
+                <exclude name="**/PGPUnicodeTest.java" />
             </fileset>
             <fileset dir="src" includes="**/*.properties" />
             <fileset dir="test/src" includes="**/*.html" />
