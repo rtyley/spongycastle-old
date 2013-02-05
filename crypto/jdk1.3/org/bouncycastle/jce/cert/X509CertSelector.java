@@ -36,6 +36,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.util.Integers;
 
 /**
  * A <code>CertSelector</code> that selects
@@ -895,7 +896,7 @@ public class X509CertSelector implements CertSelector
         // TODO full implementation of CertUtil.parseGeneralName
         byte[] encoded = CertUtil.parseGeneralName(type, name);
         List tmpList = new ArrayList();
-        tmpList.add(new Integer(type));
+        tmpList.add(Integers.valueOf(type));
         tmpList.add(name);
         subjectAltNames.add(tmpList);
         tmpList.set(1, encoded);
@@ -954,7 +955,7 @@ public class X509CertSelector implements CertSelector
     {
         // TODO check encoded format
         List tmpList = new ArrayList();
-        tmpList.add(new Integer(type));
+        tmpList.add(Integers.valueOf(type));
         tmpList.add(name.clone());
         subjectAltNames.add(tmpList);
         subjectAltNamesByte.add(tmpList);
@@ -1235,7 +1236,7 @@ public class X509CertSelector implements CertSelector
         // TODO full implementation of CertUtil.parseGeneralName
         byte[] encoded = CertUtil.parseGeneralName(type, name);
         List tmpList = new ArrayList();
-        tmpList.add(new Integer(type));
+        tmpList.add(Integers.valueOf(type));
         tmpList.add(name);
         pathToNames.add(tmpList);
         tmpList.set(1, encoded);
@@ -1276,7 +1277,7 @@ public class X509CertSelector implements CertSelector
     {
         // TODO check encoded format
         List tmpList = new ArrayList();
-        tmpList.add(new Integer(type));
+        tmpList.add(Integers.valueOf(type));
         tmpList.add(name.clone());
         pathToNames.add(tmpList);
         pathToNamesByte.add(tmpList);
@@ -2336,7 +2337,7 @@ public class X509CertSelector implements CertSelector
                     altNameObject = (ASN1TaggedObject)altNamesSequence
                             .nextElement();
                     testList = new ArrayList(2);
-                    testList.add(new Integer(altNameObject.getTagNo()));
+                    testList.add(Integers.valueOf(altNameObject.getTagNo()));
                     derData = altNameObject.getObject();
                     outStream = new ByteArrayOutputStream();
                     derOutStream = new DEROutputStream(outStream);

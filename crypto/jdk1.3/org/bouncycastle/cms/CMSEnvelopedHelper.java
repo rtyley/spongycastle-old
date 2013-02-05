@@ -22,6 +22,7 @@ import org.bouncycastle.asn1.cms.PasswordRecipientInfo;
 import org.bouncycastle.asn1.cms.RecipientInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.util.Integers;
 
 class CMSEnvelopedHelper
 {
@@ -34,10 +35,10 @@ class CMSEnvelopedHelper
 
     static
     {
-        KEYSIZES.put(CMSEnvelopedGenerator.DES_EDE3_CBC,  new Integer(192));
-        KEYSIZES.put(CMSEnvelopedGenerator.AES128_CBC,  new Integer(128));
-        KEYSIZES.put(CMSEnvelopedGenerator.AES192_CBC,  new Integer(192));
-        KEYSIZES.put(CMSEnvelopedGenerator.AES256_CBC,  new Integer(256));
+        KEYSIZES.put(CMSEnvelopedGenerator.DES_EDE3_CBC, Integers.valueOf(192));
+        KEYSIZES.put(CMSEnvelopedGenerator.AES128_CBC, Integers.valueOf(128));
+        KEYSIZES.put(CMSEnvelopedGenerator.AES192_CBC, Integers.valueOf(192));
+        KEYSIZES.put(CMSEnvelopedGenerator.AES256_CBC, Integers.valueOf(256));
 
         BASE_CIPHER_NAMES.put(CMSEnvelopedGenerator.DES_EDE3_CBC,  "DESEDE");
         BASE_CIPHER_NAMES.put(CMSEnvelopedGenerator.AES128_CBC,  "AES");

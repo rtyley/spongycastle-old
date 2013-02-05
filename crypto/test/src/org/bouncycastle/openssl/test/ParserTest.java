@@ -27,15 +27,15 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.openssl.PEMDecryptorProvider;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
-import org.bouncycastle.openssl.PEMKeyDecryptorProvider;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PasswordFinder;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8DecryptorProviderBuilder;
-import org.bouncycastle.openssl.jcajce.JcePEMKeyDecryptorProviderBuilder;
+import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import org.bouncycastle.operator.InputDecryptorProvider;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.util.test.SimpleTest;
@@ -79,7 +79,7 @@ public class ParserTest
     public void performTest()
         throws Exception
     {
-        PEMKeyDecryptorProvider decProv = new JcePEMKeyDecryptorProviderBuilder().build("secret".toCharArray());
+        PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build("secret".toCharArray());
         PEMParser       pemRd = openPEMResource("test.pem");
         Object          o;
         PEMKeyPair      pemPair;
@@ -369,7 +369,7 @@ public class ParserTest
         throws IOException
     {
         JcaPEMKeyConverter   converter = new JcaPEMKeyConverter().setProvider("BC");
-        PEMKeyDecryptorProvider decProv = new JcePEMKeyDecryptorProviderBuilder().setProvider("BC").build("changeit".toCharArray());
+        PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().setProvider("BC").build("changeit".toCharArray());
         PEMParser pr = openPEMResource("data/" + fileName);
         Object o = pr.readObject();
 
@@ -395,7 +395,7 @@ public class ParserTest
         // cause an underlying class cast exception.
         try
         {
-            PEMKeyDecryptorProvider decProv = new JcePEMKeyDecryptorProviderBuilder().setProvider("BC").build(password.toCharArray());
+            PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().setProvider("BC").build(password.toCharArray());
 
             PEMParser pemRd = openPEMResource("test.pem");
             Object o;
@@ -428,7 +428,7 @@ public class ParserTest
     private void doNoPasswordTest()
         throws IOException
     {
-        PEMKeyDecryptorProvider decProv = new JcePEMKeyDecryptorProviderBuilder().setProvider("BC").build("".toCharArray());
+        PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().setProvider("BC").build("".toCharArray());
 
         PEMParser pemRd = openPEMResource("smimenopw.pem");
         Object o;
