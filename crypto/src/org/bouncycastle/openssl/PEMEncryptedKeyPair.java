@@ -19,14 +19,14 @@ public class PEMEncryptedKeyPair
         this.parser = parser;
     }
 
-    public PEMKeyPair decryptKeyPair(PEMKeyDecryptorProvider keyDecryptorProvider)
+    public PEMKeyPair decryptKeyPair(PEMDecryptorProvider keyDecryptorProvider)
         throws IOException
     {
         try
         {
-            PEMKeyDecryptor keyDecryptor = keyDecryptorProvider.get(dekAlgName);
+            PEMDecryptor keyDecryptor = keyDecryptorProvider.get(dekAlgName);
 
-            return parser.parse(keyDecryptor.recoverKeyData(keyBytes, iv));
+            return parser.parse(keyDecryptor.decrypt(keyBytes, iv));
         }
         catch (IOException e)
         {

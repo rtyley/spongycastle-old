@@ -46,7 +46,7 @@ public class PKCS8Generator
      * Constructor for an unencrypted private key PEM object.
      *
      * @param key private key to be encoded.
-     * @deprecated use constructor with OutputEncryptor.
+     * @deprecated use JcaPKCS8Generator
      */
     public PKCS8Generator(PrivateKey key)
     {
@@ -61,7 +61,7 @@ public class PKCS8Generator
      * @param provider  name of provider to use
      * @throws NoSuchProviderException  if provider cannot be found
      * @throws NoSuchAlgorithmException if algorithm/mode cannot be found
-     *  @deprecated use constructor with OutputEncryptor.
+     *  @deprecated  use JcaPKCS8Generator
      */
     public PKCS8Generator(PrivateKey key, ASN1ObjectIdentifier algorithm, String provider)
         throws NoSuchProviderException, NoSuchAlgorithmException
@@ -83,7 +83,7 @@ public class PKCS8Generator
      * @param algorithm encryption algorithm to use
      * @param provider  provider to use
      * @throws NoSuchAlgorithmException if algorithm/mode cannot be found
-     * @deprecated use constructor with OutputEncryptor.
+     * @deprecated  use JcaPKCS8Generator
      */
     public PKCS8Generator(PrivateKey key, ASN1ObjectIdentifier algorithm, Provider provider)
         throws NoSuchAlgorithmException

@@ -2,9 +2,10 @@ package org.bouncycastle.openssl;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 
+import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
+import org.bouncycastle.openssl.jcajce.JcePEMEncryptorBuilder;
 import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.bouncycastle.util.io.pem.PemObjectGenerator;
 import org.bouncycastle.util.io.pem.PemWriter;
@@ -27,6 +28,11 @@ public class PEMWriter
         this(out, "BC");
     }
 
+    /**
+     * @deprecated use constructor that just takes out, and writeObject(PEMEncryptor)
+     * @param out
+     * @param provider
+     */
     public PEMWriter(
         Writer  out,
         String  provider)
@@ -37,12 +43,20 @@ public class PEMWriter
     }
 
     public void writeObject(
-        Object  obj)
+            Object  obj)
+            throws IOException
+    {
+        writeObject(obj, null);
+    }
+
+    public void writeObject(
+        Object  obj,
+        PEMEncryptor encryptor)
         throws IOException
     {
         try
         {
-            super.writeObject(new MiscPEMGenerator(obj));
+            super.writeObject(new JcaMiscPEMGenerator(obj, encryptor));
         }
         catch (PemGenerationException e)
         {
@@ -62,6 +76,9 @@ public class PEMWriter
         super.writeObject(obj);
     }
 
+    /**
+     * @deprecated use writeObject(obj, PEMEncryptor)
+     */
     public void writeObject(
         Object       obj,
         String       algorithm,
@@ -69,13 +86,6 @@ public class PEMWriter
         SecureRandom random)
         throws IOException
     {
-        try
-        {
-            super.writeObject(new MiscPEMGenerator(obj, algorithm, password, random, provider));
-        }
-        catch (NoSuchProviderException e)
-        {
-            throw new EncryptionException(e.getMessage(), e);
-        }
+        this.writeObject(obj, new JcePEMEncryptorBuilder(algorithm).setSecureRandom(random).setProvider(provider).build(password));
     }
 }

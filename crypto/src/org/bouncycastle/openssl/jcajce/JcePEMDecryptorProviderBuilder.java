@@ -6,38 +6,38 @@ import org.bouncycastle.jcajce.DefaultJcaJceHelper;
 import org.bouncycastle.jcajce.JcaJceHelper;
 import org.bouncycastle.jcajce.NamedJcaJceHelper;
 import org.bouncycastle.jcajce.ProviderJcaJceHelper;
+import org.bouncycastle.openssl.PEMDecryptor;
+import org.bouncycastle.openssl.PEMDecryptorProvider;
 import org.bouncycastle.openssl.PEMException;
-import org.bouncycastle.openssl.PEMKeyDecryptor;
-import org.bouncycastle.openssl.PEMKeyDecryptorProvider;
 import org.bouncycastle.openssl.PasswordException;
 
-public class JcePEMKeyDecryptorProviderBuilder
+public class JcePEMDecryptorProviderBuilder
 {
     private JcaJceHelper helper = new DefaultJcaJceHelper();
 
-    public JcePEMKeyDecryptorProviderBuilder setProvider(Provider provider)
+    public JcePEMDecryptorProviderBuilder setProvider(Provider provider)
     {
         this.helper = new ProviderJcaJceHelper(provider);
 
         return this;
     }
 
-    public JcePEMKeyDecryptorProviderBuilder setProvider(String providerName)
+    public JcePEMDecryptorProviderBuilder setProvider(String providerName)
     {
         this.helper = new NamedJcaJceHelper(providerName);
 
         return this;
     }
 
-    public PEMKeyDecryptorProvider  build(final char[] password)
+    public PEMDecryptorProvider build(final char[] password)
     {
-        return new PEMKeyDecryptorProvider()
+        return new PEMDecryptorProvider()
         {
-            public PEMKeyDecryptor get(final String dekAlgName)
+            public PEMDecryptor get(final String dekAlgName)
             {
-                return new PEMKeyDecryptor()
+                return new PEMDecryptor()
                 {
-                    public byte[] recoverKeyData(byte[] keyBytes, byte[] iv)
+                    public byte[] decrypt(byte[] keyBytes, byte[] iv)
                         throws PEMException
                     {
                         if (password == null)

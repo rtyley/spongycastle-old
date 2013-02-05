@@ -2,8 +2,8 @@ package org.bouncycastle.openssl;
 
 import org.bouncycastle.operator.OperatorCreationException;
 
-public interface PEMKeyDecryptorProvider
+public interface PEMDecryptorProvider
 {
-    PEMKeyDecryptor get(String dekAlgName)
+    PEMDecryptor get(String dekAlgName)
         throws OperatorCreationException;
 }
