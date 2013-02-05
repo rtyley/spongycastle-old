@@ -2,6 +2,7 @@ package org.bouncycastle.cms;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
@@ -28,8 +29,8 @@ import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
-import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -48,7 +49,7 @@ import org.bouncycastle.x509.X509Store;
  * matches the given signer...
  *
  * <pre>
- *  CertStore               certs = s.getCertificatesAndCRLs("Collection", "BC");
+ *  Store                   certStore = s.getCertificates();
  *  SignerInformationStore  signers = s.getSignerInfos();
  *  Collection              c = signers.getSigners();
  *  Iterator                it = c.iterator();
@@ -58,7 +59,7 @@ import org.bouncycastle.x509.X509Store;
  *      SignerInformation   signer = (SignerInformation)it.next();
  *      Collection          certCollection = certStore.getMatches(signer.getSID());
  *
- *      Iterator        certIt = certCollection.iterator();
+ *      Iterator              certIt = certCollection.iterator();
  *      X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
  *  
  *      if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(cert)))
@@ -74,7 +75,7 @@ public class CMSSignedData
     
     SignedData              signedData;
     ContentInfo             contentInfo;
-    CMSProcessable          signedContent;
+    CMSTypedData            signedContent;
     SignerInformationStore  signerInfoStore;
     X509Store               attributeStore;
     X509Store               certificateStore;
@@ -144,28 +145,56 @@ public class CMSSignedData
     }
 
     public CMSSignedData(
-        CMSProcessable  signedContent,
+        final CMSProcessable  signedContent,
         ContentInfo     sigData)
+        throws CMSException
     {
-        this.signedContent = signedContent;
+        if (signedContent instanceof CMSTypedData)
+        {
+            this.signedContent = (CMSTypedData)signedContent;
+        }
+        else
+        {
+            this.signedContent = new CMSTypedData()
+            {
+                public ASN1ObjectIdentifier getContentType()
+                {
+                    return signedData.getEncapContentInfo().getContentType();
+                }
+
+                public void write(OutputStream out)
+                    throws IOException, CMSException
+                {
+                    signedContent.write(out);
+                }
+
+                public Object getContent()
+                {
+                    return signedContent.getContent();
+                }
+            };
+        }
+
         this.contentInfo = sigData;
-        this.signedData = SignedData.getInstance(contentInfo.getContent());
+        this.signedData = getSignedData();
     }
 
     public CMSSignedData(
         Map             hashes,
         ContentInfo     sigData)
+        throws CMSException
     {
         this.hashes = hashes;
         this.contentInfo = sigData;
-        this.signedData = SignedData.getInstance(contentInfo.getContent());
+        this.signedData = getSignedData();
     }
 
     public CMSSignedData(
         ContentInfo sigData)
+        throws CMSException
     {
         this.contentInfo = sigData;
-        this.signedData = SignedData.getInstance(contentInfo.getContent());
+        this.signedData = getSignedData();
 
         //
         // this can happen if the signed message is sent simply to send a
@@ -173,13 +202,30 @@ public class CMSSignedData
         //
         if (signedData.getEncapContentInfo().getContent() != null)
         {
-            this.signedContent = new CMSProcessableByteArray(
+            this.signedContent = new CMSProcessableByteArray(signedData.getEncapContentInfo().getContentType(),
                     ((ASN1OctetString)(signedData.getEncapContentInfo()
                                                 .getContent())).getOctets());
         }
         else
         {
             this.signedContent = null;
+        }
+    }
+
+    private SignedData getSignedData()
+        throws CMSException
+    {
+        try
+        {
+            return SignedData.getInstance(contentInfo.getContent());
+        }
+        catch (ClassCastException e)
+        {
+            throw new CMSException("Malformed content.", e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new CMSException("Malformed content.", e);
         }
     }
 
@@ -478,15 +524,24 @@ public class CMSSignedData
         return signedData.getEncapContentInfo().getContentType().getId();
     }
     
-    public CMSProcessable getSignedContent()
+    public CMSTypedData getSignedContent()
     {
         return signedContent;
     }
 
     /**
-     * return the ContentInfo 
+     * return the ContentInfo
+     * @deprecated use toASN1Structure()
      */
     public ContentInfo getContentInfo()
+    {
+        return contentInfo;
+    }
+
+    /**
+     * return the ContentInfo
+     */
+    public ContentInfo toASN1Structure()
     {
         return contentInfo;
     }
@@ -575,6 +630,7 @@ public class CMSSignedData
      * @param certsAndCrls the new certificates and CRLs to be used.
      * @return a new signed data object.
      * @exception CMSException if there is an error processing the CertStore
+     * @deprecated use method taking Store arguments.
      */
     public static CMSSignedData replaceCertificatesAndCRLs(
         CMSSignedData   signedData,

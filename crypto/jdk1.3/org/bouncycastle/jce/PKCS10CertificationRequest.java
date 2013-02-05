@@ -1,8 +1,8 @@
 package org.bouncycastle.jce;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.AlgorithmParameters;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -18,14 +18,15 @@ import java.util.Hashtable;
 import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
 import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
@@ -38,6 +39,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.Strings;
 
 /**
@@ -63,6 +65,7 @@ import org.bouncycastle.util.Strings;
  *    values  SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{\@type})
  *  }
  * </pre>
+ * @deprecated use classes in org.bouncycastle.pkcs.
  */
 public class PKCS10CertificationRequest
     extends CertificationRequest
@@ -96,12 +99,18 @@ public class PKCS10CertificationRequest
         algorithms.put("SHA384WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("SHA512WITHRSAANDMGF1", PKCSObjectIdentifiers.id_RSASSA_PSS);
         algorithms.put("RSAWITHSHA1", new DERObjectIdentifier("1.2.840.113549.1.1.5"));
-        algorithms.put("RIPEMD160WITHRSAENCRYPTION", new DERObjectIdentifier("1.3.36.3.3.1.2"));
-        algorithms.put("RIPEMD160WITHRSA", new DERObjectIdentifier("1.3.36.3.3.1.2"));
+        algorithms.put("RIPEMD128WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
+        algorithms.put("RIPEMD128WITHRSA", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd128);
+        algorithms.put("RIPEMD160WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
+        algorithms.put("RIPEMD160WITHRSA", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd160);
+        algorithms.put("RIPEMD256WITHRSAENCRYPTION", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
+        algorithms.put("RIPEMD256WITHRSA", TeleTrusTObjectIdentifiers.rsaSignatureWithripemd256);
         algorithms.put("SHA1WITHDSA", new DERObjectIdentifier("1.2.840.10040.4.3"));
         algorithms.put("DSAWITHSHA1", new DERObjectIdentifier("1.2.840.10040.4.3"));
         algorithms.put("SHA224WITHDSA", NISTObjectIdentifiers.dsa_with_sha224);
         algorithms.put("SHA256WITHDSA", NISTObjectIdentifiers.dsa_with_sha256);
+        algorithms.put("SHA384WITHDSA", NISTObjectIdentifiers.dsa_with_sha384);
+        algorithms.put("SHA512WITHDSA", NISTObjectIdentifiers.dsa_with_sha512);
         algorithms.put("SHA1WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA1);
         algorithms.put("SHA224WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA224);
         algorithms.put("SHA256WITHECDSA", X9ObjectIdentifiers.ecdsa_with_SHA256);
@@ -233,9 +242,10 @@ public class PKCS10CertificationRequest
         throws NoSuchAlgorithmException, NoSuchProviderException,
                 InvalidKeyException, SignatureException
     {
-        this(signatureAlgorithm, subject, key, attributes, signingKey, "BC");
+        this(signatureAlgorithm, subject, key, attributes, signingKey, BouncyCastleProvider.PROVIDER_NAME);
     }
 
+    
     /**
      * create a PKCS10 certfication request using the named provider.
      */
@@ -254,7 +264,14 @@ public class PKCS10CertificationRequest
 
         if (sigOID == null)
         {
-            throw new IllegalArgumentException("Unknown signature type requested");
+            try
+            {
+                sigOID = new DERObjectIdentifier(algorithmName);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("Unknown signature type requested");
+            }
         }
 
         if (subject == null)
@@ -277,34 +294,34 @@ public class PKCS10CertificationRequest
         }
         else
         {
-            this.sigAlgId = new AlgorithmIdentifier(sigOID, null);
+            this.sigAlgId = new AlgorithmIdentifier(sigOID, DERNull.INSTANCE);
         }
-
-        byte[]                  bytes = key.getEncoded();
-        ByteArrayInputStream    bIn = new ByteArrayInputStream(bytes);
-        ASN1InputStream         dIn = new ASN1InputStream(bIn);
 
         try
         {
-            this.reqInfo = new CertificationRequestInfo(subject, new SubjectPublicKeyInfo((ASN1Sequence)dIn.readObject()), attributes);
+            ASN1Sequence seq = (ASN1Sequence)ASN1Primitive.fromByteArray(key.getEncoded());
+            this.reqInfo = new CertificationRequestInfo(subject, new SubjectPublicKeyInfo(seq), attributes);
         }
         catch (IOException e)
         {
             throw new IllegalArgumentException("can't encode public key");
         }
 
-        Signature sig = Signature.getInstance(signatureAlgorithm, provider);
+        Signature sig;
+        if (provider == null)
+        {
+            sig = Signature.getInstance(signatureAlgorithm);
+        }
+        else
+        {
+            sig = Signature.getInstance(signatureAlgorithm, provider);
+        }
 
         sig.initSign(signingKey);
 
         try
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(reqInfo);
-
-            sig.update(bOut.toByteArray());
+            sig.update(reqInfo.getEncoded(ASN1Encoding.DER));
         }
         catch (Exception e)
         {
@@ -321,7 +338,7 @@ public class PKCS10CertificationRequest
     public PublicKey getPublicKey()
         throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException
     {
-        return getPublicKey("BC");
+        return getPublicKey(BouncyCastleProvider.PROVIDER_NAME);
     }
 
     public PublicKey getPublicKey(
@@ -330,14 +347,22 @@ public class PKCS10CertificationRequest
                 InvalidKeyException
     {
         SubjectPublicKeyInfo    subjectPKInfo = reqInfo.getSubjectPublicKeyInfo();
-        X509EncodedKeySpec      xspec = new X509EncodedKeySpec(new DERBitString(subjectPKInfo).getBytes());
-        AlgorithmIdentifier     keyAlg = subjectPKInfo.getAlgorithmId();
+
         
         try
         {
+            X509EncodedKeySpec      xspec = new X509EncodedKeySpec(new DERBitString(subjectPKInfo).getBytes());
+            AlgorithmIdentifier     keyAlg = subjectPKInfo.getAlgorithm();
             try
             {
-                return KeyFactory.getInstance(keyAlg.getObjectId().getId(), provider).generatePublic(xspec);
+                if (provider == null)
+                {
+                    return KeyFactory.getInstance(keyAlg.getAlgorithm().getId()).generatePublic(xspec);
+                }
+                else
+                {
+                    return KeyFactory.getInstance(keyAlg.getAlgorithm().getId(), provider).generatePublic(xspec);
+                }
             }
             catch (NoSuchAlgorithmException e)
             {
@@ -348,13 +373,24 @@ public class PKCS10CertificationRequest
                 {
                     String  keyAlgorithm = (String)keyAlgorithms.get(keyAlg.getObjectId());
                     
-                    return KeyFactory.getInstance(keyAlgorithm, provider).generatePublic(xspec);
+                    if (provider == null)
+                    {
+                        return KeyFactory.getInstance(keyAlgorithm).generatePublic(xspec);
+                    }
+                    else
+                    {
+                        return KeyFactory.getInstance(keyAlgorithm, provider).generatePublic(xspec);
+                    }
                 }
                 
                 throw e;
             }
         }
         catch (InvalidKeySpecException e)
+        {
+            throw new InvalidKeyException("error decoding public key");
+        }
+        catch (IOException e)
         {
             throw new InvalidKeyException("error decoding public key");
         }
@@ -367,7 +403,7 @@ public class PKCS10CertificationRequest
         throws NoSuchAlgorithmException, NoSuchProviderException,
                 InvalidKeyException, SignatureException
     {
-        return verify("BC");
+        return verify(BouncyCastleProvider.PROVIDER_NAME);
     }
 
     /**
@@ -394,7 +430,14 @@ public class PKCS10CertificationRequest
 
         try
         {
-            sig = Signature.getInstance(getSignatureName(sigAlgId), provider);
+            if (provider == null)
+            {
+                sig = Signature.getInstance(getSignatureName(sigAlgId));
+            }
+            else
+            {
+                sig = Signature.getInstance(getSignatureName(sigAlgId), provider);
+            }
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -405,7 +448,14 @@ public class PKCS10CertificationRequest
             {
                 String  signatureAlgorithm = (String)oids.get(sigAlgId.getObjectId());
 
-                sig = Signature.getInstance(signatureAlgorithm, provider);
+                if (provider == null)
+                {
+                    sig = Signature.getInstance(signatureAlgorithm);
+                }
+                else
+                {
+                    sig = Signature.getInstance(signatureAlgorithm, provider);
+                }
             }
             else
             {
@@ -413,18 +463,13 @@ public class PKCS10CertificationRequest
             }
         }
 
-        //setSignatureParameters(sig, sigAlgId.getParameters());
+        setSignatureParameters(sig, sigAlgId.getParameters());
         
         sig.initVerify(pubKey);
 
         try
         {
-            ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-            DEROutputStream         dOut = new DEROutputStream(bOut);
-
-            dOut.writeObject(reqInfo);
-
-            sig.update(bOut.toByteArray());
+            sig.update(reqInfo.getEncoded(ASN1Encoding.DER));
         }
         catch (Exception e)
         {
@@ -439,19 +484,34 @@ public class PKCS10CertificationRequest
      */
     public byte[] getEncoded()
     {
-        ByteArrayOutputStream   bOut = new ByteArrayOutputStream();
-        DEROutputStream         dOut = new DEROutputStream(bOut);
-
         try
         {
-            dOut.writeObject(this);
+            return this.getEncoded(ASN1Encoding.DER);
         }
         catch (IOException e)
         {
             throw new RuntimeException(e.toString());
         }
+    }
 
-        return bOut.toByteArray();
+    private void setSignatureParameters(
+        Signature signature,
+        ASN1Encodable params)
+        throws NoSuchAlgorithmException, NoSuchProviderException, SignatureException, InvalidKeyException
+    {
+        if (params != null && !DERNull.INSTANCE.equals(params))
+        {
+            AlgorithmParameters sigParams = AlgorithmParameters.getInstance(signature.getAlgorithm(), signature.getProvider().getName());
+
+            try
+            {
+                sigParams.init(params.toASN1Primitive().getEncoded(ASN1Encoding.DER));
+            }
+            catch (IOException e)
+            {
+                throw new SignatureException("IOException decoding parameters: " + e.getMessage());
+            }
+        }
     }
 
     static String getSignatureName(

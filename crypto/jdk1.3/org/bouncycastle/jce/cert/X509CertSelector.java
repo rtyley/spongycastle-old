@@ -2231,8 +2231,8 @@ public class X509CertSelector implements CertSelector
                     ByteArrayInputStream inStream = new ByteArrayInputStream(
                             data);
                     ASN1InputStream derInputStream = new ASN1InputStream(inStream);
-                    ExtendedKeyUsage extendedKeyUsage = new ExtendedKeyUsage(
-                            (ASN1Sequence)derInputStream.readObject());
+                    ExtendedKeyUsage extendedKeyUsage = ExtendedKeyUsage.getInstance(
+                            derInputStream.readObject());
                     tempIter = keyPurposeSet.iterator();
                     while (tempIter.hasNext())
                     {

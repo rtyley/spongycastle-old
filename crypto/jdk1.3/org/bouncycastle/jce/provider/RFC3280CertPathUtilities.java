@@ -4,8 +4,14 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+import org.bouncycastle.jce.cert.CertPath;
+import org.bouncycastle.jce.cert.CertPathBuilder;
+import org.bouncycastle.jce.cert.CertPathBuilderException;
+import org.bouncycastle.jce.cert.CertPathValidatorException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
+import org.bouncycastle.jce.cert.PKIXCertPathChecker;
+import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.security.cert.X509Extension;
@@ -24,11 +30,11 @@ import java.util.Vector;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
@@ -43,14 +49,9 @@ import org.bouncycastle.asn1.x509.NameConstraints;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.jce.cert.CertPath;
-import org.bouncycastle.jce.cert.CertPathBuilder;
-import org.bouncycastle.jce.cert.CertPathBuilderException;
-import org.bouncycastle.jce.cert.CertPathValidatorException;
-import org.bouncycastle.jce.cert.PKIXCertPathChecker;
 import org.bouncycastle.jce.exception.ExtCertPathValidatorException;
+import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
 import org.bouncycastle.x509.ExtendedPKIXParameters;
@@ -285,7 +286,7 @@ public class RFC3280CertPathUtilities
         X509CRL crl)
         throws AnnotatedException
     {
-        ASN1Object idp = CertPathValidatorUtilities.getExtensionValue(crl, ISSUING_DISTRIBUTION_POINT);
+        ASN1Primitive idp = CertPathValidatorUtilities.getExtensionValue(crl, ISSUING_DISTRIBUTION_POINT);
         boolean isIndirect = false;
         if (idp != null)
         {
@@ -686,7 +687,11 @@ public class RFC3280CertPathUtilities
         {
             crlselect.addIssuerName(PrincipalUtil.getIssuerX509Principal(crl).getEncoded());
         }
-        catch (Exception e)
+        catch (CRLException e)
+        {
+            throw new AnnotatedException("Cannot extract issuer from CRL." + e, e);
+        }
+        catch (IOException e)
         {
             throw new AnnotatedException("Cannot extract issuer from CRL." + e, e);
         }
@@ -753,10 +758,10 @@ public class RFC3280CertPathUtilities
                 throw new AnnotatedException("Complete CRL issuer does not match delta CRL issuer.");
             }
             }
-            catch (Exception e)
+            catch (CRLException e)
             {
                 throw new AnnotatedException(
-                    "Issuing distribution point extension issuer from delta CRL could not be decoded.", e);
+                    "Cannot extract issuer from CRL.", e);
             }
 
             // (c) (2)
@@ -794,7 +799,7 @@ public class RFC3280CertPathUtilities
             }
 
             // (c) (3)
-            ASN1Object completeKeyIdentifier = null;
+            ASN1Primitive completeKeyIdentifier = null;
             try
             {
                 completeKeyIdentifier = CertPathValidatorUtilities.getExtensionValue(
@@ -806,7 +811,7 @@ public class RFC3280CertPathUtilities
                     "Authority key identifier extension could not be extracted from complete CRL.", e);
             }
 
-            ASN1Object deltaKeyIdentifier = null;
+            ASN1Primitive deltaKeyIdentifier = null;
             try
             {
                 deltaKeyIdentifier = CertPathValidatorUtilities.getExtensionValue(
@@ -899,8 +904,8 @@ public class RFC3280CertPathUtilities
             for (int j = 0; j < mappings.size(); j++)
             {
                 ASN1Sequence mapping = (ASN1Sequence)mappings.getObjectAt(j);
-                String id_p = ((ASN1ObjectIdentifier)mapping.getObjectAt(0)).getId();
-                String sd_p = ((ASN1ObjectIdentifier)mapping.getObjectAt(1)).getId();
+                String id_p = ((DERObjectIdentifier)mapping.getObjectAt(0)).getId();
+                String sd_p = ((DERObjectIdentifier)mapping.getObjectAt(1)).getId();
                 Set tmp;
 
                 if (!m_idp.containsKey(id_p))
@@ -1078,14 +1083,14 @@ public class RFC3280CertPathUtilities
 
             for (int j = 0; j < mappings.size(); j++)
             {
-                ASN1ObjectIdentifier issuerDomainPolicy = null;
-                ASN1ObjectIdentifier subjectDomainPolicy = null;
+                DERObjectIdentifier issuerDomainPolicy = null;
+                DERObjectIdentifier subjectDomainPolicy = null;
                 try
                 {
                     ASN1Sequence mapping = DERSequence.getInstance(mappings.getObjectAt(j));
 
-                    issuerDomainPolicy = ASN1ObjectIdentifier.getInstance(mapping.getObjectAt(0));
-                    subjectDomainPolicy = ASN1ObjectIdentifier.getInstance(mapping.getObjectAt(1));
+                    issuerDomainPolicy = DERObjectIdentifier.getInstance(mapping.getObjectAt(0));
+                    subjectDomainPolicy = DERObjectIdentifier.getInstance(mapping.getObjectAt(1));
                 }
                 catch (Exception e)
                 {
@@ -1292,7 +1297,7 @@ public class RFC3280CertPathUtilities
             while (e.hasMoreElements())
             {
                 PolicyInformation pInfo = PolicyInformation.getInstance(e.nextElement());
-                ASN1ObjectIdentifier pOid = pInfo.getPolicyIdentifier();
+                DERObjectIdentifier pOid = pInfo.getPolicyIdentifier();
 
                 pols.add(pOid.getId());
 
@@ -1371,9 +1376,9 @@ public class RFC3280CertPathUtilities
                                 {
                                     _policy = (String)_tmp;
                                 }
-                                else if (_tmp instanceof ASN1ObjectIdentifier)
+                                else if (_tmp instanceof DERObjectIdentifier)
                                 {
-                                    _policy = ((ASN1ObjectIdentifier)_tmp).getId();
+                                    _policy = ((DERObjectIdentifier)_tmp).getId();
                                 }
                                 else
                                 {
@@ -1677,7 +1682,7 @@ public class RFC3280CertPathUtilities
             //
             // (g) (1) permitted subtrees
             //
-            ASN1Sequence permitted = nc.getPermittedSubtrees();
+            GeneralSubtree[] permitted = nc.getPermittedSubtrees();
             if (permitted != null)
             {
                 try
@@ -1694,17 +1699,13 @@ public class RFC3280CertPathUtilities
             //
             // (g) (2) excluded subtrees
             //
-            ASN1Sequence excluded = nc.getExcludedSubtrees();
+            GeneralSubtree[] excluded = nc.getExcludedSubtrees();
             if (excluded != null)
             {
-                Enumeration e = excluded.getObjects();
+                for (int i = 0; i != excluded.length; i++)
                 try
                 {
-                    while (e.hasMoreElements())
-                    {
-                        GeneralSubtree subtree = GeneralSubtree.getInstance(e.nextElement());
-                        nameConstraintValidator.addExcludedSubtree(subtree);
-                    }
+                        nameConstraintValidator.addExcludedSubtree(excluded[i]);
                 }
                 catch (Exception ex)
                 {
@@ -1982,7 +1983,7 @@ public class RFC3280CertPathUtilities
                  * omitted and a distribution point name of the certificate
                  * issuer.
                  */
-                ASN1Object issuer = null;
+                ASN1Primitive issuer = null;
                 try
                 {
                     issuer = new ASN1InputStream(CertPathValidatorUtilities.getEncodedIssuerPrincipal(cert).getEncoded())
@@ -2211,7 +2212,7 @@ public class RFC3280CertPathUtilities
         }
         if (!criticalExtensions.isEmpty())
         {
-            throw new ExtCertPathValidatorException("Certificate has unsupported critical extension.", null, certPath,
+            throw new ExtCertPathValidatorException("Certificate has unsupported critical extension: " + criticalExtensions, null, certPath,
                 index);
         }
     }
@@ -2392,7 +2393,7 @@ public class RFC3280CertPathUtilities
 
         if (!criticalExtensions.isEmpty())
         {
-            throw new ExtCertPathValidatorException("Certificate has unsupported critical extension", null, certPath,
+            throw new ExtCertPathValidatorException("Certificate has unsupported critical extension: " + criticalExtensions, null, certPath,
                 index);
         }
     }

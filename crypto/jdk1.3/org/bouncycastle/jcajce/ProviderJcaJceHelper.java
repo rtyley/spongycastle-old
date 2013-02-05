@@ -7,7 +7,6 @@ import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Signature;
 import java.security.cert.CertificateException;
@@ -18,10 +17,7 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.jcajce.JcaJceHelper;
+import javax.crypto.SecretKeyFactory;
 
 public class ProviderJcaJceHelper
     implements JcaJceHelper
@@ -74,6 +70,12 @@ public class ProviderJcaJceHelper
         throws NoSuchAlgorithmException, NoSuchProviderException
     {
         return KeyFactory.getInstance(algorithm, provider.getName());
+    }
+
+    public SecretKeyFactory createSecretKeyFactory(String algorithm)
+        throws NoSuchAlgorithmException, NoSuchProviderException
+    {
+        return SecretKeyFactory.getInstance(algorithm, provider.getName());
     }
 
     public KeyPairGenerator createKeyPairGenerator(String algorithm)
