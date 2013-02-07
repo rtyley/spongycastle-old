@@ -21,7 +21,7 @@ public class DSTU4145ECBinary
     extends ASN1Object
 {
 
-    BigInteger version = BigInteger.ZERO;
+    BigInteger version = BigInteger.valueOf(0);
 
     DSTU4145BinaryField f;
     ASN1Integer a;
@@ -128,7 +128,7 @@ public class DSTU4145ECBinary
 
         ASN1EncodableVector v = new ASN1EncodableVector();
 
-        if (0 != version.compareTo(BigInteger.ZERO))
+        if (0 != version.compareTo(BigInteger.valueOf(0)))
         {
             v.add(new DERTaggedObject(true, 0, new ASN1Integer(version)));
         }
