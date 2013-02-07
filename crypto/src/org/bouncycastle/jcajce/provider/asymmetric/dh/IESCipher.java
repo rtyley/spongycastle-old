@@ -397,19 +397,19 @@ public class IESCipher
             {
                 public byte[] getEncoded(AsymmetricKeyParameter keyParameter)
                 {
-                    byte[] V = new byte[(((DHKeyParameters)keyParameter).getParameters().getP().bitLength() + 7) / 8];
+                    byte[] Vloc = new byte[(((DHKeyParameters)keyParameter).getParameters().getP().bitLength() + 7) / 8];
                     byte[] Vtmp = BigIntegers.asUnsignedByteArray(((DHPublicKeyParameters)keyParameter).getY());
 
-                    if (Vtmp.length > V.length)
+                    if (Vtmp.length > Vloc.length)
                     {
                         throw new IllegalArgumentException("Senders's public key longer than expected.");
                     }
                     else
                     {
-                        System.arraycopy(Vtmp, 0, V, V.length - Vtmp.length, Vtmp.length);
+                        System.arraycopy(Vtmp, 0, Vloc, Vloc.length - Vtmp.length, Vtmp.length);
                     }
 
-                    return V;
+                    return Vloc;
                 }
             });
 
