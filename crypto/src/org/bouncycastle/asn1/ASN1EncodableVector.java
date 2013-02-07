@@ -1,5 +1,6 @@
 package org.bouncycastle.asn1;
 
+import java.util.Enumeration;
 import java.util.Vector;
 
 public class ASN1EncodableVector
@@ -17,7 +18,10 @@ public class ASN1EncodableVector
 
     public void addAll(ASN1EncodableVector other)
     {
-    	v.addAll(other.v);
+        for (Enumeration en = other.v.elements(); en.hasMoreElements();)
+        {
+    	    v.add(en.nextElement());
+        }
     }
 
     public ASN1Encodable get(int i)
