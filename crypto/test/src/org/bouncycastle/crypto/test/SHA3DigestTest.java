@@ -200,7 +200,7 @@ public class SHA3DigestTest
 
         for (int i = 0; i != k64.length; i++)
         {
-            k64[i] = 'a';
+            k64[i] = (byte)'a';
         }
 
         digest.update(k64, 0, k64.length);
