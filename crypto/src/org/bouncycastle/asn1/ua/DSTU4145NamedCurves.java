@@ -9,6 +9,8 @@ import org.bouncycastle.math.ec.ECPoint;
 
 public class DSTU4145NamedCurves
 {
+    private static final BigInteger ZERO = BigInteger.valueOf(0);
+    private static final BigInteger ONE = BigInteger.valueOf(1);
 
     public static final ECDomainParameters[] params = new ECDomainParameters[10];
     static final ASN1ObjectIdentifier[] oids = new ASN1ObjectIdentifier[10];
@@ -20,16 +22,16 @@ public class DSTU4145NamedCurves
     static
     {
         ECCurve.F2m[] curves = new ECCurve.F2m[10];
-        curves[0] = new ECCurve.F2m(163, 3, 6, 7, BigInteger.ONE, new BigInteger("5FF6108462A2DC8210AB403925E638A19C1455D21", 16));
-        curves[1] = new ECCurve.F2m(167, 6, BigInteger.ONE, new BigInteger("6EE3CEEB230811759F20518A0930F1A4315A827DAC", 16));
-        curves[2] = new ECCurve.F2m(173, 1, 2, 10, BigInteger.ZERO, new BigInteger("108576C80499DB2FC16EDDF6853BBB278F6B6FB437D9", 16));
-        curves[3] = new ECCurve.F2m(179, 1, 2, 4, BigInteger.ONE, new BigInteger("4A6E0856526436F2F88DD07A341E32D04184572BEB710", 16));
-        curves[4] = new ECCurve.F2m(191, 9, BigInteger.ONE, new BigInteger("7BC86E2102902EC4D5890E8B6B4981ff27E0482750FEFC03", 16));
-        curves[5] = new ECCurve.F2m(233, 1, 4, 9, BigInteger.ONE, new BigInteger("06973B15095675534C7CF7E64A21BD54EF5DD3B8A0326AA936ECE454D2C", 16));
-        curves[6] = new ECCurve.F2m(257, 12, BigInteger.ZERO, new BigInteger("1CEF494720115657E18F938D7A7942394FF9425C1458C57861F9EEA6ADBE3BE10", 16));
-        curves[7] = new ECCurve.F2m(307, 2, 4, 8, BigInteger.ONE, new BigInteger("393C7F7D53666B5054B5E6C6D3DE94F4296C0C599E2E2E241050DF18B6090BDC90186904968BB", 16));
-        curves[8] = new ECCurve.F2m(367, 21, BigInteger.ONE, new BigInteger("43FC8AD242B0B7A6F3D1627AD5654447556B47BF6AA4A64B0C2AFE42CADAB8F93D92394C79A79755437B56995136", 16));
-        curves[9] = new ECCurve.F2m(431, 1, 3, 5, BigInteger.ONE, new BigInteger("03CE10490F6A708FC26DFE8C3D27C4F94E690134D5BFF988D8D28AAEAEDE975936C66BAC536B18AE2DC312CA493117DAA469C640CAF3", 16));
+        curves[0] = new ECCurve.F2m(163, 3, 6, 7, ONE, new BigInteger("5FF6108462A2DC8210AB403925E638A19C1455D21", 16));
+        curves[1] = new ECCurve.F2m(167, 6, ONE, new BigInteger("6EE3CEEB230811759F20518A0930F1A4315A827DAC", 16));
+        curves[2] = new ECCurve.F2m(173, 1, 2, 10, ZERO, new BigInteger("108576C80499DB2FC16EDDF6853BBB278F6B6FB437D9", 16));
+        curves[3] = new ECCurve.F2m(179, 1, 2, 4, ONE, new BigInteger("4A6E0856526436F2F88DD07A341E32D04184572BEB710", 16));
+        curves[4] = new ECCurve.F2m(191, 9, ONE, new BigInteger("7BC86E2102902EC4D5890E8B6B4981ff27E0482750FEFC03", 16));
+        curves[5] = new ECCurve.F2m(233, 1, 4, 9, ONE, new BigInteger("06973B15095675534C7CF7E64A21BD54EF5DD3B8A0326AA936ECE454D2C", 16));
+        curves[6] = new ECCurve.F2m(257, 12, ZERO, new BigInteger("1CEF494720115657E18F938D7A7942394FF9425C1458C57861F9EEA6ADBE3BE10", 16));
+        curves[7] = new ECCurve.F2m(307, 2, 4, 8, ONE, new BigInteger("393C7F7D53666B5054B5E6C6D3DE94F4296C0C599E2E2E241050DF18B6090BDC90186904968BB", 16));
+        curves[8] = new ECCurve.F2m(367, 21, ONE, new BigInteger("43FC8AD242B0B7A6F3D1627AD5654447556B47BF6AA4A64B0C2AFE42CADAB8F93D92394C79A79755437B56995136", 16));
+        curves[9] = new ECCurve.F2m(431, 1, 3, 5, ONE, new BigInteger("03CE10490F6A708FC26DFE8C3D27C4F94E690134D5BFF988D8D28AAEAEDE975936C66BAC536B18AE2DC312CA493117DAA469C640CAF3", 16));
 
         ECPoint[] points = new ECPoint[10];
         points[0] = curves[0].createPoint(new BigInteger("2E2F85F5DD74CE983A5C4237229DAF8A3F35823BE", 16), new BigInteger("3826F008A8C51D7B95284D9D03FF0E00CE2CD723A", 16), false);
