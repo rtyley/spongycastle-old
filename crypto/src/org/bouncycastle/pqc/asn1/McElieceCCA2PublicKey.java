@@ -11,52 +11,86 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.pqc.jcajce.spec.McElieceCCA2PublicKeySpec;
+import org.bouncycastle.pqc.math.linearalgebra.GF2Matrix;
 
 public class McElieceCCA2PublicKey
     extends ASN1Object
 {
-    private McElieceCCA2PublicKeySpec keySpec;
+    private ASN1ObjectIdentifier oid;
+    private int n;
+    private int t;
 
-    public McElieceCCA2PublicKey(McElieceCCA2PublicKeySpec keySpec)
+    private byte[] matrixG;
+
+    public McElieceCCA2PublicKey(ASN1ObjectIdentifier oid, int n, int t, GF2Matrix g)
     {
-        this.keySpec = keySpec;
+        this.oid = oid;
+        this.n = n;
+        this.t = t;
+        this.matrixG = g.getEncoded();
     }
 
-    public McElieceCCA2PublicKey(ASN1Sequence seq)
+    private McElieceCCA2PublicKey(ASN1Sequence seq)
     {
-        String oid = ((ASN1ObjectIdentifier)seq.getObjectAt(0)).getId();
+        oid = ((ASN1ObjectIdentifier)seq.getObjectAt(0));
         BigInteger bigN = ((ASN1Integer)seq.getObjectAt(1)).getValue();
-        int n = bigN.intValue();
+        n = bigN.intValue();
 
         BigInteger bigT = ((ASN1Integer)seq.getObjectAt(2)).getValue();
-        int t = bigT.intValue();
+        t = bigT.intValue();
 
-        byte[] matrixG = ((ASN1OctetString)seq.getObjectAt(3)).getOctets();
+        matrixG = ((ASN1OctetString)seq.getObjectAt(3)).getOctets();
+    }
 
-        keySpec = new McElieceCCA2PublicKeySpec(oid, n, t, matrixG);
+    public ASN1ObjectIdentifier getOID()
+    {
+        return oid;
+    }
+
+    public int getN()
+    {
+        return n;
+    }
+
+    public int getT()
+    {
+        return t;
+    }
+
+    public GF2Matrix getG()
+    {
+        return new GF2Matrix(matrixG);
     }
 
     public ASN1Primitive toASN1Primitive()
     {
         ASN1EncodableVector v = new ASN1EncodableVector();
         // encode <oidString>
-        v.add(new ASN1ObjectIdentifier(keySpec.getOIDString()));
+        v.add(oid);
 
         // encode <n>
-        v.add(new ASN1Integer(keySpec.getN()));
+        v.add(new ASN1Integer(n));
 
         // encode <t>
-        v.add(new ASN1Integer(keySpec.getT()));
+        v.add(new ASN1Integer(t));
 
         // encode <matrixG>
-        v.add(new DEROctetString(keySpec.getMatrixG().getEncoded()));
+        v.add(new DEROctetString(matrixG));
 
         return new DERSequence(v);
     }
 
-    public McElieceCCA2PublicKeySpec getKeySpec()
+    public static McElieceCCA2PublicKey getInstance(Object o)
     {
-        return this.keySpec;
+        if (o instanceof McElieceCCA2PublicKey)
+        {
+            return (McElieceCCA2PublicKey)o;
+        }
+        else if (o != null)
+        {
+            return new McElieceCCA2PublicKey(ASN1Sequence.getInstance(o));
+        }
+
+        return null;
     }
 }

@@ -237,6 +237,9 @@
                  <include name="org/bouncycastle/util/**/*.java" />
                  <include name="org/bouncycastle/asn1/**/*.java" />
                  <include name="org/bouncycastle/bcpg/**/*.java" />
+                 <include name="org/bouncycastle/pqc/crypto/**/*.java" />
+                 <include name="org/bouncycastle/pqc/math/**/*.java" />
+                 <include name="org/bouncycastle/pqc/asn1/**/*.java" />
              </fileset>
         </copy>
 

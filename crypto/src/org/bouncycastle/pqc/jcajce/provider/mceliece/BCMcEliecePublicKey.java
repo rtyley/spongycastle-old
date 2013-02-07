@@ -204,7 +204,7 @@ public class BCMcEliecePublicKey
      */
     public byte[] getEncoded()
     {
-        McEliecePublicKey key = new McEliecePublicKey(new McEliecePublicKeySpec(oid, n, t, g));
+        McEliecePublicKey key = new McEliecePublicKey(new ASN1ObjectIdentifier(oid), n, t, g);
         AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(this.getOID(), DERNull.INSTANCE);
 
         try

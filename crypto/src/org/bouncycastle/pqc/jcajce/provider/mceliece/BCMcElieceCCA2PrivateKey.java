@@ -269,7 +269,7 @@ public class BCMcElieceCCA2PrivateKey
      */
     public byte[] getEncoded()
     {
-        McElieceCCA2PrivateKey privateKey = new McElieceCCA2PrivateKey(new McElieceCCA2PrivateKeySpec(oid, n, k, field, goppaPoly, p, h, qInv));
+        McElieceCCA2PrivateKey privateKey = new McElieceCCA2PrivateKey(new ASN1ObjectIdentifier(oid), n, k, field, goppaPoly, p, h, qInv);
         PrivateKeyInfo pki;
         try
         {

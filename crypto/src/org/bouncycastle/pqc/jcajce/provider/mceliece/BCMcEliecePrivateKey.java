@@ -295,7 +295,7 @@ public class BCMcEliecePrivateKey
      */
     public byte[] getEncoded()
     {
-        McEliecePrivateKey privateKey = new McEliecePrivateKey(new McEliecePrivateKeySpec(oid, n, k, field, goppaPoly, sInv, p1, p2, h, qInv));
+        McEliecePrivateKey privateKey = new McEliecePrivateKey(new ASN1ObjectIdentifier(oid), n, k, field, goppaPoly, sInv, p1, p2, h, qInv);
         PrivateKeyInfo pki;
         try
         {
