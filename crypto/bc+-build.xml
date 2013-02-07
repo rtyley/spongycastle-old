@@ -697,7 +697,7 @@
                 <group title="Post-Quantum Lightweight Math Packages" packages="org.bouncycastle.pqc.math*" />
                 <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
                 <group title="JCE Provider and Test Classes" packages="org.bouncycastle.jce.provider*" />
-                <group title="Post-Quantum Provider and Test Classes" packages="org.bouncycastle.pqc.jcajce.provider*" />
+                <group title="Post-Quantum Provider and Test Classes" packages="org.bouncycastle.pqc.jcajce.*" />
             </docElements>
         </compile-doc>
 
