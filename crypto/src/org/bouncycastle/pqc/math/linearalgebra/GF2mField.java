@@ -211,18 +211,6 @@ public class GF2mField
     }
 
     /**
-     * create a random field element
-     *
-     * @return a random element
-     */
-    public int getRandomElement()
-    {
-        SecureRandom random = new SecureRandom();
-        int result = random.nextInt(1 << degree);
-        return result;
-    }
-
-    /**
      * create a random field element using PRNG sr
      *
      * @param sr SecureRandom

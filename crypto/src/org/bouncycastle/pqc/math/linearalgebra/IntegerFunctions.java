@@ -11,9 +11,9 @@ import java.security.SecureRandom;
 public final class IntegerFunctions
 {
 
-    private static final BigInteger ZERO = BigInteger.ZERO;
+    private static final BigInteger ZERO = BigInteger.valueOf(0);
 
-    private static final BigInteger ONE = BigInteger.ONE;
+    private static final BigInteger ONE = BigInteger.valueOf(1);
 
     private static final BigInteger TWO = BigInteger.valueOf(2);
 
@@ -318,7 +318,7 @@ public final class IntegerFunctions
     public static int ceilLog(BigInteger a)
     {
         int result = 0;
-        BigInteger p = BigInteger.ONE;
+        BigInteger p = ONE;
         while (p.compareTo(a) < 0)
         {
             result++;
@@ -420,7 +420,7 @@ public final class IntegerFunctions
     public static int floorLog(BigInteger a)
     {
         int result = -1;
-        BigInteger p = BigInteger.ONE;
+        BigInteger p = ONE;
         while (p.compareTo(a) <= 0)
         {
             result++;
@@ -626,12 +626,12 @@ public final class IntegerFunctions
      */
     public static BigInteger[] extgcd(BigInteger a, BigInteger b)
     {
-        BigInteger u = BigInteger.ONE;
-        BigInteger v = BigInteger.ZERO;
+        BigInteger u = ONE;
+        BigInteger v = ZERO;
         BigInteger d = a;
         if (b.signum() != 0)
         {
-            BigInteger v1 = BigInteger.ZERO;
+            BigInteger v1 = ZERO;
             BigInteger v3 = b;
             while (v3.signum() != 0)
             {
@@ -853,7 +853,7 @@ public final class IntegerFunctions
         for (int i = 0; i < smallPrime.length; i++)
         {
             if (candidate.mod(BigInteger.valueOf(smallPrime[i])).equals(
-                BigInteger.ZERO))
+                ZERO))
             {
                 return false;
             }
@@ -1023,7 +1023,7 @@ public final class IntegerFunctions
     public static BigInteger binomial(int n, int t)
     {
 
-        BigInteger result = BigInteger.ONE;
+        BigInteger result = ONE;
 
         if (n == 0)
         {
@@ -1031,7 +1031,7 @@ public final class IntegerFunctions
             {
                 return result;
             }
-            return BigInteger.ZERO;
+            return ZERO;
         }
 
         // the property (n|t) = (n|n-t) be used to reduce numbers of operations
