@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -121,6 +121,16 @@ public class SignerInfoGenerator
         this.sigEncAlgFinder = sigEncAlgFinder;
     }
 
+    public SignerIdentifier getSID()
+    {
+    	return signerIdentifier;
+    }
+
+    public ASN1Integer getGeneratedVersion()
+    {
+    	return new ASN1Integer(signerIdentifier.isTagged() ? 3 : 1);
+    }
+
     public boolean hasAssociatedCertificate()
     {
         return certHolder != null;
@@ -180,7 +190,7 @@ public class SignerInfoGenerator
                 digestAlg = digester.getAlgorithmIdentifier();
                 calculatedDigest = digester.getDigest();
                 Map parameters = getBaseParameters(contentType, digester.getAlgorithmIdentifier(), calculatedDigest);
-                AttributeTable signed = sAttrGen.getAttributes(parameters);
+                AttributeTable signed = sAttrGen.getAttributes(new HashMap(parameters));
 
                 signedAttr = getAttributeSet(signed);
 
@@ -213,7 +223,7 @@ public class SignerInfoGenerator
                 Map parameters = getBaseParameters(contentType, digestAlg, calculatedDigest);
                 parameters.put(CMSAttributeTableGenerator.SIGNATURE, sigBytes.clone());
 
-                AttributeTable unsigned = unsAttrGen.getAttributes(parameters);
+                AttributeTable unsigned = unsAttrGen.getAttributes(new HashMap(parameters));
 
                 unsignedAttr = getAttributeSet(unsigned);
             }
@@ -245,7 +255,7 @@ public class SignerInfoGenerator
         return null;
     }
 
-    private Map getBaseParameters(DERObjectIdentifier contentType, AlgorithmIdentifier digAlgId, byte[] hash)
+    private Map getBaseParameters(ASN1ObjectIdentifier contentType, AlgorithmIdentifier digAlgId, byte[] hash)
     {
         Map param = new HashMap();
 

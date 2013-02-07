@@ -2349,7 +2349,7 @@ public class BcPGPKeyRingTest
 
     public String getName()
     {
-        return "PGPKeyRingTest";
+        return "BcPGPKeyRingTest";
     }
 
     public static void main(

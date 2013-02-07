@@ -1321,13 +1321,12 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         //
                         // (g) (1) permitted subtrees
                         //
-                        ASN1Sequence permitted = nc.getPermittedSubtrees();
+                        GeneralSubtree[] permitted = nc.getPermittedSubtrees();
                         if (permitted != null)
                         {
-                            Enumeration e = permitted.getObjects();
-                            while (e.hasMoreElements())
+                            for (int indx = 0; indx != permitted.length; indx++)
                             {
-                                GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
+                                GeneralSubtree  subtree = permitted[indx];
                                 GeneralName     base = subtree.getBase();
     
                                 switch(base.getTagNo())
@@ -1348,13 +1347,12 @@ public class PKIXCertPathValidatorSpi extends CertPathValidatorSpi
                         //
                         // (g) (2) excluded subtrees
                         //
-                        ASN1Sequence excluded = nc.getExcludedSubtrees();
+                        GeneralSubtree[] excluded = nc.getExcludedSubtrees();
                         if (excluded != null)
                         {
-                            Enumeration e = excluded.getObjects();
-                            while (e.hasMoreElements())
+                            for (int indx = 0; indx != excluded.length; indx++)
                             {
-                                GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
+                                GeneralSubtree  subtree = excluded[indx];
                                 GeneralName     base = subtree.getBase();
     
                                 switch(base.getTagNo())

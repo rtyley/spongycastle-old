@@ -94,12 +94,16 @@ class CRMFHelper
     PublicKey toPublicKey(SubjectPublicKeyInfo subjectPublicKeyInfo)
         throws CRMFException
     {
-        X509EncodedKeySpec xspec = new X509EncodedKeySpec(new DERBitString(subjectPublicKeyInfo).getBytes());
-        AlgorithmIdentifier keyAlg = subjectPublicKeyInfo.getAlgorithmId();
 
         try
         {
+        X509EncodedKeySpec xspec = new X509EncodedKeySpec(new DERBitString(subjectPublicKeyInfo).getBytes());
+        AlgorithmIdentifier keyAlg = subjectPublicKeyInfo.getAlgorithmId();
             return createKeyFactory(keyAlg.getAlgorithm()).generatePublic(xspec);
+        }
+        catch (IOException e)
+        {
+            throw new CRMFException("invalid key: " + e.getMessage(), e);
         }
         catch (InvalidKeySpecException e)
         {

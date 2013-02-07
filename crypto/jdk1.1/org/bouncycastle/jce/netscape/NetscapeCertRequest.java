@@ -131,7 +131,7 @@ public class NetscapeCertRequest
         String challenge,
         AlgorithmIdentifier signing_alg,
         PublicKey pub_key) throws NoSuchAlgorithmException,
-            InvalidKeySpecException, NoSuchProviderException
+            InvalidKeySpecException, NoSuchProviderException, IOException
     {
 
         this.challenge = challenge;

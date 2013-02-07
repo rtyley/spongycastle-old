@@ -10,10 +10,12 @@ class BouncyCastleProviderConfiguration
     implements ProviderConfiguration
 {
     private volatile ECParameterSpec ecImplicitCaParams;
-    private volatile DHParameterSpec dhDefaultParams;
+    private volatile Object dhDefaultParams;
 
     void setParameter(String parameterName, Object parameter)
     {
+        SecurityManager securityManager = System.getSecurityManager();
+
         if (parameterName.equals(ConfigurableProvider.THREAD_LOCAL_EC_IMPLICITLY_CA))
         {
             ECParameterSpec curveSpec;
@@ -27,14 +29,7 @@ class BouncyCastleProviderConfiguration
                 throw new IllegalArgumentException("not a valid ECParameterSpec");
             }
 
-            if (curveSpec == null)
-            {
-                ecImplicitCaParams = null;
-            }
-            else
-            {
-                ecImplicitCaParams = (ECParameterSpec)parameter;
-            }
+            ecImplicitCaParams = (ECParameterSpec)curveSpec;
         }
         else if (parameterName.equals(ConfigurableProvider.EC_IMPLICITLY_CA))
         {
@@ -42,42 +37,37 @@ class BouncyCastleProviderConfiguration
             {
                 ecImplicitCaParams = (ECParameterSpec)parameter;
             }
-            else
+            else  // assume java.security.spec
             {
                 throw new IllegalArgumentException("not a valid ECParameterSpec");
             }
         }
         else if (parameterName.equals(ConfigurableProvider.THREAD_LOCAL_DH_DEFAULT_PARAMS))
         {
-            DHParameterSpec dhSpec;
+            Object dhSpec;
 
-            if (parameter instanceof DHParameterSpec || parameter == null)
+
+            if (parameter instanceof DHParameterSpec || parameter instanceof DHParameterSpec[] || parameter == null)
             {
-                dhSpec = (DHParameterSpec)parameter;
+                dhSpec = parameter;
             }
             else
             {
                 throw new IllegalArgumentException("not a valid DHParameterSpec");
             }
 
-            if (dhSpec == null)
-            {
-                dhDefaultParams = null;
-            }
-            else
-            {
-                dhDefaultParams = (DHParameterSpec)parameter;
-            }
+            dhDefaultParams = dhSpec;
         }
         else if (parameterName.equals(ConfigurableProvider.DH_DEFAULT_PARAMS))
         {
-            if (parameter instanceof DHParameterSpec || parameter == null)
+
+            if (parameter instanceof DHParameterSpec || parameter instanceof DHParameterSpec[] || parameter == null)
             {
-                dhDefaultParams = (DHParameterSpec)parameter;
+                dhDefaultParams = parameter;
             }
             else
             {
-                throw new IllegalArgumentException("not a valid DHParameterSpec");
+                throw new IllegalArgumentException("not a valid DHParameterSpec or DHParameterSpec[]");
             }
         }
     }
@@ -87,8 +77,32 @@ class BouncyCastleProviderConfiguration
         return ecImplicitCaParams;
     }
 
-    public DHParameterSpec getDHDefaultParameters()
+    public DHParameterSpec getDHDefaultParameters(int keySize)
     {
-        return dhDefaultParams;
+        Object    params = dhDefaultParams;
+
+        if (params instanceof DHParameterSpec)
+        {
+            DHParameterSpec spec = (DHParameterSpec)params;
+
+            if (spec.getP().bitLength() == keySize)
+            {
+                return spec;
+            }
+        }
+        else if (params instanceof DHParameterSpec[])
+        {
+            DHParameterSpec[] specs = (DHParameterSpec[])params;
+
+            for (int i = 0; i != specs.length; i++)
+            {
+                if (specs[i].getP().bitLength() == keySize)
+                {
+                    return specs[i];
+                }
+            }
+        }
+
+        return null;
     }
 }
