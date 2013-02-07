@@ -55,7 +55,7 @@ public class McEliecePointchevalCipherTest
                 mcEliecePointchevalDigestCipher.init(true, param);
 
                 // generate random message
-                int mLength = rand.nextInt(32) + 1;
+                int mLength = (rand.nextInt() & 0x1f) + 1;
                 mBytes = new byte[mLength];
                 rand.nextBytes(mBytes);
 
