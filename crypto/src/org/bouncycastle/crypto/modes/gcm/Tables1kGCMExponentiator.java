@@ -12,7 +12,7 @@ public class Tables1kGCMExponentiator implements GCMExponentiator
 
     public void init(byte[] x)
     {
-        if (lookupPowX2 != null && Arrays.areEqual(x, (byte[])lookupPowX2.get(0)))
+        if (lookupPowX2 != null && Arrays.areEqual(x, (byte[])lookupPowX2.elementAt(0)))
         {
             return;
         }
@@ -30,7 +30,7 @@ public class Tables1kGCMExponentiator implements GCMExponentiator
             if ((pow & 1L) != 0)
             {
                 ensureAvailable(bit);
-                GCMUtil.multiply(y, (byte[])lookupPowX2.get(bit));
+                GCMUtil.multiply(y, (byte[])lookupPowX2.elementAt(bit));
             }
             ++bit;
             pow >>>= 1;
@@ -44,7 +44,7 @@ public class Tables1kGCMExponentiator implements GCMExponentiator
         int count = lookupPowX2.size();
         if (count <= bit)
         {
-            byte[] tmp = (byte[])lookupPowX2.get(count - 1);
+            byte[] tmp = (byte[])lookupPowX2.elementAt(count - 1);
             do
             {
                 tmp = Arrays.clone(tmp);
