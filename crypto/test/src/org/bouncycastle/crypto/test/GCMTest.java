@@ -616,6 +616,25 @@ public class GCMTest
         }
     }
 
+    private static int nextInt(SecureRandom rand, int n)
+    {
+
+        if ((n & -n) == n)  // i.e., n is a power of 2
+        {
+            return (int)((n * (long)(rand.nextInt() >>> 1)) >> 31);
+        }
+
+        int bits, value;
+        do
+        {
+            bits = rand.nextInt() >>> 1;
+            value = bits % n;
+        }
+        while (bits - value + (n - 1) < 0);
+
+        return value;
+    }
+
     public static void main(String[] args)
     {
         runTest(new GCMTest());
