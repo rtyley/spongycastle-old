@@ -20,7 +20,7 @@ public class ASN1EncodableVector
     {
         for (Enumeration en = other.v.elements(); en.hasMoreElements();)
         {
-    	    v.add(en.nextElement());
+    	    v.addElement(en.nextElement());
         }
     }
 
