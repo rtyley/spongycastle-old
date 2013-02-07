@@ -436,15 +436,13 @@ public class GMSSKeyPairGenerator
         this.currentSeeds = new byte[numLayer][mdLength];
         this.nextNextSeeds = new byte[numLayer - 1][mdLength];
 
-        byte[] seed;
         // construct SecureRandom for initial seed generation
         SecureRandom secRan = new SecureRandom();
 
         // generation of initial seeds
         for (int i = 0; i < numLayer; i++)
         {
-            seed = secRan.generateSeed(mdLength);
-            System.arraycopy(seed, 0, currentSeeds[i], 0, mdLength);
+            secRan.nextBytes(currentSeeds[i]);
             gmssRandom.nextSeed(currentSeeds[i]);
         }
 
