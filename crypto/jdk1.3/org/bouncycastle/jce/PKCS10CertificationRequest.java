@@ -463,7 +463,7 @@ public class PKCS10CertificationRequest
             }
         }
 
-        setSignatureParameters(sig, sigAlgId.getParameters());
+        setSignatureParameters(sig, sigAlgId.getParameters(), provider);
         
         sig.initVerify(pubKey);
 
@@ -496,12 +496,13 @@ public class PKCS10CertificationRequest
 
     private void setSignatureParameters(
         Signature signature,
-        ASN1Encodable params)
+        ASN1Encodable params,
+        String provider)
         throws NoSuchAlgorithmException, NoSuchProviderException, SignatureException, InvalidKeyException
     {
         if (params != null && !DERNull.INSTANCE.equals(params))
         {
-            AlgorithmParameters sigParams = AlgorithmParameters.getInstance(signature.getAlgorithm(), signature.getProvider().getName());
+            AlgorithmParameters sigParams = AlgorithmParameters.getInstance(signature.getAlgorithm(), provider);
 
             try
             {
