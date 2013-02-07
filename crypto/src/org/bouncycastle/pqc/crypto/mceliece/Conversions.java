@@ -12,7 +12,9 @@ import org.bouncycastle.pqc.math.linearalgebra.IntegerFunctions;
  */
 final class Conversions
 {
-
+    private static final BigInteger ZERO = BigInteger.valueOf(0);
+    private static final BigInteger ONE = BigInteger.valueOf(1);
+    
     /**
      * Default constructor (private).
      */
@@ -63,7 +65,7 @@ final class Conversions
                 tt--;
                 if (nn == tt)
                 {
-                    c = BigInteger.ONE;
+                    c = ONE;
                 }
                 else
                 {
@@ -96,7 +98,7 @@ final class Conversions
         int[] vecArray = vec.getVecArray();
 
         BigInteger bc = IntegerFunctions.binomial(n, t);
-        BigInteger d = BigInteger.ZERO;
+        BigInteger d = ZERO;
         int nn = n;
         int tt = t;
         for (int i = 0; i < n; i++)
@@ -113,7 +115,7 @@ final class Conversions
                 tt--;
                 if (nn == tt)
                 {
-                    bc = BigInteger.ONE;
+                    bc = ONE;
                 }
                 else
                 {
@@ -182,7 +184,7 @@ final class Conversions
             data[nq] = (byte)(h & m[nq]);
         }
 
-        BigInteger d = BigInteger.ZERO;
+        BigInteger d = ZERO;
         int nn = n;
         int tt = t;
         for (int i = 0; i < n; i++)
@@ -201,7 +203,7 @@ final class Conversions
                 tt--;
                 if (nn == tt)
                 {
-                    bc = BigInteger.ONE;
+                    bc = ONE;
                 }
                 else
                 {

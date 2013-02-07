@@ -74,10 +74,10 @@ public class McEliecePointchevalCipher
      *
      * @param key the McElieceCCA2KeyParameters object
      * @return the key size of the given key object
-     * @throws IllegalStateException if the key is invalid
+     * @throws IllegalArgumentException if the key is invalid
      */
     public int getKeySize(McElieceCCA2KeyParameters key)
-        throws IllegalStateException
+        throws IllegalArgumentException
     {
 
         if (key instanceof McElieceCCA2PublicKeyParameters)
@@ -89,7 +89,7 @@ public class McEliecePointchevalCipher
         {
             return ((McElieceCCA2PrivateKeyParameters)key).getN();
         }
-        throw new IllegalStateException("unsupported type");
+        throw new IllegalArgumentException("unsupported type");
 
     }
 
