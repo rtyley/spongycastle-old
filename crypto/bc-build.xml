@@ -658,6 +658,7 @@
     <target name="javadoc-provider" depends="initMacros">
         <copy todir="${provider.target.src.dir}">
              <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/pqc/jcajce/**/test/*.java" />
                  <include name="org/bouncycastle/jce/**/test/*.java" />
                  <include name="org/bouncycastle/jce/**/test/*/*.java" />
                  <include name="org/bouncycastle/x509/**/test/*.java" />
@@ -694,6 +695,7 @@
     <target name="javadoc-jce" depends="initMacros">
         <copy todir="${jce.target.src.dir}">
              <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/pqc/jcajce/**/test/*.java" />
                  <include name="org/bouncycastle/jce/**/test/*.java" />
                  <include name="org/bouncycastle/jce/**/test/*/*.java" />
                  <include name="org/bouncycastle/x509/**/test/*.java" />
@@ -707,6 +709,7 @@
                 <package name="org.bouncycastle.asn1.*" />
                 <package name="org.bouncycastle.crypto.*" />
                 <package name="org.bouncycastle.jce.*" />
+                <package name="org.bouncycastle.pqc.*" />
                 <package name="org.bouncycastle.openssl.*" />
                 <package name="org.bouncycastle.mozilla.*" />
                 <package name="org.bouncycastle.x509.*" />
@@ -716,9 +719,11 @@
                 <group title="JCE Package" packages="javax.crypto*" />
                 <group title="JCE Utility and Extension Packages" packages="org.bouncycastle.jce*" />
                 <group title="OCSP and OpenSSL PEM Support Packages" packages="org.bouncycastle.ocsp*:org.bouncycastle.openssl*" />
+                <group title="Post-Quantum Provider" packages="org.bouncycastle.pqc.jcajce" />
                 <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
                 <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
                 <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
+                <group title="Post-Quantum Crypto Packages" packages="org.bouncycastle.pqc.crypto*" />
                 <group title="JCE Provider and Test Classes" packages="org.bouncycastle.jce.provider*" />
             </docElements>
         </compile-doc>
@@ -826,6 +831,7 @@
     <target name="javadoc-lw" depends="initMacros">
         <copy todir="${lcrypto.target.src.dir}">
              <fileset dir="${src.dir}">
+                 <include name="org/bouncycastle/pqc/crypto/**/test/*.java" />
                  <include name="org/bouncycastle/crypto/**/test/*.java" />
                  <include name="org/bouncycastle/asn1/**/test/*.java" />
              </fileset>
@@ -835,8 +841,13 @@
             <docElements>
                 <package name="org.bouncycastle.asn1.*" />
                 <package name="org.bouncycastle.crypto.*" />
+                <package name="org.bouncycastle.pqc.crypto.*" />
+                <package name="org.bouncycastle.pqc.asn1.*" />
+                <package name="org.bouncycastle.pqc.math.*" />
                 <package name="org.bouncycastle.math.*" />
                 <package name="org.bouncycastle.util.*" />
+                <group title="Post-Quantum Crypto Packages" packages="org.bouncycastle.pqc.crypto*" />
+                <group title="Post-Quantum Math Packages" packages="org.bouncycastle.pqc.math*" />
                 <group title="Lightweight Crypto Packages" packages="org.bouncycastle.crypto*" />
                 <group title="ASN.1 Support Packages" packages="org.bouncycastle.asn1*" />
                 <group title="Utility Packages" packages="org.bouncycastle.util*:org.bouncycastle.math*" />
