@@ -1,6 +1,6 @@
 package org.bouncycastle.crypto.modes.gcm;
 
-import java.util.ArrayList;
+import java.util.Vector;
 
 import org.bouncycastle.util.Arrays;
 
@@ -8,7 +8,7 @@ public class Tables1kGCMExponentiator implements GCMExponentiator
 {
     // A lookup table of the power-of-two powers of 'x'
     // - lookupPowX2[i] = x^(2^i)
-    private ArrayList lookupPowX2;
+    private Vector lookupPowX2;
 
     public void init(byte[] x)
     {
@@ -17,8 +17,8 @@ public class Tables1kGCMExponentiator implements GCMExponentiator
             return;
         }
 
-        lookupPowX2 = new ArrayList(8);
-        lookupPowX2.add(Arrays.clone(x));
+        lookupPowX2 = new Vector(8);
+        lookupPowX2.addElement(Arrays.clone(x));
     }
 
     public void exponentiateX(long pow, byte[] output)
@@ -49,7 +49,7 @@ public class Tables1kGCMExponentiator implements GCMExponentiator
             {
                 tmp = Arrays.clone(tmp);
                 GCMUtil.multiply(tmp, tmp);
-                lookupPowX2.add(tmp);
+                lookupPowX2.addElement(tmp);
             }
             while (++count <= bit);
         }
