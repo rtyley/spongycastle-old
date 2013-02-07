@@ -69,7 +69,6 @@ public class JceOpenSSLPKCS8EncryptorBuilder
     private SecretKey key;
 
     public JceOpenSSLPKCS8EncryptorBuilder(ASN1ObjectIdentifier algorithm)
-        throws NoSuchAlgorithmException
     {
         algOID = algorithm;
 
