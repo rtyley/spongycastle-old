@@ -2,13 +2,13 @@ package org.bouncycastle.crypto.agreement.jpake;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Arrays;
 
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.BigIntegers;
 import org.bouncycastle.util.Strings;
 
@@ -308,6 +308,7 @@ public class JPAKEUtil
     /**
      * Validates that the given object is not null.
      *
+     *  @param object object in question
      * @param description name of the object (to be used in exception message)
      * @throws NullPointerException if the object is null.
      */
