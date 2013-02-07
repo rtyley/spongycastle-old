@@ -1,5 +1,6 @@
 package org.bouncycastle.pqc.crypto.gmss;
 
+import java.util.Enumeration;
 import java.util.Vector;
 
 import org.bouncycastle.util.Arrays;
@@ -116,7 +117,11 @@ class GMSSUtils
 
         for (int i = 0; i != data.length; i++)
         {
-            copy[i] = new Vector(data[i]);
+            copy[i] = new Vector();
+            for (Enumeration en = data[i].elements(); en.hasMoreElements();)
+            {
+                copy[i].addElement(en.nextElement());
+            }
         }
 
         return copy;

@@ -91,7 +91,7 @@ public class GF2Vector
         int m = length;
         for (int i = 0; i < t; i++)
         {
-            int j = sr.nextInt(m);
+            int j = RandUtils.nextInt(sr, m);
             setBit(help[j]);
             m--;
             help[j] = help[m];

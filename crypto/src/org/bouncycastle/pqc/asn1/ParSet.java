@@ -23,6 +23,8 @@ import org.bouncycastle.util.Arrays;
 public class ParSet
     extends ASN1Object
 {
+    private static final BigInteger ZERO = BigInteger.valueOf(0);
+
     private int   t;
     private int[] h;
     private int[] w;
@@ -31,7 +33,7 @@ public class ParSet
     private static int checkBigIntegerInIntRangeAndPositive(BigInteger b)
     {
         if ((b.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) ||
-            (b.compareTo(BigInteger.ZERO) <= 0))
+            (b.compareTo(ZERO) <= 0))
         {
             throw new IllegalArgumentException("BigInteger not in Range: " + b.toString());
         }

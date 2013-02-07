@@ -109,7 +109,7 @@ public class Permutation
         int k = n;
         for (int j = 0; j < n; j++)
         {
-            int i = sr.nextInt(k);
+            int i = RandUtils.nextInt(sr, k);
             k--;
             perm[j] = help[i];
             help[i] = help[k];

@@ -98,7 +98,7 @@ public class PolynomialGF2mSmallM
         }
         while (!isIrreducible(resCoeff))
         {
-            int n = sr.nextInt(deg);
+            int n = RandUtils.nextInt(sr, deg);
             if (n == 0)
             {
                 resCoeff[0] = field.getRandomNonZeroElement(sr);

@@ -1,5 +1,6 @@
 package org.bouncycastle.pqc.crypto.gmss;
 
+import java.util.Enumeration;
 import java.util.Vector;
 
 import org.bouncycastle.crypto.Digest;
@@ -471,7 +472,12 @@ public class GMSSRootCalc
      */
     public Vector getStack()
     {
-        return new Vector(tailStack);
+        Vector copy = new Vector();
+        for (Enumeration en = tailStack.elements(); en.hasMoreElements();)
+        {
+            copy.addElement(en.nextElement());
+        }
+        return copy;
     }
 
     /**

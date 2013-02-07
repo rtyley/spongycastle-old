@@ -35,7 +35,6 @@ public class JceOpenSSLPKCS8DecryptorProviderBuilder
     private JcaJceHelper helper = new DefaultJcaJceHelper();
 
     public JceOpenSSLPKCS8DecryptorProviderBuilder()
-        throws NoSuchAlgorithmException
     {
         helper = new DefaultJcaJceHelper();
     }

@@ -230,7 +230,7 @@ public class GF2mField
      */
     public int getRandomElement(SecureRandom sr)
     {
-        int result = sr.nextInt(1 << degree);
+        int result = RandUtils.nextInt(sr, 1 << degree);
         return result;
     }
 
@@ -254,10 +254,10 @@ public class GF2mField
     {
         int controltime = 1 << 20;
         int count = 0;
-        int result = sr.nextInt(1 << degree);
+        int result = RandUtils.nextInt(sr, 1 << degree);
         while ((result == 0) && (count < controltime))
         {
-            result = sr.nextInt(1 << degree);
+            result = RandUtils.nextInt(sr, 1 << degree);
             count++;
         }
         if (count == controltime)
