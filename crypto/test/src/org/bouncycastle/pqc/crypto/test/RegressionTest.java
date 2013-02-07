@@ -1,8 +1,5 @@
 package org.bouncycastle.pqc.crypto.test;
 
-import java.security.Security;
-
-import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 import org.bouncycastle.util.test.Test;
 import org.bouncycastle.util.test.TestResult;
 
@@ -20,10 +17,6 @@ public class RegressionTest
     public static void main(
         String[]    args)
     {
-        Security.addProvider(new BouncyCastlePQCProvider());
-
-        System.out.println("Testing " + Security.getProvider("BCPQC").getInfo() + " version: " + Security.getProvider("BCPQC").getVersion());
-        
         for (int i = 0; i != tests.length; i++)
         {
             TestResult  result = tests[i].perform();
