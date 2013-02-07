@@ -280,6 +280,7 @@ implementations
 <tr><td><b>SHA256Digest</b></td><td>256</td><td>FIPS 180-2</td></tr>
 <tr><td><b>SHA384Digest</b></td><td>384</td><td>FIPS 180-2</td></tr>
 <tr><td><b>SHA512Digest</b></td><td>512</td><td>FIPS 180-2</td></tr>
+<tr><td><b>SHA3Digest</b></td><td>224, 256, 288, 384, 512</td><td></td></tr>
 <tr><td><b>TigerDigest</b></td><td>192</td><td>The Tiger Digest.</td></tr>
 <tr><td><b>GOST3411Digest</b></td><td>256</td><td>The GOST-3411 Digest.</td></tr>
 <tr><td><b>WhirlpoolDigest</b></td><td>512</td><td>The Whirlpool Digest.</td></tr>
@@ -336,7 +337,7 @@ change as the draft is finalised.
 <p>
 <h4>Signers</h4>
 <p>
-DSA, ECDSA, ISO-9796-2, GOST-3410-94, GOST-3410-2001, and RSA-PSS are supported by the <b>org.bouncycastle.crypto.signers</b>
+DSA, ECDSA, ISO-9796-2, GOST-3410-94, GOST-3410-2001, DSTU-4145-2002, and RSA-PSS are supported by the <b>org.bouncycastle.crypto.signers</b>
 package. Note: as these are light weight classes, if you need to use SHA1 or GOST-3411
 (as defined in the relevant standards) you'll also need to make use of the appropriate
 digest class in conjunction with these.
@@ -596,6 +597,10 @@ change as the draft is finalised.
 <tr><td>SHA-256</td><td>256</td><td>FIPS 180-2</td></tr>
 <tr><td>SHA-384</td><td>384</td><td>FIPS 180-2</td></tr>
 <tr><td>SHA-512</td><td>512</td><td>FIPS 180-2</td></tr>
+<tr><td>SHA3-224</td><td>224</td><td>&nbsp;</td></tr>
+<tr><td>SHA3-256</td><td>256</td><td>&nbsp;</td></tr>
+<tr><td>SHA3-384</td><td>384</td><td>&nbsp;</td></tr>
+<tr><td>SHA3-512</td><td>512</td><td>&nbsp;</td></tr>
 <tr><td>Tiger</td><td>192</td><td>&nbsp;</td></tr>
 <tr><td>Whirlpool</td><td>512</td><td>&nbsp;</td></tr>
 </table>
@@ -642,6 +647,7 @@ change as the draft is finalised.
 
 <p>Schemes:
 <ul>
+<li>DSTU4145</li>
 <li>GOST3411withGOST3410 (GOST3411withGOST3410-94)
 <li>GOST3411withECGOST3410 (GOST3411withGOST3410-2001)
 <li>MD2withRSA
