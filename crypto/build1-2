@@ -21,8 +21,10 @@ then
 
     mkdir lcrypto-jdk12-$base
     tar cf - index.html LICENSE.html CONTRIBUTORS.html releasenotes.html specifications.html src/org/bouncycastle/LICENSE.java \
-    src/org/bouncycastle/math src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1 \
+    src/org/bouncycastle/math src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1 src/org/bouncycastle/pqc/math src/org/bouncycastle/pqc/crypto src/org/bouncycastle/pqc/asn1 \
      | (cd lcrypto-jdk12-$base && tar xf -)
+    (cd jdk1.4 && tar cf - org/bouncycastle/util) \
+     | (cd lcrypto-jdk12-$base/src && tar xf -)
     (cd jdk1.3 && tar cf - org/bouncycastle/asn1) \
      | (cd lcrypto-jdk12-$base/src && tar xf -)
     (cd test && tar cf - src/org/bouncycastle/crypto src/org/bouncycastle/util src/org/bouncycastle/asn1) \
@@ -176,6 +178,7 @@ then
     rm -rf src/org/bouncycastle/jce/provider/test/PKIXNameConstraintsTest.java
     rm -rf src/org/bouncycastle/jce/provider/test/nist
     rm -rf src/org/bouncycastle/jce/provider/test/rsa3
+    rm -rf src/org/bouncycastle/jce/provider/test/DSTU4145Test.java
     rm -rf src/org/bouncycastle/x509/PKIXAttrCert*.java
     rm -rf src/org/bouncycastle/jce/provider/RFC3281*.java
     rm -rf src/org/bouncycastle/jce/provider/JDKPKCS12StoreParameter.java
@@ -192,6 +195,9 @@ then
     rm -rf src/org/bouncycastle/eac
     rm -rf src/org/bouncycastle/tsp
     rm -rf src/org/bouncycastle/mozilla
+    rm -rf src/org/bouncycastle/jcajce/provider/asymmetric/dstu
+    rm -rf src/org/bouncycastle/jcajce/provider/asymmetric/DSTU*.java
+    rm -rf src/org/bouncycastle/pqc/jcajce/provider/test
 
     (2>&1 javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
         -header "$HEADER" \
@@ -330,6 +336,7 @@ then
     rm -rf src/org/bouncycastle/i18n
     rm -rf src/org/bouncycastle/jcajce
     rm -rf src/org/bouncycastle/cert/test/ConverterTest*
+    rm -rf src/org/bouncycastle/cert/test/Bc*
     rm -rf src/org/bouncycastle/tsp/test
     rm -rf src/org/bouncycastle/tsp/GenTimeAccuracyUnit*
     rm -rf src/org/bouncycastle/tsp/TimeStampTokenInfoUnit*
@@ -418,6 +425,7 @@ then
     rm -rf src/org/bouncycastle/sasn1
     rm -rf src/org/bouncycastle/asn1/test
     rm -f src/org/bouncycastle/openpgp/test/DSA2Test.java
+    rm -f src/org/bouncycastle/openpgp/test/PGPUnicodeTest.java
     find src -name AllTests.java -exec rm {} \;
 
     javadoc -windowtitle "$WINDOWTITLE" -doctitle "$DOCTITLE" \
