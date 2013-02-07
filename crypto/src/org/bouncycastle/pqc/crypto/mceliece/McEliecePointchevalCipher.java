@@ -1,17 +1,15 @@
 package org.bouncycastle.pqc.crypto.mceliece;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.crypto.prng.DigestRandomGenerator;
 import org.bouncycastle.pqc.crypto.MessageEncryptor;
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils;
 import org.bouncycastle.pqc.math.linearalgebra.GF2Vector;
-//import javax.crypto.BadPaddingException;
 
 /**
  * This class implements the Pointcheval conversion of the McEliecePKCS.
@@ -29,10 +27,6 @@ public class McEliecePointchevalCipher
      * The OID of the algorithm.
      */
     public static final String OID = "1.3.6.1.4.1.8301.3.1.3.4.2.2";
-
-    private static final String DEFAULT_PRNG_NAME = "SHA1PRNG";
-
-    private String prngName;
 
     private Digest messDigest;
 
@@ -80,10 +74,10 @@ public class McEliecePointchevalCipher
      *
      * @param key the McElieceCCA2KeyParameters object
      * @return the key size of the given key object
-     * @throws InvalidKeyException if the key is invalid
+     * @throws IllegalStateException if the key is invalid
      */
     public int getKeySize(McElieceCCA2KeyParameters key)
-        throws InvalidKeyException
+        throws IllegalStateException
     {
 
         if (key instanceof McElieceCCA2PublicKeyParameters)
@@ -95,7 +89,7 @@ public class McEliecePointchevalCipher
         {
             return ((McElieceCCA2PrivateKeyParameters)key).getN();
         }
-        throw new InvalidKeyException("unsupported type");
+        throw new IllegalStateException("unsupported type");
 
     }
 
@@ -113,7 +107,6 @@ public class McEliecePointchevalCipher
 
     public void initCipherEncrypt(McElieceCCA2PublicKeyParameters pubKey)
     {
-        prngName = DEFAULT_PRNG_NAME;
         this.sr = sr != null ? sr : new SecureRandom();
         this.messDigest = pubKey.getParameters().getDigest();
         n = pubKey.getN();
@@ -123,12 +116,10 @@ public class McEliecePointchevalCipher
 
     public void initCipherDecrypt(McElieceCCA2PrivateKeyParameters privKey)
     {
-        prngName = DEFAULT_PRNG_NAME;
         this.messDigest = privKey.getParameters().getDigest();
         n = privKey.getN();
         k = privKey.getK();
         t = privKey.getT();
-
     }
 
     public byte[] messageEncrypt(byte[] input)
@@ -164,27 +155,10 @@ public class McEliecePointchevalCipher
             z).getEncoded();
 
         // get PRNG object
-        SecureRandom sr0 = null;
-        try
-        {
-            if (prngName.equals("SHA1PRNG"))
-            {
-                SecureRandom javaRand = java.security.SecureRandom
-                    .getInstance("SHA1PRNG", "SUN");
-                sr0 = javaRand;
-            }
-        }
-        catch (java.security.NoSuchAlgorithmException e)
-        {
-            throw new NoSuchAlgorithmException(e.getMessage());
-        }
-        catch (NoSuchProviderException e)
-        {
-            throw new NoSuchAlgorithmException(e.getMessage());
-        }
+        DigestRandomGenerator sr0 = new DigestRandomGenerator(new SHA1Digest());
 
         // seed PRNG with r'
-        sr0.setSeed(rPrimeBytes);
+        sr0.addSeedMaterial(rPrimeBytes);
 
         // generate random c2
         byte[] c2 = new byte[input.length + kDiv8];
@@ -226,27 +200,10 @@ public class McEliecePointchevalCipher
         GF2Vector z = c1Dec[1];
 
         // get PRNG object
-        SecureRandom sr0 = null;
-        try
-        {
-            if (prngName.equals("SHA1PRNG"))
-            {
-                SecureRandom javaRand = java.security.SecureRandom
-                    .getInstance("SHA1PRNG", "SUN");
-                sr0 = javaRand;
-            }
-        }
-        catch (java.security.NoSuchAlgorithmException e)
-        {
-            throw new NoSuchAlgorithmException(e.getMessage());
-        }
-        catch (NoSuchProviderException e)
-        {
-            throw new NoSuchAlgorithmException(e.getMessage());
-        }
+        DigestRandomGenerator sr0 = new DigestRandomGenerator(new SHA1Digest());
 
         // seed PRNG with r'
-        sr0.setSeed(rPrimeBytes);
+        sr0.addSeedMaterial(rPrimeBytes);
 
         // generate random sequence
         byte[] mrBytes = new byte[c2Len];

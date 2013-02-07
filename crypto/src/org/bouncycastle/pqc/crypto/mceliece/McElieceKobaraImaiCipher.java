@@ -1,12 +1,12 @@
 package org.bouncycastle.pqc.crypto.mceliece;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
+import org.bouncycastle.crypto.prng.DigestRandomGenerator;
 import org.bouncycastle.pqc.crypto.MessageEncryptor;
 import org.bouncycastle.pqc.math.linearalgebra.ByteUtils;
 import org.bouncycastle.pqc.math.linearalgebra.GF2Vector;
@@ -39,9 +39,6 @@ public class McElieceKobaraImaiCipher
     private Digest messDigest;
 
     private SecureRandom sr;
-
-
-    private String prngName;
 
     McElieceCCA2KeyParameters key;
 
@@ -101,11 +98,8 @@ public class McElieceKobaraImaiCipher
         throw new IllegalArgumentException("unsupported type");
     }
 
-    public void initCipherEncrypt(McElieceCCA2PublicKeyParameters pubKey)
+    private void initCipherEncrypt(McElieceCCA2PublicKeyParameters pubKey)
     {
-
-        prngName = DEFAULT_PRNG_NAME;
-        this.sr = sr != null ? sr : new SecureRandom();
         this.messDigest = pubKey.getParameters().getDigest();
         n = pubKey.getN();
         k = pubKey.getK();
@@ -115,14 +109,10 @@ public class McElieceKobaraImaiCipher
 
     public void initCipherDecrypt(McElieceCCA2PrivateKeyParameters privKey)
     {
-
-
-        prngName = DEFAULT_PRNG_NAME;
         this.messDigest = privKey.getParameters().getDigest();
         n = privKey.getN();
         k = privKey.getK();
         t = privKey.getT();
-
     }
 
     public byte[] messageEncrypt(byte[] input)
@@ -154,26 +144,11 @@ public class McElieceKobaraImaiCipher
         sr.nextBytes(r);
 
         // get PRNG object
-        SecureRandom sr0 = null;
-        try
-        {
-            if (prngName.equals("SHA1PRNG"))
-            {
-                SecureRandom javaRand = java.security.SecureRandom
-                    .getInstance("SHA1PRNG", "SUN");
-                sr0 = javaRand;
-            }
-        }
-        catch (java.security.NoSuchAlgorithmException e)
-        {
-            throw new NoSuchAlgorithmException(e.getMessage());
-        }
-        catch (NoSuchProviderException e)
-        {
-            throw new NoSuchAlgorithmException(e.getMessage());
-        }
-        // seed PRNG with r
-        sr0.setSeed(r);
+                // get PRNG object
+        DigestRandomGenerator sr0 = new DigestRandomGenerator(new SHA1Digest());
+
+        // seed PRNG with r'
+        sr0.addSeedMaterial(r);
 
         // generate random sequence ...
         byte[] c1 = new byte[c1Len];
@@ -307,28 +282,10 @@ public class McElieceKobaraImaiCipher
         }
 
         // get PRNG object
-        SecureRandom sr0 = null;
-        try
-        {
-            if (prngName.equals("SHA1PRNG"))
-            {
-                SecureRandom javaRand = java.security.SecureRandom
-                    .getInstance("SHA1PRNG", "SUN");
-                sr0 = javaRand;
-            }
-        }
-        catch (java.security.NoSuchAlgorithmException e)
-        {
-            throw new NoSuchAlgorithmException(e.getMessage());
-        }
-        catch (NoSuchProviderException e)
-        {
-            throw new NoSuchAlgorithmException(e.getMessage());
-        }
-
+        DigestRandomGenerator sr0 = new DigestRandomGenerator(new SHA1Digest());
 
         // seed PRNG with r'
-        sr0.setSeed(rPrime);
+        sr0.addSeedMaterial(rPrime);
 
         // generate random sequence R(r') ...
         byte[] mConstPrime = new byte[c1Len];
