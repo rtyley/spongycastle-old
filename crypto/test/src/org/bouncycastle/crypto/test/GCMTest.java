@@ -498,7 +498,7 @@ public class GCMTest
         byte[] C = new byte[cipher.getOutputSize(P.length)];
         int predicted = cipher.getUpdateOutputSize(P.length);
 
-        int split = srng.nextInt(SA.length + 1);
+        int split = nextInt(srng, SA.length + 1);
         cipher.processAADBytes(SA, 0, split);
         int len = cipher.processBytes(P, 0, P.length, C, 0);
         cipher.processAADBytes(SA, split, SA.length - split);
@@ -528,7 +528,7 @@ public class GCMTest
         byte[] decP = new byte[cipher.getOutputSize(C.length)];
         predicted = cipher.getUpdateOutputSize(C.length);
         
-        split = srng.nextInt(SA.length + 1);
+        split = nextInt(srng, SA.length + 1);
         cipher.processAADBytes(SA, 0, split);
         len = cipher.processBytes(C, 0, C.length, decP, 0);
         cipher.processAADBytes(SA, split, SA.length - split);
@@ -557,7 +557,7 @@ public class GCMTest
         cipher.init(false, new AEADParameters(null, parameters.getMacSize(), parameters.getNonce(), parameters.getAssociatedText()));
         decP = new byte[cipher.getOutputSize(C.length)];
 
-        split = srng.nextInt(SA.length + 1);
+        split = nextInt(srng, SA.length + 1);
         cipher.processAADBytes(SA, 0, split);
         len = cipher.processBytes(C, 0, C.length, decP, 0);
         cipher.processAADBytes(SA, split, SA.length - split);
