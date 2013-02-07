@@ -26,6 +26,8 @@ import org.bouncycastle.util.Strings;
  */
 public class JPAKEUtil
 {
+    static final BigInteger ZERO = BigInteger.valueOf(0);
+    static final BigInteger ONE = BigInteger.valueOf(1);
 
     /**
      * Return a value that can be used as x1 or x3 during round 1.
@@ -37,8 +39,8 @@ public class JPAKEUtil
         BigInteger q,
         SecureRandom random)
     {
-        BigInteger min = BigInteger.ZERO;
-        BigInteger max = q.subtract(BigInteger.ONE);
+        BigInteger min = ZERO;
+        BigInteger max = q.subtract(ONE);
         return BigIntegers.createRandomInRange(min, max, random);
     }
 
@@ -52,8 +54,8 @@ public class JPAKEUtil
         BigInteger q,
         SecureRandom random)
     {
-        BigInteger min = BigInteger.ONE;
-        BigInteger max = q.subtract(BigInteger.ONE);
+        BigInteger min = ONE;
+        BigInteger max = q.subtract(ONE);
         return BigIntegers.createRandomInRange(min, max, random);
     }
 
@@ -134,8 +136,8 @@ public class JPAKEUtil
         BigInteger[] zeroKnowledgeProof = new BigInteger[2];
 
         /* Generate a random v, and compute g^v */
-        BigInteger vMin = BigInteger.ZERO;
-        BigInteger vMax = q.subtract(BigInteger.ONE);
+        BigInteger vMin = ZERO;
+        BigInteger vMax = q.subtract(ONE);
         BigInteger v = BigIntegers.createRandomInRange(vMin, vMax, random);
 
         BigInteger gv = g.modPow(v, p);
@@ -178,7 +180,7 @@ public class JPAKEUtil
     public static void validateGx4(BigInteger gx4)
         throws CryptoException
     {
-        if (gx4.equals(BigInteger.ONE))
+        if (gx4.equals(ONE))
         {
             throw new CryptoException("g^x validation failed.  g^x should not be 1.");
         }
@@ -201,7 +203,7 @@ public class JPAKEUtil
     public static void validateGa(BigInteger ga)
         throws CryptoException
     {
-        if (ga.equals(BigInteger.ONE))
+        if (ga.equals(ONE))
         {
             throw new CryptoException("ga is equal to 1.  It should not be.  The chances of this happening are on the order of 2^160 for a 160-bit q.  Try again.");
         }
@@ -230,9 +232,9 @@ public class JPAKEUtil
         BigInteger r = zeroKnowledgeProof[1];
 
         BigInteger h = calculateHashForZeroKnowledgeProof(g, gv, gx, participantId, digest);
-        if (!(gx.compareTo(BigInteger.ZERO) == 1 && // g^x > 0
+        if (!(gx.compareTo(ZERO) == 1 && // g^x > 0
             gx.compareTo(p) == -1 && // g^x < p
-            gx.modPow(q, p).compareTo(BigInteger.ONE) == 0 && // g^x^q mod q = 1
+            gx.modPow(q, p).compareTo(ONE) == 0 && // g^x^q mod q = 1
                 /*
                  * Below, I took an straightforward way to compute g^r * g^x^h,
                  * which needs 2 exp. Using a simultaneous computation technique

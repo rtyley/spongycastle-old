@@ -24,6 +24,7 @@ import org.bouncycastle.util.Arrays;
 public class DSTU4145Signer
     implements DSA
 {
+    private static final BigInteger ONE = BigInteger.valueOf(1);
 
     private ECKeyParameters key;
     private SecureRandom random;
@@ -58,7 +59,7 @@ public class DSTU4145Signer
         ECFieldElement h = hash2FieldElement(key.getParameters().getCurve(), message);
         if (h.toBigInteger().signum() == 0)
         {
-            h = key.getParameters().getCurve().fromBigInteger(BigInteger.ONE);
+            h = key.getParameters().getCurve().fromBigInteger(ONE);
         }
 
         BigInteger e, r, s;
@@ -101,7 +102,7 @@ public class DSTU4145Signer
         ECFieldElement h = hash2FieldElement(key.getParameters().getCurve(), message);
         if (h.toBigInteger().signum() == 0)
         {
-            h = key.getParameters().getCurve().fromBigInteger(BigInteger.ONE);
+            h = key.getParameters().getCurve().fromBigInteger(ONE);
         }
 
         ECPoint R = ECAlgorithms.sumOfTwoMultiplies(key.getParameters().getG(), s, ((ECPublicKeyParameters)key).getQ(), r);

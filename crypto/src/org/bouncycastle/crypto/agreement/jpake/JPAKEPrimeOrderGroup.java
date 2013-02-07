@@ -73,15 +73,15 @@ public class JPAKEPrimeOrderGroup
 
         if (!skipChecks)
         {
-            if (!p.subtract(BigInteger.ONE).mod(q).equals(BigInteger.ZERO))
+            if (!p.subtract(JPAKEUtil.ONE).mod(q).equals(JPAKEUtil.ZERO))
             {
                 throw new IllegalArgumentException("p-1 must be evenly divisible by q");
             }
-            if (g.compareTo(BigInteger.valueOf(2)) == -1 || g.compareTo(p.subtract(BigInteger.ONE)) == 1)
+            if (g.compareTo(BigInteger.valueOf(2)) == -1 || g.compareTo(p.subtract(JPAKEUtil.ONE)) == 1)
             {
                 throw new IllegalArgumentException("g must be in [2, p-1]");
             }
-            if (!g.modPow(q, p).equals(BigInteger.ONE))
+            if (!g.modPow(q, p).equals(JPAKEUtil.ONE))
             {
                 throw new IllegalArgumentException("g^q mod p must equal 1");
             }
