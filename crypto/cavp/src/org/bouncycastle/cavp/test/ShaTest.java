@@ -10,6 +10,7 @@ import java.util.List;
 import org.bouncycastle.cavp.test.DigestProcessor;
 import org.bouncycastle.cavp.test.DigestProcessorFactory;
 import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Integers;
 import org.bouncycastle.util.encoders.Hex;
 
 public class ShaTest
@@ -208,7 +209,7 @@ public class ShaTest
         {
             if (name.equals("Len") || name.equals("COUNT"))
             {
-                return new Integer(value);
+                return Integer.valueOf(value);
             }
             else
             {

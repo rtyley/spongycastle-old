@@ -128,7 +128,7 @@ public class DsaTest
         {
             if (name.equals("c"))
             {
-                return new Integer(value);
+                return Integer.valueOf(value);
             }
             else if (name.equals("Result"))
             {
