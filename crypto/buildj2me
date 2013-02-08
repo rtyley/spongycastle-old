@@ -44,6 +44,9 @@ src/org/bouncycastle/bcpg \
 src/org/bouncycastle/asn1 \
 src/org/bouncycastle/cert \
 src/org/bouncycastle/cms \
+src/org/bouncycastle/pqc/math \
+src/org/bouncycastle/pqc/crypto \
+src/org/bouncycastle/pqc/asn1 \
 src/org/bouncycastle/pkcs \
 src/org/bouncycastle/tsp \
 src/org/bouncycastle/operator \

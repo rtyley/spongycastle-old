@@ -1,5 +1,6 @@
 package org.bouncycastle.tsp.cms;
 
+import org.bouncycastle.asn1.ASN1Boolean;
 import org.bouncycastle.asn1.DERBoolean;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERUTF8String;
@@ -7,6 +8,7 @@ import org.bouncycastle.asn1.cms.Attributes;
 import org.bouncycastle.asn1.cms.MetaData;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.util.Integers;
 
 public class CMSTimeStampedGenerator
 {
@@ -64,7 +66,7 @@ public class CMSTimeStampedGenerator
 
     private void setMetaData(boolean hashProtected, DERUTF8String fileName, DERIA5String mediaType, Attributes attributes)
     {
-        this.metaData = new MetaData(new DERBoolean(hashProtected), fileName, mediaType, attributes);
+        this.metaData = new MetaData(ASN1Boolean.getInstance(hashProtected), fileName, mediaType, attributes);
     }
 
     /**

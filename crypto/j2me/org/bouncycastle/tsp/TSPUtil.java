@@ -39,6 +39,7 @@ import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Arrays;
+import org.bouncycastle.util.Integers;
 
 public class TSPUtil
 {
@@ -50,16 +51,16 @@ public class TSPUtil
 
     static
     {
-        digestLengths.put(PKCSObjectIdentifiers.md5.getId(), new Integer(16));
-        digestLengths.put(OIWObjectIdentifiers.idSHA1.getId(), new Integer(20));
-        digestLengths.put(NISTObjectIdentifiers.id_sha224.getId(), new Integer(28));
-        digestLengths.put(NISTObjectIdentifiers.id_sha256.getId(), new Integer(32));
-        digestLengths.put(NISTObjectIdentifiers.id_sha384.getId(), new Integer(48));
-        digestLengths.put(NISTObjectIdentifiers.id_sha512.getId(), new Integer(64));
-        digestLengths.put(TeleTrusTObjectIdentifiers.ripemd128.getId(), new Integer(16));
-        digestLengths.put(TeleTrusTObjectIdentifiers.ripemd160.getId(), new Integer(20));
-        digestLengths.put(TeleTrusTObjectIdentifiers.ripemd256.getId(), new Integer(32));
-        digestLengths.put(CryptoProObjectIdentifiers.gostR3411.getId(), new Integer(32));
+        digestLengths.put(PKCSObjectIdentifiers.md5.getId(), Integers.valueOf(16));
+        digestLengths.put(OIWObjectIdentifiers.idSHA1.getId(), Integers.valueOf(20));
+        digestLengths.put(NISTObjectIdentifiers.id_sha224.getId(), Integers.valueOf(28));
+        digestLengths.put(NISTObjectIdentifiers.id_sha256.getId(), Integers.valueOf(32));
+        digestLengths.put(NISTObjectIdentifiers.id_sha384.getId(), Integers.valueOf(48));
+        digestLengths.put(NISTObjectIdentifiers.id_sha512.getId(), Integers.valueOf(64));
+        digestLengths.put(TeleTrusTObjectIdentifiers.ripemd128.getId(), Integers.valueOf(16));
+        digestLengths.put(TeleTrusTObjectIdentifiers.ripemd160.getId(), Integers.valueOf(20));
+        digestLengths.put(TeleTrusTObjectIdentifiers.ripemd256.getId(), Integers.valueOf(32));
+        digestLengths.put(CryptoProObjectIdentifiers.gostR3411.getId(), Integers.valueOf(32));
 
         digestNames.put(PKCSObjectIdentifiers.md5.getId(), "MD5");
         digestNames.put(OIWObjectIdentifiers.idSHA1.getId(), "SHA1");

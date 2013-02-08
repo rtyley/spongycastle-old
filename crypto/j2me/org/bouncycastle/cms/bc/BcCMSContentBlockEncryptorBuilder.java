@@ -23,6 +23,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.operator.GenericKey;
 import org.bouncycastle.operator.OutputEncryptor;
+import org.bouncycastle.util.Integers;
 
 public class BcCMSContentBlockEncryptorBuilder
 {
@@ -30,15 +31,15 @@ public class BcCMSContentBlockEncryptorBuilder
 
     static
     {
-        keySizes.put(CMSAlgorithm.AES128_CBC, new Integer(128));
-        keySizes.put(CMSAlgorithm.AES192_CBC, new Integer(192));
-        keySizes.put(CMSAlgorithm.AES256_CBC, new Integer(256));
+        keySizes.put(CMSAlgorithm.AES128_CBC, Integers.valueOf(128));
+        keySizes.put(CMSAlgorithm.AES192_CBC, Integers.valueOf(192));
+        keySizes.put(CMSAlgorithm.AES256_CBC, Integers.valueOf(256));
 
-        keySizes.put(CMSAlgorithm.CAMELLIA128_CBC, new Integer(128));
-        keySizes.put(CMSAlgorithm.CAMELLIA192_CBC, new Integer(192));
-        keySizes.put(CMSAlgorithm.CAMELLIA256_CBC, new Integer(256));
+        keySizes.put(CMSAlgorithm.CAMELLIA128_CBC, Integers.valueOf(128));
+        keySizes.put(CMSAlgorithm.CAMELLIA192_CBC, Integers.valueOf(192));
+        keySizes.put(CMSAlgorithm.CAMELLIA256_CBC, Integers.valueOf(256));
 
-        keySizes.put(CMSAlgorithm.DES_EDE3_CBC, new Integer(192));
+        keySizes.put(CMSAlgorithm.DES_EDE3_CBC, Integers.valueOf(192));
     }
 
     private static int getKeySize(ASN1ObjectIdentifier oid)

@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.crypto.PBEParametersGenerator;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.util.Integers;
 
 /**
  * the RecipientInfo class for a recipient who has been sent a message
@@ -24,15 +25,15 @@ public class PasswordRecipientInformation
 
     static
     {
-        BLOCKSIZES.put(CMSAlgorithm.DES_EDE3_CBC,  new Integer(8));
-        BLOCKSIZES.put(CMSAlgorithm.AES128_CBC,  new Integer(16));
-        BLOCKSIZES.put(CMSAlgorithm.AES192_CBC,  new Integer(16));
-        BLOCKSIZES.put(CMSAlgorithm.AES256_CBC,  new Integer(16));
+        BLOCKSIZES.put(CMSAlgorithm.DES_EDE3_CBC, Integers.valueOf(8));
+        BLOCKSIZES.put(CMSAlgorithm.AES128_CBC, Integers.valueOf(16));
+        BLOCKSIZES.put(CMSAlgorithm.AES192_CBC, Integers.valueOf(16));
+        BLOCKSIZES.put(CMSAlgorithm.AES256_CBC, Integers.valueOf(16));
 
-        KEYSIZES.put(CMSAlgorithm.DES_EDE3_CBC,  new Integer(192));
-        KEYSIZES.put(CMSAlgorithm.AES128_CBC,  new Integer(128));
-        KEYSIZES.put(CMSAlgorithm.AES192_CBC,  new Integer(192));
-        KEYSIZES.put(CMSAlgorithm.AES256_CBC,  new Integer(256));
+        KEYSIZES.put(CMSAlgorithm.DES_EDE3_CBC, Integers.valueOf(192));
+        KEYSIZES.put(CMSAlgorithm.AES128_CBC, Integers.valueOf(128));
+        KEYSIZES.put(CMSAlgorithm.AES192_CBC, Integers.valueOf(192));
+        KEYSIZES.put(CMSAlgorithm.AES256_CBC, Integers.valueOf(256));
     }
 
     private PasswordRecipientInfo info;
