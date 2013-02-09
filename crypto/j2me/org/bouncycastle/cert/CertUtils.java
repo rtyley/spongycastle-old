@@ -15,6 +15,7 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERGeneralizedTime;
+import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DEROutputStream;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -211,5 +212,35 @@ class CertUtils
     static boolean dateAfter(Date d1, Date d2)
     {
         return d1.getTime() > d2.getTime();
+    }
+
+    static boolean isAlgIdEqual(AlgorithmIdentifier id1, AlgorithmIdentifier id2)
+    {
+        if (!id1.getAlgorithm().equals(id2.getAlgorithm()))
+        {
+            return false;
+        }
+
+        if (id1.getParameters() == null)
+        {
+            if (id2.getParameters() != null && !id2.getParameters().equals(DERNull.INSTANCE))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        if (id2.getParameters() == null)
+        {
+            if (id1.getParameters() != null && !id1.getParameters().equals(DERNull.INSTANCE))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        return id1.getParameters().equals(id2.getParameters());
     }
 }

@@ -3,6 +3,7 @@ package org.bouncycastle.cms;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -13,10 +14,14 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BEROctetString;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerInfo;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -54,6 +59,16 @@ public class CMSSignedDataGenerator
      */
     public CMSSignedDataGenerator()
     {
+    }
+
+    /**
+     * constructor allowing specific source of randomness
+     * @param rand instance of SecureRandom to use
+     */
+    public CMSSignedDataGenerator(
+        SecureRandom rand)
+    {
+        super(rand);
     }
 
     public CMSSignedData generate(
@@ -112,7 +127,7 @@ public class CMSSignedDataGenerator
         //
         // add the precalculated SignerInfo objects.
         //
-        for (Iterator it = signers.iterator(); it.hasNext();)
+        for (Iterator it = _signers.iterator(); it.hasNext();)
         {
             SignerInformation signer = (SignerInformation)it.next();
             digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));

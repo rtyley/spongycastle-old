@@ -10,11 +10,10 @@ import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
-import org.bouncycastle.cms.bc.BcCMSContentBlockEncryptorBuilder;
+import org.bouncycastle.cms.bc.BcCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.bc.BcRSAKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.bc.BcRSAKeyTransRecipientInfoGenerator;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.test.SimpleTest;
@@ -75,7 +74,7 @@ public class BcEnvelopedDataTest
 
         CMSEnvelopedData ed = edGen.generate(
             new CMSProcessableByteArray(data),
-            new BcCMSContentBlockEncryptorBuilder(NISTObjectIdentifiers.id_aes128_CBC, new AESEngine()).build());
+            new BcCMSContentEncryptorBuilder(NISTObjectIdentifiers.id_aes128_CBC).build());
 
         RecipientInformationStore recipients = ed.getRecipientInfos();
 

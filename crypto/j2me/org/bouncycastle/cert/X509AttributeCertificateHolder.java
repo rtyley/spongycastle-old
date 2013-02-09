@@ -213,6 +213,16 @@ public class X509AttributeCertificateHolder
     }
 
     /**
+     * Return the extensions block associated with this certificate if there is one.
+     *
+     * @return the extensions block, null otherwise.
+     */
+    public Extensions getExtensions()
+    {
+        return extensions;
+    }
+
+    /**
      * Returns a list of ASN1ObjectIdentifier objects representing the OIDs of the
      * extensions contained in this holder's attribute certificate.
      *
@@ -305,7 +315,7 @@ public class X509AttributeCertificateHolder
     {
         AttributeCertificateInfo acinfo = attrCert.getAcinfo();
 
-        if (!acinfo.getSignature().equals(attrCert.getSignatureAlgorithm()))
+        if (!CertUtils.isAlgIdEqual(acinfo.getSignature(), attrCert.getSignatureAlgorithm()))
         {
             throw new CertException("signature invalid - algorithm identifier mismatch");
         }

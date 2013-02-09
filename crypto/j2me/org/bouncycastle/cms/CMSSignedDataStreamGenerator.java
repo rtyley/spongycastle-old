@@ -7,15 +7,21 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERSequenceGenerator;
 import org.bouncycastle.asn1.BERTaggedObject;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
 import org.bouncycastle.asn1.cms.SignerInfo;
+import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
 /**
  * General class for generating a pkcs7-signature message stream.
@@ -58,17 +64,6 @@ public class CMSSignedDataStreamGenerator
     }
 
     /**
-     * constructor allowing specific source of randomness
-     * @param rand instance of SecureRandom to use
-     * @deprecated no longer required if the addSignerInfoGenerator method is used.
-     */
-    public CMSSignedDataStreamGenerator(
-        SecureRandom rand)
-    {
-        super(rand);
-    }
-
-    /**
      * Set the underlying string size for encapsulated data
      * 
      * @param bufferSize length of octet strings to buffer the data.
@@ -78,7 +73,7 @@ public class CMSSignedDataStreamGenerator
     {
         _bufferSize = bufferSize;
     }
-
+    
     /**
      * generate a signed object that for a CMS Signed Data
      * object using the given provider.
@@ -204,7 +199,7 @@ public class CMSSignedDataStreamGenerator
         //
         // add the precalculated SignerInfo digest algorithms.
         //
-        for (Iterator it = signers.iterator(); it.hasNext();)
+        for (Iterator it = _signers.iterator(); it.hasNext();)
         {
             SignerInformation signer = (SignerInformation)it.next();
             digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
@@ -249,7 +244,7 @@ public class CMSSignedDataStreamGenerator
         CMSProcessable  content)
         throws CMSException, IOException
     {
-        OutputStream signedOut = open(new ASN1ObjectIdentifier(eContentType), out, encapsulate, dataOutputStream);
+        OutputStream signedOut = open(out, eContentType, encapsulate, dataOutputStream);
         if (content != null)
         {
             content.write(signedOut);
@@ -275,7 +270,7 @@ public class CMSSignedDataStreamGenerator
     //       THEN version MUST be 3
     //       ELSE version MUST be 1
     //
-    private DERInteger calculateVersion(
+    private ASN1Integer calculateVersion(
         ASN1ObjectIdentifier contentOid)
     {
         boolean otherCert = false;
@@ -310,7 +305,7 @@ public class CMSSignedDataStreamGenerator
 
         if (otherCert)
         {
-            return new DERInteger(5);
+            return new ASN1Integer(5);
         }
 
         if (crls != null)         // no need to check if otherCert is true
@@ -327,39 +322,49 @@ public class CMSSignedDataStreamGenerator
 
         if (otherCrl)
         {
-            return new DERInteger(5);
+            return new ASN1Integer(5);
         }
 
         if (attrCertV2Found)
         {
-            return new DERInteger(4);
+            return new ASN1Integer(4);
         }
 
         if (attrCertV1Found)
         {
-            return new DERInteger(3);
+            return new ASN1Integer(3);
         }
 
-        if (checkForVersion3(signers))
+        if (checkForVersion3(_signers, signerGens))
         {
-            return new DERInteger(3);
+            return new ASN1Integer(3);
         }
 
         if (!CMSObjectIdentifiers.data.equals(contentOid))
         {
-            return new DERInteger(3);
+            return new ASN1Integer(3);
         }
 
-        return new DERInteger(1);
+        return new ASN1Integer(1);
     }
 
-    private boolean checkForVersion3(List signerInfos)
+    private boolean checkForVersion3(List signerInfos, List signerInfoGens)
     {
         for (Iterator it = signerInfos.iterator(); it.hasNext();)
         {
             SignerInfo s = SignerInfo.getInstance(((SignerInformation)it.next()).toASN1Structure());
 
             if (s.getVersion().getValue().intValue() == 3)
+            {
+                return true;
+            }
+        }
+
+        for (Iterator it = signerInfoGens.iterator(); it.hasNext();)
+        {
+        	SignerInfoGenerator s = (SignerInfoGenerator)it.next();
+
+            if (s.getGeneratedVersion().getValue().intValue() == 3)
             {
                 return true;
             }
@@ -468,7 +473,7 @@ public class CMSSignedDataStreamGenerator
             // add the precalculated SignerInfo objects
             //
             {
-                Iterator it = signers.iterator();
+                Iterator it = _signers.iterator();
                 while (it.hasNext())
                 {
                     SignerInformation signer = (SignerInformation)it.next();
