@@ -47,10 +47,16 @@ function transplant_packages {
     done
 }
 
+pushd $1
+
+git reset --hard
+
+git clean -f -f -d
+
 transplant_packages bcmail-jdk15on {mail,cms/test}
 transplant_packages bcpg-jdk15on {openpgp,bcpg}
-transplant_packages bcpkix-jdk15on {cert,cms,eac,pkcs,mozilla,ocsp/test,operator,openssl,tsp,voms}
-transplant_packages bcprov-jdk15on {i18n,jcajce,jce,ocsp,x509}
+transplant_packages bcpkix-jdk15on {cert,jce/provider/test,cms,eac,pkcs,mozilla,ocsp/test,operator,openssl,tsp,voms}
+transplant_packages bcprov-jdk15on {i18n,jcajce,jce,ocsp,x509,pqc/jcajce}
 transplant_package bc-light-jdk15on org/bouncycastle
 
 move_files crypto/test/data/PKITS bcprov-jdk15on/src/test/resources/PKITS
@@ -58,6 +64,13 @@ move_files crypto/test/data/openpgp bcpg-jdk15on/src/test/resources/openpgp
 move_files crypto/test/data/rfc4134 bcmail-jdk15on/src/test/resources/rfc4134
 
 move_files crypto/bzip2/src bc-bzip2/src/main/java
+
+mvn clean compile test-compile
+
+popd
+
+cp use-maven-layout.sh $1/
+
 
 #                        crypto/test/src/org/bouncycastle/i18n/test/I18nTestMessages_en.properties
 #           bcprov-jdk15on/src/test/java/org/bouncycastle/i18n/test/I18nTestMessages_en.properties -- initial copy
