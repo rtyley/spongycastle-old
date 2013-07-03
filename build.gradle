@@ -17,5 +17,9 @@ subprojects {
     sourceCompatibility = 1.5
     targetCompatibility = 1.5
     version = '1.50-b01'
+
+test {
+  systemProperty 'bc.test.data.home', '/home/roberto/development/spongycastle/core/src/test/data'
+}
 }
 
