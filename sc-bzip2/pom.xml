@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.madgag</groupId>
         <artifactId>sc-parent</artifactId>
-        <version>1.47.0.3</version>
+        <version>1.47.0.4-SNAPSHOT</version>
     </parent>
     <name>sc-bzip2</name>
     <licenses>
