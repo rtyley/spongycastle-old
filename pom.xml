@@ -8,7 +8,7 @@
     </parent>
     <groupId>com.madgag</groupId>
     <artifactId>sc-parent</artifactId>
-    <version>1.47.0.3-SNAPSHOT</version>
+    <version>1.47.0.3</version>
     <packaging>pom</packaging>
     <name>Spongy Castle parent POM project</name>
     <url>http://rtyley.github.com/spongycastle/</url>

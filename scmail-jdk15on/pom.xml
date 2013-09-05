@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.madgag</groupId>
         <artifactId>sc-parent</artifactId>
-        <version>1.47.0.3-SNAPSHOT</version>
+        <version>1.47.0.3</version>
     </parent>
     <name>Spongy Castle S/MIME API</name>
     <description>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>com.madgag</groupId>
             <artifactId>scpkix-jdk15on</artifactId>
-            <version>1.47.0.3-SNAPSHOT</version>
+            <version>1.47.0.3</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
